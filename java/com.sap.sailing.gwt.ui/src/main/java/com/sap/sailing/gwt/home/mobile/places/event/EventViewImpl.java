@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -129,7 +128,7 @@ public class EventViewImpl extends Composite implements EventView {
     }
     
     @Override
-    public void setMediaForImpressions(int nrOfImages, int nrOfVideos, List<SailingImageDTO> images) {
+    public void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images) {
         impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
         impressionsUi.setStatistis(nrOfImages, nrOfVideos);
         impressionsUi.addImages(images);

@@ -12,7 +12,9 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class RegattaHeaderBody extends UIObject {
 
@@ -27,13 +29,14 @@ public class RegattaHeaderBody extends UIObject {
     @UiField protected DivElement labelUi;
     @UiField protected DivElement detailsItemContainerUi;
 
-    public RegattaHeaderBody(RegattaMetadataDTO regattaMetadata) {
+    public RegattaHeaderBody(RegattaMetadataDTO regattaMetadata, boolean showStateMarker) {
         RegattaHeaderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(regattaMetadata.getBoatClass());
         logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
         nameUi.setInnerText(regattaMetadata.getDisplayName());
-        LabelTypeUtil.renderLabelTypeOrHide(labelUi, regattaMetadata.getState().getStateMarker());
+        RegattaState state = regattaMetadata.getState();
+        LabelTypeUtil.renderLabelTypeOrHide(labelUi, showStateMarker ? state.getStateMarker() : LabelType.NONE);
         addDetailsItem(regattaMetadata.getCompetitorsCount(), I18N.competitorsCount(regattaMetadata.getCompetitorsCount()));
         addDetailsItem(regattaMetadata.getRaceCount(), I18N.racesCount(regattaMetadata.getRaceCount()));
         String defaultCourseAreaName = regattaMetadata.getDefaultCourseAreaName();

@@ -72,20 +72,31 @@
   min-width: 13.333333333333334em;
   max-width: 16.666666666666668em;
 }
-.race_item_flag {
-  max-width: 1.6em;
-  max-height: 1.6em;
+img.race_item_flag {
   vertical-align: middle;
+  height: 1em;
+  width: auto;
 }
 .race_item_position {
   margin-right: 0.333333333333333em;
 }
-.race_item_winner {
+.race_item_sailid {
   margin-left: 5px;
   vertical-align: middle;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+.race_item_winner {
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .race_itemwinner {
-  padding: 0.733333333333333em 1.333333333333333em;
+  padding: 0 1.333333333333333em;
+}
+.race_itemwinner > div {
+  vertical-align: middle;	
 }
 .race_itemcenter {
   text-align: center;
@@ -211,4 +222,13 @@
 .racesListIcon > div {
   vertical-align: middle;	
   display: inline-block;
+}
+.racesListHideColumn {
+  width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: medium none !important;
+}
+.racesListHideColumn > * {
+  display: none !important;
 }

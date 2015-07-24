@@ -1,15 +1,16 @@
 package com.sap.sailing.gwt.ui.shared.media;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.TreeSet;
 
 public class MediaDTO implements Serializable {
     private static final long serialVersionUID = 4932700214423641309L;
     
-    private ArrayList<SailingImageDTO> photos = new ArrayList<>();
-    private ArrayList<SailingVideoDTO> videos = new ArrayList<>();
+    private TreeSet<SailingImageDTO> photos = new TreeSet<>();
+    private TreeSet<SailingVideoDTO> videos = new TreeSet<>();
 
-    public ArrayList<SailingImageDTO> getPhotos() {
+    public Collection<SailingImageDTO> getPhotos() {
         return photos;
     }
     
@@ -17,7 +18,7 @@ public class MediaDTO implements Serializable {
         photos.add(photo);
     }
     
-    public ArrayList<SailingVideoDTO> getVideos() {
+    public Collection<SailingVideoDTO> getVideos() {
         return videos;
     }
     

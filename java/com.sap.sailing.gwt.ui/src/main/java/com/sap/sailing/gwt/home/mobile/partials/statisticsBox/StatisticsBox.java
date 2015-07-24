@@ -64,7 +64,7 @@ public class StatisticsBox extends Composite implements RefreshableWidget<EventS
     }
 
     @Override
-    public void setData(EventStatisticsDTO statistics, long nextUpdate, int updateNo) {
+    public void setData(EventStatisticsDTO statistics) {
         itemContainerUi.clearContent();
         if (showRegattaInformation) {
             addItem(StatisticsBox.ICON_REGATTAS_FOUGHT, MSG.regattas(), statistics.getRegattasFoughtCount());
