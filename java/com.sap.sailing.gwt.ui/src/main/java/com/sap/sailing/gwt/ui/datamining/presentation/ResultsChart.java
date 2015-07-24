@@ -120,7 +120,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
         presentationPanel = new ResizingSimplePanel() {
             @Override
             public void onResize() {
-                updateChartSize();
+                chart.setSizeToMatchContainer();
+                chart.redraw();
             }
         };
         mainPanel.add(presentationPanel);
@@ -138,11 +139,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
         showError(this.stringMessages.invalidSelection());
     }
     
-    /*package*/ void updateChartSize() {
-        chart.setSizeToMatchContainer();
-        chart.redraw();
-    }
-
     @Override
     public void showError(String error) {
         currentResult = null;
