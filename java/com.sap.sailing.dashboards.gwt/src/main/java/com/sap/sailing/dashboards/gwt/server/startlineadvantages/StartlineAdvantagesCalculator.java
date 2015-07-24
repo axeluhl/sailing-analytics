@@ -16,7 +16,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -58,8 +57,9 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
             retrieveDataForCalculation(currentLiveTrackedRace);
             Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
             Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
-            
-            //result.advantages = calculateStartlineAdvantages();
+            Pair<Double, Double> startAndEndPointOfPolarBasedStartlineAdvatages = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
+                    intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
+            result.advantages = calculateStartlineAdvantages(startAndEndPointOfPolarBasedStartlineAdvatages);
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
         }
@@ -70,14 +70,28 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
     
-    public Position getIntersectionOfRightLaylineAndStartline () {
+    private Pair<Double, Double> getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(Position rightIntersection, Position leftIntersection) {
+        Pair<Double, Double> result = null;
+        if(rightIntersection != null && leftIntersection == null) {
+            double distanceFromIntersectionToRCBoatInMeters = rightIntersection.getDistance(startlineAndFirstMarkPositions.startBoatPosition).getMeters();
+            result = new Pair<Double, Double>(0.0, distanceFromIntersectionToRCBoatInMeters);
+        } else if(rightIntersection == null && leftIntersection != null) {
+            double distanceFromIntersectionToRCBoatInMeters = leftIntersection.getDistance(startlineAndFirstMarkPositions.startBoatPosition).getMeters();
+            result = new Pair<Double, Double>(distanceFromIntersectionToRCBoatInMeters, startlineLenghtInMeters);
+        } else if(rightIntersection != null && leftIntersection != null) {
+            result = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
+        }
+        return result;
+    }
+    
+    private Position getIntersectionOfRightLaylineAndStartline () {
         Position result = null;
         Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
         result = calculateIntersectionPointsOfStartlineAndLaylineWithBearing(bearingOfRightLaylineInDeg);
         return result;
     }
     
-    public Position getIntersectionOfLeftLaylineAndStartline () {
+    private Position getIntersectionOfLeftLaylineAndStartline () {
         Position result = null;
         Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
         result = calculateIntersectionPointsOfStartlineAndLaylineWithBearing(bearingOfRightLaylineInDeg);
@@ -118,7 +132,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
 
-    private List<StartLineAdvantageDTO> calculateStartlineAdvantages() {
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantages(Pair<Double, Double> startAndEndPointOfPolarBasedStartlineAdvatages) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
         List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylines();
         result.addAll(startlineAdvantagesUnderneathLayline);
