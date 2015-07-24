@@ -230,6 +230,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -239,7 +240,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
