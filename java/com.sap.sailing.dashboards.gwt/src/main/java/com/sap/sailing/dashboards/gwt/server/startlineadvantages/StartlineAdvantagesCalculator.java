@@ -56,12 +56,15 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         if (currentLiveTrackedRace != null) {
             retrieveDataForCalculation(currentLiveTrackedRace);
             if(isStartlineCompletelyUnderneathLaylines()) {
+                logger.log(Level.INFO, "Startline is completely underneath laylines");
                 Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
                 calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
             } else if (isStartlineCompletelyAboveLaylines()) {
+                logger.log(Level.INFO, "Startline is completely above laylines");
                 Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
                 calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
             } else {
+                logger.log(Level.INFO, "Layline(s) cross startline");
             Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
             Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
             Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
