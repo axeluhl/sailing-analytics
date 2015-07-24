@@ -10,6 +10,7 @@ public class DefaultPolarValues {
 
     private final static double TACKING_ANGLE = 90;
     private final static double JIBING_ANGLE = 30;
+    private final static double BOAT_SPEED = 10;
     
     public static double getManouvreAngle(ManeuverType maneuverType) {
         double result = 0;
@@ -19,5 +20,9 @@ public class DefaultPolarValues {
             result = JIBING_ANGLE * 2;
         }
         return result;
+    }
+    
+    public static double getBoatSpeedForWindAngleAndSpeed(double angle, double speed) {
+        return BOAT_SPEED;
     }
 }

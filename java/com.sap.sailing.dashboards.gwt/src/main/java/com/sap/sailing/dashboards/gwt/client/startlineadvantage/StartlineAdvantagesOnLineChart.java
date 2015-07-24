@@ -25,6 +25,8 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -65,6 +67,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
 
     private Chart chart;
     private Series series;
+    private Series newseries;
     
     private static final int POINT_ADDING_ANIMATION_DURATION_IN_MILLIS = 2000;
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesOnLineChart.class.getName());
@@ -152,7 +155,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
                     }
                 }).setStyle(new Style().setFontFamily("Open Sans").setFontSize("12").setColor("grey")))
                 .setLineColor("grey").setGridLineWidth(0).setMinorGridLineWidth(0).setGridLineColor("white")
-                .setTickWidth(1).setTickColor("grey").setLineWidth(1).setGridLineWidth(0);
+                .setTickWidth(1).setTickColor("grey").setLineWidth(1).setGridLineWidth(0).setExtremes(0, 150).setStartOnTick(true).setEndOnTick(true);
     }
 
     private Series createSeries(Chart chart){
@@ -178,9 +181,9 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         if (firstAndLastXValue != null && firstAndLastXValue.getA() != null && firstAndLastXValue.getB() != null) {
             chart.getXAxis().setTickInterval(firstAndLastXValue.getB()/2);
             if (labelData == firstAndLastXValue.getA().doubleValue()) {
-                result = StringMessages.INSTANCE.dashboardPinEnd();
-            } else if (labelData == firstAndLastXValue.getB().doubleValue()) {
                 result = StringMessages.INSTANCE.dashboardRCBoat();
+            } else if (labelData == firstAndLastXValue.getB().doubleValue()) {
+                result = StringMessages.INSTANCE.dashboardPinEnd();
             }
         }
         return result;
@@ -203,34 +206,46 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         for(StartLineAdvantageDTO startLineAdvantageDTO : startlineAdvantages) {
             logger.log(Level.INFO, startLineAdvantageDTO.distanceToRCBoatInMeters +" "+startLineAdvantageDTO.startLineAdvantage);
         }
-        if (series.getPoints() != null && series.getPoints().length  > 0) {
+        if (series.getPoints() != null && series.getPoints().length > 0) {
             updateStartlineAdvantages(startlineAdvantages, series);
         } else {
             addStartlineAdvantages(startlineAdvantages, series);
+            chart.addSeries(series , true, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS).setEasing(Easing.SWING));
         }
         chart.setSizeToMatchContainer();
     }
     
     private void updateStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series) {
-        int counter = 0;
-        if (series != null) {
-            for (Point point : series.getPoints()) {
-                StartLineAdvantageDTO currentNewStartlineAdvantage = startlineAdvantages.get(counter);
-                point.update(currentNewStartlineAdvantage.distanceToRCBoatInMeters,  currentNewStartlineAdvantage.startLineAdvantage, false);
-                counter++;
-            }
+//        Series newSeries = createSeries(chart);
+//        addStartlineAdvantages(startlineAdvantages, newSeries);
+        removeAllSeriesPoints(chart.getSeries()[0]);
+        logger.log(Level.INFO, "SERIES: " + chart.getSeries().length);
+        addStartlineAdvantages(startlineAdvantages, series);
+//        int counter = 0;
+//        for (Point point : series.getPoints()) {
+//                if(startlineAdvantages.size() -1 > counter){
+//                    StartLineAdvantageDTO currentNewStartlineAdvantage = startlineAdvantages.get(counter);
+//                    series.addPoint(currentNewStartlineAdvantage.distanceToRCBoatInMeters, currentNewStartlineAdvantage.startLineAdvantage);
+//                    counter++;
+//                }
+//        }
+    }
+    
+    private void removeAllSeriesPoints(Series series) {
+        for (Point point : series.getPoints()) {
+            series.removePoint(point);
         }
-        chart.redraw();
     }
     
     private void addStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series){
         //TODO Build this with forEach Consumer as soon as the bundle uses GWT 2.8 with Java 8 Support.
         for (StartLineAdvantageDTO startlineAdvantage : startlineAdvantages) {
             Point point = new Point(startlineAdvantage.distanceToRCBoatInMeters, startlineAdvantage.startLineAdvantage);
-            series.addPoint(point, true, false, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS));
+            series.addPoint(point, false, false, false);
+            //new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS)
         }
         setConfidenceGradientColorToSeries(series, startlineAdvantages);
-        chart.addSeries(series , true, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS).setEasing(Easing.SWING));
+        chart.redraw();
     }
     
     private void setConfidenceGradientColorToSeries(Series series, List<StartLineAdvantageDTO> startlineAdvantages) {
@@ -266,11 +281,20 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         private static final String HIGHT_CONFIDENCE_COLOR_AS_HEX = "#008FFF";
         
         public static Color getColorWithConfidenceGradients(List<StartLineAdvantageDTO> startlineAdvantages) {
-            Color color = new Color().setLinearGradient(1.0, 0.0, 0.0, 0.0);
+            Color color = new Color().setLinearGradient(0, 0, 500, 0);
             double lineLenght = getBiggestDistanceToRCBoat(startlineAdvantages);
-            for(StartLineAdvantageDTO startlineAdvantageDTO : startlineAdvantages) {
-                double gradientPosition = getGradientStopPositionFromStartlineLenghtAndDistanceToRCBoat(lineLenght, startlineAdvantageDTO.distanceToRCBoatInMeters);
-                color.addColorStop(gradientPosition, getColorAsHexStringFromConfidence(startlineAdvantageDTO.confidence));
+            //TODO Need to find a prettier way of at adding color stops
+            double lastConfidence = 2;
+            for (StartLineAdvantageDTO startlineAdvantageDTO : startlineAdvantages) {
+                if (lastConfidence != startlineAdvantageDTO.confidence) {
+                    lastConfidence = startlineAdvantageDTO.confidence;
+                    double gradientPosition = getGradientStopPositionFromStartlineLenghtAndDistanceToRCBoat(lineLenght,
+                            startlineAdvantageDTO.distanceToRCBoatInMeters);
+                    logger.log(Level.INFO, "Confidence " + startlineAdvantageDTO.confidence + "gradientPosition"
+                            + gradientPosition);
+                    color.addColorStop(gradientPosition,
+                            getColorAsHexStringFromConfidence(startlineAdvantageDTO.confidence));
+                }
             }
             return color;
         }
@@ -280,10 +304,10 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         }
         
         private static String getColorAsHexStringFromConfidence(double position) {
-            if(position >= 0.5) {
+            if(position > 0.6) {
                 return HIGHT_CONFIDENCE_COLOR_AS_HEX;
             }else {
-                return LOW_CONFIDENCE_COLOR_AS_HEX;
+                return HIGHT_CONFIDENCE_COLOR_AS_HEX;
             }
         }
         

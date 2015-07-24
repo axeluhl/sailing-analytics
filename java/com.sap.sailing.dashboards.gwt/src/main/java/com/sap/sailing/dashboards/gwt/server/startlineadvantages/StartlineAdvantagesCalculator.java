@@ -3,7 +3,6 @@ package com.sap.sailing.dashboards.gwt.server.startlineadvantages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +15,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -29,6 +29,9 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
 
     private TrackedRace currentLiveTrackedRace;
     private MovingAverage advantageMaximumAverage;
+    
+    private Position intersectionPoint;
+    private Bearing  startLineBearingFromRCToPin;
     
     private PolarDataService polarDataService;
     
@@ -101,6 +104,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         Bearing bearingOfStartlineInRad = startlineAndFirstMarkPositions.startBoatPosition
                 .getBearingGreatCircle(startlineAndFirstMarkPositions.pinEndPosition);
         Bearing bearingOfStartlineInDeg = new DegreeBearingImpl(bearingOfStartlineInRad.getDegrees());
+        startLineBearingFromRCToPin = bearingOfStartlineInDeg;
         logger.log(Level.INFO, "bearingOfStartlineInDeg " + bearingOfStartlineInDeg);
         logger.log(Level.INFO, "bearingOfLaylineInDeg " + bearing);
         Position intersectionPointLaylineStartline = startlineAndFirstMarkPositions.firstMarkPosition
@@ -113,6 +117,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         if (bearingIntersectionPointToFirstMark.getDegrees() < bearing.getDegrees() + 1 &&
             bearingIntersectionPointToFirstMark.getDegrees() > bearing.getDegrees() - 1 &&
             isOnStartline(intersectionPointLaylineStartline)) {
+            intersectionPoint = intersectionPointLaylineStartline;
             result = intersectionPointLaylineStartline;
             logger.log(Level.INFO, "Layline crosses startline");
         }
@@ -133,7 +138,10 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     private List<StartLineAdvantageDTO> calculateStartlineAdvantages(Pair<Double, Double> rangePolarBasedStartlineAdvatages, Pair<Double, Double> rangePinEndStartlineAdvantage) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
         List<StartLineAdvantageDTO> startlineAdvantagesUnderneathLayline = calculateStartlineAdvantagesUnderneathLaylinesInRange(rangePinEndStartlineAdvantage);
+        List<StartLineAdvantageDTO> startlineAdvantagesPolarBased = calculatePolarBasedStartlineAdvantagesInRange(rangePolarBasedStartlineAdvatages);
         result.addAll(startlineAdvantagesUnderneathLayline);
+        result.addAll(startlineAdvantagesPolarBased);
+        Collections.sort(result, StartLineAdvantageDTO.startlineAdvantageComparatorByDistanceToRCBoatAsc);
         return result;
     }
     
@@ -153,80 +161,68 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
     
-    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesUnderneathLaylinesInRange(Pair<Double, Double> rangePinEndStartlineAdvantage) {
+    private List<StartLineAdvantageDTO> calculateStartlineAdvantagesUnderneathLaylinesInRange(
+            Pair<Double, Double> rangePinEndStartlineAdvantage) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
-        if(rangePinEndStartlineAdvantage != null) {
-        StartLineAdvantageDTO rightEdgeAdvantage = new StartLineAdvantageDTO();
-        rightEdgeAdvantage.confidence = 1.0;
-        rightEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getA();
-        StartLineAdvantageDTO leftEdgeAdvantage = new StartLineAdvantageDTO();
-        leftEdgeAdvantage.confidence = 1.0;
-        leftEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getB();
-        if(startlineAdvantageAtPinEndInMeters > 0) {
-            leftEdgeAdvantage.startLineAdvantage = startlineAdvantageAtPinEndInMeters;
-            rightEdgeAdvantage.startLineAdvantage = 0.0;
+        if (rangePinEndStartlineAdvantage != null) {
+            logger.log(Level.INFO, "PinEnd startline advantages range " + rangePinEndStartlineAdvantage.getA() + " - "+ rangePinEndStartlineAdvantage.getB());
+            StartLineAdvantageDTO rightEdgeAdvantage = new StartLineAdvantageDTO();
+            rightEdgeAdvantage.confidence = 1.0;
+            rightEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getA();
+            StartLineAdvantageDTO leftEdgeAdvantage = new StartLineAdvantageDTO();
+            leftEdgeAdvantage.confidence = 1.0;
+            leftEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getB();
+            if (startlineAdvantageAtPinEndInMeters > 0) {
+                leftEdgeAdvantage.startLineAdvantage = startlineAdvantageAtPinEndInMeters;
+                rightEdgeAdvantage.startLineAdvantage = 0.0;
+            } else {
+                leftEdgeAdvantage.startLineAdvantage = 0.0;
+                rightEdgeAdvantage.startLineAdvantage = Math.abs(startlineAdvantageAtPinEndInMeters);
+            }
+            result.add(rightEdgeAdvantage);
+            result.add(leftEdgeAdvantage);
         } else {
-            leftEdgeAdvantage.startLineAdvantage = 0.0;
-            rightEdgeAdvantage.startLineAdvantage = Math.abs(startlineAdvantageAtPinEndInMeters);
-        }
-        result.add(rightEdgeAdvantage);
-        result.add(leftEdgeAdvantage);
+            logger.log(Level.INFO, "PinEnd startline advantages range null");
         }
         return result;
-        
     }
+    
+    private List<StartLineAdvantageDTO> calculatePolarBasedStartlineAdvantagesInRange(Pair<Double, Double> rangePinEndStartlineAdvantage) {
+        List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
+        if (rangePinEndStartlineAdvantage != null) {
+            logger.log(Level.INFO, "PolarBased startline advantages range " + rangePinEndStartlineAdvantage.getA() + " - "+ rangePinEndStartlineAdvantage.getB());
+            for(double i = rangePinEndStartlineAdvantage.getA().doubleValue(); i < rangePinEndStartlineAdvantage.getB().doubleValue()-1 ; i++) {
+                StartLineAdvantageDTO startlineAdvantage = new StartLineAdvantageDTO();
+                startlineAdvantage.confidence = 0.5;
+                startlineAdvantage.distanceToRCBoatInMeters = i;
+                Position startingPosition = startlineAndFirstMarkPositions.startBoatPosition.translateRhumb(startLineBearingFromRCToPin, new MeterDistance(i));
+                Distance startingPositionToFirstMarkDistance = startingPosition.getDistance(startlineAndFirstMarkPositions.firstMarkPosition);
+                startlineAdvantage.startLineAdvantage = startingPositionToFirstMarkDistance.getMeters()/3;
+                result.add(startlineAdvantage);
+            }
+        } else {
+            logger.log(Level.INFO, "PinEnd startline advantages range null");
+        }
+        return result;
+    }
+    
+    
     
     private double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
         double result = 0;
-        if(advantages != null && advantages.size() > 0) {
-        Collections.sort(advantages, StartLineAdvantageDTO.startlineAdvantageComparatorDesc);
-        result = advantages.get(0).startLineAdvantage;
+        List<StartLineAdvantageDTO> sortedAdvantages = new ArrayList<StartLineAdvantageDTO>();
+        sortedAdvantages.addAll(advantages);
+        if(sortedAdvantages != null && sortedAdvantages.size() > 0) {
+        Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
+        result = sortedAdvantages.get(0).startLineAdvantage;
         }
         return result;
     }
-    
-    private Position getIntersectionPositionBetweenStartlineAndLayline() {
-        Position result = null;
-        
-        return result;
-    }
-    
-    private void getStartlineOfRace(){
-        
-    }
-    
-    private void getFirstMarkOfRace(){
-        
-    }
-    
-    private Set<Double> getPositionsLineWithStepWidthInMeter(Object line, int meter){
-        return null;
-    }
-   
 
     @Override
     public void liveTrackedRaceDidChange(TrackedRace trackedRace) {
         this.currentLiveTrackedRace = trackedRace;
     }
-    
-//    //Dummy data generation
-//    
-
-//    
-//    private List<StartLineAdvantageDTO> generateRandomAdvantagesOnStartline(){
-//        List<StartLineAdvantageDTO> randomAdvantagesOnStartline = new ArrayList<StartLineAdvantageDTO>();
-//        randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(0));
-//        randomAdvantagesOnStartline.add(getRandomStartLineAdvantageDTOWithX(33));
-//        return randomAdvantagesOnStartline;
-//    }
-//    
-//    private StartLineAdvantageDTO getRandomStartLineAdvantageDTOWithX(int x) {
-//        StartLineAdvantageDTO result = new StartLineAdvantageDTO();
-//        result.distanceToRCBoatInMeters = x;
-//        result.startLineAdvantage = (x+1)/2+(0 + (int)(Math.random()*5));
-//        result.confidence = 1;
-//        return result;
-//    }
 
     @Override
     public PolarDataService getPolarDataService() {
