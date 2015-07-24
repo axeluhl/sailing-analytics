@@ -14,9 +14,16 @@ public class StartLineAdvantageDTO extends AverageDTO implements IsSerializable 
     
     public StartLineAdvantageDTO(){}
     
-    public static Comparator<StartLineAdvantageDTO> startlineAdvantageComparatorDesc = new Comparator<StartLineAdvantageDTO>() {
+    public static Comparator<StartLineAdvantageDTO> startlineAdvantageComparatorByAdvantageDesc = new Comparator<StartLineAdvantageDTO>() {
         public int compare(StartLineAdvantageDTO a, StartLineAdvantageDTO b) {
             return (int) (b.startLineAdvantage - a.startLineAdvantage);
+        }
+
+    };
+    
+    public static Comparator<StartLineAdvantageDTO> startlineAdvantageComparatorByDistanceToRCBoatAsc = new Comparator<StartLineAdvantageDTO>() {
+        public int compare(StartLineAdvantageDTO a, StartLineAdvantageDTO b) {
+            return (int) (a.distanceToRCBoatInMeters - b.distanceToRCBoatInMeters);
         }
 
     };
