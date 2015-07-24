@@ -1432,6 +1432,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
             } else {
+                logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
