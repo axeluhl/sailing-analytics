@@ -1007,13 +1007,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (courseDTO.marks != null) {
                 for (MarkDTO markDTO : courseDTO.marks) {
                     boolean isSelected = false;
-                    if (endWaypointForCurrentLegNumber != null) {
-                        for(MarkDTO waypointMark: endWaypointForCurrentLegNumber.controlPoint.getMarks()) {
-                            if(waypointMark.equals(markDTO)) {
-                                isSelected = true;
-                                break;
-                            }
-                        }
+                    if (endWaypointForCurrentLegNumber != null && Util.contains(endWaypointForCurrentLegNumber.controlPoint.getMarks(), markDTO)) {
+                        isSelected = true;
                     }
                     CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getName());
                     if (courseMarkOverlay == null) {
