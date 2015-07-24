@@ -34,6 +34,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
@@ -110,7 +111,8 @@ public class ReplicationReceiver implements Runnable {
     private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(),
+            /* thread factory */ new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     /**
      * @param master

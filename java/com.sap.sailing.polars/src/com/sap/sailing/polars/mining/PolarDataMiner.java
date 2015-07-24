@@ -53,6 +53,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class PolarDataMiner {
 
@@ -81,8 +82,9 @@ public class PolarDataMiner {
     private final ClusterGroup<Bearing> angleClusterGroup;
 
     private ThreadPoolExecutor createExecutor() {
-        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new RejectedExecutionHandler() {
+        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60l, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true),
+                new RejectedExecutionHandler() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                         logger.warning("Polar Data Miner Executor rejected execution. Running sequentially.");

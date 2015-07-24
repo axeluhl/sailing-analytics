@@ -520,7 +520,8 @@ public class ReplicationServiceImpl implements ReplicationService {
         logger.info("Started replicator thread");
         InputStream is = initialLoadURL.openStream();
         final String queueName = new BufferedReader(new InputStreamReader(is)).readLine();
-        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(master.createChannel(), queueName);
+        final Channel channel = master.createChannel();
+        RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(channel, queueName);
         try {
             final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
             for (Replicable<?, ?> replicable : replicables) { // absolutely make sure to use the same sequence of replicables as for URL (bug 3015)
@@ -534,6 +535,8 @@ public class ReplicationServiceImpl implements ReplicationService {
                 logger.info("Done receiving initial load for "+replicable.getId());
             }
         } finally {
+            logger.info("Closing channel "+channel+"'s connection "+channel.getConnection());
+            channel.getConnection().close();
             logger.info("Resuming replicator to apply queues");
             replicator.setSuspended(false); // apply queued operations
             // delete initial load queue
