@@ -55,17 +55,16 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
             retrieveDataForCalculation(currentLiveTrackedRace);
             Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
             Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
-            Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
-                    intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
+            Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
             Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
             result.advantages = calculateStartlineAdvantages(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
+            double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+            result.maximum = maximum;
+            advantageMaximumAverage.add(maximum);
+            result.average = advantageMaximumAverage.getAverage();
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");
         }
-//        double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
-//        result.maximum = maximum;
-//        advantageMaximumAverage.add(maximum);
-//        result.average = advantageMaximumAverage.getAverage();
         return result;
     }
     
