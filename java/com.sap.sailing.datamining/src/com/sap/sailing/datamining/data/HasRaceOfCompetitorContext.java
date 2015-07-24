@@ -22,5 +22,5 @@ public interface HasRaceOfCompetitorContext {
     
     @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=2)
     public Speed getSpeedTenSecondsBeforeStart();
-
+    
 }
