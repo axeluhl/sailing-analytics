@@ -802,7 +802,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (markPassingsInOrder != null) {
                 lockForRead(markPassingsInOrder);
                 try {
-                    final MarkPassing last = markPassingsInOrder.last();
+                    final MarkPassing last = markPassingsInOrder.isEmpty() ? null : markPassingsInOrder.last();
                     if (last != null) {
                         passingTime = last.getTimePoint();
                     }
