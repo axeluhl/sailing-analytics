@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -17,6 +19,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
 public class RefreshManager {
+    private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());
 
     private static final long PAUSE_ON_ERROR = 1000 * 30;
     private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
@@ -47,16 +50,14 @@ public class RefreshManager {
         });
     }
 
-    private int updateNo;
-
     private void update() {
-        updateNo++;
         for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
             if (!refreshable.callRunning && refreshable.timeout < System.currentTimeMillis() + 5000) {
                 refreshable.callRunning = true;
-                actionExecutor.execute(refreshable.provider.getAction(), new AsyncCallback<ResultWithTTL<DTO>>() {
+                final Action<ResultWithTTL<DTO>> action = refreshable.provider.getAction();
+                actionExecutor.execute(action, new AsyncCallback<ResultWithTTL<DTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         refreshable.callRunning = false;
@@ -68,7 +69,11 @@ public class RefreshManager {
                     public void onSuccess(ResultWithTTL<DTO> result) {
                         refreshable.callRunning = false;
                         refreshable.timeout = System.currentTimeMillis() + result.getTtl();
-                        refreshable.widget.setData(result.getDto(), refreshable.timeout, updateNo);
+                        try {
+                            refreshable.widget.setData(result.getDto());
+                        } catch(Throwable error) {
+                            LOG.log(Level.SEVERE, "Error while refreshing content with action " + action.getClass().getName(), error);
+                        }
                         reschedule();
                     }
                 });

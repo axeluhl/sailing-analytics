@@ -42,6 +42,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Double lastHeight;
     private Double lastScaleFactor;
     private Boolean lastShowBuoyZone;
+    private Boolean lastIsSelected;
     private Double lastBuoyZoneRadiusInMeter;
 
     public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
@@ -78,11 +79,11 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                     canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
-            if (needToDraw(showBuoyZone, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
+            if (needToDraw(showBuoyZone, isSelected, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
                 setCanvasSize((int) canvasWidth, (int) canvasHeight);
                 Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
-                markVectorGraphics.drawMarkToCanvas(context2d, showBuoyZone, canvasWidth, canvasHeight, markSizeScaleFactor);
+                markVectorGraphics.drawMarkToCanvas(context2d, isSelected, canvasWidth, canvasHeight, markSizeScaleFactor);
                 // draw the buoy zone
                 if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     CssColor grayTransparentColor = CssColor.make("rgba(50,90,135,0.75)");
@@ -98,6 +99,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastBuoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
                 lastScaleFactor = markSizeScaleFactor;
                 lastShowBuoyZone = showBuoyZone;
+                lastIsSelected = isSelected;
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
@@ -114,8 +116,9 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      * Compares the drawing parameters to {@link #lastLegType} and the other <code>last...</code>. If anything has
      * changed, the result is <code>true</code>.
      */
-    private boolean needToDraw(boolean showBuoyZone, double buoyZoneRadiusInMeters, double width, double height, double scaleFactor) {
+    private boolean needToDraw(boolean showBuoyZone, boolean isSelected, double buoyZoneRadiusInMeters, double width, double height, double scaleFactor) {
         return lastShowBuoyZone == null || lastShowBuoyZone != showBuoyZone ||
+               lastIsSelected == null || lastIsSelected != isSelected ||
                lastBuoyZoneRadiusInMeter == null || lastBuoyZoneRadiusInMeter != buoyZoneRadiusInMeters ||
                lastScaleFactor == null || lastScaleFactor != scaleFactor ||
                lastWidth == null || lastWidth != width ||
