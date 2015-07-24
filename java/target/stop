@@ -15,7 +15,7 @@ if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         fi
 else
     NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
-    echo -n exit | $NC_CMD > /dev/null
+    echo -n shutdown | $NC_CMD > /dev/null
 
     echo "Stopped server $SERVER_NAME"
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
