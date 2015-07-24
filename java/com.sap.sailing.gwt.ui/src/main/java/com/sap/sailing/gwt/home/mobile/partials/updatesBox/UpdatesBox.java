@@ -48,7 +48,7 @@ public class UpdatesBox extends Composite implements RefreshableWidget<ListResul
 
 
     @Override
-    public void setData(final ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
+    public void setData(final ListResult<NewsEntryDTO> data) {
         setData(data == null ? null :data.getValues());
     }
 

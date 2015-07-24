@@ -32,7 +32,7 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
     }
 
     @Override
-    public void setData(SortedSetResult<RegattaWithProgressDTO> data, long nextUpdate, int updateNo) {
+    public void setData(SortedSetResult<RegattaWithProgressDTO> data) {
         this.setListData(data == null ? Collections.<RegattaWithProgressDTO>emptySet() : data.getValues());
     }
 
