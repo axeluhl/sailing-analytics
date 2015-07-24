@@ -25,8 +25,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -67,7 +65,6 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
 
     private Chart chart;
     private Series series;
-    private Series newseries;
     
     private static final int POINT_ADDING_ANIMATION_DURATION_IN_MILLIS = 2000;
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesOnLineChart.class.getName());
@@ -307,7 +304,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
             if(position > 0.6) {
                 return HIGHT_CONFIDENCE_COLOR_AS_HEX;
             }else {
-                return HIGHT_CONFIDENCE_COLOR_AS_HEX;
+                return LOW_CONFIDENCE_COLOR_AS_HEX;
             }
         }
         
