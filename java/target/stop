@@ -15,7 +15,7 @@ if [[ $TELNET_PORT == "" ]] || [[ $TELNET_ACTIVE == "" ]]; then
         fi
 else
     NC_CMD="nc -t 127.0.0.1 $TELNET_PORT"
-    echo -n shutdown | $NC_CMD > /dev/null
+    echo shutdown | $NC_CMD
 
     echo "Stopped server $SERVER_NAME"
     if [[ $SERVER_STARTUP_NOTIFY != "" ]]; then
@@ -23,8 +23,19 @@ else
     fi
 fi
 
-# make really sure to kill server
-echo "Making sure to stop server by its PID"
-kill `cat server.pid`
-sleep 5
+# Wait for server to die; if it doesn't, kill it after a timeout
+KILL_TIMEOUT_IN_SECONDS=10
+SERVER_PID=`cat server.pid`
+seconds_counter=$KILL_TIMEOUT_IN_SECONDS
+while ((seconds_counter-- != 0)); do
+  if [ ! -d /proc/$SERVER_PID ]; then
+    echo "Server successfully and gracefully stopped by OSGi shutdown command."
+    rm server.pid
+    exit 0
+  fi
+  sleep 1
+done
+echo "Server didn't die within ${KILL_TIMEOUT_IN_SECONDS}s after sending it the shutdown command. Killing..."
+kill $SERVER_PID
 rm server.pid
+
