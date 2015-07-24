@@ -192,6 +192,19 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
         });
 
     }
+    
+    public void scrollToTab(int tabNumber) {
+        Widget tab = getTab(tabNumber);
+        if (tab == null)
+            return;
+        
+        int oldLeft = parsePosition(tabBar.getElement().getStyle().getLeft());
+        int difference = getAbsoluteRightOfTabBar() - getAbsoluteRightOfWidget(tab) - SCROLL_RIGHT_TAB_MARGIN;
+        
+        // Prevent over-scrolling left border
+        int newLeft = Math.min(oldLeft + difference, 0);
+        scrollTo(oldLeft, newLeft);
+    }
 
     private void resetScrollPosition() {
         scrollTo(0, 0);
@@ -257,6 +270,14 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
             return null;
 
         return tabBar.getWidget(tabBar.getWidgetCount() - 1);
+    }
+    
+    private Widget getTab(int tabNumber) {
+        if (tabNumber < 0 || tabNumber >= tabBar.getWidgetCount()) {
+            return null;
+        }
+        
+        return tabBar.getWidget(tabNumber);
     }
     
     private Widget getFirstTab() {

@@ -138,7 +138,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
 
         showError(this.stringMessages.invalidSelection());
     }
-
+    
     @Override
     public void showError(String error) {
         currentResult = null;
