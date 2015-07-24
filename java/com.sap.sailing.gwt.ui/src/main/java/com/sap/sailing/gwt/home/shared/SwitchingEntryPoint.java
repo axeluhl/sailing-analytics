@@ -70,10 +70,9 @@ public class SwitchingEntryPoint implements EntryPoint {
      * @return
      */
     public static boolean isMobile() {
-//        boolean isMobile = isMobileRegExp.test(Navigator.getUserAgent());
-//        LOG.info("Navigator user agent matched mobile regex: " + isMobile);
-//        return isMobile;
-        return true;
+        boolean isMobile = isMobileRegExp.test(Navigator.getUserAgent());
+        LOG.info("Navigator user agent matched mobile regex: " + isMobile);
+        return isMobile;
     }
 
     /**
