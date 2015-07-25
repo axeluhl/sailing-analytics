@@ -213,11 +213,13 @@ public class ReplicationServiceImpl implements ReplicationService {
     private static class InitialLoadRequest {
         private final Channel channelForInitialLoad;
         private final Iterable<Replicable<?, ?>> replicables;
+        private final String queueName;
 
-        public InitialLoadRequest(Channel channelForInitialLoad, Iterable<Replicable<?, ?>> replicables) {
+        public InitialLoadRequest(Channel channelForInitialLoad, Iterable<Replicable<?, ?>> replicables, String queueName) {
             super();
             this.channelForInitialLoad = channelForInitialLoad;
             this.replicables = replicables;
+            this.queueName = queueName;
         }
 
         public Channel getChannelForInitialLoad() {
@@ -226,6 +228,10 @@ public class ReplicationServiceImpl implements ReplicationService {
 
         public Iterable<Replicable<?, ?>> getReplicables() {
             return replicables;
+        }
+
+        protected String getQueueName() {
+            return queueName;
         }
     }
 
@@ -574,7 +580,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             final String queueName = new BufferedReader(queueNameReader).readLine();
             queueNameReader.close();
             final Channel channel = master.createChannel();
-            initialLoadChannels.put(master, new InitialLoadRequest(channel, replicables));
+            initialLoadChannels.put(master, new InitialLoadRequest(channel, replicables, queueName));
             final RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(channel, queueName);
             try {
                 final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
@@ -685,9 +691,14 @@ public class ReplicationServiceImpl implements ReplicationService {
             final InitialLoadRequest initialLoad = initialLoadChannels.get(descriptor);
             if (initialLoad != null) {
                 try {
-                    initialLoad.getChannelForInitialLoad().getConnection().close();
-                    initialLoad.getChannelForInitialLoad().close();
-                } catch (IOException e) {
+                    final Channel channelForInitialLoad = initialLoad.getChannelForInitialLoad();
+                    // delete initial load queue
+                    DeleteOk deleteOk = channelForInitialLoad.queueDelete(initialLoad.getQueueName());
+                    logger.info("Deleted queue " + initialLoad.getQueueName()+ " used for initial load: " + deleteOk.toString());
+                    initialLoadChannels.remove(descriptor);
+                    channelForInitialLoad.getConnection().close();
+                    channelForInitialLoad.close();
+                } catch (Exception e) {
                     logger.log(Level.WARNING, "Error trying to close initial load channel / connection to message queueing system", e);
                     // let's continue trying to de-register the replica from master; re-throwing the
                     // exception wouldn't make much sense here; rather try to clean up as much as
