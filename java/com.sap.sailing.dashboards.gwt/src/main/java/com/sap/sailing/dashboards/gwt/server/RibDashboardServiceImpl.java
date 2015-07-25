@@ -223,7 +223,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 if (startlineMarkPositions != null && firstMarkPosition != null) {
                     Distance rcToMark = firstMarkPosition.getDistance(startlineMarkPositions.getA());
                     Distance pinToMark = firstMarkPosition.getDistance(startlineMarkPositions.getB());
-                    return pinToMark.getMeters() - rcToMark.getMeters();
+                    return  rcToMark.getMeters() - pinToMark.getMeters();
                 }
             }
         }
