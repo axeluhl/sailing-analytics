@@ -6,13 +6,12 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
-public class PlainResultsPresenter implements ResultsPresenter<Number> {
+public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     
     private final StringMessages stringMessages;
 
@@ -31,7 +30,7 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void internalShowResult(QueryResult<Number> result) {
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
         resultsBuilder.append(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds()));
         
@@ -49,13 +48,13 @@ public class PlainResultsPresenter implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showError(String error) {
+    public void internalShowError(String error) {
         resultsLabel.setHTML(error);
         mainPanel.setWidget(resultsLabel);
     }
 
     @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
+    public void internalShowError(String mainError, Iterable<String> detailedErrors) {
         StringBuilder errorBuilder = new StringBuilder(mainError + ":<br /><ul>");
         for (String detailedError : detailedErrors) {
             errorBuilder.append("<li>" + detailedError + "</li>");

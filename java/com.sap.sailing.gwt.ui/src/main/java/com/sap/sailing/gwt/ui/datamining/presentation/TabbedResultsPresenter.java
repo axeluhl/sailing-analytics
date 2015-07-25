@@ -86,6 +86,11 @@ public class TabbedResultsPresenter implements ResultsPresenter<Number> {
         getSelectedPresenter().showBusyIndicator();
     }
     
+    @Override
+    public QueryResult<Number> getCurrentResult() {
+        return getSelectedPresenter().getCurrentResult();
+    }
+    
     private CloseableTabHeader getSelectedHeader() {
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }

@@ -15,6 +15,7 @@ import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
+import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -22,24 +23,20 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
-import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
-public class ResultsChart implements ResultsPresenter<Number> {
+public class ResultsChart extends AbstractResultsPresenter<Number> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -76,7 +73,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
     };
     
     private final StringMessages stringMessages;
-    private final DockLayoutPanel mainPanel;
 
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
@@ -95,8 +91,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
         super();
         this.stringMessages = stringMessages;
         
-        mainPanel = new DockLayoutPanel(Unit.PX);
-        
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
         sortByPanel.add(new Label(stringMessages.sortBy()));
@@ -114,8 +108,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
             }
         });
         sortByPanel.add(keyComparatorListBox);
-        mainPanel.addNorth(sortByPanel, 40);
-        mainPanel.setWidgetHidden(sortByPanel, true);
+        sortByPanel.setVisible(false);
+        addControlWidget(sortByPanel);
         
         presentationPanel = new ResizingSimplePanel() {
             @Override
@@ -124,7 +118,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 chart.redraw();
             }
         };
-        mainPanel.add(presentationPanel);
+        setPresentationWidget(presentationPanel);
         
         chart = createChart();
         seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
@@ -140,14 +134,14 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
     
     @Override
-    public void showError(String error) {
+    public void internalShowError(String error) {
         currentResult = null;
         errorLabel.setHTML(error);
         presentationPanel.setWidget(errorLabel);
     }
     
     @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
+    public void internalShowError(String mainError, Iterable<String> detailedErrors) {
         StringBuilder errorBuilder = new StringBuilder(mainError + ":<br /><ul>");
         for (String detailedError : detailedErrors) {
             errorBuilder.append("<li>" + detailedError + "</li>");
@@ -163,7 +157,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void internalShowResult(QueryResult<Number> result) {
         if (result != null && !result.isEmpty()) {
             currentResult = result;
             updateKeyComparatorListBox();
@@ -177,7 +171,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     private void updateKeyComparatorListBox() {
-        boolean hidden = true;
+        boolean visible = false;
         Comparator<GroupKey> valueToBeSelected = standardKeyComparator;
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
@@ -185,12 +179,11 @@ public class ResultsChart implements ResultsPresenter<Number> {
             valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
             acceptableValues.add(ascendingByValueKeyComparator);
             acceptableValues.add(descendingByValueKeyComparator);
-            hidden = false;
+            visible = true;
         }
         keyComparatorListBox.setValue(valueToBeSelected);
         keyComparatorListBox.setAcceptableValues(acceptableValues);
-        mainPanel.setWidgetHidden(sortByPanel, hidden);
-        mainPanel.forceLayout();
+        sortByPanel.setVisible(visible);
     }
 
     private boolean isCurrentResultSimple() {
@@ -291,6 +284,8 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
+        
+        chart.setExporting(new Exporting().setEnabled(false));
 
         chart.getXAxis().setAllowDecimals(false);
 
@@ -306,11 +301,6 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }));
         
         return chart;
-    }
-    
-    @Override
-    public Widget getWidget() {
-        return mainPanel;
     }
 
 }
