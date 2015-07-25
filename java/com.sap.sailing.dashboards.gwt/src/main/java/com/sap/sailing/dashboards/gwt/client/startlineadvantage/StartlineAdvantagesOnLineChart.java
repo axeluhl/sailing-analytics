@@ -278,7 +278,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
         private static final String HIGHT_CONFIDENCE_COLOR_AS_HEX = "#008FFF";
         
         public static Color getColorWithConfidenceGradients(List<StartLineAdvantageDTO> startlineAdvantages) {
-            Color color = new Color().setLinearGradient(0, 0, 500, 0);
+            Color color = new Color().setLinearGradient(200, 0, 0, 0);
             double lineLenght = getBiggestDistanceToRCBoat(startlineAdvantages);
             //TODO Need to find a prettier way of at adding color stops
             double lastConfidence = 2;
