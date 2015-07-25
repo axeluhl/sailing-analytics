@@ -34,6 +34,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. Currently Expedition and Igtimi are supported.
@@ -119,6 +120,16 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     copyOfLastIgtimiMessages = new ArrayList<>(deviceAndMessagesList.getValue());
                 }
                 out.println("Windbot: <b>" + deviceAndMessagesList.getKey() + "</b>");
+                if(copyOfLastIgtimiMessages.size() > 0) {
+                    TimePoint latestTimePoint = copyOfLastIgtimiMessages.get(copyOfLastIgtimiMessages.size()-1).wind.getTimePoint(); 
+                    long lastFixDiffInMs = System.currentTimeMillis() - latestTimePoint.asMillis();
+                    out.println("&nbsp;&nbsp;&nbsp;&nbsp;Last fix:");
+                    if(lastFixDiffInMs / 1000 < 60) {
+                        out.println(lastFixDiffInMs / 1000 +"s ago");
+                    } else {
+                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 +"min ago</span>");
+                    }
+                }
                 out.println("<br/>");
                 int counter = 0;
                 for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
@@ -249,7 +260,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
             }
             formatedInfo += ", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) +"kn";
             if(wind.getFrom() != null) {
-                formatedInfo += " from "+ decimalFormatter1Digit.format(wind.getFrom().getDegrees());
+                formatedInfo += " from "+ decimalFormatter1Digit.format(wind.getFrom().getDegrees()) + "&deg;";
             }
             return formatedInfo;
         }
