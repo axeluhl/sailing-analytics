@@ -5,9 +5,12 @@ import java.io.PrintWriter;
 import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -59,7 +62,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     
     private static Object lock = new Object();
     private static int igtimiRawMessageCount;
-    private static Map<String, List<IgtimiMessageInfo>> lastIgtimiMessages;
+    private static Map<String, Deque<IgtimiMessageInfo>> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
     private static LiveDataConnection liveDataConnection;
 
@@ -93,7 +96,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     }
                 }
                 isIgtimiListenerRegistered = registerIgtimiListener();
-                lastIgtimiMessages = new HashMap<String, List<IgtimiMessageInfo>>();
+                lastIgtimiMessages = new HashMap<String, Deque<IgtimiMessageInfo>>();
                 igtimiRawMessageCount = 0;
             }
         }
@@ -114,14 +117,14 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
         if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
-            for(Entry<String, List<IgtimiMessageInfo>> deviceAndMessagesList: lastIgtimiMessages.entrySet()) {
-                final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;
+            for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: lastIgtimiMessages.entrySet()) {
+                final Deque<IgtimiMessageInfo> copyOfLastIgtimiMessages;
                 synchronized (deviceAndMessagesList.getValue()) {
-                    copyOfLastIgtimiMessages = new ArrayList<>(deviceAndMessagesList.getValue());
+                    copyOfLastIgtimiMessages = new ArrayDeque<>(deviceAndMessagesList.getValue());
                 }
                 out.println("Windbot: <b>" + deviceAndMessagesList.getKey() + "</b>");
                 if(copyOfLastIgtimiMessages.size() > 0) {
-                    TimePoint latestTimePoint = copyOfLastIgtimiMessages.get(copyOfLastIgtimiMessages.size()-1).wind.getTimePoint(); 
+                    TimePoint latestTimePoint = copyOfLastIgtimiMessages.peek().wind.getTimePoint(); 
                     long lastFixDiffInMs = System.currentTimeMillis() - latestTimePoint.asMillis();
                     out.println("&nbsp;&nbsp;&nbsp;&nbsp;Last fix:");
                     if(lastFixDiffInMs / 1000 < 60) {
@@ -131,15 +134,11 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     }
                 }
                 out.println("<br/>");
-                int counter = 0;
-                for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
-                    counter++;
-                    IgtimiMessageInfo message = iterator.previous();
+                Iterator<IgtimiMessageInfo> messageIt = copyOfLastIgtimiMessages.iterator();
+                while (messageIt.hasNext()){
+                    IgtimiMessageInfo message = messageIt.next();
                     out.println(message);
                     out.println("<br/>");
-                    if (counter >= NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
-                        break;
-                    }
                 }
                 out.println("<br/>");
             }
@@ -268,12 +267,15 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
 
     @Override
     public void windDataReceived(Wind wind, String deviceSerialNumber) {
-        List<IgtimiMessageInfo> deviceList = lastIgtimiMessages.get(deviceSerialNumber);
-        if(deviceList == null) {
-            deviceList = new ArrayList<IgtimiMessageInfo>();
-            lastIgtimiMessages.put(deviceSerialNumber, deviceList);
+        Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
+        if(messagesPerDevice == null) {
+            messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
+            lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
         }
-        deviceList.add(new IgtimiMessageInfo(wind));
+        messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+        if(messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+            messagesPerDevice.pollLast();
+        }
     }
     
     @Override
