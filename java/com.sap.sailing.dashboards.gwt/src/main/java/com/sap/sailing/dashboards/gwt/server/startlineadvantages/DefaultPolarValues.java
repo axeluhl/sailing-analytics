@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.ManeuverType;
  */
 public class DefaultPolarValues {
 
-    private final static double TACKING_ANGLE = 40;
+    private final static double TACKING_ANGLE = 90;
     private final static double JIBING_ANGLE = 30;
     private final static double BOAT_SPEED = 10;
     
@@ -23,6 +23,12 @@ public class DefaultPolarValues {
     }
     
     public static double getBoatSpeedForWindAngleAndSpeed(double angle, double speed) {
-        return BOAT_SPEED;
+        double result = BOAT_SPEED;
+        if(angle <= 180) {
+            result = BOAT_SPEED*(angle/1000);
+        } if(angle > 180) {
+            result = BOAT_SPEED*((360-angle)/1000);
+        }
+        return result;
     }
 }
