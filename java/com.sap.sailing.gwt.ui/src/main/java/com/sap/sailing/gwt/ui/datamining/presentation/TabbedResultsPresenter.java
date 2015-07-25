@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.QueryResult;
 
-public class TabResultsPresenter implements ResultsPresenter<Number> {
+public class TabbedResultsPresenter implements ResultsPresenter<Number> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
@@ -29,7 +29,7 @@ public class TabResultsPresenter implements ResultsPresenter<Number> {
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<Number>> presentersMappedByHeader;
     
-    public TabResultsPresenter(StringMessages stringMessages) {
+    public TabbedResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         
         tabPanel = new ScrolledTabLayoutPanel(30, Unit.PX, resources.arrowLeftIcon(), resources.arrowRightIcon());
