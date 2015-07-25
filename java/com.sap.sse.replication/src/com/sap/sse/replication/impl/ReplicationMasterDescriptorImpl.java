@@ -20,6 +20,17 @@ import com.sap.sse.BuildVersion;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
+/**
+ * Equality is defined by the master's hostname / port, the messaging hostname / port and the
+ * messaging exchange name, defining the sequence of messages received. The individual message
+ * consumer and queue name, however, are not part of the equality definition. Therefore, two
+ * descriptors may differ in their technical connection to the master but would still be
+ * considered equal as long as they will receive the same set of messages from the same
+ * master.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescriptor {
     private static final Logger logger = Logger.getLogger(ReplicationMasterDescriptorImpl.class.getName());
     
@@ -76,6 +87,49 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.DEREGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + uuid.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((exchangeName == null) ? 0 : exchangeName.hashCode());
+        result = prime * result + ((masterServletHostname == null) ? 0 : masterServletHostname.hashCode());
+        result = prime * result + ((messagingHostname == null) ? 0 : messagingHostname.hashCode());
+        result = prime * result + messagingPort;
+        result = prime * result + servletPort;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ReplicationMasterDescriptorImpl other = (ReplicationMasterDescriptorImpl) obj;
+        if (exchangeName == null) {
+            if (other.exchangeName != null)
+                return false;
+        } else if (!exchangeName.equals(other.exchangeName))
+            return false;
+        if (masterServletHostname == null) {
+            if (other.masterServletHostname != null)
+                return false;
+        } else if (!masterServletHostname.equals(other.masterServletHostname))
+            return false;
+        if (messagingHostname == null) {
+            if (other.messagingHostname != null)
+                return false;
+        } else if (!messagingHostname.equals(other.messagingHostname))
+            return false;
+        if (messagingPort != other.messagingPort)
+            return false;
+        if (servletPort != other.servletPort)
+            return false;
+        return true;
     }
 
     @Override
