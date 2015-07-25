@@ -627,7 +627,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
         if (!diff.isEmpty()) {
             logger.warning("Found inconsistency between race's course ("+getRace().getCourse()+
-                    ") and TrackedRace's structures ("+getTrackedLegs()+") in "+this+"; fixing");
+                    ") and TrackedRace's structures in "+this+"; fixing");
         }
         diff.applyToInPlace(trackedRaceAsWaypointList);
     }
