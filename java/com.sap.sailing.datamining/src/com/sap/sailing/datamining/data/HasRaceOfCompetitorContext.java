@@ -16,11 +16,29 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="DistanceAtStart", resultUnit=Unit.Meters, resultDecimals=0, ordinal=0)
     public double getDistanceToStartLineAtStart();
+
+    @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
+    public Double getNormalizedDistanceToStarboardSideAtStart();
     
-    @Connector(messageKey="SpeedAtStart", ordinal=1)
+    @Connector(messageKey="SpeedAtStart", ordinal=2)
     public Speed getSpeedAtStart();
     
-    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=2)
+    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
     public Speed getSpeedTenSecondsBeforeStart();
+    
+    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=4)
+    public Double getRankAtFirstMark();
+
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=5)
+    public Double getNumberOfTacks();
+
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=6)
+    public Double getNumberOfJibes();
+
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=7)
+    public Double getNumberOfPenaltyCircles();
+    
+    @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=8)
+    public Double getRankGainsOrLosses();
     
 }
