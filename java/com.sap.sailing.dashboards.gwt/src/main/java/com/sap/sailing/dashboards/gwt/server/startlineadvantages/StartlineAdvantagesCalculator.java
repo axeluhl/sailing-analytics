@@ -30,8 +30,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     private TrackedRace currentLiveTrackedRace;
     private MovingAverage advantageMaximumAverage;
     
-    private Bearing  startLineBearingFromRCToPin;
-    
     private PolarDataService polarDataService;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
@@ -58,18 +56,20 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
             if(isStartlineCompletelyUnderneathLaylines()) {
                 logger.log(Level.INFO, "Startline is completely underneath laylines");
                 Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
+                result.advantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
             } else if (isStartlineCompletelyAboveLaylines()) {
                 logger.log(Level.INFO, "Startline is completely above laylines");
                 Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
+                result.advantages = calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
+                subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages);
+                subtractMinimumOfAllStartlineAdvantages(result.advantages);
             } else {
                 logger.log(Level.INFO, "Layline(s) cross startline");
-            Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
-            Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
-            Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
-            Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
-            result.advantages = calculateStartlineAdvantagesForMinimumOneLaylineCrossingStartline(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
+                Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
+                Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
+                Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
+                Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
+                result.advantages = calculateStartlineAdvantagesForMinimumOneLaylineCrossingStartline(polarBasedStartlineAdvatagesRange, pinEndStartlineAdvatagesRange);
             }
             double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
             result.maximum = maximum;
@@ -85,8 +85,20 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         boolean result = false;
         Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
         Bearing bearingOfLeftLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
-        if (bearing.getDegrees() < bearingOfRightLaylineInDeg.getDegrees() && bearing.getDegrees() > 0 && 
+        if (bearing.getDegrees() < bearingOfRightLaylineInDeg.getDegrees() && bearing.getDegrees() > 0 || 
             bearing.getDegrees() > bearingOfLeftLaylineInDeg.getDegrees() && bearing.getDegrees() < 360) {
+            result = true;
+        }
+        return result;
+    }
+    
+    private boolean isBearingUnderneathAdvantageLines(Bearing bearing){
+        boolean result = false;
+        Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
+        Bearing bearingOfLeftLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
+        logger.log(Level.INFO, "Underneath bearingOfRightLaylineInDeg?"+bearingOfRightLaylineInDeg);
+        logger.log(Level.INFO, "Underneath bearingOfLeftLaylineInDeg?"+bearingOfLeftLaylineInDeg);
+        if (bearing.getDegrees() > bearingOfRightLaylineInDeg.getDegrees() && bearing.getDegrees() < bearingOfLeftLaylineInDeg.getDegrees()) {
             result = true;
         }
         return result;
@@ -108,13 +120,15 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     
     private boolean isStartlineCompletelyUnderneathLaylines() {
         boolean result = false;
-        Bearing bearingRCBoatToFirstMark = new DegreeBearingImpl(
+        Bearing bearingFirstMarkToRCBoat = new DegreeBearingImpl(
                 startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
                         startlineAndFirstMarkPositions.startBoatPosition).getDegrees());
-        Bearing bearingPinEndToFirstMark = new DegreeBearingImpl(
+        Bearing bearingFirstMarkToPinEnd = new DegreeBearingImpl(
                 startlineAndFirstMarkPositions.firstMarkPosition.getBearingGreatCircle(
                         startlineAndFirstMarkPositions.pinEndPosition).getDegrees());
-        if (!isBearingAboveAdvantageLines(bearingRCBoatToFirstMark) && !isBearingAboveAdvantageLines(bearingPinEndToFirstMark)) {
+        logger.log(Level.INFO, "Underneath RC?"+bearingFirstMarkToRCBoat);
+        logger.log(Level.INFO, "Underneath PIN?"+bearingFirstMarkToPinEnd);
+        if (isBearingUnderneathAdvantageLines(bearingFirstMarkToRCBoat) && isBearingUnderneathAdvantageLines(bearingFirstMarkToPinEnd)) {
             result = true;
         }
         return result;
@@ -153,7 +167,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         Bearing bearingOfStartlineInRad = startlineAndFirstMarkPositions.startBoatPosition
                 .getBearingGreatCircle(startlineAndFirstMarkPositions.pinEndPosition);
         Bearing bearingOfStartlineInDeg = new DegreeBearingImpl(bearingOfStartlineInRad.getDegrees());
-        startLineBearingFromRCToPin = bearingOfStartlineInDeg;
         logger.log(Level.INFO, "bearingOfStartlineInDeg " + bearingOfStartlineInDeg);
         logger.log(Level.INFO, "bearingOfLaylineInDeg " + bearing);
         Position intersectionPointLaylineStartline = startlineAndFirstMarkPositions.firstMarkPosition
@@ -239,13 +252,16 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();
         if (rangePinEndStartlineAdvantage != null) {
             logger.log(Level.INFO, "PolarBased startline advantages range " + rangePinEndStartlineAdvantage.getA() + " - "+ rangePinEndStartlineAdvantage.getB());
+            Bearing bearingOfStartlineInRad = startlineAndFirstMarkPositions.startBoatPosition
+                    .getBearingGreatCircle(startlineAndFirstMarkPositions.pinEndPosition);
+            Bearing bearingOfStartlineInDeg = new DegreeBearingImpl(bearingOfStartlineInRad.getDegrees());
             for(double i = rangePinEndStartlineAdvantage.getA().doubleValue(); i < rangePinEndStartlineAdvantage.getB().doubleValue()-1 ; i++) {
                 StartLineAdvantageDTO startlineAdvantage = new StartLineAdvantageDTO();
                 startlineAdvantage.confidence = 0.5;
                 startlineAdvantage.distanceToRCBoatInMeters = i;
-                Position startingPosition = startlineAndFirstMarkPositions.startBoatPosition.translateRhumb(startLineBearingFromRCToPin, new MeterDistance(i));
+                Position startingPosition = startlineAndFirstMarkPositions.startBoatPosition.translateRhumb(bearingOfStartlineInDeg, new MeterDistance(i));
                 Distance startingPositionToFirstMarkDistance = startingPosition.getDistance(startlineAndFirstMarkPositions.firstMarkPosition);
-                startlineAdvantage.startLineAdvantage = startingPositionToFirstMarkDistance.getMeters()/3;
+                startlineAdvantage.startLineAdvantage = startingPositionToFirstMarkDistance.getMeters();
                 result.add(startlineAdvantage);
             }
         } else {
@@ -254,9 +270,34 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
     
+    private List<StartLineAdvantageDTO> subtractAgainstMaximumOfAllStartlineAdvantages(List<StartLineAdvantageDTO> advantages) {
+        double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(advantages);
+        for(StartLineAdvantageDTO startLineAdvantageDTO : advantages) {
+            startLineAdvantageDTO.startLineAdvantage = maximum-startLineAdvantageDTO.startLineAdvantage;
+        }
+        return advantages;
+    }
     
+    private List<StartLineAdvantageDTO> subtractMinimumOfAllStartlineAdvantages(List<StartLineAdvantageDTO> advantages) {
+        double minimum = getMinimumAdvantageOfStartlineAdvantageDTOs(advantages);
+        for(StartLineAdvantageDTO startLineAdvantageDTO : advantages) {
+            startLineAdvantageDTO.startLineAdvantage = startLineAdvantageDTO.startLineAdvantage-minimum;
+        }
+        return advantages;
+    }
     
     private double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
+        double result = 0;
+        List<StartLineAdvantageDTO> sortedAdvantages = new ArrayList<StartLineAdvantageDTO>();
+        sortedAdvantages.addAll(advantages);
+        if(sortedAdvantages != null && sortedAdvantages.size() > 0) {
+        Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
+        result = sortedAdvantages.get(sortedAdvantages.size()-1).startLineAdvantage;
+        }
+        return result;
+    }
+    
+    private double getMinimumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
         double result = 0;
         List<StartLineAdvantageDTO> sortedAdvantages = new ArrayList<StartLineAdvantageDTO>();
         sortedAdvantages.addAll(advantages);
