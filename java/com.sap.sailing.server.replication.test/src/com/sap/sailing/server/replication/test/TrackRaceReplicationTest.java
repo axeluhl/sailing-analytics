@@ -114,7 +114,12 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testStartTrackingRaceReplication() throws Exception {
         final String leaderboardName = "Test Leaderboard";
-        master.apply(new CreateFlexibleLeaderboard(leaderboardName, null, new int[0], new LowPoint(), null));
+        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, null, new int[0], new LowPoint(), null));
+        final String columnName = "R1";
+        master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
+        final Fleet defaultFleet = masterLeaderboard.getFleet(null);
+        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
+                new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
@@ -122,10 +127,10 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertNotSame(masterTrackedRace, replicaTrackedRace);
         assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
         assertEquals(Util.size(masterTrackedRace.getRace().getCompetitors()), Util.size(replicaTrackedRace.getRace().getCompetitors()));
-        Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(leaderboardName);
-        RaceColumn column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
+        Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        RaceColumn column = replicaLeaderboard.getRaceColumnByName(columnName);
         assertNotNull(column);
-        assertSame(replicaTrackedRace, column.getTrackedRace(replicaDefaultLeaderboard.getFleet(null)));
+        assertSame(replicaTrackedRace, column.getTrackedRace(replicaLeaderboard.getFleet(null)));
     }
 
     @Test
