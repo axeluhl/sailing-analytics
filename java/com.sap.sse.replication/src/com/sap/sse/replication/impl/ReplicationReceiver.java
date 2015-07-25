@@ -326,10 +326,10 @@ public class ReplicationReceiver implements Runnable {
     
     public synchronized void setSuspended(final boolean suspended) {
         if (this.suspended != suspended) {
-            this.suspended = suspended;
-            if (!this.suspended) {
-                applyQueues();
+            if (!suspended) {
+                applyQueues(); // apply queues before setting suspended to false; further incoming operations have to stand in line
             }
+            this.suspended = suspended;
         }
     }
     
