@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.ManeuverType;
  */
 public class DefaultPolarValues {
 
-    private final static double TACKING_ANGLE = 90;
+    private final static double TACKING_ANGLE = 40;
     private final static double JIBING_ANGLE = 30;
     private final static double BOAT_SPEED = 10;
     
