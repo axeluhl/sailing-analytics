@@ -605,11 +605,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
-        triggerManeuverCacheRecalculationForAllCompetitors();
-        logger.info("Deserialized race " + getRace().getName());
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
         adjustStructureToCourse();
+        triggerManeuverCacheRecalculationForAllCompetitors();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     /**
@@ -625,6 +625,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void adjustStructureToCourse() throws PatchFailedException {
         final TrackedRaceAsWaypointList trackedRaceAsWaypointList = new TrackedRaceAsWaypointList(this);
         Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
+        if (!diff.isEmpty()) {
+            logger.warning("Found inconsistency between race's course ("+getRace().getCourse()+
+                    ") and TrackedRace's structures in "+this+"; fixing");
+        }
         diff.applyToInPlace(trackedRaceAsWaypointList);
     }
 
@@ -3032,6 +3036,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
+            competitorTrack.suspendValidityCaching();
+        }
+        for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
+            markTrack.suspendValidityCaching();
+        }
         if (markPassingCalculator != null) {
             markPassingCalculator.suspend();
         }
@@ -3040,6 +3050,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
+            competitorTrack.resumeValidityCaching();
+        }
+        for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
+            markTrack.resumeValidityCaching();
+        }
         if (markPassingCalculator != null) {
             markPassingCalculator.resume();
         }
