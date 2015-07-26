@@ -14,14 +14,11 @@ import com.sap.sse.datamining.shared.QueryResult;
 
 public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     
-    private final StringMessages stringMessages;
-
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
     public PlainResultsPresenter(StringMessages stringMessages) {
         super(stringMessages);
-        this.stringMessages = stringMessages;
         
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);
@@ -33,16 +30,15 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         Map<GroupKey, Number> resultValues = result.getResults();
         
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
-        resultsBuilder.append(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds()));
         
-        resultsBuilder.append("<ul>");
+        resultsBuilder.append("<table>");
         for (GroupKey key : getSortedKeys(result)) {
-            resultsBuilder.append("<li>");
-            resultsBuilder.append("<b>" + key.toString() + "</b>: ");
-            resultsBuilder.append(resultValues.get(key).doubleValue());
-            resultsBuilder.append("</li>");
+            resultsBuilder.append("<tr>");
+            resultsBuilder.append("<td><b>" + key.toString() + "</b>:</td>");
+            resultsBuilder.append("<td>" + resultValues.get(key).doubleValue() + "</td>");
+            resultsBuilder.append("</tr>");
         }
-        resultsBuilder.append("</ul>");
+        resultsBuilder.append("</table>");
         
         resultsLabel.setHTML(resultsBuilder.toString());
     }
