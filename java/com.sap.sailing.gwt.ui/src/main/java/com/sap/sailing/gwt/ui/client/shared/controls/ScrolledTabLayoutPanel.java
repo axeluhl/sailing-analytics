@@ -171,7 +171,7 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
         return vPanel;
     }
 
-    private void checkIfScrollButtonsNecessary() {
+    public void checkIfScrollButtonsNecessary() {
         // Defer size calculations until sizes are available, when calculating immediately after
         // add(), all size methods return zero
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -195,7 +195,7 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
     
     public void scrollToTab(int tabNumber) {
         Widget tab = getTab(tabNumber);
-        if (tab == null)
+        if (tab == null || !isScrollingNecessary())
             return;
         
         int oldLeft = parsePosition(tabBar.getElement().getStyle().getLeft());
@@ -231,6 +231,10 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
                 isScrolling = false;
             }
         }.run(SCROLL_ANIMATION_SPEED);
+    }
+    
+    private boolean isScrollingNecessary() {
+        return isScrollingToLeftNecessary() || isScrollingToRightNecessary();
     }
 
     private boolean isScrollingToRightNecessary() {

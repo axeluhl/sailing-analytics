@@ -1353,4 +1353,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
     String racesOverview();
+    String empty();
+    String runAQuery();
 }
