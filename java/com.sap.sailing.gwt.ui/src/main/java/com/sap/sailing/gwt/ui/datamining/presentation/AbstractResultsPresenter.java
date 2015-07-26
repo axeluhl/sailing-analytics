@@ -78,7 +78,17 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
         presentationPanel.onResize();
     }
     
+    protected void updatePresentationWidget() {
+        if (state == ResultsPresenterState.RESULT) {
+            presentationPanel.setWidget(getPresentationWidget());
+            internalShowResult();
+            presentationPanel.onResize();
+        }
+    }
+    
     protected abstract Widget getPresentationWidget();
+    
+    protected abstract Iterable<Widget> getControlWidgets();
 
     protected abstract void internalShowResult();
 

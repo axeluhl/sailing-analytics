@@ -121,6 +121,13 @@ public class ResultsChart extends AbstractResultsPresenter<Number> {
     protected Widget getPresentationWidget() {
         return chartPanel;
     }
+    
+    @Override
+    protected Iterable<Widget> getControlWidgets() {
+        Collection<Widget> controlWidgets = new ArrayList<>();
+        controlWidgets.add(sortByPanel);
+        return controlWidgets;
+    }
 
     @Override
     public void internalShowResult() {
@@ -174,9 +181,6 @@ public class ResultsChart extends AbstractResultsPresenter<Number> {
     private void updateChartSubtitleAndSetChartAsWidget() {
         chart.setChartSubtitle(new ChartSubtitle().setText(getStringMessages().queryResultsChartSubtitle(
                 getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
-        // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
-//        chartPanel.setWidget(null);
-//        chartPanel.setWidget(chart);
     }
 
     private void showResultData() {

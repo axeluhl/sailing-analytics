@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -12,6 +16,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     
     private final StringMessages stringMessages;
 
+    private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
     public PlainResultsPresenter(StringMessages stringMessages) {
@@ -19,19 +24,22 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         this.stringMessages = stringMessages;
         
         resultsLabel = new HTML();
+        scrollPanel = new ScrollPanel(resultsLabel);
     }
 
     @Override
     public void internalShowResult() {
         QueryResult<Number> result = getCurrentResult();
+        Map<GroupKey, Number> resultValues = result.getResults();
+        
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
         resultsBuilder.append(stringMessages.queryResultsChartSubtitle(result.getRetrievedDataAmount(), result.getCalculationTimeInSeconds()));
         
         resultsBuilder.append("<ul>");
-        for (Entry<GroupKey, Number> resultEntry : result.getResults().entrySet()) {
+        for (GroupKey key : getSortedKeys(result)) {
             resultsBuilder.append("<li>");
-            resultsBuilder.append("<b>" + resultEntry.getKey().toString() + "</b>: ");
-            resultsBuilder.append(resultEntry.getValue().doubleValue());
+            resultsBuilder.append("<b>" + key.toString() + "</b>: ");
+            resultsBuilder.append(resultValues.get(key).doubleValue());
             resultsBuilder.append("</li>");
         }
         resultsBuilder.append("</ul>");
@@ -39,9 +47,20 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         resultsLabel.setHTML(resultsBuilder.toString());
     }
     
+    private Iterable<GroupKey> getSortedKeys(QueryResult<Number> result) {
+        List<GroupKey> sortedKeys = new ArrayList<>(result.getResults().keySet());
+        Collections.sort(sortedKeys);
+        return sortedKeys;
+    }
+
     @Override
     protected Widget getPresentationWidget() {
-        return resultsLabel;
+        return scrollPanel;
+    }
+    
+    @Override
+    protected Iterable<Widget> getControlWidgets() {
+        return new ArrayList<Widget>();
     }
 
 }

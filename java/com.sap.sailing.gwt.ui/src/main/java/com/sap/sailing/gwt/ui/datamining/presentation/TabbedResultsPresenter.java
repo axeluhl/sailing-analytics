@@ -101,8 +101,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Number> {
 
     private void addTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsChart tabPresenter = new ResultsChart(stringMessages);
-        tabPresenter.showError(stringMessages.runAQuery());
+        ResultsPresenter<Number> tabPresenter = new MultiResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
