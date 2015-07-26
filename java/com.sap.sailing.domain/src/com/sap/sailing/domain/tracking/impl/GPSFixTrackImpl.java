@@ -203,10 +203,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     @Override
     public void resumeValidityCaching() {
-        this.validityCachingSuspended = false;
         lockForWrite();
         try {
-            this.validityCachingSuspended = true;
+            this.validityCachingSuspended = false;
             for (FixType fix : getRawFixes()) {
                 fix.invalidateCache();
             }
