@@ -3036,6 +3036,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        // TODO bug3185: also suspend fix validation caching on all GPS tracks (competitors and marks)
         if (markPassingCalculator != null) {
             markPassingCalculator.suspend();
         }
@@ -3044,6 +3045,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        // TODO bug3185: also resume fix validation caching on all GPS tracks (competitors and marks)
         if (markPassingCalculator != null) {
             markPassingCalculator.resume();
         }
