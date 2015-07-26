@@ -59,6 +59,7 @@ public class LockUtil {
     private static TimePoint timePointNoOlderThanOneSecond;
     
     static {
+        timePointNoOlderThanOneSecond = MillisecondsTimePoint.now();
         new Timer("LockUtil timestamp generator", /* isDaemon */ true).schedule(
             new TimerTask() {
                 @Override
