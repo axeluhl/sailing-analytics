@@ -46,14 +46,6 @@ public class StartActivity extends AbstractStartActivity {
         return homeFragment;
     }
 
-    // /**
-    // * Hockeyapp integration method.
-    // */
-    // private void checkForUpdates() {
-    // // TODO: Remove this for store builds!
-    // UpdateManager.register(this, "060ff0c8a907638e3b31d3146091c87b");
-    // }
-
     private void startRegatta(String checkinDigest) {
         Intent intent = new Intent(this, RegattaActivity.class);
         intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
