@@ -1148,7 +1148,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     @Override
     public TimePoint getNowMinusDelay() {
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         final Long delayToLiveInMillis = getDelayToLiveInMillis();
         TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         return timePoint;

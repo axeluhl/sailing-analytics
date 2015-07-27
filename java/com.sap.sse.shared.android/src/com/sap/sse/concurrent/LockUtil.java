@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -56,19 +54,6 @@ public class LockUtil {
     private static final Logger logger = Logger.getLogger(Util.class.getName());
     private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new ConcurrentWeakHashMap<NamedReentrantReadWriteLock, TimePoint>();
     
-    private static TimePoint timePointNoOlderThanOneSecond;
-    
-    static {
-        timePointNoOlderThanOneSecond = MillisecondsTimePoint.now();
-        new Timer("LockUtil timestamp generator", /* isDaemon */ true).schedule(
-            new TimerTask() {
-                @Override
-                public void run() {
-                    timePointNoOlderThanOneSecond = MillisecondsTimePoint.now();
-                }
-            }, /* delay 0 means immediate execution */ 0l, /* period 1s */ 1000l);
-    }
-    
     /**
      * Tells how many other threads propagated which held lock to the key thread. During propagation, a lock is
      * considered held if it is really locked by the propagating thread or if the propagating thread received it itself
@@ -102,7 +87,7 @@ public class LockUtil {
 
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.writeLock(), ReadOrWrite.WRITE);
-        lastTimeWriteLockWasObtained.put(lock, timePointNoOlderThanOneSecond);
+        lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.approximateNow());
     }
     
     private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final ReadOrWrite readOrWrite) {
@@ -166,7 +151,7 @@ public class LockUtil {
                     + " to be unlocked but no time recorded for when it was last obtained.\n"
                     + "This is where the lock interaction happened:\n" + getCurrentStackTrace());
         } else {
-            TimePoint now = timePointNoOlderThanOneSecond;
+            TimePoint now = MillisecondsTimePoint.approximateNow();
             final Duration heldWriteLockForMillis = timePointWriteLockWasObtained.until(now);
             if (heldWriteLockForMillis.compareTo(Duration.ONE_SECOND.times(10)) > 0) {
                 String stackTrace = getCurrentStackTrace();

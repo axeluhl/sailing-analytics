@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
@@ -32,7 +33,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventOverviewStageDTO> execute(DispatchContext context) {
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState state = HomeServiceUtil.calculateEventState(event);
         long ttl = 1000 * 60 * 5;
@@ -49,7 +50,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     }
 
     @GwtIncompatible
-    public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, MillisecondsTimePoint now) {
+    public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, TimePoint now) {
         // Simple solution:
         // P1: Show the best matching video if available
         // P2: Show Countdown for upcoming events

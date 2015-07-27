@@ -180,7 +180,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
         Thread.sleep(1000);
