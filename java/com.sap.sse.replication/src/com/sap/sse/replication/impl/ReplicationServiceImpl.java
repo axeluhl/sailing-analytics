@@ -595,6 +595,11 @@ public class ReplicationServiceImpl implements ReplicationService {
                     }
                     logger.info("Done receiving initial load for " + replicable.getId());
                 }
+            } catch (Throwable e) {
+                logger.log(Level.SEVERE, "Error while receiving initial load from "+master+". Cleaning up.", e);
+                deregisterReplicaWithMaster(master);
+                replicator.stop(/* applyQueuedMessages */ false);
+                throw e;
             } finally {
                 logger.info("Closing channel " + channel + "'s connection " + channel.getConnection());
                 channel.getConnection().close();
@@ -634,6 +639,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         try {
             URL replicationDeRegistrationRequestURL = master
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
+            logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
             final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
             deregistrationRequestConnection.connect();
             StringBuilder uuid = new StringBuilder();
@@ -646,6 +652,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             }
             content.close();
             for (Replicable<?, ?> r : getReplicables()) {
+                logger.info("Telling replicable "+r+" that it no longer replicates from master "+master);
                 r.stoppedReplicatingFrom(master);
             }
         } catch (Exception ex) {
@@ -707,7 +714,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             }
             synchronized (replicaUUIDs) {
                 if (replicator != null) {
-                    replicator.stop();
+                    replicator.stop(/* applyQueuedMessages */ true);
                     deregisterReplicaWithMaster(descriptor);
                     replicatingFromMaster = null;
                     replicaUUIDs.clear();

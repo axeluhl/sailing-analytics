@@ -332,6 +332,7 @@ public class ReplicationReceiver implements Runnable {
     }
     
     private void applyQueues(boolean resumeWhenDone) {
+        logger.info("Applying queued replication messages received");
         for (Entry<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
             final LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
             boolean queueEmpty = false;
@@ -364,10 +365,17 @@ public class ReplicationReceiver implements Runnable {
         return suspended;
     }
     
-    public synchronized void stop() {
-        if (isSuspended()) {
-            /* make sure to apply everything in queue before stopping this thread */
-            applyQueues(/* resumeWhenDone */ false);
+    public synchronized void stop(boolean applyQueuedMessages) {
+        if (applyQueuedMessages) {
+            if (isSuspended()) {
+                /* make sure to apply everything in queue before stopping this thread */
+                applyQueues(/* resumeWhenDone */ false);
+            }
+        } else {
+            logger.info("Discarding queued replication messages received");
+            for (LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue : queueByReplicableIdAsString.values()) {
+                queue.clear(); // discard queue contents if they shall not be applied
+            }
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;
