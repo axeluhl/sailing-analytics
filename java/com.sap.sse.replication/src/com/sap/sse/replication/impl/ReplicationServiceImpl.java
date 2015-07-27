@@ -20,8 +20,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import net.jpountz.lz4.LZ4BlockInputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -583,12 +584,12 @@ public class ReplicationServiceImpl implements ReplicationService {
             initialLoadChannels.put(master, new InitialLoadRequest(channel, replicables, queueName));
             final RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(channel, queueName);
             try {
-                final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
+                final LZ4BlockInputStream uncompressingInputStream = new LZ4BlockInputStream(rabbitInputStreamProvider.getInputStream());
                 for (Replicable<?, ?> replicable : replicables) { // absolutely make sure to use the same sequence of
                                                                   // replicables as for URL (bug 3015)
                     logger.info("Starting to receive initial load for " + replicable.getId());
                     try {
-                        replicable.initiallyFillFrom(gzipInputStream);
+                        replicable.initiallyFillFrom(uncompressingInputStream);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Exception trying to reveice initial load for " + replicable.getId(), e);
                         throw e;
