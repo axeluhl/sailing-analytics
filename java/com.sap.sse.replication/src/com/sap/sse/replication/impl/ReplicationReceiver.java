@@ -6,10 +6,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
@@ -34,6 +31,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Receives {@link OperationWithResult} objects from a message queue and {@link Replicable#apply(OperationWithResult)
@@ -74,7 +72,7 @@ public class ReplicationReceiver implements Runnable {
      * Keys are the {@link Replicable}s' IDs as string; values are the operation queues for the replicable identified by the
      * key.
      */
-    private final Map<String, List<Pair<String, OperationWithResult<?, ?>>>> queueByReplicableIdAsString;
+    private final Map<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> queueByReplicableIdAsString;
     
     private QueueingConsumer consumer;
     
@@ -110,7 +108,8 @@ public class ReplicationReceiver implements Runnable {
     private final static Executor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>());
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(),
+            /* thread factory */ new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     /**
      * @param master
@@ -311,11 +310,11 @@ public class ReplicationReceiver implements Runnable {
         }
     }
     
-    private synchronized void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
+    private void queue(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
         final String replicableIdAsString = replicable.getId().toString();
-        List<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicableIdAsString);
+        LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue = queueByReplicableIdAsString.get(replicableIdAsString);
         if (queue == null) {
-            queue = new ArrayList<>();
+            queue = new LinkedBlockingQueue<>();
             queueByReplicableIdAsString.put(replicableIdAsString, queue);
         }
         queue.add(new Pair<String, OperationWithResult<?, ?>>(replicable.getId().toString(), operation));
@@ -324,27 +323,39 @@ public class ReplicationReceiver implements Runnable {
     
     public synchronized void setSuspended(final boolean suspended) {
         if (this.suspended != suspended) {
-            this.suspended = suspended;
-            if (!this.suspended) {
-                applyQueues();
+            if (!suspended) {
+                applyQueues(/* resumeWhenDone */ true); // apply queues before setting suspended to false; further incoming operations have to stand in line
+            } else {
+                this.suspended = true;
             }
         }
     }
     
-    private synchronized void applyQueues() {
-        for (Entry<String, List<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
-            final List<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
-            for (Iterator<Pair<String, OperationWithResult<?, ?>>> i = queue.iterator(); i.hasNext();) {
-                Pair<String, OperationWithResult<?, ?>> replicableIdAsStringAndOperation = i.next();
-                i.remove();
+    private void applyQueues(boolean resumeWhenDone) {
+        for (Entry<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
+            final LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
+            boolean queueEmpty = false;
+            Pair<String, OperationWithResult<?, ?>> replicableIdAsStringAndOperation;
+            do {
+                synchronized (this) {
+                    replicableIdAsStringAndOperation = queue.poll();
+                    if (resumeWhenDone && replicableIdAsStringAndOperation == null) {
+                        queueEmpty = true;
+                        suspended = false;
+                        notifyAll();
+                    }
+                }
                 try {
                     apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Error applying queued, replicated operation "
                             + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
                 }
-            }
+            } while (!queueEmpty);
             assert queue.isEmpty();
+        }
+        if (resumeWhenDone) {
+            suspended = false;
         }
         notifyAll();
     }
@@ -356,7 +367,7 @@ public class ReplicationReceiver implements Runnable {
     public synchronized void stop() {
         if (isSuspended()) {
             /* make sure to apply everything in queue before stopping this thread */
-            applyQueues();
+            applyQueues(/* resumeWhenDone */ false);
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;

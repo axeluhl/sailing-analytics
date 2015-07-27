@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sse.common.TimePoint;
 
 public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
@@ -35,7 +36,7 @@ public class StartTimeFinder extends RaceLogAnalyzer<StartTimeFinderResult> {
                     return dependentStartTimeResolver.internalResolve((RaceLogDependentStartTimeEvent) event, dependingOnRaces);
                 }
             }
-            return new StartTimeFinderResult(dependingOnRaces, null, null);
+            return new StartTimeFinderResult(dependingOnRaces, null, null, ResolutionFailed.NO_START_TIME_SET);
         } finally {
             log.unlockAfterRead();
         }

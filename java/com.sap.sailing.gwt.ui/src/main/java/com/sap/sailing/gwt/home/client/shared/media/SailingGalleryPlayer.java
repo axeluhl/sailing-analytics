@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.media;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sse.common.Util;
 
 public class SailingGalleryPlayer extends ResizeComposite {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -31,9 +32,9 @@ public class SailingGalleryPlayer extends ResizeComposite {
 
     private int selectedIdx;
 
-    public SailingGalleryPlayer(SailingImageDTO selected, List<SailingImageDTO> images) {
+    public SailingGalleryPlayer(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
-        selectedIdx = Math.max(selectedIdx, images.indexOf(selected));
+        selectedIdx = Math.max(selectedIdx, Util.indexOf(images, selected));
         for (SailingImageDTO i : images) {
             mainSliderUi.appendChild(createMainImgElement(i));
             subSliderUi.appendChild(createThumbImgElement(i));

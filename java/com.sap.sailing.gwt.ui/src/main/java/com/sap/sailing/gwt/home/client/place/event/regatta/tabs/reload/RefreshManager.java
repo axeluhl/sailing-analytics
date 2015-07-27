@@ -17,11 +17,12 @@ import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sse.common.Duration;
 
 public class RefreshManager {
     private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());
 
-    private static final long PAUSE_ON_ERROR = 1000 * 30;
+    private static final long PAUSE_ON_ERROR = Duration.ONE_SECOND.times(30).asMillis();
     private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
 
     private final Timer timer = new Timer() {
@@ -68,7 +69,7 @@ public class RefreshManager {
                     @Override
                     public void onSuccess(ResultWithTTL<DTO> result) {
                         refreshable.callRunning = false;
-                        refreshable.timeout = System.currentTimeMillis() + result.getTtl();
+                        refreshable.timeout = System.currentTimeMillis() + result.getTtlMillis();
                         try {
                             refreshable.widget.setData(result.getDto());
                         } catch(Throwable error) {

@@ -6,16 +6,19 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
+import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelTrueSumAggregationProcessor;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataMiningBundleService;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.DataSourceProvider;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -74,6 +77,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
         internalClasses.add(HasMarkPassingContext.class);
+        internalClasses.add(HasRaceOfCompetitorContext.class);
         return internalClasses;
     }
 
@@ -89,6 +93,13 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
             dataSourceProvidersHaveBeenInitialized = true;
         }
         return dataSourceProviders;
+    }
+    
+    @Override
+    public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
+        HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
+        aggregators.add(ParallelTrueSumAggregationProcessor.getDefinition());
+        return aggregators;
     }
     
     private void initializeDataSourceProviders() {

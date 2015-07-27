@@ -44,7 +44,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
-    String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -1355,4 +1354,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String racesOverview();
     String listFormatLabel();
     String competitionFormatLabel();
+    String empty();
+    String runAQuery();
 }

@@ -76,8 +76,8 @@ public class RaceListColumnFactory {
         @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
         SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
         
-        @Template("<img src=\"{2}\" class=\"{0}\" /><span class=\"{1}\">{3}</span>")
-        SafeHtml winner(String styleNamesFlag, String styleNamesText, SafeUri flagImageURL, String name);
+        @Template("<img src=\"{3}\" class=\"{0}\" /><span class=\"{1}\">{4}</span><div class=\"{2}\" title=\"{5}\">{5}</div>")
+        SafeHtml winner(String styleNamesFlag, String styleNamesSailId, String styleNamesText, SafeUri flagImageURL, String sailId, String name);
         
         @Template("<img src=\"{1}\" class=\"{0}\" />")
         SafeHtml imageHeader(String styleNames, SafeUri imageURL);
@@ -470,7 +470,8 @@ public class RaceListColumnFactory {
             public void render(Context context, SimpleCompetitorDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     SafeUri flagImageUri = FlagImageResolver.getFlagImageUri(value.getFlagImageURL(), value.getTwoLetterIsoCountryCode());
-                    sb.append(TEMPLATE.winner(CSS.race_item_flag(), CSS.race_item_winner(), flagImageUri, value.getName()));
+                    String flagStyle = CSS.race_item_flag(), sailIdStyle = CSS.race_item_sailid(), nameStyle = CSS.race_item_winner();
+                    sb.append(TEMPLATE.winner(flagStyle, sailIdStyle, nameStyle, flagImageUri, value.getSailID(), value.getName()));
                 }
             }
         };

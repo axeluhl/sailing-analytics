@@ -2,7 +2,6 @@ package com.sap.sse.datamining.impl.functions;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,14 +12,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
@@ -28,6 +27,7 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunc
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.util.Classes;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
@@ -55,7 +55,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         
     }
     
-    private static final Logger LOGGER = Logger.getLogger(FunctionManager.class.getName());
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final FilterCriterion<Method> isValidDimension = new MethodIsValidDimensionFilterCriterion();
     private final FilterCriterion<Method> isValidStatistic = new MethodIsValidStatisticFilterCriterion();
@@ -63,7 +63,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final FilterCriterion<Method> isValidExternalFunction = new MethodIsValidExternalFunctionFilterCriterion();
 
     private final FunctionFactory functionFactory;
-    private final FunctionDTOFactory functionDTOFactory;
+    private final DataMiningDTOFactory dtoFactory;
     
     protected final Map<Class<?>, Set<Function<?>>> statistics;
     protected final Map<Class<?>, Set<Function<?>>> dimensions;
@@ -72,7 +72,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
     public FunctionManager() {
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
         functionFactory = new FunctionFactory();
         
         statistics = new HashMap<>();
@@ -249,7 +249,8 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
 
     private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Class<?>> typesToRetrieve = getSupertypesOf(sourceType);
+        Collection<Class<?>> typesToRetrieve = Classes.getSupertypesOf(sourceType);
+        typesToRetrieve.remove(Object.class);
         typesToRetrieve.add(sourceType);
         return getFunctionsFor(typesToRetrieve, retrievalStrategy);
     }
@@ -263,44 +264,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             }
         }
         return functions;
-    }
-
-    private Collection<Class<?>> getSupertypesOf(Class<?> type) {
-        Collection<Class<?>> supertypes = new HashSet<>();
-        
-        supertypes.addAll(getInterfacesOf(type));
-        if (isSuperclassValid(type)) {
-            supertypes.add(type.getSuperclass());
-        }
-        
-        supertypes.addAll(getSupertypesOf(supertypes));
-        return supertypes;
-    }
-
-    private Collection<Class<?>> getInterfacesOf(Class<?> type) {
-        return Arrays.asList(type.getInterfaces());
-    }
-
-    private boolean isSuperclassValid(Class<?> subType) {
-        return subType.getSuperclass() != null && !subType.getSuperclass().equals(Object.class);
-    }
-
-    private Collection<Class<?>> getSupertypesOf(Collection<Class<?>> types) {
-        Collection<Class<?>> supertypes = new HashSet<>();
-        boolean supertypeAdded;
-        do {
-            Collection<Class<?>> supertypesToAdd = getSupertypesToAdd(types);
-            supertypeAdded = supertypes.addAll(supertypesToAdd);
-        } while (supertypeAdded);
-        return supertypes;
-    }
-
-    private Collection<Class<?>> getSupertypesToAdd(Collection<Class<?>> types) {
-        Collection<Class<?>> supertypesToAdd = new HashSet<>();
-        for (Class<?> supertype : types) {
-            supertypesToAdd.addAll(getSupertypesOf(supertype));
-        }
-        return supertypesToAdd;
     }
     
     @Override
@@ -316,14 +279,14 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         
         Function<?> function = getFunctionToReturn(functionsMatchingDTO);
         if (function == null) {
-            LOGGER.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
+            logger.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
         }
         return function;
     }
 
     private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
         Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
-        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(functionDTOFactory, functionDTO);
+        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(dtoFactory, functionDTO);
         for (Function<?> function : getAllFunctions()) {
             if (functionDTOFilterCriteria.matches(function)) {
                 functionsMatchingDTO.add(function);
@@ -345,9 +308,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
 
     private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {
-        LOGGER.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
+        logger.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
         for (Function<?> function : functionsMatchingDTO) {
-            LOGGER.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
+            logger.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
         }
     }
 
