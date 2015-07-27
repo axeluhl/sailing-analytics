@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -106,9 +105,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONArray jsonLeaderboards = new JSONArray();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (String leaderboardName : leaderboards.keySet()) {
-            if (!leaderboardName.equals(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME)) {
-                jsonLeaderboards.add(leaderboardName);
-            }
+            jsonLeaderboards.add(leaderboardName);
         }
         String json = jsonLeaderboards.toJSONString();
         return Response.ok(json, MediaType.APPLICATION_JSON).build();

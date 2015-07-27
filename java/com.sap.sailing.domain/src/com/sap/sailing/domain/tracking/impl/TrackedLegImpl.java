@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -75,6 +77,16 @@ public class TrackedLegImpl implements TrackedLeg {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         competitorTracksOrderedByRank = new ConcurrentHashMap<>();
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        final Course course = trackedRace.getRace().getCourse();
+        course.lockForRead();
+        try {
+            oos.defaultWriteObject();
+        } finally {
+            course.unlockAfterRead();
+        }
     }
     
     @Override

@@ -6,11 +6,13 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -678,15 +680,27 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
             final Iterable<? extends Series> mySeries = getSeries();
             if (mySeries != null) {
-                for (Series currentSeries : mySeries) {
-                    if (currentSeries.getFleets() != null) {
-                        for (Fleet fleet : currentSeries.getFleets()) {
-                            if (currentSeries.getRaceColumns() != null) {
-                                result.put(fleet, currentSeries.getRaceColumns());
+                boolean concurrentlyModified = false;
+                do {
+                    try {
+                        for (Series currentSeries : mySeries) {
+                            if (currentSeries.getFleets() != null) {
+                                for (Fleet fleet : currentSeries.getFleets()) {
+                                    if (currentSeries.getRaceColumns() != null) {
+                                        result.put(fleet, currentSeries.getRaceColumns());
+                                    }
+                                }
                             }
                         }
+                    } catch (ConcurrentModificationException e) {
+                        // getSeries() returns a live collection, and Series.getRaceColumns() does so, too.
+                        // In the unlikely event of a modification is applied to either of these structures while iterating, an exception
+                        // will be thrown. We catch and log it here and try again.
+                        logger.log(Level.INFO,
+                                "Got a ConcurrentModificationException while trying to update the RaceExecutionOrderCache", e);
+                        concurrentlyModified = true;
                     }
-                }
+                } while (concurrentlyModified);
             }
             return result;
         }
