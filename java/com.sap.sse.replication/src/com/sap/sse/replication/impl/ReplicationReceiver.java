@@ -295,12 +295,6 @@ public class ReplicationReceiver implements Runnable {
         }
     }
 
-    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, String replicableIdAsString) {
-        @SuppressWarnings("unchecked")
-        Replicable<S, O> replicable = (Replicable<S, O>) replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
-        apply(operation, replicable);
-    }
-    
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
@@ -334,6 +328,7 @@ public class ReplicationReceiver implements Runnable {
     private void applyQueues(boolean resumeWhenDone) {
         logger.info("Applying queued replication messages received");
         for (Entry<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
+            Replicable<?, ?> replicable = replicableProvider.getReplicable(r.getKey(), /* wait */ false);
             final LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
             boolean queueEmpty = false;
             Pair<String, OperationWithResult<?, ?>> replicableIdAsStringAndOperation;
@@ -348,7 +343,7 @@ public class ReplicationReceiver implements Runnable {
                 }
                 if (replicableIdAsStringAndOperation != null) {
                     try {
-                        apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
+                        applyWithCast(replicableIdAsStringAndOperation.getB(), replicable);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error applying queued, replicated operation "
                                 + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
@@ -361,6 +356,13 @@ public class ReplicationReceiver implements Runnable {
             suspended = false;
         }
         notifyAll();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <S, O extends OperationWithResult<S, ?>> void applyWithCast(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
+        OperationWithResult<S, ?> castOperation = (OperationWithResult<S, ?>) operation;
+        Replicable<S, O> castReplicable = (Replicable<S, O>) replicable;
+        apply(castOperation, castReplicable);
     }
 
     public synchronized boolean isSuspended() {
