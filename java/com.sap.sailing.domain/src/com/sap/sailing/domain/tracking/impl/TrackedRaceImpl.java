@@ -273,6 +273,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
+    
+    /**
+     * handled by {@link #suspendAllCachesNotUpdatingWhileLoading()} and {@link #resumeAllCachesNotUpdatingWhileLoading()}.
+     */
+    private boolean cachesSuspended;
+    
+    /**
+     * Whether during {@link #cachesSuspended suspended caches mode} the maneuver re-calculation was triggered; will lead
+     * to triggering the maneuver re-calculation when caches are {@link #resumeAllCachesNotUpdatingWhileLoading() resumed}.
+     */
+    private boolean triggerManeuverCacheInvalidationForAllCompetitors;
 
     /**
      * Keys are the {@link RaceLog#getId() IDs} of the race logs that are stored as values.
@@ -2350,18 +2361,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
-        final List<Competitor> shuffledCompetitors = new ArrayList<>();
-        for (Competitor competitor : (getRace().getCompetitors())) {
-            shuffledCompetitors.add(competitor);
-        }
-        Collections.shuffle(shuffledCompetitors);
-        for (Competitor competitor : shuffledCompetitors) {
-            triggerManeuverCacheRecalculation(competitor);
+        if (cachesSuspended) {
+            triggerManeuverCacheInvalidationForAllCompetitors = true;
+        } else {
+            final List<Competitor> shuffledCompetitors = new ArrayList<>();
+            for (Competitor competitor : (getRace().getCompetitors())) {
+                shuffledCompetitors.add(competitor);
+            }
+            Collections.shuffle(shuffledCompetitors);
+            for (Competitor competitor : shuffledCompetitors) {
+                triggerManeuverCacheRecalculation(competitor);
+            }
         }
     }
 
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
+        if (cachesSuspended) {
+            triggerManeuverCacheInvalidationForAllCompetitors = true;
+        } else {
+            maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
+        }
     }
 
     private com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
@@ -3036,6 +3055,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        cachesSuspended = true;
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
             competitorTrack.suspendValidityCaching();
         }
@@ -3050,6 +3070,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        cachesSuspended = false;
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
             competitorTrack.resumeValidityCaching();
         }
@@ -3060,6 +3081,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             markPassingCalculator.resume();
         }
         crossTrackErrorCache.resume();
+        if (triggerManeuverCacheInvalidationForAllCompetitors) {
+            triggerManeuverCacheRecalculationForAllCompetitors();
+        }
         maneuverCache.resume();
     }
 

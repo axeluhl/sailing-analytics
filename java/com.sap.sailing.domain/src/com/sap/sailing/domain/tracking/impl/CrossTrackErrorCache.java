@@ -474,10 +474,13 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
 
     public void suspend() {
+        owner.removeListener(this);
         cachePerCompetitor.suspend();
     }
     
     public void resume() {
+        owner.addListener(this);
+        invalidate();
         cachePerCompetitor.resume();
     }
 }
