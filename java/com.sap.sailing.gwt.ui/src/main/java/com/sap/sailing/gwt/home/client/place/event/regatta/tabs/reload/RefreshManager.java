@@ -68,7 +68,7 @@ public class RefreshManager {
                     @Override
                     public void onSuccess(ResultWithTTL<DTO> result) {
                         refreshable.callRunning = false;
-                        refreshable.timeout = System.currentTimeMillis() + result.getTtl();
+                        refreshable.timeout = System.currentTimeMillis() + result.getTtlMillis();
                         try {
                             refreshable.widget.setData(result.getDto());
                         } catch(Throwable error) {

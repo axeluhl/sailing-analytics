@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.LeaderboardC
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sse.common.Duration;
 
 public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithTTL<RegattasAndLiveRacesDTO>> {
     private UUID eventId;
@@ -37,7 +38,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         
-        final long ttl;
+        final Duration ttl;
         if(eventState == EventState.RUNNING) {
             EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
                 @Override
@@ -48,7 +49,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
                     }
                 }
             });
-            ttl = 1000 * 60 * 2;
+            ttl = Duration.ONE_MINUTE.times(2);
         } else {
             ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
         }
