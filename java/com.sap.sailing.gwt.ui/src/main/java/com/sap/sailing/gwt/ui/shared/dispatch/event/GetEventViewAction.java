@@ -11,11 +11,11 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -38,12 +38,12 @@ public class GetEventViewAction implements Action<EventViewDTO> {
     
     @GwtIncompatible
     public EventViewDTO execute(DispatchContext context) {
-        Event event = context.getRacingEventService().getEvent(eventId);
+        final Event event = context.getRacingEventService().getEvent(eventId);
         if (event == null) {
             throw new RuntimeException("Event not found");
         }
 
-        EventViewDTO dto = new EventViewDTO();
+        final EventViewDTO dto = new EventViewDTO();
         HomeServiceUtil.mapToMetadataDTO(event, dto, context.getRacingEventService());
         
         ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
@@ -56,21 +56,22 @@ public class GetEventViewAction implements Action<EventViewDTO> {
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
 
-        boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
         
-        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+        EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
+            @Override
+            public void doForLeaderboard(LeaderboardContext context) {
                 try {
-                    if(isFakeSeries && !HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                        continue;
+                    if(isFakeSeries && !context.isPartOfEvent()) {
+                        return;
                     }
-                    RegattaMetadataDTO regattaDTO = HomeServiceUtil.toRegattaMetadataDTO(event, leaderboardGroup, leaderboard);
+                    RegattaMetadataDTO regattaDTO = context.asRegattaMetadataDTO();
                     dto.getRegattas().add(regattaDTO);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + leaderboard.getName(), e);
+                    logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + context.getLeaderboardName(), e);
                 }
             }
-        }
+        });
         
         if (isFakeSeries) {
             dto.setType(EventType.SERIES_EVENT);

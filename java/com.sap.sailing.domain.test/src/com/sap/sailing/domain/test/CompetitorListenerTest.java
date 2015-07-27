@@ -63,7 +63,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Before
     public void setUp() {
-        baseDomainFactory = new DomainFactoryImpl();
+        baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         competitor = TrackBasedTest.createCompetitor("Hasso");
         nationalityChanged = false;
         whatChangedNationality = null;
@@ -251,7 +251,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Test
     public void testCompetitorSerializationLosesAllExternalListeners() throws ClassNotFoundException, IOException {
-        DomainFactory baseDomainFactory = new DomainFactoryImpl();
+        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         clonedCompetitor.setName("Dr. Hasso Plattner");
         clonedCompetitor.getBoat().setSailId("POR 40");

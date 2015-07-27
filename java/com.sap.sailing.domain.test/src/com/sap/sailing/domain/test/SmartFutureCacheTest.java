@@ -3,7 +3,9 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -11,12 +13,15 @@ import java.util.Set;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.CacheUpdater;
@@ -24,6 +29,8 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
 public class SmartFutureCacheTest {
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(2 * 60 * 1000);
+    
     @Test
     public void testPerformanceOfGetAndCall() {
         SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
@@ -41,6 +48,34 @@ public class SmartFutureCacheTest {
             sfc.get("humba", /* waitForLatest */ false);
         }
         System.out.println("testPerformanceOfGetAndCall took "+(System.currentTimeMillis()-start)+"ms");
+    }
+
+    @Test
+    public void testExceptionInComputeCacheUpdate() {
+        final boolean[] throwException = new boolean[1];
+        throwException[0] = true;
+        SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
+                new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
+                    @Override
+                    public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) {
+                        if (throwException[0]) {
+                            throw new NullPointerException("Humba");
+                        } else {
+                            return "Humba";
+                        }
+                    }
+                }, "SmartFutureCacheTest.testExceptionInComputeCacheUpdate");
+        sfc.triggerUpdate("humba", /* update interval */ null);
+        try {
+            // during the first call, expecting exception
+            sfc.get("humba", /* waitForLatest */ true);
+            fail("Expected RuntimeException because computeCacheUpdate threw one");
+        } catch (RuntimeException expected) {
+            assertSame(ExecutionException.class, expected.getCause().getClass());
+        }
+        throwException[0] = false;
+        sfc.triggerUpdate("humba", /* update interval */ null);
+        assertEquals("Humba", sfc.get("humba", /* waitForLatest */ true));
     }
     
     @Test

@@ -36,7 +36,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     }
 
     @Override
-    public void setData(EventOverviewStageDTO stageData, long nextUpdate, int updateNo) {
+    public void setData(EventOverviewStageDTO stageData) {
         message.setMessage(stageData.getEventMessage());
         
         EventOverviewStageContentDTO data = stageData.getStageContent();

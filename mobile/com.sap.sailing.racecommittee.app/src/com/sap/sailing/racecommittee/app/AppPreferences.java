@@ -99,8 +99,7 @@ public class AppPreferences {
     }
 
     public List<String> getByNameCourseDesignerCourseNames() {
-        Set<String> values = preferences.getStringSet(
-                key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>());
+        Set<String> values = preferences.getStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>());
         return new ArrayList<String>(values);
     }
 
@@ -251,6 +250,7 @@ public class AppPreferences {
         if (value.equals("")) {
             return "http://localhost:8889";
         }
+
         return value;
     }
 
@@ -317,8 +317,7 @@ public class AppPreferences {
     public void setGateStartHasAdditionalGolfDownTime(boolean hasAdditionalGolfDownTime) {
         preferences
                 .edit()
-                .putBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key),
-                        hasAdditionalGolfDownTime).commit();
+                .putBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), hasAdditionalGolfDownTime).commit();
     }
 
     public void setGateStartHasPathfinder(boolean hasPathfinder) {
@@ -433,6 +432,16 @@ public class AppPreferences {
     public boolean isOfflineMode() {
         return preferences.getBoolean(context.getString(R.string.preference_offline_key),
                 context.getResources().getBoolean(R.bool.preference_offline_default));
+    }
+
+    public boolean isDependentRacesAllowed() {
+        return preferences.getBoolean(context.getString(R.string.preference_allow_dependent_races_key),
+            context.getResources().getBoolean(R.bool.preference_allow_dependent_races_default));
+    }
+
+    public int getDependentRacesOffset() {
+        return preferences.getInt(context.getString(R.string.preference_dependent_races_offset_key),
+            context.getResources().getInteger(R.integer.preference_dependent_races_offset_default));
     }
 
     public String getTheme() {

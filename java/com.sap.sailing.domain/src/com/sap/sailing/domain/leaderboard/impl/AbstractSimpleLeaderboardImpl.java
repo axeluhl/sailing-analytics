@@ -341,7 +341,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
+                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
     }
 
     @Override
@@ -1670,8 +1670,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.estimatedTimeToNextWaypointInSeconds = estimatedTimeToNextMarkInSeconds==null?null:estimatedTimeToNextMarkInSeconds.asSeconds();
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
+            final TimePoint legFinishTime = trackedLeg.getFinishTime();
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    trackedLeg.hasFinishedLeg(timePoint) ? trackedLeg.getFinishTime() : timePoint, cache) : null;
+                    trackedLeg.hasFinishedLeg(timePoint) ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);
@@ -1721,8 +1722,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         case TACK:
                         case JIBE:
                         case PENALTY_CIRCLE:
-                            if (!maneuver.getTimePoint().before(startOfLeg) && (!trackedLeg.hasFinishedLeg(timePoint) ||
-                                    maneuver.getTimePoint().before(trackedLeg.getFinishTime()))) {
+                            if (!maneuver.getTimePoint().before(startOfLeg) && (legFinishTime == null || legFinishTime.after(timePoint) ||
+                                    maneuver.getTimePoint().before(legFinishTime))) {
                                 if (maneuver.getManeuverLoss() != null) {
                                     result.numberOfManeuvers.put(maneuver.getType(),
                                             result.numberOfManeuvers.get(maneuver.getType()) + 1);

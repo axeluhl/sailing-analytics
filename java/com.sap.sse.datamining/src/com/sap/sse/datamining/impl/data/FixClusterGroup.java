@@ -1,17 +1,20 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class FixClusterGroup<ElementType> implements ClusterGroup<ElementType> {
+public class FixClusterGroup<ElementType extends Serializable> implements ClusterGroup<ElementType> {
 
+    private static final long serialVersionUID = 2632796094234887943L;
     private final String messageKey;
-    private final Collection<Cluster<ElementType>> clusters;
+    private final Set<Cluster<ElementType>> clusters;
 
     public FixClusterGroup(String messageKey, Collection<Cluster<ElementType>> clusters) {
         this.messageKey = messageKey;

@@ -1,11 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -131,7 +136,20 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
+            break;
+
+        case PRESCHEDULED:
+            changeVisibility(mPostponeFlags, View.VISIBLE);
+            changeVisibility(mAbandonFlags, View.GONE);
+            changeVisibility(mRecallFlags, View.GONE);
+            changeVisibility(mCourseFlags, View.GONE);
+            changeVisibility(mMoreFlags, View.GONE);
+
+            uncheckMarker(mAbandonFlags);
+            uncheckMarker(mCourseFlags);
+            uncheckMarker(mMoreFlags);
             break;
 
         case SCHEDULED:
@@ -141,6 +159,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mAbandonFlags);
             uncheckMarker(mRecallFlags);
             uncheckMarker(mMoreFlags);
@@ -154,6 +173,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
             break;
 
@@ -165,6 +185,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mRecallFlags);
             uncheckMarker(mCourseFlags);
             uncheckMarker(mMoreFlags);
@@ -178,6 +199,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
             break;
 
@@ -187,6 +209,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mPostponeFlags);
             uncheckMarker(mAbandonFlags);
             uncheckMarker(mRecallFlags);

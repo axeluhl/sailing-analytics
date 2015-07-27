@@ -14,30 +14,12 @@ public class PolarSheetsXYDiagramDataImpl implements PolarSheetsXYDiagramData {
 
     PolarSheetsXYDiagramDataImpl() {
     }
-
-    private Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageSpeedMovingAverage;
     
     private Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageSpeedRegression;
 
-    private Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> pointsForAverageConfidence;
-
     public PolarSheetsXYDiagramDataImpl(
-            Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> movingAverageSpeedDataLists,
-            Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> regressionSpeedDataLists,
-            Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> averageConfidenceDataLists) {
-        pointsForAverageSpeedMovingAverage = movingAverageSpeedDataLists;
+            Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> regressionSpeedDataLists) {
         pointsForAverageSpeedRegression = regressionSpeedDataLists;
-        pointsForAverageConfidence = averageConfidenceDataLists;
-    }
-
-    @Override
-    public List<Pair<Double, Double>> getPointsForAverageSpeedMovingAverage(Tack tack, LegType legType) {
-        return pointsForAverageSpeedMovingAverage.get(new Pair<LegType, Tack>(legType, tack));
-    }
-
-    @Override
-    public List<Pair<Double, Double>> getPointsForAverageConfidence(Tack tack, LegType legType) {
-        return pointsForAverageConfidence.get(new Pair<LegType, Tack>(legType, tack));
     }
 
     @Override

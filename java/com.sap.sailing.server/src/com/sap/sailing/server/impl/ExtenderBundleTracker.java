@@ -42,7 +42,7 @@ public class ExtenderBundleTracker extends BundleTracker<Bundle> {
             for (StackTraceElement traceElement : stackTrace) {
                 b.append(traceElement.toString() + "\n");
             }
-            logger.fine(b.toString());
+            logger.severe(b.toString());
         }
         String trackManifestEntry = (String) bundle.getHeaders().get("TrackLifecycle");
         if (trackManifestEntry != null) {

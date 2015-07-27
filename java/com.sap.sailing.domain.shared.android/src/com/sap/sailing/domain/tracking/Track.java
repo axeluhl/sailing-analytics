@@ -126,7 +126,23 @@ public interface Track<FixType extends Timed> extends Serializable {
      * will be thrown in case the caller has failed to do so.
      */
     Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive);
-
+    
+    /**
+     * Returns an iterator starting at the first fix after <code>startingAt</code> (or "at or after" in case
+     * <code>inclusive</code> is <code>true</code>) and that ends at the <code>endingAt</code> time point or just before
+     * in case <code>endingAtIncluive</code> is false. The fixes returned by the iterator are the smoothened fixes (see
+     * also {@link #getFixes()}, without any smoothening or dampening applied.
+     * 
+     * Callers must have called {@link #lockForRead()} before calling this method. This will be checked, and an
+     * exception will be thrown in case the caller has failed to do so.
+     * 
+     * @param startingAt
+     *            if <code>null</code>, starts with the first fix available
+     * @param endingAt
+     *            if <code>null</code>., ends with the last fix available
+     */
+    Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean startingAtInclusive, TimePoint endingAt, boolean endingAtInclusive);
+    
     /**
      * Returns an iterator starting at the first raw fix after <code>startingAt</code> (or "at or after" in case
      * <code>inclusive</code> is <code>true</code>). The fixes returned by the iterator are the raw fixes (see also

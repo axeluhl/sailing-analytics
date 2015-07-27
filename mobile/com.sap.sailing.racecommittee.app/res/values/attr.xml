@@ -19,6 +19,7 @@
     <attr name="buttonSolidXSmall" format="reference"/>
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="text" format="reference"/>
     <attr name="textXXSmall" format="reference"/>
     <attr name="textXSmall" format="reference"/>
     <attr name="textSmall" format="reference"/>
@@ -53,6 +54,7 @@
     <attr name="course_updown_64dp" format="reference"/>
     <attr name="dns_48dp" format="reference"/>
     <attr name="hearing_48dp" format="reference"/>
+    <attr name="link_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
     <attr name="marker" format="reference"/>
     <attr name="marker_race" format="reference"/>
@@ -60,9 +62,11 @@
     <attr name="photo_camera_48dp" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
     <attr name="search_24dp_invert" format="reference"/>
+    <attr name="spinner_background" format="reference"/>
     <attr name="swipe_idle" format="reference"/>
     <attr name="swipe_left" format="reference"/>
     <attr name="swipe_right" format="reference"/>
+    <attr name="tab_widget" format="reference"/>
     <attr name="value_next" format="reference"/>
     <attr name="value_prev" format="reference"/>
     <attr name="wind_on" format="reference"/>

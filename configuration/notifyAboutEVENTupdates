@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# set up some constants
+## Manage2Sail
+M2SURL="http://manage2sail.com"
+M2SEVENTID="???xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx???"
+M2SACCESSTOKEN="???xyz???"
+M2SSTRING=${M2SURL}"/api/public/links/event/"${M2SEVENTID}"?accesstoken="${M2SACCESSTOKEN}"&mediaType=json"
+## Local JSON
+LOCALJSON="/tmp/???EVENT???results.json"
+LOCALJSON_OLD=$LOCALJSON.old
+## Mails (each email in new line)
+MAILINGLIST="/home/trac/mailinglists/???EVENT???updatemailinglist"
+## Eventname
+EVENTNAME="???Eventname Jahr???"
+## Misc
+DOSENDMAIL=false
+
+### ROUTINE ###
+# get current json from manage2sail
+wget -O "$LOCALJSON" "$M2SSTRING" >/dev/null 2>&1
+if [ -f "$LOCALJSON_OLD" ]; then
+  # results previously downloaded; now compare
+  # sort by manage2sail Regattas.Id
+  LOCALJSON_SORTED="${LOCALJSON}.sorted"
+  LOCALJSON_OLD_SORTED="${LOCALJSON_OLD}.sorted"
+  cat "$LOCALJSON" | jq -r '.Regattas|sort_by(.Name)' >"$LOCALJSON_SORTED"
+  cat "$LOCALJSON_OLD" | jq -r '.Regattas|sort_by(.Name)' >"$LOCALJSON_OLD_SORTED"
+  # filter only necessary values
+  LOCALJSON_FORMATTED="${LOCALJSON}.formatted"
+  LOCALJSON_OLD_FORMATTED="${LOCALJSON_OLD}.formatted"
+  cat "$LOCALJSON_SORTED" | jq -r '.[]|{Final, LastPublishedRoundName, Published, Name, ClassName, Id}|select(.Published != null)' >"$LOCALJSON_FORMATTED"
+  cat "$LOCALJSON_OLD_SORTED" | jq -r '.[]|{Final, LastPublishedRoundName, Published, Name, ClassName, Id}|select(.Published != null)' >"$LOCALJSON_OLD_FORMATTED"
+  # diff sorted+formatted json
+  diff -q "$LOCALJSON_OLD_FORMATTED" "$LOCALJSON_FORMATTED"
+  if [ "$?" != "0" ]; then
+    echo "Found diff between $LOCALJSON_OLD_FORMATTED and $LOCALJSON_FORMATTED
+
+`diff -q "$LOCALJSON_OLD_FORMATTED" "$LOCALJSON_FORMATTED"`
+
+Sending mail."
+    DOSENDMAIL=true
+  fi
+fi
+if [ "$DOSENDMAIL" = "true" ]; then
+  echo "`date` Sending mail to `cat "$MAILINGLIST"`"
+  echo "$LOCALJSON has changed. Consider re-importing results for $EVENTNAME. Differences:
+
+------------------
+`diff -U 6 "$LOCALJSON_OLD_FORMATTED" "$LOCALJSON_FORMATTED"`
+------------------
+
+To unsubscribe, change $MAILINGLIST on `hostname`." | mail -s "SAP result import update: $EVENTNAME" `cat "$MAILINGLIST" | grep -v "^#"`
+fi
+
+# move to old
+mv "$LOCALJSON" "$LOCALJSON_OLD"
+# clean up temporary files
+rm -rf "$LOCALJSON_SORTED" "$LOCALJSON_OLD_SORTED" "$LOCALJSON_FORMATTED" "$LOCALJSON_OLD_FORMATTED"

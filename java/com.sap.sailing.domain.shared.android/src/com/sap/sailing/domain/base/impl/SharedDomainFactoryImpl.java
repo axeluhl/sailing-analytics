@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -106,14 +107,18 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     private final Set<String> mayStartWithNoUpwindLeg;
     
+    private final RaceLogResolver raceLogResolver;
+    
     /**
      * Uses a transient competitor store
+     * @param raceLogResolver TODO
      */
-    public SharedDomainFactoryImpl() {
-        this(new TransientCompetitorStoreImpl());
+    public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
+        this(new TransientCompetitorStoreImpl(), raceLogResolver);
     }
     
-    public SharedDomainFactoryImpl(CompetitorStore competitorStore) {
+    public SharedDomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+        this.raceLogResolver = raceLogResolver;
         waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         markCache = new HashMap<Serializable, Mark>();
@@ -386,4 +391,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         return markCache.get(markIdCache.get(toStringRepresentationOfID));
     }
 
+    @Override
+    public RaceLogResolver getRaceLogResolver() {
+        return raceLogResolver;
+    }
 }

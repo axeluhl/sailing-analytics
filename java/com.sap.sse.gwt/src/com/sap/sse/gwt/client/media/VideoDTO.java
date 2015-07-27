@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.media;
 
 import java.util.Date;
 
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 
 public class VideoDTO extends AbstractMediaDTO {
@@ -30,5 +31,21 @@ public class VideoDTO extends AbstractMediaDTO {
 
     public void setThumbnailRef(String thumbnailRef) {
         this.thumbnailRef = thumbnailRef;
+    }
+
+    public boolean isFeatured() {
+        return hasTag(MediaTagConstants.FEATURED);
+    }
+    
+    @Override
+    public int compareTo(AbstractMediaDTO o) {
+        if(o instanceof VideoDTO) {
+            VideoDTO otherVideo = (VideoDTO) o;
+            boolean featured = isFeatured();
+            if(otherVideo.isFeatured() != featured) {
+                return featured ? -1 : 1;
+            }
+        }
+        return super.compareTo(o);
     }
 }

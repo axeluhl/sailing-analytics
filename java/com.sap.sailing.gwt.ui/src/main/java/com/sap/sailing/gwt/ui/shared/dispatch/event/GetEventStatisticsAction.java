@@ -36,16 +36,23 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStatisticsDTO>> {
     private static final Logger logger = Logger.getLogger(GetEventStatisticsAction.class.getName());
-    private UUID eventId;
     private static boolean CALCULATE_MAX_SPEED = false;
     private static boolean CALCULATE_SAILED_MILES = true;
+    
+    private UUID eventId;
+    private boolean onlyCurrentEvent;
 
     @SuppressWarnings("unused")
     private GetEventStatisticsAction() {
     }
 
     public GetEventStatisticsAction(UUID eventId) {
+        this(eventId, true);
+    }
+    
+    public GetEventStatisticsAction(UUID eventId, boolean onlyCurrentEvent) {
         this.eventId = eventId;
+        this.onlyCurrentEvent = onlyCurrentEvent;
     }
 
     @GwtIncompatible
@@ -64,17 +71,17 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
         Triple<Competitor, Speed, TimePoint> maxSpeed = null;
         final TimePoint now = MillisecondsTimePoint.now();
         final Set<Leaderboard> leaderboards = new HashSet<>();
-        final boolean series = HomeServiceUtil.isFakeSeries(event);
+        final boolean filterLeaderboards = onlyCurrentEvent && HomeServiceUtil.isFakeSeries(event);
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                if(!series || HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                if(!filterLeaderboards || HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                     leaderboards.add(leaderboard);
                 }
             }
         }
         for (Leaderboard leaderboard : leaderboards) {
             competitors += HomeServiceUtil.calculateCompetitorsCount(leaderboard);
-            races += HomeServiceUtil.calculateRaceCount(leaderboard);
+            races += HomeServiceUtil.calculateRaceColumnCount(leaderboard);
             trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(leaderboard);
             regattas++;
             String disableStats = System.getenv("DISABLE_STATS");
