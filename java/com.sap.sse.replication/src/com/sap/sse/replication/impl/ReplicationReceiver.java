@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
@@ -173,11 +173,11 @@ public class ReplicationReceiver implements Runnable {
                 checksPerformed = 0;
                 // Set the replicable's class's class loader as context for deserialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
-                final GZIPInputStream uncompressedInputStream = new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage));
-                String replicableIdAsString = new DataInputStream(uncompressedInputStream).readUTF();
+                final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
+                String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    ObjectInputStream ois = new ObjectInputStream(uncompressedInputStream); // no special stream required; only reading a generic byte[]
+                    ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
                     int operationsInMessage = 0;
                     try {
                         while (true) {

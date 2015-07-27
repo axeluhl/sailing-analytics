@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -20,9 +21,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 
 import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -416,9 +417,8 @@ public class ReplicationServiceImpl implements ReplicationService {
             if (outboundBuffer == null) {
                 outboundBuffer = new ByteArrayOutputStream();
                 outboundBufferReplicableIdAsString = replicaIdAsString;
-                GZIPOutputStream zipper = new GZIPOutputStream(outboundBuffer);
-                new DataOutputStream(zipper).writeUTF(replicaIdAsString);
-                outboundObjectBuffer = new ObjectOutputStream(zipper);
+                ObjectOutputStream compressingObjectOutputStream = createCompressingObjectOutputStream(replicaIdAsString, outboundBuffer);
+                outboundObjectBuffer = compressingObjectOutputStream;
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(serializedOperation);
@@ -450,6 +450,17 @@ public class ReplicationServiceImpl implements ReplicationService {
                         + outboundBufferClasses.size());
             }
         }
+    }
+
+    private static ObjectOutputStream createCompressingObjectOutputStream(final String replicaIdAsString, OutputStream streamToWrap) throws IOException {
+        LZ4BlockOutputStream zipper = new LZ4BlockOutputStream(streamToWrap);
+        new DataOutputStream(zipper).writeUTF(replicaIdAsString);
+        ObjectOutputStream compressingObjectOutputStream = new ObjectOutputStream(zipper);
+        return compressingObjectOutputStream;
+    }
+    
+    static InputStream createUncompressingInputStream(InputStream streamToWrap) {
+        return new LZ4BlockInputStream(streamToWrap);
     }
 
     /**
