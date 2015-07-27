@@ -346,11 +346,13 @@ public class ReplicationReceiver implements Runnable {
                         notifyAll();
                     }
                 }
-                try {
-                    apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error applying queued, replicated operation "
-                            + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
+                if (replicableIdAsStringAndOperation != null) {
+                    try {
+                        apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Error applying queued, replicated operation "
+                                + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
+                    }
                 }
             } while (!queueEmpty);
             assert queue.isEmpty();
