@@ -105,7 +105,7 @@ public class ShortTimeWindCache {
      */
     private void ensureTimerIsRunning() {
         if (timer == null) {
-            timer = new Timer(getClass().getSimpleName()+" for "+trackedRace.getRace().getName());
+            timer = new Timer(getClass().getSimpleName()+" for "+trackedRace.getRace().getName(), /* isDaemon */ true);
             timer.scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds);
         }
     }

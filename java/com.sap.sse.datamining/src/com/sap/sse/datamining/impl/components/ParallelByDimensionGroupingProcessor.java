@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
@@ -26,7 +26,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
     private final ResourceBundleStringMessages stringMessages;
     private final Locale locale;
 
-    private final FunctionDTOFactory functionDTOFactory;
+    private final DataMiningDTOFactory dtoFactory;
     
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
@@ -37,7 +37,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
         this.stringMessages = stringMessages;
         this.locale = locale;
         
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
     }
 
     private static Iterable<ParameterizedFunction<?>> asIterable(ParameterizedFunction<?> parameterizedDimension) {
@@ -48,7 +48,7 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
 
     @Override
     protected GroupKey createGroupKeyFor(DataType input, Function<?> dimension, ParameterProvider parameterProvider) {
-        return new GenericGroupKey<FunctionDTO>(functionDTOFactory.createFunctionDTO(dimension, stringMessages, locale));
+        return new GenericGroupKey<FunctionDTO>(dtoFactory.createFunctionDTO(dimension, stringMessages, locale));
     }
 
 }

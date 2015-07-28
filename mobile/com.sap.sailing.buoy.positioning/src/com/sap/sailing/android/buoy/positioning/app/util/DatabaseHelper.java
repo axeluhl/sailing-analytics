@@ -1,15 +1,21 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
+import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
@@ -20,9 +26,6 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseHelper {
 
@@ -153,7 +156,11 @@ public class DatabaseHelper {
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
             CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
 
+        if (BuildConfig.DEBUG) {
+            ExLog.i(context, TAG, "New data stored");
+        }
         // inserting leaderboard first
+
 
         ContentResolver cr = context.getContentResolver();
 
@@ -195,6 +202,8 @@ public class DatabaseHelper {
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+            LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
+
         } catch (RemoteException e) {
             throw new GeneralDatabaseHelperException(e.getMessage());
         } catch (OperationApplicationException e) {

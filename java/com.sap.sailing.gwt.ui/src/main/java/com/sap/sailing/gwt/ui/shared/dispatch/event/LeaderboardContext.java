@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -50,8 +51,10 @@ public class LeaderboardContext {
     
     public void forRaces(RaceCallback callback) {
         for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for(Fleet fleet : raceColumn.getFleets()) {
-                callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, service));
+            if(!raceColumn.isCarryForward()) {
+                for(Fleet fleet : raceColumn.getFleets()) {
+                    callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, service));
+                }
             }
         }
     }
@@ -92,8 +95,7 @@ public class LeaderboardContext {
                 result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
-            int ttl = isLive ? 1000 * 60 : 1000 * 60 * 2;
-            return new ResultWithTTL<>(ttl, result);
+            return new ResultWithTTL<>(Duration.ONE_MINUTE.times(isLive ? 1 : 2), result);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);
             throw new DispatchException("Error loading leaderboard");

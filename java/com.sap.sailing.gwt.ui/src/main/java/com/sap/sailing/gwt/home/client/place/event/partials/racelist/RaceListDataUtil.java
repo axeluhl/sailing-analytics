@@ -131,7 +131,6 @@ public class RaceListDataUtil {
         });
     }
     
-    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     public static <T extends RaceMetadataDTO<?>> boolean hasDifferentStartDates(Collection<T> data) {
         return hasDifferentValues(data, new ValueProvider<T, Long>() {
             @Override
@@ -140,7 +139,7 @@ public class RaceListDataUtil {
                 if(start == null) {
                     return null;
                 }
-                return start.getTime() / DAY_IN_MILLIS;
+                return start.getTime() / Duration.ONE_DAY.asMillis();
             }
         });
     }

@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -57,18 +56,21 @@ public class OperationalTransformationTest {
         server.waitForNotRunning();
         replica.waitForNotRunning();
         Map<String, Leaderboard> replicaLeaderboards = racingEventServiceReplica.getLeaderboards();
-        assertEquals(2, replicaLeaderboards.size()); // expected to include the default leaderboard
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] { LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, LEADERBOARDNAME })),
+        assertEquals(1, replicaLeaderboards.size());
+        assertEquals(new HashSet<String>(Arrays.asList(new String[] { LEADERBOARDNAME })),
                 replicaLeaderboards.keySet());
         assertEquals(racingEventServiceServer.getLeaderboards().keySet(), replicaLeaderboards.keySet());
     }
 
     @Test
     public void testAddColumnToLeaderboardOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME,null, new int[] { 5 },
+                new LowPoint(), null);
+        server.apply(addLeaderboardOp);
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(
-                "newColumn", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn", LEADERBOARDNAME, /* medalRace */ true);
         server.apply(addLeaderboardColumn);
-        RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
+        RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(LEADERBOARDNAME);
         replica.apply(removeDefaultLeaderboard);
         replica.waitForNotRunning();
         server.waitForNotRunning();
@@ -78,17 +80,20 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddOneColumnOnEachSideThenMoveOneUpOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME,null, new int[] { 5 },
+                new LowPoint(), null);
+        server.apply(addLeaderboardOp);
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
-                "newColumn1", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn1", LEADERBOARDNAME, /* medalRace */ true);
         server.apply(addLeaderboardColumnOnServer);
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
-                "newColumn2", LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+                "newColumn2", LEADERBOARDNAME, /* medalRace */ true);
         replica.apply(addLeaderboardColumnOnReplica);
         replica.waitForNotRunning();
         server.waitForNotRunning();
-        RacingEventServiceOperation<Void> moveUpNewColumn2 = new MoveLeaderboardColumnUp(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, "newColumn2");
+        RacingEventServiceOperation<Void> moveUpNewColumn2 = new MoveLeaderboardColumnUp(LEADERBOARDNAME, "newColumn2");
         server.apply(moveUpNewColumn2);
-        RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
+        RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(LEADERBOARDNAME);
         replica.apply(removeDefaultLeaderboard);
         replica.waitForNotRunning();
         server.waitForNotRunning();

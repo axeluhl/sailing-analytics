@@ -12,11 +12,12 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -103,7 +104,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             final CountingOutputStream countingOutputStream = new CountingOutputStream(
                     ros, /* log every megabyte */1024l * 1024l, Level.INFO,
                     "HTTP output for initial load for " + req.getRemoteHost());
-            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(countingOutputStream);
+            final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
             for (String replicableIdAsString : replicableIdsAsStrings) {
                 Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable == null) {
@@ -113,7 +114,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     break; // causing an error on the replica which is expecting the replica's initial load
                 }
                 try {
-                    replicable.serializeForInitialReplication(gzipOutputStream);
+                    replicable.serializeForInitialReplication(compressingOutputStream);
                 } catch (Exception e) {
                     logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
@@ -121,7 +122,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     e.printStackTrace(resp.getWriter());
                 }
             }
-            gzipOutputStream.finish();
+            compressingOutputStream.finish();
             countingOutputStream.close();
             break;
         default:

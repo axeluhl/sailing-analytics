@@ -16,6 +16,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @GwtIncompatible
@@ -59,12 +60,12 @@ public final class EventActionUtil {
         throw new DispatchException("The leaderboard is not part of the given event.");
     }
     
-    public static long getEventStateDependentTTL(DispatchContext context, UUID eventId, long liveTTL) {
+    public static Duration getEventStateDependentTTL(DispatchContext context, UUID eventId, Duration liveTTL) {
         Event event = context.getRacingEventService().getEvent(eventId);
         return getEventStateDependentTTL(event, liveTTL);
     }
     
-    private static long getEventStateDependentTTL(Event event, long liveTTL) {
+    private static Duration getEventStateDependentTTL(Event event, Duration liveTTL) {
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         if(eventState == EventState.RUNNING) {
             return liveTTL;
@@ -81,25 +82,25 @@ public final class EventActionUtil {
         return callback.calculateWithEvent(event);
     }
 
-    public static long calculateTtlForNonLiveEvent(Event event, EventState eventState) {
+    public static Duration calculateTtlForNonLiveEvent(Event event, EventState eventState) {
         TimePoint now = MillisecondsTimePoint.now();
         if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
             Duration tillStart = now.until(event.getStartDate());
             double hoursTillStart = tillStart.asHours();
-            long ttl = 1000 * 60 * 60;
+            long ttl = Duration.ONE_HOUR.asMillis();
             if(hoursTillStart < 36) {
-                ttl = 1000 * 60 * 30;
+                ttl = Duration.ONE_MINUTE.times(30).asMillis();
             }
             if(hoursTillStart < 3) {
-                ttl = 1000 * 60 * 15;
+                ttl = Duration.ONE_MINUTE.times(15).asMillis();
             }
             ttl = Math.min(ttl, tillStart.asMillis());
-            return ttl;
+            return new MillisecondsDurationImpl(ttl);
         }
         if(eventState == EventState.FINISHED) {
-            return 1000 * 60 * 60 * 12;
+            return Duration.ONE_HOUR.times(12);
         }
-        return 0;
+        return Duration.NULL;
     }
     
     public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {

@@ -36,7 +36,7 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void dismissProgressDialog() {
-        if (progressDialog.isShowing()) {
+        if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
     }
