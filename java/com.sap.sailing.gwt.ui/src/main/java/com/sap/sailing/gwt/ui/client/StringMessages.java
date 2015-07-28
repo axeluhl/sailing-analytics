@@ -44,7 +44,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
-    String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -1050,6 +1049,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String ratio();
     String importWind();
     String importWindTooltip();
+    String importDeviceConfigurations();
+    String importDeviceConfigurationsTooltip();
     String authorName();
     String authorPriority();
     String removeDenotation();
@@ -1351,4 +1352,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
     String racesOverview();
+    String empty();
+    String runAQuery();
 }

@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
@@ -20,6 +21,8 @@ import com.sap.sse.common.Util;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
+    
+    private static final Logger logger = Logger.getLogger(AbstractRaceColumn.class.getName());
 
     private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
@@ -70,6 +73,8 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 if (trackedRace != null) {
                     this.trackedRaces.put(fleet, trackedRace);
                     this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
+                    logger.info(String.format("Linked race column %s with tracked race %s.", this.getName(),
+                            trackedRace.getRace() == null ? "null" : trackedRace.getRace().getName()));
                 }
             }
             if (trackedRace != null) {

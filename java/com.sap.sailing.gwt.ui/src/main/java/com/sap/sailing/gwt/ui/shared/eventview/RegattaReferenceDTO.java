@@ -9,9 +9,9 @@ public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO>
     public RegattaReferenceDTO() {
     }
     
-    public RegattaReferenceDTO(String id, String name) {
+    public RegattaReferenceDTO(String leaderboardId, String name) {
         super();
-        this.id = id;
+        this.id = leaderboardId;
         this.displayName = name;
     }
     public String getDisplayName() {

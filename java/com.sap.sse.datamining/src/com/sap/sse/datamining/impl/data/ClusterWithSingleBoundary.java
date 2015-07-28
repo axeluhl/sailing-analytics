@@ -7,6 +7,7 @@ import com.sap.sse.datamining.data.ClusterBoundary;
 
 public class ClusterWithSingleBoundary<ElementType> extends AbstractCluster<ElementType> {
 
+    private static final long serialVersionUID = -3188802475809553490L;
     private static final char INFINITE = '\u221e';
 
     /**

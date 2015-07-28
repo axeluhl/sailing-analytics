@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--  Energy Saving -->
+    <PreferenceCategory android:title="@string/server">
+        <EditTextPreference
+            android:defaultValue="@integer/preference_data_refresh_interval_seconds_default"
+            android:key="@string/preference_data_refresh_interval_seconds_key"
+            android:title="@string/server_sync_settings"
+            android:inputType="number"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

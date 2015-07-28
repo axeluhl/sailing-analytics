@@ -1,5 +1,8 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +15,7 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
@@ -24,9 +28,6 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RegattaActivity extends AbstractRegattaActivity {
 
@@ -86,6 +87,9 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public void onStart() {
         super.onStart();
+        Intent intent = new Intent(this, MarkerService.class);
+        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
+        startService(intent);
         Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
         bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -106,7 +110,15 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, MarkerService.class);
+        stopService(intent);
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.regatta_menu, menu);
         return true;
@@ -120,9 +132,15 @@ public class RegattaActivity extends AbstractRegattaActivity {
             CheckinManager manager = new CheckinManager(checkinUrl, this);
             manager.callServerAndGenerateCheckinData();
             return true;
+        case R.id.check_out:
+            checkOut();
+            return true;
         case R.id.about:
             AboutDialog aboutDialog = new AboutDialog(this);
             aboutDialog.show();
+            return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -131,7 +149,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.regatta_menu;
+        // Set to 0 to avoid redundant menu inflation
+        return 0;
     }
 
     @Override
@@ -151,6 +170,11 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
+    }
+
+    private void checkOut(){
+        DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+        finish();
     }
 
     public String getCheckinDigest() {

@@ -26,6 +26,6 @@ public class GetRegattaWithProgressAction implements Action<ResultWithTTL<Regatt
     @GwtIncompatible
     public ResultWithTTL<RegattaWithProgressDTO> execute(DispatchContext context) {
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 5 * 60 * 1000),
-                EventActionUtil.getLeaderboardContext(context, eventId, regattaId).getRegattaWithProgress(context));
+                EventActionUtil.getLeaderboardContext(context, eventId, regattaId).getRegattaWithProgress());
     }
 }

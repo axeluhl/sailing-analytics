@@ -1,6 +1,5 @@
 package com.sap.sse.datamining.components;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 
 public interface Processor<InputType, ResultType> {
     

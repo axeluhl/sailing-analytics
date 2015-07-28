@@ -61,10 +61,10 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
-import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
@@ -452,6 +452,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -2370,6 +2371,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
+        Object principal = SessionUtils.getPrincipal();
+        if (principal != null) {
+            logger.info(String.format("%s linked race column %s %s (%s) with tracked race %s.", principal.toString(),
+                    leaderboardName, raceColumnName, fleetName, raceIdentifier.getRaceName()));
+        } else {
+            logger.info(String.format("Linked race column %s %s (%s) with tracked race %s.", leaderboardName, raceColumnName, fleetName,
+                    raceIdentifier.getRaceName()));
+        }
         return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, fleetName, raceIdentifier));
     }
 
@@ -4395,7 +4404,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
-            final boolean compress, final boolean exportWind) {
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations) {
         final UUID importOperationId = UUID.randomUUID();
         getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, "Initializing", 0.0);
         // Create a progress indicator for as long as the server gets data from the other server.
@@ -4412,7 +4421,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 int port = hostnameAndPort.getB();
                 String query;
                 try {
-                    query = createLeaderboardQuery(groupNames, compress, exportWind);
+                    query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations);
                 } catch (UnsupportedEncodingException e1) {
                     throw new RuntimeException(e1);
                 }
@@ -4502,14 +4511,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return 0;
     }
 
-    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind)
+    private String createLeaderboardQuery(String[] groupNames, boolean compress, boolean exportWind, boolean exportDeviceConfigurations)
             throws UnsupportedEncodingException {
         StringBuffer queryStringBuffer = new StringBuffer("");
         for (int i = 0; i < groupNames.length; i++) {
             String encodedGroupName = URLEncoder.encode(groupNames[i], "UTF-8");
             queryStringBuffer.append("names[]=" + encodedGroupName + "&");
         }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s", compress, exportWind));
+        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s", compress,
+                exportWind, exportDeviceConfigurations));
         return queryStringBuffer.toString();
     }
 
@@ -5585,45 +5595,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public PolarSheetsXYDiagramData createXYDiagramForBoatClass(String boatClassName) {
         BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> movingAverageSpeedDataLists = new HashMap<>();
         Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> regressionSpeedDataLists = new HashMap<>();
-        Map<Pair<LegType, Tack>, List<Pair<Double, Double>>> averageConfidenceDataLists = new HashMap<>();
         for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
             for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                movingAverageSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
-                        new ArrayList<Pair<Double, Double>>());
                 regressionSpeedDataLists.put(new Pair<LegType, Tack>(legType, tack),
-                        new ArrayList<Pair<Double, Double>>());
-                averageConfidenceDataLists.put(new Pair<LegType, Tack>(legType, tack),
                         new ArrayList<Pair<Double, Double>>());
             }
         }
         for (double windInKnots = 0.1; windInKnots < 30; windInKnots = windInKnots + 0.1) {
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
-                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-
-                    try {
-                        SpeedWithBearingWithConfidence<Void> averageUpwindStarboardMovingAverage = getService()
-                                .getPolarDataService().getAverageSpeedWithBearing(boatClass,
-                                        new KnotSpeedImpl(windInKnots), legType, tack, false);
-
-                        movingAverageSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
-                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage.getObject()
-                                        .getKnots()));
-                        
-
-                        averageConfidenceDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
-                                new Pair<Double, Double>(windInKnots, averageUpwindStarboardMovingAverage
-                                        .getConfidence()));
-                        
-                    } catch (NotEnoughDataHasBeenAddedException e) {
-                        // Do not add a point to the result
-                    }
-                    
+                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {     
                     try {
                         SpeedWithBearingWithConfidence<Void> averageUpwindStarboardRegression = getService()
                                 .getPolarDataService().getAverageSpeedWithBearing(boatClass,
-                                        new KnotSpeedImpl(windInKnots), legType, tack, true);
+                                        new KnotSpeedImpl(windInKnots), legType, tack);
 
                         regressionSpeedDataLists.get(new Pair<LegType, Tack>(legType, tack)).add(
                                 new Pair<Double, Double>(windInKnots, averageUpwindStarboardRegression.getObject()
@@ -5635,8 +5620,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
 
-        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(movingAverageSpeedDataLists,
-                regressionSpeedDataLists, averageConfidenceDataLists);
+        PolarSheetsXYDiagramData data = new PolarSheetsXYDiagramDataImpl(regressionSpeedDataLists);
 
         return data;
     }

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.partials.impressions;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -57,7 +57,7 @@ public class Impressions extends Composite {
         headerUi.setSubtitle(sb.toString());
     }
 
-    public void addImages(List<SailingImageDTO> images) {
+    public void addImages(Collection<SailingImageDTO> images) {
         if (images.isEmpty()) {
             return;
         }

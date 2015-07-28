@@ -25,10 +25,12 @@ import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.ViewHolder;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -37,13 +39,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter.RaceData;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
@@ -74,7 +73,9 @@ public class StartTimeFragment extends BaseFragment
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
-    private Spinner mDependentRace;
+    private Spinner mLeaderBoard;
+    private Spinner mFleet;
+    private Spinner mRace;
     private TimePicker mTimePicker;
     private TextView mCountdown;
     private TextView mDebugTime;
@@ -84,10 +85,14 @@ public class StartTimeFragment extends BaseFragment
     private Calendar mTimeLeft;
     private Calendar mTimeRight;
     private Calendar mCalendar;
-    private String mRaceId;
+    private SimpleRaceLogIdentifier mRaceId;
     private Duration mStartTimeOffset;
     private boolean mListenerIgnore = true;
-    private DependentRaceSpinnerAdapter mAdapter;
+    private Map<RaceGroupSeriesFleet, List<ManagedRace>> mGroupHeaders;
+    private DependentRaceSpinnerAdapter mLeaderBoardAdapter;
+    private DependentRaceSpinnerAdapter mFleetAdapter;
+    private DependentRaceSpinnerAdapter mRaceAdapter;
+    private SimpleRaceLogIdentifier identifier;
 
     /**
      * Listens for start time changes
@@ -203,43 +208,49 @@ public class StartTimeFragment extends BaseFragment
         if (getView() != null) {
             if (getArguments() != null) {
                 switch (getArguments().getInt(START_MODE, MODE_SETUP)) {
-                case MODE_1:
-                    View header = ViewHolder.get(getView(), R.id.header_text);
-                    if (header != null) {
-                        header.setOnClickListener(this);
-                    }
-                    View back = ViewHolder.get(getView(), R.id.header_back);
-                    if (back != null) {
-                        back.setVisibility(View.VISIBLE);
-                    }
-                    break;
+                    case MODE_1:
+                        View header = ViewHolder.get(getView(), R.id.header_text);
+                        if (header != null) {
+                            header.setOnClickListener(this);
+                        }
+                        View back = ViewHolder.get(getView(), R.id.header_back);
+                        if (back != null) {
+                            back.setVisibility(View.VISIBLE);
+                        }
+                        break;
 
-                case MODE_TIME_PANEL:
-                    if (getRace() != null && getRaceState() != null) {
-                        mStartTime = getRaceState().getStartTime();
+                    case MODE_TIME_PANEL:
+                        if (getRace() != null && getRaceState() != null) {
+                            mStartTime = getRaceState().getStartTime();
+                            if (mStartTime != null) {
+                                time.setTime(mStartTime.asDate());
+                            }
+                        }
+                        View frame = ViewHolder.get(getView(), R.id.header);
+                        if (frame != null) {
+                            frame.setVisibility(View.GONE);
+                        }
+
+                        StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
+                        if (result != null && result.isDependentStartTime()) {
+                            mStartTimeOffset = result.getStartTimeDiff();
+                            mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                        }
+                        break;
+
+                    default: // MODE_SETUP
+                        mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
                         if (mStartTime != null) {
                             time.setTime(mStartTime.asDate());
                         }
-                    }
-                    View frame = ViewHolder.get(getView(), R.id.header);
-                    if (frame != null) {
-                        frame.setVisibility(View.GONE);
-                    }
-                    break;
+                        mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
+                        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
 
-                default: // MODE_SETUP
-                    mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
-                    if (mStartTime != null) {
-                        time.setTime(mStartTime.asDate());
-                    }
-                    mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
-                    mRaceId = (String) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
-
-                    View syncButtons = ViewHolder.get(getView(), R.id.buttonBar);
-                    if (syncButtons != null) {
-                        syncButtons.setVisibility(View.GONE);
-                    }
-                    break;
+                        View syncButtons = ViewHolder.get(getView(), R.id.buttonBar);
+                        if (syncButtons != null) {
+                            syncButtons.setVisibility(View.GONE);
+                        }
+                        break;
                 }
             }
 
@@ -265,59 +276,171 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setValue((mStartTimeOffset == null) ? preferences.getDependentRacesOffset() : (int) mStartTimeOffset.asMinutes());
         }
 
-        mDependentRace = ViewHolder.get(getView(), R.id.dependent_race);
-        if (mDependentRace != null) {
-            int position = 1;
-            mAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
-            DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
-            Map<RaceGroupSeriesFleet, List<ManagedRace>> mGroupHeaders = new LinkedHashMap<>();
-            List<ManagedRace> sortedRaces = new ArrayList<>(manager.getRaces());
-            Collections.sort(sortedRaces, new Comparator<ManagedRace>() {
-                @Override
-                public int compare(ManagedRace lhs, ManagedRace rhs) {
-                    return new NaturalComparator().compare(lhs.getId(), rhs.getId());
-                }
-            });
-
-            for (ManagedRace race : sortedRaces) {
-                RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
-
-                if (!mGroupHeaders.containsKey(container)) {
-                    mGroupHeaders.put(container, new LinkedList<ManagedRace>());
-                }
-                mGroupHeaders.get(container).add(race);
+        final DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
+        mGroupHeaders = new LinkedHashMap<>();
+        List<ManagedRace> sortedRaces = new ArrayList<>(manager.getRaces());
+        Collections.sort(sortedRaces, new Comparator<ManagedRace>() {
+            @Override
+            public int compare(ManagedRace lhs, ManagedRace rhs) {
+                return new NaturalComparator().compare(lhs.getId(), rhs.getId());
             }
+        });
 
+        for (ManagedRace race : sortedRaces) {
+            RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
+
+            if (!mGroupHeaders.containsKey(container)) {
+                mGroupHeaders.put(container, new LinkedList<ManagedRace>());
+            }
+            mGroupHeaders.get(container).add(race);
+        }
+
+        mLeaderBoard = ViewHolder.get(getView(), R.id.dependent_leaderboard);
+        if (mLeaderBoard != null) {
+            int leaderBoard = -1;
+            mLeaderBoardAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
-                RaceData header = new RaceData(RaceHelper.getRaceGroupName(races.getRaceGroup()), RaceHelper
-                    .getFleetSeries(races.getFleet(), races.getSeries()), null);
-                mAdapter.add(header);
-
-                for (ManagedRace race : mGroupHeaders.get(races)) {
-                    // not current race
-                    if (getRace() != null && !race.getId().equals(getRace().getId())) {
-                        if (mRaceId != null && race.getId().equals(mRaceId)) {
-                            position = mAdapter.getCount();
+                Util.Pair<String, String> data = new Util.Pair<>(races.getRaceGroup().getName(), races.getRaceGroup().getDisplayName());
+                int position = mLeaderBoardAdapter.add(data);
+                if (position >= 0) {
+                    if (mRaceId != null) {
+                        if (mRaceId.getRegattaLikeParentName().equals(data.getA())) {
+                            leaderBoard = position;
                         }
-                        RaceData items = new RaceData(race.getRaceName(), null, race);
-                        mAdapter.add(items);
+                    } else {
+                        if (leaderBoard == -1 && getRace().getRaceGroup().getName().equals(races.getRaceGroup().getName())) {
+                            leaderBoard = position;
+                        }
                     }
                 }
             }
 
-            mDependentRace.setAdapter(mAdapter);
-            mDependentRace.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            mLeaderBoard.setAdapter(mLeaderBoardAdapter);
+            mLeaderBoard.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    mAdapter.setSelected(position);
+                    mLeaderBoardAdapter.setSelected(position);
+                    initFleetSpinner();
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
-                    mAdapter.setSelected(-1);
+                    mLeaderBoardAdapter.setSelected(0);
                 }
             });
-            mDependentRace.setSelection(position);
+            mLeaderBoard.setSelection(leaderBoard);
+        }
+
+        mFleet = ViewHolder.get(getView(), R.id.dependent_fleet);
+        mRace = ViewHolder.get(getView(), R.id.dependent_racegroup);
+    }
+
+    private void initFleetSpinner() {
+        if (mLeaderBoard != null && mFleet != null) {
+            int fleet = -1;
+            mFleetAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
+            mFleet.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    mFleetAdapter.setSelected(position);
+                    initRaceSpinner();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    mFleetAdapter.setSelected(0);
+                }
+            });
+            for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
+                Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
+                if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
+                    Util.Pair<String, String> data = new Util.Pair<>(races.getFleet().getName(), null);
+                    int position = mFleetAdapter.add(data);
+                    if (position >= 0) {
+                        if (mRaceId != null) {
+                            if (mRaceId.getFleetName().equals(data.getA())) {
+                                fleet = position;
+                            }
+                        } else {
+                            if (fleet == -1) { //TODO add more heuristic here - to be discussed
+                                fleet = position;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (mFleetAdapter.getCount() > 1 || (mFleetAdapter.getCount() == 1 && !mFleetAdapter.getItem(0).getA()
+                .equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME))) {
+                mFleet.setAdapter(mFleetAdapter);
+                mFleet.setSelection(fleet);
+                mFleet.setVisibility(View.VISIBLE);
+            } else {
+                mFleet.setAdapter(null);
+                mFleet.setVisibility(View.GONE);
+                initRaceSpinner();
+            }
+        }
+    }
+
+    private void initRaceSpinner() {
+        if (mLeaderBoard != null && mFleet != null && mRace != null) {
+            mRaceAdapter = new DependentRaceSpinnerAdapter(getActivity(), R.layout.dependent_race_item);
+            mRace.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    mRaceAdapter.setSelected(position);
+                    String leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition()).getA();
+                    @SuppressWarnings("unchecked")
+                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    if (fleet == null) {
+                        fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
+                    }
+                    String race = mRaceAdapter.getItem(mRace.getSelectedItemPosition()).getA();
+                    identifier = new SimpleRaceLogIdentifierImpl(leaderBoard, race, fleet.getA());
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    mRaceAdapter.setSelected(0);
+                    identifier = null;
+                }
+            });
+
+            int racePos = -1;
+            for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
+                Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
+                if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
+                    @SuppressWarnings("unchecked")
+                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    if (fleet == null) {
+                        fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
+                    }
+                    if (races.getFleet().getName().equals(fleet.getA()) || LeaderboardNameConstants.DEFAULT_FLEET_NAME
+                        .equals(races.getFleet().getName())) {
+                        for (ManagedRace race : mGroupHeaders.get(races)) {
+                            if (!getRace().equals(race)) {
+                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
+                                int position = mRaceAdapter.add(data);
+                                if (position >= 0) {
+                                    if (mRaceId != null) {
+                                        if (mRaceId.getRaceColumnName().equals(data.getA())) {
+                                            racePos = position;
+                                        }
+                                    } else {
+                                        if (racePos == -1) { //TODO add more heuristic here - to be discussed
+                                            racePos = position;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            mRace.setAdapter(mRaceAdapter);
+            mRace.setVisibility(View.VISIBLE);
+            mRace.setSelection(racePos);
         }
     }
 
@@ -447,25 +570,25 @@ public class StartTimeFragment extends BaseFragment
         }
         Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
         switch (tab) {
-        case RELATIVE:
-            if (mRelative != null) {
-                mRelative.setVisibility(View.VISIBLE);
-            }
-            if (mRelativeButton != null) {
-                mRelativeButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mRelativeButton, drawable);
-            }
-            break;
+            case RELATIVE:
+                if (mRelative != null) {
+                    mRelative.setVisibility(View.VISIBLE);
+                }
+                if (mRelativeButton != null) {
+                    mRelativeButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mRelativeButton, drawable);
+                }
+                break;
 
-        default: // ABSOLUTE
-            if (mAbsolute != null) {
-                mAbsolute.setVisibility(View.VISIBLE);
-            }
-            if (mAbsoluteButton != null) {
-                mAbsoluteButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mAbsoluteButton, drawable);
-            }
-            break;
+            default: // ABSOLUTE
+                if (mAbsolute != null) {
+                    mAbsolute.setVisibility(View.VISIBLE);
+                }
+                if (mAbsoluteButton != null) {
+                    mAbsoluteButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mAbsoluteButton, drawable);
+                }
+                break;
         }
     }
 
@@ -486,54 +609,53 @@ public class StartTimeFragment extends BaseFragment
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-        case R.id.minute_inc:
-        case R.id.minute_dec:
-            mCalendar = Calendar.getInstance();
-            int msec = mCalendar.get(Calendar.MILLISECOND);
-            mCalendar.set(Calendar.MILLISECOND, msec);
-            String button = ((TextView) view).getText().toString();
-            boolean down = button.substring(0, 1).equals("-");
-            String[] values = button.split(":");
-            int hour = Integer.parseInt(values[0]);
-            int min = Integer.parseInt(values[1]);
-            if (view.getId() == R.id.minute_dec) { // button right
-                if (!down) { // time is positive
-                    mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                    mCalendar.add(Calendar.MINUTE, -1 * min);
-                } else {
-                    mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                    mCalendar.add(Calendar.MINUTE, min);
+            case R.id.minute_inc:
+            case R.id.minute_dec:
+                mCalendar = Calendar.getInstance();
+                int msec = mCalendar.get(Calendar.MILLISECOND);
+                mCalendar.set(Calendar.MILLISECOND, msec);
+                String button = ((TextView) view).getText().toString();
+                boolean down = button.substring(0, 1).equals("-");
+                String[] values = button.split(":");
+                int hour = Integer.parseInt(values[0]);
+                int min = Integer.parseInt(values[1]);
+                if (view.getId() == R.id.minute_dec) { // button right
+                    if (!down) { // time is positive
+                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
+                        mCalendar.add(Calendar.MINUTE, -1 * min);
+                    } else {
+                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
+                        mCalendar.add(Calendar.MINUTE, min);
+                    }
+                } else { // button left
+                    if (!down) { // time is positive
+                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
+                        mCalendar.add(Calendar.MINUTE, -1 * min);
+                    } else {
+                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
+                        mCalendar.add(Calendar.MINUTE, min);
+                    }
                 }
-            } else { // button left
-                if (!down) { // time is positive
-                    mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                    mCalendar.add(Calendar.MINUTE, -1 * min);
-                } else {
-                    mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                    mCalendar.add(Calendar.MINUTE, min);
-                }
-            }
 
-            mStartTime = new MillisecondsTimePoint(mCalendar.getTimeInMillis());
-            mListenerIgnore = true;
-            setPickerTime();
-            break;
+                mStartTime = new MillisecondsTimePoint(mCalendar.getTimeInMillis());
+                mListenerIgnore = true;
+                setPickerTime();
+                break;
 
-        case R.id.set_start_time_absolute:
-            changeFragment(mStartTime);
-            break;
+            case R.id.set_start_time_absolute:
+                changeFragment(mStartTime);
+                break;
 
-        case R.id.set_start_time_relative:
-            ManagedRace race = mAdapter.getRaceAtPosition(mDependentRace.getSelectedItemPosition());
-            changeFragment(MillisecondsTimePoint.now(), new MillisecondsDurationImpl(mTimeOffset.getValue() * 60 * 1000), race.getId());
-            break;
+            case R.id.set_start_time_relative:
+                changeFragment(MillisecondsTimePoint.now(), new MillisecondsDurationImpl(mTimeOffset.getValue() * 60 * 1000), identifier);
+                break;
 
-        case R.id.header_text:
-            changeFragment();
-            break;
+            case R.id.header_text:
+                changeFragment();
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -591,7 +713,7 @@ public class StartTimeFragment extends BaseFragment
         changeFragment(startTime, null, null);
     }
 
-    private void changeFragment(TimePoint startTime, Duration startTimeDiff, String raceId) {
+    private void changeFragment(TimePoint startTime, Duration startTimeDiff, SimpleRaceLogIdentifier identifier) {
         int viewId = R.id.racing_view_container;
         TimePoint now = MillisecondsTimePoint.now();
         RaceFragment fragment = MainScheduleFragment.newInstance();
@@ -600,13 +722,11 @@ public class StartTimeFragment extends BaseFragment
         getRaceState().setRacingProcedure(now, procedureType);
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, MODE_SETUP) != MODE_SETUP) {
-                if (startTimeDiff == null && raceId == null) {
+                if (startTimeDiff == null && identifier == null) {
                     // absolute start time
                     getRaceState().forceNewStartTime(now, startTime);
                 } else {
                     // relative start time
-                    Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(raceId);
-                    SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
                     getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier);
                 }
                 fragment = RaceFlagViewerFragment.newInstance();
@@ -615,7 +735,7 @@ public class StartTimeFragment extends BaseFragment
             args.putAll(getArguments());
             args.putSerializable(MainScheduleFragment.START_TIME, startTime);
             args.putSerializable(MainScheduleFragment.START_TIME_DIFF, startTimeDiff);
-            args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, raceId);
+            args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, identifier);
         }
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
