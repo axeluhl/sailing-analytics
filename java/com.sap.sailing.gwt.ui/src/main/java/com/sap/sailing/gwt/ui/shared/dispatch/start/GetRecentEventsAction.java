@@ -17,7 +17,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 public class GetRecentEventsAction implements Action<ListResult<EventQuickfinderDTO>> {
     
     private int limit;
-    private String kabum;
 
     protected GetRecentEventsAction() {
     }
