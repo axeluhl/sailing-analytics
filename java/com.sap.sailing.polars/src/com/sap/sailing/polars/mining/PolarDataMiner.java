@@ -60,7 +60,7 @@ public class PolarDataMiner {
     private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
     private final ThreadPoolExecutor executor = createExecutor();
-    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
+    private final ConcurrentHashMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
     
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
     
@@ -204,14 +204,17 @@ public class PolarDataMiner {
              * (trackedRace.getRace() != null ? trackedRace.getRace().getName() : trackedRace.getRaceIdentifier()
              * .getRaceName()));
              */
-            synchronized (fixesForRacesWhichAreStillLoading) {
-                Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
-                if (fixes == null) {
-                    fixes = new HashSet<>();
-                    fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
+            Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
+            if (fixes == null) {
+                synchronized (fixesForRacesWhichAreStillLoading) {
+                    fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
+                    if (fixes == null) {
+                        fixes = new HashSet<>();
+                        fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
+                    }
                 }
-                fixes.add(fixWithOriginInfo);
             }
+            fixes.add(fixWithOriginInfo);
         } else {
             processFix(trackedRace, fixWithOriginInfo);
         }

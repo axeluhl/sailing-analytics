@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -20,8 +21,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -375,7 +377,7 @@ public class ReplicationServiceImpl implements ReplicationService {
                 removeAsListenerFromReplicables();
                 synchronized (this) {
                     if (masterChannel != null) {
-                        masterChannel.close();
+                        masterChannel.getConnection().close();
                         masterChannel = null;
                     }
                 }
@@ -415,9 +417,8 @@ public class ReplicationServiceImpl implements ReplicationService {
             if (outboundBuffer == null) {
                 outboundBuffer = new ByteArrayOutputStream();
                 outboundBufferReplicableIdAsString = replicaIdAsString;
-                GZIPOutputStream zipper = new GZIPOutputStream(outboundBuffer);
-                new DataOutputStream(zipper).writeUTF(replicaIdAsString);
-                outboundObjectBuffer = new ObjectOutputStream(zipper);
+                ObjectOutputStream compressingObjectOutputStream = createCompressingObjectOutputStream(replicaIdAsString, outboundBuffer);
+                outboundObjectBuffer = compressingObjectOutputStream;
                 outboundBufferClasses = new ArrayList<>();
             }
             outboundObjectBuffer.writeObject(serializedOperation);
@@ -449,6 +450,17 @@ public class ReplicationServiceImpl implements ReplicationService {
                         + outboundBufferClasses.size());
             }
         }
+    }
+
+    private static ObjectOutputStream createCompressingObjectOutputStream(final String replicaIdAsString, OutputStream streamToWrap) throws IOException {
+        LZ4BlockOutputStream zipper = new LZ4BlockOutputStream(streamToWrap);
+        new DataOutputStream(zipper).writeUTF(replicaIdAsString);
+        ObjectOutputStream compressingObjectOutputStream = new ObjectOutputStream(zipper);
+        return compressingObjectOutputStream;
+    }
+    
+    static InputStream createUncompressingInputStream(InputStream streamToWrap) {
+        return new LZ4BlockInputStream(streamToWrap);
     }
 
     /**
@@ -583,18 +595,23 @@ public class ReplicationServiceImpl implements ReplicationService {
             initialLoadChannels.put(master, new InitialLoadRequest(channel, replicables, queueName));
             final RabbitInputStreamProvider rabbitInputStreamProvider = new RabbitInputStreamProvider(channel, queueName);
             try {
-                final GZIPInputStream gzipInputStream = new GZIPInputStream(rabbitInputStreamProvider.getInputStream());
+                final LZ4BlockInputStream uncompressingInputStream = new LZ4BlockInputStream(rabbitInputStreamProvider.getInputStream());
                 for (Replicable<?, ?> replicable : replicables) { // absolutely make sure to use the same sequence of
                                                                   // replicables as for URL (bug 3015)
                     logger.info("Starting to receive initial load for " + replicable.getId());
                     try {
-                        replicable.initiallyFillFrom(gzipInputStream);
+                        replicable.initiallyFillFrom(uncompressingInputStream);
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Exception trying to reveice initial load for " + replicable.getId(), e);
                         throw e;
                     }
                     logger.info("Done receiving initial load for " + replicable.getId());
                 }
+            } catch (Throwable e) {
+                logger.log(Level.SEVERE, "Error while receiving initial load from "+master+". Cleaning up.", e);
+                deregisterReplicaWithMaster(master);
+                replicator.stop(/* applyQueuedMessages */ false);
+                throw e;
             } finally {
                 logger.info("Closing channel " + channel + "'s connection " + channel.getConnection());
                 channel.getConnection().close();
@@ -634,6 +651,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         try {
             URL replicationDeRegistrationRequestURL = master
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
+            logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
             final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
             deregistrationRequestConnection.connect();
             StringBuilder uuid = new StringBuilder();
@@ -646,6 +664,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             }
             content.close();
             for (Replicable<?, ?> r : getReplicables()) {
+                logger.info("Telling replicable "+r+" that it no longer replicates from master "+master);
                 r.stoppedReplicatingFrom(master);
             }
         } catch (Exception ex) {
@@ -707,7 +726,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             }
             synchronized (replicaUUIDs) {
                 if (replicator != null) {
-                    replicator.stop();
+                    replicator.stop(/* applyQueuedMessages */ true);
                     deregisterReplicaWithMaster(descriptor);
                     replicatingFromMaster = null;
                     replicaUUIDs.clear();

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.zip.GZIPInputStream;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
@@ -173,11 +173,11 @@ public class ReplicationReceiver implements Runnable {
                 checksPerformed = 0;
                 // Set the replicable's class's class loader as context for deserialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
-                final GZIPInputStream uncompressedInputStream = new GZIPInputStream(new ByteArrayInputStream(bytesFromMessage));
-                String replicableIdAsString = new DataInputStream(uncompressedInputStream).readUTF();
+                final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
+                String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
-                    ObjectInputStream ois = new ObjectInputStream(uncompressedInputStream); // no special stream required; only reading a generic byte[]
+                    ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
                     int operationsInMessage = 0;
                     try {
                         while (true) {
@@ -295,12 +295,6 @@ public class ReplicationReceiver implements Runnable {
         }
     }
 
-    private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, String replicableIdAsString) {
-        @SuppressWarnings("unchecked")
-        Replicable<S, O> replicable = (Replicable<S, O>) replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
-        apply(operation, replicable);
-    }
-    
     private synchronized <S, O extends OperationWithResult<S, ?>> void apply(final OperationWithResult<S, ?> operation, Replicable<S, O> replicable) {
         Runnable runnable = () -> replicable.applyReceivedReplicated(operation);
         if (operation.requiresSynchronousExecution()) {
@@ -332,7 +326,9 @@ public class ReplicationReceiver implements Runnable {
     }
     
     private void applyQueues(boolean resumeWhenDone) {
+        logger.info("Applying queued replication messages received");
         for (Entry<String, LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>>> r : queueByReplicableIdAsString.entrySet()) {
+            Replicable<?, ?> replicable = replicableProvider.getReplicable(r.getKey(), /* wait */ false);
             final LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue = r.getValue();
             boolean queueEmpty = false;
             Pair<String, OperationWithResult<?, ?>> replicableIdAsStringAndOperation;
@@ -345,11 +341,13 @@ public class ReplicationReceiver implements Runnable {
                         notifyAll();
                     }
                 }
-                try {
-                    apply(replicableIdAsStringAndOperation.getB(), replicableIdAsStringAndOperation.getA());
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error applying queued, replicated operation "
-                            + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
+                if (replicableIdAsStringAndOperation != null) {
+                    try {
+                        applyWithCast(replicableIdAsStringAndOperation.getB(), replicable);
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Error applying queued, replicated operation "
+                                + replicableIdAsStringAndOperation + ". Continuing with next queued operation.", e);
+                    }
                 }
             } while (!queueEmpty);
             assert queue.isEmpty();
@@ -360,14 +358,28 @@ public class ReplicationReceiver implements Runnable {
         notifyAll();
     }
 
+    @SuppressWarnings("unchecked")
+    private <S, O extends OperationWithResult<S, ?>> void applyWithCast(OperationWithResult<?, ?> operation, Replicable<?, ?> replicable) {
+        OperationWithResult<S, ?> castOperation = (OperationWithResult<S, ?>) operation;
+        Replicable<S, O> castReplicable = (Replicable<S, O>) replicable;
+        apply(castOperation, castReplicable);
+    }
+
     public synchronized boolean isSuspended() {
         return suspended;
     }
     
-    public synchronized void stop() {
-        if (isSuspended()) {
-            /* make sure to apply everything in queue before stopping this thread */
-            applyQueues(/* resumeWhenDone */ false);
+    public synchronized void stop(boolean applyQueuedMessages) {
+        if (applyQueuedMessages) {
+            if (isSuspended()) {
+                /* make sure to apply everything in queue before stopping this thread */
+                applyQueues(/* resumeWhenDone */ false);
+            }
+        } else {
+            logger.info("Discarding queued replication messages received");
+            for (LinkedBlockingQueue<Pair<String, OperationWithResult<?, ?>>> queue : queueByReplicableIdAsString.values()) {
+                queue.clear(); // discard queue contents if they shall not be applied
+            }
         }
         logger.info("Signaled Replicator thread to stop asap.");
         stopped = true;

@@ -10,7 +10,7 @@ import com.rabbitmq.client.Channel;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ApproximateTime;
 
 /**
  * Output stream that can split its contents into messages for RabbitMQ. This stream creates a RabbitMQ queue and sends
@@ -61,12 +61,12 @@ public class RabbitOutputStream extends OutputStream {
                     while (!closed) {
                         synchronized (RabbitOutputStream.this) {
                             if (timeLastDataHasBeenReceived != null) {
-                                TimePoint now = MillisecondsTimePoint.now();
+                                TimePoint approximateNow = ApproximateTime.approximateNow();
                                 // FIXME the timing should better be managed by a Timer instance with delays based on last send and wake-up / test time point
-                                if (timeLastDataHasBeenReceived.until(now).compareTo(DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS) > 0) {
+                                if (timeLastDataHasBeenReceived.until(approximateNow).compareTo(DURATION_AFTER_TO_SYNC_DATA_TO_CHANNEL_AS_MILLIS) > 0) {
                                     try {
                                         sendBuffer();
-                                        timeLastDataHasBeenReceived = MillisecondsTimePoint.now(); // reset time to avoid unnecessary write attempt
+                                        timeLastDataHasBeenReceived = ApproximateTime.approximateNow(); // reset time to avoid unnecessary write attempt
                                     } catch (IOException e) {
                                         logger.log(Level.INFO, "Exception trying to send message. Aborting.", e);
                                         break;
@@ -103,7 +103,7 @@ public class RabbitOutputStream extends OutputStream {
         if (count == streamBuffer.length) {
             sendBuffer();
         }
-        timeLastDataHasBeenReceived = MillisecondsTimePoint.now();
+        timeLastDataHasBeenReceived = ApproximateTime.approximateNow();
     }
 
     @Override
