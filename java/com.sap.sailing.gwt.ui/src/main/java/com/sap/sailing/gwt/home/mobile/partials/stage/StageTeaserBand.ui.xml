@@ -29,7 +29,7 @@
 		.ellipsis {
 			overflow: hidden;
 			white-space: nowrap;
-			text-overflow: ellispsis;
+			text-overflow: ellipsis;
 				
 		}
 	</ui:style>
