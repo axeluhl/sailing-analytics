@@ -22,11 +22,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -34,6 +35,8 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sse.common.Util;
 
 public class ServerReplicationTest extends AbstractServerReplicationTest {
+    private static final String LEADERBOARDNAME = "TESTLEADERBOARD";
+
     @Test
     public void testBasicInitialLoad() throws Exception {
         assertNotSame(master, replica);
@@ -63,15 +66,18 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testLeaderboardRemovalReplication() throws InterruptedException {
-        final String leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
-        assertNotNull(replica.getLeaderboardByName(leaderboardName));
-        assertNotNull(master.getLeaderboardByName(leaderboardName));
-        RemoveLeaderboard removeDefaultLeaderboard = new RemoveLeaderboard(leaderboardName);
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME,null, new int[] { 5 },
+                new LowPoint(), null);
+        master.apply(addLeaderboardOp);
+        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
+        assertNotNull(replica.getLeaderboardByName(LEADERBOARDNAME));
+        assertNotNull(master.getLeaderboardByName(LEADERBOARDNAME));
+        RemoveLeaderboard removeDefaultLeaderboard = new RemoveLeaderboard(LEADERBOARDNAME);
         master.apply(removeDefaultLeaderboard);
-        final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
+        final Leaderboard masterLeaderboard = master.getLeaderboardByName(LEADERBOARDNAME);
         assertNull(masterLeaderboard);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
-        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(LEADERBOARDNAME);
         assertNull(replicaLeaderboard);
     }
 

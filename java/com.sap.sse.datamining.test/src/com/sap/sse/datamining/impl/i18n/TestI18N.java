@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -12,9 +13,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
-import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
 public class TestI18N {
 
@@ -42,22 +44,37 @@ public class TestI18N {
     
     @Test
     public void testDynamicCompoundStringMessages() {
-        CompoundResourceBundleStringMessages compoundStringMessages = new CompoundResourceBundleStringMessages();
+        ModifiableDataMiningServer server = TestsUtil.createNewServer();
         
         try {
-            compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
+            server.getStringMessages().get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
             fail("There shouldn't be a string message in an empty compound string messages");
         } catch (MissingResourceException e) { }
 
-        assertThat(compoundStringMessages.addStringMessages(testStringMessages), is(true));
-        assertThat(compoundStringMessages.addStringMessages(testStringMessages), is(false));
-        assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
-        assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
+        Date beforeChange = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.addStringMessages(testStringMessages);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(true));
+        
+        beforeChange = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.addStringMessages(testStringMessages);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(false));
+        
+        assertThat(server.getStringMessages().get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
+        assertThat(server.getStringMessages().get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
 
-        assertThat(compoundStringMessages.removeStringMessages(testStringMessages), is(true));
-        assertThat(compoundStringMessages.removeStringMessages(testStringMessages), is(false));
+        beforeChange = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.removeStringMessages(testStringMessages);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(true));
+
+        beforeChange = new Date();
+        ConcurrencyTestsUtil.sleepFor(10);
+        server.removeStringMessages(testStringMessages);
+        assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(false));
         try {
-            compoundStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
+            server.getStringMessages().get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY);
             fail("There shouldn't be a string message in an empty compound string messages");
         } catch (MissingResourceException e) { }
     }

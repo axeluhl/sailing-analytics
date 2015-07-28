@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
+import com.sap.sse.common.Duration;
 
 public class GetRegattaWithProgressAction implements Action<ResultWithTTL<RegattaWithProgressDTO>> {
 
@@ -25,7 +26,7 @@ public class GetRegattaWithProgressAction implements Action<ResultWithTTL<Regatt
     @Override
     @GwtIncompatible
     public ResultWithTTL<RegattaWithProgressDTO> execute(DispatchContext context) {
-        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 5 * 60 * 1000),
-                EventActionUtil.getLeaderboardContext(context, eventId, regattaId).getRegattaWithProgress(context));
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, Duration.ONE_MINUTE.times(5)),
+                EventActionUtil.getLeaderboardContext(context, eventId, regattaId).getRegattaWithProgress());
     }
 }

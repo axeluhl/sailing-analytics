@@ -308,7 +308,14 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         String url = "RegattaOverview.html?ignoreLocalSettings=true&onlyrunningraces=false&event=" + getCtx().getEventId();
         url += "&onlyracesofsameday=" + getCtx().getEventDTO().isRunning();
         if(showRegattaMetadata()) {
-            url += "&regatta=" + getCtx().getRegattaId();
+            if(getRegattaMetadata().isFlexibleLeaderboard()) {
+                String defaultCourseAreaId = getRegattaMetadata().getDefaultCourseAreaId();
+                if(defaultCourseAreaId != null && !defaultCourseAreaId.isEmpty()) {
+                    url += "&coursearea=" + defaultCourseAreaId;
+                }
+            } else {
+                url += "&regatta=" + getCtx().getRegattaId();
+            }
         }
         return url;
     }
@@ -318,9 +325,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if(showRegattaMetadata()) {
             if(ctx.getRegatta().getState() == RegattaState.RUNNING) {
                 return true;
-            }
-            if(ctx.getRegatta().getState() != RegattaState.UNKNOWN) {
-                return false;
             }
         }
         return ctx.getEventDTO().getState() == EventState.RUNNING;
