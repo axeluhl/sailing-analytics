@@ -518,4 +518,20 @@ public final class HomeServiceUtil {
     private static URL getBaseURL(URL url) throws MalformedURLException {
         return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
     }
+
+    public static boolean hasRegattaData(EventBase event) {
+        for (LeaderboardGroupBase leaderboardGroupBase : event.getLeaderboardGroups()) {
+            if(leaderboardGroupBase instanceof LeaderboardGroup) {
+                // for events that are locally available, we can see if there are any leaderboards
+                LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
+                if(!Util.isEmpty(leaderboardGroup.getLeaderboards())) {
+                    return true;
+                }
+            } else {
+                // we can't know if the event has leaderboards but the existence of a leaderboard group is a good sign for that
+                return true;
+            }
+        }
+        return false;
+    }
 }

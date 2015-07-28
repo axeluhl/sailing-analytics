@@ -24,7 +24,11 @@ public class EventStageCandidateCalculator implements EventVisitor {
             featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.RUNNING, holder));
         } else if (event.getStartDate().after(now) &&
                 event.getStartDate().before(now.plus(Duration.ONE_WEEK.times(4)))) {
-            featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
+            // This ensures that no events appear on the stage that do not have their leaderboards configured
+            // as the event page only shows a placeholder message in this stage
+            if(HomeServiceUtil.hasRegattaData(event)) {
+                featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
+            }
         } else if (event.getEndDate().before(now) &&
                 event.getEndDate().after(now.minus(Duration.ONE_YEAR))) {
             featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.POPULAR, holder));
