@@ -146,7 +146,7 @@
   clear: both;
 }
 .stage_teasers {
-  height: 38.666666666666664em;
+  height: 18em;
   width: 100%;
 }
 .stage_controls {
