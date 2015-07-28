@@ -2,12 +2,14 @@ package com.sap.sailing.gwt.ui.shared.dispatch.start;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.TimePoint;
 
 public class EventQuickfinderDTO extends EventReferenceDTO implements DTO, Comparable<EventQuickfinderDTO> {
     private String baseURL;
     private boolean isOnRemoteServer;
     private TimePoint startTimePoint;
+    private EventState state;
 
     public String getBaseURL() {
         return baseURL;
@@ -32,9 +34,31 @@ public class EventQuickfinderDTO extends EventReferenceDTO implements DTO, Compa
     public void setStartTimePoint(TimePoint startTimePoint) {
         this.startTimePoint = startTimePoint;
     }
+
+    public EventState getState() {
+        return state;
+    }
+
+    public void setState(EventState state) {
+        this.state = state;
+    }
     
     @Override
     public int compareTo(EventQuickfinderDTO o) {
+        if(state != o.state) {
+            if(state == EventState.RUNNING) {
+                return -1;
+            }
+            if(o.state == EventState.RUNNING) {
+                return 1;
+            }
+            if(state == EventState.UPCOMING || state == EventState.PLANNED) {
+                return -1;
+            }
+            if(o.state == EventState.UPCOMING || o.state == EventState.PLANNED) {
+                return 1;
+            }
+        }
         return -startTimePoint.compareTo(o.startTimePoint);
     }
 }

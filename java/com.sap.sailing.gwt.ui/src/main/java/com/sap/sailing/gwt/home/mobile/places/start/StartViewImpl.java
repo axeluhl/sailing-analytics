@@ -14,9 +14,8 @@ import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartViewImpl extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -49,13 +48,15 @@ public class StartViewImpl extends Composite implements StartView {
         // TODO change message: recent events
         quickFinderUi.addPlaceholderItem(i18n.events());
         
-        TimePoint now = MillisecondsTimePoint.now();
         for (EventQuickfinderDTO event : events) {
             String group;
-            if(now.before(event.getStartTimePoint())) {
-                group = TextMessages.INSTANCE.seriesHeaderUpcoming();
-            } else {
+            EventState state = event.getState();
+            if(state == EventState.FINISHED) {
                 group = TextMessages.INSTANCE.searchResultSortNewest();
+            } else if(state == EventState.RUNNING) {
+                group = TextMessages.INSTANCE.live();
+            } else {
+                group = TextMessages.INSTANCE.seriesHeaderUpcoming();
             }
             PlaceNavigation<?> eventPlaceNavigation = currentPresenter.getEventNavigation(event);
             quickFinderUi.addItemToGroup(group, event.getDisplayName(), eventPlaceNavigation);

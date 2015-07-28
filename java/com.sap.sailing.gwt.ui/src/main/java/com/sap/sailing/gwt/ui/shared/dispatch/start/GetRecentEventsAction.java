@@ -27,7 +27,6 @@ public class GetRecentEventsAction implements Action<ListResult<EventQuickfinder
     
     @GwtIncompatible
     public ListResult<EventQuickfinderDTO> execute(final DispatchContext context) throws MalformedURLException {
-
         final SortedSet<EventQuickfinderDTO> events = new TreeSet<>();
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), new EventVisitor() {
             @Override
@@ -38,6 +37,7 @@ public class GetRecentEventsAction implements Action<ListResult<EventQuickfinder
                 dto.setOnRemoteServer(onRemoteServer);
                 dto.setBaseURL(baseURL == null ? null : baseURL.toString());
                 dto.setStartTimePoint(event.getStartDate());
+                dto.setState(HomeServiceUtil.calculateEventState(event));
                 events.add(dto);
             }
         });
