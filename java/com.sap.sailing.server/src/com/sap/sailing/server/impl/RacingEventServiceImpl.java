@@ -3225,7 +3225,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        if (this.polarDataService == null) {
+        if (this.polarDataService == null && service != null) {
             polarDataService = service;
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);

@@ -747,7 +747,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             removeAsListenerFromReplicables();
             synchronized (this) {
                 if (masterChannel != null) {
-                    masterChannel.close();
+                    masterChannel.getConnection().close();
                     masterChannel = null;
                 }
             }
