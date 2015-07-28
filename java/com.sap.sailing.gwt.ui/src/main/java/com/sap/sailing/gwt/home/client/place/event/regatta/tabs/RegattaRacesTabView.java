@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.NEVER;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -233,17 +238,17 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         @Override
         protected void setTableData(Collection<RaceListRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
-            this.fleetCornerColumn.setShowDetails(hasFleets);
-            this.fleetNameColumn.setShowDetails(hasFleets);
+            this.fleetCornerColumn.setColumnVisibility(hasFleets ? ALWAYS : NEVER);
+            this.fleetNameColumn.setColumnVisibility(hasFleets ? LARGE : NEVER);
             this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
-            this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
+            this.durationColumn.setColumnVisibility(RaceListDataUtil.hasDurations(data) ? LARGE : NEVER);
             boolean hasWind = RaceListDataUtil.hasWind(data);
-            this.windSpeedColumn.setShowDetails(hasWind);
-            this.windDirectionColumn.setShowDetails(hasWind);
-            this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
-            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
-            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
-            this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
+            this.windSpeedColumn.setColumnVisibility(hasWind ? ALWAYS : NEVER);
+            this.windDirectionColumn.setColumnVisibility(hasWind ? MEDIUM : NEVER);
+            this.windSourcesCountColumn.setColumnVisibility(RaceListDataUtil.hasWindSources(data) ? LARGE : NEVER);
+            this.videoCountColumn.setColumnVisibility(RaceListDataUtil.hasVideos(data) ? LARGE : NEVER);
+            this.audioCountColumn.setColumnVisibility(RaceListDataUtil.hasAudios(data) ? LARGE : NEVER);
+            this.winnerColumn.setColumnVisibility(RaceListDataUtil.hasWinner(data) ? ALWAYS : NEVER);
             super.setTableData(data);
         }
 

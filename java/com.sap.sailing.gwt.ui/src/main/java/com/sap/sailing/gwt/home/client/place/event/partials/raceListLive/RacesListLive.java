@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
+import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.NEVER;
+
 import java.util.Collection;
 
 import com.google.gwt.dom.client.Style.Display;
@@ -41,20 +46,20 @@ public class RacesListLive extends Composite {
 
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
             super(presenter);
-            this.regattaNameColumn.setShowDetails(showRegattaDetails);
+            this.regattaNameColumn.setColumnVisibility(showRegattaDetails ? ALWAYS : NEVER);
         }
         
         @Override
         protected void setTableData(Collection<LiveRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
-            this.fleetCornerColumn.setShowDetails(hasFleets);
-            this.fleetNameColumn.setShowDetails(hasFleets);
+            this.fleetCornerColumn.setColumnVisibility(hasFleets ? ALWAYS : NEVER);
+            this.fleetNameColumn.setColumnVisibility(hasFleets ? LARGE : NEVER);
             this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
-            this.courseAreaColumn.setShowDetails(RaceListDataUtil.hasCourseAreas(data));
-            this.courseColumn.setShowDetails(RaceListDataUtil.hasCourses(data));
+            this.courseAreaColumn.setColumnVisibility(RaceListDataUtil.hasCourseAreas(data) ? LARGE : NEVER);
+            this.courseColumn.setColumnVisibility(RaceListDataUtil.hasCourses(data) ? LARGE : NEVER);
             boolean hasWind = RaceListDataUtil.hasWind(data);
-            this.windSpeedColumn.setShowDetails(hasWind);
-            this.windDirectionColumn.setShowDetails(hasWind);
+            this.windSpeedColumn.setColumnVisibility(hasWind ? ALWAYS : NEVER);
+            this.windDirectionColumn.setColumnVisibility(hasWind ? MEDIUM : NEVER);
             super.setTableData(data);
         }
 

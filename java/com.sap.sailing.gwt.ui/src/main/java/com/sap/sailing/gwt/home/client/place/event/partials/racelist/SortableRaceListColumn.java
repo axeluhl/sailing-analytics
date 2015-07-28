@@ -6,26 +6,57 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 
 public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> {
     
+    public enum ColumnVisibility {
+        ALWAYS {
+            @Override
+            protected String getAdditionalStyle() {
+                return "";
+            }
+        }, LARGE {
+            @Override
+            protected String getAdditionalStyle() {
+                return SharedResources.INSTANCE.mediaCss().showonlarge();
+            }
+        }, MEDIUM {
+            @Override
+            protected String getAdditionalStyle() {
+                return SharedResources.INSTANCE.mediaCss().hideonsmall();
+            }
+        }, NEVER {
+            @Override
+            protected String getAdditionalStyle() {
+                return RacesListLiveResources.INSTANCE.css().racesListHideColumn();
+            }
+        };
+        
+        protected abstract String getAdditionalStyle();
+    }
+    
     private final Header<?> header;
     private final InvertibleComparator<T> comparator;
-    
-    private boolean showDetails = true;
+    private ColumnVisibility columnVisibility = ColumnVisibility.ALWAYS;
 
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
         this(new WrappedTextHeader(headerText), cell, comparator);
+    }
+    
+    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, ColumnVisibility columnVisibility) {
+        this(new WrappedTextHeader(headerText), cell, comparator);
+        this.columnVisibility = columnVisibility;
     }
     
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
         this(new WrappedTextHeader(headerText), cell, comparator, preferredSortingOrder);
     }
     
-    protected SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
+    private SortableRaceListColumn(Header<?> header, Cell<C> cell, InvertibleComparator<T> comparator) {
         this(header, cell, comparator, SortingOrder.ASCENDING);
     }
     
@@ -45,33 +76,22 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
         return header;
     }
     
-    public void setShowDetails(boolean showDetails) {
-        this.showDetails = showDetails;
-    }
-    
-    public boolean isShowDetails() {
-        return showDetails;
+    public void setColumnVisibility(ColumnVisibility columnVisibility) {
+        this.columnVisibility = columnVisibility;
     }
     
     protected final String getStyleNamesString(String... styleNames) {
         return Util.join(" ", styleNames);
     }
     
-    private static final String COLUMN_HIDDEN_STYLE = RacesListLiveResources.INSTANCE.css().racesListHideColumn();
-    
     protected final String getCurrentHeaderStyle() {
-        return getShowOrHiddenStyle(getHeaderStyle());
+        return getStyleNamesString(getHeaderStyle(), columnVisibility.getAdditionalStyle());
     }
     
     protected final String getCurrentColumnStyle() {
-        return getShowOrHiddenStyle(getColumnStyle());
+        return getStyleNamesString(getColumnStyle(), columnVisibility.getAdditionalStyle());
     }
-    
-    private String getShowOrHiddenStyle(String showStyle) {
-        showStyle = showStyle == null ? "" : showStyle;
-        return showDetails ? showStyle : getStyleNamesString(showStyle, COLUMN_HIDDEN_STYLE);
-    }
-    
+        
     private static class WrappedTextHeader extends SafeHtmlHeader {
         public WrappedTextHeader(String headerText) {
             super(SafeHtmlUtils.fromTrustedString("<div>" + headerText + "</div>"));
