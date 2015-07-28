@@ -35,13 +35,14 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     protected final SortableRaceListStartTimeColumn<T> startTimeColumn = RaceListColumnFactory.getStartTimeColumn();
     protected final SortableRaceListColumn<T, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
     protected final SortableRaceListColumn<T, ?> raceViewerButtonColumn;
-    
-    private SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
+    protected final RaceListColumnSet columnSet;
+    private final SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
     private boolean tableColumnsInitialized = false;
     
-    protected AbstractRaceList(EventView.Presenter presenter) {
+    protected AbstractRaceList(EventView.Presenter presenter, RaceListColumnSet columnSet) {
         CSS.ensureInjected();
         this.raceViewerButtonColumn = RaceListColumnFactory.getRaceViewerButtonColumn(presenter);
+        this.columnSet = columnSet;
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
         this.initWidget(cellTableContainer);
@@ -49,7 +50,11 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
 
     protected void setTableData(Collection<T> data) {
         this.ensureInitTableColumns();
-        this.updateColumnVisibility();
+        this.columnSet.updateColumnVisibilities();
+        for (int i = 0; i < this.cellTable.getColumnCount(); i++) {
+            SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) this.cellTable.getColumn(i);
+            column.updateHeaderAndCellStyles();
+        }
         this.cellTable.setPageSize(data.size());
         this.cellTable.setList(data);
         this.restoreColumnSortInfos();
@@ -73,17 +78,6 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     }
     
     protected abstract void initTableColumns();
-    
-    private void updateColumnVisibility() {
-        for (int i = 0; i < this.cellTable.getColumnCount(); i++) {
-            SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) this.cellTable.getColumn(i);
-            Header<?> header = column.getHeader();
-            if (header != null) {
-                header.setHeaderStyleNames(column.getCurrentHeaderStyle());
-            }
-            column.setCellStyleNames(column.getCurrentColumnStyle());
-        }
-    }
     
     @SuppressWarnings("unchecked")
     private void restoreColumnSortInfos() {

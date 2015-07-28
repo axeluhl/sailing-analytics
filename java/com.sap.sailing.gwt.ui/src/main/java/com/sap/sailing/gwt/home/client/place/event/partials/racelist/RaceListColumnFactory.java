@@ -28,7 +28,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
-import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -166,7 +165,7 @@ public class RaceListColumnFactory {
                 return object.getFleet() != null ? object.getFleet().getFleetName() : null;
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.fleet(), cell, comparator, ColumnVisibility.LARGE) {
+        return new SortableRaceListColumn<T, String>(I18N.fleet(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -202,7 +201,7 @@ public class RaceListColumnFactory {
                 return object.getDuration();
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.durationPlain(), cell, comparator, ColumnVisibility.LARGE) {
+        return new SortableRaceListColumn<T, String>(I18N.durationPlain(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -305,7 +304,7 @@ public class RaceListColumnFactory {
                 return object.getWind() != null ? object.getWind().getTrueWindFromDeg() : null;
             }
         };
-        return new SortableRaceListColumn<T, AbstractWindDTO>(I18N.from(), cell, comparator, ColumnVisibility.MEDIUM) {
+        return new SortableRaceListColumn<T, AbstractWindDTO>(I18N.from(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -331,7 +330,7 @@ public class RaceListColumnFactory {
                 return object.getCourseArea();
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.courseArea(), cell, comparator, ColumnVisibility.LARGE) {
+        return new SortableRaceListColumn<T, String>(I18N.courseArea(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -357,7 +356,7 @@ public class RaceListColumnFactory {
                 return object.getCourse();
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.course(), cell, comparator, ColumnVisibility.LARGE) {
+        return new SortableRaceListColumn<T, String>(I18N.course(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -612,7 +611,6 @@ public class RaceListColumnFactory {
                     }
                 }
             }, comparator, SortingOrder.DESCENDING);
-            setColumnVisibility(ColumnVisibility.LARGE);
         }
 
         @Override

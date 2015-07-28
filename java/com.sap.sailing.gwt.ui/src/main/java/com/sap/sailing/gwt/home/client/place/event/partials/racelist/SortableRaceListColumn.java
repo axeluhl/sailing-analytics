@@ -13,7 +13,7 @@ import com.sap.sse.common.Util;
 
 public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> {
     
-    public enum ColumnVisibility {
+    enum ColumnVisibility {
         ALWAYS {
             @Override
             protected String getAdditionalStyle() {
@@ -29,27 +29,17 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
             protected String getAdditionalStyle() {
                 return SharedResources.INSTANCE.mediaCss().hideonsmall();
             }
-        }, NEVER {
-            @Override
-            protected String getAdditionalStyle() {
-                return RacesListLiveResources.INSTANCE.css().racesListHideColumn();
-            }
         };
-        
         protected abstract String getAdditionalStyle();
     }
     
     private final Header<?> header;
     private final InvertibleComparator<T> comparator;
+    private boolean showDetails = true;
     private ColumnVisibility columnVisibility = ColumnVisibility.ALWAYS;
 
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator) {
         this(new WrappedTextHeader(headerText), cell, comparator);
-    }
-    
-    protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, ColumnVisibility columnVisibility) {
-        this(new WrappedTextHeader(headerText), cell, comparator);
-        this.columnVisibility = columnVisibility;
     }
     
     protected SortableRaceListColumn(String headerText, Cell<C> cell, InvertibleComparator<T> comparator, SortingOrder preferredSortingOrder) {
@@ -76,20 +66,32 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
         return header;
     }
     
-    public void setColumnVisibility(ColumnVisibility columnVisibility) {
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
+    }
+    
+    boolean isShowDetails() {
+        return showDetails;
+    }
+
+    void setColumnVisibility(ColumnVisibility columnVisibility) {
         this.columnVisibility = columnVisibility;
+    }
+    
+    void updateHeaderAndCellStyles() {
+        if (header != null) {
+            header.setHeaderStyleNames(getCurrentStyle(getHeaderStyle()));
+        }
+        setCellStyleNames(getCurrentStyle(getColumnStyle()));
     }
     
     protected final String getStyleNamesString(String... styleNames) {
         return Util.join(" ", styleNames);
     }
     
-    protected final String getCurrentHeaderStyle() {
-        return getStyleNamesString(getHeaderStyle(), columnVisibility.getAdditionalStyle());
-    }
-    
-    protected final String getCurrentColumnStyle() {
-        return getStyleNamesString(getColumnStyle(), columnVisibility.getAdditionalStyle());
+    private String getCurrentStyle(String baseStyle) {
+        return getStyleNamesString(baseStyle, isShowDetails() ? columnVisibility.getAdditionalStyle()
+                : RacesListLiveResources.INSTANCE.css().racesListHideColumn());
     }
         
     private static class WrappedTextHeader extends SafeHtmlHeader {

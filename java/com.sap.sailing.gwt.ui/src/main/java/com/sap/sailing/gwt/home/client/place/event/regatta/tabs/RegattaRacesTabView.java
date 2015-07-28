@@ -1,10 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.NEVER;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +31,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.Mul
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnSet;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
@@ -232,23 +228,23 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter);
+            super(presenter, new RaceListColumnSet(1, 1));
         }
         
         @Override
         protected void setTableData(Collection<RaceListRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
-            this.fleetCornerColumn.setColumnVisibility(hasFleets ? ALWAYS : NEVER);
-            this.fleetNameColumn.setColumnVisibility(hasFleets ? LARGE : NEVER);
+            this.fleetCornerColumn.setShowDetails(hasFleets);
+            this.fleetNameColumn.setShowDetails(hasFleets);
             this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
-            this.durationColumn.setColumnVisibility(RaceListDataUtil.hasDurations(data) ? LARGE : NEVER);
+            this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
             boolean hasWind = RaceListDataUtil.hasWind(data);
-            this.windSpeedColumn.setColumnVisibility(hasWind ? ALWAYS : NEVER);
-            this.windDirectionColumn.setColumnVisibility(hasWind ? MEDIUM : NEVER);
-            this.windSourcesCountColumn.setColumnVisibility(RaceListDataUtil.hasWindSources(data) ? LARGE : NEVER);
-            this.videoCountColumn.setColumnVisibility(RaceListDataUtil.hasVideos(data) ? LARGE : NEVER);
-            this.audioCountColumn.setColumnVisibility(RaceListDataUtil.hasAudios(data) ? LARGE : NEVER);
-            this.winnerColumn.setColumnVisibility(RaceListDataUtil.hasWinner(data) ? ALWAYS : NEVER);
+            this.windSpeedColumn.setShowDetails(hasWind);
+            this.windDirectionColumn.setShowDetails(hasWind);
+            this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
+            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
+            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
+            this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
             super.setTableData(data);
         }
 
@@ -266,6 +262,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(audioCountColumn);
             add(winnerColumn);
             add(raceViewerButtonColumn);
+            
+            columnSet.addColumn(windSpeedColumn);
+            columnSet.addColumn(windDirectionColumn);
+            columnSet.addColumn(durationColumn);
+            columnSet.addColumn(windSourcesCountColumn);
+            columnSet.addColumn(videoCountColumn);
+            columnSet.addColumn(audioCountColumn);
+            columnSet.addColumn(fleetNameColumn);
         }
     }
 

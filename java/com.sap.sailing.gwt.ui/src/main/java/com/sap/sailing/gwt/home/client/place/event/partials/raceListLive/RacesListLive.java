@@ -1,10 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
 
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.NEVER;
-
 import java.util.Collection;
 
 import com.google.gwt.dom.client.Style.Display;
@@ -12,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnSet;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
@@ -43,23 +39,24 @@ public class RacesListLive extends Composite {
         private final SortableRaceListColumn<LiveRaceDTO, ?> courseAreaColumn = RaceListColumnFactory.getCourseAreaColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> courseColumn = RaceListColumnFactory.getCourseColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> raceViewStateColumn = RaceListColumnFactory.getRaceViewStateColumn();
-
+        
         public RaceListLiveRaces(EventView.Presenter presenter, boolean showRegattaDetails) {
-            super(presenter);
-            this.regattaNameColumn.setColumnVisibility(showRegattaDetails ? ALWAYS : NEVER);
+            super(presenter, new RaceListColumnSet(1, 1));
+            this.regattaNameColumn.setShowDetails(showRegattaDetails);
         }
         
         @Override
         protected void setTableData(Collection<LiveRaceDTO> data) {
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
-            this.fleetCornerColumn.setColumnVisibility(hasFleets ? ALWAYS : NEVER);
-            this.fleetNameColumn.setColumnVisibility(hasFleets ? LARGE : NEVER);
+            this.fleetCornerColumn.setShowDetails(hasFleets);
+            this.fleetNameColumn.setShowDetails(hasFleets);
             this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
-            this.courseAreaColumn.setColumnVisibility(RaceListDataUtil.hasCourseAreas(data) ? LARGE : NEVER);
-            this.courseColumn.setColumnVisibility(RaceListDataUtil.hasCourses(data) ? LARGE : NEVER);
+            this.courseAreaColumn.setShowDetails(RaceListDataUtil.hasCourseAreas(data));
+            this.courseColumn.setShowDetails(RaceListDataUtil.hasCourses(data));
             boolean hasWind = RaceListDataUtil.hasWind(data);
-            this.windSpeedColumn.setColumnVisibility(hasWind ? ALWAYS : NEVER);
-            this.windDirectionColumn.setColumnVisibility(hasWind ? MEDIUM : NEVER);
+            this.windSpeedColumn.setShowDetails(hasWind);
+            this.windDirectionColumn.setShowDetails(hasWind);
+            columnSet.updateColumnVisibilities();
             super.setTableData(data);
         }
 
@@ -77,6 +74,13 @@ public class RacesListLive extends Composite {
             add(courseColumn);
             add(raceViewStateColumn);
             add(raceViewerButtonColumn);
+            
+            columnSet.addColumn(regattaNameColumn);
+            columnSet.addColumn(windSpeedColumn);
+            columnSet.addColumn(windDirectionColumn);
+            columnSet.addColumn(courseAreaColumn);
+            columnSet.addColumn(courseColumn);
+            columnSet.addColumn(fleetNameColumn);
         }
     }
 }
