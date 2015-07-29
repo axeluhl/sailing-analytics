@@ -758,7 +758,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
@@ -858,7 +858,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
@@ -916,7 +916,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;

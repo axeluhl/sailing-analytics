@@ -383,7 +383,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
@@ -452,7 +452,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
 
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
 
         logger.fine("Post issued to " + this.getClass().getName());
         Object requestBody;
@@ -590,7 +590,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONArray array = new JSONArray();
         for (Mark mark : marks) {
-            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            final TimePoint now = MillisecondsTimePoint.now();
             Position lastKnownPosition = getService().getMarkPosition(mark,
                     (LeaderboardThatHasRegattaLike) leaderboard, now,
                     /* raceLog==null means use all race logs */ null);
@@ -660,7 +660,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + markId + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         Position lastKnownPosition = getService().getMarkPosition(mark,
                 (LeaderboardThatHasRegattaLike) leaderboard, now,
                 /* raceLog==null means use all race logs */ null);

@@ -24,7 +24,6 @@ import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
-import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
@@ -55,7 +54,6 @@ public class RaceListColumnFactory {
     
     private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css(); 
     private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
-    private static final MediaCss MEDIA_CSS = SharedResources.INSTANCE.mediaCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
     private static final TextMessages I18N_UBI = TextMessages.INSTANCE;
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
@@ -170,12 +168,12 @@ public class RaceListColumnFactory {
         return new SortableRaceListColumn<T, String>(I18N.fleet(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+                return CSS.raceslist_head_item();
             }
             
             @Override
             public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+                return CSS.race_item();
             }
             
             @Override
@@ -206,12 +204,12 @@ public class RaceListColumnFactory {
         return new SortableRaceListColumn<T, String>(I18N.durationPlain(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+                return CSS.raceslist_head_item();
             }
             
             @Override
             public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+                return CSS.race_item();
             }
             
             @Override
@@ -309,12 +307,12 @@ public class RaceListColumnFactory {
         return new SortableRaceListColumn<T, AbstractWindDTO>(I18N.from(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.hideonsmall());
+                return CSS.raceslist_head_item();
             }
 
             @Override
             public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), CSS.racesListIcon(), MEDIA_CSS.hideonsmall());
+                return getStyleNamesString(CSS.race_item(), CSS.racesListIcon());
             }
 
             @Override
@@ -335,12 +333,12 @@ public class RaceListColumnFactory {
         return new SortableRaceListColumn<T, String>(I18N.courseArea(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+                return CSS.raceslist_head_item();
             }
             
             @Override
             public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+                return CSS.race_item();
             }
             
             @Override
@@ -361,12 +359,12 @@ public class RaceListColumnFactory {
         return new SortableRaceListColumn<T, String>(I18N.course(), cell, comparator) {
             @Override
             public String getHeaderStyle() {
-                return getStyleNamesString(CSS.raceslist_head_item(), MEDIA_CSS.showonlarge());
+                return CSS.raceslist_head_item();
             }
             
             @Override
             public String getColumnStyle() {
-                return getStyleNamesString(CSS.race_item(), MEDIA_CSS.showonlarge());
+                return CSS.race_item();
             }
             
             @Override
@@ -617,12 +615,12 @@ public class RaceListColumnFactory {
 
         @Override
         public String getHeaderStyle() {
-            return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itemcenter(), MEDIA_CSS.showonlarge());
+            return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itemcenter());
         }
         
         @Override
         public String getColumnStyle() {
-            return getStyleNamesString(CSS.race_item(), CSS.race_itemcenter(), MEDIA_CSS.showonlarge());
+            return getStyleNamesString(CSS.race_item(), CSS.race_itemcenter());
         }
     }
 }

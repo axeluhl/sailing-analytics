@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPla
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
@@ -39,7 +40,7 @@ public class MobileActivityMapper implements ActivityMapper {
             return null;
         }
         if (place instanceof StartPlace) {
-            return new EventsActivityProxy(new EventsPlace(), clientFactory);
+            return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
         } else if (place instanceof MiniLeaderboardPlace) {

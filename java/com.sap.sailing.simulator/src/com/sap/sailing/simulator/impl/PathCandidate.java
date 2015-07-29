@@ -45,21 +45,17 @@ public class PathCandidate implements Comparable<PathCandidate> {
     }
 
     @Override
-    // sort descending by time, -#turns, width
+    // sort descending by time, -#turns
     public int compareTo(PathCandidate other) {
-        if (Math.abs(this.pos.getTimePoint().asMillis() - other.pos.getTimePoint().asMillis()) <= 1000) {
-            if (this.trn == other.trn) {
-                if (Math.abs(this.hrz) == Math.abs(other.hrz)) {
+            if (Math.abs(this.pos.getTimePoint().asMillis() - other.pos.getTimePoint().asMillis()) <= 1000) {
+                if (this.trn == other.trn) {
                     return 0;
                 } else {
-                    return (Math.abs(this.hrz) < Math.abs(other.hrz) ? -1 : +1);
+                    return (this.trn < other.trn ? -1 : +1);
                 }
             } else {
-                return (this.trn < other.trn ? -1 : +1);
+                return (this.pos.getTimePoint().asMillis() < other.pos.getTimePoint().asMillis() ? -1 : +1);
             }
-        } else {
-            return (this.pos.getTimePoint().asMillis() < other.pos.getTimePoint().asMillis() ? -1 : +1);            
-        }
     }
 
 }

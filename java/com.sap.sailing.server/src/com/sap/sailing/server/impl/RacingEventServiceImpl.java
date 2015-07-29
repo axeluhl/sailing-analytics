@@ -1905,7 +1905,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
             removeLeaderboard(regattaLeaderboardToRemove.getName());
         }
-        for (RaceDefinition race : regatta.getAllRaces()) {
+        // avoid ConcurrentModificationException by copying the races to remove:
+        Set<RaceDefinition> racesToRemove = new HashSet<>();
+        Util.addAll(regatta.getAllRaces(), racesToRemove);
+        for (RaceDefinition race : racesToRemove) {
             removeRace(regatta, race);
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
             persistentRegattasForRaceIDs.remove(race.getId().toString());
@@ -3222,7 +3225,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        if (this.polarDataService == null) {
+        if (this.polarDataService == null && service != null) {
             polarDataService = service;
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);
