@@ -5,7 +5,14 @@ import java.util.concurrent.TimeUnit;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
@@ -22,6 +29,10 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return trackedRaceContext;
     }
 
+    private TrackedRace getTrackedRace() {
+        return getTrackedRaceContext().getTrackedRace();
+    }
+
     @Override
     public Competitor getCompetitor() {
         return competitor;
@@ -29,17 +40,72 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     
     @Override
     public double getDistanceToStartLineAtStart() {
-        return getTrackedRaceContext().getTrackedRace().getDistanceToStartLine(getCompetitor(), 0).getMeters();
+        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0).getMeters();
     }
     
     @Override
     public Speed getSpeedAtStart() {
-        return getTrackedRaceContext().getTrackedRace().getSpeed(getCompetitor(), 0);
+        return getTrackedRace().getSpeed(getCompetitor(), 0);
     }
     
     @Override
     public Speed getSpeedTenSecondsBeforeStart() {
-        return getTrackedRaceContext().getTrackedRace().getSpeed(getCompetitor(), TimeUnit.SECONDS.toMillis(10));
+        return getTrackedRace().getSpeed(getCompetitor(), TimeUnit.SECONDS.toMillis(10));
+    }
+    
+    @Override
+    public Double getRankAtFirstMark() {
+        Course course = getTrackedRace().getRace().getCourse();
+        Waypoint firstMark = course.getFirstLeg().getTo();
+        Competitor competitor = getCompetitor();
+        return Double.valueOf(getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint()));
+    }
+
+    @Override
+    public Double getNumberOfTacks() {
+        return getNumberOf(ManeuverType.TACK);
+    }
+
+    @Override
+    public Double getNumberOfJibes() {
+        return getNumberOf(ManeuverType.JIBE);
+    }
+
+    @Override
+    public Double getNumberOfPenaltyCircles() {
+        return getNumberOf(ManeuverType.PENALTY_CIRCLE);
+    }
+
+    private Double getNumberOf(ManeuverType maneuverType) {
+        TrackedRace trackedRace = getTrackedRace();
+        double number = 0;
+        for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), trackedRace.getEndOfTracking(), false)) {
+            if (maneuver.getType() == maneuverType) {
+                number++;
+            }
+        }
+        return number;
+    }
+    
+    @Override
+    public Double getRankGainsOrLosses() {
+        Double rankAtFirstMark = getRankAtFirstMark();
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtFirstMark - rankAtFinish;
+    }
+
+    private Double getRankAtFinish() {
+        return Double.valueOf(getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking()));
+    }
+    
+    @Override
+    public Double getNormalizedDistanceToStarboardSideAtStart() {
+        TrackedRace trackedRace = getTrackedRace();
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
+        Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
+        return distance / length;
     }
 
 }

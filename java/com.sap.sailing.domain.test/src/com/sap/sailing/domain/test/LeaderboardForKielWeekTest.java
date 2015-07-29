@@ -25,6 +25,7 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -43,7 +44,7 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException, SubscriberInitializationException, CreateModelException {
         leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 6 }),
                 new LowPoint(), null);
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         loadRace("event_20110609_KielerWoch-505_Race_2.txt", "event_20110609_KielerWoch-505_Race_2.mtb"); // 505 Race 2
         Competitor kevin = getCompetitorByName("Kevin");
         RaceColumn column = leaderboard.addRace(getTrackedRace(), "Test Race 1", /* medalRace */false);

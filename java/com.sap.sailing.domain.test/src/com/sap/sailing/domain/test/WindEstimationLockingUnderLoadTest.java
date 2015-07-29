@@ -100,7 +100,7 @@ public class WindEstimationLockingUnderLoadTest {
         } else {
             double directionInDegrees = 360*Math.random();
             double confidence = Math.random();
-            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            final TimePoint now = MillisecondsTimePoint.now();
             result = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(49, 8), now, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(directionInDegrees))),
                     confidence, now, /* useSpeed */ true);
         }

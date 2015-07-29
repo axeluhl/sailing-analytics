@@ -38,6 +38,7 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -104,7 +105,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboard.getScoreCorrection().setComment("Humba");
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);

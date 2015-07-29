@@ -44,6 +44,8 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     ArrayList<List<PathCandidate>> gridPositions = null;
     ArrayList<List<PathCandidate>> isocPositions = null;
     String gridFile = null;
+    Distance endLineWidth = null;
+    int endMatchCriterion;
 
     public PathGeneratorTreeGrow360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
@@ -619,6 +621,9 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                 } else {
                     endPos = endPositionRight;
                 }
+                endLineWidth = null;
+            } else {
+                endLineWidth = endPositionLeft.getDistance(endPositionRight);
             }
             bearVrt = startPos.getBearingGreatCircle(endPos);
         }
@@ -764,6 +769,12 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: " + hrzBinSize);
         }
+        
+        if (endLineWidth != null) {
+            endMatchCriterion = ((int)Math.round(endLineWidth.getMeters() / hrzBinSize)) / 2;
+        } else {
+            endMatchCriterion = 0;
+        }
 
         boolean reachedEnd = false;
         int addSteps = 0;
@@ -813,7 +824,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                         // logger.fine("\ntPath: " + curPath.path + "\n      Time: " +
                         // (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int) Math.round(Math.floor((curPath.hrz + hrzBinSize / 2.0) / hrzBinSize));
-                        if ((Math.abs(curBin) <= 4)) {
+                        if ((Math.abs(curBin) <= endMatchCriterion)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }

@@ -20,7 +20,8 @@ import java.net.URLConnection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
+
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.junit.Rule;
 import org.junit.rules.Timeout;
@@ -286,9 +287,9 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                                         /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
                                 pw.println(ros.getQueueName());
-                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
-                                master.serializeForInitialReplication(gzipOutputStream);
-                                gzipOutputStream.finish();
+                                final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(ros);
+                                master.serializeForInitialReplication(compressingOutputStream);
+                                compressingOutputStream.finish();
                                 ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;
