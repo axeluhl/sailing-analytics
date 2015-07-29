@@ -317,7 +317,6 @@
 		7FED45C81A25F5900022505F /* competitor1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C21A25F5900022505F /* competitor1.json */; };
 		7FED45CA1A25F5910022505F /* event1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C41A25F5900022505F /* event1.json */; };
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
-		EAFE4EA346FB83C2B67C60B7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06377F0B2F2854497073FC0E /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -703,7 +702,6 @@
 			files = (
 				7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */,
 				7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */,
-				EAFE4EA346FB83C2B67C60B7 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1173,11 +1171,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F83F16F19F154F000C53328 /* Build configuration list for PBXNativeTarget "SAPTracker" */;
 			buildPhases = (
-				2F709DA84C6F8CAB03CB7F15 /* Check Pods Manifest.lock */,
 				7F83F14C19F154F000C53328 /* Sources */,
 				7F83F14D19F154F000C53328 /* Frameworks */,
 				7F83F14E19F154F000C53328 /* Resources */,
-				DBF8E8393235EF60C87EB83C /* Copy Pods Resources */,
 				7FF3E4BE1A1DFCF20012F1FB /* ShellScript */,
 			);
 			buildRules = (
@@ -1570,21 +1566,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2F709DA84C6F8CAB03CB7F15 /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
 		7FF3E4BE1A1DFCF20012F1FB /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1597,21 +1578,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "FILE=\"${SRCROOT}/HockeySDK-iOS/BuildAgent\"\nif [ -f \"$FILE\" ]; then\n\"$FILE\"\nfi";
-		};
-		DBF8E8393235EF60C87EB83C /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
