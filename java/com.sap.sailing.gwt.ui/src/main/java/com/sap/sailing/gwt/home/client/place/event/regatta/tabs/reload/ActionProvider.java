@@ -5,17 +5,31 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 public interface ActionProvider<A extends Action<?>> {
     
     A getAction();
-
-    public class DefaultActionProvider<A extends Action<?>> implements ActionProvider<A> {
+    
+    boolean isActive();
+    
+    public abstract class AbstractActionProvider<A extends Action<?>> implements ActionProvider<A> {
         private final A action;
-
-        public DefaultActionProvider(A action) {
+        
+        public AbstractActionProvider(A action) {
             this.action = action;
         }
         
         @Override
         public A getAction() {
             return action;
+        }
+    }
+
+    public class DefaultActionProvider<A extends Action<?>> extends AbstractActionProvider<A> {
+
+        public DefaultActionProvider(A action) {
+            super(action);
+        }
+        
+        @Override
+        public boolean isActive() {
+            return true;
         }
     }
 }
