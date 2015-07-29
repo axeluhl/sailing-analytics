@@ -31,12 +31,14 @@ import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.Mul
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
@@ -63,6 +65,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
     @UiField AnchorElement regattaOverviewLinkUi;
+    @UiField StatisticsBox statisticsBoxUi;
     private Presenter currentPresenter;
 
     @Override
@@ -97,6 +100,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         
         if (ExperimentalFeatures.SHOW_NEW_REGATTA_LIST) {
             refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
+            refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId(), true));
             content.removeFromParent();
         } else {
             boatCategoryFilterUi.removeFromParent();
