@@ -16,7 +16,7 @@
     padding: 1em;
   }
   </ui:style>
-    <div class="{local_res.css.standings_list}">
+    <div class="{local_res.css.standings_list}" style="display: none;">
       <!-- TODO header -->
       <div class="{local_res.css.standings_list_content}">
         <div class="{res.mediaCss.small12}">

@@ -27,7 +27,6 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     public StandingsList() {
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        getElement().getStyle().setDisplay(Display.NONE);
     }
 
     @Override
