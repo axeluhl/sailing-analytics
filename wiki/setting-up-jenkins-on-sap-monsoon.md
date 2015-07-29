@@ -20,3 +20,18 @@ The following additional packages needed to install using apt-get install ...
  * libXi
 
 The Monsoon instance on which I did this for the first time can currently (2015-07-29) be reached at http://mo-11705429d.mo.sap.corp:8080/jenkins
+
+Add the following to the Maven configuration file at ``/home/jenkins/.m2/settings.xml``:
+
+<pre>
+        <proxies>
+           <proxy>
+              <id>SAP-proxy</id>
+              <active>true</active>
+              <protocol>http</protocol>
+              <host>proxy.wdf.sap.corp</host>
+              <port>8080</port>
+              <nonProxyHosts>*.sap.corp|nexus</nonProxyHosts>
+            </proxy>
+        </proxies>
+</pre>
