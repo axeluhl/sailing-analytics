@@ -328,6 +328,48 @@
 			remoteGlobalIDString = 7F83F14F19F154F000C53328;
 			remoteInfo = SAPTracker;
 		};
+		C8B31F7D1B68DAD500C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AA2D50EF0C96F46B694820F2;
+			remoteInfo = Pods;
+		};
+		C8B31F7F1B68DAD500C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 729357E8252B6C54D84C1324;
+			remoteInfo = "Pods-AFNetworkActivityLogger";
+		};
+		C8B31F811B68DAD500C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E2B24D78616A02B627FE9567;
+			remoteInfo = "Pods-AFNetworking";
+		};
+		C8B31F831B68DAEE00C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D1334B0FF057CA075361E33A;
+			remoteInfo = Pods;
+		};
+		C8B31F851B68DAEE00C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 50D9C72F63386EB91C3B1F5A;
+			remoteInfo = "Pods-AFNetworkActivityLogger";
+		};
+		C8B31F871B68DAEE00C8A809 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = B1D6048B9652C25B03AA04D1;
+			remoteInfo = "Pods-AFNetworking";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -649,6 +691,7 @@
 		7FED45C21A25F5900022505F /* competitor1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = competitor1.json; sourceTree = "<group>"; };
 		7FED45C41A25F5900022505F /* event1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = event1.json; sourceTree = "<group>"; };
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
+		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1044,6 +1087,7 @@
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
+				C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */,
 				7FAFB0B51A603C3E0054D457 /* LICENSE.txt */,
 				7F83F15219F154F000C53328 /* SAPTracker */,
 				7F83F16819F154F000C53328 /* SAPTrackerTests */,
@@ -1112,6 +1156,16 @@
 			name = JSON;
 			sourceTree = "<group>";
 		};
+		C8B31F781B68DAD400C8A809 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C8B31F7E1B68DAD500C8A809 /* libPods.a */,
+				C8B31F801B68DAD500C8A809 /* libPods-AFNetworkActivityLogger.a */,
+				C8B31F821B68DAD500C8A809 /* libPods-AFNetworking.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1129,6 +1183,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				C8B31F841B68DAEE00C8A809 /* PBXTargetDependency */,
+				C8B31F861B68DAEE00C8A809 /* PBXTargetDependency */,
+				C8B31F881B68DAEE00C8A809 /* PBXTargetDependency */,
 			);
 			name = SAPTracker;
 			productName = SAPTracker;
@@ -1184,6 +1241,12 @@
 			mainGroup = 7F83F14719F154F000C53328;
 			productRefGroup = 7F83F15119F154F000C53328 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = C8B31F781B68DAD400C8A809 /* Products */;
+					ProjectRef = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				7F83F14F19F154F000C53328 /* SAPTracker */,
@@ -1191,6 +1254,30 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		C8B31F7E1B68DAD500C8A809 /* libPods.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libPods.a;
+			remoteRef = C8B31F7D1B68DAD500C8A809 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C8B31F801B68DAD500C8A809 /* libPods-AFNetworkActivityLogger.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-AFNetworkActivityLogger.a";
+			remoteRef = C8B31F7F1B68DAD500C8A809 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C8B31F821B68DAD500C8A809 /* libPods-AFNetworking.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-AFNetworking.a";
+			remoteRef = C8B31F811B68DAD500C8A809 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		7F83F14E19F154F000C53328 /* Resources */ = {
@@ -1583,6 +1670,21 @@
 			target = 7F83F14F19F154F000C53328 /* SAPTracker */;
 			targetProxy = 7F83F16619F154F000C53328 /* PBXContainerItemProxy */;
 		};
+		C8B31F841B68DAEE00C8A809 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Pods;
+			targetProxy = C8B31F831B68DAEE00C8A809 /* PBXContainerItemProxy */;
+		};
+		C8B31F861B68DAEE00C8A809 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Pods-AFNetworkActivityLogger";
+			targetProxy = C8B31F851B68DAEE00C8A809 /* PBXContainerItemProxy */;
+		};
+		C8B31F881B68DAEE00C8A809 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Pods-AFNetworking";
+			targetProxy = C8B31F871B68DAEE00C8A809 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1650,6 +1752,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(PROJECT_DIR)/Pods/**",
+					"$(PROJECT_DIR)/Pods/build/Release$(EFFECTIVE_PLATFORM_NAME)/**",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1686,6 +1794,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(PROJECT_DIR)/Pods/**",
+					"$(PROJECT_DIR)/Pods/build/Release$(EFFECTIVE_PLATFORM_NAME)/**",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
@@ -1704,7 +1818,9 @@
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(BUILD_ROOT)/../Pods";
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
+				PODS_ROOT = "$(PROJECT_DIR)/Pods";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "8a90e486-9896-4d99-91cd-7dc200bf6ab4";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
@@ -1723,7 +1839,9 @@
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "$(BUILD_ROOT)/../Pods";
 				OTHER_SWIFT_FLAGS = "";
+				PODS_ROOT = "$(PROJECT_DIR)/Pods";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "73c63f8a-9009-480c-8d34-e03bd8034f0d";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
