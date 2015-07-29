@@ -24,5 +24,6 @@ public class VideoEditDialog extends VideoDialog {
         tagsListEditor.setValue(tags);
         setSelectedMimeType(video.getMimeType());
         setSelectedLocale(video.getLocale());
+        thumbnailURLAndUploadComposite.setURL(video.getThumbnailRef());
     }
 }

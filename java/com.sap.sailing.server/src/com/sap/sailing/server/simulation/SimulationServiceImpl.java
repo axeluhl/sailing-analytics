@@ -371,7 +371,7 @@ public class SimulationServiceImpl implements SimulationService {
             if (endTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
                 List<Position> line = this.getLinePositions(toWaypoint, endTimePoint, trackedRace);
-                if ((line.size() == 2) && (toWaypoint == raceCourse.getLastWaypoint())) {
+                if (line.size() == 2) {
                     endLine = line;
                 }
             } else if (startTimePoint != null) {

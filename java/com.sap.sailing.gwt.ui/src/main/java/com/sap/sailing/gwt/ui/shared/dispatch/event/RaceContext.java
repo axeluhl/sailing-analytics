@@ -100,6 +100,10 @@ public class RaceContext {
         return !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName());
     }
 
+    public String getLeaderboardName() {
+        return leaderboard.getName();
+    }
+
     public String getRegattaName() {
         if (leaderboard instanceof RegattaLeaderboard) {
             Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
@@ -333,7 +337,7 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if (isLiveOrOfPublicInterest()) {
             // the start time is always given for live races
-            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getRegattaName(), raceColumn.getName());
+            LiveRaceDTO liveRaceDTO = new LiveRaceDTO(getLeaderboardName(), trackedRace != null ? trackedRace.getRaceIdentifier(): null, raceColumn.getName());
             fillRaceData(liveRaceDTO);
             liveRaceDTO.setFlagState(getFlagStateOrNull());
             liveRaceDTO.setProgress(getProgressOrNull());
@@ -348,7 +352,7 @@ public class RaceContext {
         // and special flags states indicating how the postponed/canceled races will be continued
         if (getLiveRaceViewState() == RaceViewState.FINISHED) {
             // the start time is always given for live races
-            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getRegattaName(), raceColumn.getName());
+            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getLeaderboardName(), trackedRace != null ? trackedRace.getRaceIdentifier(): null, raceColumn.getName());
             fillRaceData(liveRaceDTO);
             liveRaceDTO.setDuration(getDurationOrNull());
             liveRaceDTO.setWinner(getWinnerOrNull());
@@ -436,7 +440,6 @@ public class RaceContext {
     private void fillRaceData(RaceMetadataDTO<?> dto) {
         dto.setViewState(getLiveRaceViewState());
         dto.setRegattaDisplayName(getRegattaDisplayName());
-        dto.setTrackedRaceName(trackedRace != null ? trackedRace.getRaceIdentifier().getRaceName() : null);
         dto.setTrackingState(getRaceTrackingState());
         dto.setFleet(getFleetMetadataOrNull());
         dto.setStart(getStartTimeAsDate());

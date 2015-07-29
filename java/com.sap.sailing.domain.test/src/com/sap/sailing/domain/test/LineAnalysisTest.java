@@ -23,7 +23,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LineAnalysisTest extends TrackBasedTest {
-    private MillisecondsTimePoint now;
+    private TimePoint now;
     private DynamicTrackedRace trackedRace;
 
     @Before

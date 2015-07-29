@@ -92,7 +92,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -232,6 +231,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -241,7 +241,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
@@ -595,11 +595,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -660,10 +655,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // TODO clear user store? See bug 2430.
         this.competitorStore.clear();
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
     }
 
     @Override
@@ -1434,6 +1425,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
             } else {
+                logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
@@ -1597,12 +1589,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
-            final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName
-                    .get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-            if (defaultLeaderboard != null) {
-                String columnName = trackedRace.getRace().getName();
-                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false);
-            }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, true);
@@ -1826,9 +1812,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
-                // remove from default leaderboard
-                FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-                defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
     }
@@ -1924,7 +1907,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
             removeLeaderboard(regattaLeaderboardToRemove.getName());
         }
-        for (RaceDefinition race : regatta.getAllRaces()) {
+        // avoid ConcurrentModificationException by copying the races to remove:
+        Set<RaceDefinition> racesToRemove = new HashSet<>();
+        Util.addAll(regatta.getAllRaces(), racesToRemove);
+        for (RaceDefinition race : racesToRemove) {
             removeRace(regatta, race);
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
             persistentRegattasForRaceIDs.remove(race.getId().toString());
@@ -3241,7 +3227,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        if (this.polarDataService == null) {
+        if (this.polarDataService == null && service != null) {
             polarDataService = service;
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);

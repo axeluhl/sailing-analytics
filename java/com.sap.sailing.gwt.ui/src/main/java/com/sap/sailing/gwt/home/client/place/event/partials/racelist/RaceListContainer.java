@@ -43,7 +43,7 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
     }
     
     @Override
-    public void setData(CollectionResult<T> data, long nextUpdate, int updateNo) {
+    public void setData(CollectionResult<T> data) {
         setRaceListData(data == null ? null : data.getValues());
     }
     
