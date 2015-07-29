@@ -73,7 +73,7 @@ public class Impressions extends Composite {
             count++;
             imageCarousel.addImage(imageDTO);
         }
-        if (count > 0) {
+        if (count > 1) {
             mobileSectionUi.clearContent();
             mobileSectionUi.addContent(imageCarousel);
         }
