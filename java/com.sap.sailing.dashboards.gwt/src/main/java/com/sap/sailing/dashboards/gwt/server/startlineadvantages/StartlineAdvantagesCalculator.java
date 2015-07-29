@@ -14,6 +14,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAv
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -29,14 +30,15 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
 
     private TrackedRace currentLiveTrackedRace;
     private MovingAverage advantageMaximumAverage;
-    
     private PolarDataService polarDataService;
+    private DefaultPolarWindAngleBoatSpeedFunction defaultPolarSpeedWindAngleFunction;
     
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
     
     public StartlineAdvantagesCalculator(PolarDataService polarDataService){
+        this.advantageMaximumAverage = new MovingAverage(500);
         this.polarDataService = polarDataService;
-        advantageMaximumAverage = new MovingAverage(500);
+        this.defaultPolarSpeedWindAngleFunction = new DefaultPolarWindAngleBoatSpeedFunction();
     }
     
     // Get Course Buoys
@@ -282,10 +284,10 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
                 Bearing bearingOfFirstMarkToStartPositionPositionInDeg = new DegreeBearingImpl(bearingOfFirstMarkToStartPositionPositionInRad.getDegrees());
                 double angleToWind = Math.abs(wind.getBearing().getDifferenceTo(bearingOfFirstMarkToStartPositionPositionInDeg).getDegrees());
                 logger.log(Level.INFO, "angleToWind"+angleToWind);
-                double speed = DefaultPolarValues.getBoatSpeedForWindAngleAndSpeed(angleToWind, wind.getMetersPerSecond());
-                logger.log(Level.INFO, "Speed"+speed);
+                Speed speed = defaultPolarSpeedWindAngleFunction.getBoatSpeedForWindAngleAndSpeed(angleToWind, wind.getBeaufort());
+                logger.log(Level.INFO, "Speed"+speed.getKnots());
                 logger.log(Level.INFO, "startingPositionToFirstMarkDistance.getMeters()"+startingPositionToFirstMarkDistance.getMeters());
-                startlineAdvantage.startLineAdvantage = startingPositionToFirstMarkDistance.getMeters();
+                startlineAdvantage.startLineAdvantage = (startingPositionToFirstMarkDistance.getMeters()/speed.getMetersPerSecond())*speed.getMetersPerSecond();
                 result.add(startlineAdvantage);
             }
         } else {
