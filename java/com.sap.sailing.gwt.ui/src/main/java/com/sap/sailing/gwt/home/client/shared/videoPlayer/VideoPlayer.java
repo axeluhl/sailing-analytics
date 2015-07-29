@@ -44,6 +44,7 @@ public class VideoPlayer extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 videoJSPlayer.play();
+                playButton.setVisible(false);
             }
         }, ClickEvent.getType());
         panel.add(playButton);

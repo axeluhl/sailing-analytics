@@ -5,28 +5,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public class ParallelGroupedDataCountAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<?>, Map<GroupKey, Double>> {
+public class ParallelGroupedDataCountAggregationProcessor
+                extends AbstractParallelGroupedDataStoringAggregationProcessor<Object, Double> {
+    
+    private static final AggregationProcessorDefinition<Object, Double> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Object.class, Double.class, "Count", ParallelGroupedDataCountAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<Object, Double> getDefinition() {
+        return DEFINITION;
+    }
 
     private Map<GroupKey, Double> countMap;
     
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDataCountAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<?>>)(Class<?>) GroupedDataEntry.class,
-              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Count");
+        super(executor, resultReceivers, "Count");
         countMap = new HashMap<>();
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<?> element) {
+    protected void storeElement(GroupedDataEntry<Object> element) {
         GroupKey key = element.getKey();
         if (!countMap.containsKey(key)) {
             countMap.put(key, 0.0);

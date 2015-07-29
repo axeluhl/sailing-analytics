@@ -16,5 +16,14 @@
     <string name="accuracy">Accuracy</string>
     <string name="position_set">The position has been set</string>
     <string name="no_information">No information</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="settings">Settings</string>
+
+    <string name="server">Polling</string>
+    <string name="server_sync_settings">Polling Interval (seconds)</string>
+
+    <string name="options_menu_checkout">Checkout</string>
 
 </resources>

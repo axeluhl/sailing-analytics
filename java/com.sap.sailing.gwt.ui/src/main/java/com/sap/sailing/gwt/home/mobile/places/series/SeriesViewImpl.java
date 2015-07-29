@@ -13,8 +13,10 @@ import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardB
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
+import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
@@ -31,7 +33,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     @UiField Quickfinder quickFinderUi;
     @UiField(provided = true) MinileaderboardBox leaderboardUi;
     @UiField FlowPanel eventsUi;
-//    @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
     private final Presenter currentPresenter;
     private final RefreshManager refreshManager;
@@ -41,7 +43,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
-//        this.setupStatisticsBox(event);
+        this.setupStatisticsBox(series);
         leaderboardUi = new MinileaderboardBox(true);
         initWidget(uiBinder.createAndBindUi(this));
         this.setupListContent(series);
@@ -70,9 +72,9 @@ public class SeriesViewImpl extends Composite implements SeriesView {
         leaderboardUi.setAction(MSG.showAll(), currentPresenter.getMiniOverallLeaderboardNavigation());
         refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getId(), 3));
     }
-//    
-//    private void setupStatisticsBox(EventViewDTO event) {
-//        statisticsBoxUi = new StatisticsBox(event.getType() == EventType.MULTI_REGATTA);
-//        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(event.getId()));
-//    }
+    
+    private void setupStatisticsBox(EventSeriesViewDTO series) {
+        statisticsBoxUi = new StatisticsBox(true);
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(series.getId(), false));
+    }
 }

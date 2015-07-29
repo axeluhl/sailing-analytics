@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.media;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -27,7 +27,7 @@ public class SailingFullscreenViewer implements FullscreenViewer<SailingImageDTO
         };
     };
 
-    public void show(SailingImageDTO selected, List<SailingImageDTO> images) {
+    public void show(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         final SailingGalleryPlayer viewer = new SailingGalleryPlayer(selected, images);
 
         Window.addResizeHandler(new ResizeHandler() {
