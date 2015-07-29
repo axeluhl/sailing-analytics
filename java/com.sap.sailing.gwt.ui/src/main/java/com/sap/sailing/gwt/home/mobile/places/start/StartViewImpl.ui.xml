@@ -8,16 +8,29 @@
     <ui:with 
         field="res" 
         type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
     <ui:style>
         .headerWrapper {
             background-color: #f2f2f2;
         }
+        .action {
+            border-radius: .384615384615385em;
+            width: 100%;
+            text-align: center;
+        }
+        .buttonContainer {
+            margin: 1em 10px 0;
+        
+}
     </ui:style>    
     <g:HTMLPanel>
         <div class="{style.headerWrapper}">
             <mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
         </div>
         <mp:stage.Stage ui:field='stage'/>
-        <mp:socialfooter.SocialFooter/>    
+        <div class="{style.buttonContainer}">
+            <a ui:field="showAllEventsUi" class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.action}"><ui:text from='{i18n.mainEventShowAll}'/></a>
+        </div>
+        <mp:socialfooter.SocialFooter/>
     </g:HTMLPanel>
 </ui:UiBinder>
