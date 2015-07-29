@@ -346,13 +346,13 @@ public final class HomeServiceUtil {
         return LocaleMatch.NO_MATCH;
     }
     
-    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service) {
+    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service, boolean useTeaserImage) {
         EventStageDTO dto = new EventStageDTO();
         mapToMetadataDTO(event, dto, service);
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
-        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
+        dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }
     

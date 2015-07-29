@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,11 +32,14 @@ public class StartViewImpl extends Composite implements StartView {
     Stage stage;
 
     @UiField Quickfinder quickFinderUi;
+    @UiField AnchorElement showAllEventsUi;
 
     public StartViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
         stage = new Stage(presenter.getNavigator());
         initWidget(uiBinder.createAndBindUi(this));
+        
+        presenter.getNavigator().getEventsNavigation().configureAnchorElement(showAllEventsUi);
     }
     
     @Override
