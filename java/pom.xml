@@ -263,6 +263,14 @@
 	    </goals>
 	  </execution>
 	</executions>
+	<configuration>
+	  <toolchains>
+	    <jdk>
+	      <version>1.8</version>
+	      <vendor>sun</vendor>
+	    </jdk>
+	  </toolchains>
+	</configuration>
       </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
