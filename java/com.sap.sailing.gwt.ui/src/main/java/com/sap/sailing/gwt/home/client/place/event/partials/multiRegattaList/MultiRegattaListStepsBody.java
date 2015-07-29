@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sse.common.Util;
 
 public class MultiRegattaListStepsBody extends UIObject implements RequiresResize {
 
@@ -49,6 +50,7 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
+        setFleetsTooltip(seriesProgress.getFleetNames());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
@@ -65,6 +67,14 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
             String fleetColor = fleetState.getKey().getFleetColor();
             MultiRegattaListStepsBodyFleet fleet = new MultiRegattaListStepsBodyFleet(finishedWidth, liveWidth, height, fleetColor);
             fleetsContainerUi.appendChild(fleet.getElement());
+        }
+    }
+    
+    private void setFleetsTooltip(String[] fleetNames) {
+        if (fleetNames.length > 1) {
+            String fleetCount = String.valueOf(fleetNames.length);
+            String fleetNameList = "(" + Util.join(", ", fleetNames) + ")";
+            fleetsContainerUi.setTitle(Util.join(" ", fleetCount, I18N.fleets(), fleetNameList));
         }
     }
     
