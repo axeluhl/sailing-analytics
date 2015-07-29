@@ -28,7 +28,7 @@
 					</div>
 					<div class="{local_res.css.eventheader_info_subtitle}">
 						<!-- IF event.logo -->
-						<div ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"> </div>
+						<a ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"></a>
 						<!-- IF END -->
 						<div class="{local_res.css.eventheader_info_subtitle_info}">
 							<!-- IF (event.name || event.date) -->
