@@ -19,7 +19,7 @@ The following additional packages needed to install using apt-get install ...
  * libxtst6
  * libXi
 
-The Monsoon instance on which I did this for the first time can currently (2015-07-29) be reached at http://mo-11705429d.mo.sap.corp:8080/jenkins
+The Monsoon instance on which I did this for the first time can currently (2015-07-29) be reached at http://mo-11705429d.mo.sap.corp:8080/jenkins (IP address 10.97.23.55).
 
 Add the following to the Maven configuration file at ``/home/jenkins/.m2/settings.xml``:
 
