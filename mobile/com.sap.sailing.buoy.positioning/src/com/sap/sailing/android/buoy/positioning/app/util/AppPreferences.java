@@ -1,7 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
 import android.content.Context;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
@@ -26,6 +25,16 @@ public class AppPreferences extends BaseAppPreferences {
         String cleanLeaderBoardName = leaderBoardName.replaceAll(" ", "%20");
         return context.getString(R.string.preference_server_gps_fixes_post_path, "/leaderboards")
                 .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markID);
+    }
+
+    public void setDataRefreshInterval(long interval){
+        preferences.edit().putLong(context.getString(R.string.preference_data_refresh_interval_seconds_key), interval)
+            .apply();
+    }
+
+    public long getDataRefreshInterval(){
+        return preferences.getLong(context.getString(R.string.preference_data_refresh_interval_seconds_key),
+            context.getResources().getInteger(R.integer.preference_data_refresh_interval_seconds_default));
     }
 
     public static boolean getPrintDatabaseOperationDebugMessages() {

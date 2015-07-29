@@ -13,12 +13,13 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LeaderboardDTOCalculationReuseCacheTest {
     @Test
     public void testNullWindCaching() {
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(now);
         final Competitor competitor = mock(Competitor.class);
         @SuppressWarnings("unchecked")

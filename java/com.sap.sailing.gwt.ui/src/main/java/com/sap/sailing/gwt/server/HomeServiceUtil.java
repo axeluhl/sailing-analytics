@@ -19,17 +19,12 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -40,7 +35,6 @@ import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
@@ -84,22 +78,6 @@ public final class HomeServiceUtil {
             }
         }
         return true;
-    }
-    
-    public static RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
-        Date now = new Date();
-        Date startDate = regatta.getStartDate();
-        Date endDate = regatta.getEndDate();
-        if(startDate != null && now.compareTo(startDate) < 0) {
-            return RegattaState.UPCOMING;
-        }
-        if(endDate != null && now.compareTo(endDate) > 0) {
-            return RegattaState.FINISHED;
-        }
-        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
-            return RegattaState.RUNNING;
-        }
-        return RegattaState.UNKNOWN;
     }
     
     public static EventState calculateEventState(EventBase event) {
@@ -450,46 +428,11 @@ public final class HomeServiceUtil {
         return result;
     }
     
-    public static RegattaMetadataDTO toRegattaMetadataDTO(EventBase event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
-        RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();
-        fillRegattaFields(event, leaderboardGroup, leaderboard, regattaDTO);
-        
-        return regattaDTO;
-    }
-
-    public static void fillRegattaFields(EventBase event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard,
-            RegattaMetadataDTO regattaDTO) {
-        regattaDTO.setId(leaderboard.getName());
-        regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        if(hasMultipleLeaderboardGroups(event)) {
-            regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
-        }
-        regattaDTO.setCompetitorsCount(calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(calculateRaceColumnCount(leaderboard));
-        regattaDTO.setBoatClass(getBoatClassName(leaderboard));
-        if(leaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            regattaDTO.setStartDate(regatta.getStartDate() != null ? regatta.getStartDate().asDate() : null);
-            regattaDTO.setEndDate(regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null);
-        }
-        regattaDTO.setState(calculateRegattaState(regattaDTO));
-        regattaDTO.setDefaultCourseAreaName(getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
-    }
-    
-    private static boolean hasMultipleLeaderboardGroups(EventBase event) {
-        return Util.size(event.getLeaderboardGroups()) > 1;
-    }
-
-    public static boolean hasLiveRace(LeaderboardDTO leaderboard) {
-        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(getLiveTimePointInMillis());
-        return !liveRaces.isEmpty();
-    }
-    
     public static TimePoint getLiveTimePoint() {
         return new MillisecondsTimePoint(getLiveTimePointInMillis());
     }
     
-    private static long getLiveTimePointInMillis() {
+    public static long getLiveTimePointInMillis() {
         // TODO better solution
         long livePlayDelayInMillis = 15_000;
         return System.currentTimeMillis() - livePlayDelayInMillis;
@@ -510,5 +453,18 @@ public final class HomeServiceUtil {
             }
         }
         return courseArea == null ? null : courseArea.getName();
+    }
+    
+    public static String getCourseAreaIdForRegatta(EventBase event, Leaderboard leaderboard) {
+        CourseArea courseArea = null;
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+        } else if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            if (regatta != null) {
+                courseArea = regatta.getDefaultCourseArea();
+            }
+        }
+        return courseArea == null ? null : courseArea.getId().toString();
     }
 }

@@ -561,11 +561,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
-    }
-
-    @Override
     public void lockForRead(Iterable<MarkPassing> markPassings) {
         getRace().getCourse().lockForRead();
         LockUtil.lockForRead(getMarkPassingsLock(markPassings));

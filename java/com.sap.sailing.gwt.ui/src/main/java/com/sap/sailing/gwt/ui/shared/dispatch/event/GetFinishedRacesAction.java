@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sse.common.Duration;
 
 public class GetFinishedRacesAction implements Action<ResultWithTTL<SortedSetResult<RaceListRaceDTO>>> {
     
@@ -28,7 +29,7 @@ public class GetFinishedRacesAction implements Action<ResultWithTTL<SortedSetRes
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
         EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
         
-        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 5 * 60 * 1000),
-                new SortedSetResult<>(raceListDataCalculator.getResult()));
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
+                Duration.ONE_MINUTE.times(5)), new SortedSetResult<>(raceListDataCalculator.getResult()));
     }
 }

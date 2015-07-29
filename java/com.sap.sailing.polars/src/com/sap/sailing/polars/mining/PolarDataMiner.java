@@ -53,13 +53,14 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class PolarDataMiner {
 
     private static final int EXECUTOR_QUEUE_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Math.max((int) (Runtime.getRuntime().availableProcessors() * (3.0/4.0)), 3);
     private final ThreadPoolExecutor executor = createExecutor();
-    private final Map<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new HashMap<>();
+    private final ConcurrentHashMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
     
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
     
@@ -81,8 +82,9 @@ public class PolarDataMiner {
     private final ClusterGroup<Bearing> angleClusterGroup;
 
     private ThreadPoolExecutor createExecutor() {
-        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new RejectedExecutionHandler() {
+        return new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, 60l, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true),
+                new RejectedExecutionHandler() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                         logger.warning("Polar Data Miner Executor rejected execution. Running sequentially.");
@@ -202,14 +204,17 @@ public class PolarDataMiner {
              * (trackedRace.getRace() != null ? trackedRace.getRace().getName() : trackedRace.getRaceIdentifier()
              * .getRaceName()));
              */
-            synchronized (fixesForRacesWhichAreStillLoading) {
-                Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
-                if (fixes == null) {
-                    fixes = new HashSet<>();
-                    fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
+            Set<GPSFixMovingWithOriginInfo> fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
+            if (fixes == null) {
+                synchronized (fixesForRacesWhichAreStillLoading) {
+                    fixes = fixesForRacesWhichAreStillLoading.get(trackedRace);
+                    if (fixes == null) {
+                        fixes = new HashSet<>();
+                        fixesForRacesWhichAreStillLoading.put(trackedRace, fixes);
+                    }
                 }
-                fixes.add(fixWithOriginInfo);
             }
+            fixes.add(fixWithOriginInfo);
         } else {
             processFix(trackedRace, fixWithOriginInfo);
         }

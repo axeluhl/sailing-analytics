@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
+import com.sap.sse.common.Duration;
 
 public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetResult<RegattaWithProgressDTO>>> {
     private UUID eventId;
@@ -30,9 +31,10 @@ public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetR
         EventActionUtil.forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext leaderboardContext) {
-                result.add(leaderboardContext.getRegattaWithProgress(context));
+                result.add(leaderboardContext.getRegattaWithProgress());
             }
         });
-        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId, 3 * 60 * 1000), new SortedSetResult<>(result));
+        return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
+                Duration.ONE_MINUTE.times(3)), new SortedSetResult<>(result));
     }
 }

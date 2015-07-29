@@ -16,7 +16,7 @@ public interface HasRaceResultOfCompetitorContext {
     /**
      * 0 means the competitor won the race, 1 means the competitor ranked last
      */
-    @Statistic(messageKey="RelativeScoreInRace", ordinal=3, resultDecimals=2)
+    @Statistic(messageKey="RelativeScoreInRace", ordinal=1, resultDecimals=2)
     public double getRelativeRank();
 
     @Dimension(messageKey="WindSpeedInBeaufort")
@@ -24,4 +24,10 @@ public interface HasRaceResultOfCompetitorContext {
 
     @Dimension(messageKey="Regatta")
     String getRegattaName();
+    
+    @Statistic(messageKey="NumberOfPodiumFinish", ordinal=2)
+    public Boolean isPodiumFinish();
+    
+    @Statistic(messageKey="NumberOfWins", ordinal=3)
+    public Boolean isWin();
 }

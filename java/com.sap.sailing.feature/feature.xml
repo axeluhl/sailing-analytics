@@ -28,9 +28,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
       <import plugin="com.google.gwt.osgi" version="2.7.0" match="greaterOrEqual"/>
       <import plugin="org.json.simple" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.moxieapps.gwt.highcharts" version="1.6.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.geronimo.specs.geronimo-jms_1.1_spec"/>
       <import plugin="com.rabbitmq.client"/>
-      <import plugin="org.apache.geronimo.specs.geronimo-j2ee-management_1.1_spec"/>
    </requires>
 
    <plugin

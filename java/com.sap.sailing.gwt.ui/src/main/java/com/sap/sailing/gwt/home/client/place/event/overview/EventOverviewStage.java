@@ -33,13 +33,13 @@ public class EventOverviewStage extends Composite {
     
     private final RefreshableWidget<EventOverviewStageDTO> refreshable = new RefreshableWidget<EventOverviewStageDTO>() {
         @Override
-        public void setData(EventOverviewStageDTO data, long nextUpdate, int updateNo) {
+        public void setData(EventOverviewStageDTO data) {
             setStageData(data);
         }
     };
     private final RefreshableWidget<ListResult<NewsEntryDTO>> newsRefreshable = new RefreshableWidget<ListResult<NewsEntryDTO>>() {
         @Override
-        public void setData(ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
+        public void setData(ListResult<NewsEntryDTO> data) {
             setNews(data.getValues());
         }
     };

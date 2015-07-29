@@ -9,15 +9,15 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sse.common.Duration;
 
 public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithTTL<RegattasAndLiveRacesDTO>> {
     private UUID eventId;
@@ -34,11 +34,11 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
     @GwtIncompatible
     public ResultWithTTL<RegattasAndLiveRacesDTO> execute(DispatchContext context) {
         Event event = context.getRacingEventService().getEvent(eventId);
-        final Map<String, RegattaMetadataDTO> regattas = mapRegattas(event);
+        final Map<String, RegattaMetadataDTO> regattas = mapRegattas(context, event);
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         
-        final long ttl;
+        final Duration ttl;
         if(eventState == EventState.RUNNING) {
             EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
                 @Override
@@ -49,7 +49,7 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
                     }
                 }
             });
-            ttl = 1000 * 60 * 2;
+            ttl = Duration.ONE_MINUTE.times(2);
         } else {
             ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
         }
@@ -65,13 +65,14 @@ public class GetRegattasAndLiveRacesForEventAction implements Action<ResultWithT
     }
 
     @GwtIncompatible
-    private Map<String, RegattaMetadataDTO> mapRegattas(Event event) {
-        Map<String, RegattaMetadataDTO> result = new HashMap<>();
-        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            for (Leaderboard lb : lg.getLeaderboards()) {
-                result.put(lb.getName(), HomeServiceUtil.toRegattaMetadataDTO(event, lg, lb));
+    private Map<String, RegattaMetadataDTO> mapRegattas(DispatchContext context, Event event) {
+        final Map<String, RegattaMetadataDTO> result = new HashMap<>();
+        EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
+            @Override
+            public void doForLeaderboard(LeaderboardContext context) {
+                result.put(context.getLeaderboardName(), context.asRegattaMetadataDTO());
             }
-        }
+        });
         return result;
     }
 

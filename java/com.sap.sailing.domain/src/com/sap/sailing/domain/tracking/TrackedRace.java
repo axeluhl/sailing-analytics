@@ -302,6 +302,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return true;
     }
 
+    default boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+        return true;
+    }
+
     /**
      * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}
      */
@@ -859,4 +863,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default RaceLogResolver getRaceLogResolver() {
         return null;
     }
+
 }
