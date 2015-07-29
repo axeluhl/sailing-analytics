@@ -32,8 +32,8 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @Override
     public void setData(GetMiniLeaderboardDTO data) {
         itemContainerUi.removeAllChildren();
-        scoreInformationUi.removeAllChildren();
         getElement().getStyle().clearDisplay();
+        updateScoreInformation(data);
         
         if(data.getItems().isEmpty()) {
             noResultsUi.getStyle().clearDisplay();
@@ -41,7 +41,6 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         }
         noResultsUi.getStyle().setDisplay(Display.NONE);
         
-        updateScoreInformation(data);
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
@@ -50,6 +49,12 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     }
 
     private void updateScoreInformation(GetMiniLeaderboardDTO data) {
+        scoreInformationUi.removeAllChildren();
+        if(data.getScoreCorrectionText() == null && data.getLastScoreUpdate() == null) {
+            scoreInformationUi.getStyle().setDisplay(Display.NONE);
+        } else {
+            scoreInformationUi.getStyle().clearDisplay();
+        }
         if (data.getScoreCorrectionText() != null) {
             DivElement scoreCorrectionText = Document.get().createDivElement();
             scoreCorrectionText.setInnerText(data.getScoreCorrectionText());
