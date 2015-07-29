@@ -1,5 +1,5 @@
 source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '7.1'
 link_with ['SAPTracker', 'SAPTrackerTests']
-pod 'AFNetworking', '~> 2.4'
-pod 'AFNetworkActivityLogger', :configurations => ['Debug']
+pod 'AFNetworking', '2.5.0'
+pod 'AFNetworkActivityLogger', '2.0.3', :configurations => ['Debug']
