@@ -1,3 +1,5 @@
+* Setting up Jenkins on SAP Monsoon
+
 Follow the initial setup and install guide, replacing the "hudson" user by a "jenkins" user: https://wiki.wdf.sap.corp/wiki/display/LeanDI/Jenkins+Setup+on+Monsoon+Ubuntu+Image
 
 As mail host, use mail.sap.corp.
