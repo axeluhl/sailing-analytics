@@ -45,7 +45,7 @@ public class Header extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
         
-//        addNavigation(appContext.getNavigator().getHomeNavigation(), StringMessages.INSTANCE.home());
+        addNavigation(appContext.getNavigator().getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(appContext.getNavigator().getEventsNavigation(), StringMessages.INSTANCE.events());
 //        addNavigation(appContext.getNavigator().getSolutionsNavigation(), StringMessages.INSTANCE.solutions());
 

@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -20,8 +19,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
@@ -38,13 +37,8 @@ import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
@@ -57,7 +51,7 @@ import com.sap.sse.util.ServiceTrackerFactory;
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
     private static final long serialVersionUID = 3947782997746039939L;
     
-    private static final int MAX_STAGE_EVENTS = 5;
+    public static final int MAX_STAGE_EVENTS = 5;
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
 
@@ -72,100 +66,23 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService(); 
     }
-
-    private interface EventVisitor {
-        void visit(EventBase event, boolean onRemoteServer, URL baseURL);
-    }
-    
-    private static class EventHolder {
-        EventBase event;
-        boolean onRemoteServer;
-        URL baseURL;
-        public EventHolder(EventBase event, boolean onRemoteServer, URL baseURL) {
-            super();
-            this.event = event;
-            this.onRemoteServer = onRemoteServer;
-            this.baseURL = baseURL;
-        }
-    }
-    
-    private class FeaturedEventsComparator implements Comparator<Pair<StageEventType, EventHolder>> {
-        @Override
-        public int compare(Pair<StageEventType, EventHolder> eventAndStageType1,
-                Pair<StageEventType, EventHolder> eventAndStageType2) {
-            TimePoint now = MillisecondsTimePoint.now();
-            TimeRange event1Range = new TimeRangeImpl(eventAndStageType1.getB().event.getStartDate(), eventAndStageType1.getB().event.getEndDate());
-            TimeRange event2Range = new TimeRangeImpl(eventAndStageType2.getB().event.getStartDate(), eventAndStageType2.getB().event.getEndDate());
-            return event1Range.timeDifference(now).compareTo(event2Range.timeDifference(now));
-        }
-    }
-    
-    public void forAllPublicEvents(EventVisitor visitor) throws MalformedURLException {
-        URL requestedBaseURL = getRequestBaseURL();
-        for (Event event : getService().getAllEvents()) {
-            if(event.isPublic()) {
-                visitor.visit(event, false, requestedBaseURL);
-            }
-        }
-        for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
-                        getService().getPublicEventsOfAllSailingServers().entrySet()) {
-            final com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
-            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
-            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
-            URL baseURL = getBaseURL(serverRef.getURL());
-            if (remoteEvents != null) {
-                for (EventBase remoteEvent : remoteEvents) {
-                    if(remoteEvent.isPublic()) {
-                        visitor.visit(remoteEvent, true, baseURL);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
-     * to <code>http://sapsailing.com</code>.
-     * @throws MalformedURLException 
-     */
-    private URL getRequestBaseURL() throws MalformedURLException {
-        final URL url = new URL(getThreadLocalRequest().getRequestURL().toString());
-        final URL baseURL = getBaseURL(url);
-        return baseURL;
-    }
-
-    private URL getBaseURL(URL url) throws MalformedURLException {
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
-    }
     
     @Override
     public StartViewDTO getStartView() throws MalformedURLException {
-        final List<Pair<StageEventType, EventHolder>> featuredEvents = new ArrayList<Pair<StageEventType, EventHolder>>();
-        final List<EventHolder> recentEventsOfLast12Month = new ArrayList<EventHolder>();
-        final TimePoint now = MillisecondsTimePoint.now();
+        EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
+        RecentEventsCalculator recentEventsCalculator = new RecentEventsCalculator();
         
-        forAllPublicEvents(new EventVisitor() {
-            @Override
-            public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-                EventHolder holder = new EventHolder(event, onRemoteServer, baseURL);
-                if (now.after(event.getStartDate()) && now.before(event.getEndDate())) {
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.RUNNING, holder));
-                } else if (event.getStartDate().after(now) &&
-                        event.getStartDate().before(now.plus(Duration.ONE_WEEK.times(4)))) {
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.UPCOMING_SOON, holder));
-                } else if (event.getEndDate().before(now) &&
-                        event.getEndDate().after(now.minus(Duration.ONE_YEAR))) {
-                    recentEventsOfLast12Month.add(holder);
-                    featuredEvents.add(new Pair<StageEventType, EventHolder>(StageEventType.POPULAR, holder));
-                }
-            }
-        });
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), stageCandidateCalculator, recentEventsCalculator);
         
         StartViewDTO result = new StartViewDTO();
         
-        Collections.sort(featuredEvents, new FeaturedEventsComparator());
-        for(int i = 0; i < MAX_STAGE_EVENTS && i < featuredEvents.size(); i++) {
-            Pair<StageEventType, EventHolder> pair = featuredEvents.get(i);
+        int count = 0;
+        for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
+            count++;
+            if(count > MAX_STAGE_EVENTS) {
+                break;
+            }
+            
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
             result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService()));
@@ -186,19 +103,12 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
                 }
             }
         }
-        Collections.sort(recentEventsOfLast12Month, new Comparator<EventHolder>() {
-            @Override
-            public int compare(EventHolder o1, EventHolder o2) {
-                final long diff = o2.event.getEndDate().asMillis() - o1.event.getEndDate().asMillis();
-                return diff > 0l ? 1 : diff < 0l ? -1 : 0;
-            }
-        });
         
         final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
                                                                         // amount of shuffling
         final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
         
-        for(EventHolder holder : recentEventsOfLast12Month) {
+        for(EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
             if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, getService()));
             }
@@ -354,7 +264,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     public EventListViewDTO getEventListView() throws MalformedURLException {
         // TODO fill stats of years
         final EventListViewDTO result = new EventListViewDTO();
-        forAllPublicEvents(new EventVisitor() {
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), new EventVisitor() {
             @Override
             public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
                 EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, getService());
