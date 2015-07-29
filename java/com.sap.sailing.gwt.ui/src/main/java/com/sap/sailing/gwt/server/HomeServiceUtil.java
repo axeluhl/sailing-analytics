@@ -243,7 +243,7 @@ public final class HomeServiceUtil {
         return !Util.isEmpty(event.getVideos());
     }
 
-    public static boolean isPartOfEvent(Event event, Leaderboard regattaEntity) {
+    public static boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
                 return true;
@@ -520,12 +520,15 @@ public final class HomeServiceUtil {
     }
 
     public static boolean hasRegattaData(EventBase event) {
+        final boolean fakeSeries = HomeServiceUtil.isFakeSeries(event);
         for (LeaderboardGroupBase leaderboardGroupBase : event.getLeaderboardGroups()) {
             if(leaderboardGroupBase instanceof LeaderboardGroup) {
                 // for events that are locally available, we can see if there are any leaderboards
                 LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
-                if(!Util.isEmpty(leaderboardGroup.getLeaderboards())) {
-                    return true;
+                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if(!fakeSeries || isPartOfEvent(event, leaderboard)) {
+                        return true;
+                    }
                 }
             } else {
                 // we can't know if the event has leaderboards but the existence of a leaderboard group is a good sign for that
