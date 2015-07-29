@@ -329,8 +329,6 @@
         <version>${tycho-version}</version>
         <configuration>
           <useJDK>BREE</useJDK>
-          <source>1.8</source>
-          <target>1.8</target>
         </configuration>
       </plugin>
 
