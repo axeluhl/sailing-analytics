@@ -151,7 +151,6 @@ img.race_item_windflag {
 }
 .regattalistitem {
   font-size: 1rem;
-  float: left;
   width: 100%;
   margin-top: 2em;
   border: 1px solid #ddd;
