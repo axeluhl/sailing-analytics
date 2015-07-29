@@ -18,6 +18,8 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
@@ -41,6 +43,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     RacesListLive racesListLive;
     @UiField(provided = true) EventOverviewStage stage;
     @UiField StandingsList standingsUi;
+    @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
     public RegattaOverviewTabView() {
     }
@@ -60,6 +63,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
         racesListLive = new RacesListLive(currentPresenter, false);
         stage = new EventOverviewStage(currentPresenter);
+        statisticsBoxUi = new StatisticsBox(false);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
@@ -75,7 +79,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         refreshManager.add(racesListLive.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
-
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(myPlace.getCtx().getEventDTO().getId(), true));
         contentArea.setWidget(this);
     }
 

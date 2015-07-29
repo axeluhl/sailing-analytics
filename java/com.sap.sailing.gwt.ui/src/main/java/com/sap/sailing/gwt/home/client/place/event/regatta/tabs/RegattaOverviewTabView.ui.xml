@@ -21,6 +21,7 @@
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmediumbig}" />
         <dp:standings.StandingsList ui:field="standingsUi" />
+        <dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottommedium}" ui:field="statisticsBoxUi" />
       </div>
     </div>
   </g:HTMLPanel>
