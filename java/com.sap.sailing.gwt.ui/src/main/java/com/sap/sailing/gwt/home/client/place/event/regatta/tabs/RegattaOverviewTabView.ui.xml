@@ -2,7 +2,8 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive"
   xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview"
-  xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'>
+  xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'
+  xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:style>
         .legend {
@@ -19,6 +20,7 @@
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmediumbig}" />
+        <dp:standings.StandingsList ui:field="standingsUi" />
       </div>
     </div>
   </g:HTMLPanel>

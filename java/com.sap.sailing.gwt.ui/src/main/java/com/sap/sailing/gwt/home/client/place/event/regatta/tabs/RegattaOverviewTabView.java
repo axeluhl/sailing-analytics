@@ -17,7 +17,9 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Pres
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -26,6 +28,19 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaOverviewTabView extends Composite implements RegattaTabView<RegattaOverviewPlace> {
+
+    interface MyBinder extends UiBinder<HTMLPanel, RegattaOverviewTabView> {
+    }
+
+    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+    private Presenter currentPresenter;
+    
+    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
+    @UiField SimplePanel regattaInfoContainerUi;
+    @UiField(provided = true)
+    RacesListLive racesListLive;
+    @UiField(provided = true) EventOverviewStage stage;
+    @UiField StandingsList standingsUi;
 
     public RegattaOverviewTabView() {
     }
@@ -52,13 +67,14 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
             @Override
             public void setData(RegattaWithProgressDTO data) {
-                regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
+                regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, false));
             }
         }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
 
         stage.setupRefresh(refreshManager);
         refreshManager.add(racesListLive.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
+        refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
 
         contentArea.setWidget(this);
     }
@@ -67,18 +83,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     public void stop() {
 
     }
-
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaOverviewTabView> {
-    }
-
-    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-    private Presenter currentPresenter;
-    
-    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
-    @UiField SimplePanel regattaInfoContainerUi;
-    @UiField(provided = true)
-    RacesListLive racesListLive;
-    @UiField(provided = true) EventOverviewStage stage;
 
     @Override
     public RegattaOverviewPlace placeToFire() {
