@@ -29,7 +29,7 @@ public class StartActivity extends AbstractActivity implements Presenter {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
-        clientFactory.getDispatch().execute(new GetStagedEventsAction(), new AsyncCallback<ListResult<EventStageDTO>>() {
+        clientFactory.getDispatch().execute(new GetStagedEventsAction(true), new AsyncCallback<ListResult<EventStageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO Auto-generated method stub

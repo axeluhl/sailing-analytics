@@ -85,7 +85,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
             
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
-            result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService()));
+            result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService(), false));
             
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
 
