@@ -164,7 +164,7 @@
 .race_item {
   display: table-cell;
   text-align: left;
-  vertical-align: baseline;
+  vertical-align: middle;
   border-bottom: 1px solid #ebebeb;
   white-space: nowrap;
   padding: 1.4em 0.666666666666667em 0.733333333333333em 1.333333333333333em;
@@ -216,7 +216,7 @@ img.race_item_flag {
   margin-right: 0.333333333333333em;
 }
 .race_item_winner {
-  margin-left: 5px;
+  white-space: normal;
   vertical-align: middle;
 }
 .race_itemwinner {
@@ -343,7 +343,7 @@ img.race_item_flag {
   background-position: center center;
 }
 .standings_list_content_rank {
-  margin-right: 2.333333333333333em;
+  margin-right: 1.333333333333333em;
   margin-left: 0.666666666666667em;
 }
 .standings_list_content_rank:after {
