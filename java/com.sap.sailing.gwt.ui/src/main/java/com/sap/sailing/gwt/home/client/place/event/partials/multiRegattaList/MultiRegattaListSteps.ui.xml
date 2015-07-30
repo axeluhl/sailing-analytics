@@ -6,10 +6,11 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListResources" />
 	<g:HTMLPanel>
 		<div class="{local_res.css.regattalistitem_steps}" ui:field="progressContainerUi">
+			<div ui:field="noRacesMessageUi" class="{local_res.css.regattalistitem_noraces}" style="display: none;"><ui:text from="{i18n.noRacesYet}" /></div>
 			<div ui:field="stepsContainerUi" />
-			<div class="{local_res.css.regattalistitem_steps_button}" ui:field="leaderboardButtonContainerUi">
+			<div class="{local_res.css.regattalistitem_steps_button}" ui:field="leaderboardButtonContainerUi" style="display:none;">
 				<a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
-						style="display:none;" ui:field="leaderboardButtonUi">
+						ui:field="leaderboardButtonUi">
 					<ui:text from='{i18n.leaderboard}' />
 				</a>
 			</div>

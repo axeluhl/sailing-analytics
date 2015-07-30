@@ -33,6 +33,7 @@ public class MultiRegattaListSteps extends Composite {
     
     @UiField DivElement progressContainerUi;
     @UiField DivElement stepsContainerUi;
+    @UiField DivElement noRacesMessageUi;
     @UiField DivElement leaderboardButtonContainerUi;
     @UiField AnchorElement leaderboardButtonUi;
     
@@ -56,6 +57,10 @@ public class MultiRegattaListSteps extends Composite {
             stepsContainerUi.appendChild(stepsBody.getElement());
         }
         
+        if(regattaProgress.getSeries().isEmpty()) {
+            noRacesMessageUi.getStyle().clearDisplay();
+            stepsContainerUi.removeFromParent();
+        }
     }
 
     @Override
@@ -77,7 +82,7 @@ public class MultiRegattaListSteps extends Composite {
     
     void setLeaderboardNavigation(RegattaState regattaState, PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(leaderboardButtonUi);
-        leaderboardButtonUi.getStyle().clearDisplay();
+        leaderboardButtonContainerUi.getStyle().clearDisplay();
         leaderboardButtonUi.addClassName(getLeaderboardButtonStyle(regattaState));
         stepsContainerUi.getStyle().setDisplay(Display.NONE);
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
