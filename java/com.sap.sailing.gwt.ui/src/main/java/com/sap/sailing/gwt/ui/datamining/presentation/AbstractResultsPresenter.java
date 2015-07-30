@@ -6,10 +6,10 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
@@ -24,7 +24,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     
     private final DockLayoutPanel mainPanel;
     private final HorizontalPanel controlsPanel;
-    private final SimpleLayoutPanel presentationPanel;
+    private final DeckLayoutPanel presentationPanel;
     
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
@@ -50,8 +50,8 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
             }
         });
         addControl(exportButton);
-        
-        presentationPanel = new SimpleLayoutPanel();
+
+        presentationPanel = new DeckLayoutPanel();
         mainPanel.add(presentationPanel);
         
         errorLabel = new HTML();

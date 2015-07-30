@@ -22,7 +22,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
     
     private final StringMessages stringMessages;
     
-    private final DeckLayoutPanel presentersPanel;
+    private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor> presentersListBox;
     private ResultsPresenter<Number> currentPresenter;
@@ -35,7 +35,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         availableDescriptors.add(new ColumnChartDescriptor());
         availableDescriptors.add(new PlainDescriptor());
 
-        presentersPanel = new DeckLayoutPanel();
+        presenterPanel = new DeckLayoutPanel();
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -64,18 +64,18 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         presenter.addControl(controlsPanel);
         
         currentPresenter = presenter;
-        presentersPanel.setWidget(currentPresenter.getWidget());
+        presenterPanel.setWidget(currentPresenter.getWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                presentersPanel.onResize();
+                presenterPanel.onResize();
             }
         });
     }
 
     @Override
     public Widget getWidget() {
-        return presentersPanel;
+        return presenterPanel;
     }
 
     @Override
