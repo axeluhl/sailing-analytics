@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver;
+import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMutationCallback;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -18,7 +20,8 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
  */
 public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventRegattaPlace> extends Composite implements RegattaTabView<T>,
         LeaderboardUpdateListener {
-
+    private boolean initialLeaderboardSizeCalculated = false;
+    
     public SharedLeaderboardRegattaTabView() {
     }
 
@@ -28,7 +31,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
         final LeaderboardSettings leaderboardSettings = EventParamUtils
                 .createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
         final RegattaAndRaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
-        LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
+        final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
                 leaderboardSettings, //
                 preselectedRace, //
                 "leaderboardGroupName", // TODO: keep using magic string? ask frank!
@@ -36,6 +39,21 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                 true,
                 autoExpandLastRaceColumn);
         leaderboardPanel.addLeaderboardUpdateListener(this);
+        
+        if(ElementSizeMutationObserver.isSupported()) {
+            ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {
+                @Override
+                public void onSizeChanged(int newWidth, int newHeight) {
+                    if(newWidth > 0 && newHeight > 0 && newWidth > 1500 && initialLeaderboardSizeCalculated == false) {
+                        int numberOfLastRacesToShow = (1500 - 600) / 50;
+                        leaderboardPanel.setRaceColumnSelectionToLastNStrategy(numberOfLastRacesToShow);
+                        initialLeaderboardSizeCalculated = true;
+                    }
+                }
+            }); 
+            observer.observe(leaderboardPanel.getLeaderboardTable().getElement());
+        }
+
         return leaderboardPanel;
     }
 }

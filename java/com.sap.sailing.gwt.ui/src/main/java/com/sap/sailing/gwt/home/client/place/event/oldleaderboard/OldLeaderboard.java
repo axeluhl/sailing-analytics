@@ -50,7 +50,6 @@ public class OldLeaderboard extends Composite {
     public OldLeaderboard() {
         this.leaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
-        OldLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
