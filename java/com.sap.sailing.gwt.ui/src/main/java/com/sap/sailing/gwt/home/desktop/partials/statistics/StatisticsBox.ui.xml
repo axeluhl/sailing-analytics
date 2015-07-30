@@ -4,18 +4,8 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBoxResources" />
-	<g:HTMLPanel>
-		<!-- IF spacerClasses ADD Class {res.mainCss.spacermargin} AND one or more 
-			of the following: {res.mainCss.spacermargintopsmall}(15px), {res.mainCss.spacermargintopmediumsmall}(20px), 
-			{res.mainCss.spacermargintopmedium}(30px), {res.mainCss.spacermargintopmediumbig}(60px), 
-			{res.mainCss.spacermargintopbig}(80px), {res.mainCss.spacermarginbottomsmall}(15px), 
-			{res.mainCss.spacermarginbottommediumsmall}(20px), {res.mainCss.spacermarginbottommedium}(30px), 
-			{res.mainCss.spacermarginbottommediumbig}(60px), {res.mainCss.spacermarginbottombig}(80px), 
-			{res.mainCss.spacermarginonlyonsmall}(0 at screensize > 720px), {res.mainCss.spacermarginonlyonlarge}(0 
-			at screensize < 720px) -->
-		<div class="{local_res.css.statisticsbox} {local_res.css.box}">
-			<div class="{local_res.css.box_header}"><ui:text from="{i18n.statistics}"/></div>
-			<ul class="{local_res.css.box_content} {res.mediaCss.column}" ui:field="itemContainerUi"></ul>
-		</div>
+	<g:HTMLPanel addStyleNames="{local_res.css.statisticsbox} {local_res.css.box}">
+		<div class="{local_res.css.box_header}"><ui:text from="{i18n.statistics}"/></div>
+		<ul class="{local_res.css.box_content} {res.mediaCss.column}" ui:field="itemContainerUi"></ul>
 	</g:HTMLPanel>
 </ui:UiBinder>
