@@ -19,7 +19,10 @@
     <div class="{local_res.css.standings_list}" style="display: none;">
       <div class="{res.mediaCss.grid} {local_res.css.standingsHeader}">
         <a ui:field="headerLinkUi" class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.standingsHeaderLink}">
-          <div class="{local_res.css.standingsHeaderTitle}" ui:field="headerTitleUi" />
+          <div>
+            <span class="{local_res.css.standingsHeaderTitle}" ui:field="headerTitleUi" />
+            <span class="{res.mainCss.label}" style="display: none;" ui:field="headerLabelUi" />
+          </div>
           <div class="{local_res.css.standingsHeaderArrow}" ui:field="headerArrowUi" />
         </a>
       </div>

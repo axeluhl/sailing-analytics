@@ -5,16 +5,19 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class StandingsList extends Widget implements RefreshableWidget<GetMiniLeaderboardDTO> {
     interface MyUiBinder extends UiBinder<Element, StandingsList> {
@@ -24,7 +27,8 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     private static final StringMessages i18n = StringMessages.INSTANCE;
     
     @UiField AnchorElement headerLinkUi;
-    @UiField DivElement headerTitleUi;
+    @UiField SpanElement headerTitleUi;
+    @UiField SpanElement headerLabelUi;
     @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
     @UiField DivElement noResultsUi;
@@ -48,6 +52,8 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         scoreInformationUi.removeAllChildren();
         getElement().getStyle().clearDisplay();
         updateScoreInformation(data);
+        
+        LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
         
         if(data.getItems().isEmpty()) {
             noResultsUi.getStyle().clearDisplay();
