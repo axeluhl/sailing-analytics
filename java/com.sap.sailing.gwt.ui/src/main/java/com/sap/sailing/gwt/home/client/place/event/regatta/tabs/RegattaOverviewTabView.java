@@ -42,7 +42,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @UiField(provided = true)
     RacesListLive racesListLive;
     @UiField(provided = true) EventOverviewStage stage;
-    @UiField StandingsList standingsUi;
+    @UiField(provided = true) StandingsList standingsUi;
     @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
     public RegattaOverviewTabView() {
@@ -64,6 +64,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         racesListLive = new RacesListLive(currentPresenter, false);
         stage = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
+        standingsUi = new StandingsList(currentPresenter.getCtx().getEventDTO().isFinished());
 
         initWidget(ourUiBinder.createAndBindUi(this));
         

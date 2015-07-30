@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.standings;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -19,14 +20,19 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     }
     
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+    private static final StringMessages i18n = StringMessages.INSTANCE;
     
+    @UiField AnchorElement headerLinkUi;
+    @UiField DivElement headerTitleUi;
     @UiField DivElement itemContainerUi;
     @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
 
-    public StandingsList() {
+    public StandingsList(boolean finished) {
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
+        
+        headerTitleUi.setInnerText(finished ? i18n.results() : "TODO: Latest Regatta Standings");
     }
 
     @Override

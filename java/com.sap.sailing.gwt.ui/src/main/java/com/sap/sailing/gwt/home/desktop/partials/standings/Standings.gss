@@ -1,3 +1,36 @@
+div.standingsHeader {
+  background-color: #f2f2f2;
+  padding: 0.666666666666667em;
+  padding-right: 1em;
+  overflow: hidden;
+}
+div.standingsHeader, .standingsHeaderLink, .standingsHeaderLink:HOVER {
+  color: #0a0a0a;
+  text-decoration: none;
+}
+.standingsHeaderTitle {
+  font-size: 1.466666666666667em;
+  font-weight: 700;
+  height: 1.363636363636364em;
+  line-height: 1.363636363636364em;
+}
+.standingsHeaderArrow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  text-align: right;
+  padding: 0.666666666666667em;
+  padding-right: 4.666666666666667em;
+  background-image: url("images/home/arrow-down-grey.png");
+  background-size: 1.333333333333333em 1.333333333333333em;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-transform: rotate(-90deg);
+     -moz-transform: rotate(-90deg);
+      -ms-transform: rotate(-90deg);
+          transform: rotate(-90deg);
+}
 .regattalistitem {
   font-size: 1rem;
   float: left;

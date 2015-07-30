@@ -11,6 +11,10 @@ public interface StandingsResources extends ClientBundle {
     LocalCss css();
 
     public interface LocalCss extends CssResource {
+        String standingsHeader();
+        String standingsHeaderLink();
+        String standingsHeaderTitle();
+        String standingsHeaderArrow();
         String regattalistitem();
         String regattalistitem_table();
         String regattalistitem_tableborderTop();
