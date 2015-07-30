@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,11 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -51,8 +48,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
         View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
         Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
@@ -70,7 +65,20 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
 
+        setLeaderboardImageHeight(view);
+
         return view;
+    }
+
+    private void setLeaderboardImageHeight(View view){
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            RelativeLayout imageLayout = (RelativeLayout) view.findViewById(R.id.image);
+            ViewGroup.LayoutParams layoutParams = imageLayout.getLayoutParams();
+            int displayHeight = getResources().getDisplayMetrics().heightPixels;
+            // calculate 1/3 of display height
+            layoutParams.height = displayHeight / 3;
+            imageLayout.setLayoutParams(layoutParams);
+        }
     }
 
     private void checkAndSwitchToThankYouScreenIfRegattaOver() {

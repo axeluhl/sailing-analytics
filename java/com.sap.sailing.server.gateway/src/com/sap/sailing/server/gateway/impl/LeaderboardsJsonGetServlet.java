@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 
@@ -21,8 +20,7 @@ public class LeaderboardsJsonGetServlet extends AbstractJsonHttpServlet {
         JSONArray jsonLeaderboards = new JSONArray();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (String leaderboardName : leaderboards.keySet()) {
-            if(!leaderboardName.equals(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME))
-                jsonLeaderboards.add(leaderboardName);
+            jsonLeaderboards.add(leaderboardName);
         }
         setJsonResponseHeader(resp);
         jsonLeaderboards.writeJSONString(resp.getWriter());

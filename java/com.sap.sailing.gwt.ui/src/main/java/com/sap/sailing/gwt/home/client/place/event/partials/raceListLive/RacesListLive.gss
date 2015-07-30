@@ -227,7 +227,7 @@ img.race_item_flag {
   width: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
-  border: medium none !important;
+  display: none !important;
 }
 .racesListHideColumn > * {
   display: none !important;

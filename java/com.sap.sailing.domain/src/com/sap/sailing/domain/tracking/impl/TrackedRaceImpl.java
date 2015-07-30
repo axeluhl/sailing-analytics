@@ -273,6 +273,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient Timer cacheInvalidationTimer;
     private transient Object cacheInvalidationTimerLock;
+    
+    /**
+     * handled by {@link #suspendAllCachesNotUpdatingWhileLoading()} and {@link #resumeAllCachesNotUpdatingWhileLoading()}.
+     */
+    private boolean cachesSuspended;
+    
+    /**
+     * Whether during {@link #cachesSuspended suspended caches mode} the maneuver re-calculation was triggered; will lead
+     * to triggering the maneuver re-calculation when caches are {@link #resumeAllCachesNotUpdatingWhileLoading() resumed}.
+     */
+    private boolean triggerManeuverCacheInvalidationForAllCompetitors;
 
     /**
      * Keys are the {@link RaceLog#getId() IDs} of the race logs that are stored as values.
@@ -605,11 +616,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
-        triggerManeuverCacheRecalculationForAllCompetitors();
-        logger.info("Deserialized race " + getRace().getName());
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
         adjustStructureToCourse();
+        triggerManeuverCacheRecalculationForAllCompetitors();
+        logger.info("Deserialized race " + getRace().getName());
     }
 
     /**
@@ -625,6 +636,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private void adjustStructureToCourse() throws PatchFailedException {
         final TrackedRaceAsWaypointList trackedRaceAsWaypointList = new TrackedRaceAsWaypointList(this);
         Patch<Waypoint> diff = DiffUtils.diff(trackedRaceAsWaypointList, getRace().getCourse().getWaypoints());
+        if (!diff.isEmpty()) {
+            logger.warning("Found inconsistency between race's course ("+getRace().getCourse()+
+                    ") and TrackedRace's structures in "+this+"; fixing");
+        }
         diff.applyToInPlace(trackedRaceAsWaypointList);
     }
 
@@ -2346,18 +2361,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void triggerManeuverCacheRecalculationForAllCompetitors() {
-        final List<Competitor> shuffledCompetitors = new ArrayList<>();
-        for (Competitor competitor : (getRace().getCompetitors())) {
-            shuffledCompetitors.add(competitor);
-        }
-        Collections.shuffle(shuffledCompetitors);
-        for (Competitor competitor : shuffledCompetitors) {
-            triggerManeuverCacheRecalculation(competitor);
+        if (cachesSuspended) {
+            triggerManeuverCacheInvalidationForAllCompetitors = true;
+        } else {
+            final List<Competitor> shuffledCompetitors = new ArrayList<>();
+            for (Competitor competitor : (getRace().getCompetitors())) {
+                shuffledCompetitors.add(competitor);
+            }
+            Collections.shuffle(shuffledCompetitors);
+            for (Competitor competitor : shuffledCompetitors) {
+                triggerManeuverCacheRecalculation(competitor);
+            }
         }
     }
 
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
+        if (cachesSuspended) {
+            triggerManeuverCacheInvalidationForAllCompetitors = true;
+        } else {
+            maneuverCache.triggerUpdate(competitor, /* updateInterval */null);
+        }
     }
 
     private com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
@@ -3032,6 +3055,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
+        cachesSuspended = true;
+        for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
+            competitorTrack.suspendValidityCaching();
+        }
+        for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
+            markTrack.suspendValidityCaching();
+        }
         if (markPassingCalculator != null) {
             markPassingCalculator.suspend();
         }
@@ -3040,10 +3070,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void resumeAllCachesNotUpdatingWhileLoading() {
+        cachesSuspended = false;
+        for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
+            competitorTrack.resumeValidityCaching();
+        }
+        for (GPSFixTrack<Mark, GPSFix> markTrack : markTracks.values()) {
+            markTrack.resumeValidityCaching();
+        }
         if (markPassingCalculator != null) {
             markPassingCalculator.resume();
         }
         crossTrackErrorCache.resume();
+        if (triggerManeuverCacheInvalidationForAllCompetitors) {
+            triggerManeuverCacheRecalculationForAllCompetitors();
+        }
         maneuverCache.resume();
     }
 
