@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaActivity;
@@ -17,6 +16,10 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -26,10 +29,10 @@ public class EventActivityProxy extends AbstractActivityProxy {
     private AbstractEventPlace place;
     private EventContext ctx;
     private EventClientFactory clientFactory;
-    private HomePlacesNavigator homePlacesNavigator;
+    private DesktopPlacesNavigator homePlacesNavigator;
 
     public EventActivityProxy(AbstractEventPlace place, EventClientFactory clientFactory,
-            HomePlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = this.place.getCtx();
@@ -43,7 +46,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         } else {
             final UUID eventUUID = UUID.fromString(ctx.getEventId());
             
-            clientFactory.getHomeService().getEventViewById(eventUUID, new AsyncCallback<EventViewDTO>() {
+            clientFactory.getDispatch().execute(new GetEventViewAction(eventUUID), new AsyncCallback<EventViewDTO>() {
                 @Override
                 public void onSuccess(final EventViewDTO event) {
                     ctx.updateContext(event);
@@ -132,6 +135,18 @@ public class EventActivityProxy extends AbstractActivityProxy {
             // The media page for multi regatta events is on event level only but not on regatta level
             return new MultiregattaMediaPlace(new EventContext(ctx).withRegattaId(null));
         }
+        
+        if(place instanceof LatestNewsPlace) {
+            if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+                return new MultiregattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            }
+            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+        }
+        
+        if(place instanceof MiniLeaderboardPlace) {
+            return new RegattaLeaderboardPlace(place.getCtx());
+        }
+        
         // no adjustment necessary
         return place;
     }

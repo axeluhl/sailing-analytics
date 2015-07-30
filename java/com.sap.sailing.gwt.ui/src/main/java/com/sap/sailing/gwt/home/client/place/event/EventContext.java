@@ -77,12 +77,13 @@ public class EventContext {
             return regattaId;
         }
         if(eventDTO != null && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
-            return eventDTO.getRegattas().get(0).getDisplayName();
+            return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;
     }
 
     public RegattaMetadataDTO getRegatta() {
+        String regattaId = getRegattaId();
         if(regattaId == null || eventDTO == null) {
             return null;
         }

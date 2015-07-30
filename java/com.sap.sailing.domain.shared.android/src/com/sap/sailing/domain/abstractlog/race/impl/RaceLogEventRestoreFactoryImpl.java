@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
@@ -46,6 +48,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl implements RaceLogEventRestoreFactory {
@@ -58,7 +61,7 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime) {
+            Serializable id, List<Competitor> involvedBoats, int passId, TimePoint startTime, RaceLogRaceStatus nextStatue) {
         return new RaceLogStartTimeEventImpl(createdAt, author, logicalTimePoint, id, involvedBoats, passId, startTime);
     }
 
@@ -186,5 +189,13 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId, List<Competitor> competitors, int passId,
             AdditionalScoringInformationType informationType) {
         return new RaceLogAdditionalScoringInformationEventImpl(createdAt, author, logicalTimePoint, pId, competitors, passId, informationType);
+    }
+
+    @Override
+    public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint createdAt,
+            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> involvedBoats,
+            int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference, RaceLogRaceStatus nextStatus) {
+        return new RaceLogDependentStartTimeEventImpl(createdAt, author, logicalTimePoint, id, involvedBoats, passId,
+                dependentOnRace, startTimeDifference);
     }
 }

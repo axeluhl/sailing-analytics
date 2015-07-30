@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -93,6 +94,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -194,7 +197,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference);
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference, RankingMetrics rankingMetricType);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
 
@@ -205,7 +208,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference);
     
-    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+    List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
+            List<Pair<String, Integer>> columnNames);
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
@@ -291,13 +295,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
-            String logoImageURL, Iterable<String> imageURLs, Iterable<String> videoURLs,
-            Iterable<String> sponsorImageURLs) throws Exception;
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, Iterable<String> imageURLs,
-            Iterable<String> videoURLs, Iterable<String> sponsorImageURLs, String logoImageURL, String officialWebsiteURL) throws Exception;
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     void removeEvent(UUID eventId);
 
@@ -405,7 +407,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigurations);
     
     DataImportProgress getImportOperationProgress(UUID id);
 
@@ -612,4 +614,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
+
+    RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
 }

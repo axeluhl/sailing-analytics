@@ -7,7 +7,9 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.confidence.Weigher;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
@@ -27,6 +29,7 @@ import com.sap.sse.common.Util;
  */
 public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 10000; // makes for a 5s half-side interval
+    static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(40);
 
     /**
      * A listener is notified whenever a new fix is added to this track
@@ -148,5 +151,20 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      * @return an iterator of the positions, in the same order as the <code>timeds</code> are provided
      */
     Iterator<Position> getEstimatedPositions(Iterable<Timed> timeds, boolean extrapolate);
+
+    /**
+     * When a {@link TrackedRace} moves into state {@link TrackedRaceStatusEnum#LOADING}, it shall call
+     * this method on all its tracks to allow them to skip validity cache updates which, when done at massive
+     * scale, are too expensive because they keep invalidating neighbors' validity and need some time to
+     * find those neighbors. When leading state LOADING, {@link #resumeValidityCaching()} must be called.
+     */
+    void suspendValidityCaching();
+
+    /**
+     * When a {@link TrackedRace} moves out of state {@link TrackedRaceStatusEnum#LOADING}, it shall call
+     * this method on all its tracks to allow them to invalidate all validity caching so far in order to
+     * have everything re-calculated when needed.
+     */
+    void resumeValidityCaching();
 
 }

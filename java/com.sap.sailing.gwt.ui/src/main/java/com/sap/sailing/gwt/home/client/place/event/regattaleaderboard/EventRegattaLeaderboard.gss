@@ -66,9 +66,9 @@
   padding-bottom: 1em;
   border-bottom: 1px solid #ddd;
 }
+
 .regattaleaderboard_meta_scoring,
 .regattaleaderboard_meta_update {
-  margin-top: 1em;
 }
 .regattaleaderboard_meta_scoring_comment,
 .regattaleaderboard_meta_update_comment,
@@ -104,10 +104,19 @@
   background-color: #f0ab00;
 }
 
+.regattaleaderboard_meta_liverace {
+  color: red;
+  font-weight: 600;
+}
 
 .regattaleaderboard_meta_reload:hover {
   background-color: #909090;
 }
+
+.regattaleaderboard_meta_reload_live:hover {
+  background-color: #ffa4a4;
+}
+
 .regattaleaderboard_meta_settings {
   display: inline-block;
   text-align: right;
@@ -217,7 +226,7 @@
   table-layout: fixed;
 }
 .marginFix {
-  margin-top:2rem;
+  margin-top:0.5rem;
 }
 .letItScroll {
   overflow-x: auto;

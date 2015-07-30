@@ -20,12 +20,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogEventWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogStartTimeEventWithTransformationSupport;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.operationaltransformation.OperationalTransformer;
 import com.sap.sse.operationaltransformation.Peer;
-import com.sap.sse.operationaltransformation.PeerImpl;
 import com.sap.sse.operationaltransformation.Peer.Role;
+import com.sap.sse.operationaltransformation.PeerImpl;
 
 public class RaceLogOperationalTransformationTest {
     private RaceLog raceLogClient1;
@@ -136,7 +137,7 @@ public class RaceLogOperationalTransformationTest {
     public void testConflictingApplyServerWins() {
         Calendar cServer = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTimeServer = new MillisecondsTimePoint(cServer.getTime());
-        final MillisecondsTimePoint createdAt = MillisecondsTimePoint.now();
+        final TimePoint createdAt = MillisecondsTimePoint.now();
         {
             RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
                     author, startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */1,

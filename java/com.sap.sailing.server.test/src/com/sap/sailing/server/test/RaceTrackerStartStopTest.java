@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -78,13 +80,13 @@ public class RaceTrackerStartStopTest {
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         regatta.addRace(raceDef1);
         trackedRegatta1.createTrackedRace(raceDef1, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
         regatta.addRace(raceDef2);
         trackedRegatta1.createTrackedRace(raceDef2, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
         regatta.addRace(raceDef3);
         trackedRegatta1.createTrackedRace(raceDef3, Collections.<Sideline> emptyList(), /* windStore */ EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
-                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false);
+                /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
         Set<RaceDefinition> raceDefinitionSetRace2 = new HashSet<RaceDefinition>();
@@ -123,10 +125,15 @@ public class RaceTrackerStartStopTest {
         // of the tracked event
         assertNotNull(regatta.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            if (trackedRace.getRace().getName().equals(RACENAME2)) {
-                foundTrackedRaceForRaceDef2 = true;
+        trackedRegatta.lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                if (trackedRace.getRace().getName().equals(RACENAME2)) {
+                    foundTrackedRaceForRaceDef2 = true;
+                }
             }
+        } finally {
+            trackedRegatta.unlockTrackedRacesAfterRead();
         }
         assertTrue(foundTrackedRaceForRaceDef2);
         // The raceTracker2 and raceTracker3 should currently not be in track mode. 
@@ -161,10 +168,15 @@ public class RaceTrackerStartStopTest {
         // from the tracked event
         assertNull(regatta.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-            if (trackedRace.getRace().getName().equals(RACENAME2)) {
-                foundTrackedRaceForRaceDef2 = true;
+        trackedRegatta.lockTrackedRacesForRead();
+        try {
+            for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                if (trackedRace.getRace().getName().equals(RACENAME2)) {
+                    foundTrackedRaceForRaceDef2 = true;
+                }
             }
+        } finally {
+            trackedRegatta.unlockTrackedRacesAfterRead();
         }
         assertFalse(foundTrackedRaceForRaceDef2);
         // The trackers map should still contain the raceTrackers

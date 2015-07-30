@@ -10,17 +10,16 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
@@ -28,27 +27,26 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
-public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKey, AngleClusterPolarClusterKey {
+public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, AngleClusterPolarClusterKey {
 
     private final GPSFixMoving fix;
     private final TrackedRace race;
     private final Competitor competitor;
-    private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
     private final ClusterGroup<Bearing> angleClusterGroup;
-    private final BearingWithConfidence<Integer> trueWindAngle;
+    private final BearingWithConfidence<Void> absTrueWindAngle;
     private final WindWithConfidence<Pair<Position, TimePoint>> wind;
     private final SpeedWithBearingWithConfidence<TimePoint> boatSpeed;
+    private LegType legType;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
-            ClusterGroup<Speed> windSpeedClusterGroup, ClusterGroup<Bearing> angleClusterGroup) {
+            ClusterGroup<Bearing> angleClusterGroup) {
         this.fix = fix;
         this.race = race;
         this.competitor = competitor;
-        this.windSpeedClusterGroup = windSpeedClusterGroup;
         this.angleClusterGroup = angleClusterGroup;
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
-        this.trueWindAngle = computeTrueWindAngle();
+        this.absTrueWindAngle = computeTrueWindAngleAbsolute();
         this.wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint(), windSourcesToExcludeForSpeed);
         this.boatSpeed = computeBoatSpeed();
     }
@@ -65,27 +63,27 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
         return competitor;
     }
 
-    public BearingWithConfidence<Integer> getAngleToTheWind() {
-        return trueWindAngle;
+    public BearingWithConfidence<Void> getAbsoluteAngleToTheWind() {
+        return absTrueWindAngle;
     }
 
-    private BearingWithConfidence<Integer> computeTrueWindAngle() {
-        SpeedWithBearing boatSpeed = race.getTrack(competitor).getEstimatedSpeed(fix.getTimePoint());
+    private BearingWithConfidence<Void> computeTrueWindAngleAbsolute() {
+        BearingWithConfidenceImpl<Void> result = null;
+        Bearing bearing = null;
+        try {
+            TrackedLegOfCompetitor currentLeg = race.getCurrentLeg(competitor, fix.getTimePoint());
+            if (currentLeg != null) {
+                Bearing realBearing = currentLeg.getBeatAngle(fix.getTimePoint());
+                bearing = realBearing == null ? null : new DegreeBearingImpl(Math.abs(realBearing.getDegrees()));
+            }
+        } catch (NoWindException e) {
+            bearing = null;
+        }
         WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint());
-        
-        BearingWithConfidenceImpl<Integer> result = null;
-        if (wind != null && boatSpeed != null) {
-            Bearing bearing = boatSpeed.getBearing();
-            Bearing difference = wind.getObject().getFrom().getDifferenceTo(bearing);
-            result = new BearingWithConfidenceImpl<Integer>(difference, wind.getConfidence(), 0);
+        if (bearing != null && wind != null) {
+            result = new BearingWithConfidenceImpl<Void>(bearing, wind.getConfidence(), null);
         }
         return result;
-    }
-
-    @Override
-    public Cluster<Speed> getWindSpeedCluster() {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWind();
-        return windWithConfidence == null ? null : windSpeedClusterGroup.getClusterFor(windWithConfidence.getObject());
     }
 
     public WindWithConfidence<Pair<Position, TimePoint>> getWind() {
@@ -134,28 +132,29 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     }
 
     @Override
-    public Tack getTack() {
-        return getTack(getAngleToTheWind().getObject());
-    }
-
-    public static Tack getTack(Bearing angleDifferenceWindToBoat) {
-        return angleDifferenceWindToBoat.getDegrees() <= 0 ? Tack.PORT : Tack.STARBOARD;
-    }
-
-    @Override
     public LegType getLegType() {
-        TimePoint timePoint = fix.getTimePoint();
-        try {
-            final TrackedLeg currentLeg = race.getCurrentLeg(timePoint);
-            return currentLeg==null?null:currentLeg.getLegType(timePoint);
-        } catch (NoWindException e) {
-            return null;
+        LegType result = null;
+        if (legType == null) {
+            TimePoint timePoint = fix.getTimePoint();
+            try {
+                TrackedLegOfCompetitor currentLegOfCompetitor = race.getCurrentLeg(getCompetitor(), timePoint);
+                if (currentLegOfCompetitor != null) {
+                    final TrackedLeg currentLeg = currentLegOfCompetitor.getTrackedLeg();
+                    legType = currentLeg == null ? null : currentLeg.getLegType(timePoint);
+                }
+            } catch (NoWindException e) {
+                legType = null;
+            }
+            result = legType;
+        } else {
+            result = legType;
         }
+        return result;
     }
 
     @Override
     public Cluster<Bearing> getAngleCluster() {
-        return angleClusterGroup.getClusterFor(getAngleToTheWind().getObject());
+        return angleClusterGroup.getClusterFor(getAbsoluteAngleToTheWind().getObject());
     }
 
 }

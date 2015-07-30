@@ -590,6 +590,17 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
      */
     private class CacheInvalidationRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
         private static final long serialVersionUID = -6623310087193133466L;
+        
+        private boolean suspended;
+        
+        public CacheInvalidationRaceChangeListener() {
+            if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                suspended = true;
+                clearCache();
+            } else {
+                suspended = false;
+            }
+        }
 
         @Override
         protected void defaultAction() {
@@ -598,7 +609,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            invalidateForNewWind(wind, windSource);
+            if (!suspended) {
+                invalidateForNewWind(wind, windSource);
+            }
         }
 
         @Override
@@ -654,48 +667,61 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            invalidateForNewWind(wind, windSource);
+            if (!suspended) {
+                invalidateForNewWind(wind, windSource);
+            }
         }
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
-                    .getTimePoint().asMillis() - averagingInterval));
-            TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
-            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            if (!suspended) {
+                long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+                WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
+                        .getTimePoint().asMillis() - averagingInterval));
+                TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
+                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            }
         }
 
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                    suspended = false;
+                }
+            } else if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                suspended = true;
+                clearCache();
+            }
             // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
-            // cache
-            // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
+            // cache upon request. Invalidation during the LOADING phase happens by clearing the entire cache.
         }
 
         @Override
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
                 Iterable<MarkPassing> markPassings) {
-            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-            WindWithConfidence<TimePoint> startOfInvalidation;
-            TimePoint endOfInvalidation;
-            for (MarkPassing markPassing : markPassings) {
-                MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
-                if (oldMarkPassing != markPassing) {
-                    if (oldMarkPassing == null) {
-                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
-                                .getTimePoint().asMillis() - averagingInterval));
-                        endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
-                                + averagingInterval);
-                    } else {
-                        TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(),
-                                markPassing.getTimePoint() };
-                        Arrays.sort(interval);
-                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(
-                                interval[0].asMillis() - averagingInterval));
-                        endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+            if (!suspended) {
+                long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+                WindWithConfidence<TimePoint> startOfInvalidation;
+                TimePoint endOfInvalidation;
+                for (MarkPassing markPassing : markPassings) {
+                    MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
+                    if (oldMarkPassing != markPassing) {
+                        if (oldMarkPassing == null) {
+                            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
+                                    .getTimePoint().asMillis() - averagingInterval));
+                            endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
+                                    + averagingInterval);
+                        } else {
+                            TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(),
+                                    markPassing.getTimePoint() };
+                            Arrays.sort(interval);
+                            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(
+                                    interval[0].asMillis() - averagingInterval));
+                            endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+                        }
+                        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
                     }
-                    scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
                 }
             }
         }
@@ -703,13 +729,15 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             assert fix != null && fix.getTimePoint() != null;
-            // A mark position change can mean a leg type change. The interval over which the wind estimation is
-            // affected
-            // depends on how the GPS track computes the estimated mark position. Ask it:
-            TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
-            TimePoint endOfInvalidation = interval.to();
-            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            if (!suspended) {
+                // A mark position change can mean a leg type change. The interval over which the wind estimation is
+                // affected
+                // depends on how the GPS track computes the estimated mark position. Ask it:
+                TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+                WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
+                TimePoint endOfInvalidation = interval.to();
+                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            }
         }
     }
 

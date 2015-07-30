@@ -24,6 +24,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AdditionalScoringInformationFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
@@ -65,6 +66,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -859,7 +861,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assert event == null;
         assertEquals(new Double(30), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(3), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        RaceState raceStateForRace2 = RaceStateImpl.create(raceLogForRace2, new LogEventAuthorImpl("Simon", 1));
+        RaceState raceStateForRace2 = RaceStateImpl.create(mock(RaceLogResolver.class), raceLogForRace2, new LogEventAuthorImpl("Simon", 1));
         assertFalse(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         raceStateForRace2.setAdditionalScoringInformationEnabled(later.plus(Duration.ONE_MINUTE).plus(Duration.ONE_SECOND), /*enable*/true, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
         assertTrue(raceStateForRace2.isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
@@ -1357,7 +1359,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null);
+                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
         return regatta;
     }
     
@@ -1423,7 +1425,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
-                series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null);
+                series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null, OneDesignRankingMetric::new);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
         List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+6));

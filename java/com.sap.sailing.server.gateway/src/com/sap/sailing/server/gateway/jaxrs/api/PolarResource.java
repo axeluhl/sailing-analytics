@@ -85,16 +85,15 @@ public class PolarResource extends AbstractSailingServerResource {
         StringBuilder stringBuilder = new StringBuilder();
         for (BoatClass boatClass : boatClasses) {
             for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
-                for (Tack tack : new Tack[] { Tack.PORT, Tack.STARBOARD }) {
-                    try {
-                        PolynomialFunction speedFunction = polarDataService.getSpeedRegressionFunction(boatClass, legType, tack);
-                        stringBuilder.append("Speed: " + boatClass + " " + legType + " " + tack + ": " + speedFunction.toString() + "\n");
-                        PolynomialFunction angleFunction = polarDataService.getAngleRegressionFunction(boatClass, legType, tack);
-                        stringBuilder.append("Angle: " + boatClass + " " + legType + " " + tack + ": " + angleFunction.toString() + "\n");
-                    } catch (NotEnoughDataHasBeenAddedException e) {
-                        stringBuilder.append("No data for " + boatClass + " " + legType + " " + tack + "\n");
-                    }
-                }
+               try {
+                   PolynomialFunction speedFunction = polarDataService.getSpeedRegressionFunction(boatClass, legType);
+                   stringBuilder.append("Speed: " + boatClass + " " + legType + ": " + speedFunction.toString() + "\n");
+                   PolynomialFunction angleFunction = polarDataService.getAngleRegressionFunction(boatClass, legType);
+                   stringBuilder.append("Angle: " + boatClass + " " + legType + ": " + angleFunction.toString() + "\n");
+               } catch (NotEnoughDataHasBeenAddedException e) {
+                    stringBuilder.append("No data for " + boatClass + " " + legType + "\n");
+               }
+                
             }
             for (double trueWindAngle = -177.5; trueWindAngle < 180; trueWindAngle = trueWindAngle + 5) {
                 try {
@@ -123,7 +122,7 @@ public class PolarResource extends AbstractSailingServerResource {
         try {
             PolarDataService service = getService().getPolarDataService();
             SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
-                    windSpeed, legType, tack, true);
+                    windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
                     + speedWithBearing.getConfidence();

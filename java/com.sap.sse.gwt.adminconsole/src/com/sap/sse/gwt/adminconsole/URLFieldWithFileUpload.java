@@ -5,6 +5,9 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -15,6 +18,7 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -29,7 +33,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Axel Uhl (d043530)
  *
  */
-public class URLFieldWithFileUpload extends Composite {
+public class URLFieldWithFileUpload extends Composite implements HasValue<String> {
     private final TextBox urlTextBox;
     
     private final FileUpload fileUploadField;
@@ -37,6 +41,8 @@ public class URLFieldWithFileUpload extends Composite {
     private String uri;
 
     private final Button removeButton;
+
+    private boolean valueChangeHandlerInitialized = false;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
@@ -107,7 +113,7 @@ public class URLFieldWithFileUpload extends Composite {
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get("file_uri") != null) {
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
-                        urlTextBox.setValue(uri);
+                        setValue(uri, true);
                         removeButton.setEnabled(true);
                         Window.alert(stringMessages.uploadSuccessful());
                     } else {
@@ -137,6 +143,45 @@ public class URLFieldWithFileUpload extends Composite {
             urlTextBox.setValue(imageURL);
             uri = imageURL;
             removeButton.setEnabled(true);
+        }
+    }
+    
+    public void setFocus(boolean focused) {
+        urlTextBox.setFocus(focused);
+    }
+
+    private HandlerRegistration addChangeHandler(ChangeHandler handler) {
+        return addDomHandler(handler, ChangeEvent.getType());
+      }
+    
+    @Override
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
+        if (!valueChangeHandlerInitialized) {
+            valueChangeHandlerInitialized = true;
+            addChangeHandler(new ChangeHandler() {
+                public void onChange(ChangeEvent event) {
+                    ValueChangeEvent.fire(URLFieldWithFileUpload.this, getValue());
+                }
+            });
+        }
+        return addHandler(handler, ValueChangeEvent.getType());
+      }
+
+    @Override
+    public String getValue() {
+        return getURL();
+    }
+
+    @Override
+    public void setValue(String value) {
+        setURL(value);
+    }
+
+    @Override
+    public void setValue(String value, boolean fireEvents) {
+        setValue(value);
+        if (fireEvents) {
+            ValueChangeEvent.fire(this, value);
         }
     }
 }

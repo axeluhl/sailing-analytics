@@ -1,9 +1,13 @@
 package com.sap.sailing.server.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,7 +34,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.media.MediaTrack.MimeType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -49,10 +52,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import static org.junit.Assert.*;
-
-import static org.mockito.Mockito.*;
+import com.sap.sse.common.media.MimeType;
 
 public class MediaMasterDataExportTest {
     
@@ -165,7 +165,7 @@ public class MediaMasterDataExportTest {
         Map<String, Regatta> regattaForRaceIdString = Collections.emptyMap();
         GPSFixStore gpsFixStore = mock(GPSFixStore.class);
         boolean exportWind = false;
-        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind);
+        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind, new HashMap<>());
         return topLevelMasterData;
     }
 

@@ -1,7 +1,11 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -14,9 +18,10 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -24,13 +29,25 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class SpeedRegressionPerAngleClusterProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>{
-    
-private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
+public class SpeedRegressionPerAngleClusterProcessor implements
+        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
+   
+    private static final long serialVersionUID = 3279917556091599077L;
+
+    private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
     
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
+    
+    private final Map<BoatClass, Long> fixCountPerBoatClass = new HashMap<>();
 
     private final ClusterGroup<Bearing> angleClusterGroup;
+
+    /**
+     * FIXME make sure listeners and replication interact correctly
+     */
+    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+
+    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
     
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
@@ -46,6 +63,13 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
         GroupKey key = element.getKey();
         IncrementalLeastSquares regression;
+        BoatClass boatClass = element.getDataEntry().getBoatClass();
+        synchronized (fixCountPerBoatClass) {
+            if (!fixCountPerBoatClass.containsKey(boatClass)) {
+                fixCountPerBoatClass.put(boatClass, 0L);
+            }
+            fixCountPerBoatClass.put(boatClass, fixCountPerBoatClass.get(boatClass) + 1);
+        }
         synchronized (regressions) {
             regression = regressions.get(key);
             if (regression == null) {
@@ -55,6 +79,13 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
+        availableBoatClasses.add(boatClass);
+        Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
+        if (listenersForBoatClass != null) {
+            for (PolarsChangedListener listener : listenersForBoatClass) {
+                listener.polarsChanged();
+            }
+        }
     }
     
     /**
@@ -66,18 +97,29 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
         double speedSum = 0;
         double numberOfSpeeds = 0;
-        for (int i = -5; i <= 5; i++) {
-            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle.getDegrees() + i));
+        long fixCount = 0;
+        for (int i = -2; i <= 2; i++) {
+            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
             if (regressions.containsKey(key)) {
-                speedSum += regressions.get(key).getOrCreatePolynomialFunction().value(windSpeed.getKnots());
-                numberOfSpeeds++;
+                IncrementalLeastSquares incrementalLeastSquares = regressions.get(key);
+                fixCount = fixCount + incrementalLeastSquares.getNumberOfAddedPoints();
+                if (fixCount > 10) {
+                    speedSum += incrementalLeastSquares.getOrCreatePolynomialFunction().value(windSpeed.getKnots());
+                    numberOfSpeeds++;
+                }
             } 
         }
-        if (numberOfSpeeds < 1) {
+        fixCount = (long) (fixCount / numberOfSpeeds);
+        long fixCountOverall = 0;
+        if (numberOfSpeeds < 2 || fixCount < 10) {
             throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
+        } else {
+            synchronized (fixCountPerBoatClass) {
+                fixCountOverall = fixCountPerBoatClass.get(boatClass);
+             }
         }
         Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
-        return new SpeedWithConfidenceImpl<Void>(speed, /*FIXME*/ 0.5, null);
+        return new SpeedWithConfidenceImpl<Void>(speed, Math.min(1, 5.0 * ((double) fixCount / fixCountOverall)), null);
     }
     
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {
@@ -123,6 +165,14 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
         return polynomialFunction;
     }
     
+    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
+    
+    Set<BoatClass> getAvailableBoatClasses() {
+        return availableBoatClasses;
+    }
+    
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
      // TODO Auto-generated method stub
@@ -161,6 +211,10 @@ private static final Logger logger = Logger.getLogger(CubicRegressionPerCoursePr
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public ClusterGroup<Bearing> getAngleCluster() {
+        return angleClusterGroup;
     }
 
 }

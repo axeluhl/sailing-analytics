@@ -23,6 +23,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -41,6 +43,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
@@ -61,10 +64,11 @@ public class TopLevelMasterData implements Serializable {
     private final Set<WindTrackMasterData> windTrackMasterData;
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
     private final Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes;
+    private final Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks,
-            GPSFixStore gpsFixStore, boolean exportWind) {
+            GPSFixStore gpsFixStore, boolean exportWind, Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
         this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(gpsFixStore);
@@ -73,6 +77,7 @@ public class TopLevelMasterData implements Serializable {
         } else {
             this.windTrackMasterData = new HashSet<WindTrackMasterData>();
         }
+        this.deviceConfigurations = deviceConfigurations;
         this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
         this.filteredMediaTracks = new HashSet<MediaTrack>();
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
@@ -255,7 +260,15 @@ public class TopLevelMasterData implements Serializable {
     }
 
     public void setMasterDataExportFlagOnRaceColumns(boolean flagValue) {
-        for (LeaderboardGroup group : leaderboardGroups) {
+        // collect all leaderboard groups for all events that will be touched during serialization
+        final Set<LeaderboardGroup> allLeaderboardGroups = new HashSet<>();
+        allLeaderboardGroups.addAll(leaderboardGroups);
+        for (Entry<LeaderboardGroup, Set<Event>> i : eventForLeaderboardGroup.entrySet()) {
+            for (Event e : i.getValue()) {
+                Util.addAll(e.getLeaderboardGroups(), allLeaderboardGroups);
+            }
+        }
+        for (LeaderboardGroup group : allLeaderboardGroups) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     raceColumn.setMasterDataExportOngoingThreadFlag(true);
@@ -334,5 +347,9 @@ public class TopLevelMasterData implements Serializable {
 
     public Map<DeviceIdentifier, Set<GPSFix>> getRaceLogTrackingFixes() {
         return raceLogTrackingFixes;
+    }
+
+    public Map<DeviceConfigurationMatcher, DeviceConfiguration> getDeviceConfigurations() {
+        return deviceConfigurations;
     }
 }

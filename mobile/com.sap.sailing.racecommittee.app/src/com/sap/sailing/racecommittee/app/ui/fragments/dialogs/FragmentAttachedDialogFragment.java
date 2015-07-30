@@ -11,7 +11,7 @@ public abstract class FragmentAttachedDialogFragment extends AttachedDialogFragm
             return (DialogListenerHost) targetFragment;
         }
         throw new IllegalStateException(String.format("Instance of %s must be attached to instances of %s.",
-                FragmentAttachedDialogFragment.class.getName(), DialogListenerHost.class.getName()));
+                targetFragment.getClass().getName(), DialogListenerHost.class.getName()));
     }
 
 }

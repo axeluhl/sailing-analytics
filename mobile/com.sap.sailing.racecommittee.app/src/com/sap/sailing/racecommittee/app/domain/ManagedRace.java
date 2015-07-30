@@ -1,65 +1,107 @@
 package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
-    
+
     /**
      * @return the identifier of the race.
      */
-    public ManagedRaceIdentifier getIdentifier();
+    ManagedRaceIdentifier getIdentifier();
 
     /**
      * @return the state of the race.
      */
-    public RaceState getState();
+    RaceState getState();
 
     /**
      * Shortcut to {@link RaceState#getRaceLog()} of {@link ManagedRace#getState()}.
-     * 
+     *
      * @return the log of the race.
      */
-    public RaceLog getRaceLog();
+    RaceLog getRaceLog();
 
     /**
      * Shortcut to {@link RaceState#getStatus()} of {@link ManagedRace#getState()}.
-     * 
+     *
      * @return the status of the race's state.
      */
-    public RaceLogRaceStatus getStatus();
+    RaceLogRaceStatus getStatus();
 
     /**
      * the current course of the race
-     * 
+     *
      * @return the course of the race
      */
-    public CourseBase getCourseDesign();
+    CourseBase getCourseDesign();
 
     /**
      * returns the list of competitors for this race
-     * 
+     *
      * @return list of competitors
      */
-    public Collection<Competitor> getCompetitors();
+    Collection<Competitor> getCompetitors();
 
-    public CourseBase getCourseOnServer();
+    /**
+     * returns the list of markers to display on the racemap
+     *
+     * @return list of Markers
+     */
+    List<MapMarker> getMapMarkers();
 
-    public void setCourseOnServer(CourseBase course);
+    CourseBase getCourseOnServer();
+
+    void setCourseOnServer(CourseBase course);
 
     /**
      * sets the list of competitors for a race. As the competitors are retrieved later from the backend, the list of
      * competitors has to be settable.
-     * 
+     *
      * @param competitors
      *            the retrieved list of competitors for this race
      */
-    public void setCompetitors(Collection<Competitor> competitors);
+    void setCompetitors(Collection<Competitor> competitors);
+
+    /**
+     * sets the list of mapItems ( buoys, other boats ) for a race. As the mapItems are retrieved later from the backend, the list of
+     * mapItems has to be settable.
+     *
+     * @param markers
+     *            the retrieved list of mapItems for this race
+     */
+    void setMapMarkers(List<MapMarker> markers);
+
+    /**
+     * Returns true if {@link RaceState} has been calculated and set
+     *
+     * @return true, if {@link RaceState} has been set
+     */
+    boolean calculateRaceState();
+
+    /**
+     * sets the finished time, if the finished time is after the finishing time; check the {@link Result} for error message
+     *
+     * @param finishedTime finished time
+     * @return result object
+     */
+    Result setFinishedTime(TimePoint finishedTime);
+
+    /**
+     * sets the finishing time, if the finishing time is after the start time; check the {@link Result} for error message
+     *
+     * @param finishingTime finishing time
+     * @return result object
+     */
+    Result setFinishingTime(TimePoint finishingTime);
 }

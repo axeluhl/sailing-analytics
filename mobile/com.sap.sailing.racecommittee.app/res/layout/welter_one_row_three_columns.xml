@@ -6,26 +6,29 @@
     android:background="@drawable/list_selector"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="6dip" >
+    android:paddingLeft="6dip">
 
     <LinearLayout
         android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne"
-        android:layout_width="100dp" 
+        android:layout_width="100dp"
         android:layout_height="match_parent"
         android:gravity="center_horizontal|center_vertical"
         android:orientation="vertical">
-        <ImageView android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.imgImage"
-		    android:layout_width="32dp"
-		    android:layout_height="32dp" 
-		    android:gravity="center"
-		    android:contentDescription="@string/markImage"/>
+
+        <ImageView
+            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.imgImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:contentDescription="@string/markImage"
+            android:gravity="center" />
+
         <TextView
             android:id="@+id/Welter.Cell.OneRowThreeColumns.columnOne.txtLeftMark"
             android:layout_width="100dp"
             android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
             android:padding="5dp"
             android:textColor="@drawable/text_selector"
-            android:gravity="center_horizontal|center_vertical"
             android:textSize="5pt" />
     </LinearLayout>
 
@@ -33,30 +36,32 @@
         android:id="@+id/Welter.Cell.OneRowThreeColumns.txtRoundingDirection"
         android:layout_width="100dp"
         android:layout_height="match_parent"
-        android:padding="5dp"
         android:gravity="center"
+        android:padding="5dp"
         android:textColor="@drawable/text_selector"
         android:textSize="7pt" />
-    
+
     <LinearLayout
         android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree"
         android:layout_width="100dp"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
-        <ImageView android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.imgImage"
-		    android:layout_width="32dp"
-		    android:layout_height="32dp"
-		    android:gravity="center_horizontal|center_vertical" 
-		    android:contentDescription="@string/markImage"/>
-        <TextView
-        android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.txtRightMark"
-        android:layout_width="100dp"
-        android:layout_height="match_parent"
-        android:padding="5dp"
-        android:gravity="center_horizontal|center_vertical"
-        android:textColor="@drawable/text_selector"
-        android:textSize="5pt" />
-    </LinearLayout>
 
+        <ImageView
+            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.imgImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:contentDescription="@string/markImage"
+            android:gravity="center_horizontal|center_vertical" />
+
+        <TextView
+            android:id="@+id/Welter.Cell.OneRowThreeColumns.columnThree.txtRightMark"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
+            android:padding="5dp"
+            android:textColor="@drawable/text_selector"
+            android:textSize="5pt" />
+    </LinearLayout>
 </LinearLayout>

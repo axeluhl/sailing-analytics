@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    buildToolsVersion "22.0.0"
-    compileSdkVersion 22
+    buildToolsVersion rootProject.ext.buildTools
+    compileSdkVersion rootProject.ext.compileSdk
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 22
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
     }
 
     sourceSets {
@@ -14,6 +14,10 @@ android {
             manifest.srcFile "AndroidManifest.xml"
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
+        }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
         }
     }
 
@@ -35,7 +39,7 @@ android {
 
 dependencies {
     /* support libraries */
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
 
     /* local dependencies */
     compile project(':java:com.sap.sailing.domain.common')
@@ -45,7 +49,12 @@ dependencies {
     compile project(':java:org.json.simple')
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:6.5.87"
+    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* JVM tests */
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
 }

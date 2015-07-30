@@ -10,9 +10,12 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -20,9 +23,12 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
@@ -49,6 +55,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -78,6 +85,20 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     @Override
     public RaceLogStartTimeEvent createStartTimeEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, TimePoint startTime) {
         return createStartTimeEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, startTime);
+    }
+    
+    @Override
+    public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable id, List<Competitor> involvedBoats, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
+        return new RaceLogDependentStartTimeEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, involvedBoats,
+                passId, dependentOnRace, startTimeDifference);
+    }
+
+    @Override
+    public RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
+        return createDependentStartTimeEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId,
+                dependentOnRace, startTimeDifference);
     }
 
     @Override
@@ -281,16 +302,28 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public RaceLogEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+    public RaceLogFixedMarkPassingEvent createFixedMarkPassingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable id, List<Competitor> competitors, Integer passId, TimePoint ofFixedPassing, Integer zeroBasedIndexOfWaypoint) {
-        return new FixedMarkPassingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
+        return new RaceLogFixedMarkPassingEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, ofFixedPassing,
                 zeroBasedIndexOfWaypoint);
     }
 
     @Override
-    public RaceLogEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
+    public RaceLogSuppressedMarkPassingsEvent createSuppressedMarkPassingsEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId, Integer zeroBasedIndexOfFirstSuppressedWaypoint) {
-        return new SuppressedMarkPassingsEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId,
+        return new RaceLogSuppressedMarkPassingsEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId,
                 zeroBasedIndexOfFirstSuppressedWaypoint);
+    }
+    
+    @Override
+    public RaceLogStartOfTrackingEvent createStartOfTrackingEvent(TimePoint startOfTracking, AbstractLogEventAuthor author, Serializable id,
+            List<Competitor> competitors, Integer passId) {
+        return new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), author, startOfTracking, id, competitors, passId);
+    }
+    
+    @Override
+    public RaceLogEndOfTrackingEvent createEndOfTrackingEvent(TimePoint endOfTracking, AbstractLogEventAuthor author, Serializable id,
+            List<Competitor> competitors, Integer passId) {
+        return new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), author, endOfTracking, id, competitors, passId);
     }
 }

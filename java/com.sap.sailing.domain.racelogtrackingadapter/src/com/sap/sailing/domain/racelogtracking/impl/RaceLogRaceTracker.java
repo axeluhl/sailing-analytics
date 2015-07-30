@@ -18,8 +18,11 @@ import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectio
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
@@ -98,24 +101,26 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
     private final DynamicTrackedRegatta regatta;
+    private final RaceLogResolver raceLogResolver;
     private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
 
-    private ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
 
-    private Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
-    private Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
+    private final Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
+    private final Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
 
     private DynamicTrackedRace trackedRace;
 
     private static final Logger logger = Logger.getLogger(RaceLogRaceTracker.class.getName());
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            GPSFixStore gpsFixStore) {
+            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
         this.params = params;
         this.windStore = windStore;
         this.gpsFixStore = gpsFixStore;
         this.regatta = regatta;
+        this.raceLogResolver = raceLogResolver;
 
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
@@ -139,6 +144,14 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     @Override
                     public void visit(RaceLogCourseDesignChangedEvent event) {
                         RaceLogRaceTracker.this.onCourseDesignChangedEvent(event);
+                    }
+                    @Override
+                    public void visit(RaceLogStartOfTrackingEvent event) {
+                        RaceLogRaceTracker.this.onStartOfTrackingEvent(event);
+                    }
+                    @Override
+                    public void visit(RaceLogEndOfTrackingEvent event) {
+                        RaceLogRaceTracker.this.onEndOfTrackingEvent(event);
                     }
                 };
                 visitors.put(log, visitor);
@@ -386,22 +399,27 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             startTracking(event);
         }
     }
+    
+    private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
+        trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+    }
+    
+    private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
+        trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+    }
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
-        if (trackedRace == null)
-            return;
-
-        CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
-        List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
-
-        for (Waypoint waypoint : base.getWaypoints()) {
-            update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
-        }
-
-        try {
-            trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
-        } catch (PatchFailedException e) {
-            logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+        if (trackedRace != null) {
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
+            for (Waypoint waypoint : base.getWaypoints()) {
+                update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
+            }
+            try {
+                trackedRace.getRace().getCourse().update(update, params.getDomainFactory());
+            } catch (PatchFailedException e) {
+                logger.log(Level.WARNING, "Could not update course for race " + trackedRace.getRace().getName());
+            }
         }
     }
 
@@ -445,7 +463,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
         trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
-                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true);
+                boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
 
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
         

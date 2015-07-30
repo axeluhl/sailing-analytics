@@ -1,9 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -16,7 +14,6 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -25,7 +22,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
@@ -34,6 +31,8 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
+    private static final long serialVersionUID = 9016357546663534562L;
+
     private static final Logger logger = Logger.getLogger(MovingAverageProcessorImpl.class.getName());
 
     private final Map<GroupKey, MovingAverageBoatSpeedEstimator> boatSpeedEstimators = new HashMap<>();
@@ -41,10 +40,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     private final Map<GroupKey, AverageAngleContainer> averageAngleContainers = new HashMap<>();
 
     private final ClusterGroup<Speed> speedClusterGroup;
-
-    private final Set<BoatClass> availableBoatClasses = new HashSet<>();
-
-
 
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
@@ -77,10 +72,9 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
                     averageAngleContainers.put(key, averageAngleContainer);
                 }
             }
-            BearingWithConfidence<Integer> angleToTheWind = fix.getAngleToTheWind();
+            BearingWithConfidence<Void> angleToTheWind = fix.getAbsoluteAngleToTheWind();
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
             SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
-            availableBoatClasses.add(element.getDataEntry().getBoatClass());
             WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
             double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
             double confidenceForWindBearing = angleToTheWind.getConfidence();
@@ -159,10 +153,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
-    public Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
-    }
-
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
         // TODO Auto-generated method stub
@@ -177,21 +167,20 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
     @Override
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-            Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        SpeedWithBearingWithConfidence<Void> result = estimateSpeedAndAngle(boatClass, windSpeed, legType, tack);
+            Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+        SpeedWithBearingWithConfidence<Void> result = estimateSpeedAndAngle(boatClass, windSpeed, legType);
         return result;
     }
 
-    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
-        GroupKey key = createGroupKey(boatClass, windSpeed, legType, tack);
+    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+        GroupKey key = createGroupKey(boatClass, windSpeed, legType);
         Bearing angleDiffTrueWindToBoat = estimateAngle(key);
         SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(key).getSpeedWithConfidence();
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleDiffTrueWindToBoat);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
     
-    private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType,
-            final Tack tack) {
+    private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType) {
         MovingAveragePolarClusterKey key = new MovingAveragePolarClusterKey() {
 
             @Override
@@ -202,11 +191,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             @Override
             public Cluster<Speed> getWindSpeedCluster() {
                 return speedClusterGroup.getClusterFor(windSpeed);
-            }
-
-            @Override
-            public Tack getTack() {
-                return tack;
             }
 
             @Override
@@ -223,6 +207,11 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             throw new RuntimeException(e);
         }
         return compoundKey;
+    }
+
+    @Override
+    public ClusterGroup<Speed> getSpeedCluster() {
+        return speedClusterGroup;
     }
 
 }

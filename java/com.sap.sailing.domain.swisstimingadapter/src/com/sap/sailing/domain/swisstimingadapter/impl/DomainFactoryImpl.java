@@ -124,7 +124,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 teamMembers.add(person);
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         }
         return result;
     }
@@ -140,7 +141,8 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
-                competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat);
+                competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         return result;
     }
 
@@ -334,10 +336,9 @@ public class DomainFactoryImpl implements DomainFactory {
         Regatta regatta = raceIDToRegattaCache.get(raceID);
         if (regatta != null) {
             Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceID)) {
-                    toRemove.add(race);
-                }
+            RaceDefinition race = regatta.getRaceByName(raceID);
+            if (race != null) {
+                toRemove.add(race);
             }
             for (RaceDefinition raceToRemove : toRemove) {
                 regatta.removeRace(raceToRemove);

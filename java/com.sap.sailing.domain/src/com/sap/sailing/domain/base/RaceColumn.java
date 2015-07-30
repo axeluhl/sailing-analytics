@@ -7,6 +7,7 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Named;
@@ -179,8 +180,6 @@ public interface RaceColumn extends Named {
 
     /**
      * Returns the race log identifier associated with this fleet and race log
-     * @param fleet
-     * @return
      */
     RaceLogIdentifier getRaceLogIdentifier(Fleet fleet);
 
@@ -226,4 +225,6 @@ public interface RaceColumn extends Named {
     boolean hasSplitFleetContiguousScoring();
 
     boolean hasSplitFleets();
+    
+    RaceExecutionOrderProvider getRaceExecutionOrderProvider();
 }

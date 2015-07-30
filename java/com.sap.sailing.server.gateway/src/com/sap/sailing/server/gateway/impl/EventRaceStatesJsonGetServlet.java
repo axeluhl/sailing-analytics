@@ -42,7 +42,7 @@ public class EventRaceStatesJsonGetServlet extends AbstractJsonHttpServlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event "+eventIdParam+" not found");
             } else {
                 EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseAreaParam,
-                        filterByLeaderboardParam, filterByDayOffsetParam);
+                        filterByLeaderboardParam, filterByDayOffsetParam, getService());
                 JSONObject result = eventRaceStatesSerializer.serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
                 setJsonResponseHeader(response);
                 result.writeJSONString(response.getWriter());

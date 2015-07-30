@@ -6,18 +6,16 @@ import java.util.Date;
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
     private int competitorsCount;
-    private int trackedRacesCount;
     private String boatClass;
     private String boatCategory;
+    private String defaultCourseAreaName;
+    private String defaultCourseAreaId;
     private Date startDate;
     private Date endDate;
     private RegattaState state;
+    private boolean flexibleLeaderboard;
     
     public RegattaMetadataDTO() {
-    }
-    
-    public RegattaMetadataDTO(String id, String name) {
-        super(id, name);
     }
 
     @Override
@@ -36,15 +34,6 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setCompetitorsCount(int competitorsCount) {
         this.competitorsCount = competitorsCount;
-    }
-
-    @Override
-    public int getTrackedRacesCount() {
-        return trackedRacesCount;
-    }
-
-    public void setTrackedRacesCount(int trackedRacesCount) {
-        this.trackedRacesCount = trackedRacesCount;
     }
 
     @Override
@@ -90,5 +79,29 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setState(RegattaState state) {
         this.state = state;
+    }
+
+    public String getDefaultCourseAreaName() {
+        return defaultCourseAreaName;
+    }
+
+    public void setDefaultCourseAreaName(String defaultCourseAreaName) {
+        this.defaultCourseAreaName = defaultCourseAreaName;
+    }
+
+    public boolean isFlexibleLeaderboard() {
+        return flexibleLeaderboard;
+    }
+
+    public void setFlexibleLeaderboard(boolean flexibleLeaderboard) {
+        this.flexibleLeaderboard = flexibleLeaderboard;
+    }
+
+    public String getDefaultCourseAreaId() {
+        return defaultCourseAreaId;
+    }
+
+    public void setDefaultCourseAreaId(String defaultCourseAreaId) {
+        this.defaultCourseAreaId = defaultCourseAreaId;
     }
 }

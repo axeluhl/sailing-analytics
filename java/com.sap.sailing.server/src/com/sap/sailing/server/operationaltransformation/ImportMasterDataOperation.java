@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +22,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -54,7 +55,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
@@ -121,6 +121,9 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             importRaceLogTrackingGPSFixes(toState);
+            if (masterData.getDeviceConfigurations() != null) {
+                importDeviceConfigurations(toState);
+            }
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -128,6 +131,31 @@ public class ImportMasterDataOperation extends
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);
+        }
+    }
+
+    private void importDeviceConfigurations(RacingEventService toState) {
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> existingConfigs = toState.getAllDeviceConfigurations();
+        Set<DeviceConfigurationMatcher> existingKeys = existingConfigs.keySet();
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+        for(Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : newConfigs.entrySet()) {
+            DeviceConfigurationMatcher key = entry.getKey();
+            DeviceConfiguration value = entry.getValue();
+            if (existingKeys.contains(key)) {
+                if (override) {
+                    logger.info(String.format(
+                            "Device configuration [%s] already exists. Overwrite because override flag is set.",
+                            key.getMatcherIdentifier()));
+                    toState.removeDeviceConfiguration(key);
+                    toState.createOrUpdateDeviceConfiguration(key, value);
+                } else {
+                    logger.info(String
+                            .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
+                                    key.getMatcherIdentifier()));
+                }
+            } else {
+                toState.createOrUpdateDeviceConfiguration(key, value);
+            }
         }
     }
 
@@ -308,31 +336,6 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    /**
-     * Hack adding a dummy tracked race, so that the competitors will be added to the leaderboards
-     * 
-     * @param leaderboard
-     * @return the race column and fleet the dummy was attached to
-     */
-    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
-            Regatta regatta) {
-        RaceColumn raceColumn = null;
-        Fleet fleet = null;
-        Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
-        Iterator<RaceColumn> raceColumnIterator = raceColumns.iterator();
-        if (raceColumnIterator.hasNext()) {
-            raceColumn = raceColumnIterator.next();
-            Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-            Iterator<? extends Fleet> fleetIterator = fleets.iterator();
-            if (fleetIterator.hasNext()) {
-                fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(UUID.randomUUID(), leaderboard.getAllCompetitors(), regatta, null, EmptyWindStore.INSTANCE);
-                raceColumn.setTrackedRace(fleet, dummy);
-            }
-        }
-        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
-    }
-
     private void createWindTracks(RacingEventService toState) {
         int numOfWindTracks = masterData.getWindTrackMasterData().size();
         int i = 0;
@@ -406,8 +409,13 @@ public class ImportMasterDataOperation extends
                             TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
                             List<TrackedRace> toRemove = new ArrayList<TrackedRace>();
                             if (trackedRegatta != null) {
-                                for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
-                                    toRemove.add(race);
+                                trackedRegatta.lockTrackedRacesForRead();
+                                try {
+                                    for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
+                                        toRemove.add(race);
+                                    }
+                                } finally {
+                                    trackedRegatta.unlockTrackedRacesAfterRead();
                                 }
                                 for (TrackedRace raceToRemove : toRemove) {
                                     trackedRegatta.removeTrackedRace(raceToRemove);

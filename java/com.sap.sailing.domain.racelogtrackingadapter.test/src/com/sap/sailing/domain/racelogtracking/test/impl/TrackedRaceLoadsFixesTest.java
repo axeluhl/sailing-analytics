@@ -4,6 +4,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -49,7 +52,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException,
             InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null);
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
@@ -78,7 +82,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
@@ -123,7 +128,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false);
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override

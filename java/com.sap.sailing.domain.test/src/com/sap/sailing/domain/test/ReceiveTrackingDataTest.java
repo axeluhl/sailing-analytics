@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -8,6 +9,7 @@ import java.net.URISyntaxException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -83,8 +85,8 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
                         },
-                        /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
-                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
+                        /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
             receiver.subscribe();
             getRaceSubscriber().start();
         }
@@ -95,8 +97,8 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                             @Override
                             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                             }
-                        }, /* trackedRegattaRegistry */null, getTracTracRace(), null, /* courseDesignUpdateURI */
-                        /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false));
+                        }, /* trackedRegattaRegistry */null, mock(RaceLogResolver.class), getTracTracRace(), /* courseDesignUpdateURI */
+                        null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false));
     }
 
     @Test

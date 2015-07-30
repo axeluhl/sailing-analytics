@@ -43,7 +43,7 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
             result.setName((String) jsonRoot.get("Name"));
             result.setXrrUrl(parseURL(jsonRoot, "XrrUrl"));
             JSONObject jsonTracking = (JSONObject) jsonRoot.get("Tracking");
-            if(jsonTracking != null) {
+            if (jsonTracking != null) {
                 result.setTrackingDataHost((String) jsonTracking.get("Host"));
                 result.setTrackingDataPort(parseInteger(jsonTracking, "Port"));
             }

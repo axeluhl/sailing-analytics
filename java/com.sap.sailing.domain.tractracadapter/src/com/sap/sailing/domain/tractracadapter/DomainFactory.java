@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -74,7 +75,7 @@ public interface DomainFactory {
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
-            String nationalityAsString, String name, String shortName);
+            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -133,23 +134,25 @@ public interface DomainFactory {
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
+     * @param raceLogResolver TODO
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
      * a predefined {@link Regatta} is used to hold the resulting races.
+     * @param raceLogResolver TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException;
 
@@ -166,15 +169,16 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
+     * @param raceLogResolver TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, long delayToLiveInMillis,
             Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
-            IRace tractracRace, URI courseDesignUpdateURI,
-            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber,
-            IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm);
+            RaceLogResolver raceLogResolver, IRace tractracRace,
+            URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -188,17 +192,17 @@ public interface DomainFactory {
      * already immediately after the notification was sent, and that the {@link RaceDefinition} is already
      * {@link com.sap.sailing.domain.base.Regatta#getAllRaces() known} by its containing
      * {@link com.sap.sailing.domain.base.Regatta}.
-     * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the {@link RaceDefinition} is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that
      *            object.
+     * @param raceLogResolver TODO
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
             String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
             Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings);
+            URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
 
     /**
      * The record may be for a single mark or a gate. If for a gate, the
@@ -213,11 +217,12 @@ public interface DomainFactory {
 
     /**
      * If the vm argument tractrac.usemarkpassings=false, the RecieverType MARKPASSINGS will not return anything
+     * @param raceLogResolver TODO
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, IRace tractracRace, WindStore windStore,
             long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, 
-            URI courseDesignUpdateURI, String tracTracUsername, 
-            String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, ReceiverType... types);
+            RaceLogResolver raceLogResolver, URI courseDesignUpdateURI, 
+            String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean ignoreTracTracMarkPassings, ReceiverType... types);
 
     JSONService parseJSONURLWithRaceRecords(URL jsonURL, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 

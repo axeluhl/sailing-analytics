@@ -10,10 +10,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import static org.mockito.Mockito.mock;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -36,7 +39,7 @@ public class MultipleClassesInRegattaTest {
     
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
     }
     
     @Test
@@ -61,7 +64,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry());
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -72,7 +75,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry());
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -83,7 +86,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry());
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -94,7 +97,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         EmptyGPSFixStore.INSTANCE, tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry());
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
 
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
         assertEquals("5O5", kiwotest2.getRegatta().getBoatClass().getName());

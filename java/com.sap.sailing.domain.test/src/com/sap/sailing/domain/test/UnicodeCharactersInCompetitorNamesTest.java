@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import java.io.BufferedReader;
+import static org.mockito.Mockito.mock;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -36,7 +38,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
 
     @Before
     public void setUp() {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
     }
     
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, CreateModelException, SubscriberInitializationException {
@@ -68,7 +70,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
 			false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "", "",
-                        new DummyTrackedRegattaRegistry());
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {

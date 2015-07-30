@@ -3,7 +3,6 @@ package com.sap.sailing.android.buoy.positioning.app.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.view.View;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;

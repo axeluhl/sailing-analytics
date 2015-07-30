@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:background="?sap_gray">
+
+        <LinearLayout
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/header_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="?chevron_left_24dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_time"
+                android:textAppearance="?textNormal"/>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thick_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/tab_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="?black"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <Button
+            android:id="@+id/absolute"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/dependent_races_absolute"
+            android:textAllCaps="true"
+            android:textColor="?sap_yellow_1"
+            android:textSize="@dimen/textSize_26"/>
+
+        <Button
+            android:id="@+id/relative"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/dependent_races_relative"
+            android:textAllCaps="true"
+            android:textColor="?sap_light_gray"
+            android:textSize="@dimen/textSize_26"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/tab_button"
+        android:layout_below="@id/header">
+
+        <RelativeLayout
+            android:id="@+id/time_absolute"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?sap_gray_black_30"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <RelativeLayout
+                android:id="@+id/buttonBar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/selector_header_height"
+                android:layout_alignParentTop="true">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginTop="@dimen/default_margin_half"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/minute_inc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="?button_filled_bordered"
+                        android:drawableLeft="?chevron_left_36dp"
+                        android:paddingRight="@dimen/default_padding_half"
+                        android:textAppearance="?textLarge"
+                        android:textColor="?white"
+                        tools:text="@string/race_start_time_in"/>
+
+                    <TextView
+                        android:id="@+id/start_countdown"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="@dimen/default_margin"
+                        android:layout_marginRight="@dimen/default_margin"
+                        android:textAppearance="?textXLarge"
+                        android:visibility="visible"
+                        tools:text="@string/race_start_time_in"/>
+
+                    <Button
+                        android:id="@+id/minute_dec"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="?button_filled_bordered"
+                        android:drawableRight="?chevron_right_36dp"
+                        android:paddingLeft="@dimen/default_padding_half"
+                        android:textAppearance="?textLarge"
+                        android:textColor="?white"
+                        tools:text="@string/race_start_time_in"/>
+                </LinearLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/start_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:scaleX="@integer/picker_scale"
+                android:scaleY="@integer/picker_scale">
+
+                <NumberPicker
+                    android:id="@+id/start_date_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:descendantFocusability="blocksDescendants"/>
+
+                <include
+                    android:id="@+id/start_time_picker"
+                    layout="@layout/time_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/set_start_time_absolute"
+                style="?attr/buttonSolidSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:layout_margin="@dimen/default_margin_twice"
+                android:maxWidth="200dp"
+                android:text="@string/race_set_time"/>
+
+            <TextView
+                android:id="@+id/debug_time"
+                style="?textSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:visibility="gone"
+                tools:text="12:12:12"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/time_relative"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?sap_gray_black_30"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/relative_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+
+                <NumberPicker
+                    android:id="@+id/time_offset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin"
+                    android:scaleX="@integer/picker_scale"
+                    android:scaleY="@integer/picker_scale"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:padding="@dimen/default_padding"
+                    android:text="@string/minutes_after"
+                    android:textAppearance="?textLarge"/>
+
+                <LinearLayout
+                    android:layout_width="470dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <Spinner
+                        android:id="@+id/dependent_leaderboard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?spinner_background"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"/>
+
+                    <Spinner
+                        android:id="@+id/dependent_fleet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:background="?spinner_background"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <Spinner
+                        android:id="@+id/dependent_racegroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/default_margin_half"
+                        android:background="?spinner_background"
+                        android:dropDownWidth="wrap_content"
+                        android:spinnerMode="dropdown"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/set_start_time_relative"
+                style="?attr/buttonSolidSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/relative_input"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="@dimen/default_margin_half"
+                android:maxWidth="200dp"
+                android:text="@string/race_set_time"/>
+        </RelativeLayout>
+    </FrameLayout>
+</RelativeLayout>

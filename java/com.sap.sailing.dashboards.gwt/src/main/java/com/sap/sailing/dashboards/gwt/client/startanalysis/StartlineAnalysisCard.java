@@ -141,14 +141,14 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
             zoomTypes.add(ZoomTypes.BUOYS);
         } else {
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
-            zoomTypes.add(ZoomTypes.TAILS);
+            zoomTypes.add(ZoomTypes.BOATS);
         }
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
         raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel,
                 StringMessages.INSTANCE, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
-                resources.combinedWindPanelStyle());
+                resources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));
         raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());

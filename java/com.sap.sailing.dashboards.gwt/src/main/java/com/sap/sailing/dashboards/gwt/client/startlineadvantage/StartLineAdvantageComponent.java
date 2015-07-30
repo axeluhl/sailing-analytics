@@ -22,14 +22,12 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
     private StartLineAdvantageComponentState startLineAdvantageComponentState;
     private StartLineAdvantageComponentStateShowsAdvantageByWind startLineAdvantageComponentStateShowsAdvantageByWind;
     private StartLineAdvantageComponentStateShowsAdvantageByGeometry startLineAdvantageComponentStateShowsAdvantageByGeometry;
-    private StringMessages stringConstants;
+    private static StringMessages stringConstants = StringMessages.INSTANCE;
     
     public StartLineAdvantageComponent(RibDashboardDataRetriever ribDashboardDataRetriever) {
-        super();
-        stringConstants = StringMessages.INSTANCE;
+        super(stringConstants.dashboardStartlineAdvantageByWind(), "m");
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
-        this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
         this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css()
                 .startLineAdvantageComponent_header());
         liveAveragePanel.getElement().addClassName(

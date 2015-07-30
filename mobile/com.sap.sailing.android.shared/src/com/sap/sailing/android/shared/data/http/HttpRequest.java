@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.http.HttpStatus;
-
 import android.content.Context;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -20,8 +18,8 @@ public abstract class HttpRequest {
 
     private final static String TAG = HttpRequest.class.getName();
 
-    private final static int lowestOkCode = HttpStatus.SC_OK;
-    private final static int lowestRedirectCode = HttpStatus.SC_MULTIPLE_CHOICES;
+    private final static int lowestOkCode = HttpURLConnection.HTTP_OK;
+    private final static int lowestRedirectCode = HttpURLConnection.HTTP_MULT_CHOICE;
 
     private static void validateHttpResponseCode(HttpURLConnection connection) throws IOException {
         int statusCode = connection.getResponseCode();

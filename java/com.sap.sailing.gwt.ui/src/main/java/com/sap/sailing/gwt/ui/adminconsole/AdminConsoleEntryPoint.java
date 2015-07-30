@@ -33,6 +33,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
+import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -45,6 +46,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     @Override
     protected void doOnModuleLoad() {
+        Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
@@ -189,7 +191,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
-                getStringMessages().structureImportUrls(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
+                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
 
         /* ADVANCED */
         

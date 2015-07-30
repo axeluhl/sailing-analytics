@@ -12,13 +12,16 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
@@ -193,12 +196,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
-    private HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>> lastProgressPerID;
+    private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
 
     /**
-     * paramURL, liveURI and storedURI for TracTrac connection
+     * paramURL, liveURI and storedURI for TracTrac connection, voided of "random" part
      */
-    private final Util.Triple<URL, URI, URI> urls;
+    private final Object id;
 
     /**
      * Tells if this tracker was created with a valid live URI. If not, the tracker will stop and unregister itself
@@ -213,6 +216,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private boolean stopped;
 
     private final TrackedRegattaRegistry trackedRegattaRegistry;
+
+    private final Simulator simulator;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -250,13 +255,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException,
             SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory, paramURL, liveURI,
                 storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
-                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
+                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
     private TracTracRaceTrackerImpl(IRace tractracRace, DomainFactory domainFactory, URL paramURL, URI liveURI,
@@ -264,11 +269,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         this(tractracRace, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
-                gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
+                gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
     /**
@@ -282,12 +287,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException,
             MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), regatta, domainFactory, paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
-                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry);
+                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
     /**
@@ -306,19 +311,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         super();
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
-        urls = createID(paramURL, liveURI, storedURI);
+        this.id = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
-        this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
-        final Simulator simulator;
+        this.lastProgressPerID = new HashMap<>();
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
             // don't write the transformed wind fixes into the DB again... see also bug 1974 
@@ -397,8 +401,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
-                simulator, windStore, this, trackedRegattaRegistry, tractracRace, tracTracUpdateURI,
-                tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm)) {
+                simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, tractracRace,
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm)) {
             receivers.add(receiver);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -459,13 +463,48 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return trackedRegatta;
     }
 
-    static Util.Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
-        return new Util.Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+        URL paramURLStrippedOfRandomParam;
+        if (paramURL == null) {
+            paramURLStrippedOfRandomParam = null;
+        } else {
+            final String query = paramURL.getQuery();
+            if (query == null) {
+                paramURLStrippedOfRandomParam = paramURL;
+            } else {
+                final StringJoiner stringJoiner = new StringJoiner("&", "?", "");
+                stringJoiner.setEmptyValue("");
+                String[] queryParams = query.split("&");
+                for (String queryParam : queryParams) {
+                    String[] nameValue = queryParam.split("=");
+                    if (!"random".equalsIgnoreCase(nameValue[0])) {
+                        final StringBuilder param = new StringBuilder();
+                        param.append(nameValue[0]);
+                        if (nameValue.length > 1) {
+                            param.append('=');
+                            param.append(nameValue[1]);
+                        }
+                        stringJoiner.add(param.toString());
+                    }
+                }
+                try {
+                    paramURLStrippedOfRandomParam = new URL(paramURL.getProtocol(), paramURL.getHost(), paramURL.getPort(),
+                            paramURL.getPath()+stringJoiner.toString()+(paramURL.getRef() == null || paramURL.getRef().isEmpty() ?
+                                    "" : ("#"+paramURL.getRef())));
+                } catch (MalformedURLException e) {
+                    // this is pretty strange as we only removed one parameter; log and continue with original URL as a default
+                    logger.log(Level.SEVERE, "Error trying to strip the \"random\" parameter from the TracTrac params_url "+
+                            paramURL, e);
+                    paramURLStrippedOfRandomParam = paramURL;
+                }
+            }
+        }
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
     }
     
     @Override
-    public Util.Triple<URL, URI, URI> getID() {
-        return urls;
+    public Object getID() {
+        return id;
     }
 
     @Override
@@ -523,6 +562,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 // queues contents were cleared preemptively; this means we're done with loading immediately
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
+            }
+            if (stopReceiversPreemtively && simulator != null) {
+                simulator.stop();
             }
         }
     }
