@@ -179,7 +179,6 @@ img.race_item_windflag {
   float: left;
 }
 .regattalistitem_steps {
-  border-bottom: 1px solid #ddd;
   overflow: hidden;
 }
 .regattalistitem_steps_step {
