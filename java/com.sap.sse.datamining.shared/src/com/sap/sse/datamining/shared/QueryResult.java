@@ -6,9 +6,10 @@ import java.util.Map;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public interface QueryResult<AggregatedType> extends Serializable {
+public interface QueryResult<ResultType> extends Serializable {
     
     public QueryResultState getState();
+    public Class<ResultType> getResultType();
     
     public int getRetrievedDataAmount();
     public double getCalculationTimeInSeconds();
@@ -23,6 +24,6 @@ public interface QueryResult<AggregatedType> extends Serializable {
     public int getValueDecimals();
 
     public boolean isEmpty();
-    public Map<GroupKey, AggregatedType> getResults();
+    public Map<GroupKey, ResultType> getResults();
     
 }

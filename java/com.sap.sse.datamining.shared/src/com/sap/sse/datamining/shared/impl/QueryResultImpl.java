@@ -9,11 +9,12 @@ import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
+public class QueryResultImpl<ResultType> implements QueryResult<ResultType> {
     private static final long serialVersionUID = 5173796619174827696L;
     
     private QueryResultState state;
-    private Map<GroupKey, AggregatedType> results;
+    private Class<ResultType> resultType;
+    private Map<GroupKey, ResultType> results;
     private AdditionalResultData additionalData;
     
     /**
@@ -22,19 +23,25 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     @Deprecated
     QueryResultImpl() { }
     
-    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results) {
-        this(state, results, new NullAdditionalResultData());
+    public QueryResultImpl(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results) {
+        this(state, resultType, results, new NullAdditionalResultData());
     }
     
-    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
+    public QueryResultImpl(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results, AdditionalResultData additionalData) {
         this.state = state;
-        this.results = new HashMap<GroupKey, AggregatedType>(results);
+        this.resultType = resultType;
+        this.results = new HashMap<GroupKey, ResultType>(results);
         this.additionalData = additionalData;
     }
     
     @Override
     public QueryResultState getState() {
         return state;
+    }
+    
+    @Override
+    public Class<ResultType> getResultType() {
+        return resultType;
     }
 
     @Override
@@ -73,11 +80,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     }
 
     @Override
-    public Map<GroupKey, AggregatedType> getResults() {
+    public Map<GroupKey, ResultType> getResults() {
         return results;
     }
 
-    public void addResult(GroupKey key, AggregatedType value) {
+    public void addResult(GroupKey key, ResultType value) {
         results.put(key, value);
     }
 

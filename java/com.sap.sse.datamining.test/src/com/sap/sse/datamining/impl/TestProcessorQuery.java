@@ -57,7 +57,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -95,7 +95,7 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -161,7 +161,7 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                createDataSource(), stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Iterable<Number>, ?> createFirstProcessor() {
@@ -235,7 +235,7 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryWithError() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Double, ?> createFirstProcessor() {
@@ -275,7 +275,7 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryWithFailure() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
             protected Processor<Double, ?> createFirstProcessor() {
@@ -307,7 +307,7 @@ public class TestProcessorQuery {
     @Test
     public void testQueryAdditionalData() {
         AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
-        Query<?> query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+        Query<?> query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
             protected Processor<Double, ?> createFirstProcessor() {
                 return null;
@@ -318,7 +318,7 @@ public class TestProcessorQuery {
         assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), nullValue());
         
         additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
-        query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+        query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
             protected Processor<Double, ?> createFirstProcessor() {
                 return null;
