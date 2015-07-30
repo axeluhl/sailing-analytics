@@ -5,15 +5,14 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.standings.StandingsResources" />
   <ui:style>
   .scoreInformation {
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #dedede;
     font-size: 0.866666666666667em;
     padding: 0.75em 1.25em;
   }
   .noResults {
     font-weight: bold;
     font-style: italic;
-    padding: 1em;
+    padding: 1.2em;
   }
   </ui:style>
     <div class="{local_res.css.standings_list}" style="display: none;">
