@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
@@ -10,7 +11,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 public class ImageCreateDialog extends ImageDialog {
 
     public ImageCreateDialog(String initialTag, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(new ImageParameterValidator(stringMessages), stringMessages, callback);
+        super(new Date(), new ImageParameterValidator(stringMessages), stringMessages, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
         titleTextBox.setVisibleLength(50);
