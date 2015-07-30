@@ -147,6 +147,7 @@
   <properties>
     <tycho-version>0.21.0</tycho-version>
     <gwt.version>2.7.0</gwt.version>
+    <gwt.minVersion>2.7.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION: 
@@ -170,6 +171,7 @@
     <!-- "Forward declaration" for better readability. The actual value should be defined in the local settings.xml, because 
       of the differences between the CI-Build and the local setup. -->
     <parameters.proxy>
+      -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080
     </parameters.proxy>
     <reportsdirectory>${project.build.directory}/surefire-reports</reportsdirectory>
     <skipTests>false</skipTests>
@@ -327,8 +329,7 @@
         <artifactId>tycho-compiler-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <useJDK>BREE</useJDK>
         </configuration>
       </plugin>
 
