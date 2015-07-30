@@ -14,9 +14,9 @@
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" ui:field="regattaProgressLegendUi" />
-      <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
+      <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="regattaInfoContainerUi"/>
     </div>
-    <o:EventOverviewStage ui:field="stage" />
+    <o:EventOverviewStage ui:field="stage" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopsmall}" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
         <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
