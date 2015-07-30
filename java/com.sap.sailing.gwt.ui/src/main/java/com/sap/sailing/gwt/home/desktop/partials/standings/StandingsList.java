@@ -32,7 +32,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
-        headerTitleUi.setInnerText(finished ? i18n.results() : "TODO: Latest Regatta Standings");
+        headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
     }
 
     @Override
