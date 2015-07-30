@@ -301,7 +301,6 @@ img.race_item_flag {
 .standings_list {
   width: 100%;
   font-size: 1rem;
-  margin-top: 1.333333333333333em;
   border: 1px solid #ddd;
   border-radius: 0.333333333333333em;
   overflow: hidden;
