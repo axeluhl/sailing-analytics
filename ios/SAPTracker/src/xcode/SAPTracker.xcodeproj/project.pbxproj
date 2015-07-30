@@ -1696,10 +1696,10 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(PROJECT_DIR)/Pods/**",
-					"$(PROJECT_DIR)/Pods/build/Release$(EFFECTIVE_PLATFORM_NAME)/**",
+					"${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "\"$(CONFIGURATION_BUILD_DIR)/../../Pods\"/**";
+				LIBRARY_SEARCH_PATHS = "${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
@@ -1740,11 +1740,12 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(PROJECT_DIR)/Pods/**",
-					"$(PROJECT_DIR)/Pods/build/Release$(EFFECTIVE_PLATFORM_NAME)/**",
+					"${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "\"$(CONFIGURATION_BUILD_DIR)/../../Pods\"/**";
+				LIBRARY_SEARCH_PATHS = "${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
