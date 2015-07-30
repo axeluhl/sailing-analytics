@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 
 public class StandingsListCompetitor extends UIObject {
+    private static final StringMessages i18n = StringMessages.INSTANCE;
+
     interface MyUiBinder extends UiBinder<Element, StandingsListCompetitor> {
     }
     
@@ -33,7 +35,11 @@ public class StandingsListCompetitor extends UIObject {
         rankUi.setInnerText(Integer.toString(item.getRank()));
         teamIdUi.setInnerText(competitor.getSailID());
         teamNameUi.setInnerText(competitor.getName());
-        pointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(item.getPoints()));
+        String pointsString = i18n.pointsValue(item.getPoints());
+        if(showRaceCounts) {
+            pointsString += " (" + i18n.racesCount(item.getRaceCount()) + ")";
+        }
+        pointsUi.setInnerText(pointsString);
         SafeUri imageUri = FlagImageResolver.getFlagImageUri(competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode());
         flagUi.setSrc(imageUri.asString());
     }
