@@ -65,7 +65,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         racesListLive = new RacesListLive(currentPresenter, false);
         stage = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
-        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED);
+        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(myPlace.getRegattaId()));
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
