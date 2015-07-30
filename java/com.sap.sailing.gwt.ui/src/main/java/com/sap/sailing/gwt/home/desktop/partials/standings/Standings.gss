@@ -1,13 +1,11 @@
-div.standingsHeader {
-  background-color: #f2f2f2;
-  overflow: hidden;
-}
 .standingsHeaderLink, .standingsHeaderLink:HOVER {
   display: block;
-  padding: 0.666666666666667em;
-  padding-left: 2em;
+  padding: 1.111111111111111em;
+  background-color: #f2f2f2;
   color: #0a0a0a;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 .standingsHeaderTitle {
   font-size: 1.466666666666667em;
