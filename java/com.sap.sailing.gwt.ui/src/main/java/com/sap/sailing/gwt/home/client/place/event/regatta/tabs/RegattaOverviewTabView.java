@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -64,7 +65,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         racesListLive = new RacesListLive(currentPresenter, false);
         stage = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
-        standingsUi = new StandingsList(currentPresenter.getCtx().getEventDTO().isFinished());
+        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
