@@ -10,6 +10,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
@@ -24,15 +25,21 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     
     @UiField AnchorElement headerLinkUi;
     @UiField DivElement headerTitleUi;
+    @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
     @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
 
-    public StandingsList(boolean finished) {
+    public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         
         headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
+        if(headerNavigation == null) {
+            headerArrowUi.removeFromParent();
+        } else {
+            headerNavigation.configureAnchorElement(headerLinkUi);
+        }
     }
 
     @Override
