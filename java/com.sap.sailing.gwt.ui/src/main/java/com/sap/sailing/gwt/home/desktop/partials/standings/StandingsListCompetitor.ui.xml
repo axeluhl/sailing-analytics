@@ -4,13 +4,13 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.standings.StandingsResources" />
   <div class="{local_res.css.race}">
     <div class="{local_res.css.race_item}">
-      <span ui:field="rankUi" class="{local_res.css.standings_list_content_rank}" />
+      <span ui:field="rankUi" class="{local_res.css.standings_list_content_rank} {local_res.css.race_itemname}" />
       <img ui:field="flagUi" class="{local_res.css.standings_list_content_flag} {local_res.css.race_item_flag}" />
-      <span ui:field="teamIdUi" />
+      <span ui:field="teamIdUi" class="{local_res.css.race_itemname}"/>
     </div>
     <div class="{local_res.css.race_item} {local_res.css.race_itemlong}">
       <span ui:field="teamNameUi" class="{local_res.css.race_item_winner}" />
     </div>
-    <div ui:field="pointsUi" class="{local_res.css.race_item} {local_res.css.race_itemright}" />
+    <div ui:field="pointsUi" class="{local_res.css.race_item} {local_res.css.race_itemright} {local_res.css.race_itemname}" />
   </div>
 </ui:UiBinder>
