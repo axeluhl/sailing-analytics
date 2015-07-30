@@ -25,7 +25,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     }
 
     @Override
-    public void internalShowResult() {
+    protected void internalShowResult() {
         QueryResult<Number> result = getCurrentResult();
         Map<GroupKey, Number> resultValues = result.getResults();
         
@@ -54,9 +54,4 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         return scrollPanel;
     }
     
-    @Override
-    protected Iterable<Widget> getControlWidgets() {
-        return new ArrayList<Widget>();
-    }
-
 }

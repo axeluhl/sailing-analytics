@@ -101,7 +101,7 @@ public class ResultsChart extends AbstractResultsPresenter<Number> {
         });
         sortByPanel.add(keyComparatorListBox);
         sortByPanel.setVisible(false);
-        addControlWidget(sortByPanel);
+        addControl(sortByPanel);
         
         chartPanel = new SimpleLayoutPanel() {
             @Override
@@ -121,25 +121,14 @@ public class ResultsChart extends AbstractResultsPresenter<Number> {
     protected Widget getPresentationWidget() {
         return chartPanel;
     }
-    
-    @Override
-    protected Iterable<Widget> getControlWidgets() {
-        Collection<Widget> controlWidgets = new ArrayList<>();
-        controlWidgets.add(sortByPanel);
-        return controlWidgets;
-    }
 
     @Override
-    public void internalShowResult() {
-        if (getCurrentResult() != null && !getCurrentResult().isEmpty()) {
-            updateKeyComparatorListBox();
-            resetChartSeries();
-            updateYAxisLabels();
-            updateChartSubtitleAndSetChartAsWidget();
-            showResultData();
-        } else {
-            showError(getStringMessages().noDataFound() + ".");
-        }
+    protected void internalShowResult() {
+        updateKeyComparatorListBox();
+        resetChartSeries();
+        updateYAxisLabels();
+        updateChartSubtitleAndSetChartAsWidget();
+        showResultData();
     }
 
     private void updateKeyComparatorListBox() {

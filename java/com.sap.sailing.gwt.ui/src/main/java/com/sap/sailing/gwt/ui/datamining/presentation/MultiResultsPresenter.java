@@ -1,31 +1,45 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
+import com.sap.sse.datamining.shared.QueryResult;
 
-public class MultiResultsPresenter extends AbstractResultsPresenter<Number> {
+public class MultiResultsPresenter implements ResultsPresenter<Number> {
     
+    private final StringMessages stringMessages;
+    
+    private final DeckLayoutPanel presentersPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor> presentersListBox;
-    private AbstractResultsPresenter<Number> currentPresenter;
+    private ResultsPresenter<Number> currentPresenter;
+
+    private List<Descriptor> availableDescriptors;
     
     public MultiResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+        this.stringMessages = stringMessages;
+        availableDescriptors = new ArrayList<>();
+        availableDescriptors.add(new ColumnChartDescriptor());
+        availableDescriptors.add(new PlainDescriptor());
 
+        presentersPanel = new DeckLayoutPanel();
+        
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
-        
-        controlsPanel.add(new Label(getStringMessages().choosePresentation() + ":"));
+        controlsPanel.add(new Label(stringMessages.choosePresentation() + ":"));
         presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<Descriptor>() {
             @Override
             protected String convertObjectToString(Descriptor nonNullObject) {
@@ -35,54 +49,73 @@ public class MultiResultsPresenter extends AbstractResultsPresenter<Number> {
         presentersListBox.addValueChangeHandler(new ValueChangeHandler<Descriptor>() {
             @Override
             public void onValueChange(ValueChangeEvent<Descriptor> event) {
-                if (currentPresenter != null) {
-                    for (Widget controlWidget : currentPresenter.getControlWidgets()) {
-                        controlWidget.removeFromParent();
-                    }
-                }
-                currentPresenter = event.getValue().getPresenter();
-                for (Widget controlWidget : currentPresenter.getControlWidgets()) {
-                    addControlWidget(controlWidget);
-                }
-                updatePresentationWidget();
+                setCurrentPresenter(event.getValue().getPresenter());
             }
         });
         controlsPanel.add(presentersListBox);
-        addControlWidget(controlsPanel);
+        presentersListBox.setValue(availableDescriptors.get(0), false);
+        presentersListBox.setAcceptableValues(availableDescriptors);
         
-        List<Descriptor> descriptors = new ArrayList<>();
-        descriptors.add(new ColumnChartDescriptor());
-        descriptors.add(new PlainDescriptor());
-        presentersListBox.setValue(descriptors.get(0), true);
-        presentersListBox.setAcceptableValues(descriptors);
+        setCurrentPresenter(availableDescriptors.get(0).getPresenter());
+    }
+
+    private void setCurrentPresenter(ResultsPresenterWithControls<Number> presenter) {
+        controlsPanel.removeFromParent();
+        presenter.addControl(controlsPanel);
+        
+        currentPresenter = presenter;
+        presentersPanel.setWidget(currentPresenter.getWidget());
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                presentersPanel.onResize();
+            }
+        });
     }
 
     @Override
-    protected Widget getPresentationWidget() {
-        return getCurrentPresenter().getPresentationWidget();
-    }
-    
-    @Override
-    protected Iterable<Widget> getControlWidgets() {
-        Collection<Widget> controlWidgets = new ArrayList<>();
-        controlWidgets.add(controlsPanel);
-        return controlWidgets;
+    public Widget getWidget() {
+        return presentersPanel;
     }
 
     @Override
-    protected void internalShowResult() {
-        getCurrentPresenter().showResult(getCurrentResult());
+    public QueryResult<Number> getCurrentResult() {
+        return currentPresenter.getCurrentResult();
     }
 
-    private AbstractResultsPresenter<Number> getCurrentPresenter() {
-        return currentPresenter;
+    @Override
+    public void showResult(QueryResult<Number> result) {
+        for (Descriptor descriptor : availableDescriptors) {
+            descriptor.getPresenter().showResult(result);
+        }
     }
-    
+
+    @Override
+    public void showError(String error) {
+        for (Descriptor descriptor : availableDescriptors) {
+            descriptor.getPresenter().showError(error);
+        }
+    }
+
+    @Override
+    public void showError(String mainError, Iterable<String> detailedErrors) {
+        for (Descriptor descriptor : availableDescriptors) {
+            descriptor.getPresenter().showError(mainError, detailedErrors);
+        }
+    }
+
+    @Override
+    public void showBusyIndicator() {
+        for (Descriptor descriptor : availableDescriptors) {
+            descriptor.getPresenter().showBusyIndicator();
+        }
+    }
+
     private interface Descriptor {
         
         public String getName();
         
-        public AbstractResultsPresenter<Number> getPresenter();
+        public ResultsPresenterWithControls<Number> getPresenter();
         
     }
     
@@ -91,12 +124,12 @@ public class MultiResultsPresenter extends AbstractResultsPresenter<Number> {
         private final AbstractResultsPresenter<Number> presenter;
         
         public PlainDescriptor() {
-            presenter = new PlainResultsPresenter(getStringMessages());
+            presenter = new PlainResultsPresenter(stringMessages);
         }
 
         @Override
         public String getName() {
-            return getStringMessages().plainText();
+            return stringMessages.plainText();
         }
         
         @Override
@@ -111,12 +144,12 @@ public class MultiResultsPresenter extends AbstractResultsPresenter<Number> {
         private final ResultsChart presenter;
 
         public ColumnChartDescriptor() {
-            presenter = new ResultsChart(getStringMessages());
+            presenter = new ResultsChart(stringMessages);
         }
 
         @Override
         public String getName() {
-            return getStringMessages().columnChart();
+            return stringMessages.columnChart();
         }
 
         @Override

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,10 +12,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.datamining.shared.QueryResult;
 
-public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenter<ResultType> {
+public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenterWithControls<ResultType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
@@ -27,7 +29,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private QueryResult<ResultType> result;
+    private QueryResult<ResultType> currentResult;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -47,7 +49,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
                 // Call a servlet to download the previously pushed result as json file
             }
         });
-        addControlWidget(exportButton);
+        addControl(exportButton);
         
         presentationPanel = new SimpleLayoutPanel();
         mainPanel.add(presentationPanel);
@@ -61,35 +63,36 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
         showError(getStringMessages().runAQuery());
     }
     
-    protected void addControlWidget(Widget controlWidget) {
+    @Override
+    public void addControl(Widget controlWidget) {
         controlsPanel.add(controlWidget);
     }
     
     @Override
     public void showResult(QueryResult<ResultType> result) {
-        if (state != ResultsPresenterState.RESULT) {
-            mainPanel.setWidgetHidden(controlsPanel, false);
-            presentationPanel.setWidget(getPresentationWidget());
-            state = ResultsPresenterState.RESULT;
-        }
-        
-        this.result = result;
-        internalShowResult();
-        presentationPanel.onResize();
-    }
-    
-    protected void updatePresentationWidget() {
-        if (state == ResultsPresenterState.RESULT) {
-            presentationPanel.setWidget(getPresentationWidget());
+        if (result != null && !result.isEmpty()) {
+            if (state != ResultsPresenterState.RESULT) {
+                mainPanel.setWidgetHidden(controlsPanel, false);
+                presentationPanel.setWidget(getPresentationWidget());
+                state = ResultsPresenterState.RESULT;
+            }
+            
+            this.currentResult = result;
             internalShowResult();
-            presentationPanel.onResize();
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    presentationPanel.onResize();
+                }
+            });
+        } else {
+            this.currentResult = null;
+            showError(getStringMessages().noDataFound() + ".");
         }
     }
     
     protected abstract Widget getPresentationWidget();
     
-    protected abstract Iterable<Widget> getControlWidgets();
-
     protected abstract void internalShowResult();
 
     @Override
@@ -100,7 +103,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
             state = ResultsPresenterState.ERROR;
         }
         
-        result = null;
+        currentResult = null;
         presentationPanel.setWidget(errorLabel);
     }
     
@@ -121,7 +124,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
             state = ResultsPresenterState.BUSY;
         }
         
-        result = null;
+        currentResult = null;
     }
     
     protected StringMessages getStringMessages() {
@@ -130,7 +133,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     
     @Override
     public QueryResult<ResultType> getCurrentResult() {
-        return result;
+        return currentResult;
     }
 
     @Override
