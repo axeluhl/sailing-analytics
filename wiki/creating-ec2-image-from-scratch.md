@@ -2,8 +2,6 @@
 
 I started out with a clean "Amazon Linux AMI 2015.03 (HVM), SSD Volume Type - ami-a10897d6" image from Amazon and added the existing Swap and Home snapshots as new volumes. The root/system volume I left as is, to start with. This requires having access to a user key that can be selected when launching the image.
 
-Enable the EPEL repository by issuing `yum-config-manager --enable epel/x86_64`.
-
 I then did a `yum update` and added the following packages:
 
  - httpd
@@ -11,8 +9,9 @@ I then did a `yum update` and added the following packages:
  - tmux
  - nfs-utils
  - chrony
- - apachetop
- - goaccess
+ - libstdc++48.i686 (for Android builds)
+ - glibc.i686 (for Android builds)
+ - libzip.i686 (for Android builds)
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
@@ -80,5 +79,3 @@ This increases the maximum number of open files allowed from the default 1024 to
 Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server.
 
 Instead of having the `ANDROID_HOME` environment variable be set in `/etc/profile` as in the old instances, I moved this statement to the `sailing.sh` script in git at `configuration/sailing.sh` and linked to by `/etc/profile.d/sailing.sh`. For old instances this will set the variable redundantly, as they also have it set by a manually adjusted `/etc/profile`, but this shouldn't hurt.
-
-Copied /etc/logrotate.conf from an existing SL instance so that `/var/log/logrotate-target` is used to rotate logs to.
