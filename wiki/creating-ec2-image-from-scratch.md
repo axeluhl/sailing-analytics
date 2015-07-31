@@ -88,3 +88,11 @@ Copied /etc/logrotate.conf from an existing SL instance so that `/var/log/logrot
 Instead of having the `ANDROID_HOME` environment variable be set in `/etc/profile` as in the old instances, I moved this statement to the `sailing.sh` script in git at `configuration/sailing.sh` and linked to by `/etc/profile.d/sailing.sh`. For old instances this will set the variable redundantly, as they also have it set by a manually adjusted `/etc/profile`, but this shouldn't hurt.
 
 Had to fiddle a little with the JDK being used. The default installation has an OpenJDK installed, and the AWS tools depend on it. Therefore, it cannot just be removed. As a result, it's important that `env.sh` has the correct `JAVA_HOME` set (/opt/jdk1.8.0_45, in this case). Otherwise, the OSGi environment won't properly start up.
+
+To ensure that chronyd is started during the boot sequence, issued the command
+
+```
+chkconfig chrony on
+```
+
+which creates the necessary entries in the rc*.d directories.
