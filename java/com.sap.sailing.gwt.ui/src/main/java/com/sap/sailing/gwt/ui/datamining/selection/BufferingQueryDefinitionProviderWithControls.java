@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningComponentProvider;
-import com.sap.sailing.gwt.ui.datamining.DataMiningControls;
+import com.sap.sailing.gwt.ui.datamining.WithControls;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
@@ -40,7 +40,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements DataMiningControls {
+public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements WithControls {
 
     /**
      * The delay before a changed query definition is submitted to the listeners.
