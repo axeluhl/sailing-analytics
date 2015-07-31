@@ -88,7 +88,7 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Double getRankGainsOrLosses() {
+    public Double getRankGainsOrLossesBetweenFirstMarkAndFinish() {
         Double rankAtFirstMark = getRankAtFirstMark();
         Double rankAtFinish = getRankAtFinish();
         return rankAtFirstMark - rankAtFinish;

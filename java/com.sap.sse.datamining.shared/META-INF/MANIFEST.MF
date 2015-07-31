@@ -10,5 +10,6 @@ Export-Package: com.sap.sse.datamining.shared,
  com.sap.sse.datamining.shared.data,
  com.sap.sse.datamining.shared.dto,
  com.sap.sse.datamining.shared.impl,
- com.sap.sse.datamining.shared.impl.dto
+ com.sap.sse.datamining.shared.impl.dto,
+ com.sap.sse.datamining.shared.util
 Bundle-ActivationPolicy: lazy
