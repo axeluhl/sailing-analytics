@@ -8,6 +8,7 @@ I then did a `yum update` and added the following packages:
  - mod_proxy_html
  - tmux
  - nfs-utils
+ - chrony
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
@@ -73,3 +74,5 @@ Added the following two lines to `/etc/security/limits.conf`:
 This increases the maximum number of open files allowed from the default 1024 to a more appropriate 65k.
 
 Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server.
+
+Instead of having the `ANDROID_HOME` environment variable be set in `/etc/profile` as in the old instances, I moved this statement to the `sailing.sh` script in git at `configuration/sailing.sh` and linked to by `/etc/profile.d/sailing.sh`. For old instances this will set the variable redundantly, as they also have it set by a manually adjusted `/etc/profile`, but this shouldn't hurt.
