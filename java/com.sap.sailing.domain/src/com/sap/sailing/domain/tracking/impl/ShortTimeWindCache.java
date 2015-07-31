@@ -73,6 +73,7 @@ public class ShortTimeWindCache {
         cache.put(key, wind);
         boolean orderEmpty = order.isEmpty(); // FIXME this should check for timer running or be put into the synchronized block
         synchronized (order) {
+            // FIXME use ApproximiateTime instead of expensive System.currentTimeMillis();
             order.add(new Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>(System.currentTimeMillis(), key));
             if (orderEmpty) {
                 ensureTimerIsRunning();
@@ -80,7 +81,7 @@ public class ShortTimeWindCache {
         }
     }
     
-    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
+    protected WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
             TimePoint at, Set<WindSource> windSourcesToExclude) {
         WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind;
         final Triple<Position, TimePoint, Set<WindSource>> key = new Triple<Position, TimePoint, Set<WindSource>>(p, at, windSourcesToExclude);
