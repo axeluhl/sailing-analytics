@@ -14,6 +14,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.util.impl.ApproximateTime;
 
 /**
  * Caches wind information across a short duration of a few seconds, based on position and time point. A separate timer
@@ -49,7 +50,8 @@ public class ShortTimeWindCache {
         public void run() {
             long oldestToKeep = System.currentTimeMillis() - preserveHowManyMilliseconds;
             Pair<Long, Triple<Position, TimePoint, Set<WindSource>>> next;
-            while ((next = order.pollFirst()) != null && next.getA() < oldestToKeep) { // FIXME don't poll, peek; otherwise if next.getA() >= oldestToKeep then order and cache run inconsistent
+            while ((next = order.peekFirst()) != null && next.getA() < oldestToKeep) {
+                order.pollFirst();
                 cache.remove(next.getB());
             }
             synchronized (order) {
@@ -71,13 +73,15 @@ public class ShortTimeWindCache {
     
     private void add(Triple<Position, TimePoint, Set<WindSource>> key, WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind) {
         cache.put(key, wind);
-        boolean orderEmpty = order.isEmpty(); // FIXME this should check for timer running or be put into the synchronized block
         synchronized (order) {
-            // FIXME use ApproximiateTime instead of expensive System.currentTimeMillis();
-            order.add(new Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>(System.currentTimeMillis(), key));
-            if (orderEmpty) {
-                ensureTimerIsRunning();
+            final long timestamp;
+            if (preserveHowManyMilliseconds > 1000) {
+                timestamp = ApproximateTime.approximateNow().asMillis();
+            } else {
+                timestamp = System.currentTimeMillis();
             }
+            order.add(new Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>(timestamp, key));
+            ensureTimerIsRunning();
         }
     }
     
