@@ -298,7 +298,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
 
     @Override
     public StartlineAdvantagesWithMaxAndAverageDTO getAdvantagesOnStartline(String leaderboardName) {
-        StartlineAdvantagesWithMaxAndAverageDTO result = startlineAdvantagesCalculator.getStartLineAdvantagesAccrossLineAtTimePoint(MillisecondsTimePoint.now());
         return startlineAdvantagesCalculator.getStartLineAdvantagesAccrossLineAtTimePoint(MillisecondsTimePoint.now());
     }
     
