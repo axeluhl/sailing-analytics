@@ -328,7 +328,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because a copied collection is returned.
+     * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
+     * is never part of the result.
      */
     Set<WindSource> getWindSources();
 
