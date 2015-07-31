@@ -71,3 +71,5 @@ Added the following two lines to `/etc/security/limits.conf`:
 ```
 
 This increases the maximum number of open files allowed from the default 1024 to a more appropriate 65k.
+
+Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server.
