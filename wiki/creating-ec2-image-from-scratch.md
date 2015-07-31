@@ -37,3 +37,17 @@ PermitRootLogin Yes
 ```
 
 to allow root shell login.
+
+I copied the JDK7/JDK8 installations from an existing SL instance to /opt.
+
+I linked /etc/init.d/sailing to /home/sailing/code/configuration/sailing and added the following links to it:
+
+```
+rc0.d/K10sailing
+rc1.d/K10sailing
+rc2.d/S95sailing
+rc3.d/S95sailing
+rc4.d/S95sailing
+rc5.d/S95sailing
+rc6.d/K10sailing
+```
