@@ -7,6 +7,7 @@ I then did a `yum update` and added the following packages:
  - httpd
  - mod_proxy_html
  - tmux
+ - nfs-utils
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
@@ -20,3 +21,19 @@ UUID=7d7e68a3-27a1-49ef-908f-a6ebadcc55bb       none    swap    sw      0       
 ```
 
 This will mount the swap space partition as well as the /home/sailing partition, /var/log/old and the Android SDK stuff required for local builds.
+
+In `/etc/ssh/sshd_config` I commented the line
+
+```
+# Only allow root to run commands over ssh, no shell
+#PermitRootLogin forced-commands-only
+```
+
+and added the lines
+
+```
+PermitRootLogin without-password
+PermitRootLogin Yes
+```
+
+to allow root shell login.
