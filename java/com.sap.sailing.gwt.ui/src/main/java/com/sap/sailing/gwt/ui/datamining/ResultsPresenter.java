@@ -7,6 +7,8 @@ public interface ResultsPresenter<ResultType> {
 
     public Widget getWidget();
     
+    public QueryResult<ResultType> getCurrentResult();
+    
     public void showResult(QueryResult<ResultType> result);
 
     public void showError(String error);
