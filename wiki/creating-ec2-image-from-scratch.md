@@ -51,3 +51,5 @@ rc4.d/S95sailing
 rc5.d/S95sailing
 rc6.d/K10sailing
 ```
+
+Linked /etc/profile.d/sailing.sh to /home/sailing/code/configuration/sailing.sh. As this contains a PATH entry for /opt/amazon and the new image has the Amazon scripts at /opt/aws, I aldo created a symbolic link from /opt/amazon to /opt/aws to let this same path configuration find those scripts under the old and the new images.
