@@ -53,3 +53,21 @@ rc6.d/K10sailing
 ```
 
 Linked /etc/profile.d/sailing.sh to /home/sailing/code/configuration/sailing.sh. As this contains a PATH entry for /opt/amazon and the new image has the Amazon scripts at /opt/aws, I aldo created a symbolic link from /opt/amazon to /opt/aws to let this same path configuration find those scripts under the old and the new images.
+
+Added the lines
+
+```
+# number of connections the firewall can track
+net.ipv4.ip_conntrac_max = 131072
+```
+
+to `/etc/sysctl.conf` in order to increase the number of connections that are possible concurrently.
+
+Added the following two lines to `/etc/security/limits.conf`:
+
+```
+*               hard    nproc           unlimited
+*               hard    nofile          65000
+```
+
+This increases the maximum number of open files allowed from the default 1024 to a more appropriate 65k.
