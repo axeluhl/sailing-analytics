@@ -5,16 +5,20 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.LeaderboardDelegate;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenViewer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 
@@ -29,11 +33,12 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
 
     private Presenter currentPresenter;
 
-    @UiField
+    @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
     public RegattaLeaderboardTabView() {
         super();
+        leaderboard = new OldLeaderboard(new FullscreenViewerLeaderBoardDelegate());
     }
 
     @Override
@@ -99,5 +104,31 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     @Override
     public RegattaLeaderboardPlace placeToFire() {
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
+    }
+    
+    private class FullscreenViewerLeaderBoardDelegate extends FullscreenViewer implements LeaderboardDelegate {
+        
+        private final Image autoRefreshControl = new Image("images/home/reload.png");
+        private final Image settingsControl = new Image("images/home/settings.png");
+        
+        private FullscreenViewerLeaderBoardDelegate() {
+            addToolbarAction(settingsControl);
+            addToolbarAction(autoRefreshControl);
+        }
+        
+        @Override
+        public void setLeaderboard(LeaderboardPanel leaderboardPanel) {
+            showContent(leaderboardPanel);
+        }
+
+        @Override
+        public Widget getAutoRefreshControl() {
+            return autoRefreshControl;
+        }
+
+        @Override
+        public Widget getSettingsControl() {
+            return settingsControl;
+        }
     }
 }
