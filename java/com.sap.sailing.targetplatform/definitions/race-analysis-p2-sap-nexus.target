@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="98">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="125">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
-<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
 <unit id="com.sap.sailing.target.jackson.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jsp.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.test.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.shiro.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.jms.feature.group" version="1.0.0"/>
+<unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
 <repository location="http://p2.sapsailing.com/p2/sailing/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
-<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
@@ -38,32 +35,16 @@
 <unit id="org.apache.commons.collections.source" version="3.2.0.v2013030210310"/>
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
-<repository location="http://download.eclipse.org/releases/luna"/>
+<repository location="http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.releases.unzip/org/eclipse/download/releasetrain/luna/201409261001/luna-201409261001.zip-unzip/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
-<unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
-<unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
-<unit id="org.apache.commons.io.source" version="2.2.0.v201405211200"/>
-<unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
-<unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
-<unit id="org.apache.commons.math" version="2.1.0.v201105210652"/>
-<unit id="org.jdom" version="1.1.1.v201101151400"/>
-<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
-<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
-<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
-<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
-<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
-<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
-<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
-<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
-<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
-<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
-<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
-<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
-<unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
-<unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.2.2.201407241931"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.2.2.201407241931"/>
+<repository location="http://nexus:8081/nexus/content/repositories/build.releases.unzip/org/eclipse/download/jetty/jetty-bundles-repository/9.2.2/jetty-bundles-repository-9.2.2.zip-unzip/jetty.bundles.repo/target/site/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.orbit.build.feature.set1.feature.group" version="1.0.0.v201405231430-FMlFMPFjMM9Sf0XXBvBdigZ0uiBK"/>
+<repository location="http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.releases.unzip/org/eclipse/download/tools/orbit-buildrepo/R20140525021250/orbit-buildrepo-R20140525021250.zip-unzip/"/>
 </location>
 </locations>
 <includeBundles>
@@ -90,6 +71,7 @@
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
+<plugin id="lz4-java"/>
 <plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
@@ -229,7 +211,6 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
-<plugin id="lz4-java"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>
