@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -37,7 +39,6 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     protected OldLeaderboard leaderboard;
 
     public RegattaLeaderboardTabView() {
-        super();
         leaderboard = new OldLeaderboard(new FullscreenViewerLeaderBoardDelegate());
     }
 
@@ -111,9 +112,23 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         private final Image autoRefreshControl = new Image("images/home/reload.png");
         private final Image settingsControl = new Image("images/home/settings.png");
         
+        private final Label lastScoringUpdateTime = new Label();
+        private final Label lastScoringUpdateText = new Label();
+        private final Label lastScoringComment = new Label();
+        private final Label scoringScheme = new Label();
+        private final Label hasLiveRace = new Label();
+        
         private FullscreenViewerLeaderBoardDelegate() {
             addToolbarAction(settingsControl);
             addToolbarAction(autoRefreshControl);
+            addToolbarInfoText(createPanel(lastScoringUpdateText, lastScoringUpdateTime), false);
+            addToolbarInfoText(createPanel(lastScoringComment, hasLiveRace, scoringScheme), true);
+        }
+        
+        private Widget createPanel(Widget... contentWidgets) {
+            FlowPanel panel = new FlowPanel();
+            for (Widget widget : contentWidgets) panel.add(widget);
+            return panel;
         }
         
         @Override
@@ -129,6 +144,31 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         @Override
         public Widget getSettingsControl() {
             return settingsControl;
+        }
+        
+        @Override
+        public Element getLastScoringUpdateTimeElement() {
+            return lastScoringUpdateTime.getElement();
+        }
+        
+        @Override
+        public Element getLastScoringUpdateTextElement() {
+            return lastScoringUpdateText.getElement();
+        }
+        
+        @Override
+        public Element getLastScoringCommentElement() {
+            return lastScoringComment.getElement();
+        }
+        
+        @Override
+        public Element getHasLiveRaceElement() {
+            return hasLiveRace.getElement();
+        }
+        
+        @Override
+        public Element getScoringSchemeElement() {
+            return scoringScheme.getElement();
         }
     }
 }

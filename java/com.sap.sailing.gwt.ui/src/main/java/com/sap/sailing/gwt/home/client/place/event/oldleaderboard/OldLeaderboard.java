@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,6 +15,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -161,25 +163,45 @@ public class OldLeaderboard extends Composite {
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         boolean hasLiveRace = leaderboardPanel.hasLiveRace();
         if (leaderboard != null) {
-            lastScoringCommentDiv.setInnerText(leaderboard.getComment() != null ? leaderboard.getComment() : "");
+            String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
+            if (Random.nextBoolean()) comment += "asdk jkjsad sakdj sakasjdksaj sjd kjskdj ksajd ksd kskaj dkjsad jsd"
+                    + " asdlak lsds klksadl sad nsands lnd salkdnsalkdnlksandlksndlknsklnk lksandl nkal snd lak sklak"
+                    + "alds sdsadhvsdovcwebadlbcv bcq qsn sand sna qennnsa nsnd asdnsdna ndsadsn sdnsa ndsadn adlns s";
+            String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";
+            lastScoringCommentDiv.setInnerText(comment);
             hasLiveRaceDiv.setInnerText(leaderboardPanel.getLiveRacesText());
-            scoringSchemeDiv.setInnerText(leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "");
+            scoringSchemeDiv.setInnerText(scoringScheme);
+            if (delegate != null) {
+                delegate.getLastScoringCommentElement().setInnerText(comment);
+                delegate.getHasLiveRaceElement().setInnerText(leaderboardPanel.getLiveRacesText());
+                delegate.getScoringSchemeElement().setInnerText(scoringScheme);
+            }
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
                 String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                         + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                if (delegate != null) {
+                    delegate.getLastScoringUpdateTimeElement().setInnerText(lastUpdate);
+                    delegate.getLastScoringUpdateTextElement().setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                }
             } else {
                 lastScoringUpdateTimeDiv.setInnerHTML("&nbsp;");
                 lastScoringUpdateTextDiv.setInnerHTML("&nbsp;");
             }
-            setVisible(hasLiveRaceDiv, true);
-
+            setVisible(hasLiveRaceDiv, hasLiveRace);
             setVisible(lastScoringCommentDiv, !hasLiveRace);
             setVisible(lastScoringUpdateTextDiv, !hasLiveRace);
             setVisible(lastScoringUpdateTimeDiv, !hasLiveRace);
             setVisible(scoringSchemeDiv, true);
+            if (delegate != null) {
+                setVisible(delegate.getHasLiveRaceElement(), hasLiveRace);
+                setVisible(delegate.getLastScoringCommentElement(), !hasLiveRace);
+                setVisible(delegate.getLastScoringUpdateTextElement(), !hasLiveRace);
+                setVisible(delegate.getLastScoringUpdateTimeElement(), !hasLiveRace);
+                setVisible(delegate.getScoringSchemeElement(), true);
+            }
         }
     }
 
@@ -196,5 +218,10 @@ public class OldLeaderboard extends Composite {
         Widget getAutoRefreshControl();
         Widget getSettingsControl();
         HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler);
+        Element getLastScoringUpdateTimeElement();
+        Element getLastScoringUpdateTextElement();
+        Element getLastScoringCommentElement();
+        Element getScoringSchemeElement();
+        Element getHasLiveRaceElement();
     }
 }

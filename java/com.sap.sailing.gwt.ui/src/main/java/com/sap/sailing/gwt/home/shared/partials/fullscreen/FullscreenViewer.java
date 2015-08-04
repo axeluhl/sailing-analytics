@@ -18,6 +18,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -28,13 +29,16 @@ public class FullscreenViewer {
     
     private static FullscreenViewerUiBinder uiBinder = GWT.create(FullscreenViewerUiBinder.class);
 
-    interface FullscreenViewerUiBinder extends UiBinder<Widget, FullscreenViewer> {
+    interface FullscreenViewerUiBinder extends UiBinder<HeaderPanel, FullscreenViewer> {
     }
     
     interface Style extends CssResource {
+        String popup();
         String background();
         String toolbar();
-        String toolbarItem();
+        String toolbarInfoTextLeft();
+        String toolbarInfoTextRight();
+        String toolbarAction();
         String content();
     }
     
@@ -43,9 +47,11 @@ public class FullscreenViewer {
     @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenViewerContentPanel();
     
     private final FullscreenPopupPanel popup = new FullscreenPopupPanel();
+    private final HeaderPanel mainPanel;
     
     public FullscreenViewer() {
-        popup.setWidget(uiBinder.createAndBindUi(this));
+        popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
+        popup.addStyleName(style.popup());
         Image closeControl = new Image("images/home/close.svg");
         closeControl.addClickHandler(new ClickHandler() {
             @Override
@@ -61,14 +67,19 @@ public class FullscreenViewer {
     }
     
     public void addToolbarAction(Widget widget) {
-        widget.addStyleName(style.toolbarItem());
+        widget.addStyleName(style.toolbarAction());
+        toolbarUi.add(widget);
+    }
+    
+    public void addToolbarInfoText(Widget widget, boolean left) {
+        widget.addStyleName(left ? style.toolbarInfoTextLeft() : style.toolbarInfoTextRight());
         toolbarUi.add(widget);
     }
     
     public void showContent(Widget content) {
         contentUi.setWidget(content);
         contentUi.getWidget().getElement().addClassName(style.content());
-        contentUi.onResize();
+        mainPanel.onResize();
         popup.showPopupPanel();
     }
     
@@ -91,13 +102,8 @@ public class FullscreenViewer {
         };
         
         private void showPopupPanel() {
-            this.setPopupPositionAndShow(new PositionCallback() {
-                @Override
-                public void setPosition(int offsetWidth, int offsetHeight) {
-                    RootPanel.get().getElement().getStyle().setOverflow(Overflow.HIDDEN);
-                    FullscreenPopupPanel.this.center();
-                }
-            });
+            RootPanel.get().getElement().getStyle().setOverflow(Overflow.HIDDEN);
+            FullscreenPopupPanel.this.show();
         }
     }
     
@@ -116,7 +122,7 @@ public class FullscreenViewer {
             windowResizeHandler = Window.addResizeHandler(new ResizeHandler() {
                 @Override
                 public void onResize(ResizeEvent event) {
-                    FullscreenViewerContentPanel.this.onResize();
+                    mainPanel.onResize();
                 }
             });
         }
