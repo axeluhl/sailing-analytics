@@ -15,7 +15,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -164,9 +163,6 @@ public class OldLeaderboard extends Composite {
         boolean hasLiveRace = leaderboardPanel.hasLiveRace();
         if (leaderboard != null) {
             String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
-            if (Random.nextBoolean()) comment += "asdk jkjsad sakdj sakasjdksaj sjd kjskdj ksajd ksd kskaj dkjsad jsd"
-                    + " asdlak lsds klksadl sad nsands lnd salkdnsalkdnlksandlksndlknsklnk lksandl nkal snd lak sklak"
-                    + "alds sdsadhvsdovcwebadlbcv bcq qsn sand sna qennnsa nsnd asdnsdna ndsadsn sdnsa ndsadn adlns s";
             String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";
             lastScoringCommentDiv.setInnerText(comment);
             hasLiveRaceDiv.setInnerText(leaderboardPanel.getLiveRacesText());

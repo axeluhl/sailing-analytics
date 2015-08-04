@@ -119,10 +119,10 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         private final Label hasLiveRace = new Label();
         
         private FullscreenViewerLeaderBoardDelegate() {
-            addToolbarAction(settingsControl);
+            setHeaderWidget(createPanel(lastScoringComment, hasLiveRace, scoringScheme));
+            addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
             addToolbarAction(autoRefreshControl);
-            addToolbarInfoText(createPanel(lastScoringUpdateText, lastScoringUpdateTime), false);
-            addToolbarInfoText(createPanel(lastScoringComment, hasLiveRace, scoringScheme), true);
+            addToolbarAction(settingsControl);
         }
         
         private Widget createPanel(Widget... contentWidgets) {

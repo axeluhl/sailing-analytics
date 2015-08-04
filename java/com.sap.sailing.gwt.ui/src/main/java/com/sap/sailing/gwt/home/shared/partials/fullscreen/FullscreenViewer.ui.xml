@@ -1,54 +1,68 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenViewer.Style">
-	.popup {
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-	}
-	.background {
-		background-color: rgba(0,0,0,0.9);
-	}
-	.toolbar {
-		padding: 0 5px;
-	}
-	.toolbarAction, .toolbarInfoTextRight {
-		float: right;
-	}
-	.toolbarInfoTextLeft, .toolbarInfoTextRight {
-		padding: 6px 10px;
-		color: white;
-	}
-	.toolbarInfoTextLeft {
-		padding-right: 25px;
-	}
-	.toolbarInfoTextRight {
-		text-align: right;
-	}
-	.toolbarAction {
-		height: 50px;
-		width: auto;
-		cursor: pointer;
-		padding: 10px;
-	}
-	.toolbarAction:hover {
-		background-color: #d79900;
-	}
-	.container {
-		width: 100%;
-		height: 100%;
-	}
-	.content {
-		background-color: white;
-		overflow: auto !important;
-		border-color: rgba(0,0,0,0.9);
-		border-width: 0 5px 5px;
-		border-style: solid;
-	}
+		.popup {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background-color: rgba(0,0,0,0.9);
+		}
+		.popupContent {
+			border-color: rgba(0,0,0,0.9);
+			border-width: 0 5px 5px;
+			border-style: solid;
+		}
+		.header {
+			color: white
+		}
+		.header:after {
+			clear: both;
+		}
+		.headerContent {
+			padding: 9px 10px;
+		}
+		.toolbar {
+			float: right;
+			padding-left: 30px;
+			white-space: nowrap;
+		}
+		.toolbarContent {
+			display: inline-block;
+		}
+		.toolbarInfo {
+			display: inline-block;
+			padding: 9px 10px;
+			vertical-align: top;
+		}
+		.toolbarAction {
+			display: inline-block;
+			height: 50px;
+			width: auto;
+			cursor: pointer;
+			padding: 10px;
+		}
+		.toolbarAction:hover {
+			background-color: #d79900;
+		}
+		.container {
+			width: 100%;
+			height: 100%;
+		}
+		.content {
+			background-color: white;
+			overflow: auto !important;
+		}
 	</ui:style>
-	<g:HeaderPanel styleName="{style.background}">
-		<g:FlowPanel styleName="{style.toolbar}" ui:field="toolbarUi" />
+	<g:HeaderPanel styleName="{style.popupContent}">
+		<g:HTMLPanel styleName="{style.header}">
+			<div class="{style.toolbar}">
+				<g:FlowPanel styleName="{style.toolbarContent}" ui:field="toolbarUi"/>
+				<g:Image url="images/home/close.svg" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>
+			</div>
+			<g:SimplePanel styleName="{style.headerContent}" ui:field="headerContentUi"/>
+		</g:HTMLPanel>
 		<g:SimpleLayoutPanel styleName="{style.container}" ui:field="contentUi" />
 	</g:HeaderPanel>
 </ui:UiBinder> 

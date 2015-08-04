@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -14,15 +13,16 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class FullscreenViewer {
@@ -34,15 +34,13 @@ public class FullscreenViewer {
     
     interface Style extends CssResource {
         String popup();
-        String background();
-        String toolbar();
-        String toolbarInfoTextLeft();
-        String toolbarInfoTextRight();
+        String toolbarInfo();
         String toolbarAction();
         String content();
     }
     
     @UiField Style style;
+    @UiField SimplePanel headerContentUi;
     @UiField FlowPanel toolbarUi;
     @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenViewerContentPanel();
     
@@ -52,14 +50,11 @@ public class FullscreenViewer {
     public FullscreenViewer() {
         popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
         popup.addStyleName(style.popup());
-        Image closeControl = new Image("images/home/close.svg");
-        closeControl.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                popup.hide();
-            }
-        });
-        addToolbarAction(closeControl);
+    }
+    
+    @UiHandler("closeActionUi")
+    void onCloseActionClicked(ClickEvent event) {
+        popup.hide();
     }
     
     public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
@@ -71,9 +66,13 @@ public class FullscreenViewer {
         toolbarUi.add(widget);
     }
     
-    public void addToolbarInfoText(Widget widget, boolean left) {
-        widget.addStyleName(left ? style.toolbarInfoTextLeft() : style.toolbarInfoTextRight());
+    public void addToolbarInfo(Widget widget) {
+        widget.addStyleName(style.toolbarInfo());
         toolbarUi.add(widget);
+    }
+    
+    public void setHeaderWidget(Widget widget) {
+        headerContentUi.setWidget(widget);
     }
     
     public void showContent(Widget content) {
