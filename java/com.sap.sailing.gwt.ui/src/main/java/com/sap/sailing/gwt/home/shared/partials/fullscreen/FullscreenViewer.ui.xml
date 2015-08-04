@@ -1,0 +1,39 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenViewer.Style">
+	.background {
+		background-color: rgba(0,0,0,0.9);
+	}
+	.toolbar {
+		text-align: right;
+		padding: 0 5px;
+	}
+	.toolbarItem {
+		height: 50px;
+		width: auto;
+		padding: 10px;
+		cursor: pointer;
+		float: right;
+	}
+	.toolbarItem:hover {
+		background-color: #d79900;
+	}
+	.container {
+	}
+	.content {
+		background-color: white;
+		overflow: auto !important;
+		border-color: rgba(0,0,0,0.9);
+		border-width: 0 5px 5px;
+		border-style: solid;
+	}
+	</ui:style>
+	<g:LayoutPanel styleName="{style.background}">
+		<g:layer top="0" height="50">
+			<g:FlowPanel styleName="{style.toolbar}" ui:field="toolbarUi" />
+		</g:layer>
+		<g:layer top="50" bottom="0">
+			<g:SimpleLayoutPanel styleName="{style.container}" ui:field="contentUi" />
+		</g:layer>
+	</g:LayoutPanel>
+</ui:UiBinder> 
