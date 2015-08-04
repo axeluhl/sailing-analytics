@@ -43,7 +43,28 @@
 <repository location="http://nexus:8081/nexus/content/repositories/build.releases.unzip/org/eclipse/download/jetty/jetty-bundles-repository/9.2.2/jetty-bundles-repository-9.2.2.zip-unzip/jetty.bundles.repo/target/site/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.orbit.build.feature.set1.feature.group" version="1.0.0.v201405231430-FMlFMPFjMM9Sf0XXBvBdigZ0uiBK"/>
+<unit id="org.apache.commons.fileupload" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.fileupload.source" version="1.2.2.v20111214-1400"/>
+<unit id="org.apache.commons.io" version="2.2.0.v201405211200"/>
+<unit id="org.apache.commons.io.source" version="2.2.0.v201405211200"/>
+<unit id="org.apache.commons.lang" version="2.6.0.v201404270220"/>
+<unit id="org.apache.commons.lang.source" version="2.6.0.v201404270220"/>
+<unit id="org.apache.commons.math" version="2.1.0.v201105210652"/>
+<unit id="org.jdom" version="1.1.1.v201101151400"/>
+<unit id="org.jdom.source" version="1.1.1.v201101151400"/>
+<unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="com.sun.jersey" version="1.17.0.v20130314-2020"/>
+<unit id="com.sun.jersey.source" version="1.17.0.v20130314-2020"/>
+<unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
+<unit id="javax.ws.rs.source" version="1.1.1.v20130318-1750"/>
+<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
+<unit id="org.objectweb.asm.source" version="5.0.1.v201404251740"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.2.6.v201311072007"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.2.5.v201311072007"/>
+<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
+<unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
+<unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
 <repository location="http://nexus:8081/nexus/content/repositories/build.releases.unzip/org/eclipse/download/tools/orbit-buildrepo/R20140525021250/orbit-buildrepo-R20140525021250.zip-unzip/"/>
 </location>
 </locations>

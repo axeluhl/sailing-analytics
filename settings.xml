@@ -14,7 +14,7 @@
       <protocol>http</protocol>
       <host>proxy.wdf.sap.corp</host>
       <port>8080</port>
-      <nonProxyHosts>localhost|*.sap.corp</nonProxyHosts>
+      <nonProxyHosts>localhost|*.sap.corp|nexus</nonProxyHosts>
     </proxy>
   </proxies>
   
