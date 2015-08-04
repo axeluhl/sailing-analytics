@@ -4,14 +4,20 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
@@ -37,6 +43,7 @@ public class OldLeaderboard extends Composite {
     
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
+    @UiField Anchor fullscreenAnchor;
     @UiField DivElement lastScoringUpdateTimeDiv;
     @UiField DivElement lastScoringUpdateTextDiv;
     @UiField DivElement lastScoringCommentDiv;
@@ -46,29 +53,79 @@ public class OldLeaderboard extends Composite {
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
+    private final LeaderboardDelegate delegate;
     
     public OldLeaderboard() {
+        this(null);
+    }
+    
+    public OldLeaderboard(LeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
+        this.delegate = delegate;
+        this.setupFullscreenDelegate();
+    }
+    
+    private void setupFullscreenDelegate() {
+        if (delegate == null) {
+            fullscreenAnchor.removeFromParent();
+            return;
+        }
+        delegate.addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                if (leaderboardPanel != null) {
+                    leaderboardPanel.removeFromParent();
+                    leaderboardPanel.getElement().getFirstChildElement().getStyle().clearMarginTop();
+                    oldLeaderboardPanel.add(leaderboardPanel);
+                }
+            }
+        });
+        delegate.getSettingsControl().setTitle(StringMessages.INSTANCE.settings());
+        delegate.getSettingsControl().addHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                OldLeaderboard.this.settingsClicked(event);
+            }
+        }, ClickEvent.getType());
+        delegate.getAutoRefreshControl().setTitle(StringMessages.INSTANCE.refresh());
+        delegate.getAutoRefreshControl().addHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                OldLeaderboard.this.toogleAutoRefreshClicked(event);
+            }
+        }, ClickEvent.getType());
     }
     
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+            delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+        }
         if (autoRefreshTimer != null) {
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
                 // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("#8ab54e");
                 // autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+                // if (delegate != null) {
+                // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("#8ab54e");
+                // delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+                // }
             } else {
                 // playing the standalone leaderboard means putting it into live mode
                 autoRefreshTimer.setPlayMode(PlayModes.Live);
                 // autoRefreshAnchor.getElement().getStyle().setBackgroundColor("red");
                 autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+                if (delegate != null) {
+                    // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
+                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+                }
             }
         }
     }
@@ -83,6 +140,15 @@ public class OldLeaderboard extends Composite {
                     StringMessages.INSTANCE);
             dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
             dialog.show();
+        }
+    }
+    
+    @UiHandler("fullscreenAnchor")
+    void fullscreenClicked(ClickEvent event) {
+        if(leaderboardPanel != null && delegate != null) {
+            leaderboardPanel.removeFromParent();
+            leaderboardPanel.getElement().getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
+            delegate.setLeaderboard(leaderboardPanel);
         }
     }
 
@@ -108,7 +174,7 @@ public class OldLeaderboard extends Composite {
                 lastScoringUpdateTimeDiv.setInnerHTML("&nbsp;");
                 lastScoringUpdateTextDiv.setInnerHTML("&nbsp;");
             }
-            setVisible(hasLiveRaceDiv, hasLiveRace);
+            setVisible(hasLiveRaceDiv, true);
 
             setVisible(lastScoringCommentDiv, !hasLiveRace);
             setVisible(lastScoringUpdateTextDiv, !hasLiveRace);
@@ -119,6 +185,16 @@ public class OldLeaderboard extends Composite {
 
     public void hideRefresh() {
         autoRefreshAnchor.setVisible(false);
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().setVisible(false);
+        }
         lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
+    }
+    
+    public interface LeaderboardDelegate {
+        void setLeaderboard(LeaderboardPanel leaderboardPanel);
+        Widget getAutoRefreshControl();
+        Widget getSettingsControl();
+        HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler);
     }
 }
