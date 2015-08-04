@@ -1,43 +1,94 @@
-<settings>
-  <servers>
-    <server>
-      <id>ssh-repository</id>
-        <filePermissions>664</filePermissions>
-      <directoryPermissions>775</directoryPermissions>
-    </server>
-  </servers>
-  
-  <!-- Uncomment if your environment requires a proxy for web access -->
-  <proxies>
-    <proxy>
-      <active>true</active>
-      <protocol>http</protocol>
-      <host>proxy.wdf.sap.corp</host>
-      <port>8080</port>
-      <nonProxyHosts>localhost|*.sap.corp|nexus</nonProxyHosts>
-    </proxy>
-  </proxies>
-  
-  <profiles>
-    <profile>
-      <id>sailing.analytics</id>
-	  <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <!-- Leave empty, if no proxy is needed in your environment! -->
-        <!--
-        <parameters.proxy>
-	  -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080
-	</parameters.proxy>
-        -->
-	<!-- Change the configuration file to the one you like to use for the tests. -->
-        <parameters.integration-tests>
-	  -Dselenium.test.environment.configuration=ci-test-environment.xml
-	</parameters.integration-tests>
-      </properties>
-    </profile>
-  </profiles>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<!-- Id: com.sap.ldi:nexus-settings:1.17.0:LeanDI -->
+
+	<mirrors>
+		<mirror>
+			<id>mirror1</id>
+			<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+			<mirrorOf>*,!central</mirrorOf>
+		</mirror>
+	</mirrors>
+	<profiles>
+		<profile>
+			<id>release.build</id>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.releases/</url>
+				</pluginRepository>
+			</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.releases/</url>
+				</repository>
+			</repositories>
+			<properties>
+				<tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
+				<tycho.localArtifacts>ignore</tycho.localArtifacts>
+			</properties>
+		</profile>
+		<profile>
+			<id>milestone.build</id>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+				</pluginRepository>
+			</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+				</repository>
+			</repositories>
+			<properties>
+				<tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
+				<tycho.localArtifacts>ignore</tycho.localArtifacts>
+			</properties>
+		</profile>
+		<profile>
+			<id>snapshot.build</id>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.snapshots/</url>
+				</pluginRepository>
+			</pluginRepositories>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>http://nexus:8081/nexus/content/groups/build.snapshots/</url>
+				</repository>
+			</repositories>
+			<properties>
+				<tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
+				<tycho.localArtifacts>ignore</tycho.localArtifacts>
+			</properties>
+		</profile>
+		<profile>
+			<id>sonar</id>
+				<activation>
+					<activeByDefault>true</activeByDefault>
+				</activation>
+				<properties>
+					<sonar.jdbc.url>jdbc:mysql://ldisonarci.wdf.sap.corp:3306/sonar?useUnicode=true&amp;characterEncoding=utf8</sonar.jdbc.url>
+					<sonar.jdbc.driver>com.mysql.jdbc.Driver</sonar.jdbc.driver>
+					<sonar.jdbc.username>sonar</sonar.jdbc.username>
+					<sonar.jdbc.password>sonar</sonar.jdbc.password>
+					<sonar.host.url>http://ldisonarci.wdf.sap.corp:8080/sonar</sonar.host.url>
+					<tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
+					<tycho.localArtifacts>ignore</tycho.localArtifacts>
+				</properties>
+		</profile>
+	</profiles>
+	<activeProfiles>
+		<activeProfile>release.build</activeProfile>
+	</activeProfiles>
+	<pluginGroups>
+		<pluginGroup>com.sap.ldi</pluginGroup>
+	</pluginGroups>
 </settings>
-
-
