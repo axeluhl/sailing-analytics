@@ -274,7 +274,7 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ExLog.i(this, TAG, "Starting Login: " + AppUtils.getBuildInfo(this));
+        ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
 
         dataManager = DataManager.create(this);
         DataStore dataStore = dataManager.getDataStore();

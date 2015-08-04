@@ -67,7 +67,7 @@ public class SystemInformationActivityHelper {
         identifierView.setText(deviceIdentifier);
 
         TextView versionView = (TextView) activity.findViewById(R.id.system_information_application_version);
-        PackageInfo info = AppUtils.getPackageInfo(activity);
+        PackageInfo info = AppUtils.with(activity).getPackageInfo();
         if (info == null) {
             versionView.setText(activity.getString(R.string.generic_error));
         } else {
@@ -78,13 +78,13 @@ public class SystemInformationActivityHelper {
     private void setupCompileView() {
         TextView view = (TextView) activity.findViewById(R.id.system_information_application_compile);
         if (view != null) {
-            view.setText(AppUtils.getBuildInfo(activity));
+            view.setText(AppUtils.with(activity).getBuildInfo());
         }
     }
 
     private void setupInstalledView() {
         TextView installView = (TextView) activity.findViewById(R.id.system_information_application_install);
-        PackageInfo info = AppUtils.getPackageInfo(activity.getApplication());
+        PackageInfo info = AppUtils.with(activity).getPackageInfo();
         if (info == null) {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
