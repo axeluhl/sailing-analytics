@@ -7,7 +7,7 @@
 	<mirrors>
 		<mirror>
 			<id>mirror1</id>
-			<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.milestones/</url>
 			<mirrorOf>*,!central</mirrorOf>
 		</mirror>
 	</mirrors>
@@ -17,13 +17,13 @@
 			<pluginRepositories>
 				<pluginRepository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.releases/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.releases/</url>
 				</pluginRepository>
 			</pluginRepositories>
 			<repositories>
 				<repository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.releases/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.releases/</url>
 				</repository>
 			</repositories>
 			<properties>
@@ -36,13 +36,13 @@
 			<pluginRepositories>
 				<pluginRepository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.milestones/</url>
 				</pluginRepository>
 			</pluginRepositories>
 			<repositories>
 				<repository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.milestones/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.milestones/</url>
 				</repository>
 			</repositories>
 			<properties>
@@ -55,13 +55,13 @@
 			<pluginRepositories>
 				<pluginRepository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.snapshots/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots/</url>
 				</pluginRepository>
 			</pluginRepositories>
 			<repositories>
 				<repository>
 					<id>central</id>
-					<url>http://nexus:8081/nexus/content/groups/build.snapshots/</url>
+					<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots/</url>
 				</repository>
 			</repositories>
 			<properties>
