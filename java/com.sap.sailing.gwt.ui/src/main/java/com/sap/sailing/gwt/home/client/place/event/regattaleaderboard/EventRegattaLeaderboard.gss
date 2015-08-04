@@ -85,7 +85,8 @@
   text-align: right;
 }
 .regattaleaderboard_meta_reload,
-.regattaleaderboard_meta_settings_button {
+.regattaleaderboard_meta_settings_button,
+.regattaleaderboard_meta_fullscreen_button {
   display: inline-block;
   width: 2.666666666666667em;
   height: 2.666666666666667em;
@@ -231,4 +232,8 @@
 .letItScroll {
   overflow-x: auto;
   margin: 10px 0px;
+}
+.regattaleaderboard_meta_fullscreen_button {
+  background-color: #9f9f9f;
+  background-image: url("images/home/media-controls__fullsize.png");
 }
