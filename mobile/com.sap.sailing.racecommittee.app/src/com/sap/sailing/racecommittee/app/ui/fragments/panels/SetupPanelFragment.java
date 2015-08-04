@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -72,33 +72,33 @@ public class SetupPanelFragment extends BasePanelFragment {
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
 
-        mStartProcedure = ViewHolder.get(layout, R.id.start_procedure);
+        mStartProcedure = ViewHelper.get(layout, R.id.start_procedure);
         if (mStartProcedure != null) {
             mStartProcedure.setOnClickListener(new StartProcedureClick());
         }
-        mStartProcedureLock = ViewHolder.get(layout, R.id.start_procedure_lock);
-        mStartProcedureValue = ViewHolder.get(layout, R.id.start_procedure_value);
+        mStartProcedureLock = ViewHelper.get(layout, R.id.start_procedure_lock);
+        mStartProcedureValue = ViewHelper.get(layout, R.id.start_procedure_value);
 
-        mStartMode = ViewHolder.get(layout, R.id.start_mode);
+        mStartMode = ViewHelper.get(layout, R.id.start_mode);
         if (mStartMode != null) {
             mStartMode.setOnClickListener(new StartModeClick());
         }
-        mStartModeLock = ViewHolder.get(layout, R.id.start_mode_lock);
-        mStartModeFlag = ViewHolder.get(layout, R.id.start_mode_flag);
+        mStartModeLock = ViewHelper.get(layout, R.id.start_mode_lock);
+        mStartModeFlag = ViewHelper.get(layout, R.id.start_mode_flag);
 
-        mCourse = ViewHolder.get(layout, R.id.course);
+        mCourse = ViewHelper.get(layout, R.id.course);
         if (mCourse != null) {
             mCourse.setOnClickListener(new CourseClick());
         }
-        mCourseLock = ViewHolder.get(layout, R.id.course_lock);
-        mCourseValue = ViewHolder.get(layout, R.id.course_value);
+        mCourseLock = ViewHelper.get(layout, R.id.course_lock);
+        mCourseValue = ViewHelper.get(layout, R.id.course_value);
 
-        mWind = ViewHolder.get(layout, R.id.wind);
+        mWind = ViewHelper.get(layout, R.id.wind);
         if (mWind != null) {
             mWind.setOnClickListener(new WindClick());
         }
-        mWindLock = ViewHolder.get(layout, R.id.wind_lock);
-        mWindValue = ViewHolder.get(layout, R.id.wind_value);
+        mWindLock = ViewHelper.get(layout, R.id.wind_lock);
+        mWindValue = ViewHelper.get(layout, R.id.wind_value);
 
         return layout;
     }
