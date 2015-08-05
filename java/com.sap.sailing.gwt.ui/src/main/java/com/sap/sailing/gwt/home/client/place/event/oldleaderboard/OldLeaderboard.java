@@ -5,6 +5,7 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,6 +16,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -137,8 +139,16 @@ public class OldLeaderboard extends Composite {
             final String componentName = leaderboardPanel.getLocalizedShortName();
             final String debugIdPrefix = DebugIdHelper.createDebugId(componentName);
 
-            SettingsDialog<LeaderboardSettings> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardPanel,
-                    StringMessages.INSTANCE);
+            SettingsDialog<?> dialog = new SettingsDialog<LeaderboardSettings>(leaderboardPanel, StringMessages.INSTANCE) {
+                protected Widget getAdditionalWidget() {
+                    Widget additionalWidget = super.getAdditionalWidget();
+                    if (!oldLeaderboardPanel.getElement().isOrHasChild(leaderboardPanel.getElement())) {
+                        additionalWidget.getElement().getStyle().setProperty("maxWidth", Window.getClientWidth()-75, Unit.PX);
+                        additionalWidget.getElement().getStyle().setOverflow(Overflow.AUTO);
+                    }
+                    return additionalWidget;
+                }
+            };
             dialog.ensureDebugId(debugIdPrefix + "SettingsDialog");
             dialog.show();
         }
