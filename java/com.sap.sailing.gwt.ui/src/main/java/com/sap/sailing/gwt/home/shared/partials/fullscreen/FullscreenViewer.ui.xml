@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenViewer.Style">
 		.popup {
-			position: absolute;
+			position: fixed !important;
 			top: 0;
 			bottom: 0;
 			left: 0;
