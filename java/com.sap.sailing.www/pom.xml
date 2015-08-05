@@ -17,11 +17,8 @@
 		folder -->
 	<profiles>
 		<profile>
-			<!-- deactivate with parameter '-P !with-mobile' -->
+			<!-- activate with parameter '-P with-mobile' -->
 			<id>with-mobile</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>com.sap.sailing</groupId>
