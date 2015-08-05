@@ -9,7 +9,6 @@ Import-Package: org.json.simple
 Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain,
- net.sf.marineapi;bundle-version="0.5.0",
  com.sap.sse,
  com.sap.sse.common,
  com.sap.sailing.server.gateway.serialization.shared.android
