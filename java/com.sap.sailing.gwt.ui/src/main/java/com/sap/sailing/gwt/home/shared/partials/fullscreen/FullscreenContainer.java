@@ -25,11 +25,11 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class FullscreenViewer {
+public class FullscreenContainer {
     
-    private static FullscreenViewerUiBinder uiBinder = GWT.create(FullscreenViewerUiBinder.class);
+    private static FullscreenContainerUiBinder uiBinder = GWT.create(FullscreenContainerUiBinder.class);
 
-    interface FullscreenViewerUiBinder extends UiBinder<HeaderPanel, FullscreenViewer> {
+    interface FullscreenContainerUiBinder extends UiBinder<HeaderPanel, FullscreenContainer> {
     }
     
     interface Style extends CssResource {
@@ -42,12 +42,12 @@ public class FullscreenViewer {
     @UiField Style style;
     @UiField SimplePanel headerContentUi;
     @UiField FlowPanel toolbarUi;
-    @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenViewerContentPanel();
+    @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenContentPanel();
     
     private final FullscreenPopupPanel popup = new FullscreenPopupPanel();
     private final HeaderPanel mainPanel;
     
-    public FullscreenViewer() {
+    public FullscreenContainer() {
         popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
         popup.addStyleName(style.popup());
     }
@@ -106,7 +106,7 @@ public class FullscreenViewer {
         }
     }
     
-    private class FullscreenViewerContentPanel extends SimpleLayoutPanel {
+    private class FullscreenContentPanel extends SimpleLayoutPanel {
         private HandlerRegistration windowResizeHandler;
         
         @Override

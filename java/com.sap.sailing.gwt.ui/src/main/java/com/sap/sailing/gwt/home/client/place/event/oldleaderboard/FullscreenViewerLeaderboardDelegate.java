@@ -6,10 +6,10 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.LeaderboardDelegate;
-import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenViewer;
+import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
-public class FullscreenViewerLeaderboardDelegate extends FullscreenViewer implements LeaderboardDelegate {
+public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer implements LeaderboardDelegate {
     
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");
