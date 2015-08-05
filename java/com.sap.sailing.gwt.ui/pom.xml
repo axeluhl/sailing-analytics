@@ -11,19 +11,6 @@
   <artifactId>com.sap.sailing.gwt.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <repositories>
-    <repository>
-      <id>sonatype</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <dependencies>
     <!-- The following dependency needs re-declaration with the desired version because
          gwt-maps-api declares it with no version specifier which may be resolved to an
