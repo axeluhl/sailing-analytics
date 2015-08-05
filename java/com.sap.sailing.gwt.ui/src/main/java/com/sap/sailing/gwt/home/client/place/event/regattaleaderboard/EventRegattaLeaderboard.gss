@@ -236,4 +236,6 @@
 .regattaleaderboard_meta_fullscreen_button {
   background-color: #9f9f9f;
   background-image: url("images/home/media-controls__fullsize.png");
+  -webkit-transform: scaleX(-1);
+          transform: scaleX(-1);
 }
