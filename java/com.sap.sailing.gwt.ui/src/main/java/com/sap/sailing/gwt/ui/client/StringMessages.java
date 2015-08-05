@@ -1355,4 +1355,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String empty();
     String runAQuery();
     String latestRegattaStandings();
+    String plainText();
+    String columnChart();
+    String choosePresentation();
 }

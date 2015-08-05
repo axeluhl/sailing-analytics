@@ -38,7 +38,7 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=7)
     public Double getNumberOfPenaltyCircles();
     
-    @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=8)
-    public Double getRankGainsOrLosses();
+    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=8)
+    public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
 }
