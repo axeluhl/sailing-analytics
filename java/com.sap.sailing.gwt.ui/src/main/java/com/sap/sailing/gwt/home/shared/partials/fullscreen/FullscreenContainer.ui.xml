@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer.Style">
 		.popup {
 			position: fixed !important;
@@ -58,7 +59,7 @@
 		<g:HTMLPanel styleName="{style.header}">
 			<div class="{style.toolbar}">
 				<g:FlowPanel styleName="{style.toolbarContent}" ui:field="toolbarUi"/>
-				<g:Image url="images/home/close.svg" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>
+				<g:Image title="{i18n.closeFullscreenView}" url="images/home/close.svg" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>
 			</div>
 			<g:SimplePanel styleName="{style.headerContent}" ui:field="headerContentUi"/>
 		</g:HTMLPanel>

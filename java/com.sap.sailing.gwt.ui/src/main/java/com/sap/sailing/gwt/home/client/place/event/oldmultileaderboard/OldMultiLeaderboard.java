@@ -67,6 +67,9 @@ public class OldMultiLeaderboard extends Composite {
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         OldMultiLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
+        autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
+        fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
     }
