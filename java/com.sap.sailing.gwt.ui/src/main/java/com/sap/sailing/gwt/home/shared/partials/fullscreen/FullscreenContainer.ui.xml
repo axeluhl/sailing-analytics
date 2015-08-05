@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer.Style">
 		.popup {
 			position: fixed !important;
@@ -10,10 +11,12 @@
 			right: 0;
 			background-color: rgba(0,0,0,0.9);
 		}
-		.popupContent {
-			border-color: rgba(0,0,0,0);
-			border-width: 0 5px 5px;
-			border-style: solid;
+		.logoLink {
+			position: absolute;
+		}
+		.logo {
+			height: 50px;
+    		padding: 10px 5px 5px 5px;
 		}
 		.header {
 			color: white
@@ -54,9 +57,17 @@
 		.content {
 			overflow: auto !important;
 		}
+		.contentBorder {
+			border-color: rgba(0,0,0,0);
+			border-width: 0 5px 5px;
+			border-style: solid;
+		}
 	</ui:style>
-	<g:HeaderPanel styleName="{style.popupContent}">
+	<g:HeaderPanel>
 		<g:HTMLPanel styleName="{style.header}">
+			<a href="http://sapsponsorships.com" class="{style.logoLink}" style="display:none;" ui:field="logoUi">
+		    	<img src="images/home/logo-small@2x.png" alt="{i18n_ubi.headerLogo}" class="{style.logo}"></img>
+	        </a>
 			<div class="{style.toolbar}">
 				<g:FlowPanel styleName="{style.toolbarContent}" ui:field="toolbarUi"/>
 				<g:Image title="{i18n.closeFullscreenView}" url="images/home/close.svg" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>

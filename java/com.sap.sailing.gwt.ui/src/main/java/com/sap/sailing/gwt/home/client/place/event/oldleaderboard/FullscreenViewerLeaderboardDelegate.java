@@ -21,6 +21,8 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer imp
     private final Label hasLiveRace = new Label();
     
     public FullscreenViewerLeaderboardDelegate() {
+        showLogo();
+        showBorder();
         setHeaderWidget(createPanel(lastScoringComment, hasLiveRace, scoringScheme));
         addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);

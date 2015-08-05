@@ -20,6 +20,8 @@ public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContaine
     private final Label scoringScheme = new Label();
     
     public FullscreenViewerMultiLeaderboardDelegate() {
+        showLogo();
+        showBorder();
         setHeaderWidget(createPanel(lastScoringComment, scoringScheme));
         addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);

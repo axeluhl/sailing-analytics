@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.fullscreen;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,12 +35,14 @@ public class FullscreenContainer {
     
     interface Style extends CssResource {
         String popup();
+        String contentBorder();
         String toolbarInfo();
         String toolbarAction();
         String content();
     }
     
     @UiField Style style;
+    @UiField AnchorElement logoUi;
     @UiField SimplePanel headerContentUi;
     @UiField FlowPanel toolbarUi;
     @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenContentPanel();
@@ -50,6 +53,15 @@ public class FullscreenContainer {
     public FullscreenContainer() {
         popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
         popup.addStyleName(style.popup());
+    }
+    
+    protected void showLogo() {
+        logoUi.getStyle().clearDisplay();
+        headerContentUi.getElement().getStyle().setMarginLeft(5, Unit.EM);
+    }
+    
+    protected void showBorder() {
+        contentUi.addStyleName(style.contentBorder());
     }
     
     @UiHandler("closeActionUi")
