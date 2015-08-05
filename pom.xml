@@ -10,22 +10,8 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>java</module>
+		<module>ios</module>
 	</modules>
-
-	<profiles>
-		<profile>
-			<!-- deactivate with parameter '-P !with-mobile'-->
-			<id>with-mobile</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>mobile</module>
-				<module>ios</module>
-			</modules>
-		</profile>
-	</profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
