@@ -8,5 +8,5 @@ Fragment-Host: com.sap.sailing.xmlexport
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.sap.sse.common,
- com.sap.sailing.domain.test;bundle-version="1.0.0",
- com.tractrac.clientmodule;bundle-version="3.0.7"
+ com.sap.sailing.domain.test,
+ com.tractrac.clientmodule

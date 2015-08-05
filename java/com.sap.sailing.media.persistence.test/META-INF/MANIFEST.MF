@@ -7,11 +7,11 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb,
- org.json.simple;bundle-version="1.1.0",
+ org.json.simple,
  org.hamcrest.core;bundle-version="1.1.0",
  org.junit4;bundle-version="4.8.2",
- com.sap.sailing.domain.persistence;bundle-version="1.0.0",
- com.sap.sailing.gwt.ui;bundle-version="1.0.0",
- com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain.persistence,
+ com.sap.sailing.gwt.ui,
+ com.sap.sailing.domain.common,
  org.hamcrest;bundle-version="1.1.0",
  com.sap.sse.common
