@@ -36,8 +36,15 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer imp
     }
     
     @Override
-    public void setLeaderboard(LeaderboardPanel leaderboardPanel) {
+    public void setLeaderboard(final LeaderboardPanel leaderboardPanel) {
         showContent(leaderboardPanel);
+        leaderboardPanel.getElement().setAttribute("tabIndex", "0");
+        leaderboardPanel.getElement().focus();
+    }
+    
+    @Override
+    protected void onClose() {
+        getContent().getElement().removeAttribute("tabIndex");
     }
 
     @Override

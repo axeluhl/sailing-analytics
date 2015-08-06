@@ -55,6 +55,14 @@ public class FullscreenContainer {
         popup.addStyleName(style.popup());
     }
     
+    protected void onClose() {
+        
+    }
+    
+    protected Widget getContent() {
+        return contentUi.getWidget();
+    }
+    
     protected void showLogo() {
         logoUi.getStyle().clearDisplay();
         headerContentUi.getElement().getStyle().setMarginLeft(5, Unit.EM);
@@ -102,6 +110,7 @@ public class FullscreenContainer {
                 public void onClose(CloseEvent<PopupPanel> event) {
                     RootPanel.get().getElement().getStyle().setOverflow(Overflow.AUTO);
                     contentUi.getWidget().getElement().removeClassName(style.content());
+                    FullscreenContainer.this.onClose();
                 }
             });
         }
@@ -109,7 +118,10 @@ public class FullscreenContainer {
         protected void onPreviewNativeEvent(NativePreviewEvent event) {
             if (event.getTypeInt() == Event.ONKEYDOWN && event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
                 FullscreenPopupPanel.this.hide();
+                event.cancel();
+                return;
             }
+            event.consume();
         };
         
         private void showPopupPanel() {
