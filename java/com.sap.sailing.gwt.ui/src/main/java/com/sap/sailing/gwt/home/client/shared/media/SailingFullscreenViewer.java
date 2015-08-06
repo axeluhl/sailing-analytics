@@ -10,4 +10,9 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
     public void show(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         showContent(new SailingGalleryPlayer(selected, images));
     }
+    
+    @Override
+    protected void onShow() {
+        getContentWidget().setFocusToSubSlider();
+    }
 }
