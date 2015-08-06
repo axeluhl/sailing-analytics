@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
-public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer implements LeaderboardDelegate {
+public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<LeaderboardPanel> implements LeaderboardDelegate {
     
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");

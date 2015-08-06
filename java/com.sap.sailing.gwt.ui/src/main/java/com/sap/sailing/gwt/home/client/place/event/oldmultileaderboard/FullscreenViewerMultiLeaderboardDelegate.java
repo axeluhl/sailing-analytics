@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiL
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 
-public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer implements MultiLeaderboardDelegate {
+public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer<MultiLeaderboardPanel> implements MultiLeaderboardDelegate {
     
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");

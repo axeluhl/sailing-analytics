@@ -26,11 +26,11 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class FullscreenContainer {
+public class FullscreenContainer<T extends Widget> {
     
     private static FullscreenContainerUiBinder uiBinder = GWT.create(FullscreenContainerUiBinder.class);
 
-    interface FullscreenContainerUiBinder extends UiBinder<HeaderPanel, FullscreenContainer> {
+    interface FullscreenContainerUiBinder extends UiBinder<HeaderPanel, FullscreenContainer<?>> {
     }
     
     interface Style extends CssResource {
@@ -61,8 +61,9 @@ public class FullscreenContainer {
     protected void onClose() {
     }
     
-    protected Widget getContentWidget() {
-        return contentUi.getWidget();
+    @SuppressWarnings("unchecked")
+    protected T getContentWidget() {
+        return (T) contentUi.getWidget();
     }
     
     protected void showLogo() {
@@ -97,7 +98,7 @@ public class FullscreenContainer {
         headerContentUi.setWidget(widget);
     }
     
-    public void showContent(Widget content) {
+    public void showContent(T content) {
         contentUi.setWidget(content);
         getContentWidget().getElement().addClassName(style.content());
         mainPanel.onResize();
