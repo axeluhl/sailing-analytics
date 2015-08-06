@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.home.client.place.solutions;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 
-public class SolutionsPlace extends AbstractBasePlace {
+public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle {
 
     public enum SolutionsNavigationTabs { SailingAnalytics, RaceCommiteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
     private final SolutionsNavigationTabs navigationTab;
@@ -23,6 +25,11 @@ public class SolutionsPlace extends AbstractBasePlace {
     public SolutionsNavigationTabs getNavigationTab() {
         return navigationTab;
     }
+    
+    @Override
+    public String getLocationTitle() {
+        return TextMessages.INSTANCE.solutions();
+    }
 
     public static class Tokenizer implements PlaceTokenizer<SolutionsPlace> {
         @Override
@@ -35,5 +42,4 @@ public class SolutionsPlace extends AbstractBasePlace {
             return new SolutionsPlace(url);
         }
     }
-    
 }
