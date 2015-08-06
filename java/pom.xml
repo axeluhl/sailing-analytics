@@ -324,9 +324,11 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-compiler-plugin</artifactId>
         <version>${tycho-version}</version>
+<!-- Use this if a toolchains.xml file is available in ~/.m2
         <configuration>
           <useJDK>BREE</useJDK>
         </configuration>
+-->
       </plugin>
 
 
