@@ -265,7 +265,7 @@
 	    <extraRequirements>
 	      <requirement>
 	        <type>eclipse-plugin</type>
-		<id>com.google.gwt.dev</id>
+		<id>com.sap.com.google.gwt.dev</id>
                 <versionRange>0.0.0</versionRange>
 	      </requirement>
 	    </extraRequirements>
