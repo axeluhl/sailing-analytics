@@ -1,0 +1,86 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
+  <g:HTMLPanel>
+    <div class="{res.mediaCss.grid}">
+      <div class="{local_res.css.solutions} {local_res.css.accordion}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+            <h2 class="{local_res.css.solutions_item_header_title}">
+              <ui:text from='{i18n_ubi.solutionsSAPHeadline}' />
+            </h2>
+            <img src="images/home/arrow-down-grey.png" alt="{i18n_ubi.solutionsSAPHeadline}" class="{local_res.css.solutions_item_header_arrow}"></img>
+          </div>
+          <div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+            <img src="images/mobile/solutions-sap-trimmed.png" alt="{i18n.sapSailingAnalytics}"></img>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsSAPText1}' />
+            </p>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsSAPText2}' />
+            </p>
+          </div>
+        </div>
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+            <h2 class="{local_res.css.solutions_item_header_title}">
+              <ui:text from='{i18n_ubi.solutionsRaceHeadline}' />
+            </h2>
+            <img src="images/home/arrow-down-grey.png" alt="" class="{local_res.css.solutions_item_header_arrow}"></img>
+          </div>
+          <div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+            <img src="images/home/solutions-race.png" alt="{i18n_ubi.solutionsRaceHeadline}"></img>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsRaceText}' />
+            </p>
+          </div>
+        </div>
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+            <h2 class="{local_res.css.solutions_item_header_title}">
+              <ui:text from='{i18n_ubi.solutionsPostHeadline}' />
+            </h2>
+            <img src="images/home/arrow-down-grey.png" alt="" class="{local_res.css.solutions_item_header_arrow}"></img>
+          </div>
+          <div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+            <img src="images/mobile/solutions-post-trimmed.png" alt="{i18n_ubi.solutionsPostHeadline}"></img>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsPostText}' />
+            </p>
+          </div>
+        </div>
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+            <h2 class="{local_res.css.solutions_item_header_title}">
+              <ui:text from='{i18n_ubi.solutionsTrainingHeadline}' />
+            </h2>
+            <img src="images/home/arrow-down-grey.png" alt="" class="{local_res.css.solutions_item_header_arrow}"></img>
+          </div>
+          <div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+            <img src="images/home/solutions-training.png" alt="{i18n_ubi.solutionsTrainingHeadline}"></img>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsTrainingText}' />
+            </p>
+          </div>
+        </div>
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+            <h2 class="{local_res.css.solutions_item_header_title}">
+              <ui:text from='{i18n_ubi.solutionsSimulatorHeadline}' />
+            </h2>
+            <img src="images/home/arrow-down-grey.png" alt="" class="{local_res.css.solutions_item_header_arrow}"></img>
+          </div>
+          <div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+            <img src="images/mobile/solutions-simulator-trimmed.png" alt="{i18n_ubi.solutionsSimulatorHeadline}"></img>
+            <p>
+              <ui:text from='{i18n_ubi.solutionsSimulatorText}' />
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>
