@@ -83,6 +83,7 @@
     <module>com.sap.sailing.gwt.ui</module>
     <module>com.sap.sailing.velum.resultimport</module>
     <module>com.sap.sailing.sailwave.resultimport</module>
+    <module>com.sap.sailing.barbados.resultimport</module>
     <module>com.sap.sailing.manage2sail</module>
     <module>com.sap.sailing.manage2sail.resultimport</module>
     <module>com.sap.sailing.autoload</module>
@@ -218,7 +219,6 @@
 	<module>com.sap.sailing.kiworesultimport.test</module>
 	<module>com.sap.sailing.ess40.resultimport.test</module>
 	<module>com.sap.sailing.freg.resultimport.test</module>
-	<module>com.sap.sailing.barbados.resultimport</module>
 	<module>com.sap.sailing.barbados.resultimport.test</module>
 	<module>com.sap.sailing.velum.resultimport.test</module>
 	<module>com.sap.sailing.sailwave.resultimport.test</module>
