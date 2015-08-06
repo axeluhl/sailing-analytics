@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.oldleaderboard;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -8,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.LeaderboardDelegate;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sse.common.Color;
 
 public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<LeaderboardPanel> implements LeaderboardDelegate {
     
@@ -29,6 +31,24 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<Lea
         addToolbarAction(settingsControl);
     }
     
+    @Override
+    protected void onShow() {
+        Element leaderboardPanel = getContentWidget().getElement();
+        leaderboardPanel.getStyle().setBackgroundColor(Color.WHITE.getAsHtml());
+        leaderboardPanel.getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
+        leaderboardPanel.setTabIndex(0);
+        leaderboardPanel.focus();
+    }
+    
+    @Override
+    protected void onClose() {
+        Element leaderboardPanel = getContentWidget().getElement();
+        leaderboardPanel.getStyle().clearBackgroundColor();
+        leaderboardPanel.getFirstChildElement().getStyle().clearMarginTop();
+        leaderboardPanel.blur();
+        leaderboardPanel.removeAttribute("tabIndex");
+    }
+    
     private Widget createPanel(Widget... contentWidgets) {
         FlowPanel panel = new FlowPanel();
         for (Widget widget : contentWidgets) panel.add(widget);
@@ -38,15 +58,8 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<Lea
     @Override
     public void setLeaderboard(final LeaderboardPanel leaderboardPanel) {
         showContent(leaderboardPanel);
-        leaderboardPanel.getElement().setAttribute("tabIndex", "0");
-        leaderboardPanel.getElement().focus();
     }
     
-    @Override
-    protected void onClose() {
-        getContentWidget().getElement().removeAttribute("tabIndex");
-    }
-
     @Override
     public Widget getAutoRefreshControl() {
         return autoRefreshControl;
