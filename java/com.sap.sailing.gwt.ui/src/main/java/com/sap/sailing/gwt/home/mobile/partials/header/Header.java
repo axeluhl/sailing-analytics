@@ -47,7 +47,7 @@ public class Header extends Composite {
         
         addNavigation(appContext.getNavigator().getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(appContext.getNavigator().getEventsNavigation(), StringMessages.INSTANCE.events());
-//        addNavigation(appContext.getNavigator().getSolutionsNavigation(), StringMessages.INSTANCE.solutions());
+//        addNavigation(appContext.getNavigator().getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
 
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
         
