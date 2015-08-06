@@ -6,12 +6,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard.MultiLeaderboardDelegate;
+import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard.OldMultiLeaderboardDelegate;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sse.common.Color;
 
-public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer<MultiLeaderboardPanel> implements MultiLeaderboardDelegate {
+public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer<MultiLeaderboardPanel> implements OldMultiLeaderboardDelegate {
     
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");
@@ -55,7 +55,7 @@ public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContaine
     }
     
     @Override
-    public void setLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel) {
+    public void setLeaderboardPanel(MultiLeaderboardPanel multiLeaderboardPanel) {
         showContent(multiLeaderboardPanel);
     }
 

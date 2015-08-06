@@ -6,12 +6,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.LeaderboardDelegate;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.OldLeaderboardDelegate;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Color;
 
-public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<LeaderboardPanel> implements LeaderboardDelegate {
+public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<LeaderboardPanel> implements OldLeaderboardDelegate {
     
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");
@@ -56,7 +56,7 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer<Lea
     }
     
     @Override
-    public void setLeaderboard(final LeaderboardPanel leaderboardPanel) {
+    public void setLeaderboardPanel(LeaderboardPanel leaderboardPanel) {
         showContent(leaderboardPanel);
     }
     

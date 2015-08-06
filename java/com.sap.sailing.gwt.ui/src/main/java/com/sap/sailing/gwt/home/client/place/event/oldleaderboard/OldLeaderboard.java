@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -24,6 +23,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboards.LeaderboardDelegate;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -56,13 +56,13 @@ public class OldLeaderboard extends Composite {
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
-    private final LeaderboardDelegate delegate;
+    private final OldLeaderboardDelegate delegate;
     
     public OldLeaderboard() {
         this(null);
     }
     
-    public OldLeaderboard(LeaderboardDelegate delegate) {
+    public OldLeaderboard(OldLeaderboardDelegate delegate) {
         this.leaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -158,7 +158,7 @@ public class OldLeaderboard extends Composite {
     void fullscreenClicked(ClickEvent event) {
         if(leaderboardPanel != null && delegate != null) {
             leaderboardPanel.removeFromParent();
-            delegate.setLeaderboard(leaderboardPanel);
+            delegate.setLeaderboardPanel(leaderboardPanel);
         }
     }
 
@@ -218,15 +218,7 @@ public class OldLeaderboard extends Composite {
         lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
     }
     
-    public interface LeaderboardDelegate {
-        void setLeaderboard(LeaderboardPanel leaderboardPanel);
-        Widget getAutoRefreshControl();
-        Widget getSettingsControl();
-        HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler);
-        Element getLastScoringUpdateTimeElement();
-        Element getLastScoringUpdateTextElement();
-        Element getLastScoringCommentElement();
-        Element getScoringSchemeElement();
+    public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
         Element getHasLiveRaceElement();
     }
 }

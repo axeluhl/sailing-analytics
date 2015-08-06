@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
@@ -12,7 +11,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -24,6 +22,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboards.LeaderboardDelegate;
 import com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -55,13 +54,13 @@ public class OldMultiLeaderboard extends Composite {
 
     private MultiLeaderboardPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
-    private final MultiLeaderboardDelegate delegate;
+    private final OldMultiLeaderboardDelegate delegate;
     
     public OldMultiLeaderboard() {
         this(null);
     }
     
-    public OldMultiLeaderboard(MultiLeaderboardDelegate delegate) {
+    public OldMultiLeaderboard(OldMultiLeaderboardDelegate delegate) {
         this.multiLeaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
         OldMultiLeaderboardResources.INSTANCE.css().ensureInjected();
@@ -158,7 +157,7 @@ public class OldMultiLeaderboard extends Composite {
     void fullscreenClicked(ClickEvent event) {
         if(multiLeaderboardPanel != null && delegate != null) {
             multiLeaderboardPanel.removeFromParent();
-            delegate.setLeaderboard(multiLeaderboardPanel);
+            delegate.setLeaderboardPanel(multiLeaderboardPanel);
         }
     }
 
@@ -201,14 +200,6 @@ public class OldMultiLeaderboard extends Composite {
         }
     }
     
-    public interface MultiLeaderboardDelegate {
-        void setLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel);
-        Widget getAutoRefreshControl();
-        Widget getSettingsControl();
-        HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler);
-        Element getLastScoringUpdateTimeElement();
-        Element getLastScoringUpdateTextElement();
-        Element getLastScoringCommentElement();
-        Element getScoringSchemeElement();
+    public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardPanel>{
     }
 }
