@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.FullscreenViewerMultiLeaderboardDelegate;
+import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
@@ -40,7 +40,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     protected OldMultiLeaderboard leaderboard;
 
     public EventSeriesLeaderboardsTabView() {
-        leaderboard = new OldMultiLeaderboard(new FullscreenViewerMultiLeaderboardDelegate());
+        leaderboard = new OldMultiLeaderboard(new OldMultiLeaderboardDelegateFullscreenViewer());
     }
 
     @Override

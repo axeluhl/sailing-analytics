@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard;
+package com.sap.sailing.gwt.home.client.place.event.oldleaderboards;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
@@ -6,57 +6,56 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard.OldMultiLeaderboardDelegate;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sse.common.Color;
 
-public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer<MultiLeaderboardPanel> implements OldMultiLeaderboardDelegate {
-    
+public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> extends FullscreenContainer<T> implements
+        LeaderboardDelegate<T> {
+
     private final Image autoRefreshControl = new Image("images/home/reload.png");
     private final Image settingsControl = new Image("images/home/settings.png");
-    
+
     private final Label lastScoringUpdateTime = new Label();
     private final Label lastScoringUpdateText = new Label();
-    private final Label lastScoringComment = new Label();
-    private final Label scoringScheme = new Label();
-    
-    public FullscreenViewerMultiLeaderboardDelegate() {
+    protected final Label lastScoringComment = new Label();
+    protected final Label scoringScheme = new Label();
+
+    public AbstractLeaderboardFullscreenViewer() {
         showLogo();
         showBorder();
-        setHeaderWidget(createPanel(lastScoringComment, scoringScheme));
         addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);
         addToolbarAction(settingsControl);
     }
-    
+
     @Override
     protected void onShow() {
-        Element multiLeaderboardPanel = getContentWidget().getElement();
-        multiLeaderboardPanel.getStyle().setBackgroundColor(Color.WHITE.getAsHtml());
-        multiLeaderboardPanel.getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
-        multiLeaderboardPanel.setTabIndex(0);
-        multiLeaderboardPanel.focus();
+        Element leaderboardPanel = getContentWidget().getElement();
+        leaderboardPanel.getStyle().setBackgroundColor(Color.WHITE.getAsHtml());
+        leaderboardPanel.getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
+        leaderboardPanel.setTabIndex(0);
+        leaderboardPanel.focus();
     }
-    
+
     @Override
     protected void onClose() {
-        Element multiLeaderboardPanel = getContentWidget().getElement();
-        multiLeaderboardPanel.getStyle().clearBackgroundColor();
-        multiLeaderboardPanel.getFirstChildElement().getStyle().clearMarginTop();
-        multiLeaderboardPanel.blur();
-        multiLeaderboardPanel.removeAttribute("tabIndex");
+        Element leaderboardPanel = getContentWidget().getElement();
+        leaderboardPanel.getStyle().clearBackgroundColor();
+        leaderboardPanel.getFirstChildElement().getStyle().clearMarginTop();
+        leaderboardPanel.blur();
+        leaderboardPanel.removeAttribute("tabIndex");
     }
-    
-    private Widget createPanel(Widget... contentWidgets) {
+
+    protected Widget createPanel(Widget... contentWidgets) {
         FlowPanel panel = new FlowPanel();
-        for (Widget widget : contentWidgets) panel.add(widget);
+        for (Widget widget : contentWidgets)
+            panel.add(widget);
         return panel;
     }
-    
+
     @Override
-    public void setLeaderboardPanel(MultiLeaderboardPanel multiLeaderboardPanel) {
-        showContent(multiLeaderboardPanel);
+    public void setLeaderboardPanel(T leaderboardPanel) {
+        showContent(leaderboardPanel);
     }
 
     @Override
@@ -68,24 +67,25 @@ public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContaine
     public Widget getSettingsControl() {
         return settingsControl;
     }
-    
+
     @Override
     public Element getLastScoringUpdateTimeElement() {
         return lastScoringUpdateTime.getElement();
     }
-    
+
     @Override
     public Element getLastScoringUpdateTextElement() {
         return lastScoringUpdateText.getElement();
     }
-    
+
     @Override
     public Element getLastScoringCommentElement() {
         return lastScoringComment.getElement();
     }
-    
+
     @Override
     public Element getScoringSchemeElement() {
         return scoringScheme.getElement();
     }
+
 }
