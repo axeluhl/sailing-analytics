@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: json-simple
-Bundle-SymbolicName: org.json.simple
+Bundle-SymbolicName: com.sap.org.json.simple
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: JSON Simple
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

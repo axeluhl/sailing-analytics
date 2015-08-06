@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
-Bundle-SymbolicName: com.googlecode.java-diff-utils.test
+Bundle-SymbolicName: com.sap.com.googlecode.java-diff-utils.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: GOOGLECODE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Fragment-Host: com.googlecode.java-diff-utils
+Fragment-Host: com.sap.com.googlecode.java-diff-utils
 Bundle-ClassPath: test/,
  .
 Import-Package: junit.framework;version="4.8.1"

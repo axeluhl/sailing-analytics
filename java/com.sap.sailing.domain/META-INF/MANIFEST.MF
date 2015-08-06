@@ -32,10 +32,10 @@ Export-Package: com.sap.sailing.domain.base,
  com.sap.sailing.util,
  com.sap.sailing.util.impl;x-friends:="com.sap.sailing.server.replication,com.sap.sailing.domain.test"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.googlecode.java-diff-utils,
+Require-Bundle: com.sap.com.googlecode.java-diff-utils,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.common,
- org.json.simple,
+ com.sap.org.json.simple,
  com.sap.sailing.geocoding,
  com.sap.sse.datamining.shared,
  com.sap.sse.common,

@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.json.simple,
+Require-Bundle: com.sap.org.json.simple,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sse

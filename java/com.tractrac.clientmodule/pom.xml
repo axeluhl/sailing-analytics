@@ -7,7 +7,7 @@
     <groupId>com.sap.sailing</groupId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>com.tractrac.clientmodule</artifactId>
+  <artifactId>com.sap.com.tractrac.clientmodule</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

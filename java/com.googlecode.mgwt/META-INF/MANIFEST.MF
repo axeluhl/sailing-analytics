@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: mgwt
-Bundle-SymbolicName: com.googlecode.mgwt
+Bundle-SymbolicName: com.sap.com.googlecode.mgwt
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

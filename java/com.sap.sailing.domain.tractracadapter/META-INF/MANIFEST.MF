@@ -6,8 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: com.sap.sailing.domain,
- com.tractrac.clientmodule,
- com.googlecode.java-diff-utils,
+ com.sap.com.tractrac.clientmodule,
+ com.sap.com.googlecode.java-diff-utils,
  com.sap.sailing.domain.common,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sse,

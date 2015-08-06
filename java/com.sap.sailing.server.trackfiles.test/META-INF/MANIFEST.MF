@@ -6,9 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.server.trackfiles
-Require-Bundle: com.tractrac.clientmodule,
+Require-Bundle: com.sap.com.tractrac.clientmodule,
  com.sap.sailing.domain.tractracadapter,
- com.googlecode.java-diff-utils,
+ com.sap.com.googlecode.java-diff-utils,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.test,
  com.sap.sailing.domain,

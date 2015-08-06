@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.domain.igtimiadapter
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.json.simple,
+Require-Bundle: com.sap.org.json.simple,
  com.sun.jersey;bundle-version="1.17.0",
  org.objectweb.asm;bundle-version="3.3.1",
  org.apache.httpcomponents.httpclient;bundle-version="4.2.5",
