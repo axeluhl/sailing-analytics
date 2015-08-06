@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -8,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard.MultiLeaderboardDelegate;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sse.common.Color;
 
 public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContainer<MultiLeaderboardPanel> implements MultiLeaderboardDelegate {
     
@@ -28,12 +30,29 @@ public class FullscreenViewerMultiLeaderboardDelegate extends FullscreenContaine
         addToolbarAction(settingsControl);
     }
     
+    @Override
+    protected void onShow() {
+        Element multiLeaderboardPanel = getContentWidget().getElement();
+        multiLeaderboardPanel.getStyle().setBackgroundColor(Color.WHITE.getAsHtml());
+        multiLeaderboardPanel.getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
+        multiLeaderboardPanel.setTabIndex(0);
+        multiLeaderboardPanel.focus();
+    }
+    
+    @Override
+    protected void onClose() {
+        Element multiLeaderboardPanel = getContentWidget().getElement();
+        multiLeaderboardPanel.getStyle().clearBackgroundColor();
+        multiLeaderboardPanel.getFirstChildElement().getStyle().clearMarginTop();
+        multiLeaderboardPanel.blur();
+        multiLeaderboardPanel.removeAttribute("tabIndex");
+    }
+    
     private Widget createPanel(Widget... contentWidgets) {
         FlowPanel panel = new FlowPanel();
         for (Widget widget : contentWidgets) panel.add(widget);
         return panel;
     }
-    
     
     @Override
     public void setLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel) {

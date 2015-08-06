@@ -31,7 +31,6 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sse.common.Color;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
@@ -84,8 +83,6 @@ public class OldMultiLeaderboard extends Composite {
             public void onClose(CloseEvent<PopupPanel> event) {
                 if (multiLeaderboardPanel != null) {
                     multiLeaderboardPanel.removeFromParent();
-                    multiLeaderboardPanel.getElement().getStyle().clearBackgroundColor();
-                    multiLeaderboardPanel.getElement().getFirstChildElement().getStyle().clearMarginTop();
                     oldMultiLeaderboardPanel.add(multiLeaderboardPanel);
                 }
             }
@@ -161,8 +158,6 @@ public class OldMultiLeaderboard extends Composite {
     void fullscreenClicked(ClickEvent event) {
         if(multiLeaderboardPanel != null && delegate != null) {
             multiLeaderboardPanel.removeFromParent();
-            multiLeaderboardPanel.getElement().getStyle().setBackgroundColor(Color.WHITE.getAsHtml());
-            multiLeaderboardPanel.getElement().getFirstChildElement().getStyle().setMarginTop(-10, Unit.PX);
             delegate.setLeaderboard(multiLeaderboardPanel);
         }
     }
