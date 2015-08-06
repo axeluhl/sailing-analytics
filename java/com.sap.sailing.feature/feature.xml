@@ -21,13 +21,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
    </license>
 
    <requires>
-      <import plugin="com.googlecode.java-diff-utils" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.com.googlecode.java-diff-utils" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi" version="3.10.1" match="greaterOrEqual"/>
       <import plugin="javax.servlet" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.mongodb.mongo-java-driver" version="2.13.0" match="greaterOrEqual"/>
-      <import plugin="com.google.gwt.osgi" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.json.simple" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.moxieapps.gwt.highcharts" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.com.google.gwt.osgi" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.org.json.simple" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="com.sap.org.moxieapps.gwt.highcharts" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="com.rabbitmq.client"/>
    </requires>
 
@@ -95,7 +95,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.tractrac.clientmodule"
+         id="com.sap.com.tractrac.clientmodule"
          download-size="0"
          install-size="0"
          version="0.0.0"
