@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
+import static com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
+
 import java.util.Date;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -21,6 +23,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
@@ -522,7 +525,20 @@ public class RaceListColumnFactory {
                 return Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), buttonColor, MAIN_CSS.buttonarrowrightwhite());
             }
         };
-        InvertibleComparator<T> comparator = null;
+        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                if (o1.getTrackingState() == TRACKED_VALID_DATA && o2.getTrackingState() == TRACKED_VALID_DATA) {
+                    if (o1.getViewState() == RaceViewState.FINISHED && o2.getViewState() != RaceViewState.FINISHED) {
+                        return 1;
+                    }
+                    if (o1.getViewState() != RaceViewState.FINISHED && o2.getViewState() == RaceViewState.FINISHED) {
+                        return -1;
+                    }
+                }
+                return -o1.getTrackingState().compareTo(o2.getTrackingState());
+            }
+        };
         return new SortableRaceListColumn<T, T>("", cell, comparator) {
             @Override
             public String getHeaderStyle() {
