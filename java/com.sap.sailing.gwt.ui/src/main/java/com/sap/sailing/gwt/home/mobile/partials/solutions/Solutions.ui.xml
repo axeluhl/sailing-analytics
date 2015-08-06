@@ -7,7 +7,7 @@
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <div class="{local_res.css.solutions} {local_res.css.accordion}">
-        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="sapSailingAnalyticsUi">
           <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
             <h2 class="{local_res.css.solutions_item_header_title}">
               <ui:text from='{i18n_ubi.solutionsSAPHeadline}' />
@@ -24,7 +24,7 @@
             </p>
           </div>
         </div>
-        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="raceCommitteeAppUi">
           <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
             <h2 class="{local_res.css.solutions_item_header_title}">
               <ui:text from='{i18n_ubi.solutionsRaceHeadline}' />
@@ -38,7 +38,7 @@
             </p>
           </div>
         </div>
-        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="postRaceAnalyticsUi">
           <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
             <h2 class="{local_res.css.solutions_item_header_title}">
               <ui:text from='{i18n_ubi.solutionsPostHeadline}' />
@@ -52,7 +52,7 @@
             </p>
           </div>
         </div>
-        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="stgTrainingDiaryUi">
           <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
             <h2 class="{local_res.css.solutions_item_header_title}">
               <ui:text from='{i18n_ubi.solutionsTrainingHeadline}' />
@@ -66,7 +66,7 @@
             </p>
           </div>
         </div>
-        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="strategySimulatorUi">
           <div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
             <h2 class="{local_res.css.solutions_item_header_title}">
               <ui:text from='{i18n_ubi.solutionsSimulatorHeadline}' />
