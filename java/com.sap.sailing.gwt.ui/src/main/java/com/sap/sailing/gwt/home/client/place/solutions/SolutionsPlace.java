@@ -4,8 +4,9 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle {
+public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
     public enum SolutionsNavigationTabs { SailingAnalytics, RaceCommiteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
     private final SolutionsNavigationTabs navigationTab;
