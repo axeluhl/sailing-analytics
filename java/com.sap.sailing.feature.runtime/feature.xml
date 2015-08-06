@@ -2,7 +2,7 @@
 <feature
       id="com.sap.sailing.feature.runtime"
       label="Runtime features"
-      version="1.0.0.qualifier"
+      version="1.0.0"
       provider-name="SAP">
 
    <description url="http://www.example.com/description">

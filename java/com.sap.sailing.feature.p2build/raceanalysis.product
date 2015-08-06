@@ -27,8 +27,8 @@
    </plugins>
 
    <features>
-      <feature id="com.sap.sailing.feature" version="1.0.0.qualifier"/>
-      <feature id="com.sap.sailing.feature.runtime" version="1.0.0.qualifier"/>
+      <feature id="com.sap.sailing.feature" version="1.0.0"/>
+      <feature id="com.sap.sailing.feature.runtime" version="1.0.0"/>
    </features>
 
    <configurations>
