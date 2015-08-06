@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Moxie Apps GWT Highcharts
 Bundle-SymbolicName: com.sap.org.moxieapps.gwt.highcharts
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.moxieapps.gwt.highcharts.client.plotOptions;uses:="o
  rg.moxieapps.gwt.highcharts.client,com.google.gwt.json.client,org.moxie

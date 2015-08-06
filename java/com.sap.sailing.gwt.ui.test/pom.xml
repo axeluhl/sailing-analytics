@@ -6,7 +6,7 @@
     <parent>
         <artifactId>root</artifactId>
         <groupId>com.sap.sailing</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>com.sap.sailing.gwt.ui.test</artifactId>
     <packaging>eclipse-plugin</packaging>

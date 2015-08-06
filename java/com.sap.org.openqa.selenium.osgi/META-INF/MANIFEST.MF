@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Selenium
 Bundle-SymbolicName: com.sap.org.openqa.selenium.osgi
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1.qualifier
 Bundle-ClassPath: lib/apache-mime4j-0.6.jar,
  lib/bsh-1.3.0.jar,
  lib/cglib-nodep-2.1_3.jar,

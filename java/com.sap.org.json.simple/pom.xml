@@ -5,10 +5,10 @@
   <parent>
     <artifactId>root</artifactId>
     <groupId>com.sap.sailing</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>com.sap.org.json.simple</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 	<plugins>
