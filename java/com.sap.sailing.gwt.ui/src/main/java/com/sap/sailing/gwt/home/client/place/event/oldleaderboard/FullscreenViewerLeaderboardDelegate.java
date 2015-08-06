@@ -44,7 +44,7 @@ public class FullscreenViewerLeaderboardDelegate extends FullscreenContainer imp
     
     @Override
     protected void onClose() {
-        getContent().getElement().removeAttribute("tabIndex");
+        getContentWidget().getElement().removeAttribute("tabIndex");
     }
 
     @Override

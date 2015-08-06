@@ -35,10 +35,10 @@ public class FullscreenContainer {
     
     interface Style extends CssResource {
         String popup();
-        String contentBorder();
         String toolbarInfo();
         String toolbarAction();
         String content();
+        String contentBorder();
     }
     
     @UiField Style style;
@@ -55,11 +55,13 @@ public class FullscreenContainer {
         popup.addStyleName(style.popup());
     }
     
-    protected void onClose() {
-        
+    protected void onShow() {
     }
     
-    protected Widget getContent() {
+    protected void onClose() {
+    }
+    
+    protected Widget getContentWidget() {
         return contentUi.getWidget();
     }
     
@@ -97,9 +99,10 @@ public class FullscreenContainer {
     
     public void showContent(Widget content) {
         contentUi.setWidget(content);
-        contentUi.getWidget().getElement().addClassName(style.content());
+        getContentWidget().getElement().addClassName(style.content());
         mainPanel.onResize();
         popup.showPopupPanel();
+        this.onShow();
     }
     
     private class FullscreenPopupPanel extends PopupPanel {
@@ -109,7 +112,7 @@ public class FullscreenContainer {
                 @Override
                 public void onClose(CloseEvent<PopupPanel> event) {
                     RootPanel.get().getElement().getStyle().setOverflow(Overflow.AUTO);
-                    contentUi.getWidget().getElement().removeClassName(style.content());
+                    getContentWidget().getElement().removeClassName(style.content());
                     FullscreenContainer.this.onClose();
                 }
             });
