@@ -91,5 +91,11 @@ public class PolarChart implements ResultsPresenter<Number> {
         // TODO Auto-generated method stub
         
     }
+    
+    @Override
+    public QueryResult<Number> getCurrentResult() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
