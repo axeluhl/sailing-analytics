@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.Mul
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory;
+import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnSet;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn;
@@ -227,7 +228,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter);
+            super(presenter, new RaceListColumnSet(1, 1));
         }
         
         @Override
@@ -261,6 +262,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             add(audioCountColumn);
             add(winnerColumn);
             add(raceViewerButtonColumn);
+            
+            columnSet.addColumn(windSpeedColumn);
+            columnSet.addColumn(windDirectionColumn);
+            columnSet.addColumn(durationColumn);
+            columnSet.addColumn(windSourcesCountColumn);
+            columnSet.addColumn(videoCountColumn);
+            columnSet.addColumn(audioCountColumn);
+            columnSet.addColumn(fleetNameColumn);
         }
     }
 

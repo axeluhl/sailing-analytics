@@ -36,6 +36,15 @@ public class RegattaProgressSeriesDTO implements DTO {
         fleetState.put(fleet, stats);
     }
     
+    public String[] getFleetNames() {
+        String[] fleetNames = new String[fleetState.size()];
+        int i = 0;
+        for (FleetMetadataDTO fleet : fleetState.keySet()) {
+            fleetNames[i++] = fleet.getFleetName();
+        }
+        return fleetNames;
+    }
+    
     public boolean isCompleted() {
         for (RegattaProgressFleetDTO stats : fleetState.values()) {
             if (stats.getFinishedRaceCount() < totalRaceCount) {
