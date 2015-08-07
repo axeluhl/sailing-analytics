@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.shared.impl;
 
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.util.AlphanumericalComparator;
 
 
 public class GenericGroupKey<T> extends AbstractGroupKey {
@@ -49,6 +50,10 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
             Object keyValue = ((GenericGroupKey<?>) key).value;
             if (value instanceof Enum && keyValue instanceof Enum) {
                 result = ((Enum<?>) value).ordinal() - ((Enum<?>) keyValue).ordinal(); 
+            }
+            if (value instanceof String && keyValue instanceof String) {
+                AlphanumericalComparator comparator = new AlphanumericalComparator();
+                result = comparator.compare((String) value, (String) keyValue);
             }
         }
         return result;

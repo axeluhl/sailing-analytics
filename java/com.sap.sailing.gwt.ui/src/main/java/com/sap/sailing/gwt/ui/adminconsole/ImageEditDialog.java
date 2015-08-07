@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class ImageEditDialog extends ImageDialog {
     public ImageEditDialog(ImageDTO image, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(new ImageParameterValidator(stringMessages), stringMessages, callback);
+        super(image.getCreatedAtDate(), new ImageParameterValidator(stringMessages), stringMessages, callback);
         createdAtLabel = new Label(image.getCreatedAtDate().toString());
         imageURLAndUploadComposite.setURL(image.getSourceRef());
         titleTextBox = createTextBox(image.getTitle());
