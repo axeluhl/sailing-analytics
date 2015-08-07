@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
@@ -28,11 +29,11 @@ public class EventSeriesLeaderboardTabView extends SharedLeaderboardEventSeriesT
 
     private SeriesView.Presenter currentPresenter;
 
-    @UiField
+    @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
     public EventSeriesLeaderboardTabView() {
-        super();
+        leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
 
     @Override

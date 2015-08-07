@@ -40,10 +40,11 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
         A action = request.getAction();
         long start = System.currentTimeMillis();
         try {
+
             R executionResult = action.execute(
                     new DispatchContextImpl(request.getCurrentClientTime(),
                     racingEventServiceTracker.getService(), eventNewsServiceTracker.getService(), request
-                            .getClientLocaleName()));
+                            .getClientLocaleName(), getThreadLocalRequest()));
             return new ResultWrapper<R>(executionResult);
         } catch (DispatchException d) {
             logger.log(Level.WARNING, "Server exception", d);
@@ -66,4 +67,9 @@ public class DispatchRPCImpl extends ProxiedRemoteServiceServlet implements Disp
         }
     }
 
+    @Override
+    protected void doUnexpectedFailure(Throwable e) {
+        logger.log(Level.WARNING, "GWT RPC Exception: " + e.getMessage(), e);
+        super.doUnexpectedFailure(e);
+    }
 }
