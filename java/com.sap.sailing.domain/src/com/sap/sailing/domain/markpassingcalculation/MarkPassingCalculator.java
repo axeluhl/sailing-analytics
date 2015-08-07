@@ -140,7 +140,7 @@ public class MarkPassingCalculator {
                         markFixes.clear();
                         addedWaypoints.clear();
                         removedWaypoints.clear();
-                    smallestChangedWaypointIndex = null;
+                        smallestChangedWaypointIndex = null;
                         fixedMarkPassings.clear();
                         removedFixedMarkPassings.clear();
                         suppressedMarkPassings.clear();
