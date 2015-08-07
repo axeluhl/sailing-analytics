@@ -156,8 +156,14 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.authorName = authorNameBox.getValue();
         dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = new Date();
-        dto.endOfTracking = endTimeBox.getValue();
-        dto.startOfTracking = startTimeBox.getValue();
+        Date newEndTime = endTimeBox.getValue();
+        Date newStartTime = startTimeBox.getValue();
+        if (newEndTime != null && newEndTime.toString() != currentEndLabel.getText()) {
+            dto.endOfTracking = newEndTime;
+        }
+        if (newStartTime != null && newStartTime.toString() != currentStartLabel.getText()) {
+            dto.startOfTracking = newStartTime;
+        }
         return dto;
     }
 
