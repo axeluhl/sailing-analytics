@@ -5,6 +5,8 @@ import java.util.Date;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -36,8 +38,11 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
     private final String fleetName;
     private final StringMessages stringMessages;
 
+    private final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG);
     private Label currentStartLabel;
+    private Date currentStart;
     private Label currentEndLabel;
+    private Date currentEnd;
 
     private BetterDateTimeBox startTimeBox;
     private BetterDateTimeBox endTimeBox;
@@ -69,7 +74,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
     private void refreshTimes() {
         service.getTrackingTimes(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Util.Pair<Date, Date>>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
@@ -77,29 +81,25 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
                     @Override
                     public void onSuccess(Pair<Date, Date> result) {
-                        Date start = result.getA();
-                        Date end = result.getB();
-                        if (start == null) {
-                            currentStartLabel.setText(stringMessages.notAvailable());
-                        } else {
-                            currentStartLabel.setText(start.toString());
-                            startTimeBox.setValue(start);
-                        }
-                        if (end == null) {
-                            currentEndLabel.setText(stringMessages.notAvailable());
-                        } else {
-                            currentEndLabel.setText(end.toString());
-                            endTimeBox.setValue(end);
-                        }
-                        
+                        currentStart = result.getA();
+                        currentEnd = result.getB();
+                        updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
+                        updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
                     }
                 });
+    }
+    
+    private void updateDateTimeLabelAndTimeBoxFromDate(final Date date, final Label label, final BetterDateTimeBox dateTimeBox) {
+        if (date == null) {
+            label.setText(stringMessages.notAvailable());
+        } else {
+            label.setText(dateTimeFormat.format(date));
+            dateTimeBox.setValue(date);
+        }
     }
 
     private Widget createInputPanel() {
         Grid content = new Grid(4, 2);
-        
-
         startTimeBox = createDateTimeBox(null);
         startTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
@@ -158,17 +158,16 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.logicalTimePoint = new Date();
         Date newEndTime = endTimeBox.getValue();
         Date newStartTime = startTimeBox.getValue();
-        if (newEndTime != null && newEndTime.toString() != currentEndLabel.getText()) {
+        if (!Util.equalsWithNull(newEndTime, currentEnd)) {
             dto.endOfTracking = newEndTime;
         }
-        if (newStartTime != null && newStartTime.toString() != currentStartLabel.getText()) {
+        if (!Util.equalsWithNull(newEndTime, currentEnd)) {
             dto.startOfTracking = newStartTime;
         }
         return dto;
     }
 
     private static class TrackingTimesValidator implements Validator<RaceLogSetTrackingTimesDTO> {
-
         private final StringMessages stringMessages;
 
         public TrackingTimesValidator(StringMessages stringMessages) {
@@ -177,13 +176,14 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
         @Override
         public String getErrorMessage(RaceLogSetTrackingTimesDTO dto) {
+            final String result;
             if (dto.authorName == null || dto.authorPriority == null
                     || (dto.startOfTracking == null && dto.endOfTracking == null)) {
-                return stringMessages.pleaseEnterAValue();
+                result = stringMessages.pleaseEnterAValue();
+            } else {
+                result = null;
             }
-            return null;
+            return result;
         }
-
     }
-
 }
