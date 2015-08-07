@@ -12,8 +12,8 @@ import com.sap.sse.common.Color;
 public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> extends FullscreenContainer<T> implements
         LeaderboardDelegate<T> {
 
-    private final Image autoRefreshControl = new Image("images/home/reload.png");
-    private final Image settingsControl = new Image("images/home/settings.png");
+    private final Image autoRefreshControl = new Image("images/home/reload.svg");
+    private final Image settingsControl = new Image("images/home/settings.svg");
 
     private final Label lastScoringUpdateTime = new Label();
     private final Label lastScoringUpdateText = new Label();

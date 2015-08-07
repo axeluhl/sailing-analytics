@@ -93,10 +93,11 @@
   margin: 0 0 0 0.666666666666667em;
   background-repeat: no-repeat;
   background-position: center center;
+  background-size: 50%;
 }
 .regattaleaderboard_meta_reload {
   background-color: #9f9f9f;
-  background-image: url("images/home/reload.png");
+  background-image: url("images/home/reload.svg");
 }
 .regattaleaderboard_meta_reload_live {
   background-color: red;
@@ -123,12 +124,8 @@
   text-align: right;
 }
 .regattaleaderboard_meta_settings_button {
-  width: 2.666666666666667em;
-  height: 2.666666666666667em;
-  margin: 0 0 0 0.666666666666667em;
   background-color: #9f9f9f;
-  background-image: url("images/home/settings.png");
-  background-size: 40%;
+  background-image: url("images/home/settings.svg");
 }
 .regattaleaderboard_table {
   	margin-bottom: 20px;
@@ -235,7 +232,5 @@
 }
 .regattaleaderboard_meta_fullscreen_button {
   background-color: #9f9f9f;
-  background-image: url("images/home/media-controls__fullsize.png");
-  -webkit-transform: scaleX(-1);
-          transform: scaleX(-1);
+  background-image: url("images/home/fullscreen.svg");
 }
