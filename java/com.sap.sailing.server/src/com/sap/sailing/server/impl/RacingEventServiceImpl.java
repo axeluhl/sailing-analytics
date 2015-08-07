@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -164,7 +163,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.Replicator;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
@@ -3317,49 +3315,5 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = null;
         }
         return result;
-    }
-
-    @Override
-    public <T> T apply(OperationWithResult<RacingEventService, T> operation) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public <T> T applyReplicated(OperationWithResult<RacingEventService, T> operation) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void initiallyFillFrom(InputStream is) throws IOException, ClassNotFoundException, InterruptedException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void serializeForInitialReplication(OutputStream os) throws IOException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public RacingEventServiceOperation<?> readOperation(InputStream inputStream) throws IOException,
-            ClassNotFoundException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void writeOperation(OperationWithResult<?, ?> operation, OutputStream outputStream, boolean closeStream)
-            throws IOException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public <T> void replicate(RacingEventServiceOperation<?> operation) {
-        // TODO Auto-generated method stub
-        
     }
 }
