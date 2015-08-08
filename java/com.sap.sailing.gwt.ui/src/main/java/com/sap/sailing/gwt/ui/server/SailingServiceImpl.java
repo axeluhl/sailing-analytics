@@ -71,7 +71,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
@@ -4781,7 +4781,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Util.Pair<Date, Date> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        return new TrackingTimeFinder(raceLog).analyze();
+        Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
+        Date start = times.getA()!= null ? times.getA().asDate() : null;
+        Date end = times.getB()!= null ? times.getB().asDate() : null;
+        return new Pair<Date, Date>(start, end);
     }
 
     @Override
