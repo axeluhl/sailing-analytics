@@ -11,6 +11,8 @@ public class RaceLogSetTrackingTimesDTO implements IsSerializable {
     public String authorName;
     public Integer authorPriority;
     public Date logicalTimePoint;
-    public Date startOfTracking;
-    public Date endOfTracking;
+    public Date newStartOfTracking;
+    public Date newEndOfTracking;
+    public Date currentStartOfTracking;
+    public Date currentEndOfTracking;
 }

@@ -156,14 +156,10 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.authorName = authorNameBox.getValue();
         dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = new Date();
-        Date newEndTime = endTimeBox.getValue();
-        Date newStartTime = startTimeBox.getValue();
-        if (!Util.equalsWithNull(newEndTime, currentEnd)) {
-            dto.endOfTracking = newEndTime;
-        }
-        if (!Util.equalsWithNull(newEndTime, currentEnd)) {
-            dto.startOfTracking = newStartTime;
-        }
+        dto.newEndOfTracking = endTimeBox.getValue();
+        dto.newStartOfTracking = startTimeBox.getValue();
+        dto.currentStartOfTracking = currentStart;
+        dto.currentEndOfTracking = currentEnd;
         return dto;
     }
 
@@ -177,8 +173,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         @Override
         public String getErrorMessage(RaceLogSetTrackingTimesDTO dto) {
             final String result;
-            if (dto.authorName == null || dto.authorPriority == null
-                    || (dto.startOfTracking == null && dto.endOfTracking == null)) {
+            if (dto.authorName == null || dto.authorPriority == null) {
                 result = stringMessages.pleaseEnterAValue();
             } else {
                 result = null;

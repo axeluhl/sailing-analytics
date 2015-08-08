@@ -4761,18 +4761,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
-        if (dto.startOfTracking != null) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createStartOfTrackingEvent(new MillisecondsTimePoint(
-                    dto.startOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
-                    UUID.randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+        //TODO If new is null and current is not, current should be revoked.
+        if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
+            if (dto.newStartOfTracking != null) {
+                raceLog.add(RaceLogEventFactory.INSTANCE.createStartOfTrackingEvent(new MillisecondsTimePoint(
+                        dto.newStartOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
+                        .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+            }
         }
-        if (dto.endOfTracking != null) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createEndOfTrackingEvent(new MillisecondsTimePoint(
-                    dto.endOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID.randomUUID(),
-                    new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+        if (!Util.equalsWithNull(dto.newEndOfTracking, dto.currentEndOfTracking)) {
+            if (dto.newEndOfTracking != null) {
+                raceLog.add(RaceLogEventFactory.INSTANCE.createEndOfTrackingEvent(new MillisecondsTimePoint(
+                        dto.newEndOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
+                        .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+            }
         }
     }
-    
+
     @Override
     public Util.Pair<Date, Date> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
