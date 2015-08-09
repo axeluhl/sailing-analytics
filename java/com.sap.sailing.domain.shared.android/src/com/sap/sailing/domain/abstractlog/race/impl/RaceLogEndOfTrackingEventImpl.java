@@ -21,6 +21,11 @@ public class RaceLogEndOfTrackingEventImpl extends RaceLogEventImpl implements R
     @Override
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
-
     }
+    
+    @Override
+    public String getShortInfo() {
+        return "endOfTrackingTime=" + getLogicalTimePoint();
+    }
+    
 }
