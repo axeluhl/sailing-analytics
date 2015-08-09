@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class TrackingTimesFinder extends RaceLogAnalyzer<Util.Pair<TimePoint, TimePoint>> {
 
@@ -33,7 +34,13 @@ public class TrackingTimesFinder extends RaceLogAnalyzer<Util.Pair<TimePoint, Ti
                 break;
             }
         }
-        return new Util.Pair<TimePoint, TimePoint>(start, end);
+        final Pair<TimePoint, TimePoint> result;
+        if (startOfTrackingFound || endOfTrackingFound) {
+            result = new Util.Pair<TimePoint, TimePoint>(start, end);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
 }

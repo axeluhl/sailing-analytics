@@ -150,8 +150,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private void analyseTrackingTimes(RaceLog raceLog) {
         Pair<TimePoint, TimePoint> times = trackingTimesFinder.analyze();
-        trackedRace.setStartOfTrackingReceived(times.getA());
-        trackedRace.setEndOfTrackingReceived(times.getB());
+        if (times != null) {
+            trackedRace.setStartOfTrackingReceived(times.getA());
+            trackedRace.setEndOfTrackingReceived(times.getB());
+        }
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
