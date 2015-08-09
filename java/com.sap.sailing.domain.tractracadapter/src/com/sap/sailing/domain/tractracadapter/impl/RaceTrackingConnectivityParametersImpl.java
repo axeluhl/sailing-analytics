@@ -84,7 +84,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<URL, URI, URI> getTrackerID() {
+    public Object getTrackerID() {
         return TracTracRaceTrackerImpl.createID(paramURL, liveURI, storedURI);
     }
 

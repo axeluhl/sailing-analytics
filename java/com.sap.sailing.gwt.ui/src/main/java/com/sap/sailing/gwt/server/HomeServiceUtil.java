@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.server;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +11,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+import java.util.Map.Entry;
 
-import com.sap.sailing.domain.base.Competitor;
+import javax.servlet.http.HttpServletRequest;
+
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
@@ -19,13 +23,13 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -34,7 +38,10 @@ import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -43,6 +50,9 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public final class HomeServiceUtil {
+    public interface EventVisitor {
+        void visit(EventBase event, boolean onRemoteServer, URL baseURL);
+    }
     
     private HomeServiceUtil() {
     }
@@ -77,22 +87,6 @@ public final class HomeServiceUtil {
             }
         }
         return true;
-    }
-    
-    public static RegattaState calculateRegattaState(RegattaMetadataDTO regatta) {
-        Date now = new Date();
-        Date startDate = regatta.getStartDate();
-        Date endDate = regatta.getEndDate();
-        if(startDate != null && now.compareTo(startDate) < 0) {
-            return RegattaState.UPCOMING;
-        }
-        if(endDate != null && now.compareTo(endDate) > 0) {
-            return RegattaState.FINISHED;
-        }
-        if(startDate != null && now.compareTo(startDate) >= 0 && endDate != null && now.compareTo(endDate) <= 0) {
-            return RegattaState.RUNNING;
-        }
-        return RegattaState.UNKNOWN;
     }
     
     public static EventState calculateEventState(EventBase event) {
@@ -183,6 +177,10 @@ public final class HomeServiceUtil {
         return count;
     }
     
+    public static int calculateRaceColumnCount(Leaderboard sl) {
+        return Util.size(sl.getRaceColumns());
+    }
+    
     public static int calculateTrackedRaceCount(Leaderboard sl) {
         int count=0;
         for (RaceColumn column : sl.getRaceColumns()) {
@@ -196,22 +194,41 @@ public final class HomeServiceUtil {
         return count;
     }
     
-    public static String calculateBoatClass(Leaderboard leaderboard) {
-        String boatClass = null;
-        String boatClassDisplayName = null;
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            if(competitor.getBoat() != null && competitor.getBoat().getBoatClass() != null) {
-                if(boatClass == null) {
-                    boatClass = competitor.getBoat().getBoatClass().getName();
-                    boatClassDisplayName = competitor.getBoat().getBoatClass().getDisplayName();
-                } else if(competitor.getBoat().getBoatClass().getName() != null && !boatClass.equals(competitor.getBoat().getBoatClass().getName())) {
-                    // more than one boatClass
-                    return null;
+    public static int calculateTrackedRaceColumnCount(Leaderboard sl) {
+        int count=0;
+        for (RaceColumn column : sl.getRaceColumns()) {
+            for (Fleet fleet : column.getFleets()) {
+                TrackedRace trackedRace = column.getTrackedRace(fleet);
+                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
+                    count++;
+                    break;
                 }
-                
             }
         }
-        return boatClassDisplayName != null ? boatClassDisplayName : boatClass;
+        return count;
+    }
+    
+    public static String getBoatClassName(Leaderboard leaderboard) {
+        BoatClass boatClass = getBoatClass(leaderboard);
+        return boatClass == null ? null : boatClass.getName();
+    }
+
+    private static BoatClass getBoatClass(Leaderboard leaderboard) {
+        if(leaderboard instanceof RegattaLeaderboard) {
+            RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+            BoatClass boatClassFromRegatta = regattaLeaderboard.getRegatta().getBoatClass();
+            if(boatClassFromRegatta != null) {
+                return boatClassFromRegatta;
+            }
+        }
+        return getBoatClassFromTrackedRaces(leaderboard);
+    }
+
+    private static BoatClass getBoatClassFromTrackedRaces(Leaderboard leaderboard) {
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            return trackedRace.getRace().getBoatClass();
+        }
+        return null;
     }
 
     public static boolean hasMedia(Event event) {
@@ -226,7 +243,7 @@ public final class HomeServiceUtil {
         return !Util.isEmpty(event.getVideos());
     }
 
-    public static boolean isPartOfEvent(Event event, Regatta regattaEntity) {
+    public static boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             if(courseArea.equals(regattaEntity.getDefaultCourseArea())) {
                 return true;
@@ -329,13 +346,13 @@ public final class HomeServiceUtil {
         return LocaleMatch.NO_MATCH;
     }
     
-    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service) {
+    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service, boolean useTeaserImage) {
         EventStageDTO dto = new EventStageDTO();
         mapToMetadataDTO(event, dto, service);
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
-        dto.setStageImageURL(HomeServiceUtil.getStageImageURLAsString(event));
+        dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
         return dto;
     }
     
@@ -395,8 +412,7 @@ public final class HomeServiceUtil {
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
             if(leaderboard instanceof RegattaLeaderboard) {
-                Regatta regattaEntity = service.getRegattaByName(leaderboard.getName());
-                if(!HomeServiceUtil.isPartOfEvent(event, regattaEntity)) {
+                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
                     continue;
                 }
             }
@@ -419,5 +435,106 @@ public final class HomeServiceUtil {
         }
         result.setTags(tags);
         return result;
+    }
+    
+    public static TimePoint getLiveTimePoint() {
+        return new MillisecondsTimePoint(getLiveTimePointInMillis());
+    }
+    
+    public static long getLiveTimePointInMillis() {
+        // TODO better solution
+        long livePlayDelayInMillis = 15_000;
+        return System.currentTimeMillis() - livePlayDelayInMillis;
+    }
+    
+    public static String getCourseAreaNameForRegattaIdThereIsMoreThanOne(EventBase event, Leaderboard leaderboard) {
+        /** The course area will not be shown if there is only one course area defined for the event */
+        if (Util.size(event.getVenue().getCourseAreas()) <= 1) {
+            return null;
+        }
+        CourseArea courseArea = null;
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+        } else if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            if (regatta != null) {
+                courseArea = regatta.getDefaultCourseArea();
+            }
+        }
+        return courseArea == null ? null : courseArea.getName();
+    }
+    
+    public static String getCourseAreaIdForRegatta(EventBase event, Leaderboard leaderboard) {
+        CourseArea courseArea = null;
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            courseArea = ((FlexibleLeaderboard) leaderboard).getDefaultCourseArea();
+        } else if(leaderboard instanceof RegattaLeaderboard) {
+            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
+            if (regatta != null) {
+                courseArea = regatta.getDefaultCourseArea();
+            }
+        }
+        return courseArea == null ? null : courseArea.getId().toString();
+    }
+    
+    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor... visitors) throws MalformedURLException {
+        URL requestedBaseURL = getRequestBaseURL(request);
+        for (Event event : service.getAllEvents()) {
+            if(event.isPublic()) {
+                for(EventVisitor visitor : visitors) {
+                    visitor.visit(event, false, requestedBaseURL);
+                }
+            }
+        }
+        for (Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> serverRefAndEventsOrException :
+            service.getPublicEventsOfAllSailingServers().entrySet()) {
+            final Pair<Iterable<EventBase>, Exception> eventsOrException = serverRefAndEventsOrException.getValue();
+            final RemoteSailingServerReference serverRef = serverRefAndEventsOrException.getKey();
+            final Iterable<EventBase> remoteEvents = eventsOrException.getA();
+            URL baseURL = getBaseURL(serverRef.getURL());
+            if (remoteEvents != null) {
+                for (EventBase remoteEvent : remoteEvents) {
+                    if(remoteEvent.isPublic()) {
+                        for(EventVisitor visitor : visitors) {
+                            visitor.visit(remoteEvent, true, baseURL);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Determines the base URL (protocol, host and port parts) used for the currently executing servlet request. Defaults
+     * to <code>http://sapsailing.com</code>.
+     * @throws MalformedURLException 
+     */
+    private static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
+        final URL url = new URL(request.getRequestURL().toString());
+        final URL baseURL = getBaseURL(url);
+        return baseURL;
+    }
+
+    private static URL getBaseURL(URL url) throws MalformedURLException {
+        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
+    }
+
+    public static boolean hasRegattaData(EventBase event) {
+        final boolean fakeSeries = HomeServiceUtil.isFakeSeries(event);
+        for (LeaderboardGroupBase leaderboardGroupBase : event.getLeaderboardGroups()) {
+            if(leaderboardGroupBase instanceof LeaderboardGroup) {
+                // for events that are locally available, we can see if there are any leaderboards
+                LeaderboardGroup leaderboardGroup = (LeaderboardGroup) leaderboardGroupBase;
+                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if(!fakeSeries || isPartOfEvent(event, leaderboard)) {
+                        return true;
+                    }
+                }
+            } else {
+                // we can't know if the event has leaderboards but the existence of a leaderboard group is a good sign for that
+                return true;
+            }
+        }
+        return false;
     }
 }

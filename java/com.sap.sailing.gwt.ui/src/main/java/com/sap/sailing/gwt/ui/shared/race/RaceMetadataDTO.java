@@ -2,10 +2,13 @@ package com.sap.sailing.gwt.ui.shared.race;
 
 import java.util.Date;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
+import com.sap.sse.common.Util;
 
-public class RaceMetadataDTO implements IsSerializable {
+public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> implements DTO, Comparable<RaceMetadataDTO<WIND>> {
     
     public enum RaceViewState {
         PLANNED {       // no start time set
@@ -54,10 +57,11 @@ public class RaceMetadataDTO implements IsSerializable {
         TRACKED_VALID_DATA       // tracking is connected and all required data for displaying the race viewer is available
     }
     
+    private String leaderboardName;
+    private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String regattaName;
     private String regattaDisplayName;
     private String raceName;
-    private String trackedRaceName;
     private FleetMetadataDTO fleet;
     private Date start;
     private String courseArea;
@@ -65,17 +69,24 @@ public class RaceMetadataDTO implements IsSerializable {
     private String boatClass;
     private RaceViewState state;
     private RaceTrackingState trackingState;
+    private WIND wind;
 
     protected RaceMetadataDTO() {
     }
     
-    public RaceMetadataDTO(String regattaName, String raceName) {
-        this.regattaName = regattaName;
+    public RaceMetadataDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
+        this.leaderboardName = leaderboardName;
+        this.regattaAndRaceIdentifier = regattaAndRaceIdentifier;
+        this.regattaName = leaderboardName;
         this.raceName = raceName;
     }
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 
     public String getRaceName() {
@@ -138,12 +149,12 @@ public class RaceMetadataDTO implements IsSerializable {
         this.trackingState = trackingState;
     }
 
-    public String getTrackedRaceName() {
-        return trackedRaceName;
+    public WIND getWind() {
+        return wind;
     }
 
-    public void setTrackedRaceName(String trackedRaceName) {
-        this.trackedRaceName = trackedRaceName;
+    public void setWind(WIND wind) {
+        this.wind = wind;
     }
 
     public String getRegattaDisplayName() {
@@ -152,5 +163,62 @@ public class RaceMetadataDTO implements IsSerializable {
 
     public void setRegattaDisplayName(String regattaDisplayName) {
         this.regattaDisplayName = regattaDisplayName;
+    }
+
+    public RegattaAndRaceIdentifier getRegattaAndRaceIdentifier() {
+        return regattaAndRaceIdentifier;
+    }
+
+    @Override
+    public int compareTo(RaceMetadataDTO<WIND> o) {
+        Date thisStart = getStart();
+        Date otherStart = o.getStart();
+        if(Util.equalsWithNull(thisStart, otherStart)) {
+            // cases where both start times are == null or equal
+            return compareBySecondaryCriteria(o);
+        }
+        if(thisStart == null) {
+            return 1;
+        }
+        if(otherStart == null) {
+            return -1;
+        }
+        return -thisStart.compareTo(otherStart);
+    }
+
+    private int compareBySecondaryCriteria(RaceMetadataDTO<?> o) {
+        String thisRegattaName = getRegattaName();
+        String otherRegattaName = o.getRegattaName();
+        if(thisRegattaName != otherRegattaName) {
+            if(thisRegattaName == null) {
+                return 1;
+            }
+            if(otherRegattaName == null) {
+                return -1;
+            }
+            int compareByRegatta = thisRegattaName.compareTo(otherRegattaName);
+            if(compareByRegatta != 0) {
+                return compareByRegatta;
+            }
+        }
+        int compareByRace = getRaceName().compareTo(o.getRaceName());
+        if(compareByRace != 0) {
+            return compareByRace;
+        }
+        FleetMetadataDTO thisFleet = getFleet();
+        FleetMetadataDTO otherFleet = o.getFleet();
+        if(thisFleet != otherFleet) {
+            if(thisFleet == null) {
+                return 1;
+            }
+            if(otherFleet == null) {
+                return -1;
+            }
+            int compareByFleet = thisFleet.compareTo(otherFleet);
+            if(compareByFleet != 0) {
+                return compareByFleet;
+            }
+        }
+        return getViewState().compareTo(o.getViewState());
     }
 }

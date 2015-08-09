@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.common.client.controls.tabbar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -28,6 +30,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
  */
 
 public class TabPanel<PRESENTER> extends Composite {
+    private static final Logger logger = Logger.getLogger(TabPanel.class.getName());
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
     private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new LinkedHashMap<>();
     private final Map<Class<Place>, String> knownTabTitles = new HashMap<>();
@@ -135,7 +138,12 @@ public class TabPanel<PRESENTER> extends Composite {
                 }
             }
 
-            newTab.start(placeToGo, tabContentPanelUi);
+            try{
+                newTab.start(placeToGo, tabContentPanelUi);
+            } catch(Exception e) {
+                // TODO better error handling
+                logger.log(Level.SEVERE, "Error while initializing Tab for place " + placeToGo.getClass().getName(), e);
+            }
             tabBar.select(placeToGo);
 
             currentTab = newTab;

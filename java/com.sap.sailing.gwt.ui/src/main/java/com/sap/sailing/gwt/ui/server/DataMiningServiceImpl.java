@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,16 +18,18 @@ import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.Query;
-import com.sap.sse.datamining.QueryDefinition;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
@@ -39,12 +42,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
 
-    private final FunctionDTOFactory functionDTOFactory;
+    private final DataMiningDTOFactory dtoFactory;
     
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
     }
 
     private ServiceTracker<DataMiningServer, DataMiningServer> createAndOpenDataMiningServerTracker(
@@ -68,6 +71,38 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public Iterable<FunctionDTO> getAllStatistics(String localeInfoName) {
         Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsFunctionDTOs(statistics, localeInfoName);
+    }
+    
+    @Override
+    public Iterable<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
+        Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinition(retrieverChainDefinition.getId()).getRetrievedDataType();
+        Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
+        return functionsAsFunctionDTOs(statistics, localeInfoName);
+    }
+    
+    @Override
+    public Iterable<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
+        Class<?> returnType = getReturnType(extractionFunction);
+        @SuppressWarnings("unchecked")
+        Iterable<AggregationProcessorDefinition<?, ?>> definitions = 
+                (Iterable<AggregationProcessorDefinition<?, ?>>)(Iterable<?>) getDataMiningServer().getAggregationProcessorDefinitions(returnType);
+        return aggregatorDefinitionsAsDTOs(definitions, localeInfoName);
+    }
+
+    private Class<?> getReturnType(FunctionDTO extractionFunction) {
+        return getDataMiningServer().getFunctionForDTO(extractionFunction).getReturnType();
+    }
+
+    private Iterable<AggregationProcessorDefinitionDTO> aggregatorDefinitionsAsDTOs(
+            Iterable<AggregationProcessorDefinition<?, ?>> definitions, String localeInfoName) {
+        ResourceBundleStringMessages stringMessages = getDataMiningServer().getStringMessages();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        
+        Collection<AggregationProcessorDefinitionDTO> definitionDTOs = new HashSet<>();
+        for (AggregationProcessorDefinition<?,?> definition : definitions) {
+            definitionDTOs.add(dtoFactory.createAggregationProcessorDefinitionDTO(definition, stringMessages, locale));
+        }
+        return definitionDTOs;
     }
 
     @Override
@@ -95,9 +130,15 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         
         Collection<FunctionDTO> functionDTOs = new ArrayList<FunctionDTO>();
         for (Function<?> function : functions) {
-            functionDTOs.add(functionDTOFactory.createFunctionDTO(function, ServerStringMessages, locale));
+            functionDTOs.add(dtoFactory.createFunctionDTO(function, ServerStringMessages, locale));
         }
         return functionDTOs;
+    }
+    
+    @Override
+    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
+        Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
+        return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     @Override
@@ -139,8 +180,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
-//        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
-        QueryResult<Set<Object>> result = dimensionValuesQuery.run();
+        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
         return result;
     }
 
@@ -177,8 +217,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, QueryDefinitionDTO queryDefinitionDTO) {
-        QueryDefinition<RacingEventService, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
+    public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
         QueryResult<ResultType> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, query);
         return result;

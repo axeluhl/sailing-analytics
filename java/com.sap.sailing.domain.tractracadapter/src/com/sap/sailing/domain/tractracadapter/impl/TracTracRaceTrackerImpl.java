@@ -12,7 +12,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -194,12 +196,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
-    private HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>> lastProgressPerID;
+    private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
 
     /**
-     * paramURL, liveURI and storedURI for TracTrac connection
+     * paramURL, liveURI and storedURI for TracTrac connection, voided of "random" part
      */
-    private final Util.Triple<URL, URI, URI> urls;
+    private final Object id;
 
     /**
      * Tells if this tracker was created with a valid live URI. If not, the tracker will stop and unregister itself
@@ -315,12 +317,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
-        urls = createID(paramURL, liveURI, storedURI);
+        this.id = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
-        this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
+        this.lastProgressPerID = new HashMap<>();
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
             // don't write the transformed wind fixes into the DB again... see also bug 1974 
@@ -461,13 +463,48 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return trackedRegatta;
     }
 
-    static Util.Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
-        return new Util.Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+        URL paramURLStrippedOfRandomParam;
+        if (paramURL == null) {
+            paramURLStrippedOfRandomParam = null;
+        } else {
+            final String query = paramURL.getQuery();
+            if (query == null) {
+                paramURLStrippedOfRandomParam = paramURL;
+            } else {
+                final StringJoiner stringJoiner = new StringJoiner("&", "?", "");
+                stringJoiner.setEmptyValue("");
+                String[] queryParams = query.split("&");
+                for (String queryParam : queryParams) {
+                    String[] nameValue = queryParam.split("=");
+                    if (!"random".equalsIgnoreCase(nameValue[0])) {
+                        final StringBuilder param = new StringBuilder();
+                        param.append(nameValue[0]);
+                        if (nameValue.length > 1) {
+                            param.append('=');
+                            param.append(nameValue[1]);
+                        }
+                        stringJoiner.add(param.toString());
+                    }
+                }
+                try {
+                    paramURLStrippedOfRandomParam = new URL(paramURL.getProtocol(), paramURL.getHost(), paramURL.getPort(),
+                            paramURL.getPath()+stringJoiner.toString()+(paramURL.getRef() == null || paramURL.getRef().isEmpty() ?
+                                    "" : ("#"+paramURL.getRef())));
+                } catch (MalformedURLException e) {
+                    // this is pretty strange as we only removed one parameter; log and continue with original URL as a default
+                    logger.log(Level.SEVERE, "Error trying to strip the \"random\" parameter from the TracTrac params_url "+
+                            paramURL, e);
+                    paramURLStrippedOfRandomParam = paramURL;
+                }
+            }
+        }
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
     }
     
     @Override
-    public Util.Triple<URL, URI, URI> getID() {
-        return urls;
+    public Object getID() {
+        return id;
     }
 
     @Override

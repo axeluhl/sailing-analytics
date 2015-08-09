@@ -57,8 +57,7 @@ public class BitmapHelper {
 
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
+            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
         }
@@ -100,8 +99,7 @@ public class BitmapHelper {
     public static void setBackground(View view, Drawable drawable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             view.setBackground(drawable);
-        }
-        else{
+        } else {
             view.setBackgroundDrawable(drawable);
         }
     }
@@ -120,7 +118,7 @@ public class BitmapHelper {
     }
 
     public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
-        Drawable drawable = BitmapHelper.getDrawable(context, drawableResId);
+        Drawable drawable = getDrawable(context, drawableResId);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;
     }

@@ -367,11 +367,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue, boolean isPublic,
-            List<String> courseAreaNames, String officialWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
+            List<String> courseAreaNames, String officialWebsiteURL, String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<Void> callback);
@@ -518,7 +518,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback); 
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportDeviceConfigurations, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
     
@@ -719,4 +719,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean>  regattaLogCallBack);
+
+    void getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName, AsyncCallback<RegattaAndRaceIdentifier> asyncCallback);
 }

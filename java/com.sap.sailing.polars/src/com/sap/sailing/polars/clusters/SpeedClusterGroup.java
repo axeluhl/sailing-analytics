@@ -13,6 +13,8 @@ import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
 
 public class SpeedClusterGroup extends FixClusterGroup<Speed> {
+    
+    private static final long serialVersionUID = -3428022721991223921L;
 
     /**
      * A {@link SpeedClusterGroup} lets the user set the level mids for all its clusters. The Boundaries will

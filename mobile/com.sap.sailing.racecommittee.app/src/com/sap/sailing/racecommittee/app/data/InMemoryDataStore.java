@@ -44,7 +44,7 @@ public enum InMemoryDataStore implements DataStore {
         managedRaceById = new HashMap<>();
         marksById = new HashMap<>();
         courseData = null;
-        domainFactory = new SharedDomainFactoryImpl();
+        domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 
         eventUUID = null;
         courseUUID = null;

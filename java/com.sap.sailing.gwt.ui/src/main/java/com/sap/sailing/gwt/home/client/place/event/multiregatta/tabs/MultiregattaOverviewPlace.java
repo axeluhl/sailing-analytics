@@ -5,8 +5,9 @@ import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class MultiregattaOverviewPlace extends AbstractMultiregattaEventPlace {
+public class MultiregattaOverviewPlace extends AbstractMultiregattaEventPlace implements HasMobileVersion {
     public MultiregattaOverviewPlace(String id) {
         super(id);
     }

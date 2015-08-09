@@ -6,22 +6,28 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class ParallelGroupedDoubleDataAverageAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+public class ParallelGroupedDoubleDataAverageAggregationProcessor
+            extends AbstractParallelGroupedDataStoringAggregationProcessor<Double, Double> {
+    
+    private static final AggregationProcessorDefinition<Double, Double> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Average", ParallelGroupedDoubleDataAverageAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<Double, Double> getDefinition() {
+        return DEFINITION;
+    }
 
-    private final AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregationProcessor;
+    private final AbstractParallelGroupedDataStoringAggregationProcessor<Double, Double> sumAggregationProcessor;
     private final Map<GroupKey, Integer> elementAmountPerKey;
 
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataAverageAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
-              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Average");
+        super(executor, resultReceivers, "Average");
         elementAmountPerKey = new HashMap<>();
         sumAggregationProcessor = new ParallelGroupedDoubleDataSumAggregationProcessor(executor, resultReceivers);
     }

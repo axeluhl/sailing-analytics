@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
@@ -75,6 +77,16 @@ public class TrackedLegImpl implements TrackedLeg {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         competitorTracksOrderedByRank = new ConcurrentHashMap<>();
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        final Course course = trackedRace.getRace().getCourse();
+        course.lockForRead();
+        try {
+            oos.defaultWriteObject();
+        } finally {
+            course.unlockAfterRead();
+        }
     }
     
     @Override
@@ -454,27 +466,30 @@ public class TrackedLegImpl implements TrackedLeg {
 
     Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Distance result;
-        try {
-            final LegType legType = cache.getLegType(this, at);
-            if (legType != LegType.REACHING) { // upwind or downwind
-                final Position effectivePosition = getEffectiveWindPosition(
-                        () -> pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)),
-                        at, windPositionMode);
-                Wind wind = getTrackedRace().getWind(effectivePosition, at);
-                if (wind == null) {
-                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+        if (pos1 == null || pos2 == null) {
+            result = null;
+        } else {
+            try {
+                final LegType legType = cache.getLegType(this, at);
+                if (legType != LegType.REACHING) { // upwind or downwind
+                    final Position effectivePosition = getEffectiveWindPosition(() -> pos1.translateGreatCircle(
+                            pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at, windPositionMode);
+                    Wind wind = getTrackedRace().getWind(effectivePosition, at);
+                    if (wind == null) {
+                        result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+                    } else {
+                        Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
+                        result = pos2.alongTrackDistance(projectionToLineThroughPos2,
+                                legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
+                    }
                 } else {
-                    Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                    result = pos2.alongTrackDistance(projectionToLineThroughPos2,
-                            legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
+                    // reaching leg, return distance projected onto leg's bearing
+                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
                 }
-            } else {
-                // reaching leg, return distance projected onto leg's bearing
+            } catch (NoWindException e) {
+                // no wind information; use along-track distance as fallback
                 result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
             }
-        } catch (NoWindException e) {
-            // no wind information; use along-track distance as fallback
-            result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
         }
         return result;
     }

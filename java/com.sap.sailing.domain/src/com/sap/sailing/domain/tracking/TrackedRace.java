@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -64,7 +66,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable {
+public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -300,6 +302,10 @@ public interface TrackedRace extends Serializable {
         return true;
     }
 
+    default boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+        return true;
+    }
+
     /**
      * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}
      */
@@ -322,7 +328,8 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because a copied collection is returned.
+     * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
+     * is never part of the result.
      */
     Set<WindSource> getWindSources();
 
@@ -857,4 +864,5 @@ public interface TrackedRace extends Serializable {
     default RaceLogResolver getRaceLogResolver() {
         return null;
     }
+
 }

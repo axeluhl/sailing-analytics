@@ -42,6 +42,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -218,7 +219,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         addAndValidateEventIds(masterLog, replicaLog);
         
         final Series series = masterRegatta.getSeries().iterator().next();
-        final MillisecondsTimePoint approximateRaceStatusEventCreationTimePoint = MillisecondsTimePoint.now();
+        final TimePoint approximateRaceStatusEventCreationTimePoint = MillisecondsTimePoint.now();
         final RaceLogRaceStatusEvent raceStatusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(approximateRaceStatusEventCreationTimePoint, author, 42,
                 RaceLogRaceStatus.UNKNOWN);
         addEventToDB(series.getRaceColumnByName(raceColumnName).getRaceLogIdentifier(series.getFleetByName(fleetName)), raceStatusEvent, regattaName, raceColumnName, fleetName);

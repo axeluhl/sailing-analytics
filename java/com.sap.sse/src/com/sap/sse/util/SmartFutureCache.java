@@ -102,7 +102,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private final static Executor recalculator = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     
@@ -317,16 +317,19 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     runningAndReadUpdateInterval = true;
                 }
                 try {
-                    V preResult = cacheUpdateComputer.computeCacheUpdate(key, updateInterval);
-                    final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
-                    LockUtil.lockForWrite(lock);
                     try {
-                        V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
-                                updateInterval);
-                        cache(key, result);
-                        return result;
+                        V preResult = cacheUpdateComputer.computeCacheUpdate(key, updateInterval);
+                        final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+                        LockUtil.lockForWrite(lock);
+                        try {
+                            V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult,
+                                    updateInterval);
+                            cache(key, result);
+                            return result;
+                        } finally {
+                            LockUtil.unlockAfterWrite(lock);
+                        }
                     } finally {
-                        LockUtil.unlockAfterWrite(lock);
                         synchronized (ongoingRecalculations) {
                             boolean newTaskScheduled = false;
                             Pair<U, Set<SettableFuture<Future<V>>>> queued = triggeredAndNotYetScheduled.get(key);

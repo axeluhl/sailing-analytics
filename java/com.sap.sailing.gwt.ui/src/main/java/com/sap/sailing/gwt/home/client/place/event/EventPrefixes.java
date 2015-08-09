@@ -10,6 +10,7 @@ public class EventPrefixes {
     public static final String RegattaOverview = "/regatta/overview/";
     public static final String RegattaRaces = "/regatta/races/";
     public static final String RegattaLeaderboard = "/regatta/leaderboard/";
+    public static final String RegattaMiniLeaderboard = "/regatta/minileaderboard/";
     public static final String RegattaCompetitorAnalytics = "/regatta/competitoranalytics/";
     public static final String RegattaMedia = "/regatta/media/";
     public static final String SeriesDefault = "/series/";
@@ -17,6 +18,8 @@ public class EventPrefixes {
     public static final String SeriesEvents = "/series/events/";
     public static final String EventSeriesCompetitorAnalytics = "/series/competitoranalytics/";
     public static final String EventSeriesOverallLeaderboard = "/series/overallleaderboard/";
+    public static final String EventSeriesMiniOverallLeaderboard = "/series/minioverallleaderboard/";
     public static final String EventSeriesLeaderboards = "/series/leaderboards/";
     public static final String EventSeriesMedia = "/series/media/";
+    public static final String EventNews = "/event/news/";
 }

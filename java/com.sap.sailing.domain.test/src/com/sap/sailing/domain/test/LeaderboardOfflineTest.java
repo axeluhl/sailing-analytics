@@ -120,7 +120,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         leaderboard.addRaceColumn(columnName, /* medalRace */ true);
         leaderboard.addRace(testRaces.iterator().next(), columnName, /* medalRace */false);
         final Set<String> emptySet = Collections.emptySet();
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         final TrackedRegattaRegistry trackedRegattaRegistry = new TrackedRegattaRegistry() {
             @Override
             public DynamicTrackedRegatta getOrCreateTrackedRegatta(Regatta regatta) {
