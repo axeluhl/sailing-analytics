@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -22,8 +20,10 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -40,9 +40,9 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     private final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG);
     private Label currentStartLabel;
-    private Date currentStart;
+    private TimePoint currentStart;
     private Label currentEndLabel;
-    private Date currentEnd;
+    private TimePoint currentEnd;
 
     private BetterDateTimeBox startTimeBox;
     private BetterDateTimeBox endTimeBox;
@@ -73,14 +73,14 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     private void refreshTimes() {
         service.getTrackingTimes(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<Util.Pair<Date, Date>>() {
+                new AsyncCallback<Util.Pair<TimePoint, TimePoint>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(Pair<Date, Date> result) {
+                    public void onSuccess(Pair<TimePoint, TimePoint> result) {
                         currentStart = result.getA();
                         currentEnd = result.getB();
                         updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
@@ -89,12 +89,12 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
                 });
     }
     
-    private void updateDateTimeLabelAndTimeBoxFromDate(final Date date, final Label label, final BetterDateTimeBox dateTimeBox) {
-        if (date == null) {
+    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePoint timePoint, final Label label, final BetterDateTimeBox dateTimeBox) {
+        if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
         } else {
-            label.setText(dateTimeFormat.format(date));
-            dateTimeBox.setValue(date);
+            label.setText(dateTimeFormat.format(timePoint == null ? null : timePoint.asDate()));
+            dateTimeBox.setValue(timePoint==null ? null : timePoint.asDate());
         }
     }
 
@@ -155,9 +155,9 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.fleetName = fleetName;
         dto.authorName = authorNameBox.getValue();
         dto.authorPriority = authorPriorityBox.getValue();
-        dto.logicalTimePoint = new Date();
-        dto.newEndOfTracking = endTimeBox.getValue();
-        dto.newStartOfTracking = startTimeBox.getValue();
+        dto.logicalTimePoint = MillisecondsTimePoint.now();
+        dto.newStartOfTracking = startTimeBox.getValue() == null ? null : new MillisecondsTimePoint(startTimeBox.getValue());
+        dto.newEndOfTracking = endTimeBox.getValue() == null ? null : new MillisecondsTimePoint(endTimeBox.getValue());
         dto.currentStartOfTracking = currentStart;
         dto.currentEndOfTracking = currentEnd;
         return dto;

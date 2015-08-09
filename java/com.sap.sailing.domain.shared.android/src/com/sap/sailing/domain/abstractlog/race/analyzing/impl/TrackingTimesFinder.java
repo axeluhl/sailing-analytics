@@ -15,16 +15,21 @@ public class TrackingTimesFinder extends RaceLogAnalyzer<Util.Pair<TimePoint, Ti
 
     @Override
     protected Util.Pair<TimePoint, TimePoint> performAnalysis() {
+        boolean startOfTrackingFound = false;
+        boolean endOfTrackingFound = false;
         TimePoint start = null;
         TimePoint end = null;
-        for (RaceLogEvent event : getLog().getUnrevokedEventsDescending()) {
-            if (start == null && event instanceof RaceLogStartOfTrackingEvent) {
+        final RaceLog raceLog = getLog();
+        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+            if (!startOfTrackingFound && event instanceof RaceLogStartOfTrackingEvent) {
                 start = event.getLogicalTimePoint();
+                startOfTrackingFound = true;
             }
-            if (end == null && event instanceof RaceLogEndOfTrackingEvent) {
+            if (!endOfTrackingFound && event instanceof RaceLogEndOfTrackingEvent) {
                 end = event.getLogicalTimePoint();
+                endOfTrackingFound = true;
             }
-            if (start != null && end != null) {
+            if (startOfTrackingFound && endOfTrackingFound) {
                 break;
             }
         }

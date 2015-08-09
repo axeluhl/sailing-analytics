@@ -4761,30 +4761,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
-        //TODO If new is null and current is not, current should be revoked.
+        // TODO If new is null and current is not, current should be revoked.
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
-            if (dto.newStartOfTracking != null) {
-                raceLog.add(RaceLogEventFactory.INSTANCE.createStartOfTrackingEvent(new MillisecondsTimePoint(
-                        dto.newStartOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
-                        .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
-            }
+            raceLog.add(RaceLogEventFactory.INSTANCE.createStartOfTrackingEvent(
+                    dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
+                    .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
         }
         if (!Util.equalsWithNull(dto.newEndOfTracking, dto.currentEndOfTracking)) {
-            if (dto.newEndOfTracking != null) {
-                raceLog.add(RaceLogEventFactory.INSTANCE.createEndOfTrackingEvent(new MillisecondsTimePoint(
-                        dto.newEndOfTracking), new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
-                        .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
-            }
+            raceLog.add(RaceLogEventFactory.INSTANCE.createEndOfTrackingEvent(
+                    dto.newEndOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
+                    .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
         }
     }
 
     @Override
-    public Util.Pair<Date, Date> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
-        Date start = times.getA()!= null ? times.getA().asDate() : null;
-        Date end = times.getB()!= null ? times.getB().asDate() : null;
-        return new Pair<Date, Date>(start, end);
+    public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
+        return new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
     }
 
     @Override

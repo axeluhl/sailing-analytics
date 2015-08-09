@@ -90,6 +90,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
@@ -619,5 +620,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto);
 
-    Pair<Date, Date> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
+    Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
 }

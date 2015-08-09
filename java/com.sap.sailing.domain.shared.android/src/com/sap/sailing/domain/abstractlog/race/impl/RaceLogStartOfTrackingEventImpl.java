@@ -26,6 +26,4 @@ public class RaceLogStartOfTrackingEventImpl extends RaceLogEventImpl implements
     public String getShortInfo() {
         return "startOfTrackingTime=" + getLogicalTimePoint();
     }
-    
-    
 }

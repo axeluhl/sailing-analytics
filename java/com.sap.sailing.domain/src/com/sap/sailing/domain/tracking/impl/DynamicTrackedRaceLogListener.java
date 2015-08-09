@@ -76,9 +76,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             startTimeFinder = new StartTimeFinder(trackedRace.getRaceLogResolver(), raceLog);
             abortingFlagFinder = new AbortingFlagFinder(raceLog);
             trackingTimesFinder = new TrackingTimesFinder(raceLog);
-            
             analyze(raceLog);
-            
         }
     }
 

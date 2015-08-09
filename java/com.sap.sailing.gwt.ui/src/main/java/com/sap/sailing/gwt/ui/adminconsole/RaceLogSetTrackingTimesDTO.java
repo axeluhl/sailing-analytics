@@ -1,8 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Date;
-
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.TimePoint;
 
 public class RaceLogSetTrackingTimesDTO implements IsSerializable {
     public String leaderboardName;
@@ -10,9 +9,9 @@ public class RaceLogSetTrackingTimesDTO implements IsSerializable {
     public String fleetName;
     public String authorName;
     public Integer authorPriority;
-    public Date logicalTimePoint;
-    public Date newStartOfTracking;
-    public Date newEndOfTracking;
-    public Date currentStartOfTracking;
-    public Date currentEndOfTracking;
+    public TimePoint logicalTimePoint;
+    public TimePoint newStartOfTracking;
+    public TimePoint newEndOfTracking;
+    public TimePoint currentStartOfTracking;
+    public TimePoint currentEndOfTracking;
 }
