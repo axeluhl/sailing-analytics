@@ -17,7 +17,7 @@ public class TrackingTimesFinder extends RaceLogAnalyzer<Util.Pair<TimePoint, Ti
     protected Util.Pair<TimePoint, TimePoint> performAnalysis() {
         TimePoint start = null;
         TimePoint end = null;
-        for (RaceLogEvent event : getPassEventsDescending()) {
+        for (RaceLogEvent event : getLog().getUnrevokedEventsDescending()) {
             if (start == null && event instanceof RaceLogStartOfTrackingEvent) {
                 start = event.getLogicalTimePoint();
             }
@@ -28,7 +28,6 @@ public class TrackingTimesFinder extends RaceLogAnalyzer<Util.Pair<TimePoint, Ti
                 break;
             }
         }
-        
         return new Util.Pair<TimePoint, TimePoint>(start, end);
     }
 
