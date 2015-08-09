@@ -37,11 +37,14 @@ import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -745,6 +748,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (markPassingsTimes) {
             markPassingsTimes.clear();
         }
+    }
+    
+    /**
+     * The race log supports the event types {@link RaceLogStartOfTrackingEvent} and
+     * {@link RaceLogEndOfTrackingEvent}. These are to take precedence over any other start/end of
+     * tracking specification (see bug 3196). This method uses the {@link TrackingTimesFinder} to
+     * analyze all {@link #attachedRaceLogs race logs attached} to find tracking times specifications.
+     * If no tracking times specification is found at all, <code>null</code> is returned. Note that
+     * even when a valid pair is returned, the components may be <code>null</code>.
+     */
+    @Override
+    public Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            Pair<TimePoint, TimePoint> result = new TrackingTimesFinder(raceLog).analyze();
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
