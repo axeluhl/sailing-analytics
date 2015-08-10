@@ -6,6 +6,8 @@
 }
 .countdown_content_panewrapper {
   font-size: 0;
+  margin: auto;
+  text-align: center;
 }
 .countdown_content_pane {
   border: 0.2em solid #fff;

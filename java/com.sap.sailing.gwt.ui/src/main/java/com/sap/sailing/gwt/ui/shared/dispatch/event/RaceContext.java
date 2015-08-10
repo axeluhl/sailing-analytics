@@ -93,7 +93,7 @@ public class RaceContext {
         this.fleet = fleet;
         trackedRace = raceColumn.getTrackedRace(fleet);
         raceLog = raceColumn.getRaceLog(fleet);
-        state = ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
+        state = (raceLog == null) ? null : ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
     }
 
     private boolean isShowFleetData() {
@@ -220,6 +220,9 @@ public class RaceContext {
     }
 
     private FlagStateDTO getFlagStateOrNull() {
+        if(raceLog == null) {
+            return null;
+        }
         // Code extracted from SailingServiceImpl.createRaceInfoDTO
         // TODO: extract to to util to be used from both places
         TimePoint startTime = state.getStartTime();
@@ -294,6 +297,9 @@ public class RaceContext {
     }
 
     private String getCourseNameOrNull() {
+        if(state == null) {
+            return null;
+        }
         CourseBase lastCourse = state.getCourseDesign();
         if (lastCourse != null) {
             return lastCourse.getName();
@@ -532,6 +538,9 @@ public class RaceContext {
     }
 
     private Wind checkForWindFixesFromRaceLog() {
+        if(raceLog == null) {
+            return null;
+        }
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
         List<Wind> windList = windFixesFinder.analyze();
         if (windList.size() > 0) {

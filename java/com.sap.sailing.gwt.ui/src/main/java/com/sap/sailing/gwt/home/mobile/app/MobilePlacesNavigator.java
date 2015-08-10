@@ -65,8 +65,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     // NOT MOBILE PLACES
 
-    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
-        return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
+    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
+        return createLocalPlaceNavigation(new SolutionsPlace(SolutionsNavigationTabs.SailingAnalytics));
     }
 
     public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {

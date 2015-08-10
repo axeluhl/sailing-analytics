@@ -15,11 +15,15 @@ public class RaceLogStartOfTrackingEventImpl extends RaceLogEventImpl implements
     public RaceLogStartOfTrackingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint startOfTracking, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
         super(createdAt, author, startOfTracking, pId, pInvolvedBoats, pPassId);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
+    }
+    
+    @Override
+    public String getShortInfo() {
+        return "startOfTrackingTime=" + getLogicalTimePoint();
     }
 }

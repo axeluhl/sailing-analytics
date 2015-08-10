@@ -63,6 +63,7 @@ public class WidgetCarousel extends Composite {
     private boolean infiniteScrolling = true;
 
     private final String uniqueId;
+    private boolean showArrows = true;
 
     private LinkedList<Widget> items = new LinkedList<Widget>();
 
@@ -73,8 +74,12 @@ public class WidgetCarousel extends Composite {
         initWidget(ourUiBinder.createAndBindUi(this));
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
-
     }
 
     public void onAfterChange() {
@@ -141,7 +146,7 @@ public class WidgetCarousel extends Composite {
 			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
 			    swipeToSlide : false,
 			    responsive : false,
-			    arrows : true,
+			    arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
 			    prevArrow : "<div class='slick-prev'/>",
 			    nextArrow : "<div class='slick-next'/>"
 
@@ -172,6 +177,15 @@ public class WidgetCarousel extends Composite {
      */
     public void setInfiniteScrolling(boolean infiniteScrolling) {
         this.infiniteScrolling = infiniteScrolling;
+    }
+
+    /**
+     * Disable/ enable left/right arrows
+     * 
+     * @param showArrows
+     */
+    public void setShowArrows(boolean showArrows) {
+        this.showArrows = showArrows;
     }
 
     /**
