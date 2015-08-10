@@ -13,12 +13,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.countdown.CountdownTicker;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.carousel.LazyLoadable;
 
 public abstract class StageTeaser extends Composite implements LazyLoadable {
+    
     @UiField
     DivElement bandCount;
     @UiField
@@ -36,22 +37,20 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
     }
 
     private static StageTeaserUiBinder uiBinder = GWT.create(StageTeaserUiBinder.class);
-    private final EventStageDTO event;
+    private final EventListEventDTO event;
 
     @Override
     public void doInitializeLazyComponents() {
-        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : StageResources.INSTANCE
+        String stageImageUrl = event.getThumbnailImageURL() != null ? event.getThumbnailImageURL() : StageResources.INSTANCE
                 .defaultStageEventTeaserImage().getSafeUri().asString();
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
-
     }
 
     protected void handleUserAction() {
-
     }
 
-    public StageTeaser(EventStageDTO event) {
+    public StageTeaser(EventListEventDTO event) {
         this.event = event;
         StageResources.INSTANCE.css().ensureInjected();
 
@@ -76,10 +75,8 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
                     return;
                 }
                 handleUserAction();
-
             }
         }, ClickEvent.getType());
     }
-
 
 }

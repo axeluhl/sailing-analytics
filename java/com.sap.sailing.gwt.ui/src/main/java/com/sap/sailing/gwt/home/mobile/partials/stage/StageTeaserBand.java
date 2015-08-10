@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -29,10 +29,10 @@ public abstract class StageTeaserBand extends Composite {
     @UiField Anchor actionLink;
 
     private final MobilePlacesNavigator placeNavigator;
-    private final EventStageDTO event;
+    private final EventListEventDTO event;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation;
     
-    public StageTeaserBand(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public StageTeaserBand(EventListEventDTO event, MobilePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         
@@ -51,7 +51,7 @@ public abstract class StageTeaserBand extends Composite {
         return placeNavigator;
     }
 
-    public EventStageDTO getEvent() {
+    public EventListEventDTO getEvent() {
         return event;
     }
 

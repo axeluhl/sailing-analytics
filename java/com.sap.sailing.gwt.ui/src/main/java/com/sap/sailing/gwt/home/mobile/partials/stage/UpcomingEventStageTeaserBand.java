@@ -4,7 +4,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 /**
  * Teaser band for an upcoming event on the homepage stage
@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
  */
 public class UpcomingEventStageTeaserBand extends StageTeaserBand {
 
-    public UpcomingEventStageTeaserBand(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public UpcomingEventStageTeaserBand(EventListEventDTO event, MobilePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getDisplayName());

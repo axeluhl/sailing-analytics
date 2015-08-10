@@ -9,7 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sse.gwt.client.controls.carousel.WidgetCarousel;
 
 public class Stage extends Composite {
@@ -37,9 +37,8 @@ public class Stage extends Composite {
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
-    public void setFeaturedEvents(List<EventStageDTO> list) {
-
-        for (EventStageDTO event : list) {
+    public void setFeaturedEvents(List<? extends EventListEventDTO> list) {
+        for (EventListEventDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
                 stageTeaser = new PopularEventStageTeaser(event, placeNavigator);
