@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -346,13 +346,13 @@ public final class HomeServiceUtil {
         return LocaleMatch.NO_MATCH;
     }
     
-    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service, boolean useTeaserImage) {
+    public static EventStageDTO convertToEventStageDTO(EventBase event, URL baseURL, boolean onRemoteServer, StageEventType stageType, RacingEventService service) {
         EventStageDTO dto = new EventStageDTO();
         mapToMetadataDTO(event, dto, service);
         dto.setBaseURL(baseURL.toString());
         dto.setOnRemoteServer(onRemoteServer);
         dto.setStageType(stageType);
-        dto.setStageImageURL(useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event));
+        dto.setStageImageURL(getStageImageURLAsString(event));
         return dto;
     }
     
