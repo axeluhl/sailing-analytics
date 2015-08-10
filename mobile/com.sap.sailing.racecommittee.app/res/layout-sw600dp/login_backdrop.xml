@@ -18,7 +18,7 @@
         android:layout_height="@dimen/logo_size"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
         android:src="@drawable/sap_logo"/>
 
@@ -28,10 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/gradient"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:paddingTop="@dimen/default_padding"
+        android:padding="@dimen/default_padding"
         android:shadowColor="@color/constant_black"
         android:text="@string/login_text"
         android:textColor="@color/constant_white"
@@ -47,17 +44,14 @@
         android:drawableLeft="@drawable/ic_assignment_white_48dp"
         android:drawablePadding="@dimen/default_padding_half"
         android:gravity="center_vertical"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:paddingTop="@dimen/default_padding"
+        android:padding="@dimen/default_padding"
         android:shadowColor="@color/constant_black"
         android:text="@string/login_sub_text"
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40"/>
 
     <LinearLayout
-        android:id="@+id/button_bar"
+        android:id="@id/button_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -69,13 +63,31 @@
         tools:alpha="1">
 
         <ImageView
-            android:id="@+id/more"
+            android:id="@+id/settings_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
             android:background="@drawable/round_button"
             android:padding="10dp"
-            android:src="@drawable/ic_more_vert_white_48dp"/>
+            android:src="@drawable/ic_settings_white_48dp"/>
+
+        <ImageView
+            android:id="@+id/technical_info"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:background="@drawable/round_button"
+            android:padding="10dp"
+            android:src="@drawable/ic_info_outline_white_48dp"/>
+
+        <ImageView
+            android:id="@+id/refresh_data"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:background="@drawable/round_button"
+            android:padding="10dp"
+            android:src="@drawable/ic_refresh_white_48dp"/>
     </LinearLayout>
 
     <View

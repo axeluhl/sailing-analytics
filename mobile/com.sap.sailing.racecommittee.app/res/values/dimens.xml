@@ -17,6 +17,7 @@
 
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
+    <dimen name="logo_size">75dp</dimen>
 
     <dimen name="textSize_14">14sp</dimen> <!-- XXSmall -->
     <dimen name="textSize_18">18sp</dimen> <!-- XSmall -->
@@ -24,7 +25,7 @@
     <dimen name="textSize_22">22sp</dimen> <!-- Small -->
     <dimen name="textSize_26">26sp</dimen> <!-- Normal -->
     <dimen name="textSize_32">32sp</dimen> <!-- Large -->
-    <dimen name="textSize_40">40sp</dimen> <!-- XLarge -->
+    <dimen name="textSize_40">24sp</dimen> <!-- XLarge -->
     <dimen name="textSize_72">72sp</dimen>
 
     <dimen name="setup_text_width">150dp</dimen>
@@ -52,6 +53,6 @@
     <dimen name="wind_hide_button_right_margin">76dp</dimen>
     <dimen name="wind_hide_button_top_margin">20dp</dimen>
 
-    <item name="picker_scale" format="float" type="integer">1.55</item>
+    <item name="picker_scale" format="float" type="integer">1</item>
 
 </resources>

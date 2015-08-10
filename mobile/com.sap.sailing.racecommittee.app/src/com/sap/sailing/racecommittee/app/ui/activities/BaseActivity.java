@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.WindowManager;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 
 /**
@@ -23,10 +23,6 @@ public class BaseActivity extends SendingServiceAwareActivity {
         return R.menu.options_menu;
     }
 
-    public RaceApplication getRaceApplication() {
-        return (RaceApplication) getApplication();
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,20 +33,20 @@ public class BaseActivity extends SendingServiceAwareActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS");
-            intent = new Intent(this, PreferenceActivity.class);
-            startActivity(intent);
-            return true;
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS");
+                intent = new Intent(this, PreferenceActivity.class);
+                startActivity(intent);
+                return true;
 
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO");
-            intent = new Intent(this, SystemInformationActivity.class);
-            startActivity(intent);
-            return true;
+            case R.id.options_menu_info:
+                ExLog.i(this, TAG, "Clicked INFO");
+                intent = new Intent(this, SystemInformationActivity.class);
+                startActivity(intent);
+                return true;
 
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

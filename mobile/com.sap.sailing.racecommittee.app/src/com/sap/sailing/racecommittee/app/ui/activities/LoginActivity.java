@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -20,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -53,12 +60,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
     implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -462,9 +463,7 @@ public class LoginActivity extends BaseActivity
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
         animators.add(getAlphaAnimator(findViewById(R.id.backdrop_subtitle)));
-        animators.add(getAlphaAnimator(findViewById(R.id.refresh_data)));
-        animators.add(getAlphaAnimator(findViewById(R.id.technical_info)));
-        animators.add(getAlphaAnimator(findViewById(R.id.settings_button)));
+        animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animators);
