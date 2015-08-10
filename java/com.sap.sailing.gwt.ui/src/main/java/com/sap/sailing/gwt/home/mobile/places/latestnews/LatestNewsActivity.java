@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsView.Presenter;
@@ -87,6 +88,11 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
     @Override
     public PlaceNavigation<?> getNewsPlaceNavigation(List<NewsEntryDTO> values) {
         return clientFactory.getNavigator().getEventLastestNewsNavigation(getCtx(), values, null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getEventNavigation() {
+        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
     }
     
     @Override

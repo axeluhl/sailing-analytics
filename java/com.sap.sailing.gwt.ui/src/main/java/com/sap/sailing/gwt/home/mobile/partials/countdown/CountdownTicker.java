@@ -27,6 +27,7 @@ public class CountdownTicker extends Composite {
     private final Countdown countdown;
 
     public CountdownTicker(Date startTime) {
+        CountdownResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.countdown = new Countdown(new MillisecondsTimePoint(startTime), new CountdownTickerListener());
     }
