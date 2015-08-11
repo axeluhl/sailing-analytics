@@ -277,6 +277,9 @@ public class LoginActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
 
+        // This is required to reactivate the loader manager after configuration change (screen rotation)
+        getLoaderManager();
+
         dataManager = DataManager.create(this);
         DataStore dataStore = dataManager.getDataStore();
 
@@ -350,7 +353,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
