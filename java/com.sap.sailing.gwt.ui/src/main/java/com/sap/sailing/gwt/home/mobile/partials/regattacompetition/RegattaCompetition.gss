@@ -111,7 +111,7 @@
   display: inline-block;
   width: 0.75em;
   height: 0.75em;
-  background: url("../images/home/skip-forward.png") no-repeat center center;
+  background: url("images/home/skip-forward.png") no-repeat center center;
 }
 .regattacompetition_phase_fleet_race_subtitle {
   font-size: 0.666666666666667em;

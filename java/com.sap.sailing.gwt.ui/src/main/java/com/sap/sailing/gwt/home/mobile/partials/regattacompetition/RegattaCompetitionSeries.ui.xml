@@ -5,9 +5,7 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources" />
 	<g:HTMLPanel addStyleNames="{local_res.css.regattacompetition_phase}">
-		<div class="{local_res.css.accordion_trigger}">
-			<mp:section.MobileSection ui:field="sectionHeaderUi" />
-		</div>
-		<div class="{local_res.css.accordion_content}" ui:field="fleetContainerUi"></div>
+		<mp:section.SectionHeaderContent addStyleName="{local_res.css.accordion_trigger}" ui:field="sectionHeaderUi" />
+		<g:FlowPanel class="{local_res.css.accordion_content}" ui:field="fleetContainerUi" />
 	</g:HTMLPanel>
 </ui:UiBinder>

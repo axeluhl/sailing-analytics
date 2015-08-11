@@ -4,11 +4,8 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources" />
-    <div class="{local_res.css.regattacompetition_phase_fleet_race} {local_res.css.regattacompetition_phase_fleet_racelive}">
-      <a href="raceviewer.html" title="<!-- race.name -->">
-        <div class="{local_res.css.regattacompetition_phase_fleet_race_title}" ui:field="raceNameUi"></div>
-        <div class="{local_res.css.regattacompetition_phase_fleet_race_subtitle}" ui:field="raceDateUi"></div>
-        <img src="images/home/skip-forward.png" class="{local_res.css.regattacompetition_phase_fleet_race_arrow}"></img>
-      </a>
-    </div>
+    <a class="{local_res.css.regattacompetition_phase_fleet_race}">
+      <div class="{local_res.css.regattacompetition_phase_fleet_race_title}" ui:field="raceNameUi"></div>
+      <div class="{local_res.css.regattacompetition_phase_fleet_race_subtitle}" ui:field="raceDateUi"></div>
+    </a>
 </ui:UiBinder>
