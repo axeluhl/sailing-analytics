@@ -24,11 +24,11 @@ public class EventsOverviewRecent extends Composite {
     private final MobilePlacesNavigator navigator;
 
     @UiField FlowPanel year;
-    @UiField Stage eventStage;
+    @UiField (provided = true) Stage eventStage;
     
     public EventsOverviewRecent(MobilePlacesNavigator navigator) {
         this.navigator = navigator;
-        
+        this.eventStage= new Stage(navigator, false);
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }

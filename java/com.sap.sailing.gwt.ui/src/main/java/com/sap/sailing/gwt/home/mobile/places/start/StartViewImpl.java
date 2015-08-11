@@ -36,7 +36,7 @@ public class StartViewImpl extends Composite implements StartView {
 
     public StartViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
-        stage = new Stage(presenter.getNavigator());
+        stage = new Stage(presenter.getNavigator(), true);
         initWidget(uiBinder.createAndBindUi(this));
         
         presenter.getNavigator().getEventsNavigation().configureAnchorElement(showAllEventsUi);
