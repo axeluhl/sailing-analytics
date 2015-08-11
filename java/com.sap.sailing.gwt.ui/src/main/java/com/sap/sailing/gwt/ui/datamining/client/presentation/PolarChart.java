@@ -11,7 +11,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 /**
  * Expects the inner key in the group key to be the angle for the polar chart. (x-value) Maybe the angle should be
@@ -44,7 +44,7 @@ public class PolarChart implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void showResult(QueryResultDTO<Number> result) {
         resetChartData();
         Map<GroupKey, Number> results = result.getResults();
         if (!results.isEmpty()) {
@@ -93,7 +93,7 @@ public class PolarChart implements ResultsPresenter<Number> {
     }
     
     @Override
-    public QueryResult<Number> getCurrentResult() {
+    public QueryResultDTO<Number> getCurrentResult() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -3,7 +3,7 @@ package com.sap.sse.datamining;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.data.QueryResult;
 
 public interface Query<ResultType> {
     

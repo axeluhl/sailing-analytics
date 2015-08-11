@@ -1,15 +1,15 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public interface ResultsPresenter<ResultType> {
 
     public Widget getWidget();
     
-    public QueryResult<ResultType> getCurrentResult();
+    public QueryResultDTO<ResultType> getCurrentResult();
     
-    public void showResult(QueryResult<ResultType> result);
+    public void showResult(QueryResultDTO<ResultType> result);
 
     public void showError(String error);
     public void showError(String mainError, Iterable<String> detailedErrors);

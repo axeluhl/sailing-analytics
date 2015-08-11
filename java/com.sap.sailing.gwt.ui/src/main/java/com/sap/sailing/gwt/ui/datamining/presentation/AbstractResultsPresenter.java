@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenterWithControls<ResultType> {
     
@@ -29,11 +29,13 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private QueryResult<ResultType> currentResult;
+    private QueryResultDTO<ResultType> currentResult;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
+        
+//        AbstractResultDataProvider<DistanceDTO> d = new DistanceDataProvider();
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -69,7 +71,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     }
     
     @Override
-    public void showResult(QueryResult<ResultType> result) {
+    public void showResult(QueryResultDTO<ResultType> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, false);
@@ -132,7 +134,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     }
     
     @Override
-    public QueryResult<ResultType> getCurrentResult() {
+    public QueryResultDTO<ResultType> getCurrentResult() {
         return currentResult;
     }
 

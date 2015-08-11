@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     
@@ -26,7 +26,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
 
     @Override
     protected void internalShowResult() {
-        QueryResult<Number> result = getCurrentResult();
+        QueryResultDTO<Number> result = getCurrentResult();
         Map<GroupKey, Number> resultValues = result.getResults();
         
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
@@ -43,7 +43,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         resultsLabel.setHTML(resultsBuilder.toString());
     }
     
-    private Iterable<GroupKey> getSortedKeys(QueryResult<Number> result) {
+    private Iterable<GroupKey> getSortedKeys(QueryResultDTO<Number> result) {
         List<GroupKey> sortedKeys = new ArrayList<>(result.getResults().keySet());
         Collections.sort(sortedKeys);
         return sortedKeys;

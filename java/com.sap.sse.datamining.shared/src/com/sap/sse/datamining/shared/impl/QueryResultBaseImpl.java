@@ -5,43 +5,42 @@ import java.util.Map;
 
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResultBase;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public class QueryResultImpl<ResultType> implements QueryResult<ResultType> {
-    private static final long serialVersionUID = 5173796619174827696L;
-    
+public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase<ResultType> {
+    private static final long serialVersionUID = 5696532932535299241L;
+
     private QueryResultState state;
-    private Class<ResultType> resultType;
     private Map<GroupKey, ResultType> results;
     private AdditionalResultData additionalData;
-    
+
     /**
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    QueryResultImpl() { }
-    
-    public QueryResultImpl(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results) {
-        this(state, resultType, results, new NullAdditionalResultData());
+    protected QueryResultBaseImpl() {
     }
-    
-    public QueryResultImpl(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results, AdditionalResultData additionalData) {
+
+    public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results) {
+        this(state, results, new NullAdditionalResultData());
+    }
+
+    public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results,
+            AdditionalResultData additionalData) {
         this.state = state;
-        this.resultType = resultType;
         this.results = new HashMap<GroupKey, ResultType>(results);
         this.additionalData = additionalData;
     }
-    
+
     @Override
     public QueryResultState getState() {
         return state;
     }
-    
-    @Override
-    public Class<ResultType> getResultType() {
-        return resultType;
+
+    protected AdditionalResultData getAdditionalData() {
+        return additionalData;
     }
 
     @Override
@@ -63,12 +62,12 @@ public class QueryResultImpl<ResultType> implements QueryResult<ResultType> {
     public String getResultSignifier() {
         return additionalData.getResultSignifier();
     }
-    
+
     @Override
     public Unit getUnit() {
-    	return additionalData.getUnit();
+        return additionalData.getUnit();
     }
-    
+
     @Override
     public String getUnitSignifier() {
         return additionalData.getUnitSignifier();

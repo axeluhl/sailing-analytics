@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class MultiResultsPresenter implements ResultsPresenter<Number> {
     
@@ -79,12 +79,12 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
     }
 
     @Override
-    public QueryResult<Number> getCurrentResult() {
+    public QueryResultDTO<Number> getCurrentResult() {
         return currentPresenter.getCurrentResult();
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void showResult(QueryResultDTO<Number> result) {
         for (Descriptor descriptor : availableDescriptors) {
             descriptor.getPresenter().showResult(result);
         }

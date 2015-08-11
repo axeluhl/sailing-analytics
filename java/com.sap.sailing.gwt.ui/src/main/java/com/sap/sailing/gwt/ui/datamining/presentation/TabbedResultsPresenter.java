@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class TabbedResultsPresenter implements ResultsPresenter<Number> {
     
@@ -63,7 +63,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void showResult(QueryResultDTO<Number> result) {
         getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
     }
@@ -87,7 +87,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Number> {
     }
     
     @Override
-    public QueryResult<Number> getCurrentResult() {
+    public QueryResultDTO<Number> getCurrentResult() {
         return getSelectedPresenter().getCurrentResult();
     }
     
