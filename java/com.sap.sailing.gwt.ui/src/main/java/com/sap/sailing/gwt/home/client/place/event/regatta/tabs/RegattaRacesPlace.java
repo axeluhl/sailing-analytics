@@ -5,8 +5,9 @@ import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class RegattaRacesPlace extends AbstractEventRegattaPlace {
+public class RegattaRacesPlace extends AbstractEventRegattaPlace implements HasMobileVersion {
     public RegattaRacesPlace(String id, String leaderboardName) {
         super(id, leaderboardName);
     }
