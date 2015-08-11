@@ -46,6 +46,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
