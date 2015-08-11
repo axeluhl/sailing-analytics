@@ -33,21 +33,6 @@
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40"/>
 
-    <TextView
-        android:id="@+id/backdrop_subtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:alpha="0"
-        android:background="@drawable/gradient"
-        android:drawableLeft="@drawable/ic_assignment_white_48dp"
-        android:drawablePadding="@dimen/default_padding_half"
-        android:gravity="center_vertical"
-        android:padding="@dimen/default_padding"
-        android:text="@string/login_sub_text"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_40"/>
-
     <LinearLayout
         android:id="@id/button_bar"
         android:layout_width="wrap_content"
@@ -87,6 +72,21 @@
             android:padding="10dp"
             android:src="@drawable/ic_refresh_white_48dp"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/backdrop_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/button_bar"
+        android:alpha="0"
+        android:drawableLeft="@drawable/ic_assignment_white_48dp"
+        android:drawablePadding="@dimen/default_padding_half"
+        android:gravity="center_vertical"
+        android:padding="@dimen/default_padding"
+        android:text="@string/login_sub_text"
+        android:textColor="@color/constant_white"
+        android:textSize="@dimen/textSize_40"/>
 
     <View
         android:id="@+id/line"
