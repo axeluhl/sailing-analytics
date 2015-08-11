@@ -18,6 +18,11 @@
         <item name="android:editTextColor">?white</item>
         <item name="android:dialogTheme">@style/AppTheme.AlertDialog</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Light.SettingsAlertDialog</item>
+        
+        <!-- style attributes for pop up menu -->
+        <item name="android:popupMenuStyle">@style/AppTheme.Light.PopupMenuStyle</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearanceLarge</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearanceSmall</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -100,6 +105,18 @@
         <item name="flags_more">@drawable/flags_more_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_light</item>
         <item name="flags_recall">@drawable/flags_recall_light</item>
+    </style>
+    
+    <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">
+        <item name="android:popupBackground">@color/white</item>
+    </style>
+
+    <style name="PopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="PopupMenuTextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
