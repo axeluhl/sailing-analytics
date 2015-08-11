@@ -31,6 +31,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
@@ -447,8 +448,13 @@ public class LoginActivity extends BaseActivity
             return;
         }
 
-        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -backdrop.getHeight() + (backdrop.getHeight() / 5));
-        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, backdrop.getHeight() - (backdrop.getHeight() / 5));
+        int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
+        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_subtitle);
+        if (subTitle != null) {
+            upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+        }
+        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
+        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
