@@ -32,27 +32,7 @@
         android:paddingLeft="@dimen/default_padding_half"
         android:paddingRight="@dimen/default_padding_half"
         android:paddingTop="@dimen/default_padding"
-        android:shadowColor="@color/constant_black"
         android:text="@string/login_text"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_40"/>
-
-    <TextView
-        android:id="@+id/backdrop_subtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:alpha="0"
-        android:background="@drawable/gradient"
-        android:drawableLeft="@drawable/ic_assignment_white_48dp"
-        android:drawablePadding="@dimen/default_padding_half"
-        android:gravity="center_vertical"
-        android:paddingBottom="@dimen/default_padding"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:paddingTop="@dimen/default_padding"
-        android:shadowColor="@color/constant_black"
-        android:text="@string/login_sub_text"
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40"/>
 
@@ -77,6 +57,24 @@
             android:padding="10dp"
             android:src="@drawable/ic_more_vert_white_48dp"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/backdrop_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:alpha="0"
+        android:layout_toLeftOf="@id/button_bar"
+        android:drawableLeft="@drawable/ic_assignment_white_48dp"
+        android:drawablePadding="@dimen/default_padding_half"
+        android:gravity="center_vertical"
+        android:paddingBottom="@dimen/default_padding"
+        android:paddingLeft="@dimen/default_padding_half"
+        android:paddingRight="@dimen/default_padding_half"
+        android:paddingTop="@dimen/default_padding"
+        android:text="@string/login_sub_text"
+        android:textColor="@color/constant_white"
+        android:textSize="@dimen/textSize_40"/>
 
     <View
         android:id="@+id/line"

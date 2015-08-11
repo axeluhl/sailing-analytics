@@ -105,6 +105,14 @@ public class LoginBackdrop extends Fragment {
                         Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", argTypes);
                         setVerticalOffset.invoke(listPopup, -height);
 
+                        @SuppressWarnings("unchecked")
+                        int width = (Integer) listPopupClass.getDeclaredMethod("getWidth").invoke(listPopup);
+                        width -= view.getWidth();
+                        // Invoke setHorizontalOffset() with the negative height to move up by that distance
+                        @SuppressWarnings("unchecked")
+                        Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", argTypes);
+                        setHorizontalOffset.invoke(listPopup, -width);
+
                         // Invoke show() to update the window's position
                         @SuppressWarnings("unchecked")
                         Method show = listPopupClass.getDeclaredMethod("show");
