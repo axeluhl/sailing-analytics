@@ -33,7 +33,7 @@ public interface DataMiningService extends RemoteService {
     QueryResultDTO<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
             Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName);
     
-    <ResultType extends Number> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
+    <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
 
     SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy();
 

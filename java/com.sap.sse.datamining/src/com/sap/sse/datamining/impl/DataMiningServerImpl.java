@@ -32,6 +32,7 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
@@ -332,5 +333,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
         return dataMiningQueryManager.runNewAndAbortPrevious(session, query);
     }
+    
+    @Override
+    public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result) {
+        return new QueryResultDTO<ResultType>(result.getState(), result.getResultType().getName(), result.getResults(), result.getAdditionalData());
+    }
+    
     
 }

@@ -39,7 +39,7 @@ public interface DataMiningServiceAsync {
             Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<Set<Object>>> callback);
 
-    <ResultType extends Number> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+    <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining

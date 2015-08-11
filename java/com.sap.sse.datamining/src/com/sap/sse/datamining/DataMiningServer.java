@@ -19,6 +19,7 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 
@@ -60,5 +61,7 @@ public interface DataMiningServer {
     public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType);
     public <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(Class<ExtractedType> extractedType, String aggregationNameMessageKey);
     public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO);
+    
+    public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result);
     
 }

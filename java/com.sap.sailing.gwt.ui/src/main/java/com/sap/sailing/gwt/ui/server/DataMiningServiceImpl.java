@@ -22,6 +22,7 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
@@ -180,8 +181,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
-        QueryResultDTO<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
-        return result;
+        QueryResult<Set<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        return dataMiningServer.convertToDTO(result);
     }
 
     private Collection<Function<?>> functionDTOsAsFunctions(Iterable<FunctionDTO> functionDTOs) {
@@ -217,11 +218,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
-        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
-        Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
-        QueryResultDTO<ResultType> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, query);
-        return result;
+    public <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
+        QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+        return dataMiningServer.convertToDTO(result);
     }
     
     @Override
