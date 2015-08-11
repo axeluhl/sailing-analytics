@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -16,7 +18,7 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
     protected TextBox nameEntryField;
-    protected TextBox boatClassEntryField;
+    protected SuggestBox boatClassEntryField;
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
             String title, String okButton, StringMessages stringMessages,
@@ -27,9 +29,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
-        boatClassEntryField = createTextBox(null);
-        boatClassEntryField.ensureDebugId("BoatClassTextBox");
-        boatClassEntryField.setVisibleLength(20);
+        boatClassEntryField = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* include alternative names */ true));
+        boatClassEntryField.getValueBox().ensureDebugId("BoatClassTextBox");
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
