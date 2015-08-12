@@ -1,11 +1,12 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
-import android.content.Context;
-import android.util.Log;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -16,18 +17,14 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
-    private static String TAG = InMemoryDataStore.class.getName();
     private HashMap<Serializable, EventBase> eventsById;
     private HashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private HashMap<Serializable, Mark> marksById;

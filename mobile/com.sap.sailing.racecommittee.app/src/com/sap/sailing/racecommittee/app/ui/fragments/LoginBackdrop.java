@@ -62,6 +62,10 @@ public class LoginBackdrop extends Fragment {
         ImageView more = ViewHelper.get(layout, R.id.more);
         if (more != null) {
             more.setOnClickListener(new View.OnClickListener() {
+                
+                //Because of massive usage of reflection (try {} catch ())
+                //Don't know how to fix the warning a better way
+                @SuppressWarnings("unchecked")
                 @Override
                 public void onClick(View view) {
                     PopupMenu popupMenu = new PopupMenu(getActivity(), view);
