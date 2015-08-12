@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
@@ -135,6 +136,11 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     @Override
                     public void visit(RaceLogDeviceMarkMappingEvent event) {
                         RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogDefineMarkEvent event) {
+                        RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
 
                     @Override
@@ -321,6 +327,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     private void updateMarkMappings(boolean loadIfNotCovered) {
+        assert trackedRace != null;
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<Mark, List<DeviceMapping<Mark>>> newMappings = getNewMarkMappings();
@@ -357,6 +364,18 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         if (trackedRace != null) {
             updateMarkMappings(true);
             gpsFixStore.addListener(this, event.getDevice());
+        }
+    }
+    
+    /**
+     * When a log is attached to it, the tracked race creates mark tracks for all marks either defined or with a device
+     * mapped to it. When this tracker is running for a tracked race it has to mimic this behavior dynamically. When a
+     * {@link RaceLogDefineMarkEvent} is received, the existence of the track for that mark in the {@link TrackedRace}
+     * has to be ensured, also ensuring that the mark will exist in the mark tracks map key set.
+     */
+    private void onDefineMarkEvent(RaceLogDefineMarkEvent event) {
+        if (trackedRace != null) {
+            trackedRace.getOrCreateTrack(event.getMark());
         }
     }
 
