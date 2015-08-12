@@ -65,7 +65,6 @@ public class LoginBackdrop extends Fragment {
                 
                 //Because of massive usage of reflection (try {} catch ())
                 //Don't know how to fix the warning a better way
-                @SuppressWarnings("unchecked")
                 @Override
                 public void onClick(View view) {
                     PopupMenu popupMenu = new PopupMenu(getActivity(), view);

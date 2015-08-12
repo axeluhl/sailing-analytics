@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -199,10 +198,10 @@ public class OnlineDataManager extends DataManager {
                 DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
-
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
+                // no parameter encoding required here; the UrlHelper.generateUrl call uses Url.Builder which handles encoding
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
@@ -229,9 +228,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
@@ -261,9 +260,9 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
@@ -287,7 +286,7 @@ public class OnlineDataManager extends DataManager {
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
 
-                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
+                String encodedIdentifier = identifier.getClientIdentifier();
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
