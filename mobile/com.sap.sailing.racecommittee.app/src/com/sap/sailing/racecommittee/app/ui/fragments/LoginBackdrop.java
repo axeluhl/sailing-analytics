@@ -89,32 +89,26 @@ public class LoginBackdrop extends Fragment {
                     // Try to force some vertical offset
                     try {
                         Object menuHelper;
-                        Class[] argTypes;
                         Field fMenuHelper = PopupMenu.class.getDeclaredField("mPopup");
                         fMenuHelper.setAccessible(true);
                         menuHelper = fMenuHelper.get(popupMenu);
                         Field fListPopup = menuHelper.getClass().getDeclaredField("mPopup");
                         fListPopup.setAccessible(true);
                         Object listPopup = fListPopup.get(menuHelper);
-                        argTypes = new Class[] { int.class };
-                        Class listPopupClass = listPopup.getClass();
+                        Class<?> listPopupClass = listPopup.getClass();
 
                         int height = view.getHeight();
                         // Invoke setVerticalOffset() with the negative height to move up by that distance
-                        @SuppressWarnings("unchecked")
-                        Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", argTypes);
+                        Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", int.class);
                         setVerticalOffset.invoke(listPopup, -height);
 
-                        @SuppressWarnings("unchecked")
                         int width = (Integer) listPopupClass.getDeclaredMethod("getWidth").invoke(listPopup);
                         width -= view.getWidth();
                         // Invoke setHorizontalOffset() with the negative height to move up by that distance
-                        @SuppressWarnings("unchecked")
-                        Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", argTypes);
+                        Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", int.class);
                         setHorizontalOffset.invoke(listPopup, -width);
 
                         // Invoke show() to update the window's position
-                        @SuppressWarnings("unchecked")
                         Method show = listPopupClass.getDeclaredMethod("show");
                         show.invoke(listPopup);
                     } catch (Exception e) {
