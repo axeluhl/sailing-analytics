@@ -18,7 +18,7 @@
         <item name="android:editTextColor">?white</item>
         <item name="android:dialogTheme">@style/AppTheme.AlertDialog</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Light.SettingsAlertDialog</item>
-        
+
         <!-- style attributes for pop up menu -->
         <item name="android:popupMenuStyle">@style/AppTheme.Light.PopupMenuStyle</item>
         <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearanceLarge</item>
