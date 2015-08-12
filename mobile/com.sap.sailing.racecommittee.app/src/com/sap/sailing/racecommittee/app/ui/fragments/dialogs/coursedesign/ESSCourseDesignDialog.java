@@ -151,7 +151,6 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
 
         takePreviousButton = (Button) getView().findViewById(R.id.takePreviousCourseDesignButton);
         takePreviousButton.setOnClickListener(new OnClickListener() {
-
             public void onClick(View arg0) {
                 if (!previousCourseElements.isEmpty()) {
                     if (!courseElements.isEmpty()) {
@@ -164,7 +163,6 @@ public class ESSCourseDesignDialog extends RaceDialogFragment {
                 }
             }
         });
-
         publishButton = (Button) getView().findViewById(R.id.publishCourseDesignButton);
         publishButton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {

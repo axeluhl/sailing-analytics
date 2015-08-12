@@ -4778,7 +4778,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
-        return new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
+        return times == null ? null : new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
     }
 
     @Override

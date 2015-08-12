@@ -97,7 +97,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
 
     void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
 
-
     /**
      * The string returned in the callback's pair is the common event name
      * @param listHiddenRaces 
@@ -723,6 +722,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean>  regattaLogCallBack);
 
     void getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName, AsyncCallback<RegattaAndRaceIdentifier> asyncCallback);
+    
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
