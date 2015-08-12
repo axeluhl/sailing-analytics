@@ -188,6 +188,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                         windChart = null;
                     }
                     createRaceBoardInOneScreenMode(raceMap, windChart);
+                    timer.setTime(timer.getTime().getTime()-1000l);
                 }
             }
         });
