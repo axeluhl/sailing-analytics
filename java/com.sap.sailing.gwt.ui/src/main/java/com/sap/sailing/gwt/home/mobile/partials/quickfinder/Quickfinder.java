@@ -88,7 +88,7 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
     
     private void addItemToElement(Element parent, String label, PlaceNavigation<?> navigation, boolean selected, boolean disabled) {
         OptionElement oe = Document.get().createOptionElement();
-        oe.setLabel(label);
+        oe.setInnerText(label);
         oe.setDefaultSelected(selected);
         oe.setDisabled(disabled);
         parent.appendChild(oe);

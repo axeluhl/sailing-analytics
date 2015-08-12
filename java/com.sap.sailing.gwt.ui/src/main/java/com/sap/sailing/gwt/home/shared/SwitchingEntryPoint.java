@@ -27,7 +27,7 @@ public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
     private static final RegExp isMobileRegExp = RegExp.compile(
-            "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini", "i");
+            "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile Safari", "i");
     private final PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
     private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 

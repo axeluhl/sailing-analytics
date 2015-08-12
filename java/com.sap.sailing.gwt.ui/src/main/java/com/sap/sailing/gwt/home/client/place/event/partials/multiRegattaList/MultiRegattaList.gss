@@ -151,7 +151,6 @@ img.race_item_windflag {
 }
 .regattalistitem {
   font-size: 1rem;
-  float: left;
   width: 100%;
   margin-top: 2em;
   border: 1px solid #ddd;
@@ -173,8 +172,13 @@ img.race_item_windflag {
 .regattalistitem_tableborderTop {
   border-top: 1px solid #ebebeb;
 }
+.regattalistitem_noraces {
+  font-style: italic;
+  font-weight: bold;
+  padding: 1.5em 1em;
+  float: left;
+}
 .regattalistitem_steps {
-  border-bottom: 1px solid #ddd;
   overflow: hidden;
 }
 .regattalistitem_steps_step {

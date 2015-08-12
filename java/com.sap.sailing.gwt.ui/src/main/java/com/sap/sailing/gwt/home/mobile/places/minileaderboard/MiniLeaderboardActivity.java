@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
@@ -98,5 +99,10 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
     @Override
     public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
         return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<?> getEventNavigation() {
+        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
     }
 }

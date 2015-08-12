@@ -19,8 +19,8 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
-    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
-    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.STAGE, MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.STAGE, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
     
     private UUID eventId;
     

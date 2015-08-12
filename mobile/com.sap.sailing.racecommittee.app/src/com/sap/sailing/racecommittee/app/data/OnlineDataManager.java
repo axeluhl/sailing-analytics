@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.app.LoaderManager.LoaderCallbacks;
@@ -11,8 +14,11 @@ import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 
+import android.util.Log;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -24,6 +30,8 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
@@ -48,7 +56,9 @@ import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -68,6 +78,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJ
 import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+import com.sap.sse.common.Util;
 
 /**
  * Enables accessing of data.
@@ -111,8 +122,9 @@ public class OnlineDataManager extends DataManager {
 
                 // ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
-                return new OnlineDataLoader<Collection<EventBase>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/events"), parser, handler);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", new ArrayList<Util.Pair>());
+                return new OnlineDataLoader<Collection<EventBase>>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }
@@ -166,10 +178,11 @@ public class OnlineDataManager extends DataManager {
                         globalConfiguration, RaceGroupDeserializer.create(domainFactory,
                                 RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/racegroups?" + RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "="
-                        + courseAreaId.toString() + "&" + RaceLogServletConstants.PARAMS_CLIENT_UUID + "="
-                        + MessageSendingService.uuid), parser, handler);
+                List<Util.Pair> params = new ArrayList<>();
+                params.add(new Util.Pair(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups",params);
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -191,10 +204,12 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/marks?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                List<Util.Pair> params = new ArrayList<>();
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/marks", params);
+                return new OnlineDataLoader<Collection<Mark>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -218,10 +233,13 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                List<Util.Pair> params = new ArrayList<>();
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/currentcourse", params);
+
+                return new OnlineDataLoader<CourseBase>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -247,10 +265,12 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/competitors?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                        + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                        + "&" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                List<Util.Pair> params = new ArrayList<>();
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
+                return new OnlineDataLoader<Collection<Competitor>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -270,8 +290,11 @@ public class OnlineDataManager extends DataManager {
                 String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
 
-                return new OnlineDataLoader<DeviceConfiguration>(context, new URL(preferences.getServerBaseURL()
-                        + "/sailingserver/rc/configuration?client=" + encodedIdentifier), parser, handler);
+                List<Util.Pair> params = new ArrayList<>();
+                params.add(new Util.Pair("client", encodedIdentifier));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
+                return new OnlineDataLoader<DeviceConfiguration>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }
@@ -282,4 +305,30 @@ public class OnlineDataManager extends DataManager {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
+        String url = "";
+        // get simple race log identifier
+        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
+        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+        List<Util.Pair> params = new ArrayList<>();
+        params.add(new Util.Pair("regattaLikeName", identifier.getRegattaLikeParentName()));
+        params.add(new Util.Pair("raceColumnName", identifier.getRaceColumnName()));
+        params.add(new Util.Pair("fleetName", identifier.getFleetName()));
+        params.add(new Util.Pair("eventId", eventId));
+        params.add(new Util.Pair("viewShowWindChart", showWindCharts));
+        params.add(new Util.Pair("viewShowStreamlets", showStreamlets));
+        params.add(new Util.Pair("viewShowSimulation", showSimulation));
+        params.add(new Util.Pair("viewShowMapControls", showMapControls));
+
+        try {
+            url = UrlHelper.generateUrl(AppPreferences.on(context).getServerBaseURL(), AppConstants.GWT_MAP_AND_WIND_CHART_HTML, params).toString();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "An error occured while generating the map url: " + e.getMessage());
+        }
+        return url;
+    }
+
+
 }

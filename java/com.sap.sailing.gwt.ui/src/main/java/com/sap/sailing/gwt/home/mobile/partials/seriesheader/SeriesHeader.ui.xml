@@ -16,14 +16,14 @@
 						<!-- IF event.name -->
 						<h3 class="{local_res.css.eventheader_info_title_text}">
 							<span ui:field="eventNameUi"></span>
- 			            	<div data-labeltype="live" ui:field="eventStateUi" class="{local_res.css.eventheader_info_title_text_label} {res.mainCss.label}">
-				            </div>
+							<div data-labeltype="live" ui:field="eventStateUi" class="{local_res.css.eventheader_info_title_text_label} {res.mainCss.label}">
+							</div>
 						</h3>
 						<!-- IF END -->
 					</div>
 					<div class="{local_res.css.eventheader_info_subtitle}">
 						<!-- IF event.logo -->
-						<div ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"> </div>
+						<a ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"></a>
 						<!-- IF END -->
 						<div class="{local_res.css.eventheader_info_subtitle_info}">
 							<div ui:field="locationsUi" class="{local_res.css.eventheader_info_subtitle_info_location}">

@@ -88,8 +88,6 @@
 }
 .eventsoverviewrecent {
   font-size: 1rem;
-  margin: 0 -1rem;
-  
 }
 .eventsoverviewrecent_year {
   border-top: 2px solid #ccc;
@@ -105,7 +103,7 @@
 }
 .eventsoverviewrecent_year_header {
   background-color: #f2f2f2;
-  padding: 1.333333333333333em 1rem;
+  padding: 1.333333333333333em 0;
   cursor: pointer;
 }
 .eventsoverviewrecent_year_header_title {

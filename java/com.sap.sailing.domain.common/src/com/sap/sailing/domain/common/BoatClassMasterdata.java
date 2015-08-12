@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
@@ -157,4 +160,16 @@ public enum BoatClassMasterdata {
         return hasAdditionalDownwindSail;
     }
 
+    public static Iterable<String> getAllBoatClassNames(boolean includeAlternativeNames) {
+        final List<String> result = new ArrayList<>();
+        for (BoatClassMasterdata bcmd : values()) {
+            result.add(bcmd.getDisplayName());
+            if (includeAlternativeNames) {
+                for (String alternativeName : bcmd.getAlternativeNames()) {
+                    result.add(alternativeName);
+                }
+            }
+        }
+        return result;
+    }
 }

@@ -50,6 +50,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -863,6 +864,18 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     default RaceLogResolver getRaceLogResolver() {
         return null;
+    }
+
+    default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+        return null;
+    }
+
+    /**
+     * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
+     * definition events in all attached race and regatta logs.
+     */
+    default Iterable<Mark> getMarksFromRaceAndLogs() {
+        return getMarks();
     }
 
 }
