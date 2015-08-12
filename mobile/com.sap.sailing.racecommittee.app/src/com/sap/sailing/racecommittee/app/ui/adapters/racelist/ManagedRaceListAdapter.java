@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -187,7 +188,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
                             textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
                         }
-                        time.setTextSize(textSize);
+                        time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                     }
                     StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
