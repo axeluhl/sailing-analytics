@@ -870,4 +870,12 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return null;
     }
 
+    /**
+     * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
+     * definition events in all attached race and regatta logs.
+     */
+    default Iterable<Mark> getMarksFromRaceAndLogs() {
+        return getMarks();
+    }
+
 }
