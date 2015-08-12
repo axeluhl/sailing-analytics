@@ -32,7 +32,7 @@ public class UrlEditTextPreference extends EditTextPreference {
 
     private String normalizeUrl(String url) {
         // add missing protocol
-        if (!url.startsWith("http://") || !url.startsWith("https://")) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "http://" + url;
         }
 
