@@ -108,7 +108,7 @@
     </style>
     
     <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">
-        <item name="android:popupBackground">@color/white</item>
+        <item name="android:popupBackground">@color/constant_light_gray</item>
     </style>
 
     <style name="PopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large">
