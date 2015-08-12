@@ -46,7 +46,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO result = getRegattaDTO();
-        result.setName(nameEntryField.getText());
+        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing slashes
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
         return result;
     }
