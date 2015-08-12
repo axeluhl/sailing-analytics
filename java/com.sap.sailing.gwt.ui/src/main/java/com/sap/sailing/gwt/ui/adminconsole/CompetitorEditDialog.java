@@ -81,9 +81,9 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             boatClassNamesList.add(t.getDisplayName());
         }
         if (competitorToEdit.getBoatClass() != null) {
+            boatClassName.setValue(competitorToEdit.getBoatClass().getName());
             boatClassName.setEnabled(false);
         }
-        
         this.name = createTextBox(competitorToEdit.getName());
         this.email = createTextBox(competitorToEdit.getEmail());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
