@@ -218,6 +218,7 @@
     <string name="preference_allow_demo_header">Allow login as Viewer</string>
     <string name="preference_allow_demo_summary">If set, you are allowed to login as Viewer. No race changes will be send back to the server.</string>
     <string name="options_menu_info">Expert Information</string>
+    <string name="options_menu_refresh">Refresh Data</string>
     <string name="auto_update_install">Install</string>
     <string name="auto_update_install_anyway">Install anyway</string>
     <string name="gate_launch">Gate Launch</string>

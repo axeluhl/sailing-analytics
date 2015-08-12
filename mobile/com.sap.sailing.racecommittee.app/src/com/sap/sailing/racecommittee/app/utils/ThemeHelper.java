@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -117,12 +117,12 @@ public class ThemeHelper {
     private static NumberPicker getHourPicker(TimePicker timePicker) {
         Resources system = Resources.getSystem();
         int hourId = system.getIdentifier("hour", "id", "android");
-        return ViewHolder.get(timePicker, hourId);
+        return ViewHelper.get(timePicker, hourId);
     }
 
     private static NumberPicker getMinutePicker(TimePicker timePicker) {
         Resources system = Resources.getSystem();
         int minuteId = system.getIdentifier("minute", "id", "android");
-        return ViewHolder.get(timePicker, minuteId);
+        return ViewHelper.get(timePicker, minuteId);
     }
 }

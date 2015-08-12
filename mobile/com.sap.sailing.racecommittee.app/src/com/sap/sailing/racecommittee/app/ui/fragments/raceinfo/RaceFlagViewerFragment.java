@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -53,10 +53,10 @@ public class RaceFlagViewerFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.race_flag_screen, container, false);
 
-        mLayout = ViewHolder.get(layout, R.id.flags);
-        mRecall = ViewHolder.get(layout, R.id.individual_recall);
+        mLayout = ViewHelper.get(layout, R.id.flags);
+        mRecall = ViewHelper.get(layout, R.id.individual_recall);
 
-        mXrayButton = ViewHolder.get(layout, R.id.flag_down);
+        mXrayButton = ViewHelper.get(layout, R.id.flag_down);
         if (mXrayButton != null) {
             mXrayButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -66,11 +66,11 @@ public class RaceFlagViewerFragment extends BaseFragment {
                 }
             });
         }
-        mXrayFlag = ViewHolder.get(layout, R.id.flag);
+        mXrayFlag = ViewHelper.get(layout, R.id.flag);
         if (mXrayFlag != null) {
             mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), 96));
         }
-        mXrayCountdown = ViewHolder.get(layout, R.id.xray_down);
+        mXrayCountdown = ViewHelper.get(layout, R.id.xray_down);
 
         return layout;
     }
@@ -133,7 +133,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
                 } else {
                     if (mFlagCache.nextPole != null) {
                         for (int i = 0; i < mLayout.getChildCount(); i++) {
-                            ImageView flagImage = ViewHolder.get(mLayout.getChildAt(i), R.id.flag);
+                            ImageView flagImage = ViewHelper.get(mLayout.getChildAt(i), R.id.flag);
                             Flags flags = (Flags) flagImage.getTag();
                             if (isNextFlag(mFlagCache.nextPole, flags)) {
                                 updateFlagView(now, mLayout.getChildAt(i));
@@ -160,7 +160,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
     private View updateFlagView(TimePoint now, View flagView) {
         TimePoint change = mFlagCache.mChange;
         if (change != null) {
-            TextView flag_text = ViewHolder.get(flagView, R.id.flag_text);
+            TextView flag_text = ViewHelper.get(flagView, R.id.flag_text);
             String timer = TimeUtils.formatDuration(now, change, false);
             flag_text.setText(timer);
         }
@@ -174,11 +174,11 @@ public class RaceFlagViewerFragment extends BaseFragment {
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
-        ImageView flagView = ViewHolder.get(layout, R.id.flag);
-        TextView textView = ViewHolder.get(layout, R.id.flag_text);
-        View downView = ViewHolder.get(layout, R.id.arrow_down);
-        View upView = ViewHolder.get(layout, R.id.arrow_up);
-        View line = ViewHolder.get(layout, R.id.line);
+        ImageView flagView = ViewHelper.get(layout, R.id.flag);
+        TextView textView = ViewHelper.get(layout, R.id.flag_text);
+        View downView = ViewHelper.get(layout, R.id.arrow_down);
+        View upView = ViewHelper.get(layout, R.id.arrow_up);
+        View line = ViewHelper.get(layout, R.id.line);
         if (lastEntry) {
             line.setVisibility(View.GONE);
         }

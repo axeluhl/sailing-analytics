@@ -16,8 +16,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:text="@string/label_login_events"
             android:textAppearance="?textNormal"/>
 
@@ -27,8 +27,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
@@ -39,7 +39,6 @@
             android:layout_toLeftOf="@id/icon_event"
             android:layout_toRightOf="@+id/label_event"
             android:gravity="right"
-            android:singleLine="true"
             android:textColor="?white"
             android:textSize="@dimen/textSize_22"
             tools:text="Test-Event"/>
@@ -71,8 +70,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:text="@string/label_login_course_area"
             android:textAppearance="?textNormal"/>
 
@@ -82,8 +81,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
@@ -94,7 +93,6 @@
             android:layout_toLeftOf="@id/icon_area"
             android:layout_toRightOf="@id/label_area"
             android:gravity="right"
-            android:singleLine="true"
             android:textColor="?white"
             android:textSize="@dimen/textSize_22"
             tools:text="Selected Area"/>
@@ -125,8 +123,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:text="@string/label_login_position"
             android:textAppearance="?textNormal"/>
 
@@ -136,8 +134,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:paddingLeft="@dimen/default_padding_half"
-            android:paddingRight="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
             android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
 
         <TextView
@@ -148,7 +146,6 @@
             android:layout_toLeftOf="@id/icon_position"
             android:layout_toRightOf="@id/label_position"
             android:gravity="right"
-            android:singleLine="true"
             android:textColor="?white"
             android:textSize="@dimen/textSize_22"
             tools:text="Viewer"/>
@@ -175,8 +172,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginBottom="@dimen/default_margin_twice"
+        android:layout_marginRight="@dimen/default_margin_twice"
         android:enabled="false"
         android:text="@string/sign_up"
         android:textSize="@dimen/textSize_26"

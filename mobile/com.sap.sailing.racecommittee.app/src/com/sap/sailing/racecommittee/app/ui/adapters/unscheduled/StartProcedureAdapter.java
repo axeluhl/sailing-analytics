@@ -13,7 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -52,7 +52,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
             convertView = inflater.inflate(R.layout.race_schedule_procedure_row, parent, false);
         }
 
-        TextView startProcedure = ViewHolder.get(convertView, R.id.start_procedure);
+        TextView startProcedure = ViewHelper.get(convertView, R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setText(getItem(position).toString());
             startProcedure.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
@@ -61,7 +61,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
             }
         }
 
-        ImageView checked = ViewHolder.get(convertView, R.id.checked);
+        ImageView checked = ViewHelper.get(convertView, R.id.checked);
         if (checked != null) {
             checked.setTag(position);
             checked.setVisibility(View.INVISIBLE);
@@ -70,7 +70,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
             }
         }
 
-        ImageView more = ViewHolder.get(convertView, R.id.set_path_finder);
+        ImageView more = ViewHelper.get(convertView, R.id.set_path_finder);
         if (more != null) {
             String className = getItem(position).getClassName();
             if (!TextUtils.isEmpty(className)) {
@@ -90,7 +90,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
             procedure.setChecked(false);
         }
         
-        Integer position = (Integer) ViewHolder.get(view, R.id.checked).getTag();
+        Integer position = (Integer) ViewHelper.get(view, R.id.checked).getTag();
         if (position != null) {
             StartProcedure procedure = getItem(position);
             procedure.setChecked(true);

@@ -207,6 +207,7 @@
     <string name="update_app_header">Update erzwingen</string>
     <string name="update_app_description">Erzwingt ein Update. Es ist besser die Synchronisierung zu nutzen.</string>
     <string name="options_menu_info">Technische Informationen</string>
+    <string name="options_menu_refresh">Daten neu laden</string>
     <string name="gate_launch">Gate Launch</string>
     <string name="golf_down">Golf</string>
     <string name="preference_regatta_specific_title">Regattakonfiguration - %1$s</string>
