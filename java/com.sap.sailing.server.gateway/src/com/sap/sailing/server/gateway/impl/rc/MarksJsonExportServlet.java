@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -60,12 +63,21 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
         }
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         JSONArray result = new JSONArray();
+        final Iterable<Mark> marks;
         if (trackedRace != null) {
-            MarkJsonSerializer serializer = new MarkJsonSerializer();
-            for (Mark mark : trackedRace.getMarks()) {
-                if (toUUID(mark.getId().toString()) != null) {
-                    result.add(serializer.serialize(mark));
-                }
+            marks = trackedRace.getMarks();
+        } else {
+            final List<Mark> marksList = new ArrayList<>();
+            // no tracked race associated yet; grab the mark definitions from the race log:
+            for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder(raceColumn.getRaceLog(fleet)).analyze()) {
+                marksList.add(markDefinitionFromRaceLog);
+            }
+            marks = marksList;
+        }
+        MarkJsonSerializer serializer = new MarkJsonSerializer();
+        for (Mark mark : marks) {
+            if (toUUID(mark.getId().toString()) != null) {
+                result.add(serializer.serialize(mark));
             }
         }
         setJsonResponseHeader(response);
