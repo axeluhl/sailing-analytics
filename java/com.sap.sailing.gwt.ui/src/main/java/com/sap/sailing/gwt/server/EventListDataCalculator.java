@@ -2,14 +2,15 @@ package com.sap.sailing.gwt.server;
 
 import java.net.URL;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.server.RacingEventService;
@@ -17,6 +18,7 @@ import com.sap.sailing.server.RacingEventService;
 public class EventListDataCalculator implements EventVisitor {
     
     private final Map<String, EventListEventDTO> lastestEventPerSeries = new HashMap<>();
+    private final Map<String, Integer> numberOfEventsPerSeries = new HashMap<>();
     private final EventListViewDTO result = new EventListViewDTO();
     private final RacingEventService service;
 
@@ -33,22 +35,33 @@ public class EventListDataCalculator implements EventVisitor {
             if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
                 lastestEventPerSeries.put(seriesName, eventDTO);
             }
+            increaseNumberOfEvents(seriesName);
         } else {
-            result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
+            addEventToResults(eventDTO);
         }
     }
     
+    private void increaseNumberOfEvents(String seriesName) {
+        Integer currentValue = numberOfEventsPerSeries.get(seriesName);
+        currentValue = currentValue == null ? 0 : currentValue;
+        numberOfEventsPerSeries.put(seriesName, ++currentValue);
+    }
+    
     public EventListViewDTO getResult() {
-        for (EventListEventDTO eventDTO : lastestEventPerSeries.values()) {
-            result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
+        for (Entry<String, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
+            String seriesName = latestEventInSeries.getKey();
+            EventListEventDTO latestEvent = latestEventInSeries.getValue();
+            latestEvent.setEventSeries(new EventListEventSeriesDTO(latestEvent.getId(), seriesName));
+            latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesName));
+            addEventToResults(latestEvent);
         }
         return result;
     }
     
-    private int getYear(Date date) {
+    private void addEventToResults(EventListEventDTO eventDTO) {
         Calendar cal = GregorianCalendar.getInstance();
-        cal.setTime(date);
-        return cal.get(Calendar.YEAR);
+        cal.setTime(eventDTO.getStartDate());
+        result.addEvent(eventDTO, cal.get(Calendar.YEAR));
     }
 
 }
