@@ -494,21 +494,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             coordinateSystem.setCoordinateSystem(new IdentityCoordinateSystem());
         }
-        fixesAndTails.clearTails();
-        redraw();
-        // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                if (map != null) {
-                    map.setOptions(mapOptions);
-                    // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
-                    mapFirstZoomDone = false;
-                    trueNorthIndicatorPanel.redraw();
-                    orientationChangeInProgress = false;
+        if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
+            fixesAndTails.clearTails();
+            redraw();
+            // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    if (map != null) {
+                        map.setOptions(mapOptions);
+                        // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
+                        mapFirstZoomDone = false;
+                        trueNorthIndicatorPanel.redraw();
+                        orientationChangeInProgress = false;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {

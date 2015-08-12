@@ -66,6 +66,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
 
     @Override
     protected void doOnModuleLoad() {
+        GWT.debugger();
         super.doOnModuleLoad();
         // read mandatory parameters
         regattaLikeName = Window.Location.getParameter(PARAM_REGATTA_LIKE_NAME);
@@ -141,7 +142,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final List<RegattaAndRaceIdentifier> raceList = Collections.singletonList(selectedRaceIdentifier);
                     raceSelectionModel.setSelection(raceList);
                     final long refreshInterval = Duration.ONE_SECOND.times(3).asMillis();
-                    final Timer timer = new Timer(PlayModes.Live);
+                    final Timer timer = new Timer(PlayModes.Replay);
                     AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
                     final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
                     // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed;
