@@ -11,8 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.Named;
@@ -35,10 +37,11 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.login_list_item, parent, false);
             holder = new ViewHolder();
-            holder.text = (TextView) convertView.findViewById(R.id.list_item);
-            holder.subText = (TextView) convertView.findViewById(R.id.list_item_subtitle);
+            holder.text = ViewHelper.get(convertView, R.id.list_item);
+            holder.subText = ViewHelper.get(convertView, R.id.list_item_subtitle);
+            holder.checked = ViewHelper.get(convertView, R.id.checked);
 
-            convertView.setTag(holder);
+                convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
@@ -59,6 +62,14 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
             holder.subText.setVisibility(View.GONE);
         }
 
+        if (holder.checked != null) {
+            if (isChecked == position) {
+                holder.checked.setVisibility(View.VISIBLE);
+            } else {
+                holder.checked.setVisibility(View.GONE);
+            }
+        }
+
         if (holder.subText != null && item instanceof EventBase) {
             EventBase eventBase = (EventBase) item;
             String dateString = null;
@@ -73,12 +84,12 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
                 if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
                     end = endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
                 }
-                if (startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH) || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
                     end += " " + endDate.get(Calendar.DATE);
                 }
                 dateString = String.format("%s %s %s", start , (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
             }
-            holder.subText.setText(String.format("%s %s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils.isEmpty(dateString) ? dateString : "")));
+            holder.subText.setText(String.format("%s%s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils.isEmpty(dateString) ? dateString : "")));
             holder.subText.setAlpha(isEnabled(position) ? 1.0f : 0.2f);
             holder.subText.setVisibility(View.VISIBLE);
         }
@@ -93,6 +104,7 @@ public class NamedArrayAdapter<T extends Named> extends ArrayAdapter<T> {
     static class ViewHolder {
         TextView text;
         TextView subText;
+        ImageView checked;
     }
 }
 

@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -55,17 +55,17 @@ public class CourseNameAdapter extends BaseAdapter implements View.OnClickListen
         }
 
         String courseName = getItem(position);
-        TextView firstLine = ViewHolder.get(convertView, R.id.first_line);
+        TextView firstLine = ViewHelper.get(convertView, R.id.first_line);
         if (firstLine != null) {
             firstLine.setText(courseName);
         }
 
-        TextView secondLine = ViewHolder.get(convertView, R.id.second_line);
+        TextView secondLine = ViewHelper.get(convertView, R.id.second_line);
         if (secondLine != null) {
             secondLine.setVisibility(View.GONE);
         }
 
-        ImageView flag = ViewHolder.get(convertView, R.id.flag);
+        ImageView flag = ViewHelper.get(convertView, R.id.flag);
         if (flag != null) {
             int resId;
             if (courseName.toLowerCase(Locale.US).startsWith("i")) {
