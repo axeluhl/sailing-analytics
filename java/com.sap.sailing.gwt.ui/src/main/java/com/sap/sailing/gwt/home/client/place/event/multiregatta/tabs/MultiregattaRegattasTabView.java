@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -55,6 +56,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     @UiField SimplePanel content;
     @UiField DivElement newContentContainerUi;
     @UiField(provided = true) RacesListLive racesListLiveUi;
+    @UiField DivElement legendAndFilterUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
@@ -81,7 +83,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         racesListLiveUi = new RacesListLive(currentPresenter, true);
         MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
-        regattaListUi = new MultiRegattaList(currentPresenter);
+        regattaListUi = new MultiRegattaList(currentPresenter, true);
         
         initWidget(ourUiBinder.createAndBindUi(this));
         regattaOverviewLinkUi.setHref(currentPresenter.getRegattaOverviewLink());
@@ -156,6 +158,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         
         @Override
         public void setData(SortedSetResult<RegattaWithProgressDTO> data) {
+            legendAndFilterUi.getStyle().setDisplay(data.isEmpty() ? Display.NONE : Display.BLOCK);
             regattaListUi.setData(data);
             boatCategoryFilterUi.updateFilterValues();
         }

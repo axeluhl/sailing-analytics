@@ -48,6 +48,10 @@ MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
 
+#### Setting up a new image (AMI) from scratch (more or less)
+
+See [here](wiki/creating-ec2-image-from-scratch)
+
 #### Receiving wind from Expedition
 
 - To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.

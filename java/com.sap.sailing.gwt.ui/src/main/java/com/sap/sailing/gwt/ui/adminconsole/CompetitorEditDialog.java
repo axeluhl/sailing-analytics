@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -37,7 +38,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
-    private final ListBox boatClassName;
+    private final SuggestBox boatClassName;
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
     private final TextBox sailId;
@@ -73,24 +74,11 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
         
-        this.boatClassName = createListBox(/* isMultipleSelect */ false);
+        this.boatClassName = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* includeAlternativeNames */ true));
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
         for (BoatClassMasterdata t : BoatClassMasterdata.values()) {
             boatClassNamesList.add(t.getDisplayName());
-        }
-        String competitorsBoatClassName = competitorToEdit.getBoatClass() != null ? competitorToEdit.getBoatClass().getName() : null;
-        Collections.sort(boatClassNamesList);
-        for (String name : boatClassNamesList) {
-            boatClassName.addItem(name);
-            if (name.equals(competitorsBoatClassName)) {
-                boatClassName.setSelectedIndex(i);
-            }
-            i++;
-        }
-        if (boatClassName.getSelectedIndex() == -1 && competitorsBoatClassName != null) {
-            boatClassName.addItem(competitorsBoatClassName);
-            boatClassName.setSelectedIndex(i);
         }
         if (competitorToEdit.getBoatClass() != null) {
             boatClassName.setEnabled(false);
@@ -185,7 +173,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(boatClassName.getSelectedIndex()), 0);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),

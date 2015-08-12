@@ -49,4 +49,5 @@ public interface DataStore {
 
     UUID getCourseUUID();
     void setCourseUUID(UUID uuid);
+
 }

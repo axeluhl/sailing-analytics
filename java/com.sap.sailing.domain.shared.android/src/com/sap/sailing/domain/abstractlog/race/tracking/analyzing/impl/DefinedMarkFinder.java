@@ -1,22 +1,33 @@
 package com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.LogAnalyzer;
+import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.base.Mark;
 
-public class DefinedMarkFinder extends RaceLogAnalyzer<Iterable<Mark>> {
+public class DefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
     public DefinedMarkFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
+    public static class Factory implements AnalyzerFactory<Collection<Mark>> {
+        @Override
+        public LogAnalyzer<Collection<Mark>> createAnalyzer(AbstractLog<?, ?> log) {
+            return new DefinedMarkFinder((RaceLog) log);
+        }
+    }
+
     @Override
-    protected Iterable<Mark> performAnalysis() {
-        List< Mark> result = new ArrayList<Mark>();
+    protected Collection<Mark> performAnalysis() {
+        List<Mark> result = new ArrayList<Mark>();
         for (RaceLogEvent event : getLog().getUnrevokedEvents()) {
             if (event instanceof RaceLogDefineMarkEvent) {
                 RaceLogDefineMarkEvent dME = (RaceLogDefineMarkEvent) event;
@@ -25,5 +36,4 @@ public class DefinedMarkFinder extends RaceLogAnalyzer<Iterable<Mark>> {
         }
         return result;
     }
-
 }

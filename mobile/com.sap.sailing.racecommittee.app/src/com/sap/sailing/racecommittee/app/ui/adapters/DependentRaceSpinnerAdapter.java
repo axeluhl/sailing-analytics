@@ -116,7 +116,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 1;
     }
 
     @Override
