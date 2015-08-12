@@ -13,8 +13,8 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
-
 import android.util.Log;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -122,7 +122,7 @@ public class OnlineDataManager extends DataManager {
 
                 // ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", new ArrayList<Util.Pair>());
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", null);
                 return new OnlineDataLoader<Collection<EventBase>>(context,
                     url, parser, handler);
             }
@@ -178,10 +178,10 @@ public class OnlineDataManager extends DataManager {
                         globalConfiguration, RaceGroupDeserializer.create(domainFactory,
                                 RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                List<Util.Pair> params = new ArrayList<>();
-                params.add(new Util.Pair(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups",params);
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups", params);
                 return new OnlineDataLoader<Collection<ManagedRace>>(context, url, parser, handler);
             }
         }, getContext());
@@ -204,10 +204,10 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                List<Util.Pair> params = new ArrayList<>();
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/marks", params);
                 return new OnlineDataLoader<Collection<Mark>>(context, url, parser, handler);
             }
@@ -233,10 +233,10 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                List<Util.Pair> params = new ArrayList<>();
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/currentcourse", params);
 
                 return new OnlineDataLoader<CourseBase>(context, url, parser, handler);
@@ -265,10 +265,10 @@ public class OnlineDataManager extends DataManager {
                 String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
                 String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
 
-                List<Util.Pair> params = new ArrayList<>();
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
-                params.add(new Util.Pair(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
                 return new OnlineDataLoader<Collection<Competitor>>(context, url, parser, handler);
             }
@@ -290,8 +290,8 @@ public class OnlineDataManager extends DataManager {
                 String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
                 encodedIdentifier = encodedIdentifier.replace("+", "%20");
 
-                List<Util.Pair> params = new ArrayList<>();
-                params.add(new Util.Pair("client", encodedIdentifier));
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
                 return new OnlineDataLoader<DeviceConfiguration>(context,
                     url, parser, handler);
@@ -312,15 +312,15 @@ public class OnlineDataManager extends DataManager {
         // get simple race log identifier
         Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
         SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
-        List<Util.Pair> params = new ArrayList<>();
-        params.add(new Util.Pair("regattaLikeName", identifier.getRegattaLikeParentName()));
-        params.add(new Util.Pair("raceColumnName", identifier.getRaceColumnName()));
-        params.add(new Util.Pair("fleetName", identifier.getFleetName()));
-        params.add(new Util.Pair("eventId", eventId));
-        params.add(new Util.Pair("viewShowWindChart", showWindCharts));
-        params.add(new Util.Pair("viewShowStreamlets", showStreamlets));
-        params.add(new Util.Pair("viewShowSimulation", showSimulation));
-        params.add(new Util.Pair("viewShowMapControls", showMapControls));
+        List<Util.Pair<String, Object>> params = new ArrayList<>();
+        params.add(new Util.Pair<String, Object>("regattaLikeName", identifier.getRegattaLikeParentName()));
+        params.add(new Util.Pair<String, Object>("raceColumnName", identifier.getRaceColumnName()));
+        params.add(new Util.Pair<String, Object>("fleetName", identifier.getFleetName()));
+        params.add(new Util.Pair<String, Object>("eventId", eventId));
+        params.add(new Util.Pair<String, Object>("viewShowWindChart", showWindCharts));
+        params.add(new Util.Pair<String, Object>("viewShowStreamlets", showStreamlets));
+        params.add(new Util.Pair<String, Object>("viewShowSimulation", showSimulation));
+        params.add(new Util.Pair<String, Object>("viewShowMapControls", showMapControls));
 
         try {
             url = UrlHelper.generateUrl(AppPreferences.on(context).getServerBaseURL(), AppConstants.GWT_MAP_AND_WIND_CHART_HTML, params).toString();

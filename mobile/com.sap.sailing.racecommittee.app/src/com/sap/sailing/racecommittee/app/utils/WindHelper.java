@@ -1,9 +1,19 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -15,14 +25,6 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
 import com.sap.sse.common.Util;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class WindHelper {
     private static String TAG = WindHelper.class.getName();
@@ -31,8 +33,8 @@ public class WindHelper {
         try {
             Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
             String path = "/sailingserver/api/v1/events/"+ getEventId(context) + "/racestates";
-            List<Util.Pair> params = new ArrayList<>();
-            params.add(new Util.Pair("filterByLeaderboard", triple.getA()));
+            List<Util.Pair<String, Object>> params = new ArrayList<>();
+            params.add(new Util.Pair<String, Object>("filterByLeaderboard", triple.getA()));
             URL serverUrl = UrlHelper.generateUrl(getBaseUrl(context), path, params);
 
             HttpGetRequest request = new HttpGetRequest(serverUrl, context);

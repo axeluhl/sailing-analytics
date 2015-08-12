@@ -62,6 +62,10 @@ public class LoginBackdrop extends Fragment {
         ImageView more = ViewHelper.get(layout, R.id.more);
         if (more != null) {
             more.setOnClickListener(new View.OnClickListener() {
+                
+                //Because of massive usage of reflection (try {} catch ())
+                //Don't know how to fix the warning a better way
+                @SuppressWarnings("unchecked")
                 @Override
                 public void onClick(View view) {
                     PopupMenu popupMenu = new PopupMenu(getActivity(), view);
@@ -89,32 +93,28 @@ public class LoginBackdrop extends Fragment {
                     // Try to force some vertical offset
                     try {
                         Object menuHelper;
-                        Class[] argTypes;
+                        Class<? extends Integer>[] argTypes;
                         Field fMenuHelper = PopupMenu.class.getDeclaredField("mPopup");
                         fMenuHelper.setAccessible(true);
                         menuHelper = fMenuHelper.get(popupMenu);
                         Field fListPopup = menuHelper.getClass().getDeclaredField("mPopup");
                         fListPopup.setAccessible(true);
                         Object listPopup = fListPopup.get(menuHelper);
-                        argTypes = new Class[] { int.class };
-                        Class listPopupClass = listPopup.getClass();
+                        argTypes = new Class[] { Integer.class };
+                        Class<? extends Object> listPopupClass = listPopup.getClass();
 
                         int height = view.getHeight();
                         // Invoke setVerticalOffset() with the negative height to move up by that distance
-                        @SuppressWarnings("unchecked")
                         Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", argTypes);
                         setVerticalOffset.invoke(listPopup, -height);
 
-                        @SuppressWarnings("unchecked")
                         int width = (Integer) listPopupClass.getDeclaredMethod("getWidth").invoke(listPopup);
                         width -= view.getWidth();
                         // Invoke setHorizontalOffset() with the negative height to move up by that distance
-                        @SuppressWarnings("unchecked")
                         Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", argTypes);
                         setHorizontalOffset.invoke(listPopup, -width);
 
                         // Invoke show() to update the window's position
-                        @SuppressWarnings("unchecked")
                         Method show = listPopupClass.getDeclaredMethod("show");
                         show.invoke(listPopup);
                     } catch (Exception e) {
