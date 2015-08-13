@@ -44,6 +44,12 @@
 				<sourceDirectories>src</sourceDirectories>
 				<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 				<destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
+				<classesJarExcludes>
+					<classesJarExclude>*.jar</classesJarExclude>
+					<classesJarExclude>generated-sources</classesJarExclude>
+					<classesJarExclude>maven-archiver</classesJarExclude>
+					<classesJarExclude>p2*</classesJarExclude>
+				</classesJarExcludes>
 			</configuration>
 			<executions>
 				<execution>

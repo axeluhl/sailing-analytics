@@ -88,6 +88,20 @@
 					<sourceDirectories>src</sourceDirectories>
 					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
+					<classesJarExcludes>
+						<classesJarExclude>*.jar</classesJarExclude>
+						<classesJarExclude>generated-sources/**</classesJarExclude>
+						<classesJarExclude>maven-archiver/**</classesJarExclude>
+						<classesJarExclude>sourcebundle-l10n-gen/**</classesJarExclude>
+						<classesJarExclude>p2*</classesJarExclude>
+						<classesJarExclude>MANIFEST.MF</classesJarExclude>
+						<classesJarExclude>*.ap_</classesJarExclude>
+						<classesJarExclude>local-artifacts.properties</classesJarExclude>
+						<classesJarExclude>android/**</classesJarExclude>
+						<classesJarExclude>com/google/**</classesJarExclude>
+						<classesJarExclude>**/R.class</classesJarExclude>
+						<classesJarExclude>**/R$*.class</classesJarExclude>
+					</classesJarExcludes>
 				</configuration>
 			</plugin>
 		</plugins>
