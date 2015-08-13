@@ -89,6 +89,7 @@
 					<sourceDirectories>src</sourceDirectories>
 					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
+					<failOnDuplicatePackages>false</failOnDuplicatePackages>
 					<classesJarExcludes>
 						<classesJarExclude>*.jar</classesJarExclude>
 						<classesJarExclude>generated-sources/**</classesJarExclude>
