@@ -62,7 +62,7 @@
 			</exclusions>
         </dependency>
 		
-        <dependency>
+		<dependency>
             <groupId>com.android.support</groupId>
             <artifactId>appcompat-v7</artifactId>
             <version>22.1.1</version>
@@ -128,6 +128,7 @@
 					<assetsDirectory>assets</assetsDirectory>
 					<failOnNonStandardStructure>false</failOnNonStandardStructure>
 					<failOnConflictingLayouts>false</failOnConflictingLayouts>
+					<failOnDuplicatePackages>false</failOnDuplicatePackages>
 					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
@@ -148,16 +149,30 @@
                         <skip>false</skip>
                     </zipalign>
 					<excludeJarResources>
-						<excludeJarResource>^android.jar$</excludeJarResource>
+						<!-- Prevents *-sources.jar to be distributed with the APK -->
+						<excludeJarResource>^.*-sources.jar$</excludeJarResource>
 					</excludeJarResources>
 					<dex>
-						<coreLibrary>false</coreLibrary>
+						<jvmArguments>
+							<jvmArgument>-Xms1024m</jvmArgument>
+							<jvmArgument>-Xmx2048m</jvmArgument>
+						</jvmArguments>
 					</dex>
 				</configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>apk</goal>
+                        </goals>
+                        <configuration>
+                            <excludeJarResources>
+                                <excludeJarResource>^android.*.jar$</excludeJarResource>
+                            </excludeJarResources>
+                        </configuration>
+                    </execution>
+                </executions>
 			</plugin>
 
-	    <!-- plugins for generating version file and copying .apk -->
-		<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -169,7 +184,6 @@
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
-			-->
         </plugins>
     </build>
 </project>
