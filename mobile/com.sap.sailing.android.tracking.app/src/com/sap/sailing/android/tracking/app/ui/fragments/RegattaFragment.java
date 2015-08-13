@@ -82,15 +82,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
     }
 
-    private void checkAndSwitchToThankYouScreenIfRegattaOver() {
-        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-        long regattaEnd = regattaActivity.event.endMillis;
-
-        if (System.currentTimeMillis() > regattaEnd) {
-            switchToThankYouScreen();
-        }
-    }
-
     /**
      * If the regatta started, don't display the countdown any more.
      */
@@ -148,7 +139,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
         timer = new TimerRunnable();
         timer.start();
-        //checkAndSwitchToThankYouScreenIfRegattaOver();
         checkAndHideCountdownIfRegattaIsInProgress();
     }
 
