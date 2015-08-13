@@ -94,11 +94,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         EventViewDTO event = ctx.getEventDTO();
 
         if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
-            if (event.isFinished()) {
-                return new RegattaLeaderboardPlace(new EventContext(ctx).withRegattaId(null));
-            } else {
-                return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
-            }
+            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
         }
         return new MultiregattaOverviewPlace(place.getCtx());
     }

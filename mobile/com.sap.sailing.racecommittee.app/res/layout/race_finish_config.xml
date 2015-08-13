@@ -25,7 +25,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="?chevron_left_24dp"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <ImageView
                 android:id="@+id/header_flag"
@@ -112,8 +113,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="11"
-                android:scaleX="1.55"
-                android:scaleY="1.55">
+                android:scaleX="@integer/picker_scale"
+                android:scaleY="@integer/picker_scale">
 
                 <include
                     android:id="@+id/time_picker"

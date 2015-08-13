@@ -3,11 +3,10 @@ package com.sap.sailing.gwt.ui.shared.dispatch;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListResult<T extends DTO> implements DTO, Result {
+public class ListResult<T extends DTO> implements CollectionResult<T> {
     private ArrayList<T> values = new ArrayList<>();
     
-    @SuppressWarnings("unused")
-    private ListResult() {
+    public ListResult() {
     }
 
     public ListResult(List<T> values) {
@@ -15,7 +14,17 @@ public class ListResult<T extends DTO> implements DTO, Result {
         this.values.addAll(values);
     }
     
+    public void addValue(T value) {
+        if (value != null) {
+            this.values.add(value);
+        }
+    }
+    
     public List<T> getValues() {
         return values;
+    }
+    
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 }

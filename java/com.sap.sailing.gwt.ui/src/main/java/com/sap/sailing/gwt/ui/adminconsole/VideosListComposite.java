@@ -28,6 +28,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -74,14 +75,32 @@ public class VideosListComposite extends Composite {
         videosControlsPanel.setSpacing(5);
         panel.add(videosControlsPanel);
 
-        Button createVideoBtn = new Button("Add video");
+        Button createVideoBtn = new Button("Add gallery video");
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog();
+                openCreateVideoDialog(MediaTagConstants.GALLERY);
             }
         });
         videosControlsPanel.add(createVideoBtn);
+
+        Button addLiveStreamBtn = new Button("Add livestream video");
+        addLiveStreamBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateVideoDialog(MediaTagConstants.LIVESTREAM);
+            }
+        });
+        videosControlsPanel.add(addLiveStreamBtn);
+
+        Button addHighlightBtn = new Button("Add highlight video");
+        addHighlightBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT);
+            }
+        });
+        videosControlsPanel.add(addHighlightBtn);
 
         videoSelectionModel = new SingleSelectionModel<VideoDTO>();
         videoListDataProvider = new ListDataProvider<VideoDTO>();
@@ -231,8 +250,8 @@ public class VideosListComposite extends Composite {
         return result;
     }
 
-    private void openCreateVideoDialog() {
-        VideoCreateDialog dialog = new VideoCreateDialog(stringMessages, new DialogCallback<VideoDTO>() {
+    private void openCreateVideoDialog(String initialTag) {
+        VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
             }

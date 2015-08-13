@@ -34,6 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +53,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
@@ -89,7 +91,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -228,6 +229,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -237,7 +239,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
@@ -397,6 +399,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final JoinedClassLoader joinedClassLoader;
 
     /**
+     * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
+     * in some cases because containment and initialization order of some types is fairly tightly coupled.
+     * There is a dependency of many such objects on an instance of {@link RaceLogResolver} which is implemented
+     * by {@link RacingEventServiceImpl}. However, therefore, this instance only becomes available in the
+     * innermost constructor.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    public static interface ConstructorParameters {
+        DomainObjectFactory getDomainObjectFactory();
+        MongoObjectFactory getMongoObjectFactory();
+        com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
+        CompetitorStore getCompetitorStore();
+    }
+
+    /**
      * Constructs a {@link DomainFactory base domain factory} that uses this object's {@link #competitorStore competitor
      * store} for competitor management. This base domain factory is then also used for the construction of the
      * {@link DomainObjectFactory}. This constructor variant initially clears the persistent competitor collection,
@@ -421,29 +440,41 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * be cleared before the service starts.
      * 
      * @param clearPersistentCompetitorStore
-     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the correcponding
+     *            if <code>true</code>, the {@link PersistentCompetitorStore} is created empty, with the corresponding
      *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors
      *            created and stored during previous service executions will initially be loaded.
      */
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore,
-            TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(new PersistentCompetitorStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
-                clearPersistentCompetitorStore, serviceFinderFactory), null, null, serviceFinderFactory);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this((final RaceLogResolver raceLogResolver)-> {
+            return new ConstructorParameters() {
+            private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
+            private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                    PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
+                    clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
+
+            @Override public DomainObjectFactory getDomainObjectFactory() { return competitorStore.getDomainObjectFactory(); }
+            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+            @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
+            @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
+            };
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory);
     }
 
-    private RacingEventServiceImpl(boolean clearPersistentCompetitorStore, WindStore windStore,
-            GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(new PersistentCompetitorStore(
-                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory),
-                clearPersistentCompetitorStore, serviceFinderFactory), windStore, gpsFixStore, serviceFinderFactory);
-    }
+    private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
+            GPSFixStore gpsFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this((final RaceLogResolver raceLogResolver)-> {
+            return new ConstructorParameters() {
+            private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
+            private final PersistentCompetitorStore competitorStore = new PersistentCompetitorStore(
+                    mongoObjectFactory,
+                    clearPersistentCompetitorStore, serviceFinderFactory, raceLogResolver);
 
-    private RacingEventServiceImpl(PersistentCompetitorStore persistentCompetitorStore, WindStore windStore,
-            GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(persistentCompetitorStore.getDomainObjectFactory(), persistentCompetitorStore.getMongoObjectFactory(),
-                persistentCompetitorStore.getBaseDomainFactory(), MediaDBFactory.INSTANCE.getDefaultMediaDB(),
-                persistentCompetitorStore, windStore, gpsFixStore, serviceFinderFactory);
+            @Override public DomainObjectFactory getDomainObjectFactory() { return competitorStore.getDomainObjectFactory(); }
+            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+            @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
+            @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
+            };
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, gpsFixStore, serviceFinderFactory);
     }
 
     /**
@@ -452,10 +483,30 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * be used for testing because it provides a transient {@link CompetitorStore} as required for competitor
      * persistence.
      */
-    public RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
+    public RacingEventServiceImpl(Function<RaceLogResolver, DomainObjectFactory> domainObjectFactoryProvider,
+            final MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore, GPSFixStore gpsFixStore) {
+        this((final RaceLogResolver raceLogResolver)-> {
+            return new ConstructorParameters() {
+            private final DomainObjectFactory domainObjectFactory = domainObjectFactoryProvider.apply(raceLogResolver);
+
+            @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+            @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+            @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+            };
+        }, mediaDB, windStore, gpsFixStore, null);
+    }
+    
+    public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
             MediaDB mediaDB, WindStore windStore, GPSFixStore gpsFixStore) {
-        this(domainObjectFactory, mongoObjectFactory, domainObjectFactory.getBaseDomainFactory(), mediaDB,
-                domainObjectFactory.getBaseDomainFactory().getCompetitorStore(), windStore, gpsFixStore, null);
+        this((final RaceLogResolver raceLogResolver)-> {
+            return new ConstructorParameters() {
+            @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+            @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+            @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
+            };
+        }, mediaDB, windStore, gpsFixStore, null);
     }
 
     /**
@@ -467,14 +518,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            of {@link DeviceIdentifier}s of specific device types or the managing of the device-to-competitor
      *            associations per race tracked.
      */
-    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            com.sap.sailing.domain.base.DomainFactory baseDomainFactory, MediaDB mediaDb,
-            CompetitorStore competitorStore, WindStore windStore, GPSFixStore gpsFixStore,
-            TypeBasedServiceFinderFactory serviceFinderFactory) {
+    public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
+            WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
+        final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
+        this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
         this.masterDataClassLoaders.add(this.getClass().getClassLoader());
         joinedClassLoader = new JoinedClassLoader(masterDataClassLoaders);
         this.operationsSentToMasterForReplication = new HashSet<>();
+        this.baseDomainFactory = constructorParameters.getBaseDomainFactory();
+        this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
+        this.mediaDB = mediaDb;
+        this.competitorStore = constructorParameters.getCompetitorStore();
         if (windStore == null) {
             try {
                 windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
@@ -482,11 +537,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 throw new RuntimeException(e);
             }
         }
-        this.baseDomainFactory = baseDomainFactory;
-        this.domainObjectFactory = domainObjectFactory;
-        this.mongoObjectFactory = mongoObjectFactory;
-        this.mediaDB = mediaDb;
-        this.competitorStore = competitorStore;
         this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
             @Override
             public void competitorUpdated(Competitor competitor) {
@@ -543,11 +593,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -608,10 +653,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // TODO clear user store? See bug 2430.
         this.competitorStore.clear();
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
     }
 
     @Override
@@ -1382,6 +1423,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
             } else {
+                logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
@@ -1545,12 +1587,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
-            final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName
-                    .get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-            if (defaultLeaderboard != null) {
-                String columnName = trackedRace.getRace().getName();
-                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false);
-            }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, true);
@@ -1774,9 +1810,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
-                // remove from default leaderboard
-                FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-                defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
     }
@@ -1872,7 +1905,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
             removeLeaderboard(regattaLeaderboardToRemove.getName());
         }
-        for (RaceDefinition race : regatta.getAllRaces()) {
+        // avoid ConcurrentModificationException by copying the races to remove:
+        Set<RaceDefinition> racesToRemove = new HashSet<>();
+        Util.addAll(regatta.getAllRaces(), racesToRemove);
+        for (RaceDefinition race : racesToRemove) {
             removeRace(regatta, race);
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
             persistentRegattasForRaceIDs.remove(race.getId().toString());
@@ -3189,8 +3225,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        if (this.polarDataService == null) {
+        if (this.polarDataService == null && service != null) {
             polarDataService = service;
+            polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);
         }
     }
@@ -3216,6 +3253,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     public void unsetPolarDataService(PolarDataService service) {
         if (polarDataService == service) {
+            polarDataService.unregisterDomainFactory(baseDomainFactory);
             polarDataService = null;
             setPolarDataService(null);
         }

@@ -1,13 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -58,35 +63,35 @@ public class FlagPanelFragment extends BasePanelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_panel_flags, container, false);
 
-        mAbandonFlags = ViewHolder.get(layout, R.id.abandon_flags);
+        mAbandonFlags = ViewHelper.get(layout, R.id.abandon_flags);
         if (mAbandonFlags != null) {
             mAbandonFlags.setOnClickListener(new AbandonFlagsClick());
         }
-        mAbandonLock = ViewHolder.get(layout, R.id.abandon_flags_lock);
+        mAbandonLock = ViewHelper.get(layout, R.id.abandon_flags_lock);
 
-        mRecallFlags = ViewHolder.get(layout, R.id.recall_flags);
+        mRecallFlags = ViewHelper.get(layout, R.id.recall_flags);
         if (mRecallFlags != null) {
             mRecallFlags.setOnClickListener(new RecallFlagsClick());
         }
-        mRecallLock = ViewHolder.get(layout, R.id.recall_flags_lock);
+        mRecallLock = ViewHelper.get(layout, R.id.recall_flags_lock);
 
-        mPostponeFlags = ViewHolder.get(layout, R.id.postpone_flags);
+        mPostponeFlags = ViewHelper.get(layout, R.id.postpone_flags);
         if (mPostponeFlags != null) {
             mPostponeFlags.setOnClickListener(new PostponeFlagsClick());
         }
-        mPostponeLock = ViewHolder.get(layout, R.id.postpone_flags_lock);
+        mPostponeLock = ViewHelper.get(layout, R.id.postpone_flags_lock);
 
-        mCourseFlags = ViewHolder.get(layout, R.id.course_flags);
+        mCourseFlags = ViewHelper.get(layout, R.id.course_flags);
         if (mCourseFlags != null) {
             mCourseFlags.setOnClickListener(new CourseFlagsClick());
         }
-        mCourseLock = ViewHolder.get(layout, R.id.course_flags_lock);
+        mCourseLock = ViewHelper.get(layout, R.id.course_flags_lock);
 
-        mMoreFlags = ViewHolder.get(layout, R.id.more_flags);
+        mMoreFlags = ViewHelper.get(layout, R.id.more_flags);
         if (mMoreFlags != null) {
             mMoreFlags.setOnClickListener(new MoreFlagsClick());
         }
-        mMoreLock = ViewHolder.get(layout, R.id.more_flags_lock);
+        mMoreLock = ViewHelper.get(layout, R.id.more_flags_lock);
 
         return layout;
     }
@@ -131,7 +136,20 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
+            break;
+
+        case PRESCHEDULED:
+            changeVisibility(mPostponeFlags, View.VISIBLE);
+            changeVisibility(mAbandonFlags, View.GONE);
+            changeVisibility(mRecallFlags, View.GONE);
+            changeVisibility(mCourseFlags, View.GONE);
+            changeVisibility(mMoreFlags, View.GONE);
+
+            uncheckMarker(mAbandonFlags);
+            uncheckMarker(mCourseFlags);
+            uncheckMarker(mMoreFlags);
             break;
 
         case SCHEDULED:
@@ -141,6 +159,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mAbandonFlags);
             uncheckMarker(mRecallFlags);
             uncheckMarker(mMoreFlags);
@@ -154,6 +173,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
             break;
 
@@ -165,6 +185,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mRecallFlags);
             uncheckMarker(mCourseFlags);
             uncheckMarker(mMoreFlags);
@@ -178,6 +199,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.VISIBLE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.VISIBLE);
+
             uncheckMarker(mCourseFlags);
             break;
 
@@ -187,6 +209,7 @@ public class FlagPanelFragment extends BasePanelFragment {
             changeVisibility(mRecallFlags, View.GONE);
             changeVisibility(mCourseFlags, View.GONE);
             changeVisibility(mMoreFlags, View.GONE);
+
             uncheckMarker(mPostponeFlags);
             uncheckMarker(mAbandonFlags);
             uncheckMarker(mRecallFlags);

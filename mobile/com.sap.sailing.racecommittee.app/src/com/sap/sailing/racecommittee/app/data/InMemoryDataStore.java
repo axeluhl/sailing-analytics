@@ -44,7 +44,7 @@ public enum InMemoryDataStore implements DataStore {
         managedRaceById = new HashMap<>();
         marksById = new HashMap<>();
         courseData = null;
-        domainFactory = new SharedDomainFactoryImpl();
+        domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 
         eventUUID = null;
         courseUUID = null;
@@ -170,7 +170,7 @@ public enum InMemoryDataStore implements DataStore {
      * order to allow for retrieving a managed race with exclusively the information provided by a 
      * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
      *  
-     * @param id
+     * @param escapedId
      *          serialized version of a ManagedRaceIdentifier 
      * @return
      *          corresponding SimpleRaceLogIdentifier
@@ -260,4 +260,5 @@ public enum InMemoryDataStore implements DataStore {
     public void setCourseUUID(UUID uuid) {
         courseUUID = uuid;
     }
+
 }

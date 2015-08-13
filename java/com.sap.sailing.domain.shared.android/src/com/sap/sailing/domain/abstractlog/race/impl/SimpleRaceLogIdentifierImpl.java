@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 
 public class SimpleRaceLogIdentifierImpl implements SimpleRaceLogIdentifier {
+    private static final long serialVersionUID = 5377117723950808853L;
     protected final String regattaLikeParentName;
     protected final String raceColumnName;
     protected final String fleetName;

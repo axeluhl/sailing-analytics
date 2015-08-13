@@ -6,11 +6,14 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -77,7 +80,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private Set<RaceDefinition> races;
+    private ConcurrentHashMap<String, RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;
@@ -178,7 +181,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.useStartTimeInference = useStartTimeInference;
         this.id = id;
         this.raceLogStore = raceLogStore;
-        races = new HashSet<RaceDefinition>();
+        races = new ConcurrentHashMap<>();
         regattaListeners = new HashSet<RegattaListener>();
         raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
@@ -256,7 +259,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
         if (masterDataImportInformation != null) {
             raceLogStore = masterDataImportInformation.getRaceLogStore();
-            races = new HashSet<RaceDefinition>();
+            races = new ConcurrentHashMap<>();
         } else {
             raceLogStore = EmptyRaceLogStore.INSTANCE;
         }
@@ -309,9 +312,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public Iterable<RaceDefinition> getAllRaces() {
-        synchronized (races) {
-            return new ArrayList<RaceDefinition>(races);
-        }
+        return races.values();
     }
     
     @Override
@@ -326,12 +327,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     @Override
     public RaceDefinition getRaceByName(String raceName) {
-        for (RaceDefinition r : getAllRaces()) {
-            if (r.getName().equals(raceName)) {
-                return r;
-            }
-        }
-        return null;
+        return races.get(raceName);
     }
     
     @Override
@@ -340,9 +336,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
             throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match regatta's boat class "+getBoatClass());
         }
-        synchronized (races) {
-            races.add(race);
-        }
+        races.put(race.getName(), race);
         synchronized (regattaListeners) {
             for (RegattaListener l : regattaListeners) {
                 l.raceAdded(this, race);
@@ -352,10 +346,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     @Override
     public void removeRace(RaceDefinition race) {
-        synchronized (races) {
-            logger.info("Removing race "+race.getName()+" from regatta "+getName()+" ("+hashCode()+")");
-            races.remove(race);
-        }
+        logger.info("Removing race "+race.getName()+" from regatta "+getName()+" ("+hashCode()+")");
+        races.remove(race.getName());
         synchronized (regattaListeners) {
             for (RegattaListener l : regattaListeners) {
                 l.raceRemoved(this, race);
@@ -678,15 +670,27 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
             final Iterable<? extends Series> mySeries = getSeries();
             if (mySeries != null) {
-                for (Series currentSeries : mySeries) {
-                    if (currentSeries.getFleets() != null) {
-                        for (Fleet fleet : currentSeries.getFleets()) {
-                            if (currentSeries.getRaceColumns() != null) {
-                                result.put(fleet, currentSeries.getRaceColumns());
+                boolean concurrentlyModified = false;
+                do {
+                    try {
+                        for (Series currentSeries : mySeries) {
+                            if (currentSeries.getFleets() != null) {
+                                for (Fleet fleet : currentSeries.getFleets()) {
+                                    if (currentSeries.getRaceColumns() != null) {
+                                        result.put(fleet, currentSeries.getRaceColumns());
+                                    }
+                                }
                             }
                         }
+                    } catch (ConcurrentModificationException e) {
+                        // getSeries() returns a live collection, and Series.getRaceColumns() does so, too.
+                        // In the unlikely event of a modification is applied to either of these structures while iterating, an exception
+                        // will be thrown. We catch and log it here and try again.
+                        logger.log(Level.INFO,
+                                "Got a ConcurrentModificationException while trying to update the RaceExecutionOrderCache", e);
+                        concurrentlyModified = true;
                     }
-                }
+                } while (concurrentlyModified);
             }
             return result;
         }

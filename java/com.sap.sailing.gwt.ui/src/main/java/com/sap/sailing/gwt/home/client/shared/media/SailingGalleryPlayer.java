@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.shared.media;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -8,36 +8,36 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sse.common.Util;
 
 public class SailingGalleryPlayer extends ResizeComposite {
+   
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
-    private Command closeCommand;
 
     interface MyBinder extends UiBinder<Widget, SailingGalleryPlayer> {
     }
 
-    @UiField
-    DivElement mainSliderUi;
-    @UiField
-    DivElement subSliderUi;
+    @UiField DivElement mainSliderUi;
+    @UiField DivElement subSliderUi;
 
     private int selectedIdx;
 
-    public SailingGalleryPlayer(SailingImageDTO selected, List<SailingImageDTO> images) {
+    public SailingGalleryPlayer(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
-        selectedIdx = Math.max(selectedIdx, images.indexOf(selected));
+        selectedIdx = Math.max(selectedIdx, Util.indexOf(images, selected));
         for (SailingImageDTO i : images) {
             mainSliderUi.appendChild(createMainImgElement(i));
             subSliderUi.appendChild(createThumbImgElement(i));
         }
+    }
+    
+    public void setFocusToSubSlider() {
+        subSliderUi.getFirstChildElement().focus();
     }
 
     private ImageElement createThumbImgElement(SailingImageDTO i ) {
@@ -81,10 +81,8 @@ public class SailingGalleryPlayer extends ResizeComposite {
     }-*/;
 
     native void refreshSlider() /*-{
-
 	$wnd.$('.mainSlider').slick('setOption', null, null, true);
 	$wnd.$('.subSlider').slick('setOption', null, null, true);
-
     }-*/;
 
     /**
@@ -93,7 +91,6 @@ public class SailingGalleryPlayer extends ResizeComposite {
      * @param uniqueId
      */
     native void _onLoad() /*-{
-
 	$wnd.$('.mainSlider').slick({
 	    lazyLoad : 'ondemand',
 	    slidesToShow : 1,
@@ -117,17 +114,5 @@ public class SailingGalleryPlayer extends ResizeComposite {
 	    focusOnSelect : true,
 	    draggable : false
 	});
-
     }-*/;
-
-    public void setCloseCommand(Command closeCommand) {
-        this.closeCommand = closeCommand;
-    }
-
-    @UiHandler("closeUi")
-    public void didClose(ClickEvent e) {
-        if (closeCommand != null) {
-            closeCommand.execute();
-        }
-    }
 }

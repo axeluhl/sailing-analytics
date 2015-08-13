@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
 public enum BoatClassMasterdata {
-    _18Footer ("18Footer", true, 8.90, 2.00, BoatHullType.MONOHULL, true, "18.Footer", "18ft", "18ft Skiff"),
+    _18Footer ("18Footer", true, 8.90, 2.00, BoatHullType.MONOHULL, true, "18.Footer", "18ft", "18ft Skiff", "18. Footer"),
     _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre", "2.4-metre"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM", "12-metre", "12 metre"),
@@ -31,7 +34,7 @@ public enum BoatClassMasterdata {
     FINN ("Finn", true, 4.50, 1.51, BoatHullType.MONOHULL, false),
     FLYING_PHANTOM ("Flying Phantom", true, 5.52, 3.00, BoatHullType.CATAMARAN, true),
     FOLKBOAT ("Folkboat", true, 7.68, 2.20, BoatHullType.MONOHULL, false, "Folke", "Folkeboot"),
-    FUN ("FUN", true, 7.20, 2.45, BoatHullType.MONOHULL, true, "FUN O.D.", "FUN OD"),
+    FUN ("FUN", true, 7.20, 2.45, BoatHullType.MONOHULL, true, "FUN O.D.", "FUN OD", "Open FUN"),
     F_16 ("Formula 16", true, 5.00, 2.50, BoatHullType.CATAMARAN, true, "F16", "F-16"),
     HOBIE_16 ("Hobie 16", true, 5.05, 2.41, BoatHullType.CATAMARAN, false, "H16"),
     H_BOAT ("H-Boat", true, 8.28, 2.18, BoatHullType.MONOHULL, true, "HB"),
@@ -41,7 +44,7 @@ public enum BoatClassMasterdata {
     J24 ("J/24", true, 7.32, 2.67, BoatHullType.MONOHULL, true, "J24", "J-24"),
     J70 ("J/70", true, 6.93, 2.25, BoatHullType.MONOHULL, true, "J70", "J-70"),
     J80 ("J/80", true, 8.0, 2.51, BoatHullType.MONOHULL, true, "J80", "J-80"),
-    KIELZUGVOGEL ("Kielzugvogel", true, 5.80, 1.88, BoatHullType.MONOHULL, false), 
+    KIELZUGVOGEL ("Kielzugvogel", true, 5.80, 1.88, BoatHullType.MONOHULL, false, "KZV"), 
     KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false), 
     LASER_2 ("Laser 2", true, 4.39, 1.42, BoatHullType.MONOHULL, false, "Laser II", "Laser2", "Laser-2", "Laser-II"),
     LASER_4_7 ("Laser 4.7", true, 4.20, 1.39, BoatHullType.MONOHULL, false, "L4.7"),
@@ -157,4 +160,16 @@ public enum BoatClassMasterdata {
         return hasAdditionalDownwindSail;
     }
 
+    public static Iterable<String> getAllBoatClassNames(boolean includeAlternativeNames) {
+        final List<String> result = new ArrayList<>();
+        for (BoatClassMasterdata bcmd : values()) {
+            result.add(bcmd.getDisplayName());
+            if (includeAlternativeNames) {
+                for (String alternativeName : bcmd.getAlternativeNames()) {
+                    result.add(alternativeName);
+                }
+            }
+        }
+        return result;
+    }
 }

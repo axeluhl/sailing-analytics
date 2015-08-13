@@ -9,7 +9,7 @@
     <dimen name="listView_side_padding">100dp</dimen>
     <dimen name="listView_row_padding">20dp</dimen>
     <dimen name="listView_row_height">85dp</dimen>
-    <dimen name="selector_header_height">100dp</dimen>
+    <dimen name="selector_header_height">75dp</dimen>
 
     <dimen name="preference_margin">0dp</dimen>
 
@@ -17,15 +17,16 @@
 
     <dimen name="thin_line">1dp</dimen>
     <dimen name="thick_line">2dp</dimen>
+    <dimen name="logo_size">75dp</dimen>
 
-    <dimen name="textSize_14">14sp</dimen> <!-- XXSmall -->
-    <dimen name="textSize_18">18sp</dimen> <!-- XSmall -->
-    <dimen name="textSize_20">20sp</dimen>
-    <dimen name="textSize_22">22sp</dimen> <!-- Small -->
-    <dimen name="textSize_26">26sp</dimen> <!-- Normal -->
-    <dimen name="textSize_32">32sp</dimen> <!-- Large -->
-    <dimen name="textSize_40">40sp</dimen> <!-- XLarge -->
-    <dimen name="textSize_72">72sp</dimen>
+    <dimen name="textSize_14">12sp</dimen> <!-- XXSmall -->
+    <dimen name="textSize_18">14sp</dimen> <!-- XSmall -->
+    <dimen name="textSize_20">16sp</dimen>
+    <dimen name="textSize_22">18sp</dimen> <!-- Small -->
+    <dimen name="textSize_26">22sp</dimen> <!-- Normal -->
+    <dimen name="textSize_32">24sp</dimen> <!-- Large -->
+    <dimen name="textSize_40">26sp</dimen> <!-- XLarge -->
+    <dimen name="textSize_72">32sp</dimen>
 
     <dimen name="setup_text_width">150dp</dimen>
 
@@ -48,5 +49,10 @@
 
     <dimen name="bigger_over_flow_width">64dp</dimen>
     <dimen name="bigger_over_flow_height">32dp</dimen>
+    
+    <dimen name="wind_hide_button_right_margin">76dp</dimen>
+    <dimen name="wind_hide_button_top_margin">20dp</dimen>
+
+    <item name="picker_scale" format="float" type="integer">1</item>
 
 </resources>

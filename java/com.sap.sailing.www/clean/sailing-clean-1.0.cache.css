@@ -30,11 +30,9 @@ select {
   cursor: pointer;
   cursor: hand;
   font-size:small;
-  background: url("images/hborder.png") repeat-x 0px -2077px;
   border:1px solid #bbb;
   border-bottom: 1px solid #a0a0a0;
   border-radius: 3px;
- -moz-border-radius: 3px;
 }
 .gwt-Button:active {
   border: 1px inset #ccc;

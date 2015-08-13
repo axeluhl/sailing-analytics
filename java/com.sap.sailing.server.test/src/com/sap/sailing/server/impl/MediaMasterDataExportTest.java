@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -164,7 +165,7 @@ public class MediaMasterDataExportTest {
         Map<String, Regatta> regattaForRaceIdString = Collections.emptyMap();
         GPSFixStore gpsFixStore = mock(GPSFixStore.class);
         boolean exportWind = false;
-        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind);
+        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind, new HashMap<>());
         return topLevelMasterData;
     }
 

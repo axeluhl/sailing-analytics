@@ -1,9 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -24,7 +22,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
@@ -33,6 +31,8 @@ import com.sap.sse.datamining.shared.GroupKey;
 
 public class MovingAverageProcessorImpl implements MovingAverageProcessor {
 
+    private static final long serialVersionUID = 9016357546663534562L;
+
     private static final Logger logger = Logger.getLogger(MovingAverageProcessorImpl.class.getName());
 
     private final Map<GroupKey, MovingAverageBoatSpeedEstimator> boatSpeedEstimators = new HashMap<>();
@@ -40,10 +40,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     private final Map<GroupKey, AverageAngleContainer> averageAngleContainers = new HashMap<>();
 
     private final ClusterGroup<Speed> speedClusterGroup;
-
-    private final Set<BoatClass> availableBoatClasses = new HashSet<>();
-
-
 
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
@@ -79,7 +75,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             BearingWithConfidence<Void> angleToTheWind = fix.getAbsoluteAngleToTheWind();
             WindWithConfidence<Pair<Position, TimePoint>> windSpeed = fix.getWind();
             SpeedWithBearingWithConfidence<TimePoint> boatSpeedWithConfidence = fix.getBoatSpeed();
-            availableBoatClasses.add(element.getDataEntry().getBoatClass());
             WindWithConfidence<Pair<Position, TimePoint>> windWithConfidenceForSpeed = windSpeed;
             double confidenceForWindSpeed = windWithConfidenceForSpeed.getConfidence();
             double confidenceForWindBearing = angleToTheWind.getConfidence();
@@ -158,10 +153,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
-    public Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
-    }
-
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
         // TODO Auto-generated method stub
@@ -216,6 +207,11 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
             throw new RuntimeException(e);
         }
         return compoundKey;
+    }
+
+    @Override
+    public ClusterGroup<Speed> getSpeedCluster() {
+        return speedClusterGroup;
     }
 
 }

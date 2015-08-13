@@ -29,8 +29,9 @@
       -ms-transform: translateY(-40%);
           transform: translateY(-40%);
 }
-.statisticsbox_content_item_icon {
-  width: 1.538461538461539em;
+img.statisticsbox_content_item_icon {
+  width: 1.6em;
+  height: 1.6em;
   position: absolute;
   display: inline-block;
   vertical-align: middle;

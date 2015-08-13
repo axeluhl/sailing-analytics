@@ -2,13 +2,18 @@ package com.sap.sse.common.impl;
 
 import java.util.Date;
 
+import com.sap.sse.common.TimePoint;
+
 
 public class MillisecondsTimePoint extends AbstractTimePoint {
     private static final long serialVersionUID = -1021748860232043166L;
     private long millis;
     private Date date;
     
-    public static MillisecondsTimePoint now() {
+    /**
+     * A time point as exact as {@link System#currentTimeMillis()}
+     */
+    public static TimePoint now() {
         return new MillisecondsTimePoint(System.currentTimeMillis());
     }
     

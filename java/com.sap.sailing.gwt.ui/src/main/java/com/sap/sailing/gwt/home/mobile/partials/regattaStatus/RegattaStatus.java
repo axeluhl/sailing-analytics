@@ -44,7 +44,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
 
     @Override
-    public void setData(RegattasAndLiveRacesDTO data, long nextUpdate, int updateNo) {
+    public void setData(RegattasAndLiveRacesDTO data) {
         regattaContainerUi.clearContent();
         collapsableContainerUi.clearContent();
         if (data.hasRegattasWithRaces()) {

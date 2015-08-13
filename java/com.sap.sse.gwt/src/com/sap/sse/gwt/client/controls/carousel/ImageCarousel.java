@@ -1,7 +1,7 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -313,7 +313,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 
     public interface FullscreenViewer<TYPE> {
         
-        public void show(TYPE selectedImage, List<TYPE> imageList);
+        public void show(TYPE selectedImage, Collection<TYPE> imageList);
     }
     
 }

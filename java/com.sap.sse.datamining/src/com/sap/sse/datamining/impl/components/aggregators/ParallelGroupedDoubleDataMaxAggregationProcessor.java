@@ -5,21 +5,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class ParallelGroupedDoubleDataMaxAggregationProcessor extends
-        AbstractParallelStoringAggregationProcessor<GroupedDataEntry<Double>, Map<GroupKey, Double>> {
+public class ParallelGroupedDoubleDataMaxAggregationProcessor
+                extends AbstractParallelGroupedDataStoringAggregationProcessor<Double, Double> {
+    
+    private static final AggregationProcessorDefinition<Double, Double> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Double.class, Double.class, "Maximum", ParallelGroupedDoubleDataMaxAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<Double, Double> getDefinition() {
+        return DEFINITION;
+    }
 
     private Map<GroupKey, Double> maxMap;
     
-    @SuppressWarnings("unchecked")
     public ParallelGroupedDoubleDataMaxAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
-        super((Class<GroupedDataEntry<Double>>)(Class<?>) GroupedDataEntry.class,
-              (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-              executor, resultReceivers, "Maximum");
+        super(executor, resultReceivers, "Maximum");
         maxMap = new HashMap<>();
     }
 
