@@ -44,7 +44,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
-    String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -105,6 +104,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String eventName();
     String event();
     String startTime();
+    String startOfTracking();
+    String endOfTracking();
     String regatta();
     String regattas();
     String startTracking();
@@ -499,6 +500,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
     String knotsValue(double value);
+    String knotsRange(double lowerValue, double upperValue);
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
     String averageTackLossInMetersTooltip();
@@ -965,6 +967,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String setStartTime();
     String currentPass();
     String setStartTimeDescription();
+    String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
@@ -1029,6 +1032,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pingPosition(String whose);
     String pleaseEnterAValidValueFor(String what, String validTemplate);
     String copyCourseAndCompetitors();
+    String setTrackingTimes();
     String nowSelectRaceColumnAndFleetToCopyTo();
     String selectRowInTableToCopyCourse();
     String deviceId();
@@ -1049,6 +1053,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String ratio();
     String importWind();
     String importWindTooltip();
+    String importDeviceConfigurations();
+    String importDeviceConfigurationsTooltip();
     String authorName();
     String authorPriority();
     String removeDenotation();
@@ -1337,8 +1343,25 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String now();
     String minutesAgo(String minutes);
     String hoursAgo(String hours);
+    String winner();
+    String durationPlain();
+    String finishedRaces();
     String selectCompetitor();
+    String allBoatClasses();
     String points();
     String numberOfRacesShort();
+    String courseGeometry();
+    String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
+    String currentOfTotal(int current, int total);
+    String noFinishedRaces();
+    String racesOverview();
+    String empty();
+    String runAQuery();
+    String latestRegattaStandings();
+    String plainText();
+    String columnChart();
+    String choosePresentation();
+    String openFullscreenView();
+    String closeFullscreenView();
 }

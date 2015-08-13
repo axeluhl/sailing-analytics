@@ -18,5 +18,8 @@ public interface HasTrackedLegOfCompetitorContext {
     
     @Statistic(messageKey="DistanceTraveled", resultUnit=Unit.Meters, resultDecimals=0, ordinal=0)
     public Double getDistanceTraveled();
+    
+    @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)
+    public Double getRankGainsOrLosses();
 
 }

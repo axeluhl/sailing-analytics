@@ -7,7 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -29,6 +31,9 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
         Iterable<LeaderboardGroup> leaderboardGroups = event.getLeaderboardGroups();
         for(LeaderboardGroup leaderboardGroup: leaderboardGroups) {
             for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                if(!isPartOfEvent(event, leaderboard)) {
+                    continue;
+                }
                 SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                 if(scoreCorrection != null) {
                     TimePoint timePointOfLatestModification = scoreCorrection.getTimePointOfLastCorrectionsValidity();
@@ -53,6 +58,20 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
             return result;
         }
         return result.subList(0, 11);
+    }
+    
+    // TODO duplicate code taken from HomeServiceUtil
+    private boolean isPartOfEvent(EventBase event, Leaderboard regattaEntity) {
+        final CourseArea defaultCourseArea = regattaEntity.getDefaultCourseArea();
+        if(defaultCourseArea == null) {
+            return true;
+        }
+        for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+            if(courseArea.equals(defaultCourseArea)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

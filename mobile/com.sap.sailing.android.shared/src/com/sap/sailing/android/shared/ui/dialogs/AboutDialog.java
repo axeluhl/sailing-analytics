@@ -13,7 +13,7 @@ public class AboutDialog {
     public AboutDialog(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-        builder.setMessage(AppUtils.getBuildInfo(context)).setTitle(context.getString(R.string.application_version));
+        builder.setMessage(AppUtils.with(context).getBuildInfo()).setTitle(context.getString(R.string.application_version));
         dialog = builder.create();
     }
 

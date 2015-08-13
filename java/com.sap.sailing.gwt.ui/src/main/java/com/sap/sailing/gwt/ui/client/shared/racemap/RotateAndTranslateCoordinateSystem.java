@@ -52,7 +52,7 @@ public class RotateAndTranslateCoordinateSystem implements CoordinateSystem {
     @Override
     public Position getPosition(LatLng p) {
         final Position mapped = new DegreePosition(p.getLatitude(), p.getLongitude());
-        return mapped.getTargetCoordinates(zeroZero, equator, /* targetOrigin */ ZERO_ZERO, /* targetEquatorBearing */ EQUATOR_BEARING);
+        return mapped.getTargetCoordinates(/* local origin */ ZERO_ZERO, /* local equator bearing */ EQUATOR_BEARING, zeroZero, equator);
     }
 
     @Override

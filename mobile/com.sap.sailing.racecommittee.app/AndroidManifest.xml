@@ -45,8 +45,7 @@
             android:value="AIzaSyDH-Dwy5yFlyBa2-VUgiZ3qGGUO8M_0MPY"/>
 
         <activity
-            android:name=".ui.activities.LoginActivity"
-            android:screenOrientation="landscape">
+            android:name=".ui.activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

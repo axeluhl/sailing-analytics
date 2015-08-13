@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
+import com.sap.sse.common.Duration;
 
 public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>> {
     private UUID eventId;
@@ -44,9 +45,7 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
         return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, new CalculationWithEvent<ListResult<NewsEntryDTO>>() {
             @Override
             public ResultWithTTL<ListResult<NewsEntryDTO>> calculateWithEvent(Event event) {
-                        // TODO (pgt): use duration
-                long ttl = 1000 * 60 * 2;
-                return new ResultWithTTL<>(ttl, new ListResult<NewsEntryDTO>(getNews(context, event)));
+                return new ResultWithTTL<>(Duration.ONE_MINUTE.times(2), new ListResult<NewsEntryDTO>(getNews(context, event)));
             }
         });
     }

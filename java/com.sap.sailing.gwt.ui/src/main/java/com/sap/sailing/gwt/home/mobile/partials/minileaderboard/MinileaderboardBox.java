@@ -38,17 +38,13 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
 
     }
-
-    @Override
-    public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
-        setData(data);
-    }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
     }
 
+    @Override
     public void setData(final GetMiniLeaderboardDTO data) {
         itemContainerUi.clearContent();
         

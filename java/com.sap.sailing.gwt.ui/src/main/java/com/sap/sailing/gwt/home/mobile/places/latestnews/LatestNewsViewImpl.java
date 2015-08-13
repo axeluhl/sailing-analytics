@@ -30,7 +30,7 @@ public class LatestNewsViewImpl extends Composite implements LatestNewsView {
     public LatestNewsViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO());
+        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), presenter.getEventNavigation());
         updatesBoxUi = new UpdatesBox(presenter, refreshManager);
         initWidget(uiBinder.createAndBindUi(this));
         UUID uuid = UUID.fromString(presenter.getCtx().getEventId());

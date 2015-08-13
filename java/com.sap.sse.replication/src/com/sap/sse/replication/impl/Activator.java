@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -81,6 +82,8 @@ public class Activator implements BundleActivator {
     public static final String PROPERTY_NAME_REPLICATE_MASTER_EXCHANGE_NAME = "replicate.master.exchange.name";
 
     private ReplicationInstancesManager replicationInstancesManager;
+
+    private ReplicationServiceImpl serverReplicationMasterService;
     
     private static BundleContext defaultContext;
     
@@ -118,7 +121,7 @@ public class Activator implements BundleActivator {
         }
         replicationInstancesManager = new ReplicationInstancesManager();
         final OSGiReplicableTracker replicablesProvider = new OSGiReplicableTracker(bundleContext);
-        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(
+        serverReplicationMasterService = new ReplicationServiceImpl(
                 exchangeName, exchangeHost, exchangePort, replicationInstancesManager, replicablesProvider);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
         logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName+" on host "+exchangeHost);
@@ -154,11 +157,10 @@ public class Activator implements BundleActivator {
                             System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
                             Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
                     try {
-                        // TODO pass on the replicables to wait for; failure to do so can cause the symptoms of bug 3015
                         serverReplicationMasterService.startToReplicateFrom(master, replicables);
                         logger.info("Automatic replication has been started.");
                     } catch (ClassNotFoundException | IOException | InterruptedException e) {
-                        e.printStackTrace();
+                        logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
                     }
                 }
             }.start();
@@ -166,6 +168,12 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
+        // stop replicating from a master server
+        if (serverReplicationMasterService.getReplicatingFromMaster() != null) {
+            serverReplicationMasterService.stopToReplicateFromMaster();
+        }
+        // stop sending stuff to the exchange for other replicas (if this is a master)
+        serverReplicationMasterService.stopAllReplica();
     }
     
     public static BundleContext getDefaultContext() {

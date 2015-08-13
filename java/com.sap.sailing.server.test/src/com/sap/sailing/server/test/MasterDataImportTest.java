@@ -307,7 +307,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -514,7 +514,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -657,7 +657,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -741,7 +741,7 @@ public class MasterDataImportTest {
     public void testMasterDataImportForRaceLogEventsReferencingCompetitors() throws MalformedURLException, IOException,
             InterruptedException, ClassNotFoundException {
         // Setup source service
-        DomainFactory sourceDomainFactory = new DomainFactoryImpl();
+        DomainFactory sourceDomainFactory = new DomainFactoryImpl((srlid)->null);
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
@@ -835,7 +835,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -997,7 +997,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1196,7 +1196,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1356,7 +1356,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1487,7 +1487,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1623,7 +1623,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1720,7 +1720,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1843,7 +1843,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -1914,7 +1914,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();
@@ -2103,7 +2103,7 @@ public class MasterDataImportTest {
         DomainFactory domainFactory;
         MasterDataResource resource = new MasterDataResource();
         MasterDataResource spyResource = spyResource(resource, sourceService);
-        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true);
+        Response response = spyResource.getMasterDataByLeaderboardGroups(groupNamesToExport, false, true, false);
         StreamingOutput streamingOutput = (StreamingOutput) response.getEntity();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         UUID randomUUID = UUID.randomUUID();

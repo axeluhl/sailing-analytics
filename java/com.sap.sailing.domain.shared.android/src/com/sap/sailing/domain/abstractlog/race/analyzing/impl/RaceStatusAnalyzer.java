@@ -44,15 +44,14 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     @Override
     protected RaceLogRaceStatus performAnalysis() {
-        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<RaceLogRaceStatusEvent>(RaceLogRaceStatusEventComparator.INSTANCE);
+        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(RaceLogRaceStatusEventComparator.INSTANCE);
         for(RaceLogEvent event: getPassEvents()) {
             if(event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }
         }
         for (RaceLogRaceStatusEvent event : statusEvents.descendingSet()) {
-            RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-            statusEvent.accept(eventDispatcher);
+            event.accept(eventDispatcher);
             return eventDispatcher.nextStatus;
         }
         
@@ -79,7 +78,7 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
         private void setRaceLogStatusBasedOnStartTime(TimePoint startTime) {
             if (startTime == null) {
-                nextStatus = RaceLogRaceStatus.UNKNOWN;
+                nextStatus = RaceLogRaceStatus.PRESCHEDULED;
                 return;
             }
             TimePoint now = clock.now();

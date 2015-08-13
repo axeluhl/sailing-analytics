@@ -42,7 +42,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
             regattaDisplayName = presenter.getCtx().getRegatta().getDisplayName();
         }
         minileaderboardUi = new MinileaderboardBox(false);
-        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regattaDisplayName);
+        eventHeaderUi = new EventHeader(presenter.getCtx().getEventDTO(), regattaDisplayName, presenter.getEventNavigation());
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         EventContext ctx = presenter.getCtx();

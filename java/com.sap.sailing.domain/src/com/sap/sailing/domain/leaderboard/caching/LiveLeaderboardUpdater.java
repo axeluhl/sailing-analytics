@@ -279,7 +279,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                     + leaderboard.getName());
             // interrupt the current thread if not producing a single result within the overall timeout
             while (true) {
-                MillisecondsTimePoint now = MillisecondsTimePoint.now();
+                TimePoint now = MillisecondsTimePoint.now();
                 final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
                 TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
                 synchronized (this) {

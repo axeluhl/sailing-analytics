@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +16,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
-import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAdapter;
 import com.sap.sailing.racecommittee.app.ui.views.DividerItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 
 import java.io.File;
@@ -61,7 +60,7 @@ public class PhotoListFragment extends BaseFragment {
 
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        ImageView button = ViewHolder.get(layout, R.id.photo_button);
+        ImageView button = ViewHelper.get(layout, R.id.photo_button);
         if (button != null) {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -81,7 +80,7 @@ public class PhotoListFragment extends BaseFragment {
             });
         }
 
-        mPhotoList = ViewHolder.get(layout, R.id.photo_list);
+        mPhotoList = ViewHelper.get(layout, R.id.photo_list);
         if (mPhotoList != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -89,7 +88,7 @@ public class PhotoListFragment extends BaseFragment {
             mPhotoList.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         }
 
-        mSubmit = ViewHolder.get(layout, R.id.submit_button);
+        mSubmit = ViewHelper.get(layout, R.id.submit_button);
         if (mSubmit != null) {
             mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -173,35 +172,16 @@ public class PhotoListFragment extends BaseFragment {
 
     private String getSubject() {
         String author = StringHelper.on(getActivity()).getAuthor(preferences.getAuthor().getName());
-        return getString(R.string.results_mail_subject, author, getRaceName());
+        return getString(R.string.results_mail_subject, author, RaceHelper.getRaceName(getRace()));
     }
 
     private String getBody() {
         StringBuilder builder = new StringBuilder();
-        builder.append(getString(R.string.results_mail_body, getRaceName()));
+        builder.append(getString(R.string.results_mail_body, RaceHelper.getRaceName(getRace())));
         builder.append(getString(R.string.results_mail_body_race_group, getRace().getRaceGroup().getName()));
         builder.append(getString(R.string.results_mail_body_boat_class, getRace().getRaceGroup().getBoatClass().getName()));
         builder.append(getString(R.string.results_mail_body_start, mDateFormat.format(getRaceState().getStartTime().asDate())));
         builder.append(getString(R.string.results_mail_body_finish, mDateFormat.format(getRaceState().getFinishedTime().asDate())));
         return builder.toString();
-    }
-
-    private String getRaceName() {
-        String name = getRace().getRaceGroup().getDisplayName();
-        if (TextUtils.isEmpty(name)) {
-            name = getRace().getRaceGroup().getName();
-        }
-
-        if (!getRace().getSeries().getName().equals(AppConstants.DEFAULT)) {
-            name += " - " + getRace().getSeries().getName();
-        }
-
-        if (!getRace().getFleet().getName().equals(AppConstants.DEFAULT)) {
-            name += " - " + getRace().getFleet().getName();
-        }
-
-        name += " - " + getRace().getName();
-
-        return name;
     }
 }

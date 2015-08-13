@@ -25,6 +25,20 @@
   </repositories>
 
   <dependencies>
+    <!-- The following dependency needs re-declaration with the desired version because
+         gwt-maps-api declares it with no version specifier which may be resolved to an
+         incorrect version.
+      -->
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
@@ -130,6 +144,7 @@
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
                 <module>com.sap.sailing.gwt.ui.RaceBoard</module>
+                <module>com.sap.sailing.gwt.ui.EmbeddedMapAndWindChart</module>
                 <module>com.sap.sailing.gwt.ui.Spectator</module>
                 <module>com.sap.sailing.gwt.ui.DataMining</module>
                 <module>com.sap.sailing.gwt.ui.VideoPopup</module>

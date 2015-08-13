@@ -15,16 +15,16 @@
 			padding-bottom: 10px;
 		}
 	</ui:style>		
-   	<g:HTMLPanel>
-   		<div class="{style.headerWrapper}">
-   			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
-   			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
-   			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" /> 
-   		</div>
+	<g:HTMLPanel>
+		<div class="{style.headerWrapper}">
+			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
+			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
+			<mp:simpleinfoblock.SimpleInfoBlock ui:field="simpleInfoUi" /> 
+		</div>
 		<p:overview.EventOverviewStage ui:field="overviewStageUi" />
 		<g:SimplePanel ui:field="listContentUi"/>
 		<mp:updatesBox.UpdatesBox ui:field="updatesBoxUi" />
-		<mp:impressions.Impressions ui:field="impressionsUi" />		
-		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />		
+		<mp:impressions.Impressions ui:field="impressionsUi" />
+		<mp:statisticsBox.StatisticsBox ui:field="statisticsBoxUi" />
 	</g:HTMLPanel>
 </ui:UiBinder>    

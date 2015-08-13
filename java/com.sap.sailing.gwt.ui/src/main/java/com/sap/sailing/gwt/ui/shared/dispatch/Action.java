@@ -6,6 +6,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public interface Action<R extends Result> extends IsSerializable {
 
     @GwtIncompatible
-    R execute(DispatchContext ctx) throws DispatchException;
+    R execute(DispatchContext ctx) throws Exception;
 
 }

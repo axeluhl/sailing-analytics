@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -28,12 +27,11 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
-public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKey, AngleClusterPolarClusterKey {
+public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, AngleClusterPolarClusterKey {
 
     private final GPSFixMoving fix;
     private final TrackedRace race;
     private final Competitor competitor;
-    private final ClusterGroup<Speed> windSpeedClusterGroup;
     private final Set<WindSource> windSourcesToExcludeForSpeed;
     private final ClusterGroup<Bearing> angleClusterGroup;
     private final BearingWithConfidence<Void> absTrueWindAngle;
@@ -42,11 +40,10 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
     private LegType legType;
 
     public GPSFixMovingWithPolarContext(GPSFixMoving fix, TrackedRace race, Competitor competitor,
-            ClusterGroup<Speed> windSpeedClusterGroup, ClusterGroup<Bearing> angleClusterGroup) {
+            ClusterGroup<Bearing> angleClusterGroup) {
         this.fix = fix;
         this.race = race;
         this.competitor = competitor;
-        this.windSpeedClusterGroup = windSpeedClusterGroup;
         this.angleClusterGroup = angleClusterGroup;
         this.windSourcesToExcludeForSpeed = collectWindSourcesToIgnoreForSpeed();
         this.absTrueWindAngle = computeTrueWindAngleAbsolute();
@@ -87,12 +84,6 @@ public class GPSFixMovingWithPolarContext implements MovingAveragePolarClusterKe
             result = new BearingWithConfidenceImpl<Void>(bearing, wind.getConfidence(), null);
         }
         return result;
-    }
-
-    @Override
-    public Cluster<Speed> getWindSpeedCluster() {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWind();
-        return windWithConfidence == null ? null : windSpeedClusterGroup.getClusterFor(windWithConfidence.getObject());
     }
 
     public WindWithConfidence<Pair<Position, TimePoint>> getWind() {

@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
 import android.app.FragmentTransaction;
 import android.support.annotation.IdRes;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
@@ -20,6 +21,9 @@ public class BaseFragment extends RaceFragment {
             fragment.setArguments(getRecentArguments());
         } else {
             fragment.getArguments().putAll(getRecentArguments());
+        }
+        if (getArguments() != null) {
+            fragment.getArguments().putAll(getArguments());
         }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(viewId, fragment).commit();

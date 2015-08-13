@@ -44,13 +44,8 @@ public abstract class AbstractSailingServerResource {
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
         RaceDefinition result = null;
-        if(regatta != null) {
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceName)) {
-                    result = race;
-                    break;
-                }
-            }
+        if (regatta != null) {
+            result = regatta.getRaceByName(raceName);
         }
         return result;
     }

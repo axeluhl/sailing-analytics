@@ -95,7 +95,7 @@ public class AutoUpdaterChecker {
 
         @Override
         public void updateToVersion(int serverVersion, final String apkFileName) {
-            int currentVersion = AppUtils.getPackageInfo(context).versionCode;
+            int currentVersion = AppUtils.with(context).getPackageInfo().versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
             ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
             

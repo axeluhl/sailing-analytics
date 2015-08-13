@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.AbstractTimePoint;
 
 /**
  * A compact representation of a GPS fix which collects all primitive-typed attributes in one object to avoid
@@ -41,7 +42,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     
     private final double latDeg;
     private final double lngDeg;
-    private final TimePoint timePoint;
+    private final long timePointAsMillis;
     
     /**
      * Tells if in the containing {@link DynamicGPSFixTrackImpl} this fix is considered valid. This cache
@@ -77,6 +78,15 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
         }
     }
     
+    private class CompactTimePoint extends AbstractTimePoint implements TimePoint {
+        private static final long serialVersionUID = -2470922642359937437L;
+
+        @Override
+        public long asMillis() {
+            return timePointAsMillis;
+        }
+    }
+    
     private class CompactEstimatedSpeedBearing extends AbstractBearing {
         private static final long serialVersionUID = 8549231429037883121L;
 
@@ -103,7 +113,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     public CompactGPSFixImpl(Position position, TimePoint timePoint) {
         latDeg = position.getLatDeg();
         lngDeg = position.getLngDeg();
-        this.timePoint = timePoint;
+        timePointAsMillis = timePoint==null?-1:timePoint.asMillis();
     }
     
     public CompactGPSFixImpl(GPSFix gpsFix) {
@@ -122,7 +132,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
 
     @Override
     public TimePoint getTimePoint() {
-        return timePoint;
+        return new CompactTimePoint();
     }
 
     @Override

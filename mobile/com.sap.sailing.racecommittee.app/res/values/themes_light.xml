@@ -7,6 +7,7 @@
     <style name="AppTheme.Light.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
+        <item name="android:tabWidgetStyle">@style/AppTheme.Light.TabWidget</item>
 
         <item name="colorPrimary">@color/light_colorPrimary</item>
         <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
@@ -17,6 +18,11 @@
         <item name="android:editTextColor">?white</item>
         <item name="android:dialogTheme">@style/AppTheme.AlertDialog</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Light.SettingsAlertDialog</item>
+
+        <!-- style attributes for popup menu -->
+        <item name="android:popupMenuStyle">@style/AppTheme.Light.PopupMenuStyle</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/PopupMenuTextAppearanceLarge</item>
+        <item name="android:textAppearanceSmallPopupMenu">@style/PopupMenuTextAppearanceSmall</item>
 
         <!-- custom attributes because of custom themes -->
         <!-- colors -->
@@ -37,6 +43,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Light.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="text">@style/AppTheme.Light.Text</item>
         <item name="textXXSmall">@style/AppTheme.Light.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Light.Text.XSmall</item>
         <item name="textSmall">@style/AppTheme.Light.Text.Small</item>
@@ -70,6 +77,7 @@
         <item name="course_updown_64dp">@drawable/course_updown_64dp_light</item>
         <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
         <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
+        <item name="link_24dp">@drawable/ic_link_black_24dp</item>
         <item name="lock_outline">@drawable/lock_outline_light</item>
         <item name="marker">@drawable/marker_light</item>
         <item name="marker_race">@drawable/marker_race_light</item>
@@ -77,9 +85,11 @@
         <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_white_24dp</item>
+        <item name="spinner_background">@drawable/spinner_background_light</item>
         <item name="swipe_idle">@drawable/swipe_idle_light</item>
         <item name="swipe_left">@drawable/swipe_left_light</item>
         <item name="swipe_right">@drawable/swipe_right_light</item>
+        <item name="tab_widget">@drawable/tabwidget_light</item>
         <item name="value_next">@drawable/value_next_light</item>
         <item name="value_prev">@drawable/value_prev_light</item>
         <item name="wind_off">@drawable/wind_off_light</item>
@@ -95,6 +105,18 @@
         <item name="flags_more">@drawable/flags_more_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_light</item>
         <item name="flags_recall">@drawable/flags_recall_light</item>
+    </style>
+
+    <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_background</item>
+    </style>
+
+    <style name="PopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large">
+        <item name="android:textColor">@color/constant_black</item>
+    </style>
+
+    <style name="PopupMenuTextAppearanceLarge" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="android:textColor">@color/constant_black</item>
     </style>
 
     <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
@@ -179,6 +201,15 @@
         <item name="android:textColorSecondary">@color/dialog_color_text</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="AppTheme.Light.TabWidget" parent="@android:style/Widget.TabWidget">
+        <item name="android:textAppearance">@style/AppTheme.Light.TabWidgetText</item>
+    </style>
+
+    <style name="AppTheme.Light.TabWidgetText" parent="@android:style/TextAppearance.Widget.TabWidget">
+        <item name="android:textSize">@dimen/textSize_32</item>
+        <item name="android:textColor">?white</item>
     </style>
 
 </resources>

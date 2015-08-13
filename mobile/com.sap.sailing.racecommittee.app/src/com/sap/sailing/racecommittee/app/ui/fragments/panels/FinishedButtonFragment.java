@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
@@ -50,26 +50,26 @@ public class FinishedButtonFragment extends BasePanelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finished_left, container, false);
 
-        mRecord = ViewHolder.get(layout, R.id.record_button);
+        mRecord = ViewHelper.get(layout, R.id.record_button);
         if (mRecord != null) {
             mRecord.setOnClickListener(new RecordClick());
         }
-        mRecordLock = ViewHolder.get(layout, R.id.voice_lock);
+        mRecordLock = ViewHelper.get(layout, R.id.voice_lock);
 
-        mPhoto = ViewHolder.get(layout, R.id.photo_button);
+        mPhoto = ViewHelper.get(layout, R.id.photo_button);
         if (mPhoto != null) {
             mPhoto.setOnClickListener(new PhotoClick());
         }
-        mPhotoLock = ViewHolder.get(layout, R.id.photo_lock);
+        mPhotoLock = ViewHelper.get(layout, R.id.photo_lock);
         if (!isCameraAvailable(getActivity())) {
             mPhotoLock.setVisibility(View.VISIBLE);
         }
 
-        mList = ViewHolder.get(layout, R.id.list_button);
+        mList = ViewHelper.get(layout, R.id.list_button);
         if (mList != null) {
             mList.setOnClickListener(new ListClick());
         }
-        mListLock = ViewHolder.get(layout, R.id.list_lock);
+        mListLock = ViewHelper.get(layout, R.id.list_lock);
 
         return layout;
     }
