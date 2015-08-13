@@ -88,6 +88,12 @@
             <artifactId>com.sap.sailing.android.shared</artifactId>
             <version>${project.version}</version>
             <type>aar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.android.support</groupId>
+					<artifactId>appcompat-v7</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
 
         <dependency>
