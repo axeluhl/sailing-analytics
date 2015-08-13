@@ -102,6 +102,7 @@ public class PlaceNavigation<T extends Place> {
             public void onBrowserEvent(Event event) {
                 if (LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
+                    event.stopPropagation();
                     goToPlace();
                 }
             }
