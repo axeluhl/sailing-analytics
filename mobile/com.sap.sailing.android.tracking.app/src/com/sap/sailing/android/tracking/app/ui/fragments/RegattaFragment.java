@@ -147,7 +147,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
         timer = new TimerRunnable();
         timer.start();
-        checkAndSwitchToThankYouScreenIfRegattaOver();
+        //checkAndSwitchToThankYouScreenIfRegattaOver();
         checkAndHideCountdownIfRegattaIsInProgress();
     }
 
