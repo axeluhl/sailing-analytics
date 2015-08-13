@@ -1,6 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
