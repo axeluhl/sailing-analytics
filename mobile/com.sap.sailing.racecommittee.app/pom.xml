@@ -76,12 +76,13 @@
             <type>aar</type>
         </dependency>
 
-        <dependency>
+        <!-- Already transitively added? -->
+        <!--<dependency>
             <groupId>com.google.android.gms</groupId>
             <artifactId>play-services-location</artifactId>
             <version>7.3.0</version>
             <type>aar</type>
-        </dependency>
+        </dependency>-->
 		
         <dependency>
             <groupId>${project.groupId}</groupId>
