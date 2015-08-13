@@ -41,7 +41,6 @@
 			<version>4.3.0</version>
 			<extensions>true</extensions>
 			<configuration>
-				<!--<resourceDirectory>res</resourceDirectory>-->
 				<sourceDirectories>src</sourceDirectories>
 				<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 				<destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
@@ -51,12 +50,6 @@
 					<id>aar</id>
 					<goals>
 						<goal>aar</goal>
-					</goals>
-				</execution>
-				<execution>
-					<id>generate-sources</id>
-					<goals>
-						<goal>generate-sources</goal>
 					</goals>
 				</execution>
 			</executions>

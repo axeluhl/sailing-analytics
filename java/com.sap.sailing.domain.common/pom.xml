@@ -35,6 +35,46 @@
 				</execution>
 			</executions>
 		</plugin>
+		<plugin>
+			<groupId>com.simpligility.maven.plugins</groupId>
+			<artifactId>android-maven-plugin</artifactId>
+			<version>4.3.0</version>
+			<extensions>true</extensions>
+			<configuration>
+				<sourceDirectories>src</sourceDirectories>
+				<androidManifestFile>AndroidManifest.xml</androidManifestFile>
+				<destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
+			</configuration>
+			<executions>
+				<execution>
+					<id>aar</id>
+					<goals>
+						<goal>aar</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>build-helper-maven-plugin</artifactId>
+			<version>1.9.1</version>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<goals>
+						<goal>attach-artifact</goal>
+					</goals>
+					<configuration>
+						<artifacts>
+							<artifact>
+								<type>aar</type>
+								<file>${project.build.directory}/${project.build.finalName}.aar</file>
+							</artifact>
+						</artifacts>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
 	</plugins>
   </build>
 </project>

@@ -23,6 +23,7 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>com.sap.sailing.domain.common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <type>aar</type>
             <scope>compile</scope>
         </dependency>
 		
@@ -30,6 +31,7 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>com.sap.sailing.domain.shared.android</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <type>aar</type>
             <scope>compile</scope>
         </dependency>
 		
@@ -37,6 +39,7 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>com.sap.sailing.server.gateway.serialization.shared.android</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <type>aar</type>
             <scope>compile</scope>
         </dependency>
         
@@ -44,6 +47,7 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>com.sap.sse.common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <type>aar</type>
             <scope>compile</scope>
         </dependency>
 		
@@ -51,8 +55,8 @@
             <groupId>com.sap.sailing</groupId>
             <artifactId>org.json.simple</artifactId>
             <version>1.1.0-SNAPSHOT</version>
-            <scope>compile</scope>
             <type>aar</type>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -61,12 +65,11 @@
             <version>7.3.0</version>
             <type>aar</type>
         </dependency>
-
+		
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
-			<scope>system</scope>
-			<systemPath>${env.ANDROID_HOME}/platforms/android-21/android.jar</systemPath>
+			<scope>provided</scope>
         </dependency>
 	</dependencies>
 
