@@ -43,7 +43,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginBottom="@dimen/default_margin_half"
         android:alpha="0"
         android:orientation="horizontal"
         tools:alpha="1">
@@ -68,7 +68,7 @@
         android:drawableLeft="@drawable/ic_assignment_white_48dp"
         android:drawablePadding="@dimen/default_padding_half"
         android:gravity="center_vertical"
-        android:paddingBottom="@dimen/default_padding"
+        android:paddingBottom="@dimen/default_padding_half"
         android:paddingLeft="@dimen/default_padding_half"
         android:paddingRight="@dimen/default_padding_half"
         android:paddingTop="@dimen/default_padding"

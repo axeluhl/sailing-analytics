@@ -55,18 +55,14 @@
         <activity
             android:name=".ui.activities.RacingActivity"
             android:screenOrientation="landscape"/>
-        <activity
-            android:name=".ui.activities.PreferenceActivity"
-            android:screenOrientation="landscape">
+        <activity android:name=".ui.activities.PreferenceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.SystemInformationActivity"
-            android:screenOrientation="landscape"/>
+        <activity android:name=".ui.activities.SystemInformationActivity"/>
 
         <service
             android:name=".services.RaceStateService"
