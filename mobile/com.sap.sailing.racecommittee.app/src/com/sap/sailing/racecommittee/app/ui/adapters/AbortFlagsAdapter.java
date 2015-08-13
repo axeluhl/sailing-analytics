@@ -1,7 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +14,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.util.ArrayList;
-import java.util.Locale;
 
 public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
@@ -95,7 +97,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             flagImage.setVisibility(View.INVISIBLE);
             int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
-                flagDrawable = BitmapHelper.getDrawable(mContext, flagResId);
+                flagDrawable = ContextCompat.getDrawable(mContext, flagResId);
             } else {
                 flagDrawable = BitmapHelper.getAttrDrawable(mContext, item.file_name);
             }

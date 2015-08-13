@@ -1,22 +1,23 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class AutoUpdaterChecker {
 
@@ -180,7 +181,7 @@ public class AutoUpdaterChecker {
         @Override
         public void onError() {
             dialog.dismiss();
-            Drawable drawable = BitmapHelper.getDrawable(context, android.R.drawable.ic_dialog_alert);
+            Drawable drawable = ContextCompat.getDrawable(context, android.R.drawable.ic_dialog_alert);
             AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             errorDialog
                 .setTitle(R.string.auto_update)

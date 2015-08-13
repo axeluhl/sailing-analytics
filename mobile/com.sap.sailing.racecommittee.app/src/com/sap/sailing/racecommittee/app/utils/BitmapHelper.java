@@ -11,6 +11,7 @@ import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -104,21 +105,8 @@ public class BitmapHelper {
         }
     }
 
-    // @SuppressWarnings, but it is handled correctly
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static Drawable getDrawable(Context context, @DrawableRes int id) {
-        Drawable drawable;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawable = context.getDrawable(id);
-        } else {
-            drawable = context.getResources().getDrawable(id);
-        }
-        return drawable;
-    }
-
     public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
-        Drawable drawable = getDrawable(context, drawableResId);
+        Drawable drawable = ContextCompat.getDrawable(context, drawableResId);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;
     }

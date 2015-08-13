@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -163,7 +164,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             } else {
                 id = R.drawable.nav_drawer_tab_button_dark;
             }
-            Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
+            Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
             switch (getFilterMode()) {
             case ALL:
                 mAllRacesButton.setTextColor(colorOrange);

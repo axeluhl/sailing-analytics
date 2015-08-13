@@ -1,11 +1,20 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -14,13 +23,9 @@ import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick {
 
@@ -151,7 +156,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                 if (flag != null) {
                     int resId = R.drawable.flag_blue_48dp;
-                    Drawable drawable = BitmapHelper.getDrawable(getActivity(), resId);
+                    Drawable drawable = ContextCompat.getDrawable(getActivity(), resId);
                     flag.setImageDrawable(drawable);
                 }
 

@@ -12,6 +12,7 @@ import java.util.Map;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -568,7 +569,7 @@ public class StartTimeFragment extends BaseFragment
         } else {
             id = R.drawable.nav_drawer_tab_button_dark;
         }
-        Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
         switch (tab) {
             case RELATIVE:
                 if (mRelative != null) {
