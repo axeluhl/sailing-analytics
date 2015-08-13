@@ -19,12 +19,20 @@
         <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
         <app-version>${rc-app-version}</app-version>
     </properties>
+	
+	
+	<repositories>
+		<repository>
+			<id>jcenter</id>
+			<url>http://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
 
     <dependencies>
-        <!-- needed on remote repository -->
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
+			<scope>provided</scope>
         </dependency>
 
 <!--
@@ -37,32 +45,55 @@
 -->
 
         <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>21.0.3</version>
+            <groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
+            <artifactId>advrecyclerview</artifactId>
+            <version>0.6.2</version>
             <type>aar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.android.support</groupId>
+					<artifactId>recyclerview-v7</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.android.support</groupId>
+					<artifactId>appcompat-v7</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
-
+		
         <dependency>
             <groupId>com.android.support</groupId>
             <artifactId>appcompat-v7</artifactId>
-            <version>21.0.3</version>
+            <version>22.1.1</version>
+            <type>aar</type>
+        </dependency>
+		
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>recyclerview-v7</artifactId>
+            <version>22.1.1</version>
             <type>aar</type>
         </dependency>
 
         <dependency>
             <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services</artifactId>
-            <version>6.5.87</version>
+            <artifactId>play-services-location</artifactId>
+            <version>7.3.0</version>
+            <type>aar</type>
+        </dependency>
+		
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sap.sailing.android.shared</artifactId>
+            <version>${project.version}</version>
             <type>aar</type>
         </dependency>
 
-        <!-- needed on remote repository -->
         <dependency>
             <groupId>com.mobeta.android.dslv</groupId>
             <artifactId>drag-sort-listview</artifactId>
             <version>0.6.1-SNAPSHOT</version>
-            <type>apklib</type>
+			<type>jar</type>
             <exclusions>
                     <exclusion>
                     <groupId>com.google.android</groupId>
@@ -70,29 +101,33 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-        <dependency>
-          <groupId>com.sap.sailing</groupId>
-          <artifactId>com.sap.sailing.android.shared</artifactId>
-          <version>1.0.0-SNAPSHOT</version>
-          <type>apklib</type>
-        </dependency>
     </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-                <configuration>
-                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
+			<plugin>
+				<groupId>com.simpligility.maven.plugins</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<resourceDirectory>res</resourceDirectory>
+					<sourceDirectories>
+						<sourceDirectory>${project.basedir}/src</sourceDirectory>
+					</sourceDirectories>
+					<assetsDirectory>assets</assetsDirectory>
+					<failOnNonStandardStructure>false</failOnNonStandardStructure>
+					<failOnConflictingLayouts>false</failOnConflictingLayouts>
+					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
+					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
+					<undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
                         <platform>21</platform>
                     </sdk>
-                    <release>true</release>
+					<release>true</release>
                     <proguard>
                      <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
                         <skip>true</skip>
@@ -104,23 +139,17 @@
                     <zipalign>
                         <skip>false</skip>
                     </zipalign>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apk</goal>
-                        </goals>
-                        <configuration>
-                            <excludeJarResources>
-                                <!-- Prevents *-sources.jar to be distributed with the APK -->
-                                <excludeJarResource>^com\.sap\..*.jar$</excludeJarResource>
-                            </excludeJarResources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+					<excludeJarResources>
+						<excludeJarResource>^android.jar$</excludeJarResource>
+					</excludeJarResources>
+					<dex>
+						<coreLibrary>false</coreLibrary>
+					</dex>
+				</configuration>
+			</plugin>
 
 	    <!-- plugins for generating version file and copying .apk -->
+		<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -132,6 +161,7 @@
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
+			-->
         </plugins>
     </build>
 </project>
