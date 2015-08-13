@@ -140,9 +140,10 @@
                     <proguard>
                      <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
                         <skip>true</skip>
-                        <config>proguard-project.txt</config>
                         <configs>
                             <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+							<config>${project.basedir}/proguard-project.txt</config>
+							<config>${project.basedir}/../proguard-mobile.txt</config>
                         </configs>
                     </proguard>
                     <zipalign>
