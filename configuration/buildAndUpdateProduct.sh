@@ -654,10 +654,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
-        ./gradlew clean build -xtest | tee -a $START_DIR/build.log
-        if [[ ${PIPESTATUS[0]} != 0 ]]; then
-            exit 100
-        fi
+        # ./gradlew clean build -xtest | tee -a $START_DIR/build.log
+        # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+        #    exit 100
+        # fi
         if [ $testing -eq 1 ]; then
             echo "Starting JUnit tests..."
             ./gradlew test | tee -a $START_DIR/build.log
