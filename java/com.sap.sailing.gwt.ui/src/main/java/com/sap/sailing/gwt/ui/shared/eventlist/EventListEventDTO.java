@@ -6,6 +6,7 @@ public class EventListEventDTO extends EventLinkAndMetadataDTO {
     
     private EventListEventSeriesDTO eventSeries;
 
+    @Override
     public EventListEventSeriesDTO getEventSeries() {
         return eventSeries;
     }
