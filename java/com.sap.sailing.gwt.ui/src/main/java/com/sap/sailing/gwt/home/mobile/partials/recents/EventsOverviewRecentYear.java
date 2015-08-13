@@ -49,11 +49,15 @@ public class EventsOverviewRecentYear extends Composite {
         this.eventsCount.setInnerText(i18n.eventsCount(events.size()));
         boolean first = true;
         for (EventListEventDTO eventDTO : events) {
-
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId()
                     .toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             EventsOverviewRecentYearEvent recentEvent = new EventsOverviewRecentYearEvent(eventNavigation, eventDTO,
                     eventDTO.getState().getListStateMarker(), first || eventDTO.isRunning());
+            if (eventDTO.getEventSeries() != null) {
+                String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
+                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(seriesId, baseUrl, eventDTO.isOnRemoteServer());
+                recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
+            }
             recentEventsTeaserPanel.add(recentEvent);
             if (first) {
                 first = false;
