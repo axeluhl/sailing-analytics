@@ -25,62 +25,58 @@
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
+			<version>5.0.1_r2</version>
+			<scope>provided</scope>
         </dependency>
-
-        <!--
-                <dependency>
-                    <groupId>com.android.support</groupId>
-                    <artifactId>support-annotations</artifactId>
-                    <version>21.0.3</version>
-                    <type>aar</type>
-                </dependency>
-        -->
-
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>21.0.3</version>
-            <type>aar</type>
-        </dependency>
-
-        <dependency>
+		
+		<dependency>
             <groupId>com.android.support</groupId>
             <artifactId>appcompat-v7</artifactId>
-            <version>22.2.0</version>
+            <version>22.1.1</version>
             <type>aar</type>
         </dependency>
-
+		
         <dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services</artifactId>
-            <version>7.5.0</version>
-            <type>aar</type>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sap.sailing</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>com.sap.sailing.android.shared</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <type>apklib</type>
+            <version>${project.version}</version>
+            <type>aar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.android.support</groupId>
+					<artifactId>appcompat-v7</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
-    </dependencies>
-
+	</dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-                <configuration>
-                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
+			<plugin>
+				<groupId>com.simpligility.maven.plugins</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<resourceDirectory>res</resourceDirectory>
+					<sourceDirectories>
+						<sourceDirectory>${project.basedir}/src</sourceDirectory>
+					</sourceDirectories>
+					<assetsDirectory>assets</assetsDirectory>
+					<failOnNonStandardStructure>false</failOnNonStandardStructure>
+					<failOnConflictingLayouts>false</failOnConflictingLayouts>
+					<failOnDuplicatePackages>false</failOnDuplicatePackages>
+					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
+					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
+					<undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
                         <platform>21</platform>
                     </sdk>
-                    <release>true</release>
+					<release>true</release>
                     <proguard>
-                        <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
+                     <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
                         <skip>true</skip>
                         <config>proguard-project.txt</config>
                         <configs>
@@ -90,7 +86,17 @@
                     <zipalign>
                         <skip>false</skip>
                     </zipalign>
-                </configuration>
+					<excludeJarResources>
+						<!-- Prevents *-sources.jar to be distributed with the APK -->
+						<excludeJarResource>^.*-sources.jar$</excludeJarResource>
+					</excludeJarResources>
+					<dex>
+						<jvmArguments>
+							<jvmArgument>-Xms1024m</jvmArgument>
+							<jvmArgument>-Xmx2048m</jvmArgument>
+						</jvmArguments>
+					</dex>
+				</configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -98,13 +104,12 @@
                         </goals>
                         <configuration>
                             <excludeJarResources>
-                                <!-- Prevents *-sources.jar to be distributed with the APK -->
-                                <excludeJarResource>^com\.sap\..*.jar$</excludeJarResource>
+                                <excludeJarResource>^android.*.jar$</excludeJarResource>
                             </excludeJarResources>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+			</plugin>
 
             <!-- plugins for generating version file and copying .apk -->
             <plugin>
