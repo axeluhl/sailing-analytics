@@ -281,14 +281,10 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
-
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
                         DeviceConfigurationJsonDeserializer.create());
-
                 String encodedIdentifier = identifier.getClientIdentifier();
-                encodedIdentifier = encodedIdentifier.replace("+", "%20");
-
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
