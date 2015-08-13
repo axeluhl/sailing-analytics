@@ -3523,11 +3523,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (!legs.isEmpty()) {
                 if (allMarksHavePositions && numberOfMarks == 2) {
                     final TrackedLeg legDeterminingDirection = getLegDeterminingDirectionInWhichToPassWaypoint(waypoint);
-                    if (legDeterminingDirection == null) {
+                    final Bearing legBearing;
+                    if (legDeterminingDirection == null || (legBearing = legDeterminingDirection.getLegBearing(timePoint)) == null) {
                         result = null;
                     } else {
                         Distance crossTrackErrorOfMark0OnLineFromMark1ToNextWaypoint = markPositions.get(0)
-                                .crossTrackError(markPositions.get(1), legDeterminingDirection.getLegBearing(timePoint));
+                                .crossTrackError(markPositions.get(1), legBearing);
                         final Position portMarkPositionWhileApproachingLine;
                         final Position starboardMarkPositionWhileApproachingLine;
                         final Mark starboardMarkWhileApproachingLine;
