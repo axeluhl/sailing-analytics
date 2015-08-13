@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.android.shared.util;
 
 import android.content.Context;
 import android.graphics.Point;

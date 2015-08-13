@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.util.ScreenHelper;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
@@ -25,7 +26,6 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.utils.ScreenHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
