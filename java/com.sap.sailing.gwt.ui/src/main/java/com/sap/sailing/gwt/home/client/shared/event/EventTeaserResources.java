@@ -18,6 +18,9 @@ public interface EventTeaserResources extends ClientBundle {
         String eventteaser_title_name();
         String eventteaser_image();
         String eventteaser_series();
+        String eventteaser_series_corner();
+        String eventteaser_series_text();
+        String eventteaser_series_eventcount();
         String eventteaser_name();
         String eventteaser_title_name_label();
         String label();
