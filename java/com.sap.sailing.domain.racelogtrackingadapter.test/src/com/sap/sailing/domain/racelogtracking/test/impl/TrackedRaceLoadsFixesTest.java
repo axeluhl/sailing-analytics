@@ -40,7 +40,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
 
@@ -24,10 +25,24 @@ public interface GPSFixStore {
             Competitor competitor) throws TransformationException;
 
     /**
+     * Load all fixes within the start and end time point (inclusive) that correspond to the
+     * {@link DeviceCompetitorMappingEvent}s found in the {@code raceLog}.
+     */
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
+            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException;
+
+    /**
      * Load all fixes that correspond to the {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
      */
     void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
+
+    /**
+     * Load all fixes within the start and end time point (inclusive) that correspond to the
+     * {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
+     */
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark, TimePoint start,
+            TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException;
 
     /**
      * Load all fixes that correspond to the {@code mapping}.

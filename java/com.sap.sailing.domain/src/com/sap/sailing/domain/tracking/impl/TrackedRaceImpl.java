@@ -3162,7 +3162,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             try {
                                 gpsFixStore.loadCompetitorTrack(
                                         (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
-                                        competitor);
+                                        competitor, getStartOfTracking(), getEndOfTracking());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + competitor, e);
                             }
@@ -3171,7 +3171,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         logger.info("Started loading mark tracks for " + getRace().getName());
                         for (Mark mark : getMarksFromRaceAndLogs()) {
                             try {
-                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark), log, mark);
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
+                                        log, mark, getStartOfTracking(), getEndOfTracking());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.log(Level.WARNING, "Could not load track for " + mark, e);
                             }
