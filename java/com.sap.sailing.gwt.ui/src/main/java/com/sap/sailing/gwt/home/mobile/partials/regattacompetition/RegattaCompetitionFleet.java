@@ -8,8 +8,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources.LocalCss;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 
 public class RegattaCompetitionFleet extends Widget {
 
@@ -24,7 +24,7 @@ public class RegattaCompetitionFleet extends Widget {
     @UiField DivElement fleetCornerUi;
     @UiField DivElement fleetNameUi;
 
-    public RegattaCompetitionFleet(RaceListFleetDTO fleet, int fleetCount) {
+    public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet, int fleetCount) {
         setElement(uiBinder.createAndBindUi(this));
         raceContainerUi.getStyle().setBackgroundColor("rgba("+ fleet.getFleet().getFleetColor() + ", .1)");
         raceContainerUi.getStyle().setWidth(100.0 / fleetCount, Unit.PCT);
@@ -33,7 +33,7 @@ public class RegattaCompetitionFleet extends Widget {
         fleetNameUi.setInnerText(fleet.getFleet().getFleetName());
     }
     
-    public void addRace(RaceListRaceDTO race, String raceViewerUrl) {
+    public void addRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
         RegattaCompetitionFleetRace fleetRace = new RegattaCompetitionFleetRace(race, raceViewerUrl);
         raceContainerUi.appendChild(fleetRace.getElement());
     }

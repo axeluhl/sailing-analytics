@@ -14,10 +14,10 @@ import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
 
 public class RegattaCompetitionSeries extends Composite {
 
@@ -33,7 +33,7 @@ public class RegattaCompetitionSeries extends Composite {
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField FlowPanel fleetContainerUi;
 
-    public RegattaCompetitionSeries(RaceListSeriesDTO series) {
+    public RegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
         initWidget(uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
         initSubtitle(series.getCompetitorCount(), series.getRaceCount());
@@ -62,9 +62,9 @@ public class RegattaCompetitionSeries extends Composite {
         }, ClickEvent.getType());
     }
 
-    public void addFleet(Presenter presenter, RaceListFleetDTO fleet, int fleetCount) {
+    public void addFleet(Presenter presenter, RaceCompetitionFormatFleetDTO fleet, int fleetCount) {
         RegattaCompetitionFleet competitionFleet = new RegattaCompetitionFleet(fleet, fleetCount);
-        for (RaceListRaceDTO race : fleet.getRaces()) {
+        for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
             boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
             String raceViewerUrl = tracked ? null : null; // TODO No mobile "RaceViewer implemented yet 
             competitionFleet.addRace(race, raceViewerUrl);
