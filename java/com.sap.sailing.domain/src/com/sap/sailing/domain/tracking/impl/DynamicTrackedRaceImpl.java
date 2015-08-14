@@ -169,6 +169,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
+     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
+     */
     private boolean isFixWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
         return (getStartOfTracking() == null || getStartOfTracking().compareTo(fixTimePoint) <= 0) &&
             (getEndOfTracking() == null || getEndOfTracking().compareTo(fixTimePoint) >= 0);
