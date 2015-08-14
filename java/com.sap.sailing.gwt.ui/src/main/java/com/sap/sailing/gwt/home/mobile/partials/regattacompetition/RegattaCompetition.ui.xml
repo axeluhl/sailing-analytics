@@ -1,11 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
-		 xmlns:mp="com.sap.sailing.gwt.home.mobile.partials" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+		 xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources" />
 	<g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-		<g:FlowPanel class="{local_res.css.regattacompetition} {local_res.css.accordion} {res.mediaCss.small12} {res.mediaCss.columns}"
+		<g:FlowPanel addStyleNames="{local_res.css.regattacompetition} {local_res.css.accordion} {res.mediaCss.small12} {res.mediaCss.columns}"
 			ui:field="regattaSeriesContainerUi" />
 	</g:HTMLPanel>
 </ui:UiBinder>

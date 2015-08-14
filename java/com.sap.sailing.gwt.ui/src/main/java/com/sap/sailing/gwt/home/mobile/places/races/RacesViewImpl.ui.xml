@@ -1,9 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
-    	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials" xmlns:p="com.sap.sailing.gwt.home.client.place.event.partials" 
-    	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+		xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />>
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:style>
 		.headerWrapper {
 			background-color: #f2f2f2;
@@ -15,12 +15,10 @@
 			<mp:eventheader.EventHeader ui:field="eventHeaderUi" />
 			<mp:quickfinder.Quickfinder ui:field="quickFinderUi" />
 			<!-- TODO do we need this here? -->
-			<!-- 
-			<mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" /> 
-			-->
+			<!-- <mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" />	-->
 		</div>
 		<div><ui:text from="{i18n.races}" /></div>
 		<p:listNavigation.RaceStateLegend />
-		<mp:regattaCompetition.RegattaCompetition ui:field="regattaCompetitionUi"/>
+		<mp:regattacompetition.RegattaCompetition ui:field="regattaCompetitionUi" />
 	</g:HTMLPanel>	
 </ui:UiBinder> 
