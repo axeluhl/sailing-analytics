@@ -137,9 +137,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
         refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {
-            listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
-            listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
-            
             UUID eventId = myPlace.getCtx().getEventDTO().getId();
             String regattaId = myPlace.getRegattaId();
             refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
@@ -150,15 +147,23 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }, new GetRegattaWithProgressAction(eventId, regattaId));
             addRacesAction(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
             addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
-            addRacesAction(new RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>() {
-                @Override
-                public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
-                    compFormatContainerUi.clear();
-                    for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
-                        compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
+            
+            if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
+                listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+                listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
+                addRacesAction(new RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>() {
+                    @Override
+                    public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+                        compFormatContainerUi.clear();
+                        for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
+                            compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
+                        }
                     }
-                }
-            }, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
+                }, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
+            } else {
+                listNavigationPanelUi.removeFromParent();
+            }
+            
             oldContentContainer.removeFromParent();
         } else {
             regattaProgressLegendUi.removeFromParent();
