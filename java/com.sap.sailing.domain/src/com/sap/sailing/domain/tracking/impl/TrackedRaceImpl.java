@@ -3135,9 +3135,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     /**
-     * Loads the GPS fixes as per the device registrations in the <code>log</code> into this race. The <code>log</code> is added to the
-     * <code>addLogToMap</code> data structure while holding this object's monitor, and all waiters on this object are notified when done
-     * with adding the <code>log</code> to <code>addLogToMap</code>.
+     * Loads the GPS fixes as per the device registrations in the <code>log</code> into this race. The <code>log</code>
+     * is added to the <code>addLogToMap</code> data structure while holding <code>this</code> object's monitor, and all
+     * waiters on <code>this</code> object are notified when done with adding the <code>log</code> to
+     * <code>addLogToMap</code>.
      */
     private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
             final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap) {
