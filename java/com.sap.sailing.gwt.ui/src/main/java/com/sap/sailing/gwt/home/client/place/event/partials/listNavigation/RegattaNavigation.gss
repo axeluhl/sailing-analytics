@@ -125,6 +125,7 @@
   font-weight: 700;
   line-height: 0.666666666666667em;
   border: 1px solid #008fcc;
+  text-transform: capitalize;
 }
 .regattanavigation_legend_itemtracked {
   color: #fff;

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
 
-import static com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
+import static com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
 
 import java.util.Date;
 
@@ -42,9 +42,9 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;

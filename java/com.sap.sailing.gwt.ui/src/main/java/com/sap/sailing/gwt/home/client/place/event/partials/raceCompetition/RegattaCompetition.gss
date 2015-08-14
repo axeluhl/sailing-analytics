@@ -134,7 +134,7 @@
   display: inline-block;
   width: 0.466666666666667em;
   height: 0.466666666666667em;
-  background: url("../images/home/skip-forward.png") no-repeat center center;
+  background: url("images/home/skip-forward.png") no-repeat center center;
   margin: 0 0 0.133333333333333em 0.133333333333333em;
 }
 .fleet_races_race_date {
@@ -158,11 +158,12 @@
   color: #999;
   background-color: #fff;
   border: 1px solid #999;
+  padding: 0.266666666666666em 0.266666666666666em;
 }
 .fleet_races_raceplanned:hover {
   background-color: #e6e6e6;
 }
-.fleet_races_raceplanned .fleet_races_race_name:after {
+.fleet_races_raceuntracked .fleet_races_race_name:after {
   display: none;
 }
 .regattalistitem .fleet {
