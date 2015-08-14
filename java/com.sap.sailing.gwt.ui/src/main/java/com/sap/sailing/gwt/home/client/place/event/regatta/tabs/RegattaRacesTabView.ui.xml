@@ -19,6 +19,10 @@
             right: 0;
             top: -0.25em;
         }
+        .temp {
+			font-weight: bold; 
+			font-style: italic;
+		} 
     </ui:style>
     <g:HTMLPanel ui:field="contentPanel">
         <div class="{res.mediaCss.grid}">
@@ -37,7 +41,9 @@
                 </div>
                 <p:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
-            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
+            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
+            	<g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label>
+            </g:FlowPanel>
         </div>
         <g:SimplePanel ui:field="oldContentContainer"/>
     </g:HTMLPanel>
