@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -27,6 +28,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropM
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
@@ -90,6 +92,17 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
+
+        LinearLayout headerText = ViewHelper.get(view, R.id.header_text);
+        if (headerText != null) {
+            headerText.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    openMainScheduleFragment();
+                }
+            });
+        }
 
         mHistoryCourse = (RecyclerView) view.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
@@ -476,13 +489,13 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, 0)) {
-        case 1:
+            case 1:
 //            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-            break;
+                break;
 
-        default:
-            openMainScheduleFragment();
-            break;
+            default:
+                openMainScheduleFragment();
+                break;
         }
     }
 
