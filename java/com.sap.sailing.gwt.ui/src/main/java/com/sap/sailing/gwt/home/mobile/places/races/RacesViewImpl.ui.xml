@@ -9,6 +9,15 @@
 			background-color: #f2f2f2;
 			padding-bottom: 10px;
 		}
+		.pageTitle {
+			font-size: 1.066666666666667em;
+			font-weight: 700;
+			margin-top: 0.666666666666667em;
+		}
+		.legend {
+			margin-top: 0.666666666666667em;
+			margin-bottom: 0.666666666666667em;
+		}
 	</ui:style>	
 	<g:HTMLPanel>
 		<div class="{style.headerWrapper}">
@@ -17,8 +26,10 @@
 			<!-- TODO do we need this here? -->
 			<!-- <mp:simpleinfoblock.SimpleInfoBlock ui:field="sailorInfoUi" />	-->
 		</div>
-		<div><ui:text from="{i18n.races}" /></div>
-		<p:listNavigation.RaceStateLegend />
+		<div class="{res.mediaCss.columns}">
+			<div class="{res.mediaCss.small12} {style.pageTitle}"><ui:text from="{i18n.races}" /></div>
+			<p:listNavigation.RaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}"/>
+		</div>
 		<mp:regattacompetition.RegattaCompetition ui:field="regattaCompetitionUi" />
 	</g:HTMLPanel>	
 </ui:UiBinder> 
