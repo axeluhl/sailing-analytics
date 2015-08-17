@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboardView {
@@ -53,7 +53,7 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
 
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, regattaMetadatas);
+        QuickfinderPresenter.getRegattaLeaderboardsQuickfinder(quickFinderUi, currentPresenter, regattaMetadatas);
     }
     
     @Override

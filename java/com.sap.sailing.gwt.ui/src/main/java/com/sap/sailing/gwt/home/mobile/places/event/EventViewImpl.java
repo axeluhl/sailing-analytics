@@ -114,7 +114,7 @@ public class EventViewImpl extends Composite implements EventView {
     
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, regattaMetadatas);
+        QuickfinderPresenter.getRegattaLeaderboardsQuickfinder(quickFinderUi, currentPresenter, regattaMetadatas);
     }
     
     @Override

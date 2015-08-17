@@ -107,4 +107,10 @@ public class RacesActivity extends AbstractActivity implements Presenter {
     public PlaceNavigation<?> getEventNavigation() {
         return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
     }
+    
+    @Override
+    public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    }
 }
