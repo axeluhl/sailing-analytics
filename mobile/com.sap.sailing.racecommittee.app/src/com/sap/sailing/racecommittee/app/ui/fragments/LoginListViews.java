@@ -158,39 +158,39 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     }
 
     public class ToggleContainer {
-        private View rootView;
-        private FrameLayout frame;
-        private TextView text;
-        private RelativeLayout header;
-        private List<View> layouts;
+        private View mRootView;
+        private FrameLayout mFrame;
+        private TextView mText;
+        private RelativeLayout mHeader;
+        private List<View> mLayouts;
 
         public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text, List<View> layouts) {
-            this.rootView = rootView;
-            this.frame = frame;
-            this.text = text;
-            this.header = header;
-            this.layouts = layouts;
+            mRootView = rootView;
+            mFrame = frame;
+            mText = text;
+            mHeader = header;
+            mLayouts = layouts;
         }
 
         public void toggle() {
             final int[] pos = new int[2];
 
-            if (frame != null && frame.getLayoutParams() != null) {
+            if (mFrame != null && mFrame.getLayoutParams() != null) {
                 // open the frame
-                if (frame.getLayoutParams().height == 0) {
-                    frame.getLocationOnScreen(pos);
-                    if (!AppUtils.with(getActivity()).isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        if (layouts != null) {
-                            for (View view : layouts) {
+                if (mFrame.getLayoutParams().height == 0) {
+                    mFrame.getLocationOnScreen(pos);
+                    if (AppUtils.with(getActivity()).isPhoneLand()) {
+                        if (mLayouts != null) {
+                            for (View view : mLayouts) {
                                 setVisibility(view, View.GONE);
                             }
                         }
-                        rootView.getLocationOnScreen(pos);
-                        pos[1] += header.getMeasuredHeight();
+                        mRootView.getLocationOnScreen(pos);
+                        pos[1] += mHeader.getMeasuredHeight();
                     }
-                    frame.getLayoutParams().height = ScreenHelper.on(getActivity()).getScreenHeight() - pos[1];
-                    frame.requestLayout();
-                    setVisibility(text, View.GONE);
+                    mFrame.getLayoutParams().height = ScreenHelper.on(getActivity()).getScreenHeight() - pos[1];
+                    mFrame.requestLayout();
+                    setVisibility(mText, View.GONE);
                 } else {
                     close();
                 }
@@ -198,30 +198,30 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         }
 
         public void close() {
-            if (frame != null && frame.getLayoutParams() != null) {
+            if (mFrame != null && mFrame.getLayoutParams() != null) {
                 if (!AppUtils.with(getActivity()).isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    if (layouts != null) {
-                        for (View view : layouts) {
+                    if (mLayouts != null) {
+                        for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);
                         }
                     }
                 }
-                frame.getLayoutParams().height = 0;
-                frame.requestLayout();
-                setVisibility(text, View.VISIBLE);
+                mFrame.getLayoutParams().height = 0;
+                mFrame.requestLayout();
+                setVisibility(mText, View.VISIBLE);
             }
         }
 
         public boolean isClosed() {
-            return (frame != null && frame.getLayoutParams() != null && frame.getLayoutParams().height == 0);
+            return (mFrame != null && mFrame.getLayoutParams() != null && mFrame.getLayoutParams().height == 0);
         }
 
         public RelativeLayout getHeader() {
-            return this.header;
+            return this.mHeader;
         }
 
         public void setHeaderText(String header) {
-            text.setText(header);
+            mText.setText(header);
         }
 
         private void setVisibility(View view, int visibility) {

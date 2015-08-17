@@ -60,4 +60,8 @@ public class AppUtils {
             ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) || (
                 (screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE)));
     }
+
+    public boolean isPhoneLand() {
+        return !isTablet() && mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
 }

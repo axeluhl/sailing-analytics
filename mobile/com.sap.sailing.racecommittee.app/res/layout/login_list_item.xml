@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/listView_row_height"
+    android:minHeight="@dimen/listView_row_min_height"
     android:background="?sap_gray_black_30">
 
     <ImageView
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_26"
+            android:textSize="@dimen/textSize_20"
             tools:text="ListItem"/>
 
         <TextView
@@ -42,7 +42,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@id/list_item"
             android:textColor="?sap_light_gray"
-            android:textSize="@dimen/textSize_18"
+            android:textSize="@dimen/textSize_14"
             android:visibility="gone"
             tools:text="ListItemSubtitle"
             tools:visibility="visible"/>
@@ -50,7 +50,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/default_margin_half"

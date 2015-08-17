@@ -25,7 +25,8 @@
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
                 android:text="@string/label_login_events"
-                android:textAppearance="?textNormal"/>
+                android:textColor="?white"
+                android:textSize="@dimen/textSize_20"/>
 
             <ImageView
                 android:id="@+id/icon_event"
@@ -35,7 +36,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
+                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
 
             <TextView
                 android:id="@+id/selected_event"
@@ -84,7 +85,8 @@
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
                 android:text="@string/label_login_course_area"
-                android:textAppearance="?textNormal"/>
+                android:textColor="?white"
+                android:textSize="@dimen/textSize_20"/>
 
             <ImageView
                 android:id="@+id/icon_area"
@@ -94,7 +96,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
+                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
 
             <TextView
                 android:id="@+id/selected_area"
@@ -143,7 +145,8 @@
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
                 android:text="@string/label_login_position"
-                android:textAppearance="?textNormal"/>
+                android:textColor="?white"
+                android:textSize="@dimen/textSize_20"/>
 
             <ImageView
                 android:id="@+id/icon_position"
@@ -153,7 +156,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_grey600_24dp"/>
+                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
 
             <TextView
                 android:id="@+id/selected_position"
