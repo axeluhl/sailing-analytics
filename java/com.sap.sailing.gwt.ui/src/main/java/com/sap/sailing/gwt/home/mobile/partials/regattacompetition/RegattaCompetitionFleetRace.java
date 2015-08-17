@@ -25,7 +25,7 @@ public class RegattaCompetitionFleetRace extends UIObject {
 
     public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
         setElement(anchor = uiBinder.createAndBindUi(this));
-        anchor.setHref(raceViewerUrl);
+        if (raceViewerUrl != null) this.anchor.setHref(raceViewerUrl);
         local_res.css().ensureInjected();
         setupRaceState(race.getTrackingState(), race.getViewState());
         this.raceNameUi.setInnerText(race.getRaceName());
@@ -36,12 +36,12 @@ public class RegattaCompetitionFleetRace extends UIObject {
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
         if (viewState == RaceViewState.RUNNING) {
-             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_racelive());
+            anchor.addClassName(local_res.css().regattacompetition_phase_fleet_racelive());
         } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
-             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceplanned());
+            anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceplanned());
         }
         if (trackingState != RaceTrackingState.TRACKED_VALID_DATA) {
-             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
+            anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
         }
     }
 
