@@ -36,7 +36,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
+                android:src="?arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_event"
@@ -96,7 +96,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
+                android:src="?arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_area"
@@ -156,7 +156,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
-                android:src="@drawable/ic_arrow_drop_down_black_24dp"/>
+                android:src="?arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_position"
