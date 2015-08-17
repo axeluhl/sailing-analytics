@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
+import com.sap.sailing.gwt.home.mobile.partials.section.MobileSectionResources;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -34,10 +35,12 @@ public class RegattaCompetitionSeries extends Composite {
     @UiField FlowPanel fleetContainerUi;
 
     public RegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
+        MobileSectionResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
         initSubtitle(series.getCompetitorCount(), series.getRaceCount());
         initAnimation(sectionHeaderUi, fleetContainerUi, true);
+        addStyleName(MobileSectionResources.INSTANCE.css().sectionHeader());
     }
     
     private void initSubtitle(int competitorCount, int raceCount) {
