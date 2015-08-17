@@ -1,18 +1,18 @@
 package com.sap.sailing.gwt.home.mobile.partials.regattacompetition;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
+import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 
-public class RegattaCompetition extends Composite {
+public class RegattaCompetition extends Composite implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>> {
 
     private static RegattaCompetitionUiBinder uiBinder = GWT.create(RegattaCompetitionUiBinder.class);
 
@@ -20,13 +20,17 @@ public class RegattaCompetition extends Composite {
     }
 
     @UiField FlowPanel regattaSeriesContainerUi;
+    private final Presenter presenter;
     
-    public RegattaCompetition() {
+    public RegattaCompetition(Presenter presenter) {
+        this.presenter = presenter;
+        RegattaCompetitionResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     
-    public void showRaces(Presenter presenter, Collection<RaceCompetitionFormatSeriesDTO> seriesList) {
-        for (RaceCompetitionFormatSeriesDTO series : seriesList) {
+    @Override
+    public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+        for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
             RegattaCompetitionSeries regattaCompetitionSeries = new RegattaCompetitionSeries(series);
             int fleetCount = series.getFleets().size();
             for (RaceCompetitionFormatFleetDTO fleet : series.getFleets()) {
