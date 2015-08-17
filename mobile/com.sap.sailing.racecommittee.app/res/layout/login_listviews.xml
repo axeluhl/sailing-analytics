@@ -48,7 +48,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_22"
+                android:textSize="@dimen/textSize_18"
                 tools:text="Test-Event"/>
         </RelativeLayout>
 
@@ -108,7 +108,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_22"
+                android:textSize="@dimen/textSize_18"
                 tools:text="Selected Area"/>
         </RelativeLayout>
 
@@ -168,7 +168,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_22"
+                android:textSize="@dimen/textSize_18"
                 tools:text="Viewer"/>
         </RelativeLayout>
 
