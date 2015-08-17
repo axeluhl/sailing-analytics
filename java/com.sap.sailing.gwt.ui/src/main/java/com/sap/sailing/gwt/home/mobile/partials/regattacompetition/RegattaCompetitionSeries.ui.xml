@@ -4,10 +4,9 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources" />
-	<mp:section.MobileSection addStyleNames="{local_res.css.regattacompetition_phase}">
+	<mp:section.MobileSection addStyleNames="{res.mediaCss.column} {local_res.css.regattacompetition_phase}">
 		<mp:header>
-			<mp:sectionHeader.SectionHeaderContent 
-				addStyleNames="{res.mediaCss.column} {local_res.css.accordion_trigger}" ui:field="sectionHeaderUi" />
+			<mp:sectionHeader.SectionHeaderContent addStyleNames="{local_res.css.accordion_trigger}" ui:field="sectionHeaderUi" />
 		</mp:header>
 		<mp:content>
 			<g:FlowPanel addStyleNames="{local_res.css.accordion_content}" ui:field="fleetContainerUi" />

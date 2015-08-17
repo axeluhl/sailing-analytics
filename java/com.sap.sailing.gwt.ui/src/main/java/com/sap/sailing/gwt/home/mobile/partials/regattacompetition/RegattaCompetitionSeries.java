@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
+import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -23,7 +24,7 @@ public class RegattaCompetitionSeries extends Composite {
 
     private static RegattaCompetitionSeriesUiBinder uiBinder = GWT.create(RegattaCompetitionSeriesUiBinder.class);
 
-    interface RegattaCompetitionSeriesUiBinder extends UiBinder<Widget, RegattaCompetitionSeries> {
+    interface RegattaCompetitionSeriesUiBinder extends UiBinder<MobileSection, RegattaCompetitionSeries> {
     }
     
     private static final String ACCORDION_COLLAPSED_STYLE = RegattaCompetitionResources.INSTANCE.css().accordioncollapsed();
@@ -32,9 +33,11 @@ public class RegattaCompetitionSeries extends Composite {
     
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField FlowPanel fleetContainerUi;
+    private final MobileSection seriesUi;
 
     public RegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
-        initWidget(uiBinder.createAndBindUi(this));
+        initWidget(seriesUi = uiBinder.createAndBindUi(this));
+        seriesUi.setEdgeToEdgeContent(true);
         sectionHeaderUi.setSectionTitle(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
         initSubtitle(series.getCompetitorCount(), series.getRaceCount());
         initAnimation(sectionHeaderUi, fleetContainerUi, true);
