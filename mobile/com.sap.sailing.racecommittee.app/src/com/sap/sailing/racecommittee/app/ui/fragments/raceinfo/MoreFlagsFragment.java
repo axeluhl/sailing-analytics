@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -108,7 +108,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-            mTimePicker = ViewHolder.get(layout, R.id.time_picker);
+            mTimePicker = ViewHelper.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
                 Calendar calendar = Calendar.getInstance();
                 ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
@@ -117,14 +117,14 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 mTimePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
             }
 
-            mCurrentTime = ViewHolder.get(layout, R.id.current_time);
+            mCurrentTime = ViewHelper.get(layout, R.id.current_time);
 
-            View finishCurrent = ViewHolder.get(layout, R.id.finish_current);
+            View finishCurrent = ViewHelper.get(layout, R.id.finish_current);
             if (finishCurrent != null) {
                 finishCurrent.setOnClickListener(this);
             }
 
-            View finishCustom = ViewHolder.get(layout, R.id.finish_custom);
+            View finishCustom = ViewHelper.get(layout, R.id.finish_custom);
             if (finishCustom != null) {
                 finishCustom.setOnClickListener(this);
             }
@@ -138,24 +138,24 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             switch (getArguments().getInt(START_MODE, 0)) {
             case 1: // Race-State: Finishing -> End Finishing
-                View header = ViewHolder.get(getView(), R.id.header_text);
+                View header = ViewHelper.get(getView(), R.id.header_text);
                 if (header != null) {
                     header.setOnClickListener(this);
                 }
 
-                View back = ViewHolder.get(getView(), R.id.header_back);
+                View back = ViewHelper.get(getView(), R.id.header_back);
                 if (back != null) {
                     back.setVisibility(View.VISIBLE);
                 }
 
-                ImageView flag = ViewHolder.get(getView(), R.id.header_flag);
+                ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                 if (flag != null) {
                     int resId = R.drawable.flag_blue_48dp;
                     Drawable drawable = BitmapHelper.getDrawable(getActivity(), resId);
                     flag.setImageDrawable(drawable);
                 }
 
-                TextView headline = ViewHolder.get(getView(), R.id.header_headline);
+                TextView headline = ViewHelper.get(getView(), R.id.header_headline);
                 if (headline != null) {
                     headline.setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
                 }

@@ -45,12 +45,7 @@ public class CheckinManager {
 
     public void callServerAndGenerateCheckinData() {
         Uri uri = Uri.parse(url);
-
-        // TODO: assuming scheme is http, is this valid?
         String scheme = uri.getScheme();
-        if (scheme != "http" && scheme != "https") {
-            scheme = "http";
-        }
 
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
         if (urlData == null) {

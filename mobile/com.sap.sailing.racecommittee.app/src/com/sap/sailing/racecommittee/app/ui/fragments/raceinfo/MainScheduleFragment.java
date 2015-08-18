@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -78,43 +78,43 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         mStateListener = new RaceStateChangedListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        View startTime = ViewHolder.get(layout, R.id.start_time);
+        View startTime = ViewHelper.get(layout, R.id.start_time);
         if (startTime != null) {
             startTime.setOnClickListener(this);
         }
-        mStartTimeTextView = ViewHolder.get(layout, R.id.start_time_value);
+        mStartTimeTextView = ViewHelper.get(layout, R.id.start_time_value);
 
-        View startProcedure = ViewHolder.get(layout, R.id.start_procedure);
+        View startProcedure = ViewHelper.get(layout, R.id.start_procedure);
         if (startProcedure != null) {
             startProcedure.setOnClickListener(this);
         }
 
-        mStartProcedureValue = ViewHolder.get(layout, R.id.start_procedure_value);
+        mStartProcedureValue = ViewHelper.get(layout, R.id.start_procedure_value);
 
-        mStartModeView = ViewHolder.get(layout, R.id.start_mode);
+        mStartModeView = ViewHelper.get(layout, R.id.start_mode);
         if (mStartModeView != null) {
             mStartModeView.setOnClickListener(this);
         }
-        mStartModeTextView = ViewHolder.get(layout, R.id.start_mode_value);
-        mStartModeImageView = ViewHolder.get(layout, R.id.start_mode_flag);
+        mStartModeTextView = ViewHelper.get(layout, R.id.start_mode_value);
+        mStartModeImageView = ViewHelper.get(layout, R.id.start_mode_flag);
 
-        View course = ViewHolder.get(layout, R.id.start_course);
+        View course = ViewHelper.get(layout, R.id.start_course);
         if (course != null) {
             course.setOnClickListener(this);
         }
-        mCourseImageView = ViewHolder.get(layout, R.id.start_course_symbol);
-        mCourseTextView = ViewHolder.get(layout, R.id.start_course_value);
+        mCourseImageView = ViewHelper.get(layout, R.id.start_course_symbol);
+        mCourseTextView = ViewHelper.get(layout, R.id.start_course_value);
 
-        View start = ViewHolder.get(layout, R.id.start_race);
+        View start = ViewHelper.get(layout, R.id.start_race);
         if (start != null) {
             start.setOnClickListener(this);
         }
 
-        View wind = ViewHolder.get(layout, R.id.wind);
+        View wind = ViewHelper.get(layout, R.id.wind);
         if (wind != null) {
             wind.setOnClickListener(this);
         }
-        mWindValue = ViewHolder.get(layout, R.id.wind_value);
+        mWindValue = ViewHelper.get(layout, R.id.wind_value);
 
         return layout;
     }

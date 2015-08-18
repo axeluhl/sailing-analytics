@@ -75,6 +75,8 @@ public class RegattaActivity extends AbstractRegattaActivity {
         }
         RegattaFragment regattaFragment = new RegattaFragment();
         replaceFragment(R.id.content_frame, regattaFragment);
+
+        startMarkerService();
     }
 
     @Override
@@ -87,9 +89,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, MarkerService.class);
-        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
-        startService(intent);
         Intent messageSendingServiceIntent = new Intent(this, MessageSendingService.class);
         bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -170,6 +169,12 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
+    }
+
+    private void startMarkerService() {
+        Intent intent = new Intent(this, MarkerService.class);
+        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
+        startService(intent);
     }
 
     private void checkOut(){

@@ -51,7 +51,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
     private final int strictnessOfDistanceBasedProbability = 8;
 
-    // All of the penalties are multiplied onto the propability of a Candidate. A value of 0 exludes Candidates that do
+    // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
     private final double penaltyForWrongSide = 0.7;
     private final double penaltyForWrongDirection = 0.7;
@@ -697,7 +697,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance) {
         Distance legLength = getLegLength(t, w);
         if (legLength != null) {
-            double result = 1 / (strictnessOfDistanceBasedProbability/* Raising this will make is stricter */
+            double result = 1 / (strictnessOfDistanceBasedProbability/* Raising this will make it stricter */
                     * Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
             return result;
         }

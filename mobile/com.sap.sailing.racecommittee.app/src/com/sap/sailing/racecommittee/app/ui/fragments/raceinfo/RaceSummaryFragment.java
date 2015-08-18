@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.common.Wind;
@@ -41,16 +41,16 @@ public class RaceSummaryFragment extends BaseFragment {
         mRaceStateListener = new RaceStateListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        mStartTime = ViewHolder.get(layout, R.id.race_start_time);
-        mFinishStartTime = ViewHolder.get(layout, R.id.race_finish_begin_time);
-        mFinishStartDuration = ViewHolder.get(layout, R.id.race_finish_begin_duration);
-        mFinishEndTime = ViewHolder.get(layout, R.id.race_finish_end_time);
-        mFinishEndDuration = ViewHolder.get(layout, R.id.race_finish_end_duration);
-        mFinishDuration = ViewHolder.get(layout, R.id.race_finish_duration);
-        mRegionWind = ViewHolder.get(layout, R.id.region_wind);
-        mRegionRecall = ViewHolder.get(layout, R.id.region_individual_recalls);
+        mStartTime = ViewHelper.get(layout, R.id.race_start_time);
+        mFinishStartTime = ViewHelper.get(layout, R.id.race_finish_begin_time);
+        mFinishStartDuration = ViewHelper.get(layout, R.id.race_finish_begin_duration);
+        mFinishEndTime = ViewHelper.get(layout, R.id.race_finish_end_time);
+        mFinishEndDuration = ViewHelper.get(layout, R.id.race_finish_end_duration);
+        mFinishDuration = ViewHelper.get(layout, R.id.race_finish_duration);
+        mRegionWind = ViewHelper.get(layout, R.id.region_wind);
+        mRegionRecall = ViewHelper.get(layout, R.id.region_individual_recalls);
 
-        View editStartTime = ViewHolder.get(layout, R.id.edit_race_start_time);
+        View editStartTime = ViewHelper.get(layout, R.id.edit_race_start_time);
         if (editStartTime != null) {
             editStartTime.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -60,7 +60,7 @@ public class RaceSummaryFragment extends BaseFragment {
             });
         }
 
-        View editFinishingTime = ViewHolder.get(layout, R.id.edit_race_finish_begin_time);
+        View editFinishingTime = ViewHelper.get(layout, R.id.edit_race_finish_begin_time);
         if (editFinishingTime != null) {
             editFinishingTime.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -70,7 +70,7 @@ public class RaceSummaryFragment extends BaseFragment {
             });
         }
 
-        View editFinishedTime = ViewHolder.get(layout, R.id.edit_race_finish_end_time);
+        View editFinishedTime = ViewHelper.get(layout, R.id.edit_race_finish_end_time);
         if (editFinishedTime != null) {
             editFinishedTime.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -147,13 +147,13 @@ public class RaceSummaryFragment extends BaseFragment {
     
                 Wind wind = getRaceState().getWindFix();
     
-                TextView direction = ViewHolder.get(getView(), R.id.wind_direction);
+                TextView direction = ViewHelper.get(getView(), R.id.wind_direction);
                 if (direction != null) {
                     String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
                     direction.setText(wind_direction);
                 }
     
-                TextView speed = ViewHolder.get(getView(), R.id.wind_speed);
+                TextView speed = ViewHelper.get(getView(), R.id.wind_speed);
                 if (speed != null) {
                     String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
                     speed.setText(wind_speed);

@@ -34,7 +34,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
@@ -63,21 +63,21 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = ViewHolder.get(layout, R.id.mark_header);
-        latitudeTextView = ViewHolder.get(layout, R.id.marker_gps_latitude);
-        longitudeTextView = ViewHolder.get(layout, R.id.marker_gps_longitude);
-        accuracyTextView = ViewHolder.get(layout, R.id.marker_gps_accuracy);
+        markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
+        latitudeTextView = ViewHelper.get(layout, R.id.marker_gps_latitude);
+        longitudeTextView = ViewHelper.get(layout, R.id.marker_gps_longitude);
+        accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
         ClickListener clickListener = new ClickListener();
 
-        setPositionButton = ViewHolder.get(layout, R.id.marker_set_position_button);
+        setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
 
-        resetPositionButton = ViewHolder.get(layout, R.id.marker_reset_position_button);
+        resetPositionButton = ViewHelper.get(layout, R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
         resetPositionButton.setVisibility(View.GONE);
 
-        signalQualityIndicatorView = ViewHolder.get(layout, R.id.signal_quality_indicator);
+        signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
 
         mReceiver = new IntentReceiver();

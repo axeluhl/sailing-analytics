@@ -104,6 +104,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String eventName();
     String event();
     String startTime();
+    String startOfTracking();
+    String endOfTracking();
     String regatta();
     String regattas();
     String startTracking();
@@ -965,6 +967,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String setStartTime();
     String currentPass();
     String setStartTimeDescription();
+    String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
@@ -1029,6 +1032,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pingPosition(String whose);
     String pleaseEnterAValidValueFor(String what, String validTemplate);
     String copyCourseAndCompetitors();
+    String setTrackingTimes();
     String nowSelectRaceColumnAndFleetToCopyTo();
     String selectRowInTableToCopyCourse();
     String deviceId();

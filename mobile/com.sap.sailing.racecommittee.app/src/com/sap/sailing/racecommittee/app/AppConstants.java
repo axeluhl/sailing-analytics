@@ -73,4 +73,6 @@ public class AppConstants {
 
     public final static String INTENT_ACTION_IS_TRACKING = PACKAGE_NAME + "action.is.tracking";
     public final static String INTENT_ACTION_IS_TRACKING_EXTRA = PACKAGE_NAME + "action.is.tracking.extra";
+
+    public final static String GWT_MAP_AND_WIND_CHART_HTML = "gwt/EmbeddedMapAndWindChart.html";
 }

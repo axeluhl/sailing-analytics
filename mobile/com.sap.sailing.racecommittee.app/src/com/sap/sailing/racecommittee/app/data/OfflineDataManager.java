@@ -243,6 +243,12 @@ public class OfflineDataManager extends DataManager {
     }
 
     @Override
+    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation,
+        boolean showMapControls) {
+        throw new IllegalStateException("No wind map in offline mode.");
+    }
+
+    @Override
     public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
             PositionListFragment positionListFragment) {
         // TODO Auto-generated method stub
