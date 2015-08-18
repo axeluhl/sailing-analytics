@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
-import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -38,7 +37,7 @@ public class MobileActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place rawPlace) {
         Place place = placeUpdater.getRealPlace(rawPlace);
-        if (!(place instanceof HasMobileVersion)) {
+        if (!SwitchingEntryPoint.hasMobileVersion(place)) {
             GWT.log("Place has no mobile view: " + place.getClass().getName());
             SwitchingEntryPoint.reloadApp();
             return null;
