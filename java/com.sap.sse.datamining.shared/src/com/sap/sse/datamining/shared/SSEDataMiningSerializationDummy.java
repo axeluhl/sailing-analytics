@@ -11,6 +11,7 @@ public final class SSEDataMiningSerializationDummy implements Serializable {
     
     private GenericGroupKey<String> groupKey;
     private ClusterDTO cluster;
+    private Number n;
     
     private SSEDataMiningSerializationDummy() { }
     

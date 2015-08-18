@@ -18,14 +18,14 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class MultiResultsPresenter implements ResultsPresenter<Number> {
+public class MultiResultsPresenter implements ResultsPresenter {
     
     private final StringMessages stringMessages;
     
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor> presentersListBox;
-    private ResultsPresenter<Number> currentPresenter;
+    private ResultsPresenter currentPresenter;
 
     private List<Descriptor> availableDescriptors;
     
@@ -59,7 +59,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         setCurrentPresenter(availableDescriptors.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls<Number> presenter) {
+    private void setCurrentPresenter(ResultsPresenterWithControls presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
@@ -79,12 +79,12 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
     }
 
     @Override
-    public QueryResultDTO<Number> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return currentPresenter.getCurrentResult();
     }
 
     @Override
-    public void showResult(QueryResultDTO<Number> result) {
+    public void showResult(QueryResultDTO<?> result) {
         for (Descriptor descriptor : availableDescriptors) {
             descriptor.getPresenter().showResult(result);
         }
@@ -115,13 +115,13 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         
         public String getName();
         
-        public ResultsPresenterWithControls<Number> getPresenter();
+        public ResultsPresenterWithControls getPresenter();
         
     }
     
     private class PlainDescriptor implements Descriptor {
         
-        private final AbstractResultsPresenter<Number> presenter;
+        private final AbstractResultsPresenter presenter;
         
         public PlainDescriptor() {
             presenter = new PlainResultsPresenter(stringMessages);
@@ -133,7 +133,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         }
         
         @Override
-        public AbstractResultsPresenter<Number> getPresenter() {
+        public AbstractResultsPresenter getPresenter() {
             return presenter;
         }
         
@@ -153,7 +153,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         }
 
         @Override
-        public AbstractResultsPresenter<Number> getPresenter() {
+        public AbstractResultsPresenter getPresenter() {
             return presenter;
         }
         

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.datamining.shared.dto.DistanceDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO> {
     
@@ -23,17 +24,18 @@ public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO
     }
 
     @Override
-    public Collection<? extends Object> getDataKeys() {
+    public Collection<String> getDataKeys() {
         return dataKeys;
+    }
+    
+    @Override
+    public boolean acceptsResultsOfType(String type) {
+        return getResultType().getName().equals(type);
     }
 
     @Override
-    protected Number getData(DistanceDTO distance, Object dataKey) {
-        if (!(dataKey instanceof String)) {
-            throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
-        }
-        String dataKeyString = (String) dataKey;
-        switch (dataKeyString) {
+    protected Number getData(DistanceDTO distance, String dataKey) {
+        switch (dataKey) {
         case "Geographical Miles":
             return distance.getGeographicalMiles();
         case "Sea Miles":
@@ -50,6 +52,11 @@ public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO
             return distance.getCentralAngleRadian();
         }
         throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
+    }
+    
+    @Override
+    public String getDefaultDataKeyFor(QueryResultDTO<?> result) {
+        return dataKeys.get(0);
     }
 
 }

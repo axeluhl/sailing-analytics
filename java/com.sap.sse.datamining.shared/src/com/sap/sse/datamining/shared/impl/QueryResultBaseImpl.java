@@ -20,7 +20,7 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    protected QueryResultBaseImpl() {
+    public QueryResultBaseImpl() {
     }
 
     public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results) {

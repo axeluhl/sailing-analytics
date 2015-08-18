@@ -18,23 +18,28 @@ public abstract class AbstractResultDataProvider<ResultType> {
     public Class<ResultType> getResultType() {
         return resultType;
     }
+
+    public abstract Collection<String> getDataKeys();
     
-    /**
-     * 
-     * @return Collection of the keys for the provided data.
-     *         The method <code>toString()</code> can be used to display the keys.
-     */
-    public abstract Collection<? extends Object> getDataKeys();
-    
-    public Map<GroupKey, Number> getData(QueryResultDTO<ResultType> result, Object dataKey) {
+    public Map<GroupKey, Number> getData(QueryResultDTO<?> result, String dataKey) {
+        if (!acceptsResultsOfType(result.getResultType())) {
+            throw new IllegalArgumentException("This data provider doesn't work for results of the type '" + result.getResultType() + "'");
+        }
+        
         Map<GroupKey, Number> data = new HashMap<>();
-        Map<GroupKey, ResultType> results = result.getResults();
+        Map<GroupKey, ?> results = result.getResults();
         for (GroupKey groupKey : results.keySet()) {
-            data.put(groupKey, getData(results.get(groupKey), dataKey));
+            @SuppressWarnings("unchecked")
+            ResultType value = (ResultType) results.get(groupKey);
+            data.put(groupKey, getData(value, dataKey));
         }
         return data;
     }
 
-    protected abstract Number getData(ResultType result, Object dataKey);
+    public abstract boolean acceptsResultsOfType(String type);
+
+    protected abstract Number getData(ResultType result, String dataKey);
+
+    public abstract String getDefaultDataKeyFor(QueryResultDTO<?> result);
     
 }

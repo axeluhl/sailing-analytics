@@ -21,7 +21,7 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
  * @author Frederik Petersen D054528
  * 
  */
-public class PolarChart implements ResultsPresenter<Number> {
+public class PolarChart implements ResultsPresenter {
 
     private final Chart chart = createPolarChartWidget();
 
@@ -44,9 +44,9 @@ public class PolarChart implements ResultsPresenter<Number> {
     }
 
     @Override
-    public void showResult(QueryResultDTO<Number> result) {
+    public void showResult(QueryResultDTO<?> result) {
         resetChartData();
-        Map<GroupKey, Number> results = result.getResults();
+        Map<GroupKey, Number> results = (Map<GroupKey, Number>) result.getResults();
         if (!results.isEmpty()) {
             for (Entry<GroupKey, Number> resultEntry : results.entrySet()) {
                 GroupKey key = resultEntry.getKey();

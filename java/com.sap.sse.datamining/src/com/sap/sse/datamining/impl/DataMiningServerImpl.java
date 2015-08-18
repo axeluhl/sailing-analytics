@@ -336,7 +336,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result) {
-        return new QueryResultDTO<ResultType>(result.getState(), result.getResultType().getName(), result.getResults(), result.getAdditionalData());
+        return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
     }
     
     

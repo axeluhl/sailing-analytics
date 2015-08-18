@@ -19,17 +19,16 @@ public class QueryResultDTO<ResultType> extends QueryResultBaseImpl<ResultType> 
      */
     @Deprecated
     QueryResultDTO() {
-        super();
     }
 
-    public QueryResultDTO(QueryResultState state, String resultTypeName, Map<GroupKey, ResultType> results) {
-        this(state, resultTypeName, results, new NullAdditionalResultData());
+    public QueryResultDTO(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results) {
+        this(state, resultType, results, new NullAdditionalResultData());
     }
 
-    public QueryResultDTO(QueryResultState state, String resultTypeName, Map<GroupKey, ResultType> results,
+    public QueryResultDTO(QueryResultState state, Class<ResultType> resultType, Map<GroupKey, ResultType> results,
             AdditionalResultData additionalData) {
         super(state, results, additionalData);
-        this.resultTypeName = resultTypeName;
+        this.resultTypeName = resultType.getName();
     }
 
     public String getResultType() {
