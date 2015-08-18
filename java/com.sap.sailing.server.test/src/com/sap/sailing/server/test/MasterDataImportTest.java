@@ -45,6 +45,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -403,6 +404,13 @@ public class MasterDataImportTest {
         Assert.assertEquals(wind, ((RaceLogWindFixEvent) raceColumnOnTarget.getRaceLog(fleet1OnTarget)
                 .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
         
+        // Add new event to check persistence of post-import events (see bug 3230)
+        TimePoint logTimePoint5 = new MillisecondsTimePoint(1372489202000L);
+        UUID postImportEventId = UUID.randomUUID();
+        raceColumnOnTarget.getRaceLog(fleet1OnTarget).add(
+                new RaceLogStartTimeEventImpl(logTimePoint5, author, logTimePoint5, UUID.randomUUID(),
+                        new ArrayList<Competitor>(), 3, logTimePoint5));
+        
         // Check for regatta log event
         RegattaLogRegisterCompetitorEvent registerEventOnTarget = (RegattaLogRegisterCompetitorEvent)
                 regattaOnTarget.getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
@@ -419,6 +427,8 @@ public class MasterDataImportTest {
         RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
         Assert.assertEquals(logEvent.getId(), raceLog2.getFirstRawFixAtOrAfter(logTimePoint).getId());
+        
+        Assert.assertEquals(postImportEventId, raceLog2.getFirstRawFixAtOrAfter(logTimePoint5).getId());
         
         // Check for persisting of regatta log events
         Regatta regattaOnTarget2 = dest2.getRegattaByName(TEST_LEADERBOARD_NAME);
