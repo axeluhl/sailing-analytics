@@ -14,5 +14,10 @@ public interface RaceLogStore {
     void removeRaceLog(RaceLogIdentifier identifier);
 
     void removeListenersAddedByStoreFrom(RaceLog raceLogAvailable);
+    
+    /**
+     * Adds the mongo listener to the raceLog and adds raceLog to cache.
+     */
+    void addImportedRaceLog(RaceLog raceLog, RaceLogIdentifier identifier);
 
 }
