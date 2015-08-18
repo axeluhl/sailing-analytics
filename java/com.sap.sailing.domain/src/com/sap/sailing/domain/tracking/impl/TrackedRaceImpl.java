@@ -1795,34 +1795,34 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return startTimeReceived;
     }
 
-    protected void setStartOfTrackingReceived(final TimePoint startOfTracking) {
+    protected void setStartOfTrackingReceived(final TimePoint startOfTracking, final boolean waitForGPSFixesToLoad) {
         final TimePoint oldStartOfTracking = this.startOfTrackingReceived;
         this.startOfTrackingReceived = startOfTracking;
         if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
                 (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
             logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+startOfTracking);
-            loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking);
+            loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
         }
     }
 
-    private void loadGPSFixesForExtendedTimeRange(final TimePoint start, final TimePoint end) {
+    private void loadGPSFixesForExtendedTimeRange(final TimePoint start, final TimePoint end, final boolean waitForGPSFixesToLoad) {
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
             loadFixesForLog(raceLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
-                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end);
+                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
         }
         for (final RegattaLog regattaLog : attachedRegattaLogs.values()) {
             loadFixesForLog(regattaLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
-                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end);
+                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
         }
     }
 
-    protected void setEndOfTrackingReceived(final TimePoint endOfTracking) {
+    protected void setEndOfTrackingReceived(final TimePoint endOfTracking, final boolean waitForGPSFixesToLoad) {
         final TimePoint oldEndOfTracking = this.endOfTrackingReceived;
         this.endOfTrackingReceived = endOfTracking;
         if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
                 (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
             logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+endOfTracking);
-            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking);
+            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking, waitForGPSFixesToLoad);
         }
     }
 
@@ -3164,13 +3164,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * <code>addLogToMap</code>.
      */
     private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
-            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap) {
+            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap, final boolean waitForGPSFixesToLoad) {
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
             final TimePoint startOfTimeWindowToLoad = getStartOfTracking();
             final TimePoint endOfTimeWindowToLoad = getEndOfTracking();
-            loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
+            loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
         }
@@ -3197,8 +3197,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(final LogT log,
             ConcurrentHashMap<Serializable, LogT> addLogToMap, final TimePoint startOfTimeWindowToLoad,
-            final TimePoint endOfTimeWindowToLoad) {
-        new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
+            final TimePoint endOfTimeWindowToLoad, final boolean waitForGPSFixesToLoad) {
+        Thread t = new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
                 + log.getId()+" from "+startOfTimeWindowToLoad+" to "+endOfTimeWindowToLoad) {
             @Override
             public void run() {
@@ -3243,7 +3243,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.info("Thread "+getName()+" done.");
                 }
             }
-        }.start();
+        };
+        t.start();
+        if (waitForGPSFixesToLoad) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, "Got interrupted while waiting for loading of GPS fixes from log "+log+" to finish", e);
+            }
+        }
     }
 
     /**
@@ -3261,7 +3269,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public void attachRaceLog(final RaceLog raceLog) {
-        loadFixesForLog(raceLog, attachedRaceLogs);
+        loadFixesForLog(raceLog, attachedRaceLogs, /* wait for fixes to load */ false);
     }
 
     @Override
@@ -3306,7 +3314,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        loadFixesForLog(regattaLog, attachedRegattaLogs);
+        loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
     }
 
     @Override

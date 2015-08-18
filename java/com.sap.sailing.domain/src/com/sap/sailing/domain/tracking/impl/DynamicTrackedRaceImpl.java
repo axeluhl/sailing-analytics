@@ -624,16 +624,28 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
+        setStartOfTrackingReceived(startOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
+    }
+
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
         if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
-            super.setStartOfTrackingReceived(startOfTrackingReceived);
+            super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
             notifyListenersStartOfTrackingChanged(getStartOfTracking());
         }
     }
 
     @Override
     public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
+        setEndOfTrackingReceived(endOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
+    }
+    
+    /**
+     * Non-interface method, mainly for testing purposes; callers can ask to wait for the loading of fixes in the
+     * potentially extended tracking interval to finish before returning from this method.
+     */
+    public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
         if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
-            super.setEndOfTrackingReceived(endOfTrackingReceived);
+            super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
             notifyListenersEndOfTrackingChanged(getEndOfTracking());
         }
     }

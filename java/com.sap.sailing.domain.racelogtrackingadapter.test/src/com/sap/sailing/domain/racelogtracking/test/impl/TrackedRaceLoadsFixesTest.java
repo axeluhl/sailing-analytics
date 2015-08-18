@@ -84,61 +84,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
-        final Object mutex = new Object();
-        final boolean[] doneLoading = new boolean[1];
-        new Thread(() -> { 
-            synchronized (trackedRace) {
-                while (!trackedRace.isLoadingFromGPSFixStore()) {
-                    try {
-                        trackedRace.wait();
-                        if (trackedRace.isLoadingFromGPSFixStore()) {
-                            synchronized (mutex) {
-                                doneLoading[0] = true;
-                                mutex.notifyAll();
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
-        trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500));
-        // now wait for fixes to finish loading:
-        while (!doneLoading[0]) {
-            synchronized (mutex) {
-                mutex.wait(10000);
-            }
-        }
-        doneLoading[0] = false;
+        trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500), /* wait for fixes to load */ true);
         testNumberOfRawFixes(trackedRace.getTrack(comp), 2);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
-        new Thread(() -> { 
-            synchronized (trackedRace) {
-                while (!trackedRace.isLoadingFromGPSFixStore()) {
-                    try {
-                        trackedRace.wait();
-                        if (trackedRace.isLoadingFromGPSFixStore()) {
-                            synchronized (mutex) {
-                                doneLoading[0] = true;
-                                mutex.notifyAll();
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
-        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0));
-        // now wait for fixes to finish loading:
-        while (!doneLoading[0]) {
-            synchronized (mutex) {
-                mutex.wait(10000);
-            }
-        }
-        doneLoading[0] = false;
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0), /* wait for fixes to load */ true);
         testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
     }
