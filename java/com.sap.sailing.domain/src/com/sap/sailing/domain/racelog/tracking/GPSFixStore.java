@@ -27,6 +27,13 @@ public interface GPSFixStore {
     /**
      * Load all fixes within the start and end time point (inclusive) that correspond to the
      * {@link DeviceCompetitorMappingEvent}s found in the {@code raceLog}.
+     * 
+     * @param start
+     *            if <code>null</code>, the start of the time range for which to load fixes is only constrained by the
+     *            device mapping intervals
+     * @param end
+     *            if <code>null</code>, the end of the time range for which to load fixes is only constrained by the
+     *            device mapping intervals
      */
     void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
             Competitor competitor, TimePoint start, TimePoint end) throws TransformationException;
@@ -40,6 +47,13 @@ public interface GPSFixStore {
     /**
      * Load all fixes within the start and end time point (inclusive) that correspond to the
      * {@link DeviceMarkMappingEvent}s found in the {@code raceLog}.
+     * 
+     * @param start
+     *            if <code>null</code>, the start of the time range for which to load fixes is only constrained by the
+     *            device mapping intervals
+     * @param end
+     *            if <code>null</code>, the end of the time range for which to load fixes is only constrained by the
+     *            device mapping intervals
      */
     void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark, TimePoint start,
             TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException;

@@ -73,7 +73,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
-        DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
@@ -84,11 +84,61 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        final Object mutex = new Object();
+        final boolean[] doneLoading = new boolean[1];
+        new Thread(() -> { 
+            synchronized (trackedRace) {
+                while (!trackedRace.isLoadingFromGPSFixStore()) {
+                    try {
+                        trackedRace.wait();
+                        if (trackedRace.isLoadingFromGPSFixStore()) {
+                            synchronized (mutex) {
+                                doneLoading[0] = true;
+                                mutex.notifyAll();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
         // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500));
+        // now wait for fixes to finish loading:
+        while (!doneLoading[0]) {
+            synchronized (mutex) {
+                mutex.wait(10000);
+            }
+        }
+        doneLoading[0] = false;
         testNumberOfRawFixes(trackedRace.getTrack(comp), 2);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
+        new Thread(() -> { 
+            synchronized (trackedRace) {
+                while (!trackedRace.isLoadingFromGPSFixStore()) {
+                    try {
+                        trackedRace.wait();
+                        if (trackedRace.isLoadingFromGPSFixStore()) {
+                            synchronized (mutex) {
+                                doneLoading[0] = true;
+                                mutex.notifyAll();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0));
+        // now wait for fixes to finish loading:
+        while (!doneLoading[0]) {
+            synchronized (mutex) {
+                mutex.wait(10000);
+            }
+        }
+        doneLoading[0] = false;
         testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
     }
