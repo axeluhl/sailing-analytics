@@ -151,7 +151,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final WindImpl masterWindFix = new WindImpl(new DegreePosition(12, 13), MillisecondsTimePoint.now(), 
                 new KnotSpeedWithBearingImpl(12.7, new DegreeBearingImpl(123)));
         masterR1RaceLog.add(RaceLogEventFactoryImpl.INSTANCE.createWindFixEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0),
-                /* passId */ 1, masterWindFix));
+                /* passId */ 1, masterWindFix, /* isMagnetic */ false));
         // assert that the wind fix shows up in the tracked race now because the tracked race has the DynamicTrackedRaceLogListener
         // propagating the wind fix race log event into the wind track for source RACECOMMITTEE
         WindTrack masterRCWindFixes = masterTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));
@@ -224,7 +224,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final WindImpl replicaWindFix = new WindImpl(new DegreePosition(14, 15), MillisecondsTimePoint.now(), 
                 new KnotSpeedWithBearingImpl(22.9, new DegreeBearingImpl(155)));
         replicaR1RaceLog.add(RaceLogEventFactoryImpl.INSTANCE.createWindFixEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0),
-                /* passId */ 1, replicaWindFix));
+                /* passId */ 1, replicaWindFix, /* isMagnetic */ false));
         // assert that the wind fix shows up in the tracked race now because the tracked race has the DynamicTrackedRaceLogListener
         // propagating the wind fix race log event into the wind track for source RACECOMMITTEE
         WindTrack replicaRCWindFixes = replicaTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));

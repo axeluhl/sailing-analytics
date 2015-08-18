@@ -30,16 +30,16 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * TODO: this class could be a good place to leverage more information about a race containing in the {@link RaceLog}.
- * This includes for example the {@link RaceLogRaceStatus} indicating the current race's start.
+ * Listens for changes on a {@link RaceLog} and forwards the relevant ones to a {@link TrackedRace}. Examples: start time changes;
+ * fixed mark passings changes; course design changes; wind fixes entered by the race committee.<p>
  */
 public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
@@ -227,6 +227,10 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogWindFixEvent event) {
         // add the wind fix to the race committee WindTrack
+        final Wind wind;
+        if (event.isMagnetic()) {
+            final DeclinationService declinationService;
+        }
         trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
     }
 

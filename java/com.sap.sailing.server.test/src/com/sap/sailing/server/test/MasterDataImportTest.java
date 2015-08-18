@@ -259,7 +259,7 @@ public class MasterDataImportTest {
         Position p = new DegreePosition(3, 3);
         Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
         RaceLogWindFixEvent windEvent = factory.createWindFixEvent(logTimePoint2, author, UUID.randomUUID(),
-                new ArrayList<Competitor>(), 2, wind);
+                new ArrayList<Competitor>(), 2, wind, /* isMagnetic */ false);
         raceColumn.getRaceLog(testFleet1).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
         storedLogUUIDs.add(windEvent.getId());
@@ -2073,7 +2073,7 @@ public class MasterDataImportTest {
         Position p = new DegreePosition(3, 3);
         Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
         RaceLogWindFixEvent windEvent = factory.createWindFixEvent(logTimePoint2, author, UUID.randomUUID(),
-                new ArrayList<Competitor>(), 2, wind);
+                new ArrayList<Competitor>(), 2, wind, /* isMagnetic */ false);
         raceColumnOnLeaderboard.getRaceLog(defaultFleet).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
         storedLogUUIDs.add(windEvent.getId());
