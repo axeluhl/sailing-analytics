@@ -405,10 +405,10 @@ public class MasterDataImportTest {
                 .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
         
         // Add new event to check persistence of post-import events (see bug 3230)
-        TimePoint logTimePoint5 = new MillisecondsTimePoint(1372489202000L);
+        TimePoint logTimePoint5 = new MillisecondsTimePoint(1372489310000L);
         UUID postImportEventId = UUID.randomUUID();
         raceColumnOnTarget.getRaceLog(fleet1OnTarget).add(
-                new RaceLogStartTimeEventImpl(logTimePoint5, author, logTimePoint5, UUID.randomUUID(),
+                new RaceLogStartTimeEventImpl(logTimePoint5, author, logTimePoint5, postImportEventId,
                         new ArrayList<Competitor>(), 3, logTimePoint5));
         
         // Check for regatta log event
