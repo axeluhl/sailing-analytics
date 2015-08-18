@@ -21,5 +21,9 @@ public class ExperimentalFeatures {
      * Provide option to show races in competition format
      */
     public static final boolean SHOW_RACES_COMPETITION_FORMAT = false;
+    /**
+     * Provide option to show races (competition format) on mobile devices
+     */
+    public static final boolean SHOW_RACES_ON_MOBILE = false;
     
 }

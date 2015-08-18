@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
 import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RegattasAndLiveRacesDTO;
@@ -60,7 +61,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
     
     private RegattaStatusRegatta addRegatta(MobileSection container, RegattaMetadataDTO regatta) {
-        PlaceNavigation<?> placeNavigation = presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
+        PlaceNavigation<?> placeNavigation = ExperimentalFeatures.SHOW_RACES_ON_MOBILE ? 
+                presenter.getRegattaRacesNavigation(regatta.getId()) : presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
         RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
         container.addContent(regattaWidget);
         return regattaWidget;
