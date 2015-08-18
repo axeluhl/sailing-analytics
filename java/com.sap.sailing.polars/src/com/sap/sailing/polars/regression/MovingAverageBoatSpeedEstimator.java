@@ -18,8 +18,8 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * <p>
  * 
  * Note that this class should only be used for a small wind interval on a polar sheet. The
- * {@link MovingAverageProcessorImpl} is one example for that. It has one instance of the {@link MovingAverageBoatSpeedEstimator}
- * for each wind boatclass, speed level and rounded angle combination.
+ * {@link MovingAverageProcessorImpl} is one example for that. It has one instance of the
+ * {@link MovingAverageBoatSpeedEstimator} for each wind boatclass, speed level and rounded angle combination.
  * 
  * @author Frederik Petersen (D054528)
  * 
@@ -31,9 +31,9 @@ public class MovingAverageBoatSpeedEstimator implements Serializable {
     private double speedSumInKnots = 0;
 
     private transient NamedReentrantReadWriteLock lock = createLock();
-    
+
     private double confidenceSum = 0;
-    
+
     private int dataCount = 0;
 
     public Speed estimateSpeed() throws NotEnoughDataHasBeenAddedException {
@@ -53,7 +53,7 @@ public class MovingAverageBoatSpeedEstimator implements Serializable {
         try {
             speedSumInKnots = speedSumInKnots + boatSpeed.getKnots();
             dataCount++;
-            confidenceSum  = confidenceSum + confidence;
+            confidenceSum = confidenceSum + confidence;
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }
@@ -76,11 +76,11 @@ public class MovingAverageBoatSpeedEstimator implements Serializable {
             LockUtil.unlockAfterRead(lock);
         }
     }
-    
+
     private void readObject(ObjectInputStream ois) {
         lock = createLock();
     }
-    
+
     private NamedReentrantReadWriteLock createLock() {
         return new NamedReentrantReadWriteLock(getClass().getName(), true);
     }

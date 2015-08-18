@@ -27,26 +27,26 @@ public class PolarFixImpl implements PolarFix {
     private String gaugeIdString;
     private String dayString;
 
-    public PolarFixImpl(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track, Wind windSpeed,
-            PolarSheetGenerationSettings settings, String gaugeIdString) {
+    public PolarFixImpl(GPSFixMoving fix, TrackedRace race, GPSFixTrack<Competitor, GPSFixMoving> track,
+            Wind windSpeed, PolarSheetGenerationSettings settings, String gaugeIdString) {
         boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
-        
+
         Position position = fix.getPosition();
         this.gaugeIdString = gaugeIdString;
         dayString = createDayString(race);
         this.windSpeed = windSpeed;
         Set<WindSource> windSourcesToExclude;
         if (settings.useOnlyEstimatedForWindDirection()) {
-            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */ true);
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */true);
         } else {
             windSourcesToExclude = new HashSet<WindSource>();
         }
-        
+
         Wind windEstimated = race.getWind(position, fix.getTimePoint(), windSourcesToExclude);
         if (windEstimated == null) {
             // no estimated wind; try to include course layout
-            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */ false);
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(race, /* exclude course based */false);
             windEstimated = race.getWind(position, fix.getTimePoint(), windSourcesToExclude);
         }
         if (windEstimated == null) {
@@ -63,7 +63,7 @@ public class PolarFixImpl implements PolarFix {
             SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
             resultDateString = fmt.format(startTimePoint.asDate());
         }
-        
+
         return resultDateString;
     }
 
@@ -112,8 +112,8 @@ public class PolarFixImpl implements PolarFix {
     @Override
     public String getGaugeIdString() {
         return gaugeIdString;
-    }  
-    
+    }
+
     @Override
     public String getDayString() {
         return dayString;

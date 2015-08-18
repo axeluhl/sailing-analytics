@@ -57,7 +57,7 @@ public class WindSpeedAndAngleEstimator {
      */
     public SpeedWithBearingWithConfidence<Void> getAverageTrueWindSpeedAndAngle(Speed boatSpeed) {
         Set<SpeedWithBearingWithConfidence<Void>> resultCandidates = getAverageTrueWindSpeedAndAngleCandidates(boatSpeed);
-        
+
         SpeedWithBearingWithConfidence<Void> resultCandidateWithHighestConfidence = null;
         for (SpeedWithBearingWithConfidence<Void> resultCandidate : resultCandidates) {
             if (resultCandidateWithHighestConfidence == null
@@ -68,14 +68,13 @@ public class WindSpeedAndAngleEstimator {
         return resultCandidateWithHighestConfidence;
     }
 
-
     /**
      * Uses the constructor-supplied sampling points to find wind and course candidates for the supplied boatSpeed.
      * 
-     * @return empty set if the underlying data was not sufficient to estimate wind. Otherwise a set of candidates
-     *         with windspeed course of the boat relative to the wind and a confidence which was derived from the
-     *         confidences of underlying fixes, the amount of underlying fixes and the distance between the input
-     *         boatSpeed and the sampling points supplied by the gathered polar data.
+     * @return empty set if the underlying data was not sufficient to estimate wind. Otherwise a set of candidates with
+     *         windspeed course of the boat relative to the wind and a confidence which was derived from the confidences
+     *         of underlying fixes, the amount of underlying fixes and the distance between the input boatSpeed and the
+     *         sampling points supplied by the gathered polar data.
      */
     public Set<SpeedWithBearingWithConfidence<Void>> getAverageTrueWindSpeedAndAngleCandidates(Speed boatSpeed) {
         double requestedBoatSpeedInKnots = boatSpeed.getKnots();
@@ -88,7 +87,7 @@ public class WindSpeedAndAngleEstimator {
             double currentBoatSpeedInKnots = averageBoatSpeedWithCourse.getObject().getKnots();
             if (last != null) {
                 double lastBoatSpeedInKnots = last.getB().getObject().getKnots();
-                
+
                 if (lastBoatSpeedInKnots <= requestedBoatSpeedInKnots
                         && currentBoatSpeedInKnots >= requestedBoatSpeedInKnots) {
                     SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = createWeightedResultCandidateForLowerLast(
@@ -148,19 +147,19 @@ public class WindSpeedAndAngleEstimator {
         double differenceBetweenBothSpeedsInKnots = lastBoatSpeedInKnots - currentBoatSpeedInKnots;
         double ratio;
         if (differenceBetweenBothSpeedsInKnots < 0.00001) {
-            //Both sampling points have the same ratio. Use confidence to determine the ratio
-            ratio = last.getB().getConfidence() / (averageBoatSpeedWithCourse.getConfidence() + last.getB().getConfidence());
+            // Both sampling points have the same ratio. Use confidence to determine the ratio
+            ratio = last.getB().getConfidence()
+                    / (averageBoatSpeedWithCourse.getConfidence() + last.getB().getConfidence());
         } else {
             double differenceBetweenRequestedAndLower = requestedBoatSpeedInKnots - currentBoatSpeedInKnots;
             ratio = differenceBetweenRequestedAndLower / differenceBetweenBothSpeedsInKnots;
         }
-        double weightedAverageWindSpeedInKnots = (( 1 - ratio) * windSpeed.getKnots())
+        double weightedAverageWindSpeedInKnots = ((1 - ratio) * windSpeed.getKnots())
                 + (ratio * last.getA().getKnots());
-        double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing()
-                .getDegrees();
+        double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing().getDegrees();
         double lastCourseInDeg = last.getB().getObject().getBearing().getDegrees();
-        double weightedAverageAngleInDeg = (( 1 - ratio) * currentCourseInDeg) + (ratio * lastCourseInDeg);
-        double weightedAverageConfidence = (( 1 - ratio) * averageBoatSpeedWithCourse.getConfidence())
+        double weightedAverageAngleInDeg = ((1 - ratio) * currentCourseInDeg) + (ratio * lastCourseInDeg);
+        double weightedAverageConfidence = ((1 - ratio) * averageBoatSpeedWithCourse.getConfidence())
                 + (ratio * last.getB().getConfidence());
         SpeedWithBearingWithConfidenceImpl<Void> resultCandidate = new SpeedWithBearingWithConfidenceImpl<Void>(
                 new KnotSpeedWithBearingImpl(weightedAverageWindSpeedInKnots, new DegreeBearingImpl(
@@ -184,8 +183,7 @@ public class WindSpeedAndAngleEstimator {
         }
         double weightedAverageWindSpeedInKnots = (ratio * windSpeed.getKnots())
                 + ((1 - ratio) * last.getA().getKnots());
-        double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing()
-                .getDegrees();
+        double currentCourseInDeg = averageBoatSpeedWithCourse.getObject().getBearing().getDegrees();
         double lastCourseInDeg = last.getB().getObject().getBearing().getDegrees();
         double weightedAverageAngleInDeg = (ratio * currentCourseInDeg) + ((1 - ratio) * lastCourseInDeg);
         double weightedAverageConfidence = (ratio * averageBoatSpeedWithCourse.getConfidence())

@@ -7,5 +7,5 @@ public interface BasePolarClusterKey {
 
     @Dimension(messageKey = "boatClass")
     BoatClass getBoatClass();
-    
+
 }

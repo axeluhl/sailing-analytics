@@ -9,7 +9,8 @@ import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 
-public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
+public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends
+        AbstractParallelProcessor<InputType, ResultType> {
 
     public AbstractEnrichingProcessor(Class<InputType> inputType, Class<ResultType> resultType,
             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {

@@ -14,9 +14,9 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.replication.Replicable;
 
 public class Activator implements BundleActivator {
-    
+
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
-    
+
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     @Override

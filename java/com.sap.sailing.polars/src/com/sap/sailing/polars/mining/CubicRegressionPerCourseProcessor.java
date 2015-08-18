@@ -29,7 +29,7 @@ public class CubicRegressionPerCourseProcessor implements
     private static final long serialVersionUID = 3059764273262382648L;
 
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
- 
+
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
 
     /**
@@ -65,7 +65,7 @@ public class CubicRegressionPerCourseProcessor implements
             }
         }
     }
-    
+
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -77,7 +77,7 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return estimatedSpeedAndAngle;
     }
-    
+
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -93,7 +93,7 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return result;
     }
-    
+
     private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType) {
         LegTypePolarClusterKey key = new LegTypePolarClusterKey() {
 
@@ -117,7 +117,7 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return compoundKey;
     }
-    
+
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -129,7 +129,7 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return polynomialFunction;
     }
-    
+
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -148,15 +148,14 @@ public class CubicRegressionPerCourseProcessor implements
         logger.severe("Polar Data Mining Pipe failed. Cause: " + failure.getMessage());
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
-    
+
     public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
 
-
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
-     // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -166,12 +165,11 @@ public class CubicRegressionPerCourseProcessor implements
         return null;
     }
 
-    
     @Override
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
-    
+
     @Override
     public boolean isFinished() {
         return false;
@@ -181,7 +179,7 @@ public class CubicRegressionPerCourseProcessor implements
     public void abort() {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean isAborted() {
         // TODO Auto-generated method stub
@@ -193,7 +191,5 @@ public class CubicRegressionPerCourseProcessor implements
         // TODO Auto-generated method stub
         return null;
     }
-
-
 
 }

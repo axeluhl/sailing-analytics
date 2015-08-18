@@ -5,7 +5,7 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 
 public interface AngleClusterPolarClusterKey extends BasePolarClusterKey {
-    
+
     @Dimension(messageKey = "angleCluster")
     Cluster<Bearing> getAngleCluster();
 

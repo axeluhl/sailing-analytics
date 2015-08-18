@@ -36,7 +36,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     private static final Logger logger = Logger.getLogger(MovingAverageProcessorImpl.class.getName());
 
     private final Map<GroupKey, MovingAverageBoatSpeedEstimator> boatSpeedEstimators = new HashMap<>();
-    
+
     private final Map<GroupKey, AverageAngleContainer> averageAngleContainers = new HashMap<>();
 
     private final ClusterGroup<Speed> speedClusterGroup;
@@ -44,7 +44,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public MovingAverageProcessorImpl(ClusterGroup<Speed> speedClusterGroup) {
         this.speedClusterGroup = speedClusterGroup;
     }
-    
+
     @Override
     public boolean canProcessElements() {
         // TODO Auto-generated method stub
@@ -89,7 +89,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
-    
+
     @Override
     public boolean isFinished() {
         return false;
@@ -99,7 +99,7 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public void abort() {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean isAborted() {
         // TODO Auto-generated method stub
@@ -115,19 +115,22 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     public static class SpeedWithConfidenceAndDataCount {
         private final SpeedWithConfidence<Void> speedWithConfidence;
         private final int dataCount;
+
         protected SpeedWithConfidenceAndDataCount(SpeedWithConfidence<Void> speedWithConfidence, int dataCount) {
             super();
             this.speedWithConfidence = speedWithConfidence;
             this.dataCount = dataCount;
         }
+
         public SpeedWithConfidence<Void> getSpeedWithConfidence() {
             return speedWithConfidence;
         }
+
         public int getDataCount() {
             return dataCount;
         }
     }
-    
+
     private SpeedWithConfidenceAndDataCount estimateBoatSpeed(GroupKey key) throws NotEnoughDataHasBeenAddedException {
         MovingAverageBoatSpeedEstimator boatSpeedEstimator = boatSpeedEstimators.get(key);
         if (boatSpeedEstimator == null) {
@@ -136,9 +139,10 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
         Speed speedWithoutConfidence = boatSpeedEstimator.estimateSpeed();
         final int dataCount = boatSpeedEstimator.getDataCount();
         double confidence = boatSpeedEstimator.getConfidence();
-        return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence, confidence, null), dataCount);
+        return new SpeedWithConfidenceAndDataCount(new SpeedWithConfidenceImpl<Void>(speedWithoutConfidence,
+                confidence, null), dataCount);
     }
-    
+
     private Bearing estimateAngle(GroupKey key) throws NotEnoughDataHasBeenAddedException {
         AverageAngleContainer averageAngleContainer = averageAngleContainers.get(key);
         if (averageAngleContainer == null) {
@@ -172,14 +176,16 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
         return result;
     }
 
-    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
+    private SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(BoatClass boatClass, Speed windSpeed,
+            LegType legType) throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, windSpeed, legType);
         Bearing angleDiffTrueWindToBoat = estimateAngle(key);
         SpeedWithConfidence<Void> estimatedSpeed = estimateBoatSpeed(key).getSpeedWithConfidence();
-        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(), angleDiffTrueWindToBoat);
+        SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed.getObject().getKnots(),
+                angleDiffTrueWindToBoat);
         return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, estimatedSpeed.getConfidence(), null);
     }
-    
+
     private GroupKey createGroupKey(final BoatClass boatClass, final Speed windSpeed, final LegType legType) {
         MovingAveragePolarClusterKey key = new MovingAveragePolarClusterKey() {
 

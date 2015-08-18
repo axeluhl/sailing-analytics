@@ -11,8 +11,10 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 
-public interface MovingAverageProcessor extends Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
-    SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
-			Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException;
+public interface MovingAverageProcessor extends Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>,
+        Serializable {
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass, Speed windSpeed,
+            LegType legType) throws NotEnoughDataHasBeenAddedException;
+
     ClusterGroup<Speed> getSpeedCluster();
 }

@@ -11,7 +11,6 @@ import com.sap.sse.common.Util.Pair;
 
 public class SimplePolarFixRaceInterval implements PolarFixRaceInterval {
 
-
     private final Map<TrackedRace, Map<Competitor, Pair<TimePoint, TimePoint>>> intervalMap;
 
     public SimplePolarFixRaceInterval(Set<TrackedRace> races) {

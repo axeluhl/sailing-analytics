@@ -13,7 +13,7 @@ import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
 
 public class SpeedClusterGroup extends FixClusterGroup<Speed> {
-    
+
     private static final long serialVersionUID = -3428022721991223921L;
 
     /**
@@ -38,8 +38,8 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
         for (int index = 0; index < levelMidsInKnots.length; index++) {
             ClusterBoundary<Speed> lowerBoundary = createLowerBoundary(levelMidsInKnots, maxDistanceInKnots, index);
             ClusterBoundary<Speed> upperBoundary = createUpperBoundary(levelMidsInKnots, maxDistanceInKnots, index);
-            Cluster<Speed> cluster = new ClusterWithLowerAndUpperBoundaries<Speed>(levelMidsInKnots[index] + "kn", lowerBoundary,
-                    upperBoundary);
+            Cluster<Speed> cluster = new ClusterWithLowerAndUpperBoundaries<Speed>(levelMidsInKnots[index] + "kn",
+                    lowerBoundary, upperBoundary);
             clusterList.add(cluster);
         }
         return clusterList;

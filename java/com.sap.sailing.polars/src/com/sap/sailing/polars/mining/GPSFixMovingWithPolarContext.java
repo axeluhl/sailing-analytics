@@ -79,7 +79,8 @@ public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, Ang
         } catch (NoWindException e) {
             bearing = null;
         }
-        WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(), fix.getTimePoint());
+        WindWithConfidence<Pair<Position, TimePoint>> wind = race.getWindWithConfidence(fix.getPosition(),
+                fix.getTimePoint());
         if (bearing != null && wind != null) {
             result = new BearingWithConfidenceImpl<Void>(bearing, wind.getConfidence(), null);
         }
@@ -90,17 +91,18 @@ public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, Ang
         return wind;
     }
 
-    public SpeedWithBearingWithConfidence<TimePoint> getBoatSpeed() {  
+    public SpeedWithBearingWithConfidence<TimePoint> getBoatSpeed() {
         return boatSpeed;
     }
-    
+
     private SpeedWithBearingWithConfidence<TimePoint> computeBoatSpeed() {
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
-        return track.getEstimatedSpeed(fix.getTimePoint(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        return track.getEstimatedSpeed(fix.getTimePoint(),
+                ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                track.getMillisecondsOverWhichToAverageSpeed()/2, /* minimumConfidence */ 0.00000001));
+                        track.getMillisecondsOverWhichToAverageSpeed() / 2, /* minimumConfidence */0.00000001));
     }
-    
+
     private Set<WindSource> collectWindSourcesToIgnoreForSpeed() {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);

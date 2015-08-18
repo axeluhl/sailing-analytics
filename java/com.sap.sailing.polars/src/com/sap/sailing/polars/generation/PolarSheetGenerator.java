@@ -44,7 +44,6 @@ public class PolarSheetGenerator {
         return container;
     }
 
-
     private void addPolarFix(PolarFix polarFix) {
         long roundedAngleDeg = Math.round(polarFix.getTrueWindAngleDeg());
         Speed boatSpeed = polarFix.getBoatSpeed();
@@ -148,8 +147,8 @@ public class PolarSheetGenerator {
                 List<DataPointWithOriginInfo> withoutOutliers = new ArrayList<DataPointWithOriginInfo>();
                 Collections.sort(dataSetForWindLevel.get(levelIndex));
                 if (dataCountPerWindSpeed[levelIndex] > /* Minimum data count for outlier detection */10) {
-                    performOutlierExclusion(sumsPerWindSpeed, dataCountPerWindSpeed, dataSetForWindLevel,
-                            levelIndex, withoutOutliers);
+                    performOutlierExclusion(sumsPerWindSpeed, dataCountPerWindSpeed, dataSetForWindLevel, levelIndex,
+                            withoutOutliers);
                 }
 
             }
@@ -177,8 +176,8 @@ public class PolarSheetGenerator {
             if (rawData == null || rawData.size() <= 0) {
                 continue;
             }
-            PolarSheetsHistogramData histogramData = histogramBuilder.build(rawData, angleIndex,
-                    coefficiantOfVariation);
+            PolarSheetsHistogramData histogramData = histogramBuilder
+                    .build(rawData, angleIndex, coefficiantOfVariation);
             histogramDataMap.get(levelIndex).put(angleIndex, histogramData);
 
         }
@@ -189,8 +188,8 @@ public class PolarSheetGenerator {
             List<DataPointWithOriginInfo> withoutOutliers) {
         for (int dataIndex = 0; dataIndex < dataSetForWindLevel.get(levelIndex).size(); dataIndex++) {
             DataPointWithOriginInfo dataPoint = dataSetForWindLevel.get(levelIndex).get(dataIndex);
-            double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel,
-                    levelIndex, dataIndex, dataPoint, settings);
+            double pct = getNeighboorhoodSizePercentage(dataCountPerWindSpeed, dataSetForWindLevel, levelIndex,
+                    dataIndex, dataPoint, settings);
             if (pct >= settings.getOutlierMinimumNeighborhoodPct()) {
                 withoutOutliers.add(dataPoint);
             } else {
@@ -202,13 +201,13 @@ public class PolarSheetGenerator {
     }
 
     /**
-     * This method calculates the pct of the points neighborhoods based on a distance (in the settings) compared
-     * to the complete dataset.
+     * This method calculates the pct of the points neighborhoods based on a distance (in the settings) compared to the
+     * complete dataset.
      */
     public static double getNeighboorhoodSizePercentage(int[] dataCountPerWindSpeed,
             Map<Integer, List<DataPointWithOriginInfo>> valuesInMap, int levelIndex, int dataIndex,
             DataPointWithOriginInfo dataPoint, PolarSheetGenerationSettings settings) {
-      int neighborCount = 0;
+        int neighborCount = 0;
         double pct = .0;
 
         int index = dataIndex;
@@ -219,8 +218,7 @@ public class PolarSheetGenerator {
             if (index < 0) {
                 done = true;
             } else {
-                Double dataPointToCheckForNeighborStatus = valuesInMap.get(levelIndex).get(
-                        index).getRawData();
+                Double dataPointToCheckForNeighborStatus = valuesInMap.get(levelIndex).get(index).getRawData();
                 if (dataPoint.getRawData() - dataPointToCheckForNeighborStatus <= settings
                         .getOutlierDetectionNeighborhoodRadius()) {
                     neighborCount++;
@@ -241,8 +239,7 @@ public class PolarSheetGenerator {
             if (index >= dataCountPerWindSpeed[levelIndex]) {
                 done = true;
             } else {
-                Double dataPointToCheckForNeighborStatus = valuesInMap.get(levelIndex).get(
-                        index).getRawData();
+                Double dataPointToCheckForNeighborStatus = valuesInMap.get(levelIndex).get(index).getRawData();
                 if (dataPointToCheckForNeighborStatus - dataPoint.getRawData() <= settings
                         .getOutlierDetectionNeighborhoodRadius()) {
                     neighborCount++;
@@ -258,7 +255,6 @@ public class PolarSheetGenerator {
         pct = (double) neighborCount / (double) dataCountPerWindSpeed[levelIndex];
         return pct;
     }
-
 
     /**
      * Can be used to present more detailed data.

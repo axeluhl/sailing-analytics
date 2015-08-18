@@ -17,7 +17,7 @@ import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class BearingClusterGroup extends FixClusterGroup<Bearing>{
+public class BearingClusterGroup extends FixClusterGroup<Bearing> {
 
     private static final long serialVersionUID = -3810975212669767738L;
 
@@ -30,8 +30,8 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
         List<Cluster<Bearing>> clusters = new ArrayList<Cluster<Bearing>>();
         for (int i = 0; i < numberOfClusters; i++) {
             clusters.add(new ClusterWithLowerAndUpperBoundaries<Bearing>("", createBoundary(startAngle + i
-                    * clusterSize, ComparisonStrategy.GREATER_THAN), createBoundary(startAngle + (i + 1)
-                    * clusterSize, ComparisonStrategy.LOWER_EQUALS_THAN)));
+                    * clusterSize, ComparisonStrategy.GREATER_THAN), createBoundary(startAngle + (i + 1) * clusterSize,
+                    ComparisonStrategy.LOWER_EQUALS_THAN)));
         }
         return clusters;
     }
@@ -46,7 +46,7 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         return "";
     }
-    
+
     private static class BearingComparator implements Comparator<Bearing>, Serializable {
 
         private static final long serialVersionUID = 8166601046140275541L;
@@ -56,6 +56,5 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing>{
             return new Double(arg0.getDegrees()).compareTo(new Double(arg1.getDegrees()));
         }
     };
-
 
 }

@@ -51,5 +51,4 @@ public class WindSpeedLevel implements Serializable {
         return true;
     }
 
-
 }

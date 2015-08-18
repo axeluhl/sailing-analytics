@@ -5,7 +5,7 @@ import com.sap.sailing.polars.data.DataPointWithOriginInfo;
 public class DataPointWithOriginInfoImpl implements DataPointWithOriginInfo {
 
     private Double rawData;
-    
+
     private String windGaugeIdString;
 
     private String dayString;
@@ -25,7 +25,7 @@ public class DataPointWithOriginInfoImpl implements DataPointWithOriginInfo {
     public String getWindGaugeIdString() {
         return windGaugeIdString;
     }
-    
+
     @Override
     public String getDayString() {
         return dayString;
@@ -35,5 +35,5 @@ public class DataPointWithOriginInfoImpl implements DataPointWithOriginInfo {
     public int compareTo(DataPointWithOriginInfo o) {
         return getRawData().compareTo(o.getRawData());
     }
-       
+
 }

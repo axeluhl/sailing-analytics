@@ -93,9 +93,8 @@ public class PolarFixAggregator implements Future<Map<RegattaAndRaceIdentifier, 
     }
 
     /**
-     * To be called from {@link PolarFixAggregationWorker} for adding a datapoint to the list of
-     * results
-     *            wind's speed in knots
+     * To be called from {@link PolarFixAggregationWorker} for adding a datapoint to the list of results wind's speed in
+     * knots
      */
     protected void addPolarFix(RegattaAndRaceIdentifier raceId, PolarFix polarFix) {
         synchronized (fixes) {
@@ -144,8 +143,7 @@ public class PolarFixAggregator implements Future<Map<RegattaAndRaceIdentifier, 
 
     @Override
     public Map<RegattaAndRaceIdentifier, List<PolarFix>> get(long timeout, TimeUnit unit) throws InterruptedException,
-            ExecutionException,
-            TimeoutException {
+            ExecutionException, TimeoutException {
         long timeRun = 0;
         long timeoutInMillis = unit.toMillis(timeout);
         while (!isDone() && timeRun < timeoutInMillis) {
@@ -158,8 +156,7 @@ public class PolarFixAggregator implements Future<Map<RegattaAndRaceIdentifier, 
         return fixes;
     }
 
-    public Set<PolarFix> getAggregationResultAsSingleList() throws InterruptedException,
-            ExecutionException {
+    public Set<PolarFix> getAggregationResultAsSingleList() throws InterruptedException, ExecutionException {
         Set<PolarFix> fixes = new HashSet<PolarFix>();
         Map<RegattaAndRaceIdentifier, List<PolarFix>> aggregationResult = get();
         for (List<PolarFix> list : aggregationResult.values()) {

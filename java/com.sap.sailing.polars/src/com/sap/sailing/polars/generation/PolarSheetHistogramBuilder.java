@@ -59,7 +59,6 @@ public class PolarSheetHistogramBuilder {
             createHistogramDataForArrangeOption(numberOfColumns, yValuesByDayAndGaugeId, u, dayAndGaugeIdString);
 
         }
-        
 
         PolarSheetsHistogramData histogramData = new PolarSheetsHistogramDataImpl(angleIndex, xValues, yValues,
                 yValuesByGaugeIds, yValuesByDay, yValuesByDayAndGaugeId, rawData.size(), coefficiantOfVariation);

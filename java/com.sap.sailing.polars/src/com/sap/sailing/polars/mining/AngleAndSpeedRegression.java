@@ -26,11 +26,11 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class AngleAndSpeedRegression implements Serializable {
-    
+
     private static final long serialVersionUID = 6343595388753945979L;
     private final IncrementalLeastSquares speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
     private final IncrementalLeastSquares angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
-    
+
     private double maxWindSpeedInKnots = -1;
 
     public void addData(WindWithConfidence<Pair<Position, TimePoint>> windSpeed,
@@ -40,10 +40,11 @@ public class AngleAndSpeedRegression implements Serializable {
             maxWindSpeedInKnots = windSpeedInKnots;
         }
         speedRegression.addData(windSpeedInKnots, boatSpeed.getObject().getKnots());
-        angleRegression.addData(windSpeedInKnots, angleToTheWind.getObject().getDegrees()); 
+        angleRegression.addData(windSpeedInKnots, angleToTheWind.getObject().getDegrees());
     }
 
-    public SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(Speed windSpeed) throws NotEnoughDataHasBeenAddedException {
+    public SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(Speed windSpeed)
+            throws NotEnoughDataHasBeenAddedException {
         double windSpeedInKnots = windSpeed.getKnots();
         if (windSpeedInKnots > maxWindSpeedInKnots) {
             throw new NotEnoughDataHasBeenAddedException();
@@ -52,13 +53,16 @@ public class AngleAndSpeedRegression implements Serializable {
         double estimatedAngle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedInKnots);
         Bearing bearing = new DegreeBearingImpl(estimatedAngle);
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(estimatedSpeed, bearing);
-        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, Math.min(1, speedRegression.getNumberOfAddedPoints() / 100.0), null);
+        return new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearing, Math.min(1,
+                speedRegression.getNumberOfAddedPoints() / 100.0), null);
     }
 
-    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround, LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
+    public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround,
+            LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         double[] coefficiants = speedRegression.getOrCreatePolynomialFunction().getCoefficients();
-        CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0], -speedOverGround.getKnots());
-        
+        CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0],
+                -speedOverGround.getKnots());
+
         double[] windSpeedCandidates = equation.solve();
         Set<SpeedWithBearingWithConfidence<Void>> result = new HashSet<>();
         for (int i = 0; i < windSpeedCandidates.length; i++) {
@@ -68,20 +72,21 @@ public class AngleAndSpeedRegression implements Serializable {
                 boolean angleFound;
                 try {
                     angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
-                    if ((tack == Tack.PORT && legType == LegType.UPWIND) || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
+                    if ((tack == Tack.PORT && legType == LegType.UPWIND)
+                            || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
                         angle = -angle;
                     }
                     angleFound = true;
-                } catch(NotEnoughDataHasBeenAddedException e) {
+                } catch (NotEnoughDataHasBeenAddedException e) {
                     angleFound = false;
                 }
                 if (angleFound) {
                     result.add(new SpeedWithBearingWithConfidenceImpl<Void>(new KnotSpeedWithBearingImpl(
-                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.5 /*FIXME*/, null));
+                            windSpeedCandidateInKnots, new DegreeBearingImpl(angle)), 0.5 /* FIXME */, null));
                 }
             }
         }
-        
+
         return result;
     }
 
