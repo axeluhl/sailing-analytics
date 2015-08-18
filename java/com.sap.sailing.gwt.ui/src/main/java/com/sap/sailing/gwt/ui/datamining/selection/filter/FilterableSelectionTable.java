@@ -221,7 +221,6 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
-        table.redraw();
     }
 
     public void resizeTo(int widthInPX, int heightInPX) {
@@ -233,7 +232,6 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         int tableHeight = filterPanel.isVisible() ? Math.max(0, height - filterPanel.getOffsetHeight()) : height;
         table.setSize(width + "px", tableHeight + "px");
         //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
-        table.redraw();
     }
 
 }

@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
+import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -47,14 +46,6 @@ public interface DataMiningServiceAsync {
      * This is necessary, because the type is somehow hidden from GWT. For Further information
      * look at bug 1503.<br />
      */
-    void pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SSEDataMiningSerializationDummy> asyncCallback);
-    
-    /**
-     * This method does nothing, but is needed to ensure, that some classes for the data mining
-     * (like {@link GenericGroupKey}) is added to the GWT serialization policy.<br />
-     * This is necessary, because the type is somehow hidden from GWT. For Further information
-     * look at bug 1503.<br />
-     */
-    void pseudoMethodSoThatSomeSailingDataMiningClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SailingDataMiningSerializationDummy> asyncCallback);
+    void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
 
 }
