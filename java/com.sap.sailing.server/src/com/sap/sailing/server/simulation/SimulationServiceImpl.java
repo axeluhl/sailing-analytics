@@ -85,7 +85,7 @@ public class SimulationServiceImpl implements SimulationService {
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
                             logger.info("Simulation Started: \"" + key.toString() + "\"");
                             SimulationResults results = computeSimulationResults(key);
-                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.hashCode()));
+                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.getVersion().asMillis()));
                             return results;
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
@@ -260,10 +260,10 @@ public class SimulationServiceImpl implements SimulationService {
     }
 
     @Override
-    public int getSimulationResultsVersion(LegIdentifier legIdentifier) {
+    public long getSimulationResultsVersion(LegIdentifier legIdentifier) {
         SimulationResults result = cache.get(legIdentifier, false);
-        int version = (result == null ? 0 : result.hashCode());
-        logger.fine("Simulation Results-Version: " + + version);
+        long version = (result == null ? 0 : result.getVersion().asMillis());
+        logger.fine("Simulation Results-Version: " + version);
         return version;
     }
 
@@ -320,6 +320,7 @@ public class SimulationServiceImpl implements SimulationService {
 
     public SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
+        TimePoint simulationStartTime = MillisecondsTimePoint.now();
         SimulationResults result = null;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
@@ -370,7 +371,7 @@ public class SimulationServiceImpl implements SimulationService {
             if (endTimePoint != null) {
                 endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
                 List<Position> line = this.getLinePositions(toWaypoint, endTimePoint, trackedRace);
-                if ((line.size() == 2) && (toWaypoint == raceCourse.getLastWaypoint())) {
+                if (line.size() == 2) {
                     endLine = line;
                 }
             } else if (startTimePoint != null) {
@@ -418,7 +419,7 @@ public class SimulationServiceImpl implements SimulationService {
             }
             // prepare simulator-results
             result = new SimulationResults(startTimePoint.asDate(), timeStep.asMillis(), legDuration, startPosition,
-                    endPosition, paths, null);
+                    endPosition, paths, null, simulationStartTime);
         }
         return result;
     }

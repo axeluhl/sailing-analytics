@@ -6,9 +6,10 @@ import java.util.Map;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
-public abstract class AbstractEventPlace extends Place {
+public abstract class AbstractEventPlace extends Place implements HasLocationTitle {
     private final EventContext ctx;
 
     protected AbstractEventPlace(EventContext ctx) {
@@ -26,6 +27,11 @@ public abstract class AbstractEventPlace extends Place {
 
     public String getTitle(String eventName) {
         return TextMessages.INSTANCE.sapSailing() + " - " + eventName;
+    }
+
+    @Override
+    public String getLocationTitle() {
+        return TextMessages.INSTANCE.events();
     }
 
     public String getEventUuidAsString() {

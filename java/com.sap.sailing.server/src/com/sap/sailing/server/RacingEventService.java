@@ -371,7 +371,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
 
     /**
@@ -467,7 +467,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, URL officialWebsiteURL, Iterable<ImageDescriptor> images,
+            boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, Iterable<ImageDescriptor> images,
             Iterable<VideoDescriptor> videos);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
@@ -612,5 +612,4 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ClassLoader getCombinedMasterDataClassLoader();
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
-
 }

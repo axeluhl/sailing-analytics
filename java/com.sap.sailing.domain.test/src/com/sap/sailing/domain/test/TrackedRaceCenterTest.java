@@ -67,7 +67,7 @@ public class TrackedRaceCenterTest {
     
     @Test
     public void testSimpleAverage() {
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         Position mark1Pos = new DegreePosition(10, 10);
         mark1Track.add(new GPSFixImpl(mark1Pos, now));
         Position mark2Pos = new DegreePosition(20, 10);
@@ -85,7 +85,7 @@ public class TrackedRaceCenterTest {
         DynamicGPSFixTrackImpl<Mark> mark3Track = new DynamicGPSFixTrackImpl<Mark>(mark3, /* millisecondsOverWhichToAverage */ 10);
         when(trackedRace.getOrCreateTrack(mark3)).thenReturn(mark3Track);
 
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         Position mark1Pos = new DegreePosition(0, 0);
         mark1Track.add(new GPSFixImpl(mark1Pos, now));
         Position mark2Pos = new DegreePosition(0, 10);

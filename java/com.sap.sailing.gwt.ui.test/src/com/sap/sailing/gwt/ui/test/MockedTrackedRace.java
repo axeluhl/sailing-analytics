@@ -11,13 +11,13 @@ import java.util.Set;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -64,6 +64,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -275,11 +276,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
-                return null;
-            }
-
-            @Override
             public void addTrackedRace(TrackedRace trackedRace) {
             }
 
@@ -332,6 +328,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public void unlockTrackedRacesAfterWrite() {
+            }
+
+            @Override
+            public void removeRaceListener(RaceListener listener) {
             }
         };
     }
@@ -784,5 +784,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+        return this;
     }
 }

@@ -12,7 +12,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -194,12 +196,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
     private TrackedRaceStatus lastStatus;
-    private HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>> lastProgressPerID;
+    private Map<Object, Util.Pair<Integer, Float>> lastProgressPerID;
 
     /**
-     * paramURL, liveURI and storedURI for TracTrac connection
+     * paramURL, liveURI and storedURI for TracTrac connection, voided of "random" part
      */
-    private final Util.Triple<URL, URI, URI> urls;
+    private final Object id;
 
     /**
      * Tells if this tracker was created with a valid live URI. If not, the tracker will stop and unregister itself
@@ -214,6 +216,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private boolean stopped;
 
     private final TrackedRegattaRegistry trackedRegattaRegistry;
+
+    private final Simulator simulator;
 
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -246,7 +250,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            available but loses track of the wind, e.g., during server restarts.
      * @param trackedRegattaRegistry
      *            used to create the {@link TrackedRegatta} for the domain event
-     * @param raceLogResolver TODO
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
@@ -278,7 +281,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * tracker is already known up-front, particularly if it has a specific configuration to use. Other constructors
      * may create a default {@link Regatta} with only a single default {@link Series} and {@link Fleet} which may not
      * always be what you want.
-     * @param raceLogResolver TODO
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
@@ -303,7 +305,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
      *            events received such that they seem to be sent in "real-time." So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
-     * @param raceLogResolver TODO
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking,
@@ -316,13 +317,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
-        urls = createID(paramURL, liveURI, storedURI);
+        this.id = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.races = new HashSet<RaceDefinition>();
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
-        this.lastProgressPerID = new HashMap<Util.Triple<URL, URI, URI>, Util.Pair<Integer, Float>>();
-        final Simulator simulator;
+        this.lastProgressPerID = new HashMap<>();
         if (simulateWithStartTimeNow) {
             simulator = new Simulator(windStore);
             // don't write the transformed wind fixes into the DB again... see also bug 1974 
@@ -463,13 +463,48 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return trackedRegatta;
     }
 
-    static Util.Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
-        return new Util.Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+    public static Object createID(URL paramURL, URI liveURI, URI storedURI) {
+        URL paramURLStrippedOfRandomParam;
+        if (paramURL == null) {
+            paramURLStrippedOfRandomParam = null;
+        } else {
+            final String query = paramURL.getQuery();
+            if (query == null) {
+                paramURLStrippedOfRandomParam = paramURL;
+            } else {
+                final StringJoiner stringJoiner = new StringJoiner("&", "?", "");
+                stringJoiner.setEmptyValue("");
+                String[] queryParams = query.split("&");
+                for (String queryParam : queryParams) {
+                    String[] nameValue = queryParam.split("=");
+                    if (!"random".equalsIgnoreCase(nameValue[0])) {
+                        final StringBuilder param = new StringBuilder();
+                        param.append(nameValue[0]);
+                        if (nameValue.length > 1) {
+                            param.append('=');
+                            param.append(nameValue[1]);
+                        }
+                        stringJoiner.add(param.toString());
+                    }
+                }
+                try {
+                    paramURLStrippedOfRandomParam = new URL(paramURL.getProtocol(), paramURL.getHost(), paramURL.getPort(),
+                            paramURL.getPath()+stringJoiner.toString()+(paramURL.getRef() == null || paramURL.getRef().isEmpty() ?
+                                    "" : ("#"+paramURL.getRef())));
+                } catch (MalformedURLException e) {
+                    // this is pretty strange as we only removed one parameter; log and continue with original URL as a default
+                    logger.log(Level.SEVERE, "Error trying to strip the \"random\" parameter from the TracTrac params_url "+
+                            paramURL, e);
+                    paramURLStrippedOfRandomParam = paramURL;
+                }
+            }
+        }
+        return new Util.Triple<URL, URI, URI>(paramURLStrippedOfRandomParam, liveURI, storedURI);
     }
     
     @Override
-    public Util.Triple<URL, URI, URI> getID() {
-        return urls;
+    public Object getID() {
+        return id;
     }
 
     @Override
@@ -527,6 +562,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 // queues contents were cleared preemptively; this means we're done with loading immediately
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
+            }
+            if (stopReceiversPreemtively && simulator != null) {
+                simulator.stop();
             }
         }
     }

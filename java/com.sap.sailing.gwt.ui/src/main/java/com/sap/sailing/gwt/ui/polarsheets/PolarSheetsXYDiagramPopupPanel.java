@@ -4,12 +4,9 @@ import java.util.List;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.Series.Type;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-import org.moxieapps.gwt.highcharts.client.plotOptions.SplinePlotOptions;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -58,33 +55,14 @@ public class PolarSheetsXYDiagramPopupPanel extends DialogBox {
     }
 
     private void addSpeedAndConfidenceSeriesForTackAndLegType(PolarSheetsXYDiagramData result, Tack tack, LegType legType, boolean showByDefault) {
-        Point[] pointsForUpwindStarboardAverageSpeedMovingAverage = toPointArray(result.getPointsForAverageSpeedMovingAverage(tack, legType));
-        Series speedSeriesMovingAverage = chart.createSeries();
-        speedSeriesMovingAverage.setName(tack + " " + legType + " Speed - MovingAverage");
-        speedSeriesMovingAverage.setPoints(pointsForUpwindStarboardAverageSpeedMovingAverage);
-        chart.addSeries(speedSeriesMovingAverage, false, false);
-        
         Point[] pointsForUpwindStarboardAverageSpeedRegression = toPointArray(result.getPointsForAverageSpeedRegression(tack, legType));
         Series speedSeriesRegression = chart.createSeries();
         speedSeriesRegression.setName(tack + " " + legType + " Speed - Regression");
         speedSeriesRegression.setPoints(pointsForUpwindStarboardAverageSpeedRegression);
         chart.addSeries(speedSeriesRegression, false, false);
-        
-        Point[] pointsForUpwindStarboardAverageConfidence = toPointArray(result.getPointsForAverageConfidence(tack, legType));
-        Series confidenceSeries = chart
-                .createSeries()
-                .setYAxis(1)
-                .setType(Series.Type.SPLINE)
-                .setPlotOptions(
-                        new SplinePlotOptions().setColor("#AA4643").setMarker(new Marker().setEnabled(false))
-                                .setDashStyle(PlotLine.DashStyle.SHORT_DOT));
-        confidenceSeries.setName(tack + " " + legType + " Confidence");
-        confidenceSeries.setPoints(pointsForUpwindStarboardAverageConfidence);
-        chart.addSeries(confidenceSeries, false, false);
-        
+ 
         if (!showByDefault) {
             speedSeriesRegression.setVisible(false, false);
-            confidenceSeries.setVisible(false, false);
         }
     }
     

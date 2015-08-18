@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeMap;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,10 +28,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -41,19 +55,18 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.*;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.StringHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TickListener;
+import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 
-import java.io.Serializable;
-import java.util.*;
-
-public class RaceListFragment
-    extends LoggableFragment
-    implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
+public class RaceListFragment extends LoggableFragment implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
@@ -67,7 +80,7 @@ public class RaceListFragment
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
     private ListView mListView;
-    private HashMap<Serializable, ManagedRace> mManagedRacesById;
+    private LinkedHashMap<String, ManagedRace> mManagedRacesById;
     private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
@@ -93,7 +106,7 @@ public class RaceListFragment
     public RaceListFragment() {
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
-        mManagedRacesById = new HashMap<>();
+        mManagedRacesById = new LinkedHashMap<>();
         mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
         mViewItems = new ArrayList<>();
     }
@@ -109,12 +122,8 @@ public class RaceListFragment
     public static void showProtest(Context context, ManagedRace race) {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
         String extra = race.getRaceGroup().getName();
-        if (!race.getSeries().getName().equals(AppConstants.DEFAULT)) {
-            extra += " - " + race.getSeries().getName();
-        }
-        if (!race.getFleet().getName().equals(AppConstants.DEFAULT)) {
-            extra += " - " + race.getFleet().getName();
-        }
+        extra += RaceHelper.getSeriesName(race.getSeries());
+        extra += RaceHelper.getFleetName(race.getFleet());
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -420,7 +429,6 @@ public class RaceListFragment
             mViewItems.add(new RaceListDataTypeHeader(key));
 
             List<ManagedRace> races = mRacesByGroup.get(key);
-            Collections.sort(races, new NaturalNamedComparator());
             for (ManagedRace race : races) {
                 // ... and add the race view!
                 mViewItems.add(new RaceListDataTypeRace(race));
@@ -459,42 +467,6 @@ public class RaceListFragment
         }
     }
 
-    public enum FilterMode {
-        ACTIVE(R.string.race_list_filter_show_active), ALL(R.string.race_list_filter_show_all);
-
-        private String displayName;
-
-        FilterMode(int resId) {
-            this.displayName = RaceApplication.getStringContext().getString(resId);
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
-    }
-
-
-    public interface RaceListCallbacks {
-        void onRaceListItemSelected(RaceListDataType selectedItem);
-    }
-
-
-    private class IntentReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
-                String raceGroupName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                if (raceGroupName != null) {
-                    showProtestTimeDialog(raceGroupName);
-                } else {
-                    ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
-                }
-            }
-        }
-    }
-
     private void showProtestTimeDialog(String raceGroupName) {
         // Find the race group for which the
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
@@ -522,5 +494,38 @@ public class RaceListFragment
         return false;
     }
 
+    public enum FilterMode {
+        ACTIVE(R.string.race_list_filter_show_active), ALL(R.string.race_list_filter_show_all);
+
+        private String displayName;
+
+        FilterMode(int resId) {
+            this.displayName = RaceApplication.getStringContext().getString(resId);
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
+
+    public interface RaceListCallbacks {
+        void onRaceListItemSelected(RaceListDataType selectedItem);
+    }
+
+    private class IntentReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
+                String raceGroupName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (raceGroupName != null) {
+                    showProtestTimeDialog(raceGroupName);
+                } else {
+                    ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
+                }
+            }
+        }
+    }
 
 }

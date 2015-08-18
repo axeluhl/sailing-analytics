@@ -17,7 +17,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Big Data - Numbers|wiki/big-data-numbers]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
-  * [[RaceLog tracking|wiki/racelog-tracking]]
+  * [[RaceLog / Smartphone tracking|wiki/racelog-tracking]]
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]
@@ -68,6 +68,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
   * [[Kieler Woche event page|wiki/kieler-woche-2015]]
+* Lean DI Support
+  * [[Setting up internal Jenkins on SAP Monsoon|wiki/setting-up-jenkins-on-sap-monsoon]]
 
 ### Internal services (not related to wiki but useful)
 
@@ -76,7 +78,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/racecommittee-app-environment]])
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
-* [Traffic and CPU for app01](http://mrtg.sapsailing.com/)
 
 ### TracTrac Workshop in Kopenhagen
 

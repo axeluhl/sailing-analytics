@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -89,6 +90,7 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
@@ -295,11 +297,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     void removeEvent(UUID eventId);
 
@@ -407,7 +409,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigurations);
     
     DataImportProgress getImportOperationProgress(UUID id);
 
@@ -614,4 +616,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
+
+    RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
+    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto);
+
+    Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
 }

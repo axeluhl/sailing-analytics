@@ -131,6 +131,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String eventDescription = "Event Description";
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
+        final URL officialWebsiteURL = new URL("http://official.website.com");
+        final URL sailorsInfoWebsiteURL = new URL("http://sailorsinfo.website.com");
         final Venue venue = new VenueImpl(venueName);
         
         for (String courseAreaName : courseAreaNames) {
@@ -144,7 +146,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg1);
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
-        event.setOfficialWebsiteURL(new URL("http://official.website.com"));
+        event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -169,6 +172,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(eventName, loadedEvent.getName());
         assertEquals(eventDescription, loadedEvent.getDescription());
         assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
+        assertEquals(event.getSailorsInfoWebsiteURL(), loadedEvent.getSailorsInfoWebsiteURL());
         assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
         Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
         assertSame(lg1, lgIter.next());

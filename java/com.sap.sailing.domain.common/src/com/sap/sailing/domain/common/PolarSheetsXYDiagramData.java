@@ -7,10 +7,6 @@ import com.sap.sse.common.Util.Pair;
 
 public interface PolarSheetsXYDiagramData extends Serializable {
 
-    List<Pair<Double, Double>> getPointsForAverageSpeedMovingAverage(Tack tack, LegType legType);
-    
-    List<Pair<Double, Double>> getPointsForAverageConfidence(Tack tack, LegType legType);
-
     List<Pair<Double, Double>> getPointsForAverageSpeedRegression(Tack tack, LegType legType);
 
 }

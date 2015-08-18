@@ -13,6 +13,13 @@
    </license>
 
    <plugin
+         id="lz4-java"
+         download-size="0"
+         install-size="0"
+         version="1.3.0"
+         unpack="false"/>
+
+   <plugin
          id="javax.servlet"
          download-size="0"
          install-size="0"
@@ -87,13 +94,6 @@
          download-size="0"
          install-size="0"
          version="1.6.4.1"
-         unpack="false"/>
-
-   <plugin
-         id="rome"
-         download-size="0"
-         install-size="0"
-         version="1.0.0"
          unpack="false"/>
 
    <plugin

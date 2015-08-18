@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -55,8 +54,6 @@ public interface TrackedRegatta extends Serializable {
 
     void unlockTrackedRacesAfterWrite();
 
-    Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
-
     /**
      * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it
      * to this tracked regatta. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)}
@@ -93,6 +90,8 @@ public interface TrackedRegatta extends Serializable {
      */
     void addRaceListener(RaceListener listener);
     
+    void removeRaceListener(RaceListener listener);
+
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     void removeTrackedRace(RaceDefinition raceDefinition);

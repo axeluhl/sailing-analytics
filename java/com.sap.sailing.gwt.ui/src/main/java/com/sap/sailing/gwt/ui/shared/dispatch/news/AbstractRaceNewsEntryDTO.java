@@ -3,21 +3,21 @@ package com.sap.sailing.gwt.ui.shared.dispatch.news;
 import java.util.Date;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
     
-    private String regattaName;
-    private String trackedRaceName;
+    private String leaderboardName;
+    private RegattaAndRaceIdentifier regattaAndRaceIdentfier; 
     private String boatClass;
 
     protected AbstractRaceNewsEntryDTO() {
     }
 
     @GwtIncompatible
-    public AbstractRaceNewsEntryDTO(String regattaName, String trackedRaceName, String raceTitle, String boatClass, Date timestamp, Date currentTimestamp) {
-        super(raceTitle, timestamp, currentTimestamp, null);
-        this.regattaName = regattaName;
-        this.trackedRaceName = trackedRaceName;
+    public AbstractRaceNewsEntryDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp) {
+        super(raceTitle, timestamp, null);
+        this.leaderboardName = leaderboardName;
         this.boatClass = boatClass;
     }
     
@@ -26,19 +26,11 @@ public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
         return boatClass;
     }
 
-    public String getRegattaName() {
-        return regattaName;
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
 
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
-    }
-
-    public String getTrackedRaceName() {
-        return trackedRaceName;
-    }
-
-    public void setTrackedRaceName(String trackedRaceName) {
-        this.trackedRaceName = trackedRaceName;
+    public RegattaAndRaceIdentifier getRegattaAndRaceIdentfier() {
+        return regattaAndRaceIdentfier;
     }
 }

@@ -33,13 +33,13 @@ public class EventOverviewStage extends Composite {
     
     private final RefreshableWidget<EventOverviewStageDTO> refreshable = new RefreshableWidget<EventOverviewStageDTO>() {
         @Override
-        public void setData(EventOverviewStageDTO data, long nextUpdate, int updateNo) {
+        public void setData(EventOverviewStageDTO data) {
             setStageData(data);
         }
     };
     private final RefreshableWidget<ListResult<NewsEntryDTO>> newsRefreshable = new RefreshableWidget<ListResult<NewsEntryDTO>>() {
         @Override
-        public void setData(ListResult<NewsEntryDTO> data, long nextUpdate, int updateNo) {
+        public void setData(ListResult<NewsEntryDTO> data) {
             setNews(data.getValues());
         }
     };
@@ -59,6 +59,7 @@ public class EventOverviewStage extends Composite {
     private Widget lastContent;
 
     private final EventView.Presenter presenter;
+    private RefreshManager refreshManager;
     
     public EventOverviewStage(EventView.Presenter presenter) {
         this.presenter = presenter;
@@ -68,6 +69,7 @@ public class EventOverviewStage extends Composite {
     }
     
     public void setupRefresh(RefreshManager refreshManager) {
+        this.refreshManager = refreshManager;
         refreshManager.add(refreshable, new GetEventOverviewStageAction(presenter.getCtx().getEventDTO().getId()));
         
         if(presenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
@@ -103,13 +105,13 @@ public class EventOverviewStage extends Composite {
             setStageData(new EventOverviewStageDTO(null, new EventOverviewTickerStageDTO(null, null, null)));
         }
         
-        if(news.isEmpty()) {
+        if(news == null || news.isEmpty()) {
             updatesWrapperUi.getStyle().setDisplay(Display.NONE);
             stage.removeStyleName(mediaCss.medium7());
             stage.removeStyleName(mediaCss.large8());
         } else {
             updatesWrapperUi.getStyle().clearDisplay();
-            updatesUi.setData(news);
+            updatesUi.setData(news, refreshManager.getDispatchSystem().getCurrentServerTime());
             stage.addStyleName(mediaCss.medium7());
             stage.addStyleName(mediaCss.large8());
         }

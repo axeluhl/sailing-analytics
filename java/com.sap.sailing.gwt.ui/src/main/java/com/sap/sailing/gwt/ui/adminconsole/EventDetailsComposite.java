@@ -38,6 +38,7 @@ public class EventDetailsComposite extends Composite  {
     private final Label endDate;
     private final Label isPublic;
     private final Anchor officialWebsiteURL;
+    private final Anchor sailorsInfoWebsiteURL;
     private final Anchor eventOverviewURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleStringListComposite imageURLList;
@@ -55,7 +56,7 @@ public class EventDetailsComposite extends Composite  {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 15;
+        int rows = 16;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -68,6 +69,7 @@ public class EventDetailsComposite extends Composite  {
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
         officialWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        sailorsInfoWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
         eventOverviewURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
         courseAreaNamesList = createLableAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
@@ -128,6 +130,8 @@ public class EventDetailsComposite extends Composite  {
             isPublic.setText(String.valueOf(event.isPublic));
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
             officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
+            sailorsInfoWebsiteURL.setText(event.getSailorsInfoWebsiteURL());
+            sailorsInfoWebsiteURL.setHref(event.getSailorsInfoWebsiteURL());
             Map<String, String> regattaOverviewURLParameters = new HashMap<String, String>();
             regattaOverviewURLParameters.put("event", event.id.toString());
             String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
@@ -153,7 +157,7 @@ public class EventDetailsComposite extends Composite  {
             }
             videoURLList.setValues(videoURLStringsAsList);
             List<String> leaderboardGroupNamesAsList = new ArrayList<>();
-            for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
+            for (LeaderboardGroupDTO leaderboardGroupDTO : event.getLeaderboardGroups()) {
                 leaderboardGroupNamesAsList.add(leaderboardGroupDTO.getName());
             }
             leaderboardGroupList.setValues(leaderboardGroupNamesAsList);

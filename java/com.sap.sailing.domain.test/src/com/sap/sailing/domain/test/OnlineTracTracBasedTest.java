@@ -86,7 +86,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
@@ -219,7 +219,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
-            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         }
         domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 getTracTracRace(), /* trackedRegattaRegistry */ null);

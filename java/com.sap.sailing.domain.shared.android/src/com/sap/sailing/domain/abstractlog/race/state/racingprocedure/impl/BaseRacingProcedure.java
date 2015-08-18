@@ -19,7 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsInFinishingPhase
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
+import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -79,12 +79,10 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");
         }
-        
         this.raceLog = raceLog;
         this.author = author;
         this.factory = factory;
         this.configuration = configuration;
-
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
         this.recallDisplayedFinder = new IndividualRecallDisplayedFinder(raceLog);
@@ -92,10 +90,8 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.finishingTimeFinder = new FinishingTimeFinder(raceLog);
         this.finishedTimeFinder = new FinishedTimeFinder(raceLog);
         this.startTimeFinder = new StartTimeFinder(raceLogResolver, raceLog);
-
-        this.raceLogListener = new RaceLogChangedVisitor(this);
-        this.raceLog.addListener(raceLogListener);
-
+        this.raceLogListener = new WeakRaceLogChangedVisitor(this.raceLog, this);
+        this.raceLog.addListener(this.raceLogListener);
         this.cachedIsIndividualRecallDisplayed = false;
     }
     
@@ -228,7 +224,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected void update() {
         boolean isRecallDisplayed = isRecallDisplayedAnalyzer.analyze();
-        
         if (cachedIsIndividualRecallDisplayed != isRecallDisplayed) {
             cachedIsIndividualRecallDisplayed = isRecallDisplayed;
             if (cachedIsIndividualRecallDisplayed) {
@@ -238,8 +233,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
                 changedListeners.onIndividualRecallRemoved(this);
                 unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
             }
-        }    
-        
+        }
         // always call listeners for changed flag, as this does not only affect recall, but also
         // changes start procedure, for which some text elements need to be updated
         // ({@link BaseRaceInfoFragmen#renderFlagChangesCountdown}

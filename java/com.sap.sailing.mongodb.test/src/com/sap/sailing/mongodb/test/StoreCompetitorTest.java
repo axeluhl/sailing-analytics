@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.DB;
@@ -16,6 +17,7 @@ import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -25,11 +27,18 @@ import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sse.common.Util;
 
 public class StoreCompetitorTest extends AbstractMongoDBTest {
-
+    private DomainFactory domainFactory;
+    
     public StoreCompetitorTest() throws UnknownHostException, MongoException {
         super();
     }
 
+    @Before
+    public void setUp() {
+        // clear the domainFactory competitor store for a clean start:
+        domainFactory = new DomainFactoryImpl((srlid)->null);
+    }
+    
     private void dropCompetitorCollection() {
         DB db = getMongoService().getDB();
         DBCollection competitorCollection = db.getCollection(CollectionNames.COMPETITORS.name());
@@ -45,7 +54,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         String competitorName2 = "Hasso Plattner";
 
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
         DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor(competitorName1);
@@ -72,7 +81,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndUpdateCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
 
         DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso", UUID.randomUUID());
@@ -86,7 +95,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndRemoveCompetitor() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
         DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso");
@@ -100,7 +109,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndRemoveCompetitorWithUUIDAsId() {
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
-        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
         DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso", UUID.randomUUID());

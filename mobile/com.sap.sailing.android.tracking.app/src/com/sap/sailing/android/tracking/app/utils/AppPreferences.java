@@ -50,6 +50,11 @@ public class AppPreferences extends BaseAppPreferences {
                 competitorId);
     }
 
+    public String getServerCompetiorTeamPath(String competitorId){
+        return context.getString(R.string.preference_server_team_info_path, "/competitors").replace("{competitor_id}",
+            competitorId);
+    }
+
     public int getGPSFixInterval() {
         // EditTextPreference saves value as string, even if android:inputType="number" is set
         String value = PrefUtils.getString(context, R.string.preference_gps_fix_interval_ms_key,

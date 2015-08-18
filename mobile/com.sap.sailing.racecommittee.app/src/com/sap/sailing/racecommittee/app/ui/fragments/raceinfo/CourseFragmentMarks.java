@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
@@ -13,14 +18,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
-import com.sap.sailing.domain.base.*;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
@@ -42,11 +54,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener {
 
@@ -86,6 +93,17 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
 
+        LinearLayout headerText = ViewHelper.get(view, R.id.header_text);
+        if (headerText != null) {
+            headerText.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    openMainScheduleFragment();
+                }
+            });
+        }
+
         mHistoryCourse = (RecyclerView) view.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -102,7 +120,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mGuardManager.setEnabled(true);
 
             mDragDropManager = new RecyclerViewDragDropManager();
-            NinePatchDrawable drawable = (NinePatchDrawable) BitmapHelper.getDrawable(getActivity(),R.drawable.material_shadow_z3);
+            NinePatchDrawable drawable = (NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z3);
             mDragDropManager.setDraggingItemShadowDrawable(drawable);
 
             mSwipeManager = new RecyclerViewSwipeManager();
@@ -126,8 +144,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                mCurrentCourse
-                    .addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z1)));
+                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z1)));
             }
 
             mGuardManager.attachRecyclerView(mCurrentCourse);
@@ -471,13 +488,13 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, 0)) {
-        case 1:
+            case 1:
 //            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-            break;
+                break;
 
-        default:
-            openMainScheduleFragment();
-            break;
+            default:
+                openMainScheduleFragment();
+                break;
         }
     }
 

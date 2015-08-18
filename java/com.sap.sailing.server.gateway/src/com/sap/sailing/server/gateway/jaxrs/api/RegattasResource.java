@@ -356,14 +356,24 @@ public class RegattasResource extends AbstractSailingServerResource {
                         lastAdded = false;
                         break;
                     }
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                    addFixToJsonFixes(jsonFixes, fix);
                     lastAdded = true;
                 }
                 
-                if (addLastKnown && fix != null && !lastAdded){
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                if (addLastKnown && !lastAdded) {
+                    // find a fix earlier than the interval requested:
+                    Iterator<GPSFix> earlierFixIter = track.getFixesDescendingIterator(from, /* inclusive */false);
+                    final GPSFix earlierFix;
+                    if (earlierFixIter.hasNext()) {
+                        earlierFix = earlierFixIter.next();
+                    } else {
+                        earlierFix = null;
+                    }
+                    if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from).compareTo(to.until(fix.getTimePoint())) <= 0)) {
+                        addFixToJsonFixes(jsonFixes, earlierFix); // the earlier fix is closer to the interval's beginning than fix is to its end
+                    } else if (fix != null) {
+                        addFixToJsonFixes(jsonFixes, fix);
+                    }
                 }
                 
             } finally {
@@ -377,6 +387,12 @@ public class RegattasResource extends AbstractSailingServerResource {
         String json = jsonRace.toJSONString();
 
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
+    private JSONObject addFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
+        JSONObject jsonFix = constructFixJson(fix);
+        jsonFixes.add(jsonFix);
+        return jsonFix;
     }
 
     private JSONObject constructFixJson(GPSFix fix) {
@@ -651,7 +667,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-
+                // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
+                from = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
+                to = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
                         new DefaultWindTrackJsonSerializer());
                 serializer.setWindSource(windSource);

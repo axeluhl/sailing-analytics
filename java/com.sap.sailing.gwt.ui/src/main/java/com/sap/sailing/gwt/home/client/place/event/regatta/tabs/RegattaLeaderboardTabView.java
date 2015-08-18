@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
@@ -29,11 +30,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
 
     private Presenter currentPresenter;
 
-    @UiField
+    @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
     public RegattaLeaderboardTabView() {
-        super();
+        leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
 
     @Override
@@ -100,4 +101,5 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     public RegattaLeaderboardPlace placeToFire() {
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
+    
 }

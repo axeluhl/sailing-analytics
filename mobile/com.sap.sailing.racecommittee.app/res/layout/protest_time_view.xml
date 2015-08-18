@@ -13,13 +13,14 @@
         android:layout_height="match_parent"
         android:verticalSpacing="5dp"/>
 
-    <TimePicker
+    <include
         android:id="@+id/protest_time_time_time_picker"
+        layout="@layout/time_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:paddingLeft="@dimen/default_padding"
         android:paddingRight="@dimen/default_padding"
-        android:scaleX="1.55"
-        android:scaleY="1.55"/>
+        android:scaleX="@integer/picker_scale"
+        android:scaleY="@integer/picker_scale"/>
 </LinearLayout>

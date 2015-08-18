@@ -1,8 +1,8 @@
 apply plugin: "com.android.application"
 apply from: "../git.gradle"
 
-def packageName = "com.sap.sailing.buoy.positioning.app"
-def verCode = 1
+def packageName="com.sap.sailing.buoy.positioning.app"
+def verCode=1
 
 android {
     buildToolsVersion rootProject.ext.buildTools
@@ -82,6 +82,7 @@ dependencies {
     testCompile "org.mockito:mockito-core:${rootProject.ext.mockito}"
 
     /* UI testing with espresso */
+
     androidTestCompile "com.android.support:support-annotations:${rootProject.ext.support}"
     androidTestCompile "com.android.support.test:runner:${rootProject.ext.test}"
     androidTestCompile "com.android.support.test:rules:${rootProject.ext.test}"

@@ -87,9 +87,7 @@ public class ByNameCourseDesignDialog extends RaceDialogFragment {
     protected void onCourseSelectionButtonClicked(View v) {
         Button selectedButton = (Button) v;
         String internalCourseName = (String) selectedButton.getText();
-
         CourseBase courseLayout = new CourseDataImpl(internalCourseName);
-
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
         dismiss();
     }

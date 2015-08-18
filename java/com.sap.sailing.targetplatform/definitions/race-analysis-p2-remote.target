@@ -112,10 +112,6 @@
 <plugin id="org.apache.felix.gogo.shell.source"/>
 <plugin id="org.apache.felix.shell"/>
 <plugin id="org.apache.felix.shell.remote"/>
-<plugin id="org.apache.geronimo.specs.geronimo-annotation_1.0_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-j2ee-management_1.1_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-jms_1.1_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-jta_1.0.1B_spec"/>
 <plugin id="org.apache.httpcomponents.httpclient"/>
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
@@ -230,10 +226,10 @@
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
-<plugin id="rome"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
+<plugin id="lz4-java"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

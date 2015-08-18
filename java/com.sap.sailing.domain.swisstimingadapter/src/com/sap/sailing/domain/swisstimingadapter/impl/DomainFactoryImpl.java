@@ -336,10 +336,9 @@ public class DomainFactoryImpl implements DomainFactory {
         Regatta regatta = raceIDToRegattaCache.get(raceID);
         if (regatta != null) {
             Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceID)) {
-                    toRemove.add(race);
-                }
+            RaceDefinition race = regatta.getRaceByName(raceID);
+            if (race != null) {
+                toRemove.add(race);
             }
             for (RaceDefinition raceToRemove : toRemove) {
                 regatta.removeRace(raceToRemove);

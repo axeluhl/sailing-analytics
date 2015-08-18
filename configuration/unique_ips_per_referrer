@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# groups Apache / httpd log entries into "${referrer}.ips" files, where ${referrer} is the
+# referrer URL identifying the "event"; the lines written to the .ips files hold the IP
+# address of the requestor, the date (not the time) and the user agent string.
+# Sorting for unique entries should give a count similar to what goaccess is using to
+# determine "unique visitors."
+
+# A sample line:
+# 505Worlds2012.sapsailing.com 66.249.73.53 - - [12/Jan/2014:03:33:11 +0000] "GET /robots.txt HTTP/1.1" 404 238 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+
+#cat $* | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \[\([^:]*\):\([^]]*\)\] \"[^\"]*\" [^ ]* [^ ]* \"[^\"]\" \"\([\"]*\)\"\(.*\)$/\1 \2 \5 \7/'
+cat $* | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \[\([^:]*\):\([^]]*\)\] \"[^\"]*\" [^ ]* [^ ]* \"[^\"]*\" \"\([^\"]*\)\"/\1 \2 \5 \7/' | while read referrer hit; do
+  echo "$hit" >>${referrer}.ips
+done
+for i in *.ips; do
+  echo -n "$i "
+  cat $i | sort -u | wc | awk '{ print $1; }'
+done | tee unique-ips-days-useragents-per-event
+echo "Done. Wrote results to `pwd`/unique-ips-days-useragents-per-event

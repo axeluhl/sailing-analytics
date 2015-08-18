@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -78,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.search.KeywordQuery;
@@ -94,7 +96,6 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
     void getRegattaByName(String regattaName, AsyncCallback<RegattaDTO> asyncCallback);
-
 
     /**
      * The string returned in the callback's pair is the common event name
@@ -367,11 +368,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue, boolean isPublic,
-            List<String> courseAreaNames, String officialWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
+            List<String> courseAreaNames, String officialWebsiteURL, String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
     void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<Void> callback);
@@ -518,7 +519,7 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback); 
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
-            AsyncCallback<UUID> asyncCallback);
+            boolean exportDeviceConfigurations, AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
     
@@ -719,4 +720,11 @@ public interface SailingServiceAsync extends BuildVersionRetriever, FileStorageM
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean>  regattaLogCallBack);
+
+    void getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName, AsyncCallback<RegattaAndRaceIdentifier> asyncCallback);
+    
+    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
+
+    void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Pair<TimePoint, TimePoint>> callback);
 }

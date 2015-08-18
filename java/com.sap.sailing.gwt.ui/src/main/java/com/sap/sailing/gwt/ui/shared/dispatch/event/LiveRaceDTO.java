@@ -1,15 +1,14 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleWindDTO;
+import com.sap.sailing.gwt.ui.shared.race.wind.SimpleWindDTO;
 
-public class LiveRaceDTO extends RaceMetadataDTO {
+public class LiveRaceDTO extends RaceMetadataDTO<SimpleWindDTO> {
     
     private FlagStateDTO flagState;
-    
-    private SimpleWindDTO wind;
     
     private RaceProgressDTO progress;
 
@@ -17,16 +16,8 @@ public class LiveRaceDTO extends RaceMetadataDTO {
     private LiveRaceDTO() {
     }
     
-    public LiveRaceDTO(String regattaName, String raceName) {
-        super(regattaName, raceName);
-    }
-
-    public SimpleWindDTO getWind() {
-        return wind;
-    }
-
-    public void setWind(SimpleWindDTO wind) {
-        this.wind = wind;
+    public LiveRaceDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
+        super(leaderboardName, regattaAndRaceIdentifier, raceName);
     }
 
     public FlagStateDTO getFlagState() {

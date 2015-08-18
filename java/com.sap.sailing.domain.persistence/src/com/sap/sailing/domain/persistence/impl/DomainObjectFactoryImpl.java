@@ -35,7 +35,7 @@ import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
@@ -44,6 +44,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -51,11 +52,12 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -141,7 +143,6 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
-import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections.LeaderboardCorrectionsResolvedListener;
 import com.sap.sailing.domain.leaderboard.EventResolver;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -315,7 +316,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             .add(FieldNames.WIND.name() + "." + FieldNames.TIME_AS_MILLIS.name(), 1).get(),
                     new BasicDBObjectBuilder().add("unique", true).add("dropDups", true).get());
         } catch (MongoException exception) {
-
             if (exception.getCode() == 10092) {
                 logger.warning(String.format(
                         "Setting the unique index on the %s collection failed because you have too many duplicates. "
@@ -408,19 +408,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (result != null) {
                 final Leaderboard finalResult = result;
                 finalResult.setDisplayName((String) dbLeaderboard.get(FieldNames.LEADERBOARD_DISPLAY_NAME.name()));
-
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result, baseDomainFactory);
-                final boolean[] needsMigration = new boolean[1];
-                loadedLeaderboardCorrections.addLeaderboardCorrectionsResolvedListener(new LeaderboardCorrectionsResolvedListener() {
-                    @Override
-                    public void correctionsResolved(DelayedLeaderboardCorrections delayedLeaderboardCorrections) {
-                        if (needsMigration[0]) {
-                            new MongoObjectFactoryImpl(database).storeLeaderboard(finalResult);
-                        }
-                    }
-                });
-                needsMigration[0] = loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection()) || needsMigration[0];
-                needsMigration[0] = loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections) || needsMigration[0];
+                loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, result.getScoreCorrection());
+                loadSuppressedCompetitors(dbLeaderboard, loadedLeaderboardCorrections);
                 loadColumnFactors(dbLeaderboard, result);
                 // add the leaderboard to the registry
                 if (leaderboardRegistry != null) {
@@ -449,25 +439,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
     }
 
-    private boolean loadSuppressedCompetitors(DBObject dbLeaderboard,
-            DelayedLeaderboardCorrections loadedLeaderboardCorrections) {
-        final boolean needsMigration;
-        BasicDBList dbSuppressedCompetitorNames = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITORS.name());
-        if (dbSuppressedCompetitorNames != null) {
-            needsMigration = true;
-            for (Object escapedCompetitorName : dbSuppressedCompetitorNames) {
-                loadedLeaderboardCorrections.suppressCompetitorByName(MongoUtils.unescapeDollarAndDot((String) escapedCompetitorName));
-            }
-        } else {
-            needsMigration = false;
-        }
+    private void loadSuppressedCompetitors(DBObject dbLeaderboard, DelayedLeaderboardCorrections loadedLeaderboardCorrections) {
         BasicDBList dbSuppressedCompetitorIDs = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_SUPPRESSED_COMPETITOR_IDS.name());
         if (dbSuppressedCompetitorIDs != null) {
             for (Object competitorId : dbSuppressedCompetitorIDs) {
-                loadedLeaderboardCorrections.suppressCompetitorById((Serializable) competitorId);
+                loadedLeaderboardCorrections.suppressCompetitorByID((Serializable) competitorId);
             }
         }
-        return needsMigration;
     }
 
     /**
@@ -576,19 +554,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return scoringScheme;
     }
 
-    private boolean loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
+    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
             SettableScoreCorrection scoreCorrectionToUpdate) {
-        boolean needsMigration = false;
-        DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
-        if (carriedPoints != null) {
-            needsMigration = true;
-            for (String escapedCompetitorName : carriedPoints.keySet()) {
-                Double carriedPointsForCompetitor = ((Number) carriedPoints.get(escapedCompetitorName)).doubleValue();
-                if (carriedPointsForCompetitor != null) {
-                    correctionsToUpdate.setCarriedPointsByName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), carriedPointsForCompetitor);
-                }
-            }
-        }
         BasicDBList carriedPointsById = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS_BY_ID.name());
         if (carriedPointsById != null) {
             for (Object o : carriedPointsById) {
@@ -618,44 +585,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(escapedRaceColumnName);
             final RaceColumn raceColumn = correctionsToUpdate.getLeaderboard().getRaceColumnByName(MongoUtils.unescapeDollarAndDot(escapedRaceColumnName));
             if (raceColumn != null) {
-                if (dbScoreCorrectionForRace instanceof BasicDBList) {
-                    for (Object o : (BasicDBList) dbScoreCorrectionForRace) {
-                        DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) o;
-                        Serializable competitorId = (Serializable) dbScoreCorrectionForCompetitorInRace
-                                .get(FieldNames.COMPETITOR_ID.name());
-                        if (dbScoreCorrectionForCompetitorInRace
-                                .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                            correctionsToUpdate.setMaxPointsReasonByID(competitorId, raceColumn, MaxPointsReason
-                                    .valueOf((String) dbScoreCorrectionForCompetitorInRace
-                                            .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
-                        }
-                        if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE
-                                .name())) {
-                            final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
-                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
-                            correctionsToUpdate.correctScoreByID(competitorId, raceColumn,
-                                    (Double) leaderboardCorrectedScore);
-                        }
+                for (Object o : (BasicDBList) dbScoreCorrectionForRace) {
+                    DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) o;
+                    Serializable competitorId = (Serializable) dbScoreCorrectionForCompetitorInRace
+                            .get(FieldNames.COMPETITOR_ID.name());
+                    if (dbScoreCorrectionForCompetitorInRace
+                            .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
+                        correctionsToUpdate.setMaxPointsReasonByID(competitorId, raceColumn, MaxPointsReason
+                                .valueOf((String) dbScoreCorrectionForCompetitorInRace
+                                        .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                     }
-                } else {
-                    needsMigration = true;
-                    for (String competitorName : dbScoreCorrectionForRace.keySet()) {
-                        DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace
-                                .get(competitorName);
-                        if (dbScoreCorrectionForCompetitorInRace
-                                .containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                            correctionsToUpdate.setMaxPointsReasonByName(MongoUtils
-                                    .unescapeDollarAndDot(competitorName), raceColumn, MaxPointsReason
-                                    .valueOf((String) dbScoreCorrectionForCompetitorInRace
-                                            .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
-                        }
-                        if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE
-                                .name())) {
-                            final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
-                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
-                            correctionsToUpdate.correctScoreByName(MongoUtils.unescapeDollarAndDot(competitorName),
-                                    raceColumn, (Double) leaderboardCorrectedScore);
-                        }
+                    if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE
+                            .name())) {
+                        final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
+                                .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
+                        correctionsToUpdate.correctScoreByID(competitorId, raceColumn,
+                                (Double) leaderboardCorrectedScore);
                     }
                 }
             } else {
@@ -667,22 +612,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // deprecated style: a DBObject whose keys are the escaped competitor names
         // new style: a BasicDBList whose entries are DBObjects with COMPETITOR_ID and COMPETITOR_DISPLAY_NAME fields
         if (competitorDisplayNames != null) {
-            if (competitorDisplayNames instanceof BasicDBList) {
-                for (Object o : (BasicDBList) competitorDisplayNames) {
-                    DBObject competitorDisplayName = (DBObject) o;
-                    final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
-                    final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
-                    correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
-                }
-            } else {
-                needsMigration = true;
-                for (String escapedCompetitorName : competitorDisplayNames.keySet()) {
-                    correctionsToUpdate.setDisplayNameByName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName),
-                            (String) competitorDisplayNames.get(escapedCompetitorName));
-                }
+            for (Object o : (BasicDBList) competitorDisplayNames) {
+                DBObject competitorDisplayName = (DBObject) o;
+                final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
+                final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+                correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
             }
         }
-        return needsMigration;
     }
 
     /**
@@ -1047,6 +983,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
+        String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
+        if (sailorsInfoWebSiteURLAsString != null) {
+            try {
+                result.setSailorsInfoWebsiteURL(new URL(sailorsInfoWebSiteURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {
@@ -1352,6 +1296,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String eventClass = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RaceLogStartTimeEvent.class.getSimpleName())) {
             return loadRaceLogStartTimeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogStartOfTrackingEvent.class.getSimpleName())) {
+            return loadRaceLogStartOfTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+        } else if (eventClass.equals(RaceLogEndOfTrackingEvent.class.getSimpleName())) {
+            return loadRaceLogEndOfTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogDependentStartTimeEvent.class.getSimpleName())) {
             return loadRaceLogDependentStartTimeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRaceStatusEvent.class.getSimpleName())) {
@@ -1385,7 +1333,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogDenoteForTrackingEvent.class.getSimpleName())) {
             return loadRaceLogDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogStartTrackingEvent.class.getSimpleName())) {
-            return loadRaceLogStartEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+            return loadRaceLogStartTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRevokeEvent.class.getSimpleName())) {
             return loadRaceLogRevokeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {
@@ -1396,9 +1344,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogAdditionalScoringInformationEvent.class.getSimpleName())) {
             return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(FixedMarkPassingEvent.class.getSimpleName())){
+        } else if (eventClass.equals(RaceLogFixedMarkPassingEvent.class.getSimpleName())){
             return loadRaceLogFixedMarkPassingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(SuppressedMarkPassingsEvent.class.getSimpleName())){
+        } else if (eventClass.equals(RaceLogSuppressedMarkPassingsEvent.class.getSimpleName())){
             return loadRaceLogSuppressedMarkPassingsEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         }
 
@@ -1453,7 +1401,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return raceLogEventFactory.createDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, raceName, boatClass, raceId);
     }
 
-    private RaceLogEvent loadRaceLogStartEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    private RaceLogEvent loadRaceLogStartTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         return raceLogEventFactory.createStartTrackingEvent(createdAt, author, logicalTimePoint, id, passId);
     }
@@ -1634,6 +1582,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String nextStatusName = (String) dbObject.get(FieldNames.RACE_LOG_EVENT_NEXT_STATUS.name());
         final RaceLogRaceStatus nextStatus = nextStatusName==null?null:RaceLogRaceStatus.valueOf(nextStatusName);
         return raceLogEventFactory.createStartTimeEvent(createdAt, author, logicalTimePoint, id, competitors, passId, startTime, nextStatus);
+    }
+
+    private RaceLogStartOfTrackingEvent loadRaceLogStartOfTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        return raceLogEventFactory.createStartOfTrackingEvent(logicalTimePoint, author, id, competitors, passId);
+    }
+
+    private RaceLogEndOfTrackingEvent loadRaceLogEndOfTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
+        return raceLogEventFactory.createEndOfTrackingEvent(logicalTimePoint, author, id, competitors, passId);
     }
 
     private RaceLogDependentStartTimeEvent loadRaceLogDependentStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {

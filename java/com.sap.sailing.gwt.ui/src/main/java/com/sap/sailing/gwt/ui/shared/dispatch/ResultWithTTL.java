@@ -1,19 +1,23 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+
 public class ResultWithTTL<T extends DTO> implements Result {
-
-    /**
-     * Time To Live in millisecs.
-     */
-    private long ttl;
-
+    
+    /** Time to live*/
+    private Duration ttl;
     private T dto;
     
-    public ResultWithTTL() {
+    @SuppressWarnings("unused")
+    private ResultWithTTL() {
     }
 
     public ResultWithTTL(long ttl, T dto) {
-        super();
+       this(new MillisecondsDurationImpl(ttl), dto);
+    }
+    
+    public ResultWithTTL(Duration ttl, T dto) {
         this.ttl = ttl;
         this.dto = dto;
     }
@@ -22,7 +26,11 @@ public class ResultWithTTL<T extends DTO> implements Result {
         return dto;
     }
 
-    public long getTtl() {
+    public Duration getTtl() {
         return ttl;
+    }
+    
+    public long getTtlMillis() {
+        return ttl.asMillis();
     }
 }

@@ -1,10 +1,10 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.widget.Toast;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -19,7 +19,6 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,38 +38,40 @@ public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
     private AbstractCheckinData checkinData;
     private CheckinDataActivity activity;
+    private Context mContext;
     private AppPreferences prefs;
     private String url;
+    private DataChangedListner dataChangedListner;
+
+    public CheckinManager(String url, Context context){
+        this.url = url;
+        mContext = context;
+        prefs = new AppPreferences(context);
+    }
 
     public CheckinManager(String url, CheckinDataActivity activity) {
         this.activity = activity;
         this.url = url;
-        prefs = new AppPreferences(activity);
+        mContext = activity;
+        prefs = new AppPreferences(mContext);
     }
 
     public void callServerAndGenerateCheckinData() {
         Uri uri = Uri.parse(url);
-
-        // TODO: assuming scheme is http, is this valid?
         String scheme = uri.getScheme();
-        if (scheme != "http" && scheme != "https") {
-            scheme = "http";
-        }
-
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
         if (urlData == null) {
             setCheckinData(null);
             return;
         }
-
-        activity.showProgressDialog(R.string.please_wait, R.string.getting_marks);
-
+        if (activity != null) {
+            activity.showProgressDialog(R.string.please_wait, R.string.getting_marks);
+        }
         try {
-            HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(urlData.getLeaderboardUrl), activity);
+            HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(urlData.getLeaderboardUrl), mContext);
             getLeaderBoardFromServer(urlData, getLeaderboardRequest);
-
         } catch (MalformedURLException e) {
-            ExLog.e(activity, TAG,
+            ExLog.e(mContext, TAG,
                     "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
@@ -87,17 +88,17 @@ public class CheckinManager {
             leaderboardNameFromQR = URLEncoder.encode(
                     uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
-            ExLog.e(activity, TAG, "Failed to encode leaderboard name: " + e.getMessage());
+            ExLog.e(mContext, TAG, "Failed to encode leaderboard name: " + e.getMessage());
         } catch (NullPointerException e) {
-            ExLog.e(activity, TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
-            Toast.makeText(activity, activity.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
+            ExLog.e(mContext, TAG, "Invalid Barcode (no leaderboard-name set): " + e.getMessage());
+            Toast.makeText(mContext, mContext.getString(R.string.error_invalid_qr_code), Toast.LENGTH_LONG).show();
             urlData = null;
         }
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
 
             urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                    .getUniqueId(activity)));
+                    .getUniqueId(mContext)));
 
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
@@ -105,49 +106,46 @@ public class CheckinManager {
     }
 
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
-        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
+        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
                 new NetworkHelper.NetworkHelperSuccessListener() {
-
                     @Override
                     public void performAction(JSONObject response) {
-                        // TODO Auto-generated method stub
-
                         final String leaderboardName;
-
                         try {
                             leaderboardName = response.getString("name");
                             urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
                         } catch (JSONException e) {
-                            ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getLeaderboardUrl
+                            ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getLeaderboardUrl
                                     + ", Error: " + e.getMessage());
-                            activity.dismissProgressDialog();
-                            displayAPIErrorRecommendRetry();
+                            if (activity != null) {
+                                activity.dismissProgressDialog();
+                                displayAPIErrorRecommendRetry();
+                            }
                             return;
                         }
 
                         HttpGetRequest getMarksRequest;
                         try {
-                            getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), activity);
+                            getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
                             getMarksFromServer(leaderboardName, getMarksRequest, urlData);
                         } catch (MalformedURLException e1) {
-                            ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: "
-                                    + e1.getMessage());
+                            ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
                         }
                     }
-
                 }, new NetworkHelper.NetworkHelperFailureListener() {
-
                     @Override
                     public void performAction(NetworkHelper.NetworkHelperError e) {
-                        ExLog.e(activity, TAG, "Failed to get event from API: " + e.getMessage());
-                        activity.dismissProgressDialog();
-                        displayAPIErrorRecommendRetry();
+                        ExLog.e(mContext, TAG, "Failed to get event from API: " + e.getMessage());
+                        if (activity != null) {
+                            activity.dismissProgressDialog();
+                            displayAPIErrorRecommendRetry();
+                        }
                     }
                 });
     }
 
     private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
-        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getMarksRequest,
+        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsnchronously(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
                     @Override
@@ -184,10 +182,12 @@ public class CheckinManager {
                             saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
 
                         } catch (JSONException e) {
-                            ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
+                            ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
                                     + ", Error: " + e.getMessage());
-                            activity.dismissProgressDialog();
-                            displayAPIErrorRecommendRetry();
+                            if (activity != null) {
+                                activity.dismissProgressDialog();
+                                displayAPIErrorRecommendRetry();
+                            }
                             return;
                         }
 
@@ -196,9 +196,11 @@ public class CheckinManager {
 
                     @Override
                     public void performAction(NetworkHelper.NetworkHelperError e) {
-                        ExLog.e(activity, TAG, "Failed to get marks from API: " + e.getMessage());
-                        activity.dismissProgressDialog();
-                        displayAPIErrorRecommendRetry();
+                        ExLog.e(mContext, TAG, "Failed to get marks from API: " + e.getMessage());
+                        if (activity != null) {
+                            activity.dismissProgressDialog();
+                            displayAPIErrorRecommendRetry();
+                        }
                     }
                 });
     }
@@ -213,24 +215,43 @@ public class CheckinManager {
         data.uriString = urlData.uriStr;
         try {
             data.setCheckinDigestFromString(urlData.uriStr);
-            activity.dismissProgressDialog();
+            if (activity != null) {
+                activity.dismissProgressDialog();
+            }
             setCheckinData(data);
         } catch (UnsupportedEncodingException e) {
-            ExLog.e(activity, TAG,
+            ExLog.e(mContext, TAG,
                     "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
-            activity.dismissProgressDialog();
-            displayAPIErrorRecommendRetry();
+            if (activity != null) {
+                activity.dismissProgressDialog();
+                displayAPIErrorRecommendRetry();
+            }
         } catch (NoSuchAlgorithmException e) {
-            ExLog.e(activity, TAG,
+            ExLog.e(mContext, TAG,
                     "Failed to get generate digest of qr-code string (" + urlData.uriStr + "). " + e.getMessage());
-            activity.dismissProgressDialog();
-            displayAPIErrorRecommendRetry();
+            if (activity != null) {
+                activity.dismissProgressDialog();
+                displayAPIErrorRecommendRetry();
+            }
         }
     }
 
     public void setCheckinData(AbstractCheckinData data) {
         checkinData = data;
-        activity.onCheckinDataAvailable(getCheckinData());
+        if (activity != null) {
+            activity.onCheckinDataAvailable(getCheckinData());
+        }
+        else if (dataChangedListner != null){
+            dataChangedListner.handleData(data);
+        }
+    }
+
+    public interface DataChangedListner{
+        void handleData(AbstractCheckinData data);
+    }
+
+    public void setDataChangedListner(DataChangedListner listner){
+        dataChangedListner = listner;
     }
 
     public AbstractCheckinData getCheckinData() {
@@ -241,10 +262,10 @@ public class CheckinManager {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     private void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(activity.getString(R.string.notify_user_api_call_failed));
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage(mContext.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
-        builder.setPositiveButton(activity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(mContext.getString(R.string.ok), new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -276,10 +297,6 @@ public class CheckinManager {
             e.printStackTrace();
         }
         return checkinDigest;
-    }
-
-    public interface CheckinDataHandler {
-        public void onCheckinDataAvailable(CheckinData data);
     }
 
     private class URLData {

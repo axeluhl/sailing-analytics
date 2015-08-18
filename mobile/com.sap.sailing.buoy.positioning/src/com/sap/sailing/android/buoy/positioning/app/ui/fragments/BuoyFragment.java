@@ -2,11 +2,16 @@ package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import java.text.DecimalFormat;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,8 +25,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.activities.PositioningActivity;
-import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.util.PingHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.PingServerReplyCallback;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
@@ -29,9 +34,11 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
+    private static final String TAG = BuoyFragment.class.getName();
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
     private OpenSansTextView markHeaderTextView;
@@ -47,42 +54,48 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private pingListener pingListener;
     private SignalQualityIndicatorView signalQualityIndicatorView;
     private boolean initialLocationUpdate;
+    private IntentReceiver mReceiver;
+    private PositioningActivity positioningActivity;
+    private LocalBroadcastManager mBroadcastManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
+        View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = (OpenSansTextView) view.findViewById(R.id.mark_header);
-        latitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_latitude);
-        longitudeTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_longitude);
-        accuracyTextView = (OpenSansTextView) view.findViewById(R.id.marker_gps_accuracy);
+        markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
+        latitudeTextView = ViewHelper.get(layout, R.id.marker_gps_latitude);
+        longitudeTextView = ViewHelper.get(layout, R.id.marker_gps_longitude);
+        accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
         ClickListener clickListener = new ClickListener();
 
-        setPositionButton = (OpenSansButton) view.findViewById(R.id.marker_set_position_button);
+        setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
 
-        resetPositionButton = (OpenSansButton) view.findViewById(R.id.marker_reset_position_button);
+        resetPositionButton = ViewHelper.get(layout, R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
         resetPositionButton.setVisibility(View.GONE);
 
-        signalQualityIndicatorView = (SignalQualityIndicatorView) view.findViewById(R.id.signal_quality_indicator);
+        signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
-        return view;
+
+        mReceiver = new IntentReceiver();
+        mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
+        return layout;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mapFragment = (MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map);
+        positioningActivity = (PositioningActivity) getActivity();
+        mapFragment = (MapFragment) positioningActivity.getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         initLocationProvider();
-        MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
+        MarkInfo mark = positioningActivity.getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
-            markHeaderTextView.setText(mark.getName());
             setUpTextUI(lastKnownLocation);
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
@@ -92,6 +105,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15));
             }
         }
+        initMarkerReceiver();
+    }
+
+    private void initMarkerReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.database_changed));
+        filter.addAction(getString(R.string.ping_reached_server));
+        mBroadcastManager.registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -99,9 +120,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onPause();
         // Unsubscribe location updates for power saving
         locationManager.removeUpdates(this);
+        mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
     public void setUpTextUI(Location location) {
+        MarkInfo mark = positioningActivity.getMarkInfo();
+        markHeaderTextView.setText(mark.getName());
         String longitudeText = "";
         String latitudeText = "";
         String accuracyText = "";
@@ -117,7 +141,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             longitudeText += "n/a";
             accuracyText += "n/a";
         }
-        MarkPingInfo markPing = ((PositioningActivity) getActivity()).getMarkPing();
+        MarkPingInfo markPing = positioningActivity.getMarkPing();
         if (markPing != null) {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
@@ -223,6 +247,10 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     }
 
+    public void handleSuccessfulResponse(){
+        Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
+    }
+
     public void setPingListener(pingListener listener) {
         pingListener = listener;
     }
@@ -251,26 +279,39 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             int id = v.getId();
             if (id == R.id.marker_set_position_button) {
                 PingHelper helper = new PingHelper();
-                try {
-                    if (lastKnownLocation != null) {
-                        MarkInfo mark = ((PositioningActivity) getActivity()).getMarkInfo();
-                        LeaderboardInfo leaderBoard = ((PositioningActivity) getActivity()).getLeaderBoard();
-                        helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
-                        helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark);
-                        ((PositioningActivity) getActivity()).updatePing();
-                        savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
-                        pingListener.updatePing();
-                        setUpTextUI(lastKnownLocation);
-                        updateMap();
-                        Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
-                    }
-                } catch (GeneralDatabaseHelperException e) {
-                    e.printStackTrace();
+                if (lastKnownLocation != null) {
+                    MarkInfo mark = positioningActivity.getMarkInfo();
+                    LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
+                    helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
+                    helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
+                    ((PositioningActivity) getActivity()).updatePing();
+                    savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+                    pingListener.updatePing();
+                    setUpTextUI(lastKnownLocation);
+                    updateMap();
+                } else {
+                    Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                 }
             } else if (id == R.id.marker_reset_position_button) {
                 // Reset position
+            }
+        }
+    }
+
+    // Broadcast receiver to update ui on data changed
+    private class IntentReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d(TAG, "Action: " + action);
+            if(action.equals(getString(R.string.database_changed))) {
+                positioningActivity.loadDataFromDatabase();
+                setUpTextUI(lastKnownLocation);
+                updateMap();
+            }
+            if (action.equals(getString(R.string.ping_reached_server))){
+                Log.d(TAG, "Response reached Buoy Fragment");
+                handleSuccessfulResponse();
             }
         }
     }

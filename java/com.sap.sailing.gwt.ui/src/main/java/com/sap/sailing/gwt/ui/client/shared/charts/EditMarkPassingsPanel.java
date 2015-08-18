@@ -19,6 +19,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -88,6 +89,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     private final Button removeFixedMarkPassingsButton;
     private final Button suppressPassingsButton;
     private final Button removeSuppressedPassingButton;
+    private Label selectCompetitorLabel = new Label();
 
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             final RegattaAndRaceIdentifier raceIdentifier, final StringMessages stringMessages,
@@ -100,8 +102,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         this.competitorSelectionModel = competitorSelectionModel;
         this.stringMessages = stringMessages;
         competitorSelectionModel.addCompetitorSelectionChangeListener(this);
-
-        setVisible(false);
 
         // Waypoint list
         currentWaypoints = new ArrayList<>();
@@ -265,7 +265,9 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 });
             }
         });
+        selectCompetitorLabel.setText(stringMessages.selectCompetitor());
         refreshWaypoints();
+        setVisible(false);
         HorizontalPanel tableAndButtons = new HorizontalPanel();
         add(tableAndButtons, 0, 0);
         tableAndButtons.setSpacing(3);
@@ -277,32 +279,43 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(removeFixedMarkPassingsButton);
         buttonPanel.add(suppressPassingsButton);
         buttonPanel.add(removeSuppressedPassingButton);
+        buttonPanel.add(selectCompetitorLabel);
         enableButtons();
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        processCompetitorSelectionChange(visible);
+        super.setVisible(visible);
+        
     }
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange();
+        processCompetitorSelectionChange(isVisible());
     }
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        processCompetitorSelectionChange();
+        processCompetitorSelectionChange(isVisible());
     }
 
-    private void processCompetitorSelectionChange() {
-        waypointSelectionModel.clear();
-        if (Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
-            refillList();
-        } else {
-            disableEditing();
-        }
+    private void processCompetitorSelectionChange(boolean visible) {
+            waypointSelectionModel.clear();
+            if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+                selectCompetitorLabel.setText("");
+                refillList();
+            } else {
+                disableEditing();
+                selectCompetitorLabel.setText(stringMessages.selectCompetitor());
+            }
     }
 
     private void disableEditing() {
         waypointList.getList().clear();
         clearInfo();
     }
+    
 
     private void refillList() {
         clearInfo();

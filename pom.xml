@@ -24,6 +24,13 @@
 				<module>mobile</module>
 			</modules>
 		</profile>
+		<profile>
+			<!-- activate with parameter '-P with-ios'-->
+			<id>with-ios</id>
+			<modules>
+				<module>ios</module>
+			</modules>
+		</profile>
 	</profiles>
 
 	<properties>

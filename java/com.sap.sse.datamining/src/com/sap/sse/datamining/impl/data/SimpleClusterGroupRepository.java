@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,7 +31,7 @@ public class SimpleClusterGroupRepository implements ClusterGroupRepository {
 
     @SuppressWarnings("unchecked") // Necessary because you can't use instanceof with generics
     @Override
-    public <T> Collection<ClusterGroup<T>> getClusterGroupsFor(Class<T> type) {
+    public <T extends Serializable> Collection<ClusterGroup<T>> getClusterGroupsFor(Class<T> type) {
         Collection<ClusterGroup<T>> specificClusterGroups = new HashSet<>();
         if (clusterGroupsMappedByType.containsKey(type)) {
             for (ClusterGroup<?> clusterGroup : clusterGroupsMappedByType.get(type)) {

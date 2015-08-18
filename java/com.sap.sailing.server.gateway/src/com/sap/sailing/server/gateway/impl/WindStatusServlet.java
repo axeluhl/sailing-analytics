@@ -3,10 +3,18 @@ package com.sap.sailing.server.gateway.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.SocketException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +37,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. Currently Expedition and Igtimi are supported.
@@ -39,15 +48,21 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
-    private static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+    protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
 
-    private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
-    
+    protected final int NUMBER_OF_MESSAGES_TO_SHOW=20;
+    protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=5;
+
+    protected static final DecimalFormat decimalFormatter2Digits = new DecimalFormat("#.##");
+    protected static final DecimalFormat decimalFormatter1Digit = new DecimalFormat("#.#");
+    protected static final DecimalFormat latLngDecimalFormatter = new DecimalFormat("#.######");
+    protected static final DateFormat dateTimeFormatter = DateFormat.getTimeInstance(DateFormat.LONG);
+            
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
     private static Object lock = new Object();
     private static int igtimiRawMessageCount;
-    private static List<IgtimiMessageInfo> lastIgtimiMessages;
+    private static Map<String, Deque<IgtimiMessageInfo>> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
     private static LiveDataConnection liveDataConnection;
 
@@ -60,7 +75,19 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         isIgtimiListenerRegistered = false;
     }
     
-    private void initializeWindReceiver(boolean reinitialize) {
+    protected int getIgtimiMessagesRawCount() {
+        return igtimiRawMessageCount;
+    }
+    
+    protected Map<String, Deque<IgtimiMessageInfo>> getLastIgtimiMessages() {
+        return lastIgtimiMessages;
+    }
+    
+    protected List<ExpeditionMessageInfo> getLastExpeditionMessages() {
+        return lastExpeditionMessages;
+    }
+    
+    protected void initializeWindReceiver(boolean reinitialize) {
         synchronized (lock) {
             if (!isExpeditionListenerRegistered || reinitialize) {
                 isExpeditionListenerRegistered = registerExpeditionListener();
@@ -81,7 +108,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     }
                 }
                 isIgtimiListenerRegistered = registerIgtimiListener();
-                lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
+                lastIgtimiMessages = new HashMap<String, Deque<IgtimiMessageInfo>>();
                 igtimiRawMessageCount = 0;
             }
         }
@@ -102,19 +129,30 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
         if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
-            final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;
-            synchronized (lastIgtimiMessages) {
-                copyOfLastIgtimiMessages = new ArrayList<>(WindStatusServlet.lastIgtimiMessages);
-            }
-            int counter = 0;
-            for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
-                counter++;
-                IgtimiMessageInfo message = iterator.previous();
-                out.println(message);
-                out.println("<br/>");
-                if (counter >= NUMBER_OF_MESSAGES_TO_SHOW) {
-                    break;
+            for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: lastIgtimiMessages.entrySet()) {
+                final Deque<IgtimiMessageInfo> copyOfLastIgtimiMessages;
+                synchronized (deviceAndMessagesList.getValue()) {
+                    copyOfLastIgtimiMessages = new ArrayDeque<>(deviceAndMessagesList.getValue());
                 }
+                out.println("Windbot: <b>" + deviceAndMessagesList.getKey() + "</b>");
+                if(copyOfLastIgtimiMessages.size() > 0) {
+                    TimePoint latestTimePoint = copyOfLastIgtimiMessages.peek().wind.getTimePoint(); 
+                    long lastFixDiffInMs = System.currentTimeMillis() - latestTimePoint.asMillis();
+                    out.println("&nbsp;&nbsp;&nbsp;&nbsp;Last fix:");
+                    if(lastFixDiffInMs / 1000 < 60) {
+                        out.println(lastFixDiffInMs / 1000 +"s ago");
+                    } else {
+                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 +"min ago</span>");
+                    }
+                }
+                out.println("<br/>");
+                Iterator<IgtimiMessageInfo> messageIt = copyOfLastIgtimiMessages.iterator();
+                while (messageIt.hasNext()){
+                    IgtimiMessageInfo message = messageIt.next();
+                    out.println(message);
+                    out.println("<br/>");
+                }
+                out.println("<br/>");
             }
         } else {
             if (igtimiRawMessageCount == 0) {
@@ -199,7 +237,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         return result;
     }
     
-    private class ExpeditionMessageInfo {
+    protected class ExpeditionMessageInfo {
         Integer boatID;
         ExpeditionMessage message;
         Date messageReceivedAt;
@@ -216,23 +254,44 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         }
     }
     
-    private class IgtimiMessageInfo {
+    protected class IgtimiMessageInfo {
         private Wind wind;
-        private String deviceSerialInfo;
         
-        public IgtimiMessageInfo(Wind wind, String deviceSerialInfo) {
+        public IgtimiMessageInfo(Wind wind) {
             this.wind = wind;
-            this.deviceSerialInfo = deviceSerialInfo;
+        }
+        
+        public Wind getWind() {
+            return wind;
         }
         
         public String toString() {
-            return deviceSerialInfo + ":" + wind.toString();
+            String formatedInfo = "";
+            if(wind.getTimePoint() != null) {
+                formatedInfo += "Time: " + dateTimeFormatter.format(wind.getTimePoint().asDate());
+            }
+            if(wind.getPosition() != null) {
+                formatedInfo += ", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + " " + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()); 
+            }
+            formatedInfo += ", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) +"kn";
+            if(wind.getFrom() != null) {
+                formatedInfo += " from "+ decimalFormatter1Digit.format(wind.getFrom().getDegrees()) + "&deg;";
+            }
+            return formatedInfo;
         }
     }
 
     @Override
     public void windDataReceived(Wind wind, String deviceSerialNumber) {
-        lastIgtimiMessages.add(new IgtimiMessageInfo(wind, deviceSerialNumber));
+        Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
+        if(messagesPerDevice == null) {
+            messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
+            lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
+        }
+        messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+        if(messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+            messagesPerDevice.pollLast();
+        }
     }
     
     @Override

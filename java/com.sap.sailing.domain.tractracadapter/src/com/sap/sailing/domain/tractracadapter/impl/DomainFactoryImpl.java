@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,7 +123,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
      * identified by that UUID
      */
-    private final Map<UUID, RaceDefinition> raceCache = new HashMap<>();
+    private final ConcurrentHashMap<UUID, RaceDefinition> raceCache = new ConcurrentHashMap<>();
     
     private final MetadataParser metadataParser;
 
@@ -328,11 +329,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
-        synchronized (raceCache) {
-            RaceDefinition result = raceCache.get(raceId);
-            boolean interrupted = false;
-            while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
-                try {
+        RaceDefinition result = raceCache.get(raceId);
+        boolean interrupted = false;
+        while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+            try {
+                synchronized (raceCache) {
                     if (timeoutInMilliseconds == -1) {
                         raceCache.wait();
                     } else {
@@ -341,13 +342,13 @@ public class DomainFactoryImpl implements DomainFactory {
                             raceCache.wait(timeToWait);
                         }
                     }
-                    result = raceCache.get(raceId);
-                } catch (InterruptedException e) {
-                    interrupted = true;
                 }
+                result = raceCache.get(raceId);
+            } catch (InterruptedException e) {
+                interrupted = true;
             }
-            return result;
         }
+        return result;
     }
 
     @Override
