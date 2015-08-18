@@ -25,10 +25,12 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void showProgressDialog(String title, String message) {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(title);
-        progressDialog.setMessage(message);
-        progressDialog.show();
+        if (progressDialog == null || !progressDialog.isShowing()) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle(title);
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
     }
 
     public void showProgressDialog(int string1Id, int string2Id) {

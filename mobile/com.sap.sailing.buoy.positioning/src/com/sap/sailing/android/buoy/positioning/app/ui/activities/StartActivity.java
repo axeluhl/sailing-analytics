@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
@@ -57,9 +58,10 @@ public class StartActivity extends AbstractStartActivity {
         return homeFragment;
     }
 
-    public void startRegatta(String leaderboardName) {
-        Intent intent = new Intent(this, RegattaActivity.class);
-        intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-        startActivity(intent);
+    @Override
+    public void onCheckinDataAvailable(AbstractCheckinData data) {
+        if (data != null) {
+            getHomeFragment().displayUserConfirmationScreen(data);
+        }
     }
 }

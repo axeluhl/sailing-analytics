@@ -145,7 +145,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
         String uriString = uri.toString();
-        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity());
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), false);
         manager.callServerAndGenerateCheckinData();
     }
 

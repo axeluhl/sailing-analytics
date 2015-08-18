@@ -9,7 +9,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.BuildConfig;
 import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
@@ -52,13 +51,6 @@ public abstract class AbstractStartActivity extends CheckinDataActivity {
         }
 
         intent.setData(null);
-    }
-
-    @Override
-    public void onCheckinDataAvailable(AbstractCheckinData data) {
-        if (data != null) {
-            getHomeFragment().displayUserConfirmationScreen(data);
-        }
     }
 
     public abstract AbstractHomeFragment getHomeFragment();
