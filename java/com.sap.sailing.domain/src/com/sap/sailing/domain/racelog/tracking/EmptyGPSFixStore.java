@@ -10,6 +10,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.WithID;
 
@@ -64,6 +65,15 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     @Override
     public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        
+    }
+
+    @Override
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
+            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
+    }
+
+    @Override
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark,
+            TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
 }

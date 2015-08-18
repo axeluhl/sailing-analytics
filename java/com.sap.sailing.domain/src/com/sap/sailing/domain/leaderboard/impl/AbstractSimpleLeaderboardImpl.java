@@ -1372,7 +1372,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (trackedRace != null) {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
             if (track != null) {
-                entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenFixes();
+                entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenRawFixes();
             }
             if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
                 long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();

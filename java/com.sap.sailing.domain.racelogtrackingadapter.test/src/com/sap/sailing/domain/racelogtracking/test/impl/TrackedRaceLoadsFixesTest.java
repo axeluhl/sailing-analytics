@@ -40,6 +40,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
@@ -49,6 +50,49 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private Integer previouslyLoading = null;
     private int numFixesReceived = 0;
 
+    @Test
+    public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
+            NoCorrespondingServiceRegisteredException, InterruptedException {
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
+        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
+                new WaypointImpl(mark2) }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        map(comp, device, 0, 10000);
+        map(mark, markDevice, 0, 10000);
+
+        store.storeFix(device, createFix(100, 10, 20, 30, 40)); // before
+        store.storeFix(device, createFix(1100, 10, 20, 30, 40)); // in
+        store.storeFix(device, createFix(2100, 10, 20, 30, 40)); // after
+        store.storeFix(markDevice, createFix(100, 10, 20, 30, 40));
+        store.storeFix(markDevice, createFix(1100, 10, 20, 30, 40));
+        store.storeFix(markDevice, createFix(2100, 10, 20, 30, 40));
+
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
+                null, /* endDate */null, null, null, "a", null));
+        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
+        trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
+
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+
+        testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        // now extend the tracking interval of the tracked race and assert that the additional fixes are loaded
+        trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2500), /* wait for fixes to load */ true);
+        testNumberOfRawFixes(trackedRace.getTrack(comp), 2);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
+        trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(0), /* wait for fixes to load */ true);
+        testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
+    }
+    
     @Test
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException,
             InterruptedException {
@@ -88,10 +132,10 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
 
-        testLength(trackedRace.getTrack(comp), 10002);
-        testLength(trackedRace.getTrack(comp2), 1);
-        testLength(trackedRace.getOrCreateTrack(mark), 1);
-        testLength(trackedRace.getOrCreateTrack(mark2), 1);
+        testNumberOfRawFixes(trackedRace.getTrack(comp), 10002);
+        testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
     }
 
     @Test

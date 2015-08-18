@@ -23,4 +23,8 @@ public enum EmptyRaceLogStore implements RaceLogStore {
     @Override
     public void removeRaceLog(RaceLogIdentifier identifier) {
     }
+
+    @Override
+    public void addImportedRaceLog(RaceLog raceLog, RaceLogIdentifier identifier) {
+    }
 }

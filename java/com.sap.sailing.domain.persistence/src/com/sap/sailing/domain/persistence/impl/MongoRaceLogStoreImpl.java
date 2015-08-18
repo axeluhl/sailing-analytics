@@ -34,12 +34,16 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
             result = raceLogCache.get(identifier);
         } else {
             result = domainObjectFactory.loadRaceLog(identifier);
-            MongoRaceLogStoreVisitor listener = new MongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
-            listeners.put(result, listener);
-            result.addListener(listener);
+            addListener(identifier, result);
             raceLogCache.put(identifier, result);
         }
         return result;
+    }
+
+    private void addListener(RaceLogIdentifier identifier, final RaceLog raceLog) {
+        MongoRaceLogStoreVisitor listener = new MongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
+        listeners.put(raceLog, listener);
+        raceLog.addListener(listener);
     }
 
     @Override
@@ -55,6 +59,12 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
         if (visitor != null) {
             raceLog.removeListener(visitor);
         }
+    }
+
+    @Override
+    public void addImportedRaceLog(RaceLog raceLog, RaceLogIdentifier identifier) {
+        addListener(identifier, raceLog);
+        raceLogCache.put(identifier, raceLog);
     }
 
 }
