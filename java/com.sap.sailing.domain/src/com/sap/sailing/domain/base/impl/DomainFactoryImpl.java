@@ -187,7 +187,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                 statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
-                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
+                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
                 }
             }
         } catch (NoWindException e) {
