@@ -2,9 +2,9 @@ package com.sap.sailing.polars.datamining.data.impl;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
+import com.sap.sailing.polars.datamining.data.PolarStatistic;
 
 public class CompetitorWithPolarContext implements HasCompetitorPolarContext {
     
@@ -34,8 +34,8 @@ public class CompetitorWithPolarContext implements HasCompetitorPolarContext {
     }
 
     @Override
-    public TrackedLegOfCompetitor getTrackedLegOfCompetitor() {
-        return trackedRace.getTrackedLeg(competitor, leg);
+    public PolarStatistic getPolarStatistics() {
+        return new PolarStatisticImpl(trackedRace, competitor, leg);
     }
 
 }

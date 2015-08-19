@@ -1,0 +1,50 @@
+package com.sap.sailing.polars.datamining.components.aggregators;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
+import com.sap.sailing.polars.datamining.data.PolarStatistic;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.shared.GroupKey;
+
+public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataStoringAggregationProcessor<PolarStatistic, Integer> {
+
+    private static final String POLARS_MESSAGE_KEY = "Polars";
+    //FIXME!!! Replace Integer with actual result data type
+    private final Map<GroupKey, Integer> countMap = new HashMap<>();
+    
+    public PolarDataAggregationProcessor(ExecutorService executor,
+            Collection<Processor<Map<GroupKey, Integer>, ?>> resultReceivers) {
+        super(executor, resultReceivers, POLARS_MESSAGE_KEY);
+    }
+    
+    private static final AggregationProcessorDefinition<PolarStatistic, Integer> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(PolarStatistic.class, Integer.class, POLARS_MESSAGE_KEY, PolarDataAggregationProcessor.class);
+    
+    public static AggregationProcessorDefinition<PolarStatistic, Integer> getDefinition() {
+        return DEFINITION;
+    }
+
+    @Override
+    protected void storeElement(GroupedDataEntry<PolarStatistic> element) {
+        //FIXME do actual polar regression here
+        int count = element.getDataEntry().getFixCount();
+        Integer currentCount = countMap.get(element.getKey());
+        if (currentCount == null) {
+            currentCount = 0;
+        }
+        countMap.put(element.getKey(), currentCount + count);
+    }
+
+    @Override
+    protected Map<GroupKey, Integer> aggregateResult() {
+        return countMap;
+    }
+
+}

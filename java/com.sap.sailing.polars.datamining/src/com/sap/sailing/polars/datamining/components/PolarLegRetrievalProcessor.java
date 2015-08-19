@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
@@ -29,10 +30,14 @@ public class PolarLegRetrievalProcessor extends AbstractRetrievalProcessor<HasFl
         Set<HasLegPolarContext> legWithContext = new HashSet<>();
         Fleet fleet = element.getFleet();
         RaceColumn raceColumn = element.getRaceColumn();
-        Course course = raceColumn.getRaceDefinition(fleet).getCourse();
-        for (Leg leg : course.getLegs()) {
-            legWithContext.add(new LegWithPolarContext(leg, trackedRace));
-        }
+        
+        RaceDefinition raceDefinition = raceColumn.getRaceDefinition(fleet);
+        if (raceDefinition != null) {
+            Course course = raceDefinition.getCourse();
+            for (Leg leg : course.getLegs()) {
+                legWithContext.add(new LegWithPolarContext(leg, trackedRace));
+            }
+        } 
         return legWithContext;
     }
 
