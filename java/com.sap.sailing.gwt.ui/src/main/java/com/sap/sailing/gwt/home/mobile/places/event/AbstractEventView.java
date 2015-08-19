@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -18,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
-public abstract class AbstractEventView extends Composite implements EventViewBase {
+public abstract class AbstractEventView<P extends EventViewBase.Presenter> extends Composite implements EventViewBase {
     
     private static AbstractEventViewUiBinder uiBinder = GWT.create(AbstractEventViewUiBinder.class);
 
@@ -36,33 +37,46 @@ public abstract class AbstractEventView extends Composite implements EventViewBa
         }
     }
 
-    private final Presenter currentPresenter;
-    private final AbstractEventViewLayout layout;
+    protected final P currentPresenter;
     protected final RefreshManager refreshManager;
+    private final AbstractEventViewLayout layout;
 
-    public AbstractEventView(Presenter presenter, boolean enableLogoNavigation) {
+    public AbstractEventView(P presenter, boolean enableLogoNavigation) {
         this.currentPresenter = presenter;
+        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
         this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), logoNavigation);
-        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         initWidget(uiBinder.createAndBindUi(this.layout));
-        layout.viewContentUi.setWidget(getViewContent());
     }
     
-    protected abstract Widget getViewContent();
+    protected void setViewContent(Widget contentWidget) {
+        layout.viewContentUi.setWidget(contentWidget);
+    }
+    
+    protected UUID getEventId() {
+        return currentPresenter.getCtx().getEventDTO().getId();
+    }
+    
+    protected String getRegattaId() {
+        return currentPresenter.getCtx().getRegattaId();
+    }
+    
+    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
+        QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
+    }
 
     @Override
-    public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getForRegattaLeaderboards(layout.quickFinderUi, currentPresenter, regattaMetadatas);
+    public final void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
+        setQuickFinderValues(layout.quickFinderUi, regattaMetadatas);
     }
     
     @Override
-    public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+    public final void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(layout.quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
     
     @Override
-    public void hideQuickfinder() {
+    public final void hideQuickfinder() {
         layout.quickFinderUi.removeFromParent();
     }
     
