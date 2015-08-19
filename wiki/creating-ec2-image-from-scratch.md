@@ -17,6 +17,7 @@ I then did a `yum update` and added the following packages:
  - telnet
  - apachetop
  - goaccess
+ - postfix (for sending e-mail, e.g., to invite competitors and buoy pingers)
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
