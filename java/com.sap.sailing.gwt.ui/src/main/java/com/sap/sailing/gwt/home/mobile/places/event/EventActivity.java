@@ -12,7 +12,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
@@ -28,7 +27,6 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -49,31 +47,6 @@ public class EventActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        if(place.getCtx().getEventDTO() == null) {
-            currentEventUUId = UUID.fromString(place.getCtx().getEventId());
-            
-            clientFactory.getDispatch().execute(new GetEventViewAction(currentEventUUId), new AsyncCallback<EventViewDTO>() {
-                @Override
-                public void onSuccess(final EventViewDTO event) {
-                    place.getCtx().updateContext(event);
-                    initUi(panel, eventBus);
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
-                    // TODO @FM: reload sinnvoll hier?
-                    errorPlace.setComingFrom(place);
-                    clientFactory.getPlaceController().goTo(errorPlace);
-                }
-            });
-        } else {
-            initUi(panel, eventBus);
-        }
-    }
-    
-    private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
         final EventView view = new EventViewImpl(this);
         panel.setWidget(view.asWidget());
         EventViewDTO event = getCtx().getEventDTO();

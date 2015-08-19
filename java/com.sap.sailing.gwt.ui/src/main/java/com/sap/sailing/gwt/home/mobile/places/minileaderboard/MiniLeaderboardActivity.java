@@ -4,9 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
@@ -16,7 +14,6 @@ import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardVie
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
@@ -31,32 +28,6 @@ public class MiniLeaderboardActivity extends AbstractActivity implements Present
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        if (place.getCtx().getEventDTO() == null) {
-            UUID currentEventUUId = UUID.fromString(place.getCtx().getEventId());
-            clientFactory.getDispatch().execute(new GetEventViewAction(currentEventUUId),
-                    new AsyncCallback<EventViewDTO>() {
-                        @Override
-                        public void onSuccess(final EventViewDTO event) {
-                            place.getCtx().updateContext(event);
-                            initUi(panel, eventBus);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            // TODO @FM: extract text?
-                            ErrorPlace errorPlace = new ErrorPlace(
-                                    "Error while loading the event with service getEventViewById()");
-                            // TODO @FM: reload sinnvoll hier?
-                            errorPlace.setComingFrom(place);
-                            clientFactory.getPlaceController().goTo(errorPlace);
-                        }
-                    });
-        } else {
-            initUi(panel, eventBus);
-        }
-    }
-
-    private void initUi(AcceptsOneWidget panel, EventBus eventBus) {
         final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this);
         EventViewDTO event = place.getCtx().getEventDTO();
         if(event.getType() == EventType.MULTI_REGATTA) {
