@@ -50,7 +50,7 @@ MONGODB_NAME=myspecificevent
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
-See [here](creating-ec2-image-from-scratch)
+See [here](wiki/creating-ec2-image-from-scratch)
 
 #### Receiving wind from Expedition
 
