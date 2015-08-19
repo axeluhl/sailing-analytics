@@ -7,6 +7,12 @@ import java.util.Set;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.RacingEventServiceProvider;
+import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
+import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
+import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
+import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
+import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
+import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -61,7 +67,12 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     @Override
     public Iterable<Class<?>> getClassesWithMarkedMethods() {
         Set<Class<?>> internalClasses = new HashSet<>();
-        //internalClasses.add(HasTrackedRaceContext.class);
+        internalClasses.add(HasLeaderboardGroupPolarContext.class);
+        internalClasses.add(HasLeaderboardPolarContext.class);
+        internalClasses.add(HasRaceColumnPolarContext.class);
+        internalClasses.add(HasFleetPolarContext.class);
+        internalClasses.add(HasCompetitorPolarContext.class);
+        internalClasses.add(HasLegPolarContext.class);
         return internalClasses;
     }
 
