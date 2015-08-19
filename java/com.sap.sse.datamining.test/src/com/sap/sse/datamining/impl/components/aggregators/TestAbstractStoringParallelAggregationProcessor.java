@@ -5,29 +5,36 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestAbstractStoringParallelAggregationProcessor {
 
-    private Collection<Processor<Integer, ?>> receivers;
+    private Collection<Processor<Map<GroupKey, Integer>, ?>> receivers;
     private boolean receiverWasToldToFinish = false;
-    private Integer receivedElement = null;
+    private GroupKey groupKey = new GenericGroupKey<>("Key");
+    private Map<GroupKey, Integer> result = null;
     
-    private Collection<Integer> elementStore = new ArrayList<>();
+    private Collection<GroupedDataEntry<Integer>> elementStore = new ArrayList<>();
     
     @Before
     public void initializeReceivers() {
-        Processor<Integer, Void> receiver = new NullProcessor<Integer, Void>(Integer.class, Void.class) {
+        @SuppressWarnings("unchecked")
+        Processor<Map<GroupKey, Integer>, Void> receiver = new NullProcessor<Map<GroupKey,Integer>, Void>((Class<Map<GroupKey, Integer>>)(Class<?>) Map.class, Void.class) {
             @Override
-            public void processElement(Integer element) {
-                receivedElement = element;
+            public void processElement(Map<GroupKey, Integer> element) {
+                result = element;
             }
             @Override
             public void finish() throws InterruptedException {
@@ -41,43 +48,48 @@ public class TestAbstractStoringParallelAggregationProcessor {
 
     @Test
     public void testAbstractAggregationHandling() throws InterruptedException {
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
-            protected void storeElement(Integer element) {
+            protected void storeElement(GroupedDataEntry<Integer> element) {
                 elementStore.add(element);
             }
             @Override
-            protected Integer aggregateResult() {
-                Integer sum = 0;
-                for (Integer element : elementStore) {
-                    sum += element;
+            protected Map<GroupKey, Integer> aggregateResult() {
+                Map<GroupKey, Integer> result = new HashMap<>();
+                for (GroupedDataEntry<Integer> element : elementStore) {
+                    GroupKey key = element.getKey();
+                    if (!result.containsKey(key)) {
+                        result.put(key, 0);
+                    }
+                    result.put(key, result.get(key) + element.getDataEntry());
                 }
-                return sum;
+                return result;
             }
         };
 
-        processElementAndVerifyThatItWasStored(processor, 42);
-        processElementAndVerifyThatItWasStored(processor, 7);
+        processElementAndVerifyThatItWasStored(processor, new GroupedDataEntry<>(groupKey, 42));
+        processElementAndVerifyThatItWasStored(processor, new GroupedDataEntry<>(groupKey, 7));
         
         processor.finish();
         assertThat("The receiver wasn't told to finish", receiverWasToldToFinish, is(true));
-        Integer expectedReceivedElement = 42 + 7;
-        assertThat(receivedElement, is(expectedReceivedElement));
+        int expectedData = 42 + 7;
+        assertThat(result.get(groupKey), is(expectedData));
     }
 
-    private void processElementAndVerifyThatItWasStored(Processor<Integer, Integer> processor, int element) {
+    private void processElementAndVerifyThatItWasStored(Processor<GroupedDataEntry<Integer>, ?> processor, GroupedDataEntry<Integer> element) {
         processor.processElement(element);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to process the instructions
         assertThat("The element store doesn't contain the previously processed element '" + element + "'", elementStore.contains(element), is(true));
     }
     
+    @SuppressWarnings("unchecked")
     @Test(timeout=5000)
     public void testThatTheLockIsReleasedAfterStoringFailed() throws InterruptedException {
-        Collection<Processor<Integer, ?>> receivers = new HashSet<>();
-        receivers.add(new NullProcessor<Integer, Void>(Integer.class, Void.class) {
+        Collection<Processor<Map<GroupKey, Integer>, ?>> receivers = new HashSet<>();
+        receivers.add(new NullProcessor<Map<GroupKey, Integer>, Void>((Class<Map<GroupKey, Integer>>)(Class<?>) Map.class, Void.class) {
             @Override
-            public void processElement(Integer element) {
-                receivedElement = element;
+            public void processElement(Map<GroupKey, Integer> element) {
+                result = element;
             }
             @Override
             public void finish() throws InterruptedException {
@@ -92,32 +104,36 @@ public class TestAbstractStoringParallelAggregationProcessor {
                 }
             }
         });
-        Processor<Integer, Integer> processor = new AbstractParallelStoringAggregationProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
+        Processor<GroupedDataEntry<Integer>, Map<GroupKey, Integer>> processor = new AbstractParallelGroupedDataStoringAggregationProcessor<Integer, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, "Sum") {
             @Override
-            protected void storeElement(Integer element) {
-                if (element < 0) {
+            protected void storeElement(GroupedDataEntry<Integer> element) {
+                if (element.getDataEntry() < 0) {
                     throw new IllegalArgumentException("The element mustn't be negative");
                 }
                 elementStore.add(element);
             }
             @Override
-            protected Integer aggregateResult() {
-                Integer sum = 0;
-                for (Integer element : elementStore) {
-                    sum += element;
+            protected Map<GroupKey, Integer> aggregateResult() {
+                Map<GroupKey, Integer> result = new HashMap<>();
+                for (GroupedDataEntry<Integer> element : elementStore) {
+                    GroupKey key = element.getKey();
+                    if (!result.containsKey(key)) {
+                        result.put(key, 0);
+                    }
+                    result.put(key, result.get(key) + element.getDataEntry());
                 }
-                return sum;
+                return result;
             }
         };
 
-        processor.processElement(-1);
-        processor.processElement(42);
-        processor.processElement(7);
+        processor.processElement(new GroupedDataEntry<>(groupKey, -1));
+        processor.processElement(new GroupedDataEntry<>(groupKey, 42));
+        processor.processElement(new GroupedDataEntry<>(groupKey, 7));
         
         processor.finish();
         assertThat("The receiver wasn't told to finish", receiverWasToldToFinish, is(true));
-        Integer expectedReceivedElement = 42 + 7;
-        assertThat(receivedElement, is(expectedReceivedElement));
+        int expectedData = 42 + 7;
+        assertThat(result.get(groupKey), is(expectedData));
     }
 
 }

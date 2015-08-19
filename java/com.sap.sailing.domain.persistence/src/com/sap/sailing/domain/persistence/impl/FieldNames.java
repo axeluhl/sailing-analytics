@@ -61,7 +61,7 @@ public enum FieldNames {
     BOAT_CLASS_TYPICALLY_STARTS_UPWIND,
     
     // wind:
-    WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND,
+    WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND, IS_MAGNETIC,
     
     // SwissTiming configuration parameters:
     ST_CONFIG_NAME, ST_CONFIG_HOSTNAME, ST_CONFIG_PORT,

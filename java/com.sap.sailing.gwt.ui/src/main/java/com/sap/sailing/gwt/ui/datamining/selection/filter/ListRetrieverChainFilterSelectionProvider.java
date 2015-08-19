@@ -17,7 +17,6 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CustomScrollPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -58,7 +57,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final CellList<LocalizedTypeDTO> retrieverLevelList;
     private final SingleSelectionModel<LocalizedTypeDTO> retrieverLevelSelectionModel;
     private final ListDataProvider<LocalizedTypeDTO> retrieverLevelDataProvider;
-    private final SizeProvidingScrollPanel selectionPanel;
+    private final ScrollPanel selectionPanel;
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
 
@@ -86,7 +85,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         
         DockLayoutPanel selectionDockLayoutPanel = new DockLayoutPanel(Unit.PX);
         selectionDockLayoutPanel.addNorth(new Label(this.stringMessages.filterBy()), 18);
-        selectionPanel = new SizeProvidingScrollPanel();
+        selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
         
         selectionPresenter = new PlainFilterSelectionPresenter(stringMessages, retrieverChainProvider, this);
@@ -149,7 +148,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
                         LocalizedTypeDTO retrievedDataType = retrieverChain.getRetrievedDataType(retrieverLevel);
                         RetrieverLevelFilterSelectionProvider selectionProvider =
                                 new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter, ListRetrieverChainFilterSelectionProvider.this, retrieverChain,
-                                                                          retrievedDataType, retrieverLevel, selectionPanel);
+                                                                          retrievedDataType, retrieverLevel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());
                         selectionProvidersMappedByRetrievedDataType.put(retrievedDataType, selectionProvider);
                         
@@ -335,18 +334,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             }
             
             super.setSelected(item, selected);
-        }
-    }
-    
-    private class SizeProvidingScrollPanel extends CustomScrollPanel implements RetrieverLevelFilterSelectionProvider.SizeProvider {
-        @Override
-        public int getFreeWidthInPX() {
-            return getOffsetWidth() - getVerticalScrollbar().asWidget().getOffsetWidth();
-        }
-        @Override
-        public int getFreeHeightInPX() {
-            //Subtracting a value prevents weird scroll behavior
-            return getOffsetHeight() - getHorizontalScrollbar().asWidget().getOffsetHeight() - 3;
         }
     }
 

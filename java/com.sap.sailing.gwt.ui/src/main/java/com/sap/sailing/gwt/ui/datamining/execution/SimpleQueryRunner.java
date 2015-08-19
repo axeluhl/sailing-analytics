@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -28,12 +28,12 @@ public class SimpleQueryRunner implements QueryRunner {
 
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider queryDefinitionProvider;
-    private final ResultsPresenter<Number> resultsPresenter;
+    private final ResultsPresenter resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
-            ResultsPresenter<Number> resultsPresenter) {
+            ResultsPresenter resultsPresenter) {
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -70,7 +70,7 @@ public class SimpleQueryRunner implements QueryRunner {
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                protected void handleSuccess(QueryResult<Number> result) {
+                protected void handleSuccess(QueryResultDTO<Number> result) {
                     resultsPresenter.showResult(result);
                 }
             });
