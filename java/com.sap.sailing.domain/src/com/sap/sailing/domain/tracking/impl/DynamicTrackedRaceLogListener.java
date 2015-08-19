@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.declination.Declination;
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -29,10 +34,13 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -227,11 +235,28 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogWindFixEvent event) {
         // add the wind fix to the race committee WindTrack
-        final Wind wind;
+        Wind wind;
         if (event.isMagnetic()) {
-            final DeclinationService declinationService;
+            final Wind magneticNorthBasedWindFix = event.getWindFix();
+            final DeclinationService declinationService = DeclinationService.INSTANCE;
+            Declination declination;
+            try {
+                declination = declinationService.getDeclination(magneticNorthBasedWindFix.getTimePoint(),
+                        magneticNorthBasedWindFix.getPosition(), /* timeoutForOnlineFetchInMilliseconds */
+                        Duration.ONE_SECOND.times(5).asMillis());
+                wind = new WindImpl(magneticNorthBasedWindFix.getPosition(), magneticNorthBasedWindFix.getTimePoint(),
+                        new KnotSpeedWithBearingImpl(magneticNorthBasedWindFix.getKnots(), magneticNorthBasedWindFix
+                                .getBearing().add(
+                                        declination.getBearingCorrectedTo(magneticNorthBasedWindFix.getTimePoint()))));
+            } catch (IOException | ParseException e) {
+                logger.log(Level.SEVERE, "Error trying to correct magnetic wind fix "+magneticNorthBasedWindFix+" by declination. "+
+                                         "Using uncorrected magnetic wind direction instead.", e);
+                wind = magneticNorthBasedWindFix;
+            }
+        } else {
+            wind = event.getWindFix();
         }
-        trackedRace.recordWind(event.getWindFix(), raceCommitteeWindSource);
+        trackedRace.recordWind(wind, raceCommitteeWindSource);
     }
 
     @Override
