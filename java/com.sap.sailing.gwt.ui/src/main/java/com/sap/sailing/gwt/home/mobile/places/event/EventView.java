@@ -2,38 +2,16 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
 
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
-import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaRacesNavigationProvider;
-import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
-public interface EventView {
-
-    Widget asWidget();
-    
-    void setSailorInfos(String description, String buttonLabel, String url);
-    
-    void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
-    
-    void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas);
-    
-    void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries);
-    
-    void hideQuickfinder();
+public interface EventView extends EventViewBase {
 
     void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images);
 
-    public interface Presenter extends NewsItemLinkProvider, RegattaLeaderboardNavigationProvider,
-            RegattaRacesNavigationProvider, SeriesLeaderboardNavigationProvider {
-        EventContext getCtx();
-        DispatchSystem getDispatch();
+    public interface Presenter extends EventViewBase .Presenter, NewsItemLinkProvider, RegattaRacesNavigationProvider {
         String getRaceViewerURL(String regattaName, String trackedRaceName);
         PlaceNavigation<?> getMediaPageNavigation();
     }

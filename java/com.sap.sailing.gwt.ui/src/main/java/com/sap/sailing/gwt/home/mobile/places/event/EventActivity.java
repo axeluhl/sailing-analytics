@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
+import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
@@ -184,5 +185,10 @@ public class EventActivity extends AbstractActivity implements Presenter {
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
         EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<?> getEventNavigation() {
+        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
     }
 }
