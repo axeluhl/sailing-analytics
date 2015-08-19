@@ -42,15 +42,18 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -246,8 +249,8 @@ public class ImportMasterDataOperation extends
             }
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
-                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
-                storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory());
+                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory());
+                storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -276,7 +279,8 @@ public class ImportMasterDataOperation extends
      * in serialized form on the {@link RaceColumn} objects, but the database doesn't yet know about them. This method uses
      * a <code>MongoRaceLogStoreVisitor</code> to store all race log events to the database.
      */
-    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
+    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) {
+        RaceLogStore mongoRaceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
@@ -292,6 +296,8 @@ public class ImportMasterDataOperation extends
                     } finally {
                         log.unlockAfterRead();
                     }
+                    // Make sure listener is added to race log
+                    mongoRaceLogStore.addImportedRaceLog(log, identifier);
                 }
             }
         }
@@ -303,7 +309,8 @@ public class ImportMasterDataOperation extends
      * potentially {@link HasRegattaLike has} an attached RegattaLog, which then must be stored in the database.
      * @see #storeRaceLogEvents(Leaderboard, MongoObjectFactory)
      */
-    private void storeRegattaLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
+    private void storeRegattaLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory) {
+        RegattaLogStore regattaLogStore = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
         if (leaderboard instanceof HasRegattaLike) {
             IsRegattaLike regattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
             RegattaLog log = regattaLike.getRegattaLog();
@@ -318,6 +325,7 @@ public class ImportMasterDataOperation extends
             } finally {
                 log.unlockAfterRead();
             }
+            regattaLogStore.addImportedRegattaLog(log, identifier);
         }
     }
 

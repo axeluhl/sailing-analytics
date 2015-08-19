@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -187,7 +188,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
                             textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
                         }
-                        time.setTextSize(textSize);
+                        time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                     }
                     StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
@@ -257,22 +258,22 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     private void findViews(View layout) {
-        marker = ViewHolder.get(layout, R.id.race_marker);
-        current_flag = ViewHolder.get(layout, R.id.current_flag);
-        update_badge = ViewHolder.get(layout, R.id.update_badge);
-        race_flag = ViewHolder.get(layout, R.id.race_flag);
-        time = ViewHolder.get(layout, R.id.time);
-        race_name = ViewHolder.get(layout, R.id.race_name);
-        race_finished = ViewHolder.get(layout, R.id.race_finshed);
-        race_started = ViewHolder.get(layout, R.id.race_started);
-        race_scheduled = ViewHolder.get(layout, R.id.race_scheduled);
-        race_unscheduled = ViewHolder.get(layout, R.id.race_unscheduled);
-        flag_timer = ViewHolder.get(layout, R.id.flag_timer);
-        protest_image = ViewHolder.get(layout, R.id.protest_image);
-        boat_class = ViewHolder.get(layout, R.id.boat_class);
-        fleet_series = ViewHolder.get(layout, R.id.fleet_series);
-        has_dependent_races = ViewHolder.get(layout, R.id.has_dependent_races);
-        depends_on = ViewHolder.get(layout, R.id.depends_on);
+        marker = ViewHelper.get(layout, R.id.race_marker);
+        current_flag = ViewHelper.get(layout, R.id.current_flag);
+        update_badge = ViewHelper.get(layout, R.id.update_badge);
+        race_flag = ViewHelper.get(layout, R.id.race_flag);
+        time = ViewHelper.get(layout, R.id.time);
+        race_name = ViewHelper.get(layout, R.id.race_name);
+        race_finished = ViewHelper.get(layout, R.id.race_finshed);
+        race_started = ViewHelper.get(layout, R.id.race_started);
+        race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
+        race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
+        flag_timer = ViewHelper.get(layout, R.id.flag_timer);
+        protest_image = ViewHelper.get(layout, R.id.protest_image);
+        boat_class = ViewHelper.get(layout, R.id.boat_class);
+        fleet_series = ViewHelper.get(layout, R.id.fleet_series);
+        has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
+        depends_on = ViewHelper.get(layout, R.id.depends_on);
     }
 
     private void resetValues(View layout) {

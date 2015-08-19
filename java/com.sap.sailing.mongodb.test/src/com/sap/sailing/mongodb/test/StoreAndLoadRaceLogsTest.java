@@ -137,7 +137,7 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
     
     @Test
-    public void testdMigrateObsoleteIdentifier() {
+    public void testMigrateObsoleteIdentifier() {
         DBCollection collection = mongoFactory.getRaceLogCollection();
         RaceLogIdentifier identifier = createIdentifier("A.A", "B.B", "C.C");
         

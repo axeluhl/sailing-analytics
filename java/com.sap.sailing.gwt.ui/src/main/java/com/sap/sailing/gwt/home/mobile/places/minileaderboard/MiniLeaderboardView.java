@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
@@ -13,6 +14,8 @@ import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 public interface MiniLeaderboardView {
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider {
+        
+        PlaceNavigation<?> getEventNavigation();
 
         DispatchSystem getDispatch();
 

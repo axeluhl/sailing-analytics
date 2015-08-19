@@ -935,6 +935,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogWindFixEvent.class.getSimpleName());
         result.put(FieldNames.WIND.name(), storeWind(event.getWindFix()));
+        result.put(FieldNames.IS_MAGNETIC.name(), event.isMagnetic());
         return result;
     }
 

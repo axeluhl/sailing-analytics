@@ -8,12 +8,8 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingNmeaDTOJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.GPSFixNmeaDTOJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GPSFixNmeaDTOJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -23,10 +19,6 @@ public class GPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJso
             new GPSFixJsonSerializer());
     private final GPSFixJsonHandler gpsFixMovingHandler = new GPSFixJsonHandlerImpl<GPSFixMoving>(
             new GPSFixMovingJsonDeserializer(), new GPSFixMovingJsonSerializer());
-    private final GPSFixJsonHandler gpsFixNmeaDTOHandler = new GPSFixJsonHandlerImpl<GPSFix>(
-            new GPSFixNmeaDTOJsonDeserializer(), new GPSFixNmeaDTOJsonSerializer());
-    private final GPSFixJsonHandler gpsFixMovingNmeaDTOHandler = new GPSFixJsonHandlerImpl<GPSFixMoving>(
-            new GPSFixMovingNmeaDTOJsonDeserializer(), new GPSFixMovingNmeaDTOJsonSerializer());
 
     @Override
     public GPSFixJsonHandler findService(String type) throws NoCorrespondingServiceRegisteredException {
@@ -34,10 +26,6 @@ public class GPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJso
             return gpsFixHandler;
         } else if (type.equals(GPSFixMovingJsonDeserializer.TYPE)) {
             return gpsFixMovingHandler;
-        } else if (type.equals(GPSFixNmeaDTOJsonDeserializer.TYPE)) {
-            return gpsFixNmeaDTOHandler;
-        } else if (type.equals(GPSFixMovingNmeaDTOJsonDeserializer.TYPE)) {
-            return gpsFixMovingNmeaDTOHandler;
         }
         throw new NoCorrespondingServiceRegisteredException(
                 "Only handlers for GPSFix, GPSFixMoving, GPSFixNmeaDTO, GPSFixMovingNmeaDTO are registered", type,
@@ -51,8 +39,7 @@ public class GPSFixJsonServiceFinder implements TypeBasedServiceFinder<GPSFixJso
 
     @Override
     public Set<GPSFixJsonHandler> findAllServices() {
-        return new HashSet<GPSFixJsonHandler>(Arrays.asList(gpsFixHandler, gpsFixMovingHandler,
-                gpsFixMovingNmeaDTOHandler, gpsFixNmeaDTOHandler));
+        return new HashSet<GPSFixJsonHandler>(Arrays.asList(gpsFixHandler, gpsFixMovingHandler));
     }
 
 }

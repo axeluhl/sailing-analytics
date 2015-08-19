@@ -58,13 +58,7 @@ public class CheckinManager {
 
     public void callServerAndGenerateCheckinData() {
         Uri uri = Uri.parse(url);
-
-        // TODO: assuming scheme is http, is this valid?
         String scheme = uri.getScheme();
-        if (scheme != "http" && scheme != "https") {
-            scheme = "http";
-        }
-
         final URLData urlData = extractRequestParametersFromUri(uri, scheme);
         if (urlData == null) {
             setCheckinData(null);
@@ -76,7 +70,6 @@ public class CheckinManager {
         try {
             HttpGetRequest getLeaderboardRequest = new HttpGetRequest(new URL(urlData.getLeaderboardUrl), mContext);
             getLeaderBoardFromServer(urlData, getLeaderboardRequest);
-
         } catch (MalformedURLException e) {
             ExLog.e(mContext, TAG,
                     "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
@@ -115,13 +108,9 @@ public class CheckinManager {
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
         NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
                 new NetworkHelper.NetworkHelperSuccessListener() {
-
                     @Override
                     public void performAction(JSONObject response) {
-                        // TODO Auto-generated method stub
-
                         final String leaderboardName;
-
                         try {
                             leaderboardName = response.getString("name");
                             urlData.getMarkUrl = urlData.hostWithPort + prefs.getServerMarkPath(leaderboardName);
@@ -143,9 +132,7 @@ public class CheckinManager {
                             ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
                         }
                     }
-
                 }, new NetworkHelper.NetworkHelperFailureListener() {
-
                     @Override
                     public void performAction(NetworkHelper.NetworkHelperError e) {
                         ExLog.e(mContext, TAG, "Failed to get event from API: " + e.getMessage());

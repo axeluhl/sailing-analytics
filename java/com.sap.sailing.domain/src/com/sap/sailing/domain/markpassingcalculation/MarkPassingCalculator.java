@@ -72,7 +72,9 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
-            new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName()).start();
+            final Thread listenerThread = new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName());
+            listenerThread.setDaemon(true);
+            listenerThread.start();
         }
     }
 
@@ -101,6 +103,7 @@ public class MarkPassingCalculator {
                 List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
                 List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
                 while (!finished) {
+                    try {
                     logger.finer("MPC is checking the queue");
                     List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                     try {
@@ -140,11 +143,14 @@ public class MarkPassingCalculator {
                         markFixes.clear();
                         addedWaypoints.clear();
                         removedWaypoints.clear();
-                    smallestChangedWaypointIndex = null;
+                        smallestChangedWaypointIndex = null;
                         fixedMarkPassings.clear();
                         removedFixedMarkPassings.clear();
                         suppressedMarkPassings.clear();
-                        unsuppressedMarkPassings.clear();
+                            unsuppressedMarkPassings.clear();
+                        }
+                    } catch (Exception e) {
+                        logger.severe("Error while calculating markpassings: " + e.getMessage());
                     }
                 }
             } finally {

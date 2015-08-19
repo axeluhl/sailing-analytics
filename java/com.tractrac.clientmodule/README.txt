@@ -15,7 +15,33 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+************* TracAPI 3.0.12 ***************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features. 
+These features add methods to the API, but they keep the backward compatibility. 
+This version provides a new JavaDoc version.
+
+Release date: 07/08/2015
+Build number: 11130
+
+ 1) Features
  
+ - Adding the method ISubscriberFactory.setUserId(userId) used to configure a valid user with permissions
+ to retrieve data from the TracTrac servers. (Requested by Jorge Piera, 18/06/2015)
+ 
+ 2) Bugs
+ 
+ - If the consumer application is not subscribed to the events that manage the addition of new "objects" 
+ in the system (e.g: add control, add competitor...), it is never going to receive the events related 
+ with these "objects". It is an error of design in TracAPI because it has been designed "thinking"
+ that the consumer application is always subscribed to receive all the events. The solution is simple: 
+ TracAPI is always going to subscribe to all the events to guarantee that the static model is always 
+ updated and to guarantee that if the consumer application is subscribed to a type of event it is always 
+ going to receive all the events of this type. There is a secondary effect: the consumer application can 
+ receive events with new objects. (Reported by Axel Uhl, 20/07/2015)
+  
 ********************************************
 ************* TracAPI 3.0.11 ***************
 ********************************************
@@ -44,37 +70,20 @@ Build number: 10715
    
  - It is possible to add two or more subscriptions for the same subscriber (Reported by Jorge Piera, 02/05/2015)
  
- - An initialized race is a race where the tracking is on. A not 
-initialized race is a race where the tracking is off. If a race is in a 
-not initialized state and it is loaded using the parameters file, the 
-library assumes that the consumer application wants to load the race and 
-it changes its initialized  attribute to true (the tracking is on). This 
-assumption is wrong. Now, if a race is not initialized it will continue 
-being uninitialized until the event administrator changes its state to 
-initialized.
-    When a race changes its state from not initialized to initialized, 
-some events are thrown in the system:
-       1. 
-IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
-IStartStopData): where the IStartStopData object contains the new 
-tracking interval.
-       2. IRacesListener.startTracking(UUID): the UUID is the race 
-identifier
-       3. IRacesListener.updateRace(IRace): IRace is the new updated 
-race where the IRace.isInitialized is true and it has values for both 
-the getTrackingStartTime and the getTrackingEndTime methods.
-    When a race changes its state from initialized to not initialized, 
-the following events are thrown in the system:
-       1. 
-IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, 
-IStartStopData): where the IStartStopData object contains the null 
-interval ([0, 0])
-       2. IRacesListener.abandonRace(UUID): the UUID is the race identifier
-       3. IRacesListener.updateRace(IRace): IRace is the new updated 
-race where the IRace.isInitialized is false and it has null values for 
-both the getTrackingStartTime and the getTrackingEndTime methods.
-   (Reported by Axel Uhl, 17/05/2015)
-
+ - An initialized race is a race where the tracking is on. A not initialized race is a race where the tracking is off.
+ If a race is in a not initialized state and it is loaded using the parameters file, the library assumes that the 
+ consumer application wants to load the race and it changes its initialized  attribute to true (the tracking is on).
+ This assumption is wrong. Now, if a race is not initialized it will continue being uninitialized until the event 
+ administrator changes its state to initialized.
+   When a race changes its state from not initialized to initialized, some events are thrown in the system:
+     1. IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, IStartStopData): where the IStartStopData object contains the new tracking interval.
+     2. IRacesListener.startTracking(UUID): the UUID is the race identifier
+     3. IRacesListener.updateRace(IRace): IRace is the new updated race where the IRace.isInitialized is true and it has values for both the getTrackingStartTime and the getTrackingEndTime methods.
+   When a race changes its state from initialized to not initialized, the following events are thrown in the system:
+     1. IRaceStartStopTimesChangeListener.gotTrackingStartStopTime(IRace, IStartStopData): where the IStartStopData object contains the null interval ([0, 0])
+     2. IRacesListener.abandonRace(UUID): the UUID is the race identifier
+     3. IRacesListener.updateRace(IRace): IRace is the new updated race where the IRace.isInitialized is false and it has null values for both the getTrackingStartTime and the getTrackingEndTime methods.
+  (Reported by Axel Uhl, 17/05/2015)
  
 ********************************************
 ************* TracAPI 3.0.10 ***************
