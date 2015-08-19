@@ -14,6 +14,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataSourceProvider;
@@ -99,6 +100,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
         HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
         aggregators.add(ParallelBoolSumAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDistanceSumAggregationProcessor.getDefinition());
         return aggregators;
     }
     

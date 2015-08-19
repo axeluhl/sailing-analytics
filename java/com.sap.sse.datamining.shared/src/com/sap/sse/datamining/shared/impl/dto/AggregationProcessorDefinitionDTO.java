@@ -44,7 +44,6 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
         final int prime = 31;
         int result = 1;
         result = prime * result + ((aggregatedTypeName == null) ? 0 : aggregatedTypeName.hashCode());
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((extractedTypeName == null) ? 0 : extractedTypeName.hashCode());
         return result;
     }
@@ -62,11 +61,6 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
             if (other.aggregatedTypeName != null)
                 return false;
         } else if (!aggregatedTypeName.equals(other.aggregatedTypeName))
-            return false;
-        if (displayName == null) {
-            if (other.displayName != null)
-                return false;
-        } else if (!displayName.equals(other.displayName))
             return false;
         if (extractedTypeName == null) {
             if (other.extractedTypeName != null)

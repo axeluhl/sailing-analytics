@@ -1,7 +1,10 @@
 package com.sap.sailing.datamining.shared.dto;
 
-public class DistanceDTO {
+import java.io.Serializable;
 
+public class DistanceDTO implements Serializable {
+    private static final long serialVersionUID = -4949861628112888523L;
+    
     private double geographicalMiles;
     private double seaMiles;
     private double nauticalMiles;
@@ -19,7 +22,7 @@ public class DistanceDTO {
     }
 
     public DistanceDTO(double geographicalMiles, double seaMiles, double nauticalMiles, double meters,
-            double kilometers, double centralAngleDegree, double centralAngleRadian) {
+                       double kilometers, double centralAngleDegree, double centralAngleRadian) {
         this.geographicalMiles = geographicalMiles;
         this.seaMiles = seaMiles;
         this.nauticalMiles = nauticalMiles;
