@@ -11,10 +11,12 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsView.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
@@ -60,15 +62,8 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
         final LatestNewsView view = new LatestNewsViewImpl(this);
         panel.setWidget(view.asWidget());
         Window.setTitle(place.getTitle());
+        view.hideQuickfinder();
         view.showNews(place.getNews());
-    }
-
-    @Override
-    public void gotoEvents() {
-        clientFactory //
-                .getNavigator() //
-                .getEventsNavigation()//
-                .goToPlace();
     }
 
     @Override
@@ -103,5 +98,21 @@ public class LatestNewsActivity extends AbstractActivity implements Presenter, N
     @Override
     public DispatchSystem getDispatch() {
         return clientFactory.getDispatch();
+    }
+
+    @Override
+    public PlaceNavigation<?> getRegattaMiniLeaderboardNavigation(String leaderboardName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
+    }
+
+    @Override
+    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext().withId(getCtx().getEventId())), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
     }
 }
