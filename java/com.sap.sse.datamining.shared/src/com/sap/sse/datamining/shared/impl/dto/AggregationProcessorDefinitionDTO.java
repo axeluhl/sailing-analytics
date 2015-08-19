@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class AggregationProcessorDefinitionDTO implements Serializable, Comparable<AggregationProcessorDefinitionDTO> {
     private static final long serialVersionUID = -434497637456305118L;
     
+    private String messageKey;
     private String extractedTypeName;
     private String aggregatedTypeName;
 
@@ -16,7 +17,8 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
     @Deprecated
     AggregationProcessorDefinitionDTO() { }
 
-    public AggregationProcessorDefinitionDTO(String extractedTypeName, String aggregatedTypeName, String displayName) {
+    public AggregationProcessorDefinitionDTO(String messageKey, String extractedTypeName, String aggregatedTypeName, String displayName) {
+        this.messageKey = messageKey;
         this.extractedTypeName = extractedTypeName;
         this.aggregatedTypeName = aggregatedTypeName;
         this.displayName = displayName;
@@ -45,6 +47,7 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
         int result = 1;
         result = prime * result + ((aggregatedTypeName == null) ? 0 : aggregatedTypeName.hashCode());
         result = prime * result + ((extractedTypeName == null) ? 0 : extractedTypeName.hashCode());
+        result = prime * result + ((messageKey == null) ? 0 : messageKey.hashCode());
         return result;
     }
 
@@ -66,6 +69,11 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
             if (other.extractedTypeName != null)
                 return false;
         } else if (!extractedTypeName.equals(other.extractedTypeName))
+            return false;
+        if (messageKey == null) {
+            if (other.messageKey != null)
+                return false;
+        } else if (!messageKey.equals(other.messageKey))
             return false;
         return true;
     }
