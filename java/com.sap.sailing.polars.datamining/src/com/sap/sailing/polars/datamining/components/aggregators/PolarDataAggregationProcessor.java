@@ -10,10 +10,10 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataStoringAggregationProcessor<PolarStatistic, Integer> {
+public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataAggregationProcessor<PolarStatistic, Integer> {
 
     private static final String POLARS_MESSAGE_KEY = "Polars";
     //FIXME!!! Replace Integer with actual result data type
@@ -32,7 +32,7 @@ public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataSt
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<PolarStatistic> element) {
+    protected void handleElement(GroupedDataEntry<PolarStatistic> element) {
         //FIXME do actual polar regression here
         int count = element.getDataEntry().getFixCount();
         Integer currentCount = countMap.get(element.getKey());
@@ -43,7 +43,7 @@ public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataSt
     }
 
     @Override
-    protected Map<GroupKey, Integer> aggregateResult() {
+    protected Map<GroupKey, Integer> getResult() {
         return countMap;
     }
 
