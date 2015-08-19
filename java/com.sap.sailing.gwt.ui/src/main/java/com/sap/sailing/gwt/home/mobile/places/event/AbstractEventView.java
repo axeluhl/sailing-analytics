@@ -32,8 +32,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         @UiField SimpleInfoBlock simpleInfoUi;
         @UiField SimplePanel viewContentUi;
         
-        private AbstractEventViewLayout(EventViewDTO event, PlaceNavigation<?> logoNavigation) {
-            this.eventHeaderUi = new EventHeader(event, logoNavigation);
+        private AbstractEventViewLayout(EventViewDTO event, String regattaName, PlaceNavigation<?> logoNavigation) {
+            this.eventHeaderUi = new EventHeader(event, regattaName, logoNavigation);
         }
     }
 
@@ -41,11 +41,12 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     protected final RefreshManager refreshManager;
     private final AbstractEventViewLayout layout;
 
-    public AbstractEventView(P presenter, boolean enableLogoNavigation) {
+    public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation) {
         this.currentPresenter = presenter;
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        String regattaName = showRegattaName ? currentPresenter.getCtx().getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
-        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), logoNavigation);
+        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
     }
     

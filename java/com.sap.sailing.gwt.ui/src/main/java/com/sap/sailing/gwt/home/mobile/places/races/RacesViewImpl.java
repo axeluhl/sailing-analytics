@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implements RacesView {
@@ -24,7 +25,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     @UiField(provided = true) RegattaCompetition regattaCompetitionUi;
 
     public RacesViewImpl(RacesView.Presenter presenter) {
-        super(presenter, true);
+        super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
         RegattaNavigationResources.INSTANCE.css().ensureInjected();
         regattaCompetitionUi = new RegattaCompetition(presenter);
         refreshManager.add(regattaCompetitionUi, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
