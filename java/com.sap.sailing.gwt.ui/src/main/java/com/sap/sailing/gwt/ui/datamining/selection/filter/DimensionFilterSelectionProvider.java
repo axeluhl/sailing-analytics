@@ -74,6 +74,7 @@ class DimensionFilterSelectionProvider {
                 return function.getDisplayName();
             }
         });
+        dimensionListBox.setWidth("100%");
         dimensionChangedHandler = new DimensionChangedHandler();
         dimensionListBox.addValueChangeHandler(dimensionChangedHandler);
         controlsPanel.add(dimensionListBox);
@@ -100,7 +101,7 @@ class DimensionFilterSelectionProvider {
             }
         });
         selectionTable.setVisible(false);
-        mainPanel.add(selectionTable);
+        mainPanel.add(selectionTable.getWidget());
     }
     
     private class DimensionChangedHandler implements ValueChangeHandler<FunctionDTO> {
@@ -236,14 +237,6 @@ class DimensionFilterSelectionProvider {
     
     public Widget getEntryWidget() {
         return mainPanel;
-    }
-
-    public void resizeToHeight(int heightInPX) {
-        int widthInPX = controlsPanel.getOffsetWidth();
-        mainPanel.setSize(widthInPX + "px", heightInPX + "px");
-        
-        int remainingHeightInPX = Math.max(0, heightInPX - controlsPanel.getOffsetHeight());
-        selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     
 }
