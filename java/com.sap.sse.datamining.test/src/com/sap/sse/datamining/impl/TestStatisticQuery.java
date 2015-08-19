@@ -25,7 +25,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.QueryResultState;
@@ -56,9 +56,9 @@ public class TestStatisticQuery {
             }
         });
 
-        Query<Double> query = server.createQuery(createQueryDefinition());
+        Query<java.lang.Number> query = server.createQuery(createQueryDefinition());
         assertThat(query.getState(), is(QueryState.NOT_STARTED));
-        QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
+        QueryResult<java.lang.Number> expectedResult = buildExpectedResult(dataSource);
         verifyResult(query.run(), expectedResult);
     }
 
@@ -66,7 +66,7 @@ public class TestStatisticQuery {
      * Creates a query definition, that filters all numbers < 10, groups them by
      * their length, extracts the cross sum and aggregates their sum.
      */
-    private StatisticQueryDefinition<Collection<Number>, Number, Double, Double> createQueryDefinition() {
+    private StatisticQueryDefinition<Collection<Number>, Number, java.lang.Number, java.lang.Number> createQueryDefinition() {
         FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
         
         @SuppressWarnings("unchecked")
@@ -74,8 +74,8 @@ public class TestStatisticQuery {
         retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
         
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-        AggregationProcessorDefinition<Double, Double> sumAggregatorDefinition = ParallelGroupedDoubleDataSumAggregationProcessor.getDefinition();
-        ModifiableStatisticQueryDefinition<Collection<Number>, Number, Double, Double> definition =
+        AggregationProcessorDefinition<java.lang.Number, java.lang.Number> sumAggregatorDefinition = ParallelGroupedNumberDataSumAggregationProcessor.getDefinition();
+        ModifiableStatisticQueryDefinition<Collection<Number>, Number, java.lang.Number, java.lang.Number> definition =
                 new ModifiableStatisticQueryDefinition<>(Locale.ENGLISH, retrieverChain, functionFactory.createMethodWrappingFunction(getCrossSumMethod), sumAggregatorDefinition);
         
         Method getLengthMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getLength");
@@ -135,17 +135,17 @@ public class TestStatisticQuery {
         return dataSource;
     }
 
-    private QueryResult<Double> buildExpectedResult(Collection<Number> dataSource) {
-        Map<GroupKey, Double> results = new HashMap<>();
+    private QueryResult<java.lang.Number> buildExpectedResult(Collection<Number> dataSource) {
+        Map<GroupKey, java.lang.Number> results = new HashMap<>();
         results.put(new GenericGroupKey<Integer>(2), 5.0);
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<Double> result = new QueryResultImpl<>(QueryResultState.NORMAL, Double.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
+        QueryResultImpl<java.lang.Number> result = new QueryResultImpl<>(QueryResultState.NORMAL, java.lang.Number.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
         return result;
     }
 
-    private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
+    private void verifyResult(QueryResult<java.lang.Number> result, QueryResult<java.lang.Number> expectedResult) {
         assertThat("The result State isn't correct.", result.getState(), is(expectedResult.getState()));
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
         assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));

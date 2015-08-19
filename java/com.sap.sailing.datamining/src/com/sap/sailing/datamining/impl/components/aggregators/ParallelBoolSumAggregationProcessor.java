@@ -9,14 +9,14 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class ParallelTrueSumAggregationProcessor
-             extends AbstractParallelGroupedDataStoringAggregationProcessor<Boolean, Double> {
+public class ParallelBoolSumAggregationProcessor
+             extends AbstractParallelGroupedDataAggregationProcessor<Boolean, Double> {
     
     private static final AggregationProcessorDefinition<Boolean, Double> DEFINITION =
-            new SimpleAggregationProcessorDefinition<>(Boolean.class, Double.class, "Sum", ParallelTrueSumAggregationProcessor.class);
+            new SimpleAggregationProcessorDefinition<>(Boolean.class, Double.class, "Sum", ParallelBoolSumAggregationProcessor.class);
     
     public static AggregationProcessorDefinition<Boolean, Double> getDefinition() {
         return DEFINITION;
@@ -24,14 +24,14 @@ public class ParallelTrueSumAggregationProcessor
 
     private Map<GroupKey, Double> result;
 
-    public ParallelTrueSumAggregationProcessor(ExecutorService executor,
+    public ParallelBoolSumAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
         super(executor, resultReceivers, "Sum");
         result = new HashMap<>();
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<Boolean> element) {
+    protected void handleElement(GroupedDataEntry<Boolean> element) {
         GroupKey key = element.getKey();
         if (!result.containsKey(key)) {
             result.put(key, 0.0);
@@ -43,7 +43,7 @@ public class ParallelTrueSumAggregationProcessor
     }
 
     @Override
-    protected Map<GroupKey, Double> aggregateResult() {
+    protected Map<GroupKey, Double> getResult() {
         return result;
     }
 
