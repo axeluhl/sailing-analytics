@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
@@ -30,8 +31,8 @@ public abstract class AbstractEventView extends Composite implements EventViewBa
         @UiField SimpleInfoBlock simpleInfoUi;
         @UiField SimplePanel viewContentUi;
         
-        private AbstractEventViewLayout(EventViewDTO event) {
-            this.eventHeaderUi = new EventHeader(event);
+        private AbstractEventViewLayout(EventViewDTO event, PlaceNavigation<?> logoNavigation) {
+            this.eventHeaderUi = new EventHeader(event, logoNavigation);
         }
     }
 
@@ -39,9 +40,10 @@ public abstract class AbstractEventView extends Composite implements EventViewBa
     private final AbstractEventViewLayout layout;
     protected final RefreshManager refreshManager;
 
-    public AbstractEventView(Presenter presenter) {
+    public AbstractEventView(Presenter presenter, boolean enableLogoNavigation) {
         this.currentPresenter = presenter;
-        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO());
+        PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
+        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), logoNavigation);
         this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         initWidget(uiBinder.createAndBindUi(this.layout));
         layout.viewContentUi.setWidget(getViewContent());
