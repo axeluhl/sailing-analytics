@@ -114,12 +114,12 @@ public class EventViewImpl extends Composite implements EventView {
     
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getRegattaLeaderboardsQuickfinder(quickFinderUi, currentPresenter, regattaMetadatas);
+        QuickfinderPresenter.getForRegattaLeaderboards(quickFinderUi, currentPresenter, regattaMetadatas);
     }
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
     
     @Override

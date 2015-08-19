@@ -45,6 +45,6 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 }

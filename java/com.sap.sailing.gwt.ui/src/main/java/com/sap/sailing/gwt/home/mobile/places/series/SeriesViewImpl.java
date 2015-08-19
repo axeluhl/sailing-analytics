@@ -65,7 +65,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 
     private void setupListContent(EventSeriesViewDTO event) {

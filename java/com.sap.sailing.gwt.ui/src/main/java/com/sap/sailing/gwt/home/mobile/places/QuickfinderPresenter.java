@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 public class QuickfinderPresenter {
     private static final StringMessages MSG = StringMessages.INSTANCE;
     
-    public static QuickfinderPresenter getRegattaLeaderboardsQuickfinder(Quickfinder quickfinder, 
+    public static QuickfinderPresenter getForRegattaLeaderboards(Quickfinder quickfinder, 
             final RegattaLeaderboardNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
         return new QuickfinderPresenter(quickfinder, MSG.resultsQuickfinder(), new RegattaPlaceNaviationProvider() {
             @Override
@@ -22,7 +22,7 @@ public class QuickfinderPresenter {
         }, regattaMetadatas);
     }
     
-    public static QuickfinderPresenter getRegattaRacesQuickfinder(Quickfinder quickfinder, 
+    public static QuickfinderPresenter getForRegattaRaces(Quickfinder quickfinder, 
             final RegattaRacesNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
         return new QuickfinderPresenter(quickfinder, MSG.racesQuickfinder(), new RegattaPlaceNaviationProvider() {
             @Override
@@ -32,7 +32,12 @@ public class QuickfinderPresenter {
         }, regattaMetadatas);
     }
     
-    public QuickfinderPresenter(Quickfinder quickfinder, SeriesLeaderboardNavigationProvider navigator, String seriesName, Collection<? extends EventReferenceDTO> eventsOfSeries) {
+    public static QuickfinderPresenter getForSeriesLeaderboards(Quickfinder quickfinder, String seriesName,
+            SeriesLeaderboardNavigationProvider navigator, Collection<? extends EventReferenceDTO> eventsOfSeries) {
+        return new QuickfinderPresenter(quickfinder, navigator, seriesName, eventsOfSeries);
+    }
+    
+    private QuickfinderPresenter(Quickfinder quickfinder, SeriesLeaderboardNavigationProvider navigator, String seriesName, Collection<? extends EventReferenceDTO> eventsOfSeries) {
         if (eventsOfSeries == null) {
             quickfinder.removeFromParent();
             return;

@@ -43,12 +43,12 @@ public class RacesViewImpl extends Composite implements RacesView {
 
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getRegattaRacesQuickfinder(quickFinderUi, currentPresenter, regattaMetadatas);
+        QuickfinderPresenter.getForRegattaRaces(quickFinderUi, currentPresenter, regattaMetadatas);
     }
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
     
     @Override

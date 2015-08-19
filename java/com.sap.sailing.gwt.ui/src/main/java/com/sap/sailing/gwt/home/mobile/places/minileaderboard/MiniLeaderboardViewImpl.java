@@ -53,12 +53,12 @@ public class MiniLeaderboardViewImpl extends Composite implements MiniLeaderboar
 
     @Override
     public void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getRegattaLeaderboardsQuickfinder(quickFinderUi, currentPresenter, regattaMetadatas);
+        QuickfinderPresenter.getForRegattaLeaderboards(quickFinderUi, currentPresenter, regattaMetadatas);
     }
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
     
     @Override
