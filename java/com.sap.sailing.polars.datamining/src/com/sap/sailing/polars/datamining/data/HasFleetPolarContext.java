@@ -8,6 +8,7 @@ import com.sap.sse.datamining.shared.annotations.Connector;
 
 public interface HasFleetPolarContext {
     
+    @Connector(messageKey="Fleet")
     Fleet getFleet();
     
     RaceColumn getRaceColumn();

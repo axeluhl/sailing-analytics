@@ -24,4 +24,9 @@ public class LegWithPolarContext implements HasLegPolarContext {
         return trackedRace;
     }
 
+    @Override
+    public Integer getLegIndex() {
+        return leg.getZeroBasedIndexOfStartWaypoint();
+    }
+
 }
