@@ -17,6 +17,8 @@ I then did a `yum update` and added the following packages:
  - telnet
  - apachetop
  - goaccess
+ - postfix (for sending e-mail, e.g., to invite competitors and buoy pingers)
+ - tigervnc-server
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
@@ -96,3 +98,10 @@ chkconfig chrony on
 ```
 
 which creates the necessary entries in the rc*.d directories.
+
+Adjust the /etc/sysconfig/vncservers settings to something like:
+
+```
+VNCSERVERS="2:sailing"
+VNCSERVERARGS[2]="-geometry 1600x900"
+```
