@@ -200,7 +200,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testWindFixSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createWindFixEvent(null, author, 0, null);
+        RaceLogEvent event = factory.createWindFixEvent(null, author, 0, null, /* isMagnetic */ false);
         serializer.serialize(event);
         verify(windFixEventSerializer).serialize(event);
     }

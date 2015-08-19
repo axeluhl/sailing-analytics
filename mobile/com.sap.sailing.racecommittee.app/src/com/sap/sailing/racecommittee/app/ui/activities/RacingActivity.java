@@ -302,7 +302,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 windValue.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
             }
             if (mSelectedRace != null) {
-                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix);
+                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, /* isMagnetic */ true);
             }
 
             mWind = windFix;

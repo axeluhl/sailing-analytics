@@ -56,7 +56,7 @@ public class RaceLogWindFixEventSerializerTest {
 
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, createWindFix());
+        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, createWindFix(), /* isMagnetic */ false);
     }
 
     @Test

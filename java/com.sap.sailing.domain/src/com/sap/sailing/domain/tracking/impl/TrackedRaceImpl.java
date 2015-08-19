@@ -205,7 +205,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Race start time as announced by the tracking infrastructure
      */
     private TimePoint startTimeReceived;
-
+    
     /**
      * The calculated race start time
      */
