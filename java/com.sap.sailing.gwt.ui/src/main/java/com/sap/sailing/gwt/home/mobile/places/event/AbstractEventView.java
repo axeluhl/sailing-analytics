@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -16,6 +17,7 @@ import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
@@ -62,6 +64,10 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         return currentPresenter.getCtx().getRegattaId();
     }
     
+    protected boolean isMultiRegattaEvent() {
+        return currentPresenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA;
+    }
+    
     protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
     }
@@ -79,6 +85,17 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     @Override
     public final void hideQuickfinder() {
         layout.quickFinderUi.removeFromParent();
+    }
+    
+    @Override
+    public void setSailorInfos(String description, String buttonLabel, String url) {
+        layout.simpleInfoUi.setDescription(SafeHtmlUtils.fromString(description.replace("\n", " ")));
+        layout.simpleInfoUi.setAction(buttonLabel, url);
+    }
+    
+    @Override
+    public void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation) {
+        layout.simpleInfoUi.setAction(buttonLabel, placeNavigation);
     }
     
 }

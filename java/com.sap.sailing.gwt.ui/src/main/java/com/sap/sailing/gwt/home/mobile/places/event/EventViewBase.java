@@ -18,6 +18,10 @@ public interface EventViewBase extends IsWidget {
     void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries);
 
     void hideQuickfinder();
+    
+    void setSailorInfos(String description, String buttonLabel, String url);
+    
+    void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider {
         
