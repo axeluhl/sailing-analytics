@@ -89,7 +89,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
 
         checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-        manager = new CheckinManager(checkinUrl.urlString, this);
+        manager = new CheckinManager(checkinUrl.urlString, this, false);
 
         competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
