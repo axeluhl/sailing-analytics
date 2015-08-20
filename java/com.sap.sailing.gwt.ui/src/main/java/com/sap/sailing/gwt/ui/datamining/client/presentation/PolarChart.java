@@ -46,6 +46,7 @@ public class PolarChart implements ResultsPresenter {
     @Override
     public void showResult(QueryResultDTO<?> result) {
         resetChartData();
+        @SuppressWarnings("unchecked")
         Map<GroupKey, Number> results = (Map<GroupKey, Number>) result.getResults();
         if (!results.isEmpty()) {
             for (Entry<GroupKey, Number> resultEntry : results.entrySet()) {
