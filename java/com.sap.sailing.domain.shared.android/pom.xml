@@ -53,6 +53,9 @@
 					<classesJarExclude>*.ap_</classesJarExclude>
 					<classesJarExclude>local-artifacts.properties</classesJarExclude>
 				</classesJarExcludes>
+				<sdk>
+					<platform>22</platform>
+				</sdk>
 			</configuration>
 			<executions>
 				<execution>

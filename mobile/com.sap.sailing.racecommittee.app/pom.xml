@@ -121,7 +121,7 @@
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
                     <extractDuplicates>true</extractDuplicates>
                     <sdk>
-                        <platform>21</platform>
+                        <platform>22</platform>
                     </sdk>
 					<release>true</release>
                     <proguard>

@@ -104,6 +104,9 @@
 						<classesJarExclude>**/R.class</classesJarExclude>
 						<classesJarExclude>**/R$*.class</classesJarExclude>
 					</classesJarExcludes>
+					<sdk>
+						<platform>22</platform>
+					</sdk>
 				</configuration>
 			</plugin>
 		</plugins>
