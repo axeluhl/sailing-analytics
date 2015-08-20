@@ -50,7 +50,7 @@ MONGODB_NAME=myspecificevent
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
-See [here](creating-ec2-image-from-scratch)
+See [here](/wiki/creating-ec2-image-from-scratch)
 
 #### Receiving wind from Expedition
 
@@ -131,7 +131,7 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 The architecture is divided into logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. Each tier can contain one or more instances. The following image depicts the parts of the architecture.
 
-<img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/EC2Architecture.jpg" width="100%" height="100%"/>
 
 ### Tiers
 

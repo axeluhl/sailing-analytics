@@ -6,26 +6,27 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
-public class FilterableSelectionTable<ContentType extends Serializable> extends FlowPanel {
+public class FilterableSelectionTable<ContentType extends Serializable> {
     
     private final Set<FilterSelectionChangedListener> listeners;
     
     private final Collection<ContentType> allData;
-    private int width;
-    private int height;
 
+    private final FlowPanel mainPanel;
     private final AbstractFilterablePanel<ContentType> filterPanel;
     private String filterText;
-    private final DataGrid<ContentType> table;
+    private final CellTable<ContentType> table;
     private final ControllableMultiSelectionModel<ContentType> selectionModel;
     private final ListDataProvider<ContentType> dataProvider;
     
@@ -34,7 +35,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         
         allData = new ArrayList<ContentType>();
         
-        table = new DataGrid<ContentType>();
+        table = new CellTable<>();
+        table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);
         
@@ -44,6 +46,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
                 return FilterableSelectionTable.this.getElementAsString(content);
             }
         };
+        contentColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         table.addColumn(contentColumn);
 
         selectionModel = new ControllableMultiSelectionModel<ContentType>();
@@ -77,8 +80,9 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         filterPanel.setVisible(false);
         filterText = "";
         
-        add(filterPanel);
-        add(table);
+        mainPanel = new FlowPanel();
+        mainPanel.add(filterPanel);
+        mainPanel.add(table);
     }
     
     private String getElementAsString(ContentType element) {
@@ -214,26 +218,14 @@ public class FilterableSelectionTable<ContentType extends Serializable> extends 
         }
         
         filterPanel.setVisible(visible);
-        resizeTo(width, height);
     }
     
-    @Override
     public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
-        table.redraw();
+        mainPanel.setVisible(visible);
     }
-
-    public void resizeTo(int widthInPX, int heightInPX) {
-        width = widthInPX;
-        height = heightInPX;
-        
-        setSize(width + "px", height+ "px");
-        filterPanel.setWidth(width + "px");
-        int tableHeight = filterPanel.isVisible() ? Math.max(0, height - filterPanel.getOffsetHeight()) : height;
-        table.setSize(width + "px", tableHeight + "px");
-        //FIXME Force a rerendering of the table. Switching the retriever level fixes the display
-        table.redraw();
+    
+    public Widget getWidget() {
+        return mainPanel;
     }
 
 }

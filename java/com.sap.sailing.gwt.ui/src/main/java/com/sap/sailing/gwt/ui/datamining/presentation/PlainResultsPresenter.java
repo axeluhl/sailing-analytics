@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
+public class PlainResultsPresenter extends AbstractResultsPresenter {
     
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
@@ -25,12 +25,10 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
     }
 
     @Override
-    protected void internalShowResult() {
-        QueryResult<Number> result = getCurrentResult();
-        Map<GroupKey, Number> resultValues = result.getResults();
+    protected void internalShowResult(Map<GroupKey, Number> resultValues) {
+        QueryResultDTO<?> result = getCurrentResult();
         
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
-        
         resultsBuilder.append("<table>");
         for (GroupKey key : getSortedKeys(result)) {
             resultsBuilder.append("<tr>");
@@ -43,7 +41,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter<Number> {
         resultsLabel.setHTML(resultsBuilder.toString());
     }
     
-    private Iterable<GroupKey> getSortedKeys(QueryResult<Number> result) {
+    private Iterable<GroupKey> getSortedKeys(QueryResultDTO<?> result) {
         List<GroupKey> sortedKeys = new ArrayList<>(result.getResults().keySet());
         Collections.sort(sortedKeys);
         return sortedKeys;

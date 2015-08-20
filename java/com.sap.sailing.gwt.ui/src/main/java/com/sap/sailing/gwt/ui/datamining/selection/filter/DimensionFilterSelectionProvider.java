@@ -29,9 +29,9 @@ import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallbac
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
@@ -74,6 +74,7 @@ class DimensionFilterSelectionProvider {
                 return function.getDisplayName();
             }
         });
+        dimensionListBox.setWidth("100%");
         dimensionChangedHandler = new DimensionChangedHandler();
         dimensionListBox.addValueChangeHandler(dimensionChangedHandler);
         controlsPanel.add(dimensionListBox);
@@ -100,7 +101,7 @@ class DimensionFilterSelectionProvider {
             }
         });
         selectionTable.setVisible(false);
-        mainPanel.add(selectionTable);
+        mainPanel.add(selectionTable.getWidget());
     }
     
     private class DimensionChangedHandler implements ValueChangeHandler<FunctionDTO> {
@@ -164,7 +165,7 @@ class DimensionFilterSelectionProvider {
                 retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
                 LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<Set<Object>>(counter) {
                     @Override
-                    protected void handleSuccess(QueryResult<Set<Object>> result) {
+                    protected void handleSuccess(QueryResultDTO<Set<Object>> result) {
                         Map<GroupKey, Set<Object>> results = result.getResults();
                         List<Object> content = new ArrayList<Object>();
                         
@@ -236,14 +237,6 @@ class DimensionFilterSelectionProvider {
     
     public Widget getEntryWidget() {
         return mainPanel;
-    }
-
-    public void resizeToHeight(int heightInPX) {
-        int widthInPX = controlsPanel.getOffsetWidth();
-        mainPanel.setSize(widthInPX + "px", heightInPX + "px");
-        
-        int remainingHeightInPX = Math.max(0, heightInPX - controlsPanel.getOffsetHeight());
-        selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     
 }
