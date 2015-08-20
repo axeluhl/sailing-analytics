@@ -9,7 +9,6 @@
 		type="com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentResources" />
 
 	<a ui:field="eventLinkUi">
-		<img ui:field="eventImageUi" class="{local_res.css.eventsoverviewrecent_event_image}"></img>
 		<div class="{local_res.css.eventsoverviewrecent_event}">
 			<div class="{local_res.css.eventteaser_title}">
 				<div class="{local_res.css.eventteaser_title_name}">

@@ -4,7 +4,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -21,45 +20,24 @@ public class EventsOverviewRecentYearEvent extends Widget {
 
     interface RecentEventTeaserUiBinder extends UiBinder<Element, EventsOverviewRecentYearEvent> {
     }
-    
-    @UiField
-    ImageElement eventImageUi;
-    @UiField
-    AnchorElement eventLinkUi;
-    @UiField
-    DivElement eventStateUi;
-    @UiField
-    SpanElement venueUi;
-    @UiField
-    SpanElement eventDateUi;
-    @UiField
-    SpanElement eventNameUi;
+
+    @UiField AnchorElement eventLinkUi;
+    @UiField DivElement eventStateUi;
+    @UiField SpanElement venueUi;
+    @UiField SpanElement eventDateUi;
+    @UiField SpanElement eventNameUi;
 
     public EventsOverviewRecentYearEvent(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event,
             LabelType labelType, boolean isTeaserEvent) {
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         eventNameUi.setInnerText(event.getDisplayName());
-//        if (isTeaserEvent) {
-//            eventImageUi.getStyle().setDisplay(Display.BLOCK);
-//            if(event.getThumbnailImageURL() == null || event.getThumbnailImageURL().isEmpty()) {
-//                eventImageUi.setSrc(EventsOverviewRecentResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
-//                
-//            }else {
-//                eventImageUi.setSrc(event.getThumbnailImageURL());
-//            }
-//        } else {
-//            eventImageUi.getStyle().setDisplay(Display.NONE);
-//        }
-        eventImageUi.removeFromParent();
         eventLinkUi.setTitle(event.getDisplayName());
         eventLinkUi.setHref(placeNavigation.getTargetUrl());
         placeNavigation.configureAnchorElement(eventLinkUi);
         LabelTypeUtil.renderLabelType(eventStateUi, event.getState().getListStateMarker());
         venueUi.setInnerText(event.getLocationOrVenue());
-        eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(),
-                event.getEndDate()));
+        eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
     }
-
 
 }
