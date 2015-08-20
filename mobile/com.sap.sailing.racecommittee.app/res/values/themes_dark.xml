@@ -24,6 +24,7 @@
         <item name="sap_gray_black_30">@color/dark_sap_gray_black_30</item>
         <item name="sap_gray_black_40">@color/dark_sap_gray_black_40</item>
         <item name="sap_gray_white_10">@color/dark_sap_gray_white_10</item>
+        <item name="sap_gray_white_20">@color/dark_sap_gray_white_20</item>
         <item name="sap_light_gray">@color/dark_sap_light_gray</item>
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>

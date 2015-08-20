@@ -44,4 +44,11 @@
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_32"
         tools:text="Extreme Sailing Series 2015 Act 1 Singapore"/>
+
+    <ImageView
+        android:id="@+id/bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_alignParentBottom="true"
+        android:background="@color/constant_sap_yellow_1"/>
 </RelativeLayout>
