@@ -42,14 +42,14 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
 
     @Override
-    public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+    public final void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final EventViewBase view = initView();
         panel.setWidget(view.asWidget());
     }
     
-    protected abstract <VIEW extends EventViewBase> VIEW initView();
+    protected abstract EventViewBase initView();
     
-    protected void initSailorInfoOrSeriesNavigation(EventViewBase view) {
+    protected final void initSailorInfoOrSeriesNavigation(EventViewBase view) {
         EventViewDTO event = getCtx().getEventDTO();
         String sailorInfoUrl = event.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
@@ -61,7 +61,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
     }
     
-    protected void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
+    protected final void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
         EventViewDTO event = getCtx().getEventDTO();
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
             view.setQuickFinderValues(getSortedQuickFinderValues());
@@ -86,9 +86,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return sortedRegattas;
     }
     
+    protected final PLACE getPlace() {
+        return place;
+    }
+    
     @Override
     public EventContext getCtx() {
-        return place.getCtx();
+        return getPlace().getCtx();
     }
 
     public DispatchSystem getDispatch() {
@@ -148,6 +152,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
 
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
-        return null;
+        return null; // TODO No mobile "RaceViewer implemented yet
     }
 }
