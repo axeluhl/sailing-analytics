@@ -16,16 +16,16 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class MultiResultsPresenter implements ResultsPresenter<Number> {
+public class MultiResultsPresenter implements ResultsPresenter {
     
     private final StringMessages stringMessages;
     
-    private final DeckLayoutPanel presentersPanel;
+    private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor> presentersListBox;
-    private ResultsPresenter<Number> currentPresenter;
+    private ResultsPresenter currentPresenter;
 
     private List<Descriptor> availableDescriptors;
     
@@ -35,7 +35,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         availableDescriptors.add(new ColumnChartDescriptor());
         availableDescriptors.add(new PlainDescriptor());
 
-        presentersPanel = new DeckLayoutPanel();
+        presenterPanel = new DeckLayoutPanel();
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -59,32 +59,32 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         setCurrentPresenter(availableDescriptors.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls<Number> presenter) {
+    private void setCurrentPresenter(ResultsPresenterWithControls presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
         currentPresenter = presenter;
-        presentersPanel.setWidget(currentPresenter.getWidget());
+        presenterPanel.setWidget(currentPresenter.getWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                presentersPanel.onResize();
+                presenterPanel.onResize();
             }
         });
     }
 
     @Override
     public Widget getWidget() {
-        return presentersPanel;
+        return presenterPanel;
     }
 
     @Override
-    public QueryResult<Number> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return currentPresenter.getCurrentResult();
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
+    public void showResult(QueryResultDTO<?> result) {
         for (Descriptor descriptor : availableDescriptors) {
             descriptor.getPresenter().showResult(result);
         }
@@ -115,13 +115,13 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         
         public String getName();
         
-        public ResultsPresenterWithControls<Number> getPresenter();
+        public ResultsPresenterWithControls getPresenter();
         
     }
     
     private class PlainDescriptor implements Descriptor {
         
-        private final AbstractResultsPresenter<Number> presenter;
+        private final AbstractResultsPresenter presenter;
         
         public PlainDescriptor() {
             presenter = new PlainResultsPresenter(stringMessages);
@@ -133,7 +133,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         }
         
         @Override
-        public AbstractResultsPresenter<Number> getPresenter() {
+        public AbstractResultsPresenter getPresenter() {
             return presenter;
         }
         
@@ -153,7 +153,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Number> {
         }
 
         @Override
-        public AbstractResultsPresenter<Number> getPresenter() {
+        public AbstractResultsPresenter getPresenter() {
             return presenter;
         }
         

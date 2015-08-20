@@ -69,7 +69,7 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
             TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, int passId, TimePoint protestStartTime);
 
     RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, Integer passId, Wind wind);
+            Serializable id, List<Competitor> competitors, Integer passId, Wind wind, boolean isMagnetic);
 
     RaceLogDeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author,
     		TimePoint logicalTimePoint, Serializable pId, DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to);

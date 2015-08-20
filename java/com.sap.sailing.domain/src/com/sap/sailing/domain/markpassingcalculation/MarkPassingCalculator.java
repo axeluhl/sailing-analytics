@@ -72,7 +72,9 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
-            new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName()).start();
+            final Thread listenerThread = new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName());
+            listenerThread.setDaemon(true);
+            listenerThread.start();
         }
     }
 

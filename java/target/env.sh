@@ -84,7 +84,7 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseG1GC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
+ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseG1GC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Djava.awt.headless=true"
 
 JAVA_HOME=/opt/jdk1.8.0_20
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then

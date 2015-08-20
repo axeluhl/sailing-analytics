@@ -79,7 +79,7 @@ public class AbstractGPSFixStoreTest {
                 mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
-    protected void testLength(Track<?> track, long expected) {
+    protected void testNumberOfRawFixes(Track<?> track, long expected) {
         track.lockForRead();
         assertEquals(expected, size(track.getRawFixes()));
         track.unlockAfterRead();

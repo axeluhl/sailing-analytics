@@ -234,14 +234,14 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     }
 
     @Override
-    public RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, Wind wind) {
-        return createWindFixEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, wind);
+    public RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, Wind wind, boolean isMagnetic) {
+        return createWindFixEvent(logicalTimePoint, author, UUID.randomUUID(), new ArrayList<Competitor>(), passId, wind, isMagnetic);
     }
 
     @Override
     public RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
-            List<Competitor> competitors, int passId, Wind wind) {
-        return new RaceLogWindFixEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, wind);
+            List<Competitor> competitors, int passId, Wind wind, boolean isMagnetic) {
+        return new RaceLogWindFixEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, competitors, passId, wind, isMagnetic);
     }
 
     @Override

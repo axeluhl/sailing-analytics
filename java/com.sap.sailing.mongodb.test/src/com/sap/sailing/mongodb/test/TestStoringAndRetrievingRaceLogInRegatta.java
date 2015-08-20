@@ -412,7 +412,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogWindFixEvent() {
         Wind wind = createWindFix();
-        RaceLogWindFixEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, wind);
+        RaceLogWindFixEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, wind, /* isMagnetic */ false);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 

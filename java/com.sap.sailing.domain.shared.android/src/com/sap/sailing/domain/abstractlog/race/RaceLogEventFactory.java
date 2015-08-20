@@ -97,10 +97,10 @@ public interface RaceLogEventFactory {
 
     RaceLogProtestStartTimeEvent createProtestStartTimeEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, TimePoint protestStartTime);
 
-    RaceLogWindFixEvent createWindFixEvent(TimePoint eventTime, AbstractLogEventAuthor author, int currentPassId, Wind wind);
+    RaceLogWindFixEvent createWindFixEvent(TimePoint eventTime, AbstractLogEventAuthor author, int currentPassId, Wind wind, boolean isMagnetic);
     
     RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Serializable id, List<Competitor> competitors, int passId, Wind wind);
+            Serializable id, List<Competitor> competitors, int passId, Wind wind, boolean isMagnetic);
 
     RaceLogDeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to);
