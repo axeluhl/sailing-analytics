@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentMap;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.management.DataMiningQueryManager;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
 
 public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryManager {
 

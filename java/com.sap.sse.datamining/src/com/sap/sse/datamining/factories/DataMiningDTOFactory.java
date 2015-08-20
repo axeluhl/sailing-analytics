@@ -66,7 +66,8 @@ public class DataMiningDTOFactory {
     }
 
     private AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition, String displayName) {
-        return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getExtractedType().getSimpleName(),
+        return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getAggregationNameMessageKey(),
+                                                     aggregatorDefinition.getExtractedType().getSimpleName(),
                                                      aggregatorDefinition.getAggregatedType().getSimpleName(),
                                                      displayName);
     }

@@ -34,6 +34,11 @@ public class MillisecondsDurationImpl implements Duration {
     }
 
     @Override
+    public double divide(Duration duration) {
+        return ((double) asMillis()) / (double) duration.asMillis();
+    }
+
+    @Override
     public Duration times(long factor) {
         return new MillisecondsDurationImpl(asMillis() * factor);
     }

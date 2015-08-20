@@ -200,8 +200,8 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setWindFix(TimePoint timePoint, Wind wind) {
-        raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind));
+    public void setWindFix(TimePoint timePoint, Wind wind, boolean isMagnetic) {
+        raceLog.add(factory.createWindFixEvent(timePoint, author, raceLog.getCurrentPassId(), wind, isMagnetic));
     }
 
     @Override
