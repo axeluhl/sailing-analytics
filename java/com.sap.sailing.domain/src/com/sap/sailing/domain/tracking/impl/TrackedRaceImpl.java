@@ -611,6 +611,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
