@@ -26,7 +26,7 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
         if(placeNavigation.isRemotePlace()) {
             String destinationUrl = placeNavigation.getTargetUrl();
             History.newItem(History.getToken(), false);
-            Window.Location.replace(destinationUrl);
+            Window.Location.assign(destinationUrl);
         } else {
             placeController.goTo(placeNavigation.getPlace());
         }
