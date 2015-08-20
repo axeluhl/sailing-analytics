@@ -1,87 +1,21 @@
 package com.sap.sailing.gwt.home.mobile.places.races;
 
-import java.util.UUID;
-
-import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
-import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
-public class RacesActivity extends AbstractActivity implements Presenter {
-    private final MobileApplicationClientFactory clientFactory;
-    private final RegattaRacesPlace place;
+public class RacesActivity extends AbstractEventActivity<RegattaRacesPlace> implements Presenter {
 
     public RacesActivity(RegattaRacesPlace place, MobileApplicationClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
-        this.place = place;
+        super(place, clientFactory);
     }
-
+    
     @Override
-    public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+    protected EventViewBase initView() {
         final RacesView view = new RacesViewImpl(this);
-        EventViewDTO event = place.getCtx().getEventDTO();
-        if(event.getType() == EventType.MULTI_REGATTA) {
-            view.setQuickFinderValues(event.getRegattas());
-        } else if(event.getType() == EventType.SERIES_EVENT) {
-            view.setQuickFinderValues(event.getSeriesName(), event.getEventsOfSeries());
-        } else {
-            view.hideQuickfinder();
-        }
-        panel.setWidget(view.asWidget());
-    }
-
-    @Override
-    public EventContext getCtx() {
-        return place.getCtx();
-    }
-
-    @Override
-    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
-    }
-
-    @Override
-    public DispatchSystem getDispatch() {
-        return clientFactory.getDispatch();
-    }
-
-    @Override
-    public PlaceNavigation<?> getRegattaMiniLeaderboardNavigation(String leaderboardName) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
-    }
-
-    @Override
-    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext().withId(getCtx().getEventId())), null, false);
-    }
-    
-    @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
-    }
-
-    @Override
-    public PlaceNavigation<?> getEventNavigation() {
-        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
-    }
-    
-    @Override
-    public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+        initQuickfinder(view, true);
+        return view;
     }
 }
