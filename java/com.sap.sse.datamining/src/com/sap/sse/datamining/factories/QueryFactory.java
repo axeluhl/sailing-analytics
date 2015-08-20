@@ -35,7 +35,7 @@ public class QueryFactory {
 
     public <DataSourceType, DataType, ExtractedType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition,
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override
             protected Processor<DataSourceType, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
@@ -121,7 +121,9 @@ public class QueryFactory {
             final DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, final int retrieverLevel,
             final Iterable<Function<?>> dimensions, final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
-        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
+        @SuppressWarnings("unchecked")
+        Class<Set<Object>> resultType = (Class<Set<Object>>)(Class<?>) Set.class;
+        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
             protected Processor<DataSource, ?> createFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);

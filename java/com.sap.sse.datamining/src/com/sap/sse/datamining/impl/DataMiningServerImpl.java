@@ -22,16 +22,17 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
@@ -332,5 +333,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
         return dataMiningQueryManager.runNewAndAbortPrevious(session, query);
     }
+    
+    @Override
+    public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result) {
+        return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
+    }
+    
     
 }

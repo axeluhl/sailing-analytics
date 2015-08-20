@@ -4,9 +4,11 @@ import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.shared.dto.DistanceDTO;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -39,8 +41,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public double getDistanceToStartLineAtStart() {
-        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0).getMeters();
+    public DistanceDTO getDistanceToStartLineAtStart() {
+        Distance distance = getTrackedRace().getDistanceToStartLine(getCompetitor(), 0);
+        return new DistanceDTO(distance.getGeographicalMiles(), distance.getSeaMiles(),
+                               distance.getNauticalMiles(), distance.getMeters(),
+                               distance.getKilometers(), distance.getCentralAngleDeg(),
+                               distance.getCentralAngleRad());
     }
     
     @Override

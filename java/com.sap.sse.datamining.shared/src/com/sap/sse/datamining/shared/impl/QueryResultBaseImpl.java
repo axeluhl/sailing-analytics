@@ -5,36 +5,42 @@ import java.util.Map;
 
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.datamining.shared.QueryResultBase;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.data.Unit;
 
-public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedType> {
-    private static final long serialVersionUID = 5173796619174827696L;
-    
+public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase<ResultType> {
+    private static final long serialVersionUID = 5696532932535299241L;
+
     private QueryResultState state;
-    private Map<GroupKey, AggregatedType> results;
+    private Map<GroupKey, ResultType> results;
     private AdditionalResultData additionalData;
-    
+
     /**
      * Constructor for the GWT-Serialization. Don't use this!
      */
     @Deprecated
-    QueryResultImpl() { }
-    
-    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results) {
+    public QueryResultBaseImpl() {
+    }
+
+    public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results) {
         this(state, results, new NullAdditionalResultData());
     }
-    
-    public QueryResultImpl(QueryResultState state, Map<GroupKey, AggregatedType> results, AdditionalResultData additionalData) {
+
+    public QueryResultBaseImpl(QueryResultState state, Map<GroupKey, ResultType> results,
+            AdditionalResultData additionalData) {
         this.state = state;
-        this.results = new HashMap<GroupKey, AggregatedType>(results);
+        this.results = new HashMap<GroupKey, ResultType>(results);
         this.additionalData = additionalData;
     }
-    
+
     @Override
     public QueryResultState getState() {
         return state;
+    }
+
+    protected AdditionalResultData getAdditionalData() {
+        return additionalData;
     }
 
     @Override
@@ -56,12 +62,12 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     public String getResultSignifier() {
         return additionalData.getResultSignifier();
     }
-    
+
     @Override
     public Unit getUnit() {
-    	return additionalData.getUnit();
+        return additionalData.getUnit();
     }
-    
+
     @Override
     public String getUnitSignifier() {
         return additionalData.getUnitSignifier();
@@ -73,11 +79,11 @@ public class QueryResultImpl<AggregatedType> implements QueryResult<AggregatedTy
     }
 
     @Override
-    public Map<GroupKey, AggregatedType> getResults() {
+    public Map<GroupKey, ResultType> getResults() {
         return results;
     }
 
-    public void addResult(GroupKey key, AggregatedType value) {
+    public void addResult(GroupKey key, ResultType value) {
         results.put(key, value);
     }
 

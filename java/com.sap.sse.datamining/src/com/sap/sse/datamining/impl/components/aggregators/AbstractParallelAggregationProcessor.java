@@ -11,20 +11,20 @@ import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
-public abstract class AbstractParallelStoringAggregationProcessor<InputType, AggregatedType> 
+public abstract class AbstractParallelAggregationProcessor<InputType, AggregatedType> 
                       extends AbstractParallelProcessor<InputType, AggregatedType> {
 
-    private final Lock storeLock;
     private final String aggregationNameMessageKey;
+    private final Lock writeLock;
 
-    public AbstractParallelStoringAggregationProcessor(Class<InputType> inputType,
-                                                       Class<AggregatedType> resultType,
-                                                       ExecutorService executor,
-                                                       Collection<Processor<AggregatedType, ?>> resultReceivers,
-                                                       String aggregationNameMessageKey) {
+    public AbstractParallelAggregationProcessor(Class<InputType> inputType,
+                                                Class<AggregatedType> resultType,
+                                                ExecutorService executor,
+                                                Collection<Processor<AggregatedType, ?>> resultReceivers,
+                                                String aggregationNameMessageKey) {
         super(inputType, resultType, executor, resultReceivers);
-        storeLock = new ReentrantLock();
         this.aggregationNameMessageKey = aggregationNameMessageKey;
+        writeLock = new ReentrantLock();
     }
 
     @Override
@@ -32,31 +32,32 @@ public abstract class AbstractParallelStoringAggregationProcessor<InputType, Agg
         return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
             public AggregatedType computeResult() {
-                storeLock.lock();
+                writeLock.lock();
                 try {
-                    storeElement(element);
+                    handleElement(element);
                 } finally {
-                    storeLock.unlock();
+                    writeLock.unlock();
                 }
-                return AbstractParallelStoringAggregationProcessor.super.createInvalidResult();
+                return AbstractParallelAggregationProcessor.super.createInvalidResult();
             }
         };
     }
 
+
     /**
-     * Method to store the element in the concrete store. This method is only called in a way, that is thread safe, so
-     * that multiple threads can't corrupt the store.
+     * Method to handle the element. This method is only called in a way, that is thread safe, so
+     * that multiple threads can't corrupt the data.
      */
-    protected abstract void storeElement(InputType element);
+    protected abstract void handleElement(InputType element);
     
     @Override
     public void finish() throws InterruptedException {
         super.sleepUntilAllInstructionsFinished();
-        super.forwardResultToReceivers(aggregateResult());
+        super.forwardResultToReceivers(getResult());
         super.tellResultReceiversToFinish();
     }
 
-    protected abstract AggregatedType aggregateResult();
+    protected abstract AggregatedType getResult();
     
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
