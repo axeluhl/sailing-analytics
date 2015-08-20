@@ -70,7 +70,7 @@ public class EventViewImpl extends Composite implements EventView {
     
     private void setupOverviewStage(UUID eventId) {
         overviewStageUi = new EventOverviewStage(currentPresenter);
-        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId));
+        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(eventId, true));
     }
     
     private void setupListContent(EventViewDTO event) {

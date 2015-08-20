@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
@@ -20,6 +21,8 @@ public class EventsOverviewRecentYearEvent extends Widget {
 
     interface RecentEventTeaserUiBinder extends UiBinder<Element, EventsOverviewRecentYearEvent> {
     }
+    
+    private final Element eventContainerUi;
 
     @UiField AnchorElement eventLinkUi;
     @UiField DivElement eventStateUi;
@@ -30,7 +33,7 @@ public class EventsOverviewRecentYearEvent extends Widget {
     public EventsOverviewRecentYearEvent(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event,
             LabelType labelType, boolean isTeaserEvent) {
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
+        setElement(eventContainerUi = uiBinder.createAndBindUi(this));
         eventNameUi.setInnerText(event.getDisplayName());
         eventLinkUi.setTitle(event.getDisplayName());
         eventLinkUi.setHref(placeNavigation.getTargetUrl());
@@ -40,4 +43,7 @@ public class EventsOverviewRecentYearEvent extends Widget {
         eventDateUi.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
     }
 
+    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+        eventContainerUi.appendChild(new EventOverviewRecentSeriesInfo(seriesNavigation, eventSeries).getElement());
+    }
 }

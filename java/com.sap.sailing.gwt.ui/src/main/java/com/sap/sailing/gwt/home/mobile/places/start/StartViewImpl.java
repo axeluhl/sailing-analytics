@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class StartViewImpl extends Composite implements StartView {
@@ -43,7 +43,7 @@ public class StartViewImpl extends Composite implements StartView {
     }
     
     @Override
-    public void setFeaturedEvents(List<? extends EventListEventDTO> list) {
+    public void setFeaturedEvents(List<? extends EventLinkAndMetadataDTO> list) {
         stage.setFeaturedEvents(list);
     }
 

@@ -17,23 +17,18 @@ import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.client.shared.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventTeaser extends Composite {
 
-    @UiField
-    SpanElement eventName;
-    @UiField
-    SpanElement venue;
-    @UiField
-    SpanElement eventDate;
-    @UiField
-    AnchorElement eventLink;
-    @UiField
-    DivElement eventImage;
-    @UiField
-    DivElement eventState;
+    @UiField SpanElement eventName;
+    @UiField SpanElement venue;
+    @UiField SpanElement eventDate;
+    @UiField AnchorElement eventLink;
+    @UiField DivElement eventImage;
+    @UiField DivElement eventState;
 
     private final EventMetadataDTO event;
 
@@ -77,7 +72,6 @@ public class EventTeaser extends Composite {
         eventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithoutYear(event.getStartDate(), event.getEndDate()));
 
         final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
-
         final String thumbnailImageUrl = event.getThumbnailImageURL();
         if (thumbnailImageUrl == null || thumbnailImageUrl.isEmpty()) {
             thumbnailUrlBuilder.append(EventTeaserResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
@@ -87,7 +81,11 @@ public class EventTeaser extends Composite {
         thumbnailUrlBuilder.append("')");
         eventImage.getStyle().setBackgroundImage(thumbnailUrlBuilder.toString());
     }
-
+    
+    public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
+        eventImage.appendChild(new EventTeaserSeriesInfoCorner(seriesNavigation, eventSeries).getElement());
+    }
+    
     public void hideImage(boolean hide) {
         if (hide) {
             eventImage.getStyle().setDisplay(Display.NONE);

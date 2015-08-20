@@ -7,7 +7,7 @@
 		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentResources" />
-
+	<div>
 	<a ui:field="eventLinkUi">
 		<div class="{local_res.css.eventsoverviewrecent_event}">
 			<div class="{local_res.css.eventteaser_title}">
@@ -26,4 +26,5 @@
 			</div>
 		</div>
 	</a>
+	</div>
 </ui:UiBinder>
