@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
@@ -31,6 +32,7 @@ public class EventsOverviewRecentYear extends Composite {
     @UiField SpanElement year;
     @UiField SpanElement eventsCount;
     @UiField FlowPanel recentEventsTeaserPanel;
+    @UiField (provided = true) Stage eventStage;
     @UiField DivElement contentDiv;
     @UiField HTMLPanel headerDiv;
     @UiField StringMessages i18n;
@@ -41,7 +43,7 @@ public class EventsOverviewRecentYear extends Composite {
     
     public EventsOverviewRecentYear(EventListYearDTO yearDTO, MobilePlacesNavigator navigator, boolean showInitial) {
         List<EventListEventDTO> events = yearDTO.getEvents();
-        
+        eventStage = new Stage(navigator, false);
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -59,10 +61,12 @@ public class EventsOverviewRecentYear extends Composite {
                 first = false;
             }
         }
+        eventStage.setFeaturedEvents(events);
+//        eventStage.removeFromParent();
         headerDiv.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                onHeaderCicked();
+                onHeaderClicked();
             }
         }, ClickEvent.getType());
 
@@ -71,7 +75,7 @@ public class EventsOverviewRecentYear extends Composite {
         updateAccordionState();
     }
 
-    private void onHeaderCicked() {
+    void onHeaderClicked() {
         isContentVisible = !isContentVisible;
         updateContentVisibility();
     }

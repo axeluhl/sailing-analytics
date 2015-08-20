@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
@@ -24,11 +23,9 @@ public class EventsOverviewRecent extends Composite {
     private final MobilePlacesNavigator navigator;
 
     @UiField FlowPanel year;
-    @UiField (provided = true) Stage eventStage;
     
     public EventsOverviewRecent(MobilePlacesNavigator navigator) {
         this.navigator = navigator;
-        this.eventStage= new Stage(navigator, false);
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -40,11 +37,11 @@ public class EventsOverviewRecent extends Composite {
         List<EventListEventDTO> allEvents = new LinkedList<EventListEventDTO>();
         boolean oneYearIsExpanded = false;
         for (EventListYearDTO yearDTO : years) {
-            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator, !oneYearIsExpanded);
+            EventsOverviewRecentYear recentEventsOfOneYear = new EventsOverviewRecentYear(yearDTO, navigator, true);
             year.add(recentEventsOfOneYear);
+            if (oneYearIsExpanded) recentEventsOfOneYear.onHeaderClicked();
             oneYearIsExpanded = true;
             allEvents.addAll(yearDTO.getEvents());
         }
-        eventStage.setFeaturedEvents(allEvents);
     }
 }
