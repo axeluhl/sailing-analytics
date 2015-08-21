@@ -139,7 +139,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 regatta = header.getRaceGroup().getName();
             }
             boat_class.setText(regatta);
-            fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
+            String fleetSeries = RaceHelper.getFleetSeries(header.getFleet(), header.getSeries());
+            if (!TextUtils.isEmpty(fleetSeries)) {
+                fleet_series.setText(fleetSeries);
+                fleet_series.setVisibility(View.VISIBLE);
+            }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -278,6 +282,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     private void resetValues(View layout) {
         if (layout != null) {
+            if (fleet_series != null) {
+                fleet_series.setVisibility(View.GONE);
+            }
             if (update_badge != null) {
                 update_badge.setVisibility(View.GONE);
             }
