@@ -116,10 +116,6 @@
         <item name="android:textColor">@color/constant_black</item>
         <item name="android:background">@drawable/button_dark</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:bottomRightRadius">@dimen/default_button_radius</item>
-        <item name="android:bottomLeftRadius">@dimen/default_button_radius</item>
-        <item name="android:topRightRadius">@dimen/default_button_radius</item>
-        <item name="android:topLeftRadius">@dimen/default_button_radius</item>
     </style>
 
     <style name="AppTheme.Dark.Button.Default">
