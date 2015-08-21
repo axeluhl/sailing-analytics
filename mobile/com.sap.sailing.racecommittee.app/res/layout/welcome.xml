@@ -26,12 +26,12 @@
         android:layout_marginStart="@dimen/default_margin"
         android:text="@string/login_text"
         android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_40" />
+        android:textSize="@dimen/textSize_32" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/logo_size"
+        android:layout_height="@dimen/logo_size"
         android:layout_above="@+id/backdrop_title"
         android:layout_alignLeft="@+id/backdrop_title"
         android:layout_alignStart="@+id/backdrop_title"
