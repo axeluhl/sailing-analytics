@@ -5,6 +5,7 @@
     <dimen name="navigation_drawer_image_height">120dp</dimen>
     <dimen name="navigation_drawer_width">380dp</dimen>
     <dimen name="navigation_drawer_right_box">150dp</dimen>
+    <dimen name="navigation_drawer_left_padding">12dp</dimen>
 
     <dimen name="selector_header_height">80dp</dimen>
     <dimen name="listView_side_padding">100dp</dimen>

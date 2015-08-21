@@ -1,48 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_image_height"
-    android:background="@color/constant_black">
+    android:layout_height="@dimen/navigation_drawer_image_height">
 
-    <ImageView
-        android:id="@+id/nav_button"
-        style="?round"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/default_margin"
-        android:src="@drawable/ic_power_settings_new_white_48dp"/>
-
-    <TextView
-        android:id="@+id/regatta_data"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/nav_button"
-        android:layout_toStartOf="@id/nav_button"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_32"
-        tools:text="Marina Bay / Viewer"/>
-
-    <TextView
-        android:id="@+id/regatta_course"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/regatta_data"
-        android:layout_toLeftOf="@id/nav_button"
-        android:layout_toStartOf="@id/nav_button"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:singleLine="true"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_32"
-        tools:text="Extreme Sailing Series 2015 Act 1 Singapore"/>
+    <include layout="@layout/race_list_header_content"/>
 
     <ImageView
         android:id="@+id/bottom_line"
@@ -50,4 +12,5 @@
         android:layout_height="@dimen/thick_line"
         android:layout_alignParentBottom="true"
         android:background="@color/constant_sap_yellow_1"/>
+
 </RelativeLayout>

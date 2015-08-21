@@ -20,7 +20,7 @@
         android:id="@+id/delimiter_line"
         android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
-        android:background="?sap_gray_white_20"
+        android:background="?black"
         android:layout_toStartOf="@id/protest_image"/>
 
     <ImageView
@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginLeft="@dimen/navigation_drawer_left_padding"
         android:layout_toStartOf="@id/delimiter_line"
         android:orientation="vertical">
 
