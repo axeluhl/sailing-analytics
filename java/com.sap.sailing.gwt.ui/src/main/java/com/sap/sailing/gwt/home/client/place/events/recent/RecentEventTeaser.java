@@ -21,6 +21,7 @@ public class RecentEventTeaser extends Composite {
     @UiField(provided = true) EventTeaser eventTeaser;
 
     public RecentEventTeaser(final PlaceNavigation<?> placeNavigation, final EventMetadataDTO event, LabelType labelType) {
+        EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         eventTeaser = new EventTeaser(placeNavigation, event, labelType);
         initWidget(uiBinder.createAndBindUi(this));
     }
