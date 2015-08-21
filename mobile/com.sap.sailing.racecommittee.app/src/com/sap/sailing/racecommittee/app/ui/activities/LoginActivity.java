@@ -477,6 +477,7 @@ public class LoginActivity extends BaseActivity
         animatorSet.playTogether(animators);
         animatorSet.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.addListener(new AnimatorSetListener());
         animatorSet.start();
     }
 
@@ -507,6 +508,43 @@ public class LoginActivity extends BaseActivity
             transaction.replace(R.id.area_fragment, new Fragment());
             transaction.replace(R.id.position_fragment, new Fragment());
             transaction.commit();
+        }
+    }
+
+    private class AnimatorSetListener implements Animator.AnimatorListener {
+
+        private View submit;
+
+        private AnimatorSetListener() {
+            submit = findViewById(R.id.login_submit);
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            setAlpha(submit, 0f);
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (submit != null) {
+                submit.animate().alpha(1f).setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+            setAlpha(submit, 0f);
+        }
+
+        private void setAlpha(View view, float alpha) {
+            if (view != null) {
+                view.setAlpha(alpha);
+            }
         }
     }
 }

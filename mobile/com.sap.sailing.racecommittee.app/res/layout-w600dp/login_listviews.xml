@@ -176,6 +176,5 @@
         android:layout_marginRight="@dimen/default_margin_twice"
         android:enabled="false"
         android:text="@string/sign_up"
-        android:textSize="@dimen/textSize_26"
-        android:visibility="visible"/>
+        android:textSize="@dimen/textSize_26"/>
 </RelativeLayout>
