@@ -12,7 +12,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="2dp">
+        >
 
         <LinearLayout
             android:id="@+id/race_scheduled"
@@ -66,7 +66,7 @@
 
         <ImageView
             android:id="@+id/race_marker"
-            android:layout_width="@dimen/thick_line"
+            android:layout_width="@dimen/obesity_line"
             android:layout_height="match_parent"
             android:src="?marker_race"/>
 
@@ -156,9 +156,14 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
         android:contentDescription="@string/updateIndicator"
         android:src="@drawable/updatelabel"
         android:visibility="gone"
         tools:visibility="visible"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:background="?black"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

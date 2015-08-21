@@ -9,9 +9,9 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="?black"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/races_current"
@@ -47,8 +47,8 @@
             android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="?black"
-            android:dividerHeight="1dp"/>
+            android:divider="@null"
+            android:dividerHeight="0dp"/>
 
         <ProgressBar
             android:id="@+id/progress"
