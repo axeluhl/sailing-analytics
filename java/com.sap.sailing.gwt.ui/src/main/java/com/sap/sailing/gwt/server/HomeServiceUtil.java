@@ -412,11 +412,10 @@ public final class HomeServiceUtil {
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
             if(leaderboard instanceof RegattaLeaderboard) {
-                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                    continue;
+                if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                    return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
                 }
             }
-            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
     }
