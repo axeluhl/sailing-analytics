@@ -177,6 +177,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
             loadNavDrawer(courseArea);
+            if (savedInstanceState != null) {
+                String raceID = (String) savedInstanceState.getSerializable(RACE);
+                if (raceID != null) {
+                    onRaceItemClicked(dataManager.getDataStore().getRace(raceID));
+                    return;
+                }
+            }
             loadWelcomeFragment();
         }
     }
