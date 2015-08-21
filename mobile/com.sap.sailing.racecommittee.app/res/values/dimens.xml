@@ -32,6 +32,10 @@
 
     <dimen name="setup_text_width">150dp</dimen>
 
+    <dimen name="default_button_height">40dp</dimen>
+    <dimen name="default_button_width">216dp</dimen>
+    <dimen name="default_button_radius">2dp</dimen>
+
     <dimen name="default_padding_half">12dp</dimen>
     <dimen name="default_padding">24dp</dimen>
     <dimen name="default_padding_twice">48dp</dimen>

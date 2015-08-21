@@ -41,6 +41,7 @@
         <item name="white_invert">@color/constant_white</item>
 
         <!-- styles -->
+        <item name="button">@style/AppTheme.Light.Button</item>
         <item name="buttonSolidXSmall">@style/AppTheme.Light.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
@@ -125,17 +126,6 @@
         <item name="spinBars">false</item>
     </style>
 
-    <style name="AppTheme.Light.Button">
-        <item name="android:textColor">@color/constant_white</item>
-        <item name="android:background">@drawable/button_light</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:paddingTop">@dimen/default_padding_half</item>
-        <item name="android:paddingRight">@dimen/default_padding</item>
-        <item name="android:paddingBottom">@dimen/default_padding_half</item>
-        <item name="android:paddingLeft">@dimen/default_padding</item>
-    </style>
-
     <!-- custom styles -->
     <style name="AppTheme.Light.EditText" parent="android:Widget.EditText">
         <item name="android:background">@drawable/edit_text_light</item>
@@ -143,15 +133,33 @@
         <item name="android:textColorHint">?sap_light_gray</item>
     </style>
 
-    <style name="AppTheme.Light.Button.XSmall">
+    <style name="AppTheme.Light.Button">
+        <item name="android:textColor">@color/constant_white</item>
+        <item name="android:background">@drawable/button_light</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:bottomRightRadius">@dimen/default_button_radius</item>
+        <item name="android:bottomLeftRadius">@dimen/default_button_radius</item>
+        <item name="android:topRightRadius">@dimen/default_button_radius</item>
+        <item name="android:topLeftRadius">@dimen/default_button_radius</item>
+    </style>
+
+    <style name="AppTheme.Light.Button.Default">
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">@dimen/default_padding_half</item>
+        <item name="android:paddingRight">@dimen/default_padding</item>
+        <item name="android:paddingBottom">@dimen/default_padding_half</item>
+        <item name="android:paddingLeft">@dimen/default_padding</item>
+    </style>
+
+    <style name="AppTheme.Light.Button.XSmall" parent="AppTheme.Light.Button.Default">
         <item name="android:textSize">@dimen/textSize_18</item>
     </style>
 
-    <style name="AppTheme.Light.Button.Small">
+    <style name="AppTheme.Light.Button.Small" parent="AppTheme.Light.Button.Default">
         <item name="android:textSize">@dimen/textSize_22</item>
     </style>
 
-    <style name="AppTheme.Light.Button.Normal">
+    <style name="AppTheme.Light.Button.Normal" parent="AppTheme.Light.Button.Default">
         <item name="android:textSize">@dimen/textSize_26</item>
     </style>
 

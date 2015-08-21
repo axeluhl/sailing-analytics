@@ -187,15 +187,14 @@
 
     <Button
         android:id="@+id/login_submit"
-        style="?attr/buttonSolidNormal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="?attr/button"
+        android:layout_width="@dimen/default_button_width"
+        android:layout_height="@dimen/default_button_height"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
         android:enabled="false"
         android:text="@string/sign_up"
-        android:textSize="@dimen/textSize_26"
-        android:visibility="visible"/>
+        android:textSize="@dimen/textSize_18"
+        android:textStyle="normal"/>
 </RelativeLayout>
