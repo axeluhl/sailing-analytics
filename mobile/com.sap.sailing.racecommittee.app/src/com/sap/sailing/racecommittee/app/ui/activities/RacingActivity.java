@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -141,8 +142,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
-            setOverflowIcon();
-            toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
+            if (AppUtils.with(this).isTablet()) {
+                setOverflowIcon();
+                toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
+            }
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
