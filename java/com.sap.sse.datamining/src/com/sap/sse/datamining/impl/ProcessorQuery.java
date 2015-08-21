@@ -78,10 +78,10 @@ public abstract class ProcessorQuery<ResultType, DataSourceType> implements Quer
         this.additionalData = additionalData;
 
         resultReceiver = new ProcessResultReceiver();
-        firstProcessor = createFirstProcessor();
+        firstProcessor = createChainAndReturnFirstProcessor();
     }
 
-    protected abstract Processor<DataSourceType, ?> createFirstProcessor();
+    protected abstract Processor<DataSourceType, ?> createChainAndReturnFirstProcessor();
     
     @Override
     public QueryState getState() {

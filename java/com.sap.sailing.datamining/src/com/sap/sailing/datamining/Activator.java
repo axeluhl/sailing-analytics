@@ -7,6 +7,8 @@ import java.util.Set;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
+import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -79,6 +81,8 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         internalClasses.add(HasGPSFixContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
+        internalClasses.add(HasLeaderboardGroupContext.class);
+        internalClasses.add(HasLeaderboardContext.class);
         return internalClasses;
     }
 

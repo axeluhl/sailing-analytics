@@ -60,7 +60,7 @@ public class TestProcessorQuery {
                 dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor() {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
@@ -98,7 +98,7 @@ public class TestProcessorQuery {
                 dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor() {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
@@ -164,7 +164,7 @@ public class TestProcessorQuery {
                 createDataSource(), stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
                 return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
@@ -238,7 +238,7 @@ public class TestProcessorQuery {
         Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
@@ -278,7 +278,7 @@ public class TestProcessorQuery {
         Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor() {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
                 resultReceivers.add(this.getResultReceiver());
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
@@ -309,7 +309,7 @@ public class TestProcessorQuery {
         AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
         Query<?> query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor() {
                 return null;
             }
         };
@@ -320,7 +320,7 @@ public class TestProcessorQuery {
         additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
         query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor() {
                 return null;
             }
         };

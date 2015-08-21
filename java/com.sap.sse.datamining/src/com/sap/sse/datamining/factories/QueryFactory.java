@@ -37,7 +37,7 @@ public class QueryFactory {
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override
-            protected Processor<DataSourceType, ?> createFirstProcessor() {
+            protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Function<ExtractedType> extractionFunction = queryDefinition.getStatisticToCalculate();
@@ -125,7 +125,7 @@ public class QueryFactory {
         Class<Set<Object>> resultType = (Class<Set<Object>>)(Class<?>) Set.class;
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
-            protected Processor<DataSource, ?> createFirstProcessor() {
+            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor() {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
