@@ -47,29 +47,26 @@
 
         <ImageView
             android:id="@+id/settings_button"
+            style="?round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
-            android:background="@drawable/round_button"
-            android:padding="10dp"
             android:src="@drawable/ic_settings_white_48dp"/>
 
         <ImageView
             android:id="@+id/technical_info"
+            style="?round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
-            android:background="@drawable/round_button"
-            android:padding="10dp"
             android:src="@drawable/ic_info_outline_white_48dp"/>
 
         <ImageView
             android:id="@+id/refresh_data"
+            style="?round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
-            android:background="@drawable/round_button"
-            android:padding="10dp"
             android:src="@drawable/ic_refresh_white_48dp"/>
     </LinearLayout>
 

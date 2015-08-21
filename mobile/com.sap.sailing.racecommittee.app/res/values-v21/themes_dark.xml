@@ -15,4 +15,14 @@
         <item name="android:colorAccent">@color/dark_colorAccent</item>
     </style>
 
+    <style name="AppTheme.Dark.Button">
+        <item name="android:textColor">@color/constant_black</item>
+        <item name="android:background">@drawable/button_dark_ripple</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTheme.Dark.Round">
+        <item name="android:background">@drawable/round_button_ripple</item>
+        <item name="android:padding">10dp</item>
+    </style>
 </resources>

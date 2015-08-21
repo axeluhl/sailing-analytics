@@ -45,6 +45,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Light.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="round">@style/AppTheme.Light.Round</item>
         <item name="text">@style/AppTheme.Light.Text</item>
         <item name="textXXSmall">@style/AppTheme.Light.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Light.Text.XSmall</item>
@@ -124,6 +125,11 @@
 
     <style name="AppTheme.Light.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">false</item>
+    </style>
+
+    <style name="AppTheme.Light.Round">
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">10dp</item>
     </style>
 
     <!-- custom styles -->

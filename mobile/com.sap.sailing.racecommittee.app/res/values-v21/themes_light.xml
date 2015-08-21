@@ -16,4 +16,14 @@
         <item name="android:colorAccent">@color/light_colorAccent</item>
     </style>
 
+    <style name="AppTheme.Light.Button">
+        <item name="android:textColor">@color/constant_white</item>
+        <item name="android:background">@drawable/button_light_ripple</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTheme.Light.Round">
+        <item name="android:background">@drawable/round_button_ripple</item>
+        <item name="android:padding">10dp</item>
+    </style>
 </resources>

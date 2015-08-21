@@ -49,12 +49,11 @@
         tools:alpha="1">
 
         <ImageView
+            style="?round"
             android:id="@+id/more"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
-            android:background="@drawable/round_button"
-            android:padding="10dp"
             android:src="@drawable/ic_more_vert_white_48dp"/>
     </LinearLayout>
 

@@ -8,14 +8,13 @@
 
     <ImageView
         android:id="@+id/nav_button"
+        style="?round"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/default_margin"
-        android:background="@drawable/round_button"
-        android:padding="10dp"
         android:src="@drawable/ic_power_settings_new_white_48dp"/>
 
     <TextView
