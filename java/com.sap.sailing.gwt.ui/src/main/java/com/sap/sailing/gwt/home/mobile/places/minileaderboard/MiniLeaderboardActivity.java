@@ -1,79 +1,20 @@
 package com.sap.sailing.gwt.home.mobile.places.minileaderboard;
 
-import java.util.UUID;
-
-import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardView.Presenter;
-import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
-public class MiniLeaderboardActivity extends AbstractActivity implements Presenter {
-    private final MobileApplicationClientFactory clientFactory;
-    private final MiniLeaderboardPlace place;
+public class MiniLeaderboardActivity extends AbstractEventActivity<MiniLeaderboardPlace> implements Presenter {
 
     public MiniLeaderboardActivity(MiniLeaderboardPlace place, MobileApplicationClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
-        this.place = place;
+        super(place, clientFactory);
     }
 
     @Override
-    public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+    protected EventViewBase initView() {
         final MiniLeaderboardView view = new MiniLeaderboardViewImpl(this);
-        EventViewDTO event = place.getCtx().getEventDTO();
-        if(event.getType() == EventType.MULTI_REGATTA) {
-            view.setQuickFinderValues(event.getRegattas());
-        } else if(event.getType() == EventType.SERIES_EVENT) {
-            view.setQuickFinderValues(event.getSeriesName(), event.getEventsOfSeries());
-        } else {
-            view.hideQuickfinder();
-        }
-        panel.setWidget(view.asWidget());
-    }
-
-    @Override
-    public EventContext getCtx() {
-        return place.getCtx();
-    }
-
-    @Override
-    public PlaceNavigation<?> getRegattaLeaderboardNavigation(String leaderboardName) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new RegattaLeaderboardPlace(ctx), null, false);
-    }
-
-    @Override
-    public DispatchSystem getDispatch() {
-        return clientFactory.getDispatch();
-    }
-
-    @Override
-    public PlaceNavigation<?> getRegattaMiniLeaderboardNavigation(String leaderboardName) {
-        EventContext ctx = new EventContext(getCtx()).withRegattaId(leaderboardName).withRegattaAnalyticsManager(null);
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(ctx), null, false);
-    }
-
-    @Override
-    public PlaceNavigation<?> getMiniOverallLeaderboardNavigation() {
-        return clientFactory.getNavigator().getSeriesNavigation(new SeriesMiniOverallLeaderboardPlace(new SeriesContext().withId(getCtx().getEventId())), null, false);
-    }
-    
-    @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
-    }
-
-    @Override
-    public PlaceNavigation<?> getEventNavigation() {
-        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(getCtx()), null, false);
+        initQuickfinder(view, true);
+        return view;
     }
 }
