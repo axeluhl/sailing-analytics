@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="race_list_header" type="layout">@layout/race_list_header_port</item>
+
+</resources>
