@@ -1,3 +1,4 @@
+@require "colors";
 
 .bar {
 	height: 100%;
@@ -16,7 +17,7 @@
 	position: absolute;
 	border: none;
 	border-radius: 0;
-	background-color: #d4d4d4;
+	background-color: C_PRIMARY;
 	left: 0;
 	right: 0;
 	top: 0;
@@ -60,40 +61,6 @@
 	right: 0pt;
 }
 
-/*??????*/
-.panelHeader {
-	height: 100%;
-	line-height: 25pt;
-	vertical-align: middle;
-	font-size: 15pt;
-	font-family: 'Open Sans', Arial, Verdana, sans-serif;
-	width: 100%;
-	text-align: center;
-	font-weight: bold;
-	overflow: visible;
-	background-color: white;
-}
-
-/*?????????*/
-.currentaveragepanel {
-	position: absolute;
-	border: none;
-	border-radius: 0pt;
-	background-color: white;
-	top: 20pt;
-	bottom: 75%;
-}
-
-/*????????*/
-.windchartpanel {
-	position: absolute;
-	border: none;
-	border-radius: 0pt;
-	background-color: white;
-	top: 25%;
-	bottom: 0pt;
-}
-
 .left {
 	left: 0pt;
 	right: 50%;
@@ -125,19 +92,28 @@
 }
 
 .rootpanel {
-	background-color: #fafafa;
+	background-color: C_PRIMARY;
 	width: 100%;
 	height: 200%;
 }
 
-.startlineadvantagepanel {
+.startline_advantage_by_wind_container {
 	position: absolute;
 	background-color: white;
-	top: 0pt;
+	top: 27%;
 	right: 0pt;
 	left: 0pt;
-	bottom: 70%;
-	margin-bottom: 5pt;
+	bottom: 0%;
+}
+
+.startline_advantage_by_geometry_container {
+	position: absolute;
+	background-color: white;
+	top: 0%;
+	right: 0pt;
+	left: 0pt;
+	bottom: 73%;
+	margin-bottom: 10pt;
 }
 
 .hintpanel {

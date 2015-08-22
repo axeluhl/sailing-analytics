@@ -115,6 +115,12 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private void setChartOptions() {
         verticalWindChart.setType(Series.Type.AREA_SPLINE).setInverted(true).setChartTitleText(" ").setMarginTop(10)
                 .setMarginBottom(25).setMarginRight(20)
+                        .setBackgroundColor("#FFFFFF")
+        .setBorderColor("#FFFFFF")
+        .setPlotShadow(false)
+        .setPlotBorderColor("#FFFFFF")
+        .setOption("/exporting/enabled", false)
+        .setShadow(false)
                 .setBarPlotOptions(new BarPlotOptions().setDataLabels(new DataLabels().setEnabled(true)))
                 .setLegend(new Legend().setEnabled(false)).setCredits(new Credits().setEnabled(false))
                 .setToolTip(new ToolTip().setEnabled(false));
@@ -128,7 +134,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 .setLabels(
                         new XAxisLabels().setStyle(new Style().setFontFamily("Arial").setFontSize("12")
                                 .setColor("grey"))).setLineColor("grey").setTickWidth(0.5).setLineWidth(1)
-                .setTickWidth(1).setTickColor("grey").setOffset(0).setMinPadding(20)
+                .setTickWidth(1).setTickColor("grey").setOffset(0).setMinPadding(20).setGridLineColor("white")
+                .setGridLineWidth(0)
                 .setDateTimeLabelFormats(new DateTimeLabelFormats().setMonth("%e. %b").setYear("%b"));
     }
 
@@ -144,6 +151,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 .setLineWidth(1)
                 .setEndOnTick(true)
                 .setStartOnTick(true)
+                .setGridLineColor("transparent")
+                .setGridLineWidth(0)
                 .setOffset(0)
                 .setMaxPadding(0)
                 .setLabels(
