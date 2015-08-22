@@ -29,7 +29,7 @@ else
         tmux new-window -t "$sn:$[counter+4]" -n "Logs" "bash -c 'ls -lah'; bash"
 
         cd $SERVERS_DIR
-        tmux new-window -t "$sn:$[counter+5]" -n "LeaderboardCalc" "bash -c 'tail -f server/logs/sailing0.log.0'; bash"
+        tmux new-window -t "$sn:$[counter+5]" -n "LeaderboardCalc" "bash -c 'tail -f server/logs/sailing0.log.0 | grep took'; bash"
 
         tmux select-window -t "$sn:0"
 fi
