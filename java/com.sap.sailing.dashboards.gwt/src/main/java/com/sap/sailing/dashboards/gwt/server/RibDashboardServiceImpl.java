@@ -2,7 +2,6 @@ package com.sap.sailing.dashboards.gwt.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -289,8 +288,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         logger.log(Level.INFO, "getCompetitorsInLeaderboard(...) Request.");
         if (leaderboardName != null) {
             Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
-            return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(new MillisecondsTimePoint(
-                    new Date())));
+            return baseDomainFactory.getCompetitorDTOList(lb.getCompetitorsFromBestToWorst(MillisecondsTimePoint.now()));
         } else {
             return null;
         }
