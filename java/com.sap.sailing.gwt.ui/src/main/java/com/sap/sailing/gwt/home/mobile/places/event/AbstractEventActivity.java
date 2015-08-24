@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
@@ -30,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
@@ -84,6 +87,22 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
             }
         });
         return sortedRegattas;
+    }
+    
+    protected final void initMedia(final EventView view) {
+        if (getCtx().getEventDTO().isHasMedia()) {
+            clientFactory.getHomeService().getMediaForEvent(getCtx().getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Failed to load media");
+                }
+                
+                @Override
+                public void onSuccess(MediaDTO result) {
+                    view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
+                }
+            });
+        }
     }
     
     protected final PLACE getPlace() {
