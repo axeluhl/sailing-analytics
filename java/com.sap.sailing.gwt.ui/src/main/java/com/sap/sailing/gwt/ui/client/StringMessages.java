@@ -1258,12 +1258,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     
     String dashboardNewStartAnalysisAvailable();
     
-    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantagesByWind();
     String dashboardStartlineAdvantageByGeometry();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    
+    String dashboardAdvantageInSeconds();
+    String dashboardSecondsAbreviation();
+    String dashboardDistanceToRCBoat();
+    String dashboardPinEnd();
+    String dashboardRCBoat();
+    
     String fixedMarkPassing();
     String suppressedMarkPassing();
     String windUp();
