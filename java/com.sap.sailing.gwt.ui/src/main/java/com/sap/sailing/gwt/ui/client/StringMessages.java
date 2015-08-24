@@ -1367,4 +1367,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String choosePresentation();
     String openFullscreenView();
     String closeFullscreenView();
+    String progress();
 }
