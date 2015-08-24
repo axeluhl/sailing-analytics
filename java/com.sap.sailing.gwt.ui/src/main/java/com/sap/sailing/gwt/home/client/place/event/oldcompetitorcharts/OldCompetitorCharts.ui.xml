@@ -1,36 +1,38 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
-    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.place.event">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.place.event.regattaleaderboard.EventRegattaLeaderboardResources" />
 	<ui:style>
 		.marginFix {
 			margin-top: 2rem;
-			
 		}
-	</ui:style>             
-
-
-		<g:HTMLPanel>
-			<div class="{res.mediaCss.grid} {style.marginFix}" >
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-			   		<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
-			  </div>    
-			  <div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
-			      	<ui:text from="{i18n.chooseChart}" />
-			  		<g:ListBox ui:field="chartTypeSelectionListBox" />
-			  </div>    
-			  <div class="{res.mediaCss.column}" style="margin-bottom: 1em;">
-			   		<b><ui:text from="{i18n.chartSelectionHint}" /></b>
-			  </div>    
-			  <div ui:field="competitorSelectionStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;">
-			  </div>    
-			  <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-              	<g:HTMLPanel ui:field="oldCompetitorChartsPanel">
-        		</g:HTMLPanel>
-			  </div>
-			</div>		    		    
-		</g:HTMLPanel>
-</ui:UiBinder>    
+		.toolbar {
+			white-space: nowrap;
+		}
+		.toolbarButton {
+			display: inline;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.grid} {style.marginFix}">
+			<div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium4} {res.mediaCss.large6} {local_res.css.regattaleaderboard_meta_scoring}">
+				<h3><ui:text from="{i18n.competitorsAnalytics}" /></h3>
+			</div>
+			<div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium8} {res.mediaCss.large6} {local_res.css.regattaleaderboard_meta_settings} {style.toolbar}">
+				<ui:text from="{i18n.chooseChart}" />
+				<g:ListBox ui:field="chartTypeSelectionListBox" />
+				<g:Anchor styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button} {style.toolbarButton}" 
+					href="javascript:;" ui:field="fullscreenAnchor"></g:Anchor>
+			</div>
+			<div class="{res.mediaCss.column}" style="margin-bottom: 1em;">
+				<b><ui:text from="{i18n.chartSelectionHint}" /></b>
+			</div>
+			<div ui:field="competitorSelectionStateUi" class="{res.mediaCss.column}" style="margin-bottom: 1em;"></div>
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+				<g:HTMLPanel ui:field="oldCompetitorChartsPanel"/>
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>
