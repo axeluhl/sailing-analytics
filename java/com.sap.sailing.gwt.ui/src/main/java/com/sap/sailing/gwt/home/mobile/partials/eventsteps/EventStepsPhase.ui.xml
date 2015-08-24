@@ -4,15 +4,12 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventStepsResources" />
-	<g:HTMLPanel>
-		<!-- IF phase.count === 0 ADD CLASS event-steps_phases_phase_inactive -->
-		<div class="{local_res.css.eventsteps_phases_phase}" ui:field="seriesContainerUi">
-			<div class="{local_res.css.eventsteps_phases_phase_name}" ui:field="nameUi"></div>
-			<div class="{local_res.css.eventsteps_phases_phase_progressbar}" ui:field="fleetsContainerUi"></div>
-			<div class="{local_res.css.eventsteps_phases_phase_progress}">
-				<img src="images/home/icon-green-check.svg" class="{local_res.css.eventsteps_phases_phase_progress_icon}" ui:field="checkUi"></img>
-				<span class="{local_res.css.eventsteps_phases_phase_progress_text}" ui:field="progressUi"></span>
-			</div>
+	<g:HTMLPanel addStyleNames="{local_res.css.eventsteps_phases_phase}">
+		<div class="{local_res.css.eventsteps_phases_phase_name}" ui:field="nameUi"></div>
+		<div class="{local_res.css.eventsteps_phases_phase_progressbar}" ui:field="fleetsContainerUi"></div>
+		<div class="{local_res.css.eventsteps_phases_phase_progress}">
+			<img src="images/home/icon-green-check.svg" class="{local_res.css.eventsteps_phases_phase_progress_icon}" ui:field="checkUi"></img>
+			<span class="{local_res.css.eventsteps_phases_phase_progress_text}" ui:field="progressUi"></span>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>

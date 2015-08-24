@@ -27,7 +27,6 @@ public class EventStepsPhase extends Composite {
     interface EventStepsPhaseUiBinder extends UiBinder<Widget, EventStepsPhase> {
     }
     
-    @UiField DivElement seriesContainerUi;
     @UiField DivElement nameUi;
     @UiField ImageElement checkUi;
     @UiField SpanElement progressUi;
@@ -44,7 +43,7 @@ public class EventStepsPhase extends Composite {
             progressUi.setInnerText(I18N.currentOfTotal(current, total));
         }
         if (seriesProgress.getProgressRaceCount() == 0) {
-            seriesContainerUi.addClassName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());
+            addStyleName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
     }

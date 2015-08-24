@@ -4,8 +4,8 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventStepsResources" />
-	<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet}">
-		<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet_progress}" ui:field="progressLiveUi"></div>
-		<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet_progress}" ui:field="progressUi"></div>
+	<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet}" style="position:relative;">
+		<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet_progress}" style="position:absolute; top:0;" ui:field="progressLiveUi"></div>
+		<div class="{local_res.css.eventsteps_phases_phase_progressbar_fleet_progress}" style="position:absolute; top:0;" ui:field="progressUi"></div>
 	</div>
 </ui:UiBinder>

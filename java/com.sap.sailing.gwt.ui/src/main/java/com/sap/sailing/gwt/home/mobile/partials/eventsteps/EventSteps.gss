@@ -48,7 +48,7 @@
 }
 .eventsteps_phases_phase_progress {
   text-align: center;
-  margin-top: 0.666666666666667em;
+  margin: 0.666666666666667em 0;
 }
 img.eventsteps_phases_phase_progress_icon {
   display: inline-block;
