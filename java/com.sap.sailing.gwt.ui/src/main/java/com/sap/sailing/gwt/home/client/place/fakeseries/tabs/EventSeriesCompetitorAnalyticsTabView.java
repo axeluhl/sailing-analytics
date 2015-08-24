@@ -16,9 +16,11 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
+import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sse.common.Util;
@@ -33,8 +35,9 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private SeriesView.Presenter currentPresenter;
 
-    @UiField
-    protected OldCompetitorCharts competitorCharts;
+    @UiField(provided = true)
+    protected OldCompetitorCharts competitorCharts = new OldCompetitorCharts(
+            ExperimentalFeatures.SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER ? new OldCompetitorChartsDelegateFullscreenViewer() : null);
 
     private final int MAX_COMPETITORS_IN_CHART = 30; 
 

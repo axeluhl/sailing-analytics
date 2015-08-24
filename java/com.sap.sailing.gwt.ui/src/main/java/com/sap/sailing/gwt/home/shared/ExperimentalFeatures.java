@@ -25,5 +25,8 @@ public class ExperimentalFeatures {
      * Provide option to show races (competition format) on mobile devices
      */
     public static final boolean SHOW_RACES_ON_MOBILE = false;
-    
+    /**
+     * Provide button to show the competitor analytics in fullscreen view (work in progress)
+     */
+    public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
 }
