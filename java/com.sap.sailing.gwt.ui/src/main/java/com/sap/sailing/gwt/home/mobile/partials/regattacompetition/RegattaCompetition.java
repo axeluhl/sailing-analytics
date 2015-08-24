@@ -30,6 +30,7 @@ public class RegattaCompetition extends Composite implements RefreshableWidget<L
     
     @Override
     public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+        regattaSeriesContainerUi.clear(); 
         for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
             RegattaCompetitionSeries regattaCompetitionSeries = new RegattaCompetitionSeries(series);
             int fleetCount = series.getFleets().size();
