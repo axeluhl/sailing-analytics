@@ -25,6 +25,7 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
         EventStepsResources.INSTANCE.css().ensureInjected();
         initWidget(regattaProgessUi = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.progress());
+        regattaProgessUi.setEdgeToEdgeContent(true);
     }
     
     @Override

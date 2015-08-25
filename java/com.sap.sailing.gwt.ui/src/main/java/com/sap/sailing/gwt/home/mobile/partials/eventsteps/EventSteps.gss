@@ -12,36 +12,33 @@
   font-size: 1rem;
   width: 50%;
   display: inline-block;
-  padding: 0 0.333333333333333em;
+  padding: 0 0.666666666666666em;
   vertical-align: top;
 }
 .eventsteps_phases_phaseinactive {
   color: #999;
 }
-.eventsteps_phases_phase:first-child {
-  padding-left: 0;
+.eventsteps_phases_phase:nth-child(2n-1) {
+  padding-right: 0.333333333333333em;
 }
-.eventsteps_phases_phase:last-child {
-  padding-right: 0;
+.eventsteps_phases_phase:nth-child(2n) {
+  padding-left: 0.333333333333333em;
 }
 .eventsteps_phases_phase_name {
   font-size: 0.866666666666667em;
   font-weight: 600;
   text-transform: uppercase;
   text-align: center;
-  padding: 1.153846153846154em 0;
+  padding: .666666666666667em 0;
 }
 .eventsteps_phases_phase_progressbar {
-  height: 1em;
+  height: 1.266666666666667em;
   width: 100%;
   border: 1px solid #dedede;
+  padding: 1px;
 }
 .eventsteps_phases_phase_progressbar_fleet {
   font-size: inherit;
-  border-bottom: 1px solid #dedede;
-}
-.eventsteps_phases_phase_progressbar_fleet:last-child {
-  border-bottom: none;
 }
 .eventsteps_phases_phase_progressbar_fleet_progress {
   height: 100%;
