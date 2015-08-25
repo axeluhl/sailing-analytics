@@ -58,14 +58,13 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListC
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks {
+public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
@@ -262,12 +261,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
             getFragmentManager().beginTransaction().replace(R.id.racing_view_container, infoFragment).commit();
         }
-    }
-
-    @Override
-    public void onResetTime() {
-        ExLog.i(this, TAG, "OnResetTime");
-        infoFragment.onResetTime();
     }
 
     @Override

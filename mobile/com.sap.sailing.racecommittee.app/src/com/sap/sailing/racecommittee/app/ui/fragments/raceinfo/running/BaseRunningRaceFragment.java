@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -19,7 +18,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceFinishingTimeDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.running.ConfirmDialog.ConfirmRecallListener;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagPoleStateRenderer;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -38,8 +36,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     protected ImageButton individualRecallButton;
     protected TextView individualRecallLabel;
     
-    private FlagPoleStateRenderer flagRenderer;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ExLog.i(getActivity(), TAG, this.getClass().getName());
@@ -128,10 +124,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
                 showCourseDesignDialog();
             }
         });
-        
-        flagRenderer = new FlagPoleStateRenderer(getActivity(), getRace(),
-                (LinearLayout) getView().findViewById(R.id.race_flag_space_up_flags), 
-                (LinearLayout) getView().findViewById(R.id.race_flag_space_down_flags));
     }
 
     @Override
@@ -160,15 +152,6 @@ public abstract class BaseRunningRaceFragment<ProcedureType extends RacingProced
     protected void onIndividualRecallChanged(boolean displayed) {
         int textId = displayed ? (R.string.choose_xray_flag_down) : (R.string.choose_xray_flag_up);
         individualRecallLabel.setText(getString(textId));
-    }
-    
-    @Override
-    protected void setupUi() {
-        ProcedureType procedure = getRacingProcedure();
-        TimePoint startTime = getRaceState().getStartTime();
-        if (startTime != null) {
-            flagRenderer.render(procedure.getActiveFlags(startTime, MillisecondsTimePoint.now()));
-        }
     }
 
     protected void setFinishingTime() {

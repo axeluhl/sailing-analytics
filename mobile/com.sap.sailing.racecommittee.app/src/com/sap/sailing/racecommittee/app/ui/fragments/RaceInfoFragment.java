@@ -11,6 +11,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -21,12 +22,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
+public class RaceInfoFragment extends RaceFragment {
 
     private final static String TAG = RaceInfoFragment.class.getName();
 
@@ -105,8 +104,8 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
 
     protected void switchToInfoFragment(RaceFragment chosenFragment) {
         ExLog.i(getActivity(), TAG, String
-            .format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass().getName(), getRace().getId(),
-                getRace().getStatus()));
+            .format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass().getName(), getRace().getId(), getRace()
+                .getStatus()));
 
         this.infoFragment = chosenFragment;
         displayInfoFragment();
@@ -175,11 +174,6 @@ public class RaceInfoFragment extends RaceFragment implements RaceInfoListener {
                         .reverse().toString()));
             }
         }
-    }
-
-    @Override
-    public void onResetTime() {
-        switchToInfoFragment(SetStartTimeRaceFragment.create(getRace()));
     }
 
     private RaceStateChangedListener stateChangedListener = new BaseRaceStateChangedListener() {
