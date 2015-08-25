@@ -21,4 +21,9 @@ public class ViewHelper {
 
         return (T) childView;
     }
+
+    public static void disableSave(View view){
+        view.setSaveFromParentEnabled(false);
+        view.setSaveEnabled(false);
+    }
 }

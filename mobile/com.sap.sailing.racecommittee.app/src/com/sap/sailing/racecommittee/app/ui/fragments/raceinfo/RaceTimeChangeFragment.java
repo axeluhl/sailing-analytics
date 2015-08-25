@@ -10,6 +10,8 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
@@ -108,6 +110,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             default:
                 // use default values
             }
+            ViewHelper.disableSave(mDatePicker);
             ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             TimeUtils.initDatePicker(getActivity(), mDatePicker, calendar, mPastDays, mFutureDays, false);
@@ -120,6 +123,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
         mTimePicker = (TimePicker) layout.findViewById(R.id.time_picker);
         if (mTimePicker != null) {
+            ViewHelper.disableSave(mTimePicker);
             ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mTimePicker.setIs24HourView(true);
@@ -129,7 +133,8 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
         mSecondPicker = (NumberPicker) layout.findViewById(R.id.second_picker);
         if (mSecondPicker != null) {
-            ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+            ViewHelper.disableSave(mSecondPicker);
+            ThemeHelper.setPickerColor(getActivity(), mSecondPicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mSecondPicker.setVisibility(View.VISIBLE);
             mSecondPicker.setMinValue(0);

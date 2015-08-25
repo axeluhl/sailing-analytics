@@ -73,7 +73,7 @@ public class PreferenceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AppUtils.lockOrientation(this);
+//        AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
 
         setContentView(R.layout.preference_view);
