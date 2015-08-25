@@ -5,6 +5,8 @@ import java.util.Collection;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
+import com.sap.sailing.gwt.home.mobile.places.RegattaOverviewNavigationProvider;
+import com.sap.sailing.gwt.home.mobile.places.RegattaRacesNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
@@ -23,12 +25,14 @@ public interface EventViewBase extends IsWidget {
     
     void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
 
-    public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider {
+    public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
+            RegattaRacesNavigationProvider, RegattaOverviewNavigationProvider {
+        
+        EventContext getCtx();
+
+        DispatchSystem getDispatch();
         
         PlaceNavigation<?> getEventNavigation();
 
-        DispatchSystem getDispatch();
-
-        EventContext getCtx();
     }
 }

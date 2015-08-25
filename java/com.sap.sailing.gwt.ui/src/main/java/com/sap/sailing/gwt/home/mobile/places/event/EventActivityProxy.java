@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivity;
@@ -14,6 +15,7 @@ import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivity;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.races.RacesActivity;
+import com.sap.sailing.gwt.home.mobile.places.regatta.RegattaActivity;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -59,6 +61,8 @@ public class EventActivityProxy extends AbstractActivityProxy {
             public void onSuccess() {
                 if (currentPlace instanceof EventDefaultPlace) {
                     super.onSuccess(new EventActivity(currentPlace, clientFactory));
+                } else if (currentPlace instanceof RegattaOverviewPlace) {
+                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, clientFactory));
                 } else if (currentPlace instanceof RegattaRacesPlace) {
                     super.onSuccess(new RacesActivity((RegattaRacesPlace) currentPlace, clientFactory));
                 } else if (currentPlace instanceof MiniLeaderboardPlace) {
