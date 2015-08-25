@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.regatta;
+package com.sap.sailing.gwt.home.mobile.places.event.regatta;
 
 import java.util.Collection;
 

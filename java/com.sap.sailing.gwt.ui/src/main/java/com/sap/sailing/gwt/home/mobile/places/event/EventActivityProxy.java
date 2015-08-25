@@ -14,9 +14,9 @@ import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderbo
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.regatta.RegattaActivity;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivity;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
-import com.sap.sailing.gwt.home.mobile.places.regatta.RegattaActivity;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
