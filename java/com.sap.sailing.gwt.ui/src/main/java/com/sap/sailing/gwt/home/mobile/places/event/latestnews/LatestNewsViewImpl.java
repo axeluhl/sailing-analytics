@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.latestnews;
+package com.sap.sailing.gwt.home.mobile.places.event.latestnews;
 
 import java.util.List;
 
