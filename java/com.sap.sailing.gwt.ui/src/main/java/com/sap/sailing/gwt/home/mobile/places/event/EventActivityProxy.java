@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivity;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivity;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.event;
+package com.sap.sailing.gwt.home.mobile.places.event.overview;
 
 import java.util.Collection;
 
@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardB
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
+import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
