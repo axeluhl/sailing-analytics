@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class AbortFlagsAdapter extends BaseFlagsAdapter {
@@ -93,11 +94,14 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
         final ImageView flagImage = ViewHelper.get(convertView, R.id.flag);
         if (flagImage != null) {
-            Drawable flagDrawable = null;
+            Drawable flagDrawable;
             flagImage.setVisibility(View.INVISIBLE);
             int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
-                flagDrawable = ContextCompat.getDrawable(mContext, flagResId);
+                String[] flag = item.file_name.split("_");
+                String flagName = flag[1];
+                int flagSize = Integer.parseInt(flag[flag.length - 1].replace("dp", ""));
+                flagDrawable = FlagsResources.getFlagDrawable(mContext, flagName, flagSize);
             } else {
                 flagDrawable = BitmapHelper.getAttrDrawable(mContext, item.file_name);
             }

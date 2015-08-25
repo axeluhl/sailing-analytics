@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -18,7 +19,7 @@ public class FlagsResources {
         String flag;
         String outline = "flag_shape_XX_outline_" + size + "dp";
 
-        switch (Flags.valueOf(res)) {
+        switch (Flags.valueOf(res.toUpperCase(Locale.US))) {
         case ALPHA:
             flag = "flag_alpha_" + size + "dp";
             outline = outline.replace("XX", "03");
