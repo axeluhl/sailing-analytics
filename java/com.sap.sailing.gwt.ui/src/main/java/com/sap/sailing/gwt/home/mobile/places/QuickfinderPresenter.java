@@ -32,6 +32,16 @@ public class QuickfinderPresenter {
         }, regattaMetadatas);
     }
     
+    public static QuickfinderPresenter getForRegattaOverview(Quickfinder quickfinder, 
+            final RegattaOverviewNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
+        return new QuickfinderPresenter(quickfinder, MSG.regattaQuickfinder(), new RegattaPlaceNaviationProvider() {
+            @Override
+            public PlaceNavigation<?> getPlaceNavigation(String regattaId) {
+                return navigator.getRegattaOverviewNavigation(regattaId);
+            }
+        }, regattaMetadatas);
+    }
+    
     public static QuickfinderPresenter getForSeriesLeaderboards(Quickfinder quickfinder, String seriesName,
             SeriesLeaderboardNavigationProvider navigator, Collection<? extends EventReferenceDTO> eventsOfSeries) {
         return new QuickfinderPresenter(quickfinder, navigator, seriesName, eventsOfSeries);
