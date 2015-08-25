@@ -7,8 +7,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
-import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
-import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
@@ -58,16 +56,6 @@ public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> im
             refreshManager.add(latestNewsUi, new GetEventOverviewNewsAction(getEventId(), 2));
             container.add(latestNewsUi);
         }
-    }
-    
-    private void initRacesNavigation(Panel container) {
-        MobileSection mobileSection = new MobileSection();
-        SectionHeaderContent header = new SectionHeaderContent();
-        header.setSectionTitle(StringMessages.INSTANCE.racesCount(currentPresenter.getCtx().getRegatta().getRaceCount()));
-        header.setInfoText(StringMessages.INSTANCE.showAll());
-        header.setClickAction(currentPresenter.getRegattaRacesNavigation(getRegattaId()));
-        mobileSection.addHeader(header);
-        container.add(mobileSection);
     }
     
     private void initStatisticsUi(Panel container) {

@@ -32,6 +32,6 @@ public class RegattaRacesPlace extends AbstractEventRegattaPlace implements Mobi
     
     @Override
     public boolean hasMobileVersion() {
-        return ExperimentalFeatures.SHOW_RACES_ON_MOBILE;
+        return ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE;
     }
 }

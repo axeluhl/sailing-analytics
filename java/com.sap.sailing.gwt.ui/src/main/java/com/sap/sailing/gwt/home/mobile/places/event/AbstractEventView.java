@@ -8,14 +8,18 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
+import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -70,6 +74,16 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
+    }
+    
+    protected void initRacesNavigation(Panel container) {
+        MobileSection mobileSection = new MobileSection();
+        SectionHeaderContent header = new SectionHeaderContent();
+        header.setSectionTitle(StringMessages.INSTANCE.racesCount(currentPresenter.getCtx().getRegatta().getRaceCount()));
+        header.setInfoText(StringMessages.INSTANCE.showAll());
+        header.setClickAction(currentPresenter.getRegattaRacesNavigation(getRegattaId()));
+        mobileSection.addHeader(header);
+        container.add(mobileSection);
     }
 
     @Override

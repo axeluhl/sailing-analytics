@@ -70,6 +70,9 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
             miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
             container.add(miniLeaderboard);
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+            if (ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE) {
+                initRacesNavigation(container);
+            }
         }
     }
     

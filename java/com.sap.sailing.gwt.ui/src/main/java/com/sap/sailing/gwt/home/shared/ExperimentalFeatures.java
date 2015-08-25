@@ -22,13 +22,10 @@ public class ExperimentalFeatures {
      */
     public static final boolean SHOW_RACES_COMPETITION_FORMAT = false;
     /**
-     * Provide option to show races (competition format) on mobile devices
+     * Provide option to show the overview for regattas in multi regatta events and a navigation 
+     * to the races view (competition format) for single regatta and series events on mobile devices 
      */
-    public static final boolean SHOW_RACES_ON_MOBILE = true;
-    /**
-     * Provide option to show the overview for regattas in multi regatta events on mobile devices 
-     */
-    public static final boolean SHOW_REGATTA_OVERVIEW_ON_MOBILE = false;
+    public static final boolean SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE = false;
     /**
      * Provide option to show the regatta progress for single regatta and series event on mobile devices 
      */
