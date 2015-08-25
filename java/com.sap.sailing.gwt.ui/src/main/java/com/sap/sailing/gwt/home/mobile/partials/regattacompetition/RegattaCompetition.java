@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
-import com.sap.sailing.gwt.home.mobile.places.races.RacesView.Presenter;
+import com.sap.sailing.gwt.home.mobile.places.event.races.RacesView.Presenter;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;

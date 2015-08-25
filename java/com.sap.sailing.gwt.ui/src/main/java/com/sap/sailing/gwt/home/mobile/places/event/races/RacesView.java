@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.races;
+package com.sap.sailing.gwt.home.mobile.places.event.races;
 
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 
