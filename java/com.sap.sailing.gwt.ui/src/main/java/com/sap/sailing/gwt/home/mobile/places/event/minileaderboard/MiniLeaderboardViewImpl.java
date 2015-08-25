@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.minileaderboard;
+package com.sap.sailing.gwt.home.mobile.places.event.minileaderboard;
 
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;

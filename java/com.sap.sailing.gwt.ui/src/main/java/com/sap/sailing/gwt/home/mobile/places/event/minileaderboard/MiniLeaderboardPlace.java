@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.minileaderboard;
+package com.sap.sailing.gwt.home.mobile.places.event.minileaderboard;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
