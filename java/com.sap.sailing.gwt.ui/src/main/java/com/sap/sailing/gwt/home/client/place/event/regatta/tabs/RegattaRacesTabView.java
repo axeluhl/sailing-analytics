@@ -162,8 +162,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
                 }, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
             } else {
                 listNavigationPanelUi.removeFromParent();
+                compFormatContainerUi.removeFromParent();
             }
-            
             oldContentContainer.removeFromParent();
         } else {
             regattaProgressLegendUi.removeFromParent();
