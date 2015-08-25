@@ -275,6 +275,8 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setMaxValue(MAX_DIFF_MIN);
             mTimeOffset.setWrapSelectorWheel(false);
             mTimeOffset.setValue((mStartTimeOffset == null) ? preferences.getDependentRacesOffset() : (int) mStartTimeOffset.asMinutes());
+            mTimeOffset.setSaveFromParentEnabled(false);
+            mTimeOffset.setSaveEnabled(false);
         }
 
         final DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
@@ -448,6 +450,8 @@ public class StartTimeFragment extends BaseFragment
     private void initViewsAbsolute(Calendar time) {
         mDatePicker = ViewHelper.get(getView(), R.id.start_date_picker);
         if (mDatePicker != null) {
+            mDatePicker.setSaveFromParentEnabled(false);
+            mDatePicker.setSaveEnabled(false);
             ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mDatePicker.setOnValueChangedListener(this);
