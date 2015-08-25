@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
 import com.sap.sailing.gwt.home.mobile.partials.countdown.CountdownResources.LocalCss;
-import com.sap.sailing.gwt.home.mobile.places.event.EventView;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRaceTickerStageDTO;
@@ -44,7 +44,7 @@ public class Countdown extends Composite {
     @UiField(provided = true) NavigationAnchor navigationButton;
     @UiField DivElement image;
 
-    public Countdown(EventView.Presenter presenter) {
+    public Countdown(EventViewBase.Presenter presenter) {
         CSS.ensureInjected();
         this.navigationButton = new NavigationAnchor(presenter);
         initWidget(uiBinder.createAndBindUi(this));
@@ -89,7 +89,7 @@ public class Countdown extends Composite {
 
         private PlaceNavigation<?> currentPlaceNavigation;
 
-        private NavigationAnchor(EventView.Presenter presenter) {
+        private NavigationAnchor(EventViewBase.Presenter presenter) {
             // we don't use it yet, commented out to avoid warning
             // this.presenter = presenter;
         }

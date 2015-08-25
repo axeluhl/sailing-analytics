@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.Refreshab
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
-import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;

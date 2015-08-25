@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
 import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.countdown.Countdown;
-import com.sap.sailing.gwt.home.mobile.places.event.EventView;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
@@ -28,7 +28,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     
     private Widget lastContent;
 
-    private final EventView.Presenter presenter;
+    private final EventViewBase.Presenter presenter;
     
     public EventOverviewStage(EventView.Presenter presenter) {
         this.presenter = presenter;
