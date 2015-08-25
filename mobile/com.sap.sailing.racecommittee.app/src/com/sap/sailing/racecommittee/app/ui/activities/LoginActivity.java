@@ -59,7 +59,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class LoginActivity extends BaseActivity
@@ -247,7 +246,6 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
-
     }
 
     public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
@@ -290,8 +288,6 @@ public class LoginActivity extends BaseActivity
         if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
             switchToRacingActivity();
         }
-
-        ThemeHelper.setTheme(this);
 
         setContentView(R.layout.login_view);
 
@@ -339,8 +335,7 @@ public class LoginActivity extends BaseActivity
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        resetData();
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -500,15 +495,19 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            setupDataManager();
-
-            addEventListFragment();
-
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.area_fragment, new Fragment());
-            transaction.replace(R.id.position_fragment, new Fragment());
-            transaction.commit();
+            resetData();
         }
+    }
+
+    private void resetData() {
+        setupDataManager();
+
+        addEventListFragment();
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.area_fragment, new Fragment());
+        transaction.replace(R.id.position_fragment, new Fragment());
+        transaction.commit();
     }
 
     private class AnimatorSetListener implements Animator.AnimatorListener {

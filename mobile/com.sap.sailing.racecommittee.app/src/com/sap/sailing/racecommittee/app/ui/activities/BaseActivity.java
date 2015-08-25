@@ -6,9 +6,11 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 /**
  * Base activity for all race committee cockpit activities enabling basic menu functionality.
@@ -26,6 +28,10 @@ public class BaseActivity extends SendingServiceAwareActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        AppUtils.lockOrientation(this);
+        ThemeHelper.setTheme(this);
+
         this.preferences = AppPreferences.on(getApplicationContext());
     }
 

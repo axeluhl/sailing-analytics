@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -23,6 +25,19 @@ public class AppUtils {
 
     public static AppUtils with(Context context) {
         return new AppUtils(context);
+    }
+
+    /**
+     * Locks the phone screen to portrait and tablets to landscape
+     *
+     * @param activity Activity to lock
+     */
+    public static void lockOrientation(Activity activity) {
+        if (with(activity).isTablet()) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        } else {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
     }
 
     public PackageInfo getPackageInfo() {

@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.util.Date;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
@@ -18,8 +21,6 @@ import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.Date;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity {
     
@@ -57,9 +58,11 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     private MessageSendingServiceConnection sendingServiceConnection;
     
     private String sendingServiceStatus = "";
+
+    private static String TAG = SendingServiceAwareActivity.class.getName();
     
     public SendingServiceAwareActivity() {
-        this.sendingServiceConnection = new MessageSendingServiceConnection();
+        sendingServiceConnection = new MessageSendingServiceConnection();
     }
 
     @Override
@@ -67,7 +70,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         super.onStart();
         
         Intent intent = new Intent(this, MessageSendingService.class);
-        ExLog.i(this, this.getClass().getName(), "bindSendingService");
+        ExLog.i(this, TAG, "bindSendingService");
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     
@@ -75,33 +78,31 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     public void onStop() {
         super.onStop();
         
-        if (boundSendingService) {
-            ExLog.i(this, this.getClass().getName(), "unbindSendingService");
-            unbindService(sendingServiceConnection);
-            boundSendingService = false;
-        }
+        ExLog.i(this, TAG, "unbindSendingService");
+        unbindService(sendingServiceConnection);
+        boundSendingService = false;
     }
 
     protected void updateSendingServiceInformation() {
         if (menuItemLive == null) {
-            ExLog.w(this, this.getClass().getName(), "updateSendingServiceInformation -> menuItemLive==null");
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> menuItemLive==null");
             return;
         }
         if (!boundSendingService) {
-            ExLog.w(this, this.getClass().getName(), "updateSendingServiceInformation -> !boundSendingService");
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> !boundSendingService");
             return;
         }
 
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            ExLog.i(this, this.getClass().getName(), "updateSendingServiceInformation -> errorCount > 0");
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount > 0");
             menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
             sendingServiceStatus = String.format(statusText,
                     errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
-            ExLog.i(this, this.getClass().getName(), "updateSendingServiceInformation -> errorCount <= 0");
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount <= 0");
             menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, getResources().getColor(android.R.color.white)));
             sendingServiceStatus = getString(R.string.no_event_to_be_sent);
         }
