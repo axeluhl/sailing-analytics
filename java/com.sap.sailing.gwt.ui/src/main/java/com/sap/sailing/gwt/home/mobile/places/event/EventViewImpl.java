@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventOverviewStage;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
@@ -46,7 +47,8 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupProgress(Panel container) {
         eventStepsUi = new EventSteps();
-        if (!isMultiRegattaEvent()) {
+        boolean showRegattaProgress = !isMultiRegattaEvent() && ExperimentalFeatures.SHOW_REGATTA_PROGRESS_ON_MOBILE;
+        if (showRegattaProgress) {
             refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
             container.add(eventStepsUi);
         }
