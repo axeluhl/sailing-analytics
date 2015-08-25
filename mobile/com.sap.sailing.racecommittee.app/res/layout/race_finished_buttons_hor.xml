@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="@dimen/side_button_width_large"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/side_button_large"
+    android:baselineAligned="false"
+    android:orientation="horizontal">
 
     <RelativeLayout
         android:id="@+id/record_button"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:visibility="gone"
         tools:visibility="visible">
@@ -18,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin_half"
             android:orientation="horizontal">
 
             <TextView
@@ -49,30 +51,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:drawablePadding="@dimen/default_padding"
-                android:drawableTop="?hearing_48dp"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?hearing"
                 android:text="@string/finished_replay"
-                android:textAppearance="?textPanelCaption" />
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
         </RelativeLayout>
 
         <View
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black" />
+            android:background="?black"/>
 
         <ImageView
             android:id="@+id/record_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker" />
+            android:src="?marker"/>
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/photo_button"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1">
 
         <LinearLayout
@@ -80,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin_half"
             android:orientation="horizontal">
 
             <TextView
@@ -88,7 +91,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/finished_list"
-                android:textAppearance="?textPanelHeader"/>
+                android:textAppearance="?textPanelHeader"
+                android:textSize="@dimen/textSize_18"/>
 
             <ImageView
                 android:id="@+id/photo_lock"
@@ -111,30 +115,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:drawablePadding="@dimen/default_padding"
-                android:drawableTop="?photo_camera_48dp"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?photo_camera"
                 android:text="@string/finished_photos"
-                android:textAppearance="?textPanelCaption" />
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
         </RelativeLayout>
 
         <View
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black" />
+            android:background="?black"/>
 
         <ImageView
             android:id="@+id/photo_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker" />
+            android:src="?marker"/>
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/list_button"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1">
 
         <LinearLayout
@@ -142,7 +147,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginTop="@dimen/default_margin_half"
             android:orientation="horizontal">
 
             <TextView
@@ -173,23 +178,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:drawablePadding="@dimen/default_padding"
-                android:drawableTop="?dns_48dp"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?dns"
                 android:text="@string/finished_edit"
-                android:textAppearance="?textPanelCaption" />
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
         </RelativeLayout>
 
         <View
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black" />
+            android:background="?black"/>
 
         <ImageView
             android:id="@+id/list_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker" />
+            android:src="?marker"/>
     </RelativeLayout>
 </LinearLayout>

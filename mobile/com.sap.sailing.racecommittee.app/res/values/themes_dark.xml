@@ -70,14 +70,14 @@
         <item name="course_triangle_64dp">@drawable/course_triangle_64dp_dark</item>
         <item name="course_updown_48dp">@drawable/course_updown_48dp_dark</item>
         <item name="course_updown_64dp">@drawable/course_updown_64dp_dark</item>
-        <item name="dns_48dp">@drawable/ic_dns_white_48dp</item>
-        <item name="hearing_48dp">@drawable/ic_hearing_white_48dp</item>
+        <item name="dns">@drawable/ic_dns_white</item>
+        <item name="hearing">@drawable/ic_hearing_white</item>
         <item name="link_24dp">@drawable/ic_link_white_24dp</item>
-        <item name="lock_outline">@drawable/lock_outline_dark</item>
+        <item name="lock_outline">@drawable/ic_lock_outline_white</item>
         <item name="marker">@drawable/marker_dark</item>
         <item name="marker_race">@drawable/marker_race_dark</item>
         <item name="mic_48dp">@drawable/ic_mic_white_48dp</item>
-        <item name="photo_camera_48dp">@drawable/ic_photo_camera_white_48dp</item>
+        <item name="photo_camera">@drawable/ic_photo_camera_white</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_white_36dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_black_24dp</item>
         <item name="spinner_background">@drawable/spinner_background_dark</item>
@@ -178,13 +178,12 @@
 
     <style name="AppTheme.Dark.Text.PanelHeader">
         <item name="android:textColor">?sap_light_gray</item>
-        <item name="android:textSize">@dimen/textSize_20</item>
+        <item name="android:textSize">@dimen/panel_button_header_size</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="AppTheme.Dark.Text.PanelCaption">
-        <item name="android:textSize">@dimen/textSize_22</item>
-        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">@dimen/panel_button_caption_size</item>
     </style>
 
     <style name="AppTheme.Dark.TabWidget" parent="@android:style/Widget.TabWidget">

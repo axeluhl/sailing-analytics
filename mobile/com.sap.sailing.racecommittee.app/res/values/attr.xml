@@ -56,14 +56,14 @@
     <attr name="course_triangle_64dp" format="reference"/>
     <attr name="course_updown_48dp" format="reference"/>
     <attr name="course_updown_64dp" format="reference"/>
-    <attr name="dns_48dp" format="reference"/>
-    <attr name="hearing_48dp" format="reference"/>
+    <attr name="dns" format="reference"/>
+    <attr name="hearing" format="reference"/>
     <attr name="link_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
     <attr name="marker" format="reference"/>
     <attr name="marker_race" format="reference"/>
     <attr name="mic_48dp" format="reference"/>
-    <attr name="photo_camera_48dp" format="reference"/>
+    <attr name="photo_camera" format="reference"/>
     <attr name="play_arrow_36dp" format="reference"/>
     <attr name="search_24dp_invert" format="reference"/>
     <attr name="spinner_background" format="reference"/>

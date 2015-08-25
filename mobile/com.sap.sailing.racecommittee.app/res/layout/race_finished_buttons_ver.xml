@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/side_button_large"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/record_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:id="@+id/voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_margin_half"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/voice_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_recording"
+                android:textAppearance="?textPanelHeader"/>
+
+            <ImageView
+                android:id="@+id/voice_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/lock_margin"
+                android:layout_marginRight="@dimen/lock_margin"
+                android:src="?lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/voice">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?hearing"
+                android:text="@string/finished_replay"
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:background="?black"/>
+
+        <ImageView
+            android:id="@+id/record_marker"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:src="?marker"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/photo_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_margin_half"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/photo_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_list"
+                android:textAppearance="?textPanelHeader"
+                android:textSize="@dimen/textSize_18"/>
+
+            <ImageView
+                android:id="@+id/photo_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="?lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/photo">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?photo_camera"
+                android:text="@string/finished_photos"
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:background="?black"/>
+
+        <ImageView
+            android:id="@+id/photo_marker"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:src="?marker"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/list_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_margin_half"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/list_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/finished_tracking"
+                android:textAppearance="?textPanelHeader"/>
+
+            <ImageView
+                android:id="@+id/list_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:src="?lock_outline"
+                android:tint="?sap_light_gray"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/list">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:drawablePadding="@dimen/compound_padding"
+                android:drawableTop="?dns"
+                android:text="@string/finished_edit"
+                android:textAppearance="?textPanelCaption"
+                android:gravity="center_horizontal"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:background="?black"/>
+
+        <ImageView
+            android:id="@+id/list_marker"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:src="?marker"/>
+    </RelativeLayout>
+</LinearLayout>

@@ -28,12 +28,13 @@
 	<dimen name="textSize_72">72sp</dimen>
 
 	<dimen name="setup_text_width">150dp</dimen>
+	<dimen name="compound_padding">24dp</dimen>
 
 	<dimen name="lock_margin">5dp</dimen>
 	<dimen name="race_flag_margin">100dp</dimen>
 
-	<dimen name="side_button_width">168dp</dimen>
-	<dimen name="side_button_width_large">200dp</dimen>
+	<dimen name="side_button">168dp</dimen>
+	<dimen name="side_button_large">200dp</dimen>
 	<dimen name="side_button_imageSize">100dp</dimen>
 
 	<dimen name="biggerActionBarSize">75dp</dimen>
@@ -46,5 +47,15 @@
 
 	<item name="picker_scale" format="float" type="integer">1.55</item>
 
+	<dimen name="panel_button_caption_size">@dimen/textSize_18</dimen>
+	<dimen name="panel_button_header_size">@dimen/textSize_20</dimen>
+
+	<!-- race state dependent -->
+	<!-- finished -->
+	<dimen name="finished_side_padding">@dimen/default_padding</dimen>
+	<dimen name="finished_header_text_size">@dimen/textSize_40</dimen>
+	<dimen name="finished_default_text_size">@dimen/textSize_26</dimen>
+	<dimen name="finished_line_padding_half">@dimen/default_padding_half</dimen>
+	<dimen name="finished_line_padding">@dimen/default_padding</dimen>
 
 </resources>

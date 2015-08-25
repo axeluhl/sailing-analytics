@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/side_button_large"
+    android:layout_height="match_parent"
+    android:background="?sap_gray"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/side_button_large">
+
+        <TextView
+            android:id="@+id/protest_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:drawableTop="@drawable/flag_bravo_48dp"
+            android:drawablePadding="@dimen/compound_padding"
+            android:text="@string/protest_time"
+            android:textAppearance="?textPanelCaption"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:background="?black"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_margin"
+            android:text="@string/finished_publishing"
+            android:textAllCaps="false"
+            android:textAppearance="?textPanelHeader"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/publish_advice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/default_margin"
+            android:gravity="center"
+            android:text="@string/finished_text_01"
+            android:textAppearance="?textPanelCaption"
+            android:visibility="invisible"/>
+
+        <View
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:background="?black"/>
+    </RelativeLayout>
+</LinearLayout>

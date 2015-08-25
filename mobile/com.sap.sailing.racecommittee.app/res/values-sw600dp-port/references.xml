@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="race_finished" type="layout">@layout/race_finished_small</item>
+    <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_hor</item>
+
+</resources>

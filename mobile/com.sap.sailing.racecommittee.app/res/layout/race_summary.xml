@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,51 +14,53 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="@dimen/default_padding_twice"
-            android:paddingRight="@dimen/default_padding_twice">
+            android:paddingLeft="@dimen/finished_side_padding"
+            android:paddingRight="@dimen/finished_side_padding">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/default_padding_half"
-                android:paddingTop="@dimen/default_padding">
+                android:paddingBottom="@dimen/finished_line_padding_half"
+                android:paddingTop="@dimen/finished_line_padding">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
+                    android:layout_centerInParent="true"
                     android:text="@string/race_summary_title"
                     android:textColor="?white"
-                    android:textSize="@dimen/textSize_40"/>
-
+                    android:textSize="@dimen/finished_header_text_size"/>
             </RelativeLayout>
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_marginBottom="@dimen/default_margin_half"
-                android:background="?sap_gray"/>
+                android:background="?black"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="@dimen/default_padding_half"
-                android:paddingTop="@dimen/default_padding_half">
+                android:paddingTop="@dimen/finished_line_padding_half"
+                android:paddingBottom="@dimen/finished_line_padding_half"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="2"
                     android:text="@string/race_summary_start"
-                    android:textAppearance="?attr/textNormal"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"/>
 
                 <ImageView
                     android:id="@+id/edit_race_start_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/default_margin_half"
+                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?create"
                     android:visibility="invisible"
                     tools:visibility="visible"/>
@@ -66,9 +69,11 @@
                     android:id="@+id/race_start_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:textAppearance="?attr/textNormal"
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
                     tools:text="11:00:00"/>
 
                 <View
@@ -80,20 +85,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/default_padding_half"
-                android:paddingTop="@dimen/default_padding_half">
+                android:paddingTop="@dimen/finished_line_padding_half"
+                android:paddingBottom="@dimen/finished_line_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="2"
                     android:text="@string/race_summary_finish_begin"
-                    android:textAppearance="?attr/textNormal"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"/>
 
                 <ImageView
                     android:id="@+id/edit_race_finish_begin_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/default_margin_half"
+                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?create"
                     android:visibility="visible"/>
 
@@ -101,38 +111,47 @@
                     android:id="@+id/race_finish_begin_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:textAppearance="?attr/textNormal"
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
                     tools:text="11:12:18"/>
 
                 <TextView
                     android:id="@+id/race_finish_begin_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:textAppearance="?textNormal"
-                    tools:text="12:18 min"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
+                    tools:text="12' 18"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/default_padding_half"
-                android:paddingTop="@dimen/default_padding_half">
+                android:paddingBottom="@dimen/finished_line_padding_half"
+                android:paddingTop="@dimen/finished_line_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="2"
                     android:text="@string/race_summary_finish_end"
-                    android:textAppearance="?attr/textNormal"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"/>
 
                 <ImageView
                     android:id="@+id/edit_race_finish_end_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/default_margin_half"
+                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?create"
                     android:visibility="visible"/>
 
@@ -140,42 +159,50 @@
                     android:id="@+id/race_finish_end_time"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:textAppearance="?attr/textNormal"
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
                     tools:text="11:16:36"/>
 
                 <TextView
                     android:id="@+id/race_finish_end_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="right"
-                    android:textAppearance="?attr/textNormal"
-                    tools:text="16:36 min"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
+                    tools:text="16' 36"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/default_padding_half"
-                android:paddingTop="@dimen/default_padding_half">
+                android:paddingBottom="@dimen/finished_line_padding_half"
+                android:paddingTop="@dimen/finished_line_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="2"
                     android:text="@string/race_summary_finish_duration"
-                    android:textAppearance="?attr/textNormal"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"/>
 
                 <TextView
                     android:id="@+id/race_finish_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="2"
                     android:gravity="right"
-                    android:textAppearance="?attr/textNormal"
-                    tools:text="04:18 min"/>
+                    android:textColor="?white"
+                    android:textSize="@dimen/finished_default_text_size"
+                    tools:text="04' 18"/>
             </LinearLayout>
 
             <LinearLayout
@@ -189,43 +216,49 @@
                     android:layout_height="@dimen/thin_line"
                     android:layout_marginBottom="@dimen/default_margin_half"
                     android:layout_marginTop="@dimen/default_margin_half"
-                    android:background="?sap_gray"/>
+                    android:background="?black"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/default_padding_half"
-                    android:paddingTop="@dimen/default_padding_half">
+                    android:paddingBottom="@dimen/finished_line_padding_half"
+                    android:paddingTop="@dimen/finished_line_padding_half">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="2"
                         android:text="@string/race_summary_wind_direction"
-                        android:textAppearance="?attr/textNormal"/>
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"/>
 
                     <TextView
                         android:id="@+id/wind_direction"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="2"
                         android:gravity="right"
-                        android:textAppearance="?attr/textNormal"
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"
                         tools:text="from 192°"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/default_padding_half"
-                    android:paddingTop="@dimen/default_padding_half">
+                    android:paddingBottom="@dimen/finished_line_padding_half"
+                    android:paddingTop="@dimen/finished_line_padding_half">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_weight="2"
                         android:text="@string/race_summary_wind_speed"
-                        android:textAppearance="?attr/textNormal"/>
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"/>
 
                     <TextView
                         android:id="@+id/wind_speed"
@@ -234,7 +267,8 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="2"
                         android:gravity="right"
-                        android:textAppearance="?attr/textNormal"
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"
                         tools:text="6.5 kts"/>
                 </LinearLayout>
             </LinearLayout>
@@ -250,25 +284,29 @@
                     android:layout_height="@dimen/thin_line"
                     android:layout_marginBottom="@dimen/default_margin_half"
                     android:layout_marginTop="@dimen/default_margin_half"
-                    android:background="?sap_gray"/>
+                    android:background="?black"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/default_padding_half"
-                    android:paddingTop="@dimen/default_padding_half">
+                    android:paddingTop="@dimen/finished_line_padding_half"
+                    android:paddingBottom="@dimen/finished_line_padding_half">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:text="@string/race_summary_individual_recalls"
-                        android:textAppearance="?attr/textNormal"/>
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:gravity="right"
-                        android:textAppearance="?attr/textNormal"
+                        android:textColor="?white"
+                        android:textSize="@dimen/finished_default_text_size"
                         tools:text="AUT 553  GER 766  ITA 912"/>
                 </LinearLayout>
             </LinearLayout>

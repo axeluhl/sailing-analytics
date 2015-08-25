@@ -45,7 +45,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     private final static String TAG = ManagedRaceListAdapter.class.getName();
-    private final static int FLAG_SIZE = 48;
     private final Object mLockObject = new Object();
     private List<RaceListDataType> mAllViewItems;
     private RaceFilter mFilter;
@@ -72,6 +71,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private RaceListDataType mSelectedRace;
     private ViewGroup panel_left;
     private ViewGroup panel_right;
+    private int flag_size;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
         super(context, 0);
@@ -81,6 +81,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
+        flag_size = getContext().getResources().getInteger(R.integer.flag_size);
     }
 
     @Override
@@ -144,7 +145,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 fleet_series.setText(fleetSeries);
                 fleet_series.setVisibility(View.VISIBLE);
             }
-            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
+            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -366,7 +367,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
 
                     if (isNext != 0) {
-                        flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), FLAG_SIZE);
+                        flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), flag_size);
                         switch (isNext) {
                             case 1:
                                 if (nextPole.isDisplayed()) {
@@ -390,7 +391,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         } else {
             TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
             if (now.before(flagDown)) {
-                flag = FlagsResources.getFlagDrawable(getContext(), Flags.XRAY.name(), FLAG_SIZE);
+                flag = FlagsResources.getFlagDrawable(getContext(), Flags.XRAY.name(), flag_size);
                 arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
                 timer = TimeUtils.formatDuration(now, flagDown);
             }

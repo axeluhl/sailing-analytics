@@ -5,12 +5,12 @@
 
     <FrameLayout
         android:id="@+id/race_panel_left"
-        android:layout_width="@dimen/side_button_width"
+        android:layout_width="@dimen/side_button"
         android:layout_height="match_parent" />
 
     <FrameLayout
         android:id="@+id/race_panel_right"
-        android:layout_width="@dimen/side_button_width"
+        android:layout_width="@dimen/side_button"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true" />

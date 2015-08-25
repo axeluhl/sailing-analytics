@@ -79,14 +79,14 @@
         <item name="course_triangle_64dp">@drawable/course_triangle_64dp_light</item>
         <item name="course_updown_48dp">@drawable/course_updown_48dp_light</item>
         <item name="course_updown_64dp">@drawable/course_updown_64dp_light</item>
-        <item name="dns_48dp">@drawable/ic_dns_black_48dp</item>
-        <item name="hearing_48dp">@drawable/ic_hearing_black_48dp</item>
+        <item name="dns">@drawable/ic_dns_black</item>
+        <item name="hearing">@drawable/ic_hearing_black</item>
         <item name="link_24dp">@drawable/ic_link_black_24dp</item>
-        <item name="lock_outline">@drawable/lock_outline_light</item>
+        <item name="lock_outline">@drawable/ic_lock_outline_black</item>
         <item name="marker">@drawable/marker_light</item>
         <item name="marker_race">@drawable/marker_race_light</item>
         <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
-        <item name="photo_camera_48dp">@drawable/ic_photo_camera_black_48dp</item>
+        <item name="photo_camera">@drawable/ic_photo_camera_black</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_white_24dp</item>
         <item name="spinner_background">@drawable/spinner_background_light</item>
@@ -205,7 +205,6 @@
 
     <style name="AppTheme.Light.Text.PanelCaption">
         <item name="android:textSize">@dimen/textSize_22</item>
-        <item name="android:gravity">center_horizontal</item>
     </style>
 
     <style name="AppTheme.Light.SettingsAlertDialog" parent="AppTheme.AlertDialog">

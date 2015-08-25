@@ -1,14 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class FinishedSubmitFragment extends BasePanelFragment {
 
@@ -20,10 +24,13 @@ public class FinishedSubmitFragment extends BasePanelFragment {
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_finished_right, container, false);
+        View layout = inflater.inflate(R.layout.race_finished_desc, container, false);
 
-        Button protest = ViewHelper.get(layout, R.id.protest_button);
+        TextView protest = ViewHelper.get(layout, R.id.protest_button);
         if (protest != null) {
+            int size = getActivity().getResources().getInteger(R.integer.flag_size);
+            Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), Flags.BRAVO.name(), size);
+            protest.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             protest.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

@@ -48,7 +48,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_finished_left, container, false);
+        View layout = inflater.inflate(R.layout.race_finished_buttons, container, false);
 
         mRecord = ViewHelper.get(layout, R.id.record_button);
         if (mRecord != null) {

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <item name="race_list_header" type="layout">@layout/race_list_header_land</item>
+    <item name="race_finished" type="layout">@layout/race_finished_large</item>
+    <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_ver</item>
+    <item name="race_finished_desc" type="layout">@layout/race_finished_desc_ver</item>
+    <item name="race_list_header" type="layout">@layout/race_list_header_large</item>
 
 </resources>
