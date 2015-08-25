@@ -63,9 +63,6 @@
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_arrow {
   display: block;
 }
-.regattacompetition_phase_fleet a {
-  color: #f6f9fc;
-}
 .regattacompetition_phase_fleet_title {
   font-size: 1.066666666666667em;
   font-weight: 700;
