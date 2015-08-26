@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
+import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
@@ -14,6 +15,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -22,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.general.EventState;
 public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> implements RegattaView {
 
     private EventSteps regattaProgressUi;
+    private RegattaLiveRaces liveRacesUi;
     private MinileaderboardBox leaderboardUi;
     private UpdatesBox latestNewsUi;
     private StatisticsBox statisticsUi;
@@ -30,6 +33,7 @@ public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> im
         super(presenter, true, true);
         Panel container = new FlowPanel();
         this.initRegattaProgressUi(container);
+        this.initLiveRaces(container);
         this.initLeaderboardUi(container);
         this.initLatestNewsUi(container);
         this.initRacesNavigation(container);
@@ -41,6 +45,12 @@ public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> im
         regattaProgressUi = new EventSteps();
         refreshManager.add(regattaProgressUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(regattaProgressUi);
+    }
+    
+    private void initLiveRaces(Panel container) {
+        liveRacesUi = new RegattaLiveRaces();
+        refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
+        container.add(liveRacesUi);
     }
     
     private void initLeaderboardUi(Panel container) {
