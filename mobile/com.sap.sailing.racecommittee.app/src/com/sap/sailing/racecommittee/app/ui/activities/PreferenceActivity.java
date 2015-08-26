@@ -1,16 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -75,7 +78,6 @@ public class PreferenceActivity extends AppCompatActivity {
 
 //        AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
-
         setContentView(R.layout.preference_view);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -89,6 +91,8 @@ public class PreferenceActivity extends AppCompatActivity {
             }
         }
 
+        disableStatusbarTranslucent();
+        setStatusbarColor();
         Fragment fragment = null;
         if (getIntent() != null && getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
@@ -118,6 +122,22 @@ public class PreferenceActivity extends AppCompatActivity {
             fragment = MainPreferenceFragment.newInstance();
         }
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void disableStatusbarTranslucent() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+    private void setStatusbarColor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.settings_navbar));
+        }
     }
 
     @Override

@@ -12,6 +12,7 @@
 
     <color name="constant_black_light">#ff242424</color>
     <color name="constant_black_transparent">#99000000</color>
+    <color name="settings_navbar">#1d1d1d</color>
 
     <color name="dialog_background">#eeeeee</color>
     <color name="dialog_color_header">#000000</color>
