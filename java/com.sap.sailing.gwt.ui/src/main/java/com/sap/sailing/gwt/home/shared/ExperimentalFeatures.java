@@ -31,6 +31,10 @@ public class ExperimentalFeatures {
      */
     public static final boolean SHOW_REGATTA_PROGRESS_ON_MOBILE = false;
     /**
+     * Provide option to show the regattas live races for single regatta and series event on mobile devices 
+     */
+    public static final boolean SHOW_REGATTA_LIVE_RACES_ON_MOBILE = false;
+    /**
      * Provide button to show the competitor analytics in fullscreen view (work in progress)
      */
     public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;

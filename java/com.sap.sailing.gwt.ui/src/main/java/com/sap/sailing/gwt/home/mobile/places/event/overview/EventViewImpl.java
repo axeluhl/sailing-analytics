@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
+import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
@@ -17,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
@@ -29,6 +31,7 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
 
     private EventOverviewStage overviewStageUi;
     private EventSteps eventStepsUi;
+    private RegattaLiveRaces liveRacesUi;
     private Impressions impressionsUi;
     private StatisticsBox statisticsBoxUi;
     private UpdatesBox updatesBoxUi;
@@ -66,10 +69,15 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
             container.add(regattaStatus);
             refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(getEventId()));
         } else {
+            if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
+                liveRacesUi = new RegattaLiveRaces();
+                refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
+                container.add(liveRacesUi);
+            }
             MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
             miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-            container.add(miniLeaderboard);
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+            container.add(miniLeaderboard);
             if (ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE) {
                 initRacesNavigation(container);
             }
