@@ -99,7 +99,7 @@
         <item name="wind_off">@drawable/wind_off_light</item>
         <item name="wind_on">@drawable/wind_on_light</item>
 
-        <!-- flag drawable -->
+        <!-- drawable drawable -->
         <item name="flag_ap_alpha_96dp">@drawable/flag_ap_alpha_96dp_light</item>
         <item name="flag_ap_hotel_96dp">@drawable/flag_ap_hotel_96dp_light</item>
         <item name="flag_november_alpha_96dp">@drawable/flag_november_alpha_96dp_light</item>

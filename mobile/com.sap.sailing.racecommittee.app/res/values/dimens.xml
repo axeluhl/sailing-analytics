@@ -61,14 +61,24 @@
     <dimen name="wind_hide_button_right_margin">76dp</dimen>
     <dimen name="wind_hide_button_top_margin">20dp</dimen>
 
-    <item name="picker_scale" format="float" type="integer">1</item>
-
     <dimen name="panel_button_caption_size">@dimen/textSize_18</dimen>
     <dimen name="panel_button_header_size">@dimen/textSize_20</dimen>
 
+    <!-- custom dimens (float, integer) -->
+    <item name="picker_scale" format="float" type="integer">1</item>
+    <item name="flag_size" format="integer" type="integer">32</item>
+
+    <dimen name="side_padding">@dimen/default_padding_half</dimen>
+
     <!-- race state dependent -->
+    <!-- login -->
+    <dimen name="login_text_size_small">@dimen/textSize_18</dimen>
+    <dimen name="login_text_size">@dimen/textSize_20</dimen>
+
+    <!-- unscheduled -->
+    <dimen name="unscheduled_confirm_button_margin">@dimen/default_margin</dimen>
+
     <!-- finished -->
-    <dimen name="finished_side_padding">@dimen/default_padding_half</dimen>
     <dimen name="finished_header_text_size">@dimen/textSize_32</dimen>
     <dimen name="finished_default_text_size">@dimen/textSize_22</dimen>
     <dimen name="finished_line_padding_half">5dp</dimen>

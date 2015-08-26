@@ -22,11 +22,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:text="@string/label_login_events"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_20"/>
+                android:textSize="@dimen/login_text_size"/>
 
             <ImageView
                 android:id="@+id/icon_event"
@@ -34,8 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:src="?arrow_drop_down_24dp"/>
 
             <TextView
@@ -48,7 +46,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textSize="@dimen/login_text_size_small"
                 tools:text="Test-Event"/>
         </RelativeLayout>
 
@@ -82,11 +80,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:text="@string/label_login_course_area"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_20"/>
+                android:textSize="@dimen/login_text_size"/>
 
             <ImageView
                 android:id="@+id/icon_area"
@@ -94,8 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:src="?arrow_drop_down_24dp"/>
 
             <TextView
@@ -108,7 +104,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textSize="@dimen/login_text_size_small"
                 tools:text="Selected Area"/>
         </RelativeLayout>
 
@@ -142,11 +138,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:text="@string/label_login_position"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_20"/>
+                android:textSize="@dimen/login_text_size"/>
 
             <ImageView
                 android:id="@+id/icon_position"
@@ -154,8 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:paddingLeft="@dimen/default_padding_half"
-                android:paddingRight="@dimen/default_padding_half"
+                android:padding="@dimen/side_padding"
                 android:src="?arrow_drop_down_24dp"/>
 
             <TextView
@@ -168,7 +162,7 @@
                 android:gravity="right"
                 android:singleLine="true"
                 android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textSize="@dimen/login_text_size_small"
                 tools:text="Viewer"/>
         </RelativeLayout>
 
@@ -185,16 +179,5 @@
             android:background="?sap_gray_black_30"/>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/login_submit"
-        style="?attr/button"
-        android:layout_width="@dimen/default_button_width"
-        android:layout_height="@dimen/default_button_height"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/default_margin"
-        android:enabled="false"
-        android:text="@string/sign_up"
-        android:textSize="@dimen/textSize_18"
-        android:textStyle="normal"/>
+    <include layout="@layout/login_listviews_button"/>
 </RelativeLayout>
