@@ -40,18 +40,14 @@ public class Impressions extends Composite {
 
     public void setStatistis(int nrOfImages, int nrOfVideos) {
         StringBuilder sb = new StringBuilder();
-        if (nrOfImages >0) {
-            sb.append(nrOfImages);
-            sb.append(" ");
-            sb.append(i18n.photos());
+        if (nrOfImages > 0) {
+            sb.append(i18n.photosCount(nrOfImages));
             if (nrOfVideos > 0) {
                 sb.append(" | ");
             }
         }
         if (nrOfVideos > 0) {
-            sb.append(nrOfVideos);
-            sb.append(" ");
-            sb.append(i18n.videos());
+            sb.append(i18n.videosCount(nrOfVideos));
         }
 
         headerUi.setSubtitle(sb.toString());
