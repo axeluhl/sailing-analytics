@@ -17,7 +17,7 @@ public class VideoGalleryVideo extends Composite {
     interface VideoGalleryVideoUiBinder extends UiBinder<Widget, VideoGalleryVideo> {
     }
     
-    @UiField(provided = true) VideoPlayer videoPlayerUi = new VideoPlayer(false, false);
+    @UiField(provided = true) VideoPlayer videoPlayerUi = new VideoPlayer(true, false);
     @UiField DivElement videoTitleUi;
     @UiField DivElement videoCreateDateUi;
     

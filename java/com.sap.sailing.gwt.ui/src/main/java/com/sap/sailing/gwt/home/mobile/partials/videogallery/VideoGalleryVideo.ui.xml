@@ -4,13 +4,13 @@
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGalleryResources" />
-	<g:HTMLPanel>
-		<div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.videogallery_video}">
+	<g:HTMLPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.videogallery_video}">
+		<div class="{local_res.css.video}">
 			<s:videoPlayer.VideoPlayer ui:field="videoPlayerUi"/>
-			<div class="{local_res.css.videogallery_video_info}">
-				<div class="{local_res.css.videogallery_video_info_title}" ui:field="videoTitleUi"></div>
-				<div class="{local_res.css.videogallery_video_info_subtitle}" ui:field="videoCreateDateUi"></div>
-			</div>
+		</div>
+		<div class="{local_res.css.videogallery_video_info}">
+			<div class="{local_res.css.videogallery_video_info_title}" ui:field="videoTitleUi"></div>
+			<div class="{local_res.css.videogallery_video_info_subtitle}" ui:field="videoCreateDateUi"></div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
