@@ -32,10 +32,12 @@ public class RegattaLiveRaces extends Composite implements RefreshableWidget<Sor
     
     @Override
     public void setData(SortedSetResult<LiveRaceDTO> data) {
-        setVisible(!data.isEmpty());
+        setVisible(data != null && !data.isEmpty());
         mobileSection.clearContent();
-        for (LiveRaceDTO liveRace : data.getValues()) {
-            mobileSection.addContent(new RegattaStatusRace(liveRace));
+        if (data != null) {
+            for (LiveRaceDTO liveRace : data.getValues()) {
+                mobileSection.addContent(new RegattaStatusRace(liveRace));
+            }
         }
     }
     
