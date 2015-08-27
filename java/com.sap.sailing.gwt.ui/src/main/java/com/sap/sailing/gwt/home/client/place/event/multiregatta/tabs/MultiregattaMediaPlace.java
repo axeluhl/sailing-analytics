@@ -5,8 +5,10 @@ import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
+import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 
-public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace {
+public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace implements MobileSupport {
     public MultiregattaMediaPlace(String id) {
         super(id);
     }
@@ -21,5 +23,10 @@ public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace {
         protected MultiregattaMediaPlace getRealPlace(EventContext context) {
             return new MultiregattaMediaPlace(context);
         }
+    }
+    
+    @Override
+    public boolean hasMobileVersion() {
+        return ExperimentalFeatures.SHOW_MEDIA_PAGE_ON_MOBILE;
     }
 }

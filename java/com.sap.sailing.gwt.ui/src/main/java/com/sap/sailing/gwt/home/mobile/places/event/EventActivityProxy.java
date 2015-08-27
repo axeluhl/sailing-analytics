@@ -7,11 +7,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.media.MediaActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
@@ -70,6 +73,8 @@ public class EventActivityProxy extends AbstractActivityProxy {
                     super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) currentPlace, clientFactory));
                 } else if (currentPlace instanceof LatestNewsPlace) {
                     super.onSuccess(new LatestNewsActivity((LatestNewsPlace) currentPlace, clientFactory));
+                } else if (currentPlace instanceof RegattaMediaPlace || currentPlace instanceof MultiregattaMediaPlace) {
+                    super.onSuccess(new MediaActivity(currentPlace, clientFactory));
                 }
             }
         });
