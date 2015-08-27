@@ -61,6 +61,7 @@
 
 	<!-- unscheduled -->
 	<dimen name="unscheduled_confirm_button_margin">@dimen/default_margin_twice</dimen>
+	<dimen name="padding_dependend_race_item">@dimen/default_padding_half</dimen>
 
 	<!-- finished -->
 	<dimen name="finished_header_text_size">@dimen/textSize_40</dimen>
