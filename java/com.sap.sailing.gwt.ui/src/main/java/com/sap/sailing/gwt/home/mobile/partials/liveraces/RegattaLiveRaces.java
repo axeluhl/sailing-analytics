@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.liveraces;
 
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusRace;
@@ -12,14 +15,18 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 
 public class RegattaLiveRaces extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
 
-    private final MobileSection mobileSection = new MobileSection();
-    private final SectionHeaderContent header = new SectionHeaderContent();
+    private static RegattaLiveRacesUiBinder uiBinder = GWT.create(RegattaLiveRacesUiBinder.class);
+    
+    interface RegattaLiveRacesUiBinder extends UiBinder<MobileSection, RegattaLiveRaces> {
+    }
+
+    @UiField SectionHeaderContent sectionHeaderUi;
+    private final MobileSection mobileSection;
 
     public RegattaLiveRaces() {
         RegattaStatusResources.INSTANCE.css().ensureInjected();
-        header.setSectionTitle(StringMessages.INSTANCE.liveNow());
-        mobileSection.addHeader(header);
-        initWidget(mobileSection);
+        initWidget(mobileSection = uiBinder.createAndBindUi(this));
+        sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.liveNow());
         setVisible(false);
     }
     
