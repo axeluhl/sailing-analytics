@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventView;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
@@ -91,19 +90,16 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return sortedRegattas;
     }
     
-    protected final void initMedia(final EventView view) {
+    protected final void initMedia(AsyncMediaCallback callback) {
         if (getCtx().getEventDTO().isHasMedia()) {
-            clientFactory.getHomeService().getMediaForEvent(getCtx().getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    GWT.log("Failed to load media");
-                }
-                
-                @Override
-                public void onSuccess(MediaDTO result) {
-                    view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
-                }
-            });
+            clientFactory.getHomeService().getMediaForEvent(getCtx().getEventDTO().getId(), callback);
+        }
+    }
+    
+    protected abstract class AsyncMediaCallback implements AsyncCallback<MediaDTO> {
+        @Override
+        public void onFailure(Throwable caught) {
+            GWT.log("Failed to load media");
         }
     }
     
