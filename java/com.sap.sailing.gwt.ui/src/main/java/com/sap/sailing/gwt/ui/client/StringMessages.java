@@ -1370,7 +1370,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String closeFullscreenView();
     String progress();
     String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
-    String noVideos();
-    String imagesCount(@PluralCount(DefaultRule_1_0n.class) int count);
-    String noImages();
+    String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
 }
