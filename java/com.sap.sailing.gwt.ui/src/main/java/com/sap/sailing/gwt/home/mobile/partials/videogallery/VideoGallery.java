@@ -25,6 +25,7 @@ public class VideoGallery extends Composite {
         VideoGalleryResources.INSTANCE.css().ensureInjected();
         initWidget(mobileSection = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.videos());
+        sectionHeaderUi.initCollapsibility(mobileSection.getContentContainerElement(), true);
     }
     
     public void setVideos(Collection<? extends VideoDTO> videos) {

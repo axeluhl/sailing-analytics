@@ -22,11 +22,13 @@ public class ImageGallery extends Composite {
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField DivElement firstColumnUi;
     @UiField DivElement secondColumnUi;
+    private final MobileSection mobileSection;
     
     public ImageGallery() {
         ImageGalleryResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
+        initWidget(mobileSection = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.images());
+        sectionHeaderUi.initCollapsibility(mobileSection.getContentContainerElement(), true);
     }
     
     public void setImages(Collection<? extends ImageDTO> images) {
