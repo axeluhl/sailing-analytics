@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.MainScheduleItem;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
 
@@ -49,14 +47,20 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
         holder.caption.setText(item.getCaption());
         holder.value.setText(item.getValue());
         holder.drawable.setImageDrawable(null);
+        holder.drawable.setVisibility(View.GONE);
         if (item.getDrawable() != null) {
             holder.drawable.setImageDrawable(item.getDrawable());
+            holder.drawable.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public int getItemCount() {
         return (mItems != null) ? mItems.size() : 0;
+    }
+
+    public interface ItemClick {
+        void onItemClick(Runnable runnable);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -72,9 +76,5 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
             drawable = ViewHelper.get(itemView, R.id.item_flag);
             value = ViewHelper.get(itemView, R.id.item_value);
         }
-    }
-
-    public interface ItemClick {
-        void onItemClick(Runnable runnable);
     }
 }
