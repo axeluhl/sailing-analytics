@@ -69,7 +69,7 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
+            final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder, container, false);
 
             mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
             mNum = ViewHelper.get(layout, R.id.pathfinder_num);
@@ -232,7 +232,7 @@ public class GateStartFragment {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
+            View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_timing, container, false);
 
             View caption = ViewHelper.get(layout, R.id.header_text);
             if (caption != null) {
