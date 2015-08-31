@@ -17,7 +17,6 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginStart="@dimen/default_margin"
             android:orientation="horizontal">
 
             <ImageView
@@ -192,7 +191,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
                 android:visibility="gone"
                 tools:text="12:12:12"/>
 
@@ -221,22 +219,20 @@
                         android:id="@+id/time_offset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|start"
+                        android:layout_centerVertical="true"
                         android:layout_marginBottom="@dimen/default_margin"
                         android:layout_marginLeft="@dimen/default_margin"
-                        android:layout_marginStart="@dimen/default_margin"
                         android:layout_marginTop="@dimen/default_margin"
                         android:scaleX="@integer/picker_scale"
                         android:scaleY="@integer/picker_scale"/>
 
                     <LinearLayout
                         android:id="@+id/relative_spinner_area"
-                        android:layout_width="250dp"
+                        android:layout_width="@dimen/unscheduled_spinner_width"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/relative_text_after"
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="@dimen/default_margin"
-                        android:layout_marginStart="@dimen/default_margin"
                         android:layout_toRightOf="@id/time_offset"
                         android:orientation="vertical">
 
@@ -244,6 +240,7 @@
                             android:id="@+id/dependent_leaderboard"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/default_margin_half"
                             android:background="?spinner_background"
                             android:dropDownWidth="wrap_content"
                             android:spinnerMode="dropdown"/>
@@ -275,10 +272,9 @@
                         android:layout_height="wrap_content"
                         android:layout_alignLeft="@+id/relative_spinner_area"
                         android:layout_alignParentTop="true"
-                        android:layout_alignStart="@+id/relative_spinner_area"
+                        android:paddingLeft="@dimen/spinner_padding"
                         android:text="@string/minutes_after"
-                        android:textAppearance="?android:textAppearanceMedium"/>
-
+                        android:textAppearance="?textSmall"/>
                 </RelativeLayout>
             </RelativeLayout>
 

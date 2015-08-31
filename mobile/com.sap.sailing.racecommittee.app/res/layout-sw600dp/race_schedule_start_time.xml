@@ -220,7 +220,7 @@
                     android:textAppearance="?textLarge"/>
 
                 <LinearLayout
-                    android:layout_width="470dp"
+                    android:layout_width="@dimen/unscheduled_spinner_width"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:orientation="vertical">
