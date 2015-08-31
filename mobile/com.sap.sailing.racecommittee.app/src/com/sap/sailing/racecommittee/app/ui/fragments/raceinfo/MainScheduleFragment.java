@@ -84,6 +84,11 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         raceData.setLayoutManager(layoutManager);
         raceData.setAdapter(mAdapter);
 
+        View startButton = ViewHelper.get(layout, R.id.start_race);
+        if (startButton != null) {
+            startButton.setOnClickListener(this);
+        }
+
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mFlagSize = getResources().getInteger(R.integer.flag_size);
 
