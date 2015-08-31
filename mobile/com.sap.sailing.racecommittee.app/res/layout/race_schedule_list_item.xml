@@ -25,7 +25,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginRight="@dimen/side_padding"
         android:src="@drawable/ic_chevron_right_grey600_24dp"/>
 
     <ImageView
