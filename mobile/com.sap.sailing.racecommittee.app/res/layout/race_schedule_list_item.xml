@@ -13,41 +13,49 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/side_padding"
-        android:layout_toLeftOf="@+id/item_flag"
+        android:layout_marginRight="@dimen/side_padding"
         android:text="@string/start_mode"
-        android:textAppearance="?textNormal"
-        android:layout_marginRight="@dimen/side_padding"/>
+        android:textAppearance="?textNormal"/>
 
-    <ImageView
-        android:id="@+id/item_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/side_padding"
-        android:src="@drawable/ic_chevron_right_grey600_24dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@id/item_caption"
+        android:orientation="horizontal">
 
-    <ImageView
-        android:id="@+id/item_flag"
-        tools:src="@drawable/flag_papa_48dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/item_value"/>
+        <ImageView
+            android:id="@+id/item_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/side_padding"
+            android:src="@drawable/ic_chevron_right_grey600_24dp"/>
 
-    <TextView
-        android:id="@+id/item_value"
-        tools:text="Papa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_icon"
-        android:layout_marginRight="@dimen/side_padding"
-        android:layout_toLeftOf="@+id/item_icon"
-        android:gravity="end"
-        android:singleLine="true"
-        android:textAppearance="?textSmall"
-        android:layout_marginLeft="@dimen/side_padding"/>
+        <TextView
+            android:id="@+id/item_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/item_icon"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:layout_marginRight="@dimen/side_padding"
+            android:layout_toLeftOf="@+id/item_icon"
+            android:gravity="end"
+            android:singleLine="true"
+            android:textAppearance="?textSmall"
+            tools:text="Papa"/>
+
+        <ImageView
+            android:id="@+id/item_flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/item_value"
+            android:visibility="gone"
+            tools:src="@drawable/flag_papa_48dp"
+            tools:visibility="visible"/>
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
