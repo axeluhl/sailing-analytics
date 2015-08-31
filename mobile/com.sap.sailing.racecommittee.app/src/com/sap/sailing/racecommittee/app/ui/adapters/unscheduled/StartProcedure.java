@@ -5,21 +5,15 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 public class StartProcedure {
 
     private Boolean mChecked;
-    private String mClassName;
     private RacingProcedureType mProcedureType;
 
-    public StartProcedure(RacingProcedureType procedureType, Boolean checked, String className) {
+    public StartProcedure(RacingProcedureType procedureType, Boolean checked) {
         mChecked = checked;
-        mClassName = className;
         mProcedureType = procedureType;
     }
 
     public RacingProcedureType getProcedureType() {
         return mProcedureType;
-    }
-
-    public String getClassName() {
-        return mClassName;
     }
 
     public Boolean isChecked() {

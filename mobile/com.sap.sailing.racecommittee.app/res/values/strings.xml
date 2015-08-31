@@ -303,11 +303,11 @@
     <string name="flags_postpone">Postpone</string>
     <string name="race_select">Select a Race</string>
 
-    <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
+    <string name="gate_start_pathfinder">Pathfinder</string>
     <string name="gate_start_nationality">Nationality</string>
     <string name="gate_start_number">Number</string>
     <string name="gate_start_set_pathfinder">Set Pathfinder</string>
-    <string name="gate_start_timing">Gate Start Timing</string>
+    <string name="gate_start_timing">Timing</string>
     <string name="gate_start_set">Set Gate Time</string>
 
     <string name="time_launch">Gate Launch\n(Minutes)</string>

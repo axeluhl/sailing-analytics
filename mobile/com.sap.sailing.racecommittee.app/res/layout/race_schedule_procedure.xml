@@ -14,8 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginLeft="@dimen/side_padding"
             android:orientation="horizontal">
 
             <ImageView
@@ -29,7 +28,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_procedure"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?textNormal"
+                android:textSize="@dimen/textSize_20"/>
         </LinearLayout>
 
         <View

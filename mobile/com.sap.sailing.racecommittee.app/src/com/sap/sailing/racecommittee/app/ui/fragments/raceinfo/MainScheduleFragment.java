@@ -82,6 +82,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mAdapter = new MainScheduleAdapter(getActivity(), mItems, this);
         raceData.setLayoutManager(layoutManager);
+        raceData.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
         raceData.setAdapter(mAdapter);
 
         View startButton = ViewHelper.get(layout, R.id.start_race);
@@ -161,10 +162,23 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
                 mItems.add(new MainScheduleItem(getString(R.string.start_mode), drawable, flag.name(), runnableMode));
-            } if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
+            } else if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
                 // GateStart
-                mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), null, null, null));
-                mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), null, null, null));
+                Runnable runnablePathfinder = new Runnable() {
+                    @Override
+                    public void run() {
+                        openFragment(PathFinderFragment.newInstance(0));
+                    }
+                };
+                mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), null, null, runnablePathfinder));
+
+                Runnable runnableTiming = new Runnable() {
+                    @Override
+                    public void run() {
+                        openFragment(TimingFragment.newInstance(0, "", ""));
+                    }
+                };
+                mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), null, null, runnableTiming));
             }
         }
     }

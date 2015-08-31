@@ -73,12 +73,12 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
 
         String className;
         for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
-            if (procedureType.equals(RacingProcedureType.GateStart)) {
-                className = GateStartFragment.class.getSimpleName();
-            } else {
-                className = null;
-            }
-            startProcedure.add(new StartProcedure(procedureType, (getRaceState().getRacingProcedure().getType() == procedureType), className));
+//            if (procedureType.equals(RacingProcedureType.GateStart)) {
+//                className = GateStartFragment.class.getSimpleName();
+//            } else {
+//                className = null;
+//            }
+            startProcedure.add(new StartProcedure(procedureType, (getRaceState().getRacingProcedure().getType() == procedureType)));
         }
 
         ListView listView = (ListView) getActivity().findViewById(R.id.listView);
@@ -103,14 +103,14 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
     }
 
     @Override
-    public void onClick(RacingProcedureType procedureType, String className) {
+    public void onClick(RacingProcedureType procedureType) {
         boolean sameProcedure = false;
         if (getRaceState().getRacingProcedure().getType() == procedureType) {
             sameProcedure = true;
         } else {
             getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         }
-        if (TextUtils.isEmpty(className)) {
+//        if (TextUtils.isEmpty(className)) {
             if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
                 openMainScheduleFragment();
             } else {
@@ -120,12 +120,12 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
                     getRaceState().forceNewStartTime(MillisecondsTimePoint.now(), getRaceState().getStartTime());
                 }
             }
-        } else {
-            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
-                replaceFragment(GateStartFragment.Pathfinder.newInstance());
-            } else {
-                replaceFragment(GateStartFragment.Pathfinder.newInstance(1), R.id.race_frame);
-            }
-        }
+//        } else {
+//            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
+//                replaceFragment(GateStartFragment.Pathfinder.newInstance());
+//            } else {
+//                replaceFragment(GateStartFragment.Pathfinder.newInstance(1), R.id.race_frame);
+//            }
+//        }
     }
 }

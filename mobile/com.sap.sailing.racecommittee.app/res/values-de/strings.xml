@@ -284,8 +284,8 @@
     <string name="start_procedure_line_start">Line Start</string>
     <string name="start_procedure_simplified">Vereinfacht</string>
     <string name="race_select">Wähle ein Rennen</string>
-    <string name="gate_start_pathfinder">Gate Start Pathfinder</string>
-    <string name="gate_start_timing">Gate Start Timing</string>
+    <string name="gate_start_pathfinder">Pathfinder</string>
+    <string name="gate_start_timing">Timing</string>
     <string name="time_golf">Golf\n(Minuten)</string>
     <string name="time_launch">Gate Launch\n(Minuten)</string>
     <string name="time_total">Gesamt\n(Minuten)</string>

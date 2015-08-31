@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -64,19 +63,9 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
         ImageView checked = ViewHelper.get(convertView, R.id.checked);
         if (checked != null) {
             checked.setTag(position);
-            checked.setVisibility(View.INVISIBLE);
+            checked.setVisibility(View.GONE);
             if (getItem(position).isChecked()) {
                 checked.setVisibility(View.VISIBLE);
-            }
-        }
-
-        ImageView more = ViewHelper.get(convertView, R.id.set_path_finder);
-        if (more != null) {
-            String className = getItem(position).getClassName();
-            if (!TextUtils.isEmpty(className)) {
-                more.setVisibility(View.VISIBLE);
-            } else {
-                more.setVisibility(View.INVISIBLE);
             }
         }
 
@@ -95,7 +84,7 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
             StartProcedure procedure = getItem(position);
             procedure.setChecked(true);
             if (mListener != null) {
-                mListener.onClick(procedure.getProcedureType(), procedure.getClassName());
+                mListener.onClick(procedure.getProcedureType());
             }
         }
 
@@ -103,6 +92,6 @@ public class StartProcedureAdapter extends BaseAdapter implements OnClickListene
     }
 
     public interface RacingProcedureTypeClick {
-        void onClick(RacingProcedureType procedureType, String className);
+        void onClick(RacingProcedureType procedureType);
     }
 }

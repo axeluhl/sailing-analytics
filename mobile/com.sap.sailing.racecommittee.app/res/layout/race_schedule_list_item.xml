@@ -15,7 +15,8 @@
         android:layout_marginLeft="@dimen/side_padding"
         android:layout_marginRight="@dimen/side_padding"
         android:text="@string/start_mode"
-        android:textAppearance="?textNormal"/>
+        android:textAppearance="?textNormal"
+        android:textSize="@dimen/textSize_20"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -37,13 +38,14 @@
             android:id="@+id/item_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/item_icon"
             android:layout_marginLeft="@dimen/side_padding"
             android:layout_marginRight="@dimen/side_padding"
             android:layout_toLeftOf="@+id/item_icon"
             android:gravity="end"
             android:singleLine="true"
             android:textAppearance="?textSmall"
+            android:textSize="@dimen/textSize_18"
+            android:layout_centerVertical="true"
             tools:text="Papa"/>
 
         <ImageView
