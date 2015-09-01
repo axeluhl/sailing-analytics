@@ -11,10 +11,10 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -41,11 +41,10 @@ public class WindHelper {
             NetworkHelper.getInstance(context).executeHttpJsonRequestAsnchronously(request, new NetworkHelper.NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
-                    LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
                     Intent notifyTrackedIntent = new Intent();
                     notifyTrackedIntent.putExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, checkResponseForTracking(response, race));
                     notifyTrackedIntent.setAction(AppConstants.INTENT_ACTION_IS_TRACKING);
-                    manager.sendBroadcast(notifyTrackedIntent);
+                    BroadcastManager.getInstance(context).addIntent(notifyTrackedIntent);
                 }
             }, new NetworkHelper.NetworkHelperFailureListener() {
                 @Override
