@@ -103,7 +103,7 @@
                     android:layout_height="25dp"
                     android:layout_gravity="center_horizontal"
                     android:scaleType="centerInside"
-                    tools:src="@drawable/alpha_flag"/>
+                    tools:src="@drawable/flag_alpha_64dp"/>
 
                 <TextView
                     android:id="@+id/flag_timer"

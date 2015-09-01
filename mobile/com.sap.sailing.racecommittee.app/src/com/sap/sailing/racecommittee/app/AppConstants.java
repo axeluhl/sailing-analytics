@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app;
 
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
-
 public class AppConstants {
 
     //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
@@ -32,8 +30,6 @@ public class AppConstants {
 
     // Login activity
     public final static String EventIdTag = "EventId";
-
-    public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
 
     public static final int DefaultStartTimeMinuteOffset = 10;
 
