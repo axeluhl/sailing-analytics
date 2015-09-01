@@ -20,6 +20,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseItem;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentName extends CourseFragment{
@@ -69,7 +70,7 @@ public class CourseFragmentName extends CourseFragment{
             }
             List<CheckedListItem> items = new ArrayList<>();
             for (String course : courses) {
-                CheckedListItem item = new CheckedListItem();
+                CourseItem item = new CourseItem();
                 item.setText(course);
                 item.setChecked(course.equals(courseName));
                 items.add(item);
