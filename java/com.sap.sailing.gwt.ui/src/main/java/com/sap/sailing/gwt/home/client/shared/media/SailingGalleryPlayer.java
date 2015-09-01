@@ -8,6 +8,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ResizeComposite;
@@ -43,8 +44,7 @@ public class SailingGalleryPlayer extends ResizeComposite {
     private ImageElement createThumbImgElement(SailingImageDTO i ) {
         ImageElement img = Document.get().createImageElement();
         img.setAttribute("src", i.getSourceRef());
-        img.setHeight(100);
-        img.setWidth(i.getWidthInPx() * 100 / i.getHeightInPx());
+        img.getStyle().setHeight(103, Unit.PX);
         return img;
     }
     
