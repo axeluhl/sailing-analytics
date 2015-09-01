@@ -382,7 +382,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
-    String sailingServers();
+    String serverInstances();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
     String errorRemovingSailingServers(String message);

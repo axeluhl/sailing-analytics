@@ -211,7 +211,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteSailingServerInstancesManagementPanel>(sailingServerInstancesManagementPanel),
-                getStringMessages().sailingServers(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
+                getStringMessages().serverInstances(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
 
         final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
                 getStringMessages(), this);

@@ -18,10 +18,11 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -33,21 +34,94 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
-public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
+public class RemoteSailingServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-    private final MultiSelectionModel<RemoteSailingServerReferenceDTO> serverSelectionModel;
-    private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTable;
+    private MultiSelectionModel<RemoteSailingServerReferenceDTO> serverSelectionModel;
+    private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTablePanel;
+
+    private final CaptionPanel remoteServersPanel;
 
     public RemoteSailingServerInstancesManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
+
+        VerticalPanel mainPanel = new VerticalPanel();
+        setWidget(mainPanel);
+        mainPanel.setWidth("100%");
+
+        remoteServersPanel = new CaptionPanel(stringMessages.registeredSailingServerInstances());
+        mainPanel.add(remoteServersPanel);
+        VerticalPanel remoteServersContentPanel = new VerticalPanel();
+        remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
+        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createdRemoteServersTable();
+        ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
+        serverDataProvider.addDataDisplay(remoteServersTable);
+
+        filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
+                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO>emptyList(), remoteServersTable, serverDataProvider) {
+            @Override
+            public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.getUrl());
+                if (t.getEvents() != null) {
+                    for (EventBaseDTO e : t.getEvents()) {
+                        strings.add(e.getName());
+                    }
+                }
+                return strings;
+            }
+        };
+
+        remoteServersContentPanel.add(filteredServerTablePanel);
+        remoteServersContentPanel.add(remoteServersTable);
+        remoteServersContentPanel.add(createdButtonToolbar());
+
+        refreshSailingServerList();
+    }
+
+    private Panel createdButtonToolbar() {
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+
+        Button addButton = new Button(stringMessages.add());
+        buttonPanel.add(addButton);
+        addButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addRemoteSailingServerReference();
+            }
+        });
+
+        Button removeButton = new Button(stringMessages.remove());
+        buttonPanel.add(removeButton);
+        removeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeSelectedSailingServers();
+            }
+        });
+
+        Button refreshButton = new Button(stringMessages.refresh());
+        buttonPanel.add(refreshButton);
+        refreshButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                refreshSailingServerList();
+            }
+        });
+        return buttonPanel;
+    }
+    
+    private CellTable<RemoteSailingServerReferenceDTO> createdRemoteServersTable() {
+        CellTable<RemoteSailingServerReferenceDTO> serverTable = new CellTable<RemoteSailingServerReferenceDTO>(10000, tableRes);
         TextColumn<RemoteSailingServerReferenceDTO> serverNameColumn = new TextColumn<RemoteSailingServerReferenceDTO>() {
             @Override
             public String getValue(RemoteSailingServerReferenceDTO server) {
@@ -78,7 +152,6 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
                 return builder.toSafeHtml();
             }
         };
-        CellTable<RemoteSailingServerReferenceDTO> serverTable = new CellTable<RemoteSailingServerReferenceDTO>(10000, tableRes);
         serverTable.addColumn(serverNameColumn, stringMessages.name());
         serverTable.addColumn(serverUrlColumn, stringMessages.url());
         serverTable.addColumn(eventsOrErrorColumn, stringMessages.events());
@@ -88,60 +161,7 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
         serverSelectionModel = new MultiSelectionModel<RemoteSailingServerReferenceDTO>();
         serverTable.setSelectionModel(serverSelectionModel);
 
-        ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
-        serverDataProvider.addDataDisplay(serverTable);
-
-        Button addButton = new Button(stringMessages.add());
-        Button removeButton = new Button(stringMessages.remove());
-        Button refreshButton = new Button(stringMessages.refresh());
-        addButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addRemoteSailingServerReference();
-            }
-        });
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeSelectedSailingServers();
-            }
-        });
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refreshSailingServerList();
-            }
-        });
-        VerticalPanel vp = new VerticalPanel();
-        HorizontalPanel providerSelectionPanel = new HorizontalPanel();
-        providerSelectionPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        vp.add(providerSelectionPanel);
-        
-        filteredServerTable = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
-                new Label(stringMessages.registeredSailingServerInstances()), Collections.<RemoteSailingServerReferenceDTO>emptyList(), serverTable, serverDataProvider) {
-            @Override
-            public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.add(t.getName());
-                strings.add(t.getUrl());
-                if (t.getEvents() != null) {
-                    for (EventBaseDTO e : t.getEvents()) {
-                        strings.add(e.getName());
-                    }
-                }
-                return strings;
-            }
-        };
-        providerSelectionPanel.add(filteredServerTable);
-        vp.add(serverTable);
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.add(addButton);
-        buttonPanel.add(removeButton);
-        buttonPanel.add(refreshButton);
-        vp.add(buttonPanel);
-
-        add(vp);
-        refreshSailingServerList();
+        return serverTable;
     }
     
     private void refreshSailingServerList() {
@@ -153,7 +173,7 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
 
             @Override
             public void onSuccess(List<RemoteSailingServerReferenceDTO> result) {
-                filteredServerTable.updateAll(result);
+                filteredServerTablePanel.updateAll(result);
             }
         });
     }
@@ -179,7 +199,7 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
     }
 
     private void addRemoteSailingServerReference() {
-        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(filteredServerTable.getAll(), stringMessages, new DialogCallback<RemoteSailingServerReferenceDTO>() {
+        SailingServerCreateOrEditDialog dialog = new SailingServerCreateOrEditDialog(filteredServerTablePanel.getAll(), stringMessages, new DialogCallback<RemoteSailingServerReferenceDTO>() {
             @Override
             public void cancel() {
             }
@@ -194,7 +214,7 @@ public class RemoteSailingServerInstancesManagementPanel extends FlowPanel {
 
                     @Override
                     public void onSuccess(RemoteSailingServerReferenceDTO result) {
-                    	filteredServerTable.add(result);
+                    	filteredServerTablePanel.add(result);
                         Window.setStatus(stringMessages.successfullyUpdatedSailingServers());
                     }
                 });
