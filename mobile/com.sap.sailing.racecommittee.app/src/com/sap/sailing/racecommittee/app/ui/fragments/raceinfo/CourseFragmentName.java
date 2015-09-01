@@ -69,13 +69,19 @@ public class CourseFragmentName extends CourseFragment{
                 courseName = courseDesign.getName();
             }
             List<CheckedListItem> items = new ArrayList<>();
+            int position = 0;
+            int selected = -1;
             for (String course : courses) {
                 CourseItem item = new CourseItem();
                 item.setText(course);
-                item.setChecked(course.equals(courseName));
+                if (course.equals(courseName)) {
+                    selected = position;
+                }
                 items.add(item);
+                position++;
             }
             final CheckedItemListAdapter checkedItemListAdapter = new CheckedItemListAdapter(getActivity(), items);
+            checkedItemListAdapter.setCheckedPostion(selected);
             mListView.setAdapter(checkedItemListAdapter);
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override

@@ -2,13 +2,33 @@ package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
 import android.graphics.drawable.Drawable;
 
-public interface CheckedListItem {
+public abstract class CheckedListItem {
 
-    Drawable getImage();
+    protected Drawable image;
+    protected String text;
+    protected String subText;
 
-    String getText();
+    public Drawable getImage(){
+        return null;
+    }
 
-    String getSubtext();
+    public void setImage(Drawable image) {
+        this.image = image;
+    }
 
-    boolean isChecked();
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getSubtext() {
+        return null;
+    }
+
+    public void setSubtext(String subText) {
+        this.subText = subText;
+    }
 }

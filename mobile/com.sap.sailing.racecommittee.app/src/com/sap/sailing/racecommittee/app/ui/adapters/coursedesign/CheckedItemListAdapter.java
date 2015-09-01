@@ -16,9 +16,11 @@ import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
 
+    private int checkedPosition;
 
-    public CheckedItemListAdapter(Context context, List<CheckedListItem> items) {
+    public CheckedItemListAdapter(Context context, List<? extends CheckedListItem> items) {
         super(context, R.layout.checked_list_item, items);
+        checkedPosition = -1;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
         }
 
         mainTextView.setText(item.getText());
-        if (!item.isChecked()) {
+        if (checkedPosition != -1 && position != checkedPosition) {
             mainTextView.setAlpha(0.2f);
         }
 
@@ -50,9 +52,13 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
             subTextView.setVisibility(View.GONE);
         }
 
-        if (item.isChecked()) {
+        if (position != checkedPosition) {
             checkImageView.setVisibility(View.VISIBLE);
         }
         return convertView;
+    }
+
+    public void setCheckedPostion(int postion) {
+        checkedPosition = postion;
     }
 }
