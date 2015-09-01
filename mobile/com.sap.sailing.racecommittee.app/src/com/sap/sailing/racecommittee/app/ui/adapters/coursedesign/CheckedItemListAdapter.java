@@ -18,8 +18,10 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
 
     private int checkedPosition;
 
+    // Needs an unchecked cast back to base class. Won't compile otherwise.
+    @SuppressWarnings("unchecked")
     public CheckedItemListAdapter(Context context, List<? extends CheckedListItem> items) {
-        super(context, R.layout.checked_list_item, items);
+        super(context, R.layout.checked_list_item, (List<CheckedListItem>) items);
         checkedPosition = -1;
     }
 
@@ -37,8 +39,7 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
 
         if (item.getImage() != null){
             BitmapHelper.setBackground(itemImageView, item.getImage());
-        } else {
-            itemImageView.setVisibility(View.GONE);
+            itemImageView.setVisibility(View.VISIBLE);
         }
 
         mainTextView.setText(item.getText());
@@ -52,7 +53,7 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
             subTextView.setVisibility(View.GONE);
         }
 
-        if (position != checkedPosition) {
+        if (position == checkedPosition) {
             checkImageView.setVisibility(View.VISIBLE);
         }
         return convertView;

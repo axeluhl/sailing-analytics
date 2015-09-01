@@ -9,7 +9,7 @@ public abstract class CheckedListItem {
     protected String subText;
 
     public Drawable getImage(){
-        return null;
+        return image;
     }
 
     public void setImage(Drawable image) {

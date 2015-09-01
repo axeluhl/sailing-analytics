@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
 
-import android.graphics.drawable.Drawable;
-
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
 
@@ -24,10 +22,5 @@ public class StartMode extends CheckedListItem{
     @Override
     public String getText() {
         return getFlagName();
-    }
-
-    @Override
-    public Drawable getImage() {
-        return image;
     }
 }
