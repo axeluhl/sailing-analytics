@@ -29,6 +29,11 @@ public class RRS26RunningRaceFragment extends BaseRunningRaceFragment<RRS26Racin
         super.onStop();
     }
 
+    @Override
+    protected void setupUi() {
+
+    }
+
     private class ChangeListener extends BaseRacingProcedureChangedListener implements RRS26ChangedListener {
 
         @Override

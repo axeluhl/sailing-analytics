@@ -25,7 +25,12 @@ public class GateStartRunningRaceFragment extends BaseRunningRaceFragment<GateSt
         getRacingProcedure().removeChangedListener(changeListener);
         super.onStop();
     }
-    
+
+    @Override
+    protected void setupUi() {
+
+    }
+
     private class ChangeListener extends BaseRacingProcedureChangedListener implements GateStartChangedListener {
 
         @Override

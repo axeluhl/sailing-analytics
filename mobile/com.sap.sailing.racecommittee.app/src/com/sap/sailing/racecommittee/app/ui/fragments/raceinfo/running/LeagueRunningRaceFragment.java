@@ -4,4 +4,8 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.Leag
 
 public class LeagueRunningRaceFragment extends BaseRunningRaceFragment<LeagueRacingProcedure> {
 
+    @Override
+    protected void setupUi() {
+
+    }
 }

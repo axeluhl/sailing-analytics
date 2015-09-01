@@ -9,5 +9,9 @@ public class ESSRunningRaceFragment extends BaseRunningRaceFragment<ESSRacingPro
     protected void setFinishingTime() {
         getRaceState().setFinishingTime(MillisecondsTimePoint.now());
     }
-    
+
+    @Override
+    protected void setupUi() {
+
+    }
 }
