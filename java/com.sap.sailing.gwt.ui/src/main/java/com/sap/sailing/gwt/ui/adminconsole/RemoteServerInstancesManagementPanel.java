@@ -34,7 +34,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
-public class RemoteSailingServerInstancesManagementPanel extends SimplePanel {
+public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -45,7 +45,7 @@ public class RemoteSailingServerInstancesManagementPanel extends SimplePanel {
 
     private final CaptionPanel remoteServersPanel;
 
-    public RemoteSailingServerInstancesManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RemoteServerInstancesManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -146,7 +146,7 @@ public class RemoteSailingServerInstancesManagementPanel extends SimplePanel {
                         builder.appendHtmlConstant("<br>");
                     }
                 } else {
-                    builder.appendEscaped(RemoteSailingServerInstancesManagementPanel.this.stringMessages
+                    builder.appendEscaped(RemoteServerInstancesManagementPanel.this.stringMessages
                             .errorAddingSailingServer(server.getLastErrorMessage()));
                 }
                 return builder.toSafeHtml();

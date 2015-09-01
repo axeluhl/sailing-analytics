@@ -43,7 +43,12 @@ public enum CollectionNames {
      * Stores the registered sailing servers.
      */
     SAILING_SERVERS,
-    
+
+    /** 
+     * Stores the settings of the server instance.
+     */
+    SERVER,
+
     /**
      * Stores regatta definitions including their series layout and fleets and race columns. Regattas can reference
      * the event from the {@link #EVENTS} collection to which they belong.
