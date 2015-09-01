@@ -9,10 +9,10 @@
 			<mp:sectionHeader.SectionHeaderContent ui:field="sectionHeaderUi" />
 		</mp:header>
 		<mp:content>
-			<g:HTMLPanel>
-				<div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.imagegallery_column} {local_res.css.imagegallery_columnfirst}" ui:field="firstColumnUi"></div>
-				<div class="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.imagegallery_column} {local_res.css.imagegallery_columnsecond}" ui:field="secondColumnUi"></div>
-			</g:HTMLPanel>
+			<g:FlowPanel addStyleNames="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.imagegallery_column} {local_res.css.imagegallery_columnfirst}" ui:field="firstColumnUi" />
+		</mp:content>
+		<mp:content>
+			<g:FlowPanel addStyleNames="{res.mediaCss.small6} {res.mediaCss.columns} {local_res.css.imagegallery_column} {local_res.css.imagegallery_columnsecond}" ui:field="secondColumnUi" />
 		</mp:content>
 	</mp:section.MobileSection>
 </ui:UiBinder>

@@ -3,14 +3,16 @@ package com.sap.sailing.gwt.home.mobile.partials.imagegallery;
 import java.util.Collection;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
 public class ImageGallery extends Composite {
 
@@ -20,8 +22,8 @@ public class ImageGallery extends Composite {
     }
 
     @UiField SectionHeaderContent sectionHeaderUi;
-    @UiField DivElement firstColumnUi;
-    @UiField DivElement secondColumnUi;
+    @UiField FlowPanel firstColumnUi;
+    @UiField FlowPanel secondColumnUi;
     private final MobileSection mobileSection;
     
     public ImageGallery() {
@@ -31,14 +33,21 @@ public class ImageGallery extends Composite {
         sectionHeaderUi.initCollapsibility(mobileSection.getContentContainerElement(), true);
     }
     
-    public void setImages(Collection<? extends ImageDTO> images) {
+    public void setImages(final Collection<SailingImageDTO> images) {
         sectionHeaderUi.setInfoText(StringMessages.INSTANCE.photosCount(images.size()));
-        firstColumnUi.removeAllChildren();
-        secondColumnUi.removeAllChildren();
+        firstColumnUi.clear();
+        secondColumnUi.clear();
         int imageCount = 0;
-        for (ImageDTO image : images) {
-            DivElement container = ++imageCount % 2 != 0 ? firstColumnUi : secondColumnUi;
-            container.appendChild(new ImageGalleryItem(image).getElement());
+        for (final SailingImageDTO image : images) {
+            FlowPanel container = ++imageCount % 2 != 0 ? firstColumnUi : secondColumnUi;
+            ImageGalleryItem imageGalleryItem = new ImageGalleryItem(image);
+            imageGalleryItem.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new MobileFullscreenGallery().show(image, images);
+                }
+            });
+            container.add(imageGalleryItem);
         }
     }
     
