@@ -30,18 +30,23 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+    
+    private boolean showIfEmpty = false;
 
     public MinileaderboardBox(boolean isOverall) {
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
         headerUi.setInfoText(StringMessages.INSTANCE.details());
-
-
+        setVisible(false);
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
+    }
+    
+    public void setShowIfEmpty(boolean showIfEmpty) {
+        this.showIfEmpty = showIfEmpty;
     }
 
     @Override
@@ -49,10 +54,12 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         itemContainerUi.clearContent();
         
         if(data.getItems().isEmpty()) {
+            setVisible(showIfEmpty);
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
         
+        setVisible(true);
         headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
         
         if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
