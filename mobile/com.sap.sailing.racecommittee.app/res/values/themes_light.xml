@@ -54,6 +54,7 @@
         <item name="textLarge">@style/AppTheme.Light.Text.Large</item>
         <item name="textXLarge">@style/AppTheme.Light.Text.XLarge</item>
 
+        <item name="textHeader">@style/AppTheme.Light.Text.Header</item>
         <item name="textPanelCaption">@style/AppTheme.Light.Text.PanelCaption</item>
         <item name="textPanelHeader">@style/AppTheme.Light.Text.PanelHeader</item>
         <item name="floatLabel">@style/AppTheme.Light.Text.FloatLabel</item>
@@ -195,6 +196,10 @@
 
     <style name="AppTheme.Light.Text.XLarge">
         <item name="android:textSize">@dimen/textSize_40</item>
+    </style>
+
+    <style name="AppTheme.Light.Text.Header" parent="AppTheme.Light.Text.Normal">
+        <item name="android:textSize">@dimen/textSize_20</item>
     </style>
 
     <style name="AppTheme.Light.Text.PanelHeader">

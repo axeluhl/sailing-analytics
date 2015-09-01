@@ -30,6 +30,8 @@
     <attr name="textLarge" format="reference"/>
     <attr name="textXLarge" format="reference"/>
 
+    <attr name="textHeader" format="reference"/>
+
     <attr name="textPanelHeader" format="reference"/>
     <attr name="textPanelCaption" format="reference"/>
     <attr name="editText" format="reference"/>

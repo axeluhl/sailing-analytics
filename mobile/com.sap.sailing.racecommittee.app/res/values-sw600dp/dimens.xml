@@ -60,6 +60,7 @@
 	<dimen name="login_text_size">@dimen/textSize_26</dimen>
 
 	<!-- unscheduled -->
+	<dimen name="unscheduled_header_line">@dimen/thick_line</dimen>
 	<dimen name="unscheduled_confirm_button_margin">@dimen/default_margin_twice</dimen>
 	<dimen name="unscheduled_padding_dependend_race_item">@dimen/default_padding_half</dimen>
 	<dimen name="unscheduled_spinner_width">470dp</dimen>

@@ -8,7 +8,7 @@ public class MainScheduleItem {
     private Drawable mDrawable;
     private Runnable mRunnable;
 
-    public MainScheduleItem(String caption, Drawable drawable, String value, Runnable runnable) {
+    public MainScheduleItem(String caption, String value, Drawable drawable, Runnable runnable) {
         mCaption = caption;
         mDrawable = drawable;
         mValue = value;

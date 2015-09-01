@@ -28,13 +28,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_mode"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?textHeader"/>
         </LinearLayout>
 
         <View
             android:id="@+id/line_top"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/thick_line"
+            android:layout_height="@dimen/unscheduled_header_line"
             android:layout_alignParentBottom="true"
             android:background="?black"/>
     </RelativeLayout>

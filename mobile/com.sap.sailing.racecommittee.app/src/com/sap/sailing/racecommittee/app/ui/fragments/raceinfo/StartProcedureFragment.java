@@ -71,13 +71,7 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
             }
         }
 
-        String className;
         for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
-//            if (procedureType.equals(RacingProcedureType.GateStart)) {
-//                className = GateStartFragment.class.getSimpleName();
-//            } else {
-//                className = null;
-//            }
             startProcedure.add(new StartProcedure(procedureType, (getRaceState().getRacingProcedure().getType() == procedureType)));
         }
 

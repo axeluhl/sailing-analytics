@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.sap.sailing.android.shared.util.ActivityHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -106,10 +107,9 @@ public class PathFinderFragment extends BaseFragment {
 
         if (mHeader != null) {
             mHeader.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(StartProcedureFragment.newInstance(0));
+                    openMainScheduleFragment();
                 }
             });
         }
@@ -132,12 +132,14 @@ public class PathFinderFragment extends BaseFragment {
             }
         }
 
-        final GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-        if (mNat != null && TextUtils.isEmpty(mNat.getText())) {
-            mNat.setText(extractPosition(0, procedure.getPathfinder()));
-        }
-        if (mNum != null && TextUtils.isEmpty(mNum.getText())) {
-            mNum.setText(extractPosition(1, procedure.getPathfinder()));
+        final GateStartRacingProcedure procedure = (GateStartRacingProcedure) getRaceState().getRacingProcedure();
+        if (procedure != null) {
+            if (mNat != null && TextUtils.isEmpty(mNat.getText())) {
+                mNat.setText(extractPosition(0, procedure.getPathfinder()));
+            }
+            if (mNum != null && TextUtils.isEmpty(mNum.getText())) {
+                mNum.setText(extractPosition(1, procedure.getPathfinder()));
+            }
         }
 
         if (mButton != null) {
@@ -154,11 +156,13 @@ public class PathFinderFragment extends BaseFragment {
                     if (mNum != null) {
                         number = mNum.getText().toString();
                     }
-                    procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
+                    if (procedure != null) {
+                        procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
+                    }
                     if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
-                        replaceFragment(TimingFragment.newInstance(nation, number));
+                        openMainScheduleFragment();
                     } else {
-                        replaceFragment(TimingFragment.newInstance(1, nation, number), R.id.race_frame);
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     }
                 }
             });
