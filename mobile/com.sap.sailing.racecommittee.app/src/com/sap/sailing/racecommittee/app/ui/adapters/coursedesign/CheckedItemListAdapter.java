@@ -44,9 +44,9 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
         }
 
         mainTextView.setText(item.getText());
+        subTextView.setAlpha(0.4f);
         if (checkedPosition != -1 && position != checkedPosition) {
             mainTextView.setAlpha(0.2f);
-            subTextView.setAlpha(0.2f);
             mainTextView.setTypeface(Typeface.DEFAULT);
         }else if (checkedPosition != -1 && position == checkedPosition) {
             mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
