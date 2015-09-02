@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,16 +46,19 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
         mainTextView.setText(item.getText());
         if (checkedPosition != -1 && position != checkedPosition) {
             mainTextView.setAlpha(0.2f);
+            mainTextView.setTypeface(Typeface.DEFAULT);
+        }else if (checkedPosition != -1 && position == checkedPosition) {
+            mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
+            mainTextView.setAlpha(1.0f);
+            subTextView.setAlpha(1.0f);
+            checkImageView.setVisibility(View.VISIBLE);
         }
 
         if (item.getSubtext() != null && !item.getSubtext().equals("")) {
             subTextView.setText(item.getSubtext());
+            subTextView.setAlpha(0.2f);
         } else {
             subTextView.setVisibility(View.GONE);
-        }
-
-        if (position == checkedPosition) {
-            checkImageView.setVisibility(View.VISIBLE);
         }
         return convertView;
     }
