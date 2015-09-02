@@ -72,13 +72,14 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         int count = 0;
         for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
+            StageEventType stageType = pair.getA();
+            EventHolder holder = pair.getB();
+
             count++;
-            if(count > MAX_STAGE_EVENTS) {
+            if(count > MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
                 break;
             }
             
-            StageEventType stageType = pair.getA();
-            EventHolder holder = pair.getB();
             result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService(), false));
             
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
