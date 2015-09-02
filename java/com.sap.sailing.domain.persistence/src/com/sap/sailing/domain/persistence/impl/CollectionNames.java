@@ -45,9 +45,9 @@ public enum CollectionNames {
     SAILING_SERVERS,
 
     /** 
-     * Stores the settings of the server instance.
+     * Stores the configuration of the server instance.
      */
-    SERVER,
+    SERVER_CONFIGURATION,
 
     /**
      * Stores regatta definitions including their series layout and fleets and race columns. Regattas can reference

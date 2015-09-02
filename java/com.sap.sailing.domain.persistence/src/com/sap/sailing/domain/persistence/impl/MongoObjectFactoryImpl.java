@@ -504,7 +504,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeServerConfiguration(SailingServerConfiguration serverConfiguration) {
-        DBCollection serverCollection = database.getCollection(CollectionNames.SERVER.name());
+        DBCollection serverCollection = database.getCollection(CollectionNames.SERVER_CONFIGURATION.name());
         DBObject newServerConfig = new BasicDBObject();
         newServerConfig.put(FieldNames.SERVER_IS_STANDALONE.name(), serverConfiguration.isStandaloneServer());
         DBObject currentServerConfig = serverCollection.findOne();

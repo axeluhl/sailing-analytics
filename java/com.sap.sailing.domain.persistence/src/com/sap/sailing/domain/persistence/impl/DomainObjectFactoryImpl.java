@@ -935,7 +935,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public SailingServerConfiguration loadServerConfiguration() {
         SailingServerConfiguration result;
-        DBCollection serverCollection = database.getCollection(CollectionNames.SERVER.name());
+        DBCollection serverCollection = database.getCollection(CollectionNames.SERVER_CONFIGURATION.name());
         DBObject theServer = serverCollection.findOne();
         if (theServer != null) {
             result = loadServerConfiguration(theServer);
