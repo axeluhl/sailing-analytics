@@ -816,9 +816,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         JSONObject jsonLeg = new JSONObject();
                         jsonLeg.put("from", leg.getLeg().getFrom().getName());
-                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId());
+                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId() != null ? leg.getLeg().getFrom().getId().toString() : null);
                         jsonLeg.put("to", leg.getLeg().getTo().getName());
-                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId());
+                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId() != null ? leg.getLeg().getTo().getId().toString() : null);
                         try {
                             jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
                         } catch (NoWindException e) {
