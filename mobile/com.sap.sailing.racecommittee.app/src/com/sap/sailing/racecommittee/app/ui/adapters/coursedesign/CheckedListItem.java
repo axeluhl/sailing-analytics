@@ -25,7 +25,7 @@ public abstract class CheckedListItem {
     }
 
     public String getSubtext() {
-        return null;
+        return subText;
     }
 
     public void setSubtext(String subText) {

@@ -57,6 +57,7 @@ public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
         if (item.getSubtext() != null && !item.getSubtext().equals("")) {
             subTextView.setText(item.getSubtext());
             subTextView.setAlpha(0.2f);
+            subTextView.setVisibility(View.VISIBLE);
         } else {
             subTextView.setVisibility(View.GONE);
         }

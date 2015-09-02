@@ -5,33 +5,43 @@ import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.LoginItem;
 import com.sap.sse.common.Named;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 
 public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
     implements LoadClient<Collection<T>>, DialogListenerHost {
 
     protected ArrayList<T> namedList;
+    protected List<CheckedListItem> checkedListItems;
     private ItemSelectedListener<T> listener;
-    private NamedArrayAdapter<T> listAdapter;
+    private CheckedItemListAdapter listAdapter;
     private int mSelectedIndex = -1;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
@@ -51,11 +61,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         super.onActivityCreated(savedInstanceState);
 
         namedList = new ArrayList<>();
-        listAdapter = createAdapter(getActivity(), namedList);
+        checkedListItems = new ArrayList<>();
+        listAdapter = new CheckedItemListAdapter(getActivity(), checkedListItems);
         if (savedInstanceState != null) {
             mSelectedIndex = savedInstanceState.getInt("position", -1);
             if (mSelectedIndex >= 0) {
-                listAdapter.setSelected(mSelectedIndex);
+                listAdapter.setCheckedPostion(mSelectedIndex);
 
             }
         }
@@ -83,16 +94,14 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-        listAdapter.setSelected(position);
+        listAdapter.setCheckedPostion(position);
         setStyleClicked(view);
 
         mSelectedIndex = position;
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        @SuppressWarnings("unchecked")
-        T item = (T) listView.getItemAtPosition(position);
-        listener.itemSelected(this, item);
+        listener.itemSelected(this, (T) namedList.get(position));
     }
 
     @Override
@@ -112,14 +121,48 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
+        checkedListItems.clear();
+        listAdapter.setCheckedPostion(-1);
         //TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
             Collections.sort(namedList, new NaturalNamedComparator());
+            for (Named named: namedList) {
+                LoginItem item = new LoginItem();
+                item.setText(named.getName());
+                item.setSubtext(getEventSubText(named));
+                checkedListItems.add(item);
+            }
             listAdapter.notifyDataSetChanged();
         }
 
         showProgressBar(false);
+    }
+
+    private String getEventSubText(Named named) {
+        String subText = null;
+        if (named instanceof EventBase) {
+            EventBase eventBase = (EventBase) named;
+            String dateString = null;
+            if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
+                Locale locale = getActivity().getResources().getConfiguration().locale;
+                Calendar startDate = Calendar.getInstance();
+                startDate.setTime(eventBase.getStartDate().asDate());
+                Calendar endDate = Calendar.getInstance();
+                endDate.setTime(eventBase.getEndDate().asDate());
+                String start = String.format("%s %s", startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale), startDate.get(Calendar.DATE));
+                String end = "";
+                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
+                    end = endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+                }
+                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH) || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                    end += " " + endDate.get(Calendar.DATE);
+                }
+                dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
+                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils.isEmpty(dateString) ? dateString : ""));
+            }
+        }
+        return subText;
     }
 
     @Override
