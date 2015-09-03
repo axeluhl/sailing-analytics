@@ -92,7 +92,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
             }
-        }, getStringMessages().leaderboardConfiguration(), Permission.MANAGE_LEADERBOARDS);
+        }, getStringMessages().leaderboards(), Permission.MANAGE_LEADERBOARDS);
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
