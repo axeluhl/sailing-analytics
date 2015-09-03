@@ -31,13 +31,12 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField SpanElement headerLabelUi;
     @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
-    @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
 
     public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        
+        setVisible(false);
         headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
         if(headerNavigation == null) {
             headerArrowUi.removeFromParent();
@@ -54,13 +53,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         updateScoreInformation(data);
         
         LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        
-        if(data.getItems().isEmpty()) {
-            noResultsUi.getStyle().clearDisplay();
-            return;
-        }
-        noResultsUi.getStyle().setDisplay(Display.NONE);
-        
+        setVisible(!data.getItems().isEmpty());
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
