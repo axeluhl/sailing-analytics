@@ -283,7 +283,11 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             boolean hasFleets = RaceListDataUtil.hasFleets(data);
             this.fleetCornerColumn.setShowDetails(hasFleets);
             this.fleetNameColumn.setShowDetails(hasFleets);
-            this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
+            // Imagine a long running event (several days) where only one race has taken place.
+            // Actually, you can't find out the date of this race, only its start time.
+            // Therefore, start date and time is shown, as long as there's now grouping feature. 
+            // TODO: this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
+            this.startTimeColumn.setShowTimeOnly(false);
             this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
             boolean hasWind = RaceListDataUtil.hasWind(data);
             this.windSpeedColumn.setShowDetails(hasWind);
