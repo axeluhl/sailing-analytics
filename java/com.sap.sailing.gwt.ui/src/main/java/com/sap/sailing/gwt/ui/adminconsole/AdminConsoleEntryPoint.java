@@ -112,7 +112,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         /* RACES */
         
-        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().races(), "RacesPanel");
+        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
@@ -147,6 +147,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().mediaPanel(), Permission.MANAGE_MEDIA);
 
+        /* RACE COMMITTEE APP */
+
+        final TabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
+        final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
+                getStringMessages(), this);
+        panel.addToTabPanel(raceCommitteeTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
+                getStringMessages().deviceConfiguration(), Permission.MANAGE_DEVICE_CONFIGURATION);
+        
         /* CONNECTORS */
         
         final TabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
@@ -212,11 +220,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteSailingServerInstancesManagementPanel>(sailingServerInstancesManagementPanel),
                 getStringMessages().serverInstances(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
-
-        final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
-                getStringMessages(), this);
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
-                getStringMessages().deviceConfiguration(), Permission.MANAGE_DEVICE_CONFIGURATION);
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
                 SailingPermissionsForRoleProvider.INSTANCE);
