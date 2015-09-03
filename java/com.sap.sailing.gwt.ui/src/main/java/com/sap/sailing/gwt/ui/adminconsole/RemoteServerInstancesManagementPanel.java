@@ -60,7 +60,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         VerticalPanel remoteServersContentPanel = new VerticalPanel();
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
-        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createdRemoteServersTable();
+        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
         ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         serverDataProvider.addDataDisplay(remoteServersTable);
 
@@ -82,12 +82,12 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
-        remoteServersContentPanel.add(createdButtonToolbar());
+        remoteServersContentPanel.add(createButtonToolbar());
 
         refreshSailingServerList();
     }
 
-    private Panel createdButtonToolbar() {
+    private Panel createButtonToolbar() {
         HorizontalPanel buttonPanel = new HorizontalPanel();
         buttonPanel.setSpacing(5);
 
@@ -120,7 +120,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         return buttonPanel;
     }
     
-    private CellTable<RemoteSailingServerReferenceDTO> createdRemoteServersTable() {
+    private CellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
         CellTable<RemoteSailingServerReferenceDTO> serverTable = new CellTable<RemoteSailingServerReferenceDTO>(10000, tableRes);
         TextColumn<RemoteSailingServerReferenceDTO> serverNameColumn = new TextColumn<RemoteSailingServerReferenceDTO>() {
             @Override

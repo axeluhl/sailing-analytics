@@ -780,7 +780,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                 courseDesignChangedListener.courseDesignChanged(newCourseDesign);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "Exception trying to notify race course design change listeners about course design change", e);
         }
     }
 
