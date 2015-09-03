@@ -78,6 +78,7 @@
   padding: 1.066666666666667em 0;
   border-radius: 0.333333333333333em;
   color: #f6f9fc;
+  min-height: 4.4em;
 }
 .regattacompetition_phase_fleet_racetracked {
   background: #008fcc;
