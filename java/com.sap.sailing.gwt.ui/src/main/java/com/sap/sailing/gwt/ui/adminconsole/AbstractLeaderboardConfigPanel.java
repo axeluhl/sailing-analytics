@@ -212,7 +212,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                raceSelectionProvider, stringMessages, /* multiselection */false);
+                raceSelectionProvider, stringMessages, /* multiselection */false, /* actionButtonsEnabled */ false);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
