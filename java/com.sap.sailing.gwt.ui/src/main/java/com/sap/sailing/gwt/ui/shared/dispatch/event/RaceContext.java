@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
@@ -34,7 +35,6 @@ import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -42,8 +42,8 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
+import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
@@ -133,40 +133,42 @@ public class RaceContext {
     }
 
     private SimpleWindDTO getWindOrNull() {
+        final SimpleWindDTO result;
         if (trackedRace != null) {
-            TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(
-                    trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
-            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            if (newestEvent != null && newestEvent.before(toTimePoint)) {
-                toTimePoint = newestEvent;
+            TimePoint toTimePoint = getWindToTimePoint();
+            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = getWindFromTrackedRace(toTimePoint);
+            if (averagedWindWithConfidence != null) {
+                result = new SimpleWindDTO(averagedWindWithConfidence.getObject().getFrom().getDegrees(), averagedWindWithConfidence.getObject().getKnots());
+            } else {
+                result = null;
             }
-            WindTrack windTrack = trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.COMBINED));
-            if (windTrack != null) {
-                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                        .getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(toTimePoint), toTimePoint);
-                if (averagedWindWithConfidence != null) {
-                    Wind wind = averagedWindWithConfidence.getObject();
-                    if (wind.getKnots() >= 0.05d) {
-                        return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
-                    }
-                }
+        } else {
+            Wind wind = checkForWindFixesFromRaceLog();
+            if (wind != null) {
+                result = new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
+            } else {
+                result = null;
             }
         }
-        Wind wind = checkForWindFixesFromRaceLog();
-        if (wind != null) {
-            return new SimpleWindDTO(wind.getFrom().getDegrees(), wind.getKnots());
+        return result;
+    }
+    
+    private WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindFromTrackedRace(TimePoint timePoint) {
+        WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = trackedRace
+                .getWindWithConfidence(trackedRace.getCenterOfCourse(timePoint), timePoint);
+        final WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> result;
+        if (averagedWindWithConfidence != null && averagedWindWithConfidence.getObject().getKnots() >= 0.05d) {
+            result = averagedWindWithConfidence;
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     private WindStatisticsDTO getWindStatisticsOrNull() {
+        final WindStatisticsDTO result;
         if (trackedRace != null) {
-            TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(
-                    trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
-            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-            if (newestEvent != null && newestEvent.before(toTimePoint)) {
-                toTimePoint = newestEvent;
-            }
+            TimePoint toTimePoint = getWindToTimePoint();
             final BearingWithConfidenceCluster<TimePoint> bwcc = new BearingWithConfidenceCluster<TimePoint>(
                     new Weigher<TimePoint>() {
                         private static final long serialVersionUID = -5779398785058438328L;
@@ -175,48 +177,63 @@ public class RaceContext {
                             return 1;
                         }
                     });
-            WindTrack windTrack = trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.COMBINED));
-            if (windTrack != null) {
-                TimePoint startTime = getStartTime();
-                if (startTime == null) {
-                    startTime = toTimePoint;
-                }
-                TimePoint middleOfRace = startTime.plus(startTime.until(toTimePoint).divide(2));
-                List<TimePoint> pointsToGetWind = Arrays.asList(startTime, middleOfRace, toTimePoint);
-                Double lowerBoundWindInKnots = null;
-                Double upperBoundWindInKnots = null;
-                for (TimePoint timePoint : pointsToGetWind) {
-                    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                            .getAveragedWindWithConfidence(trackedRace.getCenterOfCourse(timePoint), timePoint);
-                    if (averagedWindWithConfidence != null) {
-                        Wind wind = averagedWindWithConfidence.getObject();
-                        
-                        bwcc.add(new BearingWithConfidenceImpl<TimePoint>(wind.getBearing(), averagedWindWithConfidence
-                                .getConfidence(), timePoint));
-                        double currentWindInKnots = wind.getKnots();
-                        if (currentWindInKnots >= 0.05d) {
-                            if (lowerBoundWindInKnots == null) {
-                                lowerBoundWindInKnots = currentWindInKnots;
-                                upperBoundWindInKnots = currentWindInKnots;
-                            } else {
-                                lowerBoundWindInKnots = Math.min(lowerBoundWindInKnots, currentWindInKnots);
-                                upperBoundWindInKnots = Math.max(upperBoundWindInKnots, currentWindInKnots);
-                            }
-                        }
+            TimePoint startTime = getStartTime();
+            if (startTime == null) {
+                startTime = toTimePoint;
+            }
+            final TimePoint middleOfRace = startTime.plus(startTime.until(toTimePoint).divide(2));
+            List<TimePoint> pointsToGetWind = Arrays.asList(startTime, middleOfRace, toTimePoint);
+            Double lowerBoundWindInKnots = null;
+            Double upperBoundWindInKnots = null;
+            for (TimePoint timePoint : pointsToGetWind) {
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = getWindFromTrackedRace(timePoint);
+                if (averagedWindWithConfidence != null) {
+                    Wind wind = averagedWindWithConfidence.getObject();
+                    bwcc.add(new BearingWithConfidenceImpl<TimePoint>(wind.getBearing(), averagedWindWithConfidence
+                            .getConfidence(), timePoint));
+                    double currentWindInKnots = wind.getKnots();
+                    if (lowerBoundWindInKnots == null) {
+                        lowerBoundWindInKnots = currentWindInKnots;
+                        upperBoundWindInKnots = currentWindInKnots;
+                    } else {
+                        lowerBoundWindInKnots = Math.min(lowerBoundWindInKnots, currentWindInKnots);
+                        upperBoundWindInKnots = Math.max(upperBoundWindInKnots, currentWindInKnots);
                     }
                 }
-                if (lowerBoundWindInKnots != null && upperBoundWindInKnots != null) {
-                    BearingWithConfidence<TimePoint> average = bwcc.getAverage(middleOfRace);
-                    return new WindStatisticsDTO(average.getObject().reverse().getDegrees(), lowerBoundWindInKnots,
-                            upperBoundWindInKnots);
-                }
+            }
+            if (lowerBoundWindInKnots != null && upperBoundWindInKnots != null) {
+                BearingWithConfidence<TimePoint> average = bwcc.getAverage(middleOfRace);
+                result = new WindStatisticsDTO(average.getObject().reverse().getDegrees(), lowerBoundWindInKnots,
+                        upperBoundWindInKnots);
+            } else {
+                result = null;
+            }
+        } else {
+            Wind wind = checkForWindFixesFromRaceLog();
+            if (wind != null) {
+                result = new WindStatisticsDTO(wind.getFrom().getDegrees(), wind.getKnots(), wind.getKnots());
+            } else {
+                result = null;
             }
         }
-        Wind wind = checkForWindFixesFromRaceLog();
-        if (wind != null) {
-            return new WindStatisticsDTO(wind.getFrom().getDegrees(), wind.getKnots(), wind.getKnots());
+        return result;
+    }
+
+    /**
+     * Determines the end of the interval for which to compute wind data for the race. Usually, this will be the
+     * {@link TrackedRace#getEndOfRace() end of the race}; however, if this time point is not (yet) known, e.g., during
+     * a live race that is still ongoing, instead the current time point minus the live delay is chosen. If, however,
+     * the {@link TrackedRace#getTimePointOfNewestEvent() the race's newest event} is older than this time point,
+     * the time point of the race's newest event is used.
+     */
+    private TimePoint getWindToTimePoint() {
+        TimePoint toTimePoint = trackedRace.getEndOfRace() == null ? MillisecondsTimePoint.now().minus(
+                trackedRace.getDelayToLiveInMillis()) : trackedRace.getEndOfRace();
+        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+        if (newestEvent != null && newestEvent.before(toTimePoint)) {
+            toTimePoint = newestEvent;
         }
-        return null;
+        return toTimePoint;
     }
 
     private FlagStateDTO getFlagStateOrNull() {
@@ -538,16 +555,21 @@ public class RaceContext {
     }
 
     private Wind checkForWindFixesFromRaceLog() {
-        if(raceLog == null) {
-            return null;
+        final Wind result;
+        if (raceLog == null) {
+            result = null;
+        } else {
+            WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
+            List<RaceLogWindFixEvent> windList = windFixesFinder.analyze();
+            if (!windList.isEmpty()) {
+                result = new RaceLogWindFixDeclinationHelper().getOptionallyDeclinationCorrectedWind(windList.get(windList.size() - 1));
+            } else {
+                result = null;
+            }
         }
-        WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
-        List<Wind> windList = windFixesFinder.analyze();
-        if (windList.size() > 0) {
-            return windList.get(windList.size() - 1);
-        }
-        return null;
+        return result;
     }
+    
 
     private RaceLogFlagEvent checkForAbortFlagEvent() {
         RaceLogFlagEvent result = null;

@@ -86,7 +86,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
         this.errorReporter = errorReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();

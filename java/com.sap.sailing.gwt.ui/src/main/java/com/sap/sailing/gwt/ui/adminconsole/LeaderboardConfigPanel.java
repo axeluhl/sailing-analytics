@@ -65,9 +65,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final boolean showRaceDetails;
 
     private Button leaderboardRemoveButton;
-
     private Button addRaceColumnsButton;
-
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
 
@@ -93,8 +91,26 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {
-        filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
+    protected void addLeaderboardControls(Panel controlsPanel) {
+        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
+        controlsPanel.add(createFlexibleLeaderboardBtn);
+        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createFlexibleLeaderboard();
+            }
+        });
+
+        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
+        controlsPanel.add(createRegattaLeaderboardBtn);
+        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createRegattaLeaderboard();
+            }
+        });
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
@@ -107,7 +123,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 }
             }
         });
-        configPanel.add(leaderboardRemoveButton);
+        controlsPanel.add(leaderboardRemoveButton);
     }
     
     @Override
@@ -330,28 +346,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
-    }
-
-    protected void addLeaderboardCreateControls(Panel createPanel) {
-        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
-        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-        createPanel.add(createFlexibleLeaderboardBtn);
-        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createFlexibleLeaderboard();
-            }
-        });
-
-        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
-        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
-        createPanel.add(createRegattaLeaderboardBtn);
-        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createRegattaLeaderboard();
-            }
-        });
     }
     
     @Override
