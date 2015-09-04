@@ -1,13 +1,10 @@
-package com.sap.sailing.gwt.home.mobile.app;
+package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 
 public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     protected final PlaceController placeController;

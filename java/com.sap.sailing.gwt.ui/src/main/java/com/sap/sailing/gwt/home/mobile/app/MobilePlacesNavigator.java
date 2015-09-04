@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 

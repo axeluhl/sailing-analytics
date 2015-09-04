@@ -10,7 +10,6 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.mobile.app.AbstractPlaceNavigator;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
