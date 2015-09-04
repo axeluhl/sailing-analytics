@@ -34,7 +34,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new TabletAndDesktopApplicationView(new DesktopPlacesNavigator(placeController), eventBus), eventBus, placeController);
+        this(eventBus, placeController, new DesktopPlacesNavigator(placeController));
+    }
+
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
+        super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
     }
 
     @Override

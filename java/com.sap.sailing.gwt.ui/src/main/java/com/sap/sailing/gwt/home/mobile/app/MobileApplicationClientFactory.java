@@ -37,13 +37,17 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
     }
 
     private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        this(new MainView(new MobilePlacesNavigator(placeController), eventBus), eventBus, placeController);
+        this(eventBus, placeController, new MobilePlacesNavigator(placeController));
     }
-    
+
+    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, MobilePlacesNavigator navigator) {
+        this(new MainView(navigator, eventBus), eventBus, placeController, navigator);
+    }
+
     public MobileApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
-            PlaceController placeController) {
+            PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
-        this.navigator = new MobilePlacesNavigator(placeController);
+        this.navigator = navigator;
         this.homeService = GWT.create(HomeService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) homeService,
                 RemoteServiceMappingConstants.homeServiceRemotePath);

@@ -22,9 +22,9 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
     private final MediaServiceAsync mediaService;
     private final PlaceNavigator navigator;
 
-    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController) {
+    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
         super(root, eventBus, placeController);
-        navigator = new PlaceNavigatorImpl(placeController);
+        this.navigator = navigator;
         sailingService = GWT.create(SailingService.class);
         homeService = GWT.create(HomeService.class);
         mediaService = GWT.create(MediaService.class);

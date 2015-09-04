@@ -25,9 +25,9 @@ public abstract class AbstractApplicationClientFactory extends
     private final DesktopPlacesNavigator navigator;
 
     public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
-            PlaceController placeController) {
+            PlaceController placeController, final DesktopPlacesNavigator navigator) {
         super(root, eventBus, placeController);
-        navigator = new DesktopPlacesNavigator(placeController);
+        this.navigator = navigator;
         sailingService = GWT.create(SailingService.class);
         homeService = GWT.create(HomeService.class);
         mediaService = GWT.create(MediaService.class);
