@@ -15,9 +15,9 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 
 public class PositionListFragment extends LoggableListFragment {
@@ -69,7 +69,6 @@ public class PositionListFragment extends LoggableListFragment {
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        setStyleClicked(view);
         ListAdapter adapter = listView.getAdapter();
         if (adapter instanceof CheckedItemAdapter) {
             CheckedItemAdapter checkedItemAdapter = (CheckedItemAdapter) adapter;

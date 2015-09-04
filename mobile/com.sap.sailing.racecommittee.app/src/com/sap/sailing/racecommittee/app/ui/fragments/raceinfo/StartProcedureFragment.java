@@ -16,10 +16,9 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
-import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartProcedureAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartProcedureFragment extends BaseFragment implements StartProcedureAdapter.RacingProcedureTypeClick {
+public class StartProcedureFragment extends BaseFragment{
 
     private final static String START_MODE = "startMode";
 
@@ -109,7 +108,6 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
-    @Override
     public void onClick(RacingProcedureType procedureType) {
         boolean sameProcedure = false;
         if (getRaceState().getRacingProcedure().getType() == procedureType) {

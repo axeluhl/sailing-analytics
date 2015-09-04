@@ -35,6 +35,8 @@ public class PreferenceActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = "SHOW_FRAGMENT_ARGUMENTS";
     private static final String TAG = PreferenceActivity.class.getName();
 
+    private boolean mIsRedirected = false;
+
     public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
         // reset temp preferences
         PreferenceHelper helper = new PreferenceHelper(context, "TEMP_PREFERENCE_KEY");
@@ -110,6 +112,7 @@ public class PreferenceActivity extends AppCompatActivity {
                 if (bundle.containsKey(EXTRA_SHOW_FRAGMENT_ARGUMENTS)) {
                     Bundle info = bundle.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
                     if (info != null) {
+                        mIsRedirected = true;
                         // sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
                         String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
                         String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
@@ -166,4 +169,7 @@ public class PreferenceActivity extends AppCompatActivity {
         }
     }
 
+    public boolean isRedirected() {
+        return mIsRedirected;
+    }
 }

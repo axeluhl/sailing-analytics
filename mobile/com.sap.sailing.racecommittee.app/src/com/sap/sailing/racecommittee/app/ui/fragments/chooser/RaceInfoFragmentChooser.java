@@ -54,8 +54,4 @@ public abstract class RaceInfoFragmentChooser {
         fragment.setArguments(RaceFragment.createArguments(managedRace));
         return fragment;
     }
-
-    public RaceFragment getStartFragment(Context context, ManagedRace managedRace) {
-        return createInfoFragment(context, getStartphaseFragment(), managedRace);
-    }
 }

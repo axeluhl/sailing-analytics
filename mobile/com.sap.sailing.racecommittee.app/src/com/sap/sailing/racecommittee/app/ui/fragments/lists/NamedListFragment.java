@@ -86,7 +86,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
         listAdapter.setCheckedPosition(position);
-        setStyleClicked(view);
 
         mSelectedIndex = position;
 
