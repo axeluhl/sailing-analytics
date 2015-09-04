@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -411,10 +411,8 @@ public final class HomeServiceUtil {
         }
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(leaderboard instanceof RegattaLeaderboard) {
-                if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                    return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
-                }
+            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
             }
         }
         return null;
