@@ -1,16 +1,15 @@
-package com.sap.sailing.racecommittee.app.ui.adapters.unscheduled;
+package com.sap.sailing.racecommittee.app.ui.adapters.checked;
 
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
 
-public class StartMode extends CheckedListItem{
-    
+public class StartModeItem extends CheckedItem {
+
     private Flags mFlag;
-    
-    public StartMode(Flags flag) {
+
+    public StartModeItem(Flags flag) {
         mFlag = flag;
     }
-    
+
     public Flags getFlag() {
         return mFlag;
     }

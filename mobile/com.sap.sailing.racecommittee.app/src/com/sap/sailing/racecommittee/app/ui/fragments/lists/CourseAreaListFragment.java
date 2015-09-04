@@ -1,20 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.os.Bundle;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.ui.adapters.CourseAreaArrayAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseAreaSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 
@@ -35,11 +31,6 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
         super.onCreate(savedInstanceState);
         parentEventId = getArguments().getSerializable(AppConstants.EventIdTag);
     }
-    
-    @Override
-    protected NamedArrayAdapter<CourseArea> createAdapter(Context context, ArrayList<CourseArea> items) {
-        return new CourseAreaArrayAdapter(context, items);
-    }
 
     @Override
     protected ItemSelectedListener<CourseArea> attachListener(Activity activity) {
@@ -49,7 +40,7 @@ public class CourseAreaListFragment extends NamedListFragment<CourseArea> {
         }
 
         throw new IllegalStateException(String.format("%s cannot be attached to a instance of %s",
-                CourseAreaListFragment.class.getName(), activity.getClass().getName()));
+            CourseAreaListFragment.class.getName(), activity.getClass().getName()));
     }
 
     @Override

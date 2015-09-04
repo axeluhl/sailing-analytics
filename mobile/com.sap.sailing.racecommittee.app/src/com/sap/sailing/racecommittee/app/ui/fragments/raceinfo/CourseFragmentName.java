@@ -18,12 +18,11 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentName extends CourseFragment{
+public class CourseFragmentName extends CourseFragment {
 
     private ListView mListView;
 
@@ -68,11 +67,11 @@ public class CourseFragmentName extends CourseFragment{
             if (courseDesign != null) {
                 courseName = courseDesign.getName();
             }
-            List<CheckedListItem> items = new ArrayList<>();
+            List<CheckedItem> items = new ArrayList<>();
             int position = 0;
             int selected = -1;
             for (String course : courses) {
-                CourseItem item = new CourseItem();
+                CheckedItem item = new CheckedItem();
                 item.setText(course);
                 if (course.equals(courseName)) {
                     selected = position;
@@ -80,13 +79,13 @@ public class CourseFragmentName extends CourseFragment{
                 items.add(item);
                 position++;
             }
-            final CheckedItemListAdapter checkedItemListAdapter = new CheckedItemListAdapter(getActivity(), items);
-            checkedItemListAdapter.setCheckedPostion(selected);
-            mListView.setAdapter(checkedItemListAdapter);
+            final CheckedItemAdapter checkedItemAdapter = new CheckedItemAdapter(getActivity(), items);
+            checkedItemAdapter.setCheckedPosition(selected);
+            mListView.setAdapter(checkedItemAdapter);
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    handleSelection(checkedItemListAdapter.getItem(position).getText());
+                    handleSelection(checkedItemAdapter.getItem(position).getText());
                 }
             });
         }

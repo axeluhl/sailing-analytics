@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,22 +13,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
-import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartModeItem;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class StartModeFragment extends BaseFragment{
+public class StartModeFragment extends BaseFragment {
 
     private final static String START_MODE = "startMode";
     private ListView mListView;
@@ -43,15 +43,15 @@ public class StartModeFragment extends BaseFragment{
 
         if (getArguments() != null) {
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
-                if (getView() != null) {
-                    View header = getView().findViewById(R.id.header);
-                    header.setVisibility(View.GONE);
-                }
-                break;
+                case 1:
+                    if (getView() != null) {
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
+                    }
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
 
@@ -82,7 +82,7 @@ public class StartModeFragment extends BaseFragment{
     public void onResume() {
         super.onResume();
 
-        ArrayList<StartMode> startModes = new ArrayList<>();
+        ArrayList<StartModeItem> startModes = new ArrayList<>();
         List<Flags> flags = mProcedure.getConfiguration().getStartModeFlags();
         int position = 0;
         int selected = -1;
@@ -90,22 +90,23 @@ public class StartModeFragment extends BaseFragment{
             if (mProcedure.getStartModeFlag() != null) {
                 selected = position;
             }
-            StartMode startMode = new StartMode(flag);
+            StartModeItem startMode = new StartModeItem(flag);
             startMode.setImage(FlagsResources.getFlagDrawable(getActivity(), startMode.getFlagName(), 64));
             startModes.add(startMode);
             position++;
         }
 
         Collections.sort(startModes, new StartModeComparator());
-        final CheckedItemListAdapter adapter = new CheckedItemListAdapter(getActivity(), startModes);
-        adapter.setCheckedPostion(selected);
+        final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), startModes);
+        adapter.setCheckedPosition(selected);
         mListView.setAdapter(adapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                CheckedListItem item = adapter.getItem(position);
-                if(item != null && item instanceof StartMode) {
-                    onClick((StartMode) item);
+                adapter.setCheckedPosition(position);
+                StartModeItem item = (StartModeItem) adapter.getItem(position);
+                if (item != null) {
+                    onClick(item);
                 }
             }
         });
@@ -120,7 +121,7 @@ public class StartModeFragment extends BaseFragment{
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
-    public void onClick(StartMode startMode) {
+    public void onClick(StartModeItem startMode) {
         boolean sameFlag = false;
         if (startMode.getFlag() == mProcedure.getStartModeFlag()) {
             sameFlag = true;
@@ -135,10 +136,10 @@ public class StartModeFragment extends BaseFragment{
         }
     }
 
-    private class StartModeComparator implements Comparator<StartMode> {
+    private class StartModeComparator implements Comparator<StartModeItem> {
 
         @Override
-        public int compare(StartMode left, StartMode right) {
+        public int compare(StartModeItem left, StartModeItem right) {
             return left.getFlagName().compareToIgnoreCase(right.getFlagName());
         }
     }

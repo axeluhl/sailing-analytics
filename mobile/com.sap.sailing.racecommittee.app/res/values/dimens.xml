@@ -71,6 +71,12 @@
     <dimen name="side_padding">@dimen/default_padding_half</dimen>
     <dimen name="spinner_padding">9dp</dimen>
 
+    <dimen name="checked_item_text">@dimen/textSize_20</dimen>
+    <dimen name="checked_item_small_text">@dimen/textSize_14</dimen>
+
+    <dimen name="management_text_normal">@dimen/textSize_20</dimen>
+    <dimen name="management_text_small">@dimen/textSize_18</dimen>
+
     <!-- race state dependent -->
     <!-- login -->
     <dimen name="login_text_size_small">@dimen/textSize_18</dimen>

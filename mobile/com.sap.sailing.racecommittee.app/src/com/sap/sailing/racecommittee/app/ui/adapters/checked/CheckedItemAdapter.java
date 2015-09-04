@@ -1,9 +1,10 @@
-package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
+package com.sap.sailing.racecommittee.app.ui.adapters.checked;
 
 import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,57 +16,60 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
-public class CheckedItemListAdapter extends ArrayAdapter<CheckedListItem> {
+public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
 
     private int checkedPosition;
 
     // Needs an unchecked cast back to base class. Won't compile otherwise.
     @SuppressWarnings("unchecked")
-    public CheckedItemListAdapter(Context context, List<? extends CheckedListItem> items) {
-        super(context, R.layout.checked_list_item, (List<CheckedListItem>) items);
+    public CheckedItemAdapter(Context context, List<? extends CheckedItem> items) {
+        super(context, R.layout.checked_list_item, (List<CheckedItem>) items);
         checkedPosition = -1;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            convertView = inflater.inflate(R.layout.checked_list_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.checked_list_item, parent, false);
         }
-        CheckedListItem item = getItem(position);
+
+        CheckedItem item = getItem(position);
         ImageView itemImageView = ViewHelper.get(convertView, R.id.checked_item_image);
         TextView mainTextView = ViewHelper.get(convertView, R.id.list_item);
         TextView subTextView = ViewHelper.get(convertView, R.id.list_item_subtitle);
         ImageView checkImageView = ViewHelper.get(convertView, R.id.checked);
 
-        if (item.getImage() != null){
+        if (item.getImage() != null && itemImageView != null) {
             BitmapHelper.setBackground(itemImageView, item.getImage());
             itemImageView.setVisibility(View.VISIBLE);
         }
 
         mainTextView.setText(item.getText());
-        subTextView.setAlpha(0.4f);
-        if (checkedPosition != -1 && position != checkedPosition) {
-            mainTextView.setAlpha(0.2f);
-            mainTextView.setTypeface(Typeface.DEFAULT);
-        }else if (checkedPosition != -1 && position == checkedPosition) {
-            mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
-            mainTextView.setAlpha(1.0f);
-            subTextView.setAlpha(1.0f);
-            checkImageView.setVisibility(View.VISIBLE);
+        if (checkedPosition != -1) {
+            if (position != checkedPosition) {
+                mainTextView.setAlpha(0.2f);
+                mainTextView.setTypeface(Typeface.DEFAULT);
+                checkImageView.setVisibility(View.GONE);
+            } else {
+                mainTextView.setAlpha(1.0f);
+                mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
+                checkImageView.setVisibility(View.VISIBLE);
+            }
         }
 
-        if (item.getSubtext() != null && !item.getSubtext().equals("")) {
+        subTextView.setAlpha(1.0f);
+        if (!TextUtils.isEmpty(item.getSubtext())) {
             subTextView.setText(item.getSubtext());
-            mainTextView.setAlpha(1.0f);
             subTextView.setVisibility(View.VISIBLE);
+            mainTextView.setAlpha(1.0f);
         } else {
             subTextView.setVisibility(View.GONE);
         }
+
         return convertView;
     }
 
-    public void setCheckedPostion(int postion) {
-        checkedPosition = postion;
+    public void setCheckedPosition(int position) {
+        checkedPosition = position;
     }
 }

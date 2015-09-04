@@ -9,14 +9,13 @@
 
     <ImageView
         android:id="@+id/checked_item_image"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginLeft="@dimen/side_padding"
         android:visibility="gone"
-        tools:src="@drawable/papa_flag"
+        tools:src="@drawable/flag_papa_64dp"
         tools:visibility="visible"/>
 
     <ImageView
@@ -25,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:paddingRight="@dimen/default_padding_half"
+        android:paddingRight="@dimen/side_padding"
         android:src="?check_18dp"
         android:visibility="invisible"
         tools:visibility="visible"/>
@@ -34,8 +33,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
-        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
         android:layout_toLeftOf="@id/checked"
         android:layout_toRightOf="@id/checked_item_image">
 
@@ -45,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_20"
+            android:textSize="@dimen/checked_item_text"
             tools:text="ListItem"/>
 
         <TextView
@@ -55,7 +54,7 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@id/list_item"
             android:textColor="?white"
-            android:textSize="@dimen/textSize_14"
+            android:textSize="@dimen/checked_item_small_text"
             android:visibility="gone"
             tools:text="ListItemSubtitle"
             tools:visibility="visible"/>
@@ -65,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
-        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
         android:background="?sap_gray"/>
 </RelativeLayout>

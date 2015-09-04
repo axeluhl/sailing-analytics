@@ -1,9 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -17,38 +23,24 @@ import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
-import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.LoginItem;
 import com.sap.sse.common.Named;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-
-public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
-    implements LoadClient<Collection<T>>, DialogListenerHost {
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>, DialogListenerHost {
 
     protected ArrayList<T> namedList;
-    protected List<CheckedListItem> checkedListItems;
+    protected List<CheckedItem> checkedItems;
     private ItemSelectedListener<T> listener;
-    private CheckedItemListAdapter listAdapter;
+    private CheckedItemAdapter listAdapter;
     private int mSelectedIndex = -1;
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
-
-    protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
-        return new NamedArrayAdapter<>(context, items);
-    }
 
     protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
@@ -61,13 +53,12 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         super.onActivityCreated(savedInstanceState);
 
         namedList = new ArrayList<>();
-        checkedListItems = new ArrayList<>();
-        listAdapter = new CheckedItemListAdapter(getActivity(), checkedListItems);
+        checkedItems = new ArrayList<>();
+        listAdapter = new CheckedItemAdapter(getActivity(), checkedItems);
         if (savedInstanceState != null) {
             mSelectedIndex = savedInstanceState.getInt("position", -1);
             if (mSelectedIndex >= 0) {
-                listAdapter.setCheckedPostion(mSelectedIndex);
-
+                listAdapter.setCheckedPosition(mSelectedIndex);
             }
         }
         getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -94,14 +85,14 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-        listAdapter.setCheckedPostion(position);
+        listAdapter.setCheckedPosition(position);
         setStyleClicked(view);
 
         mSelectedIndex = position;
 
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        listener.itemSelected(this, (T) namedList.get(position));
+        listener.itemSelected(this, namedList.get(position));
     }
 
     @Override
@@ -121,17 +112,17 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     @Override
     public void onLoadSucceeded(Collection<T> data, boolean isCached) {
         namedList.clear();
-        checkedListItems.clear();
-        listAdapter.setCheckedPostion(-1);
+        checkedItems.clear();
+        listAdapter.setCheckedPosition(-1);
         //TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
             Collections.sort(namedList, new NaturalNamedComparator());
-            for (Named named: namedList) {
-                LoginItem item = new LoginItem();
+            for (Named named : namedList) {
+                CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
                 item.setSubtext(getEventSubText(named));
-                checkedListItems.add(item);
+                checkedItems.add(item);
             }
             listAdapter.notifyDataSetChanged();
         }
@@ -143,7 +134,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         String subText = null;
         if (named instanceof EventBase) {
             EventBase eventBase = (EventBase) named;
-            String dateString = null;
+            String dateString;
             if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
                 Locale locale = getActivity().getResources().getConfiguration().locale;
                 Calendar startDate = Calendar.getInstance();
@@ -159,7 +150,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
                     end += " " + endDate.get(Calendar.DATE);
                 }
                 dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
-                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils.isEmpty(dateString) ? dateString : ""));
+                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils
+                    .isEmpty(dateString) ? dateString : ""));
             }
         }
         return subText;
