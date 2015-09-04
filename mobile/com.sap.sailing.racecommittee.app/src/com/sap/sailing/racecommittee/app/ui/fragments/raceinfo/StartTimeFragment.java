@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -393,8 +393,7 @@ public class StartTimeFragment extends BaseFragment
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     mRaceAdapter.setSelected(position);
                     String leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition()).getA();
-                    @SuppressWarnings("unchecked")
-                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
@@ -413,8 +412,7 @@ public class StartTimeFragment extends BaseFragment
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                 Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
                 if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
-                    @SuppressWarnings("unchecked")
-                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
@@ -742,6 +740,7 @@ public class StartTimeFragment extends BaseFragment
         }
         fragment.setArguments(args);
         getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 }

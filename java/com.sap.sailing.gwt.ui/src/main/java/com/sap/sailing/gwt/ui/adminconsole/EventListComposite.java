@@ -164,7 +164,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         
-        panel.add(eventTable);
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventListDataProvider) {
             @Override
@@ -181,7 +180,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
-        eventControlsPanel.add(filterTextbox);
+        panel.add(filterTextbox);
+        panel.add(eventTable);
         
         noEventsLabel = new Label("No events defined yet.");
         noEventsLabel.ensureDebugId("NoRegattasLabel");

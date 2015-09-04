@@ -1,0 +1,21 @@
+@CHARSET "UTF-8";
+
+.startline_advantages_by_wind_component_container{
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.advantage_maximum_live_average{
+	position: absolute;
+	height: 30%;
+	width: 100%;
+	top: 4pt;
+}
+
+.advantages_on_line_chart_container{
+    position: absolute;
+	height: 70%;
+	top: 30%;
+	width: 100%;
+}

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -151,7 +151,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 public void onClick(View v) {
                     Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
                     intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
-                    LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+                    BroadcastManager.getInstance(getContext()).addIntent(intent);
                 }
             });
         } else if (type == ViewType.RACE.index) {

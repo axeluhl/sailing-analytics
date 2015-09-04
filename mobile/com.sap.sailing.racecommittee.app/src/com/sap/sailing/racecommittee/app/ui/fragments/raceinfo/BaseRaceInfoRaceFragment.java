@@ -9,6 +9,7 @@ import android.support.annotation.IdRes;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -149,8 +150,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     private void showMainContent() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-        RacingActivity activity = (RacingActivity) getActivity();
-        activity.processIntent(intent);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     private class FlagPoleCache {
@@ -180,17 +180,17 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
             super.onStatusChanged(state);
 
             switch (state.getStatus()) {
-            case UNSCHEDULED:
-            case FINISHED:
-                RacingActivity activity = (RacingActivity) getActivity();
-                if (activity != null) {
-                    activity.onRaceItemClicked(getRace(), true);
-                }
-                break;
+                case UNSCHEDULED:
+                case FINISHED:
+                    RacingActivity activity = (RacingActivity) getActivity();
+                    if (activity != null) {
+                        activity.onRaceItemClicked(getRace(), true);
+                    }
+                    break;
 
-            default:
-                showMainContent();
-                break;
+                default:
+                    showMainContent();
+                    break;
             }
         }
 

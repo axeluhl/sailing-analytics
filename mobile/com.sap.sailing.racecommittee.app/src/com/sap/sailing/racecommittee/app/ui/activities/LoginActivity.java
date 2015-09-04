@@ -31,6 +31,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -107,7 +108,7 @@ public class LoginActivity extends BaseActivity
             //send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
-            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
@@ -128,7 +129,7 @@ public class LoginActivity extends BaseActivity
             //send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
-            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
 
