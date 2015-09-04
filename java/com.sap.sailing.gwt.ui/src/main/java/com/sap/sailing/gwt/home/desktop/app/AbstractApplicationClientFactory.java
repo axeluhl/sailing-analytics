@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
@@ -34,17 +33,6 @@ public abstract class AbstractApplicationClientFactory extends
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) homeService, RemoteServiceMappingConstants.homeServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-        
-        this.homeService.isStandaloneServer(new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                navigator.setStandaloneServer(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
     }
     
     @Override

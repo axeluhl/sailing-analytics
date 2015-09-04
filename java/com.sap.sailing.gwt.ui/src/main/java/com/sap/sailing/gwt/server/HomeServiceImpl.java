@@ -67,12 +67,6 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return racingEventServiceTracker.getService(); 
     }
 
-
-    @Override
-    public boolean isStandaloneServer() {
-        return getService().getSailingServerConfiguration().isStandaloneServer();
-    }
-
     @Override
     public StartViewDTO getStartView() throws MalformedURLException {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();

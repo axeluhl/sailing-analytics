@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.mobile.app;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -28,16 +27,16 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
     private final MobilePlacesNavigator navigator;
     private final DispatchSystem dispatch = new DispatchSystemImpl();
 
-    public MobileApplicationClientFactory() {
-        this(new SimpleEventBus());
+    public MobileApplicationClientFactory(boolean isStandaloneServer) {
+        this(new SimpleEventBus(), isStandaloneServer);
     }
 
-    private MobileApplicationClientFactory(SimpleEventBus eventBus) {
-        this(eventBus, new PlaceController(eventBus));
+    private MobileApplicationClientFactory(SimpleEventBus eventBus, boolean isStandaloneServer) {
+        this(eventBus, new PlaceController(eventBus), isStandaloneServer);
     }
 
-    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        this(eventBus, placeController, new MobilePlacesNavigator(placeController));
+    private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, boolean isStandaloneServer) {
+        this(eventBus, placeController, new MobilePlacesNavigator(placeController, isStandaloneServer));
     }
 
     private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, MobilePlacesNavigator navigator) {
@@ -49,19 +48,7 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.homeService = GWT.create(HomeService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) homeService,
-                RemoteServiceMappingConstants.homeServiceRemotePath);
-        
-        this.homeService.isStandaloneServer(new AsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-                navigator.setStandaloneServer(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
+        EntryPointHelper.registerASyncService((ServiceDefTarget) homeService, RemoteServiceMappingConstants.homeServiceRemotePath);
     }
 
     public MobilePlacesNavigator getNavigator() {

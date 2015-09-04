@@ -16,9 +16,9 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
 
     private boolean isStandaloneServer;
     
-    protected AbstractPlaceNavigator(PlaceController placeController) {
+    protected AbstractPlaceNavigator(PlaceController placeController, boolean isStandaloneServer) {
         this.placeController = placeController;
-        this.isStandaloneServer = false; // the default
+        this.isStandaloneServer = isStandaloneServer;
     }
 
     public <T extends Place> void goToPlace(PlaceNavigation<T> placeNavigation) {
@@ -52,9 +52,5 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     @Override
     public boolean isStandaloneServer() {
         return isStandaloneServer;
-    }
-
-    public void setStandaloneServer(boolean isStandaloneServer) {
-        this.isStandaloneServer = isStandaloneServer;
     }
 }

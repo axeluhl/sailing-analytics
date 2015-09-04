@@ -18,6 +18,4 @@ public interface HomeService extends RemoteService {
     EventListViewDTO getEventListView() throws Exception;
     
     StartViewDTO getStartView() throws Exception;
-
-    boolean isStandaloneServer();
 }

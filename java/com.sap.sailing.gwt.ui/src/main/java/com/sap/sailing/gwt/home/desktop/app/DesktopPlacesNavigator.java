@@ -28,8 +28,8 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
 
-    protected DesktopPlacesNavigator(PlaceController placeController) {
-        super(placeController);
+    protected DesktopPlacesNavigator(PlaceController placeController, boolean isStandaloneServer) {
+        super(placeController, isStandaloneServer);
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {

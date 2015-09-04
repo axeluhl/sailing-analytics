@@ -24,8 +24,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
-    protected MobilePlacesNavigator(PlaceController placeController) {
-        super(placeController);
+    protected MobilePlacesNavigator(PlaceController placeController, boolean isStandaloneServer) {
+        super(placeController, isStandaloneServer);
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {

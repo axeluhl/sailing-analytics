@@ -22,6 +22,4 @@ public interface HomeServiceAsync {
     void getEventListView(AsyncCallback<EventListViewDTO> callback);
 
     void getStartView(AsyncCallback<StartViewDTO> callback);
-    
-    void isStandaloneServer(AsyncCallback<Boolean> callback);
 }
