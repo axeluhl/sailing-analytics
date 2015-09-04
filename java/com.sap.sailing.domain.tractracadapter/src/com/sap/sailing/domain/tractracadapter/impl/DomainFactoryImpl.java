@@ -587,6 +587,10 @@ public class DomainFactoryImpl implements DomainFactory {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
+            Pair<String, String> competitorBoatNameAndBoatColor = getMetadataParser().parseCompetitorBoatAndColor(rc);
+            if(competitorBoatNameAndBoatColor != null) {
+                // TODO: How to add this information to the competitor for a race?
+            }
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
             competitors.add(getOrCreateCompetitor(rc.getCompetitor()));

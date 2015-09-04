@@ -18,7 +18,9 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -204,5 +206,27 @@ public class MetadataParserImpl implements MetadataParser {
         }
         return result;
     }
-    
+
+    @Override
+    public Pair<String, String> parseCompetitorBoatAndColor(IRaceCompetitor competitor) {
+        Pair<String, String> result = null;
+        String parsedBoat = null;
+        String parsedColor = null;
+        String raceCompetitorMetadataString = competitor.getMetadata() != null ? competitor.getMetadata().getText() : null;
+        if (raceCompetitorMetadataString != null) {
+            Map<String, String> competitorMetadata = parseMetadata(raceCompetitorMetadataString);
+            for (Entry<String, String> entry : competitorMetadata.entrySet()) {
+                if (entry.getKey().startsWith("Boot")) {
+                    parsedBoat = entry.getValue();
+                } else if (entry.getKey().startsWith("Color")) {
+                    parsedColor = entry.getValue();
+                }
+            }
+            if(parsedBoat != null || parsedColor != null) {
+                result = new Pair<String, String>(parsedBoat, parsedColor);
+            }
+        }
+        
+        return result;
+    }
 }
