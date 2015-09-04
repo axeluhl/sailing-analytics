@@ -28,6 +28,7 @@ public class StartModeFragment extends BaseFragment {
     private final static String START_MODE = "startMode";
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
+    private int mFlagSize;
 
     public static StartModeFragment newInstance(int startMode) {
         StartModeFragment fragment = new StartModeFragment();
@@ -75,6 +76,8 @@ public class StartModeFragment extends BaseFragment {
             });
         }
 
+        mFlagSize = getResources().getInteger(R.integer.flag_size_large);
+
         return layout;
     }
 
@@ -91,7 +94,7 @@ public class StartModeFragment extends BaseFragment {
                 selected = position;
             }
             StartModeItem startMode = new StartModeItem(flag);
-            startMode.setImage(FlagsResources.getFlagDrawable(getActivity(), startMode.getFlagName(), 64));
+            startMode.setImage(FlagsResources.getFlagDrawable(getActivity(), startMode.getFlagName(), mFlagSize));
             startModes.add(startMode);
             position++;
         }

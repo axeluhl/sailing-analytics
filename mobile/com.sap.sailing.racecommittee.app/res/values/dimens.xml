@@ -67,6 +67,7 @@
     <!-- custom dimens (float, integer) -->
     <item name="picker_scale" format="float" type="integer">1</item>
     <item name="flag_size" format="integer" type="integer">32</item>
+    <item name="flag_size_large" format="integer" type="integer">48</item>
 
     <dimen name="side_padding">@dimen/default_padding_half</dimen>
     <dimen name="spinner_padding">9dp</dimen>
