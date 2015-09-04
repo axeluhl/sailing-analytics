@@ -59,7 +59,7 @@ public class PositionListFragment extends LoggableListFragment {
             items.add(item);
         }
 
-        final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity().getBaseContext(), items);
+        final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), items);
         setListAdapter(adapter);
 
         host = (PositionSelectedListenerHost) getActivity();

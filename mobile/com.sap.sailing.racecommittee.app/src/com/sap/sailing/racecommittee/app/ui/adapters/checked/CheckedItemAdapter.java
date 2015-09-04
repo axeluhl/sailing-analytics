@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
 
@@ -47,21 +48,20 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
         mainTextView.setText(item.getText());
         if (checkedPosition != -1) {
             if (position != checkedPosition) {
-                mainTextView.setAlpha(0.2f);
+                mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
                 mainTextView.setTypeface(Typeface.DEFAULT);
                 checkImageView.setVisibility(View.GONE);
             } else {
-                mainTextView.setAlpha(1.0f);
+                mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                 mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
                 checkImageView.setVisibility(View.VISIBLE);
             }
         }
 
-        subTextView.setAlpha(1.0f);
         if (!TextUtils.isEmpty(item.getSubtext())) {
             subTextView.setText(item.getSubtext());
             subTextView.setVisibility(View.VISIBLE);
-            mainTextView.setAlpha(1.0f);
+            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         } else {
             subTextView.setVisibility(View.GONE);
         }
