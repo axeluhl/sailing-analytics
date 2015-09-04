@@ -1,21 +1,29 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.CourseNameAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseItem;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentName extends CourseFragment implements CourseNameAdapter.CourseItemClick {
+public class CourseFragmentName extends CourseFragment{
 
     private ListView mListView;
 
@@ -52,12 +60,39 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
         super.onResume();
 
         if (mListView != null) {
-            mListView.setAdapter(new CourseNameAdapter(getActivity(), preferences.getByNameCourseDesignerCourseNames(), this));
+            final List<String> courses = preferences.getByNameCourseDesignerCourseNames();
+            Collections.sort(courses, new NaturalComparator());
+            String courseName = "";
+
+            CourseBase courseDesign = getRaceState().getCourseDesign();
+            if (courseDesign != null) {
+                courseName = courseDesign.getName();
+            }
+            List<CheckedListItem> items = new ArrayList<>();
+            int position = 0;
+            int selected = -1;
+            for (String course : courses) {
+                CourseItem item = new CourseItem();
+                item.setText(course);
+                if (course.equals(courseName)) {
+                    selected = position;
+                }
+                items.add(item);
+                position++;
+            }
+            final CheckedItemListAdapter checkedItemListAdapter = new CheckedItemListAdapter(getActivity(), items);
+            checkedItemListAdapter.setCheckedPostion(selected);
+            mListView.setAdapter(checkedItemListAdapter);
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    handleSelection(checkedItemListAdapter.getItem(position).getText());
+                }
+            });
         }
     }
 
-    @Override
-    public void onClick(String course) {
+    public void handleSelection(String course) {
         CourseBase courseLayout = new CourseDataImpl(course);
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
 

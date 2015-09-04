@@ -5,14 +5,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartMode;
-import com.sap.sailing.racecommittee.app.ui.adapters.unscheduled.StartModeAdapter;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class StartModeFragment extends BaseFragment implements StartModeAdapter.StartModeClick {
+public class StartModeFragment extends BaseFragment{
 
     private final static String START_MODE = "startMode";
     private ListView mListView;
@@ -79,20 +82,33 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
     public void onResume() {
         super.onResume();
 
-        ArrayList<StartMode> startMode = new ArrayList<>();
+        ArrayList<StartMode> startModes = new ArrayList<>();
         List<Flags> flags = mProcedure.getConfiguration().getStartModeFlags();
-
+        int position = 0;
+        int selected = -1;
         for (Flags flag : flags) {
-            if (mProcedure.getStartModeFlag() == null) {
-                startMode.add(new StartMode(flag));
-            } else {
-                startMode.add(new StartMode(flag, mProcedure.getStartModeFlag() == flag));
+            if (mProcedure.getStartModeFlag() != null) {
+                selected = position;
             }
+            StartMode startMode = new StartMode(flag);
+            startMode.setImage(FlagsResources.getFlagDrawable(getActivity(), startMode.getFlagName(), 64));
+            startModes.add(startMode);
+            position++;
         }
 
-        Collections.sort(startMode, new StartModeComparator());
-        StartModeAdapter adapter = new StartModeAdapter(getActivity(), startMode, this);
+        Collections.sort(startModes, new StartModeComparator());
+        final CheckedItemListAdapter adapter = new CheckedItemListAdapter(getActivity(), startModes);
+        adapter.setCheckedPostion(selected);
         mListView.setAdapter(adapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                CheckedListItem item = adapter.getItem(position);
+                if(item != null && item instanceof StartMode) {
+                    onClick((StartMode) item);
+                }
+            }
+        });
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
@@ -104,7 +120,6 @@ public class StartModeFragment extends BaseFragment implements StartModeAdapter.
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
-    @Override
     public void onClick(StartMode startMode) {
         boolean sameFlag = false;
         if (startMode.getFlag() == mProcedure.getStartModeFlag()) {

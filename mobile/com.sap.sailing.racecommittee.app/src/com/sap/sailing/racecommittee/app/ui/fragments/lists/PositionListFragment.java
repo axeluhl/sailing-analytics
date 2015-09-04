@@ -4,17 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedItemListAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CheckedListItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.LoginItem;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PositionListFragment extends LoggableListFragment {
 
@@ -48,7 +52,14 @@ public class PositionListFragment extends LoggableListFragment {
             values.add(getString(R.string.login_type_viewer));
         }
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(), R.layout.login_list_item, R.id.list_item, values);
+        final List<CheckedListItem> items = new ArrayList<>();
+        for (String displayedText : values) {
+            LoginItem item = new LoginItem();
+            item.setText(displayedText);
+            items.add(item);
+        }
+
+        final CheckedItemListAdapter adapter = new CheckedItemListAdapter(getActivity().getBaseContext(), items);
         setListAdapter(adapter);
 
         host = (PositionSelectedListenerHost) getActivity();
@@ -59,7 +70,12 @@ public class PositionListFragment extends LoggableListFragment {
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         setStyleClicked(view);
-
+        ListAdapter adapter = listView.getAdapter();
+        if (adapter instanceof CheckedItemListAdapter){
+            CheckedItemListAdapter checkedItemListAdapter = (CheckedItemListAdapter) adapter;
+            checkedItemListAdapter.setCheckedPostion(position);
+            checkedItemListAdapter.notifyDataSetChanged();
+        }
         LoginType selectedLoginType;
         switch (position) {
         // see loginTypeDescriptions for the indices of the login types
