@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.app;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -46,6 +47,17 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
         this.homeService = GWT.create(HomeService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) homeService,
                 RemoteServiceMappingConstants.homeServiceRemotePath);
+        
+        this.homeService.isStandaloneServer(new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                navigator.setStandaloneServer(result);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+        });
     }
 
     public MobilePlacesNavigator getNavigator() {
