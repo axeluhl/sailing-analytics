@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -584,6 +585,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
 
+    /**
+     * Gets the configuration of the local sailing server instances.
+     */
+    SailingServerConfiguration getSailingServerConfiguration();
+    
+    void updateServerConfiguration(SailingServerConfiguration serverConfiguration);
+    
     /**
      * References to remote servers may be dead or alive. This is internally determined by regularly polling those
      * servers for their events list. If the events list cannot be successfully retrieved, the server is considered "dead."

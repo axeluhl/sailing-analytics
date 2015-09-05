@@ -77,6 +77,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -209,7 +210,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
-import com.sap.sse.BuildVersion;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -397,6 +398,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
     
     private final JoinedClassLoader joinedClassLoader;
+
+    private SailingServerConfiguration sailingServerConfiguration;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -593,6 +596,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
+        sailingServerConfiguration = domainObjectFactory.loadServerConfiguration();
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -1135,6 +1139,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return Collections.unmodifiableMap(new HashMap<String, Leaderboard>(leaderboardsByName));
     }
 
+    @Override
+    public SailingServerConfiguration getSailingServerConfiguration() {
+        return sailingServerConfiguration;
+    }
+    
+    @Override
+    public void updateServerConfiguration(SailingServerConfiguration serverConfiguration) {
+        this.sailingServerConfiguration = serverConfiguration;
+        mongoObjectFactory.storeServerConfiguration(serverConfiguration);
+    }
+    
     @Override
     public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
         return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own
@@ -2911,7 +2926,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public String toString() {
-        return "RacingEventService: " + this.hashCode() + " Build: " + BuildVersion.getBuildVersion();
+        return "RacingEventService: " + this.hashCode() + " Build: " + ServerInfo.getBuildVersion();
     }
 
     @Override
