@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -71,15 +72,22 @@ public class StartProcedureFragment extends BaseFragment{
                     break;
             }
         }
-
+        RacingProcedure racingProcedure = getRaceState().getRacingProcedure();
+        int position = 0;
+        int selected = -1;
         for (RacingProcedureType procedureType : RacingProcedureType.validValues()) {
             StartProcedureItem item = new StartProcedureItem(procedureType);
             startProcedure.add(item);
+            if (racingProcedure != null && racingProcedure.getType().equals(procedureType)) {
+                selected = position;
+            }
+            position++;
         }
 
         ListView listView = (ListView) getActivity().findViewById(R.id.listView);
         if (listView != null) {
             final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), startProcedure);
+            adapter.setCheckedPosition(selected);
             listView.setAdapter(adapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
