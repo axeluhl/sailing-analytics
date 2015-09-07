@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.dto.DistanceDTO;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
@@ -55,7 +55,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
-        AbstractResultDataProvider<DistanceDTO> distanceDataProvider = new DistanceDataProvider();
+        AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
         dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
         
         controlsPanel = new HorizontalPanel();
@@ -72,7 +72,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
                 // Call a servlet to download the previously pushed result as json file
             }
         });
-        addControl(exportButton);
+//        addControl(exportButton);
         
         dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
             @Override
