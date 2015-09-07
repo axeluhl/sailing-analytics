@@ -8,24 +8,23 @@
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentResources" />
 	<div>
-		<a ui:field="eventLinkUi">
-			<img ui:field="eventImageUi" class="{local_res.css.eventsoverviewrecent_event_image}"></img>
-			<div class="{local_res.css.eventsoverviewrecent_event}">
-				<div class="{local_res.css.eventteaser_title}">
-					<div class="{local_res.css.eventteaser_title_name}">
-						<span ui:field="eventNameUi" />
-						<div ui:field="eventStateUi" 
-							class="{local_res.css.eventteaser_title_name_state} {res.mainCss.label}" />
-					</div>
-					<div class="{local_res.css.eventteaser_title_location}">
-						 <span ui:field="venueUi" />,&nbsp;<span ui:field="eventDateUi" />
-					</div>
+	<a ui:field="eventLinkUi">
+		<div class="{local_res.css.eventsoverviewrecent_event}">
+			<div class="{local_res.css.eventteaser_title}">
+				<div class="{local_res.css.eventteaser_title_name}">
+					<span ui:field="eventNameUi" />
+					<div ui:field="eventStateUi" 
+						class="{local_res.css.eventteaser_title_name_state} {res.mainCss.label}" />
 				</div>
-				<div class="{local_res.css.eventsoverviewrecent_event_arrow}">
-					<img src="images/home/arrow-down-grey.png" alt="{i18n.goToEventOverview}"
-						class="{local_res.css.eventsoverviewrecent_event_arrow_image}"></img>
+				<div class="{local_res.css.eventteaser_title_location}">
+					 <span ui:field="venueUi" />,&nbsp;<span ui:field="eventDateUi" />
 				</div>
 			</div>
-		</a>
+			<div class="{local_res.css.eventsoverviewrecent_event_arrow}">
+				<img src="images/home/arrow-down-grey.png" alt="{i18n.goToEventOverview}"
+					class="{local_res.css.eventsoverviewrecent_event_arrow_image}"></img>
+			</div>
+		</div>
+	</a>
 	</div>
 </ui:UiBinder>

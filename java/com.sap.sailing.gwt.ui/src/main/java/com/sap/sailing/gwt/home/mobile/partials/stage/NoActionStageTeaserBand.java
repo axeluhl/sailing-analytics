@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.mobile.partials.stage;
 
 import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 /**
  * Teaser band with no action on the homepage stage
@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
  */
 public class NoActionStageTeaserBand extends StageTeaserBand {
 
-    public NoActionStageTeaserBand(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public NoActionStageTeaserBand(EventListEventDTO event, MobilePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getDisplayName());

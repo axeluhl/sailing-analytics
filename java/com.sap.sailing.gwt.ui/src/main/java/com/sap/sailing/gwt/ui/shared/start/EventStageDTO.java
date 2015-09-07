@@ -7,6 +7,7 @@ public class EventStageDTO extends EventLinkAndMetadataDTO {
     private StageEventType stageType;
     private String stageImageURL;
 
+    @Override
     public StageEventType getStageType() {
         return stageType;
     }
