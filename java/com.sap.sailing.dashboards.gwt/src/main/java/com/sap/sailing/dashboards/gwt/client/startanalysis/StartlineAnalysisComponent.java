@@ -271,7 +271,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         if (displaysCards == true) {
             if (clickedLeft) {
                 if (page != 0) {
-                    currentScrollPosition = currentScrollPosition + SCROLL_OFFSET_STARTANALYSIS_CARDS;
+                    currentScrollPosition += SCROLL_OFFSET_STARTANALYSIS_CARDS;
                     page--;
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
