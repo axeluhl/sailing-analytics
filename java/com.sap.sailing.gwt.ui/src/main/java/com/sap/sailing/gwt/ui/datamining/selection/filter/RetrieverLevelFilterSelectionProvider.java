@@ -9,9 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ProvidesResize;
-import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -35,13 +34,12 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final int retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
-    private final HorizontalLayoutPanel mainPanel;
+    private final HorizontalPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
-    private final SizeProvider sizeProvider;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
-            LocalizedTypeDTO retrievedDataType, int retrieverLevel, SizeProvider sizeProvider) {
+            LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         
@@ -52,10 +50,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
-        mainPanel = new HorizontalLayoutPanel();
+        mainPanel = new HorizontalPanel();
         dimensionSelectionProviders = new ArrayList<>();
-
-        this.sizeProvider = sizeProvider;
     }
 
     public void setAvailableDimensions(Collection<FunctionDTO> dimensions) {
@@ -87,8 +83,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     
     private void addDimensionSelectionProvider(DimensionFilterSelectionProvider dimensionFilter) {
         dimensionSelectionProviders.add(dimensionFilter);
+        dimensionFilter.getEntryWidget().getElement().getStyle().setDisplay(Display.INLINE);
         mainPanel.add(dimensionFilter.getEntryWidget());
-        mainPanel.onResize();
     }
 
     boolean shouldRemoveDimensionSelectionProvider() {
@@ -99,7 +95,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         dimensionFilter.clearSelection(); // Notifies the listeners, if values were selected
         dimensionSelectionProviders.remove(dimensionFilter);
         mainPanel.remove(dimensionFilter.getEntryWidget());
-        mainPanel.onResize();
     }
     
     void updateAvailableDimensions() {
@@ -115,7 +110,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
             remainingDimensions.add(null);
             dimensionFilter.setAvailableDimensions(remainingDimensions);
         }
-        mainPanel.onResize();
     }
 
     private Collection<FunctionDTO> getSelectedDimensions() {
@@ -244,24 +238,6 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     @Override
     public String getDependentCssClassName() {
         return "singleRetrieverLevelSelectionPanel";
-    }
-    
-    interface SizeProvider {
-        
-        public int getFreeWidthInPX();
-        public int getFreeHeightInPX();
-
-    }
-    
-    private class HorizontalLayoutPanel extends HorizontalPanel implements RequiresResize, ProvidesResize {
-        @Override
-        public void onResize() {
-            int heightInPX = sizeProvider.getFreeHeightInPX();
-            setHeight(heightInPX + "px");
-            for (DimensionFilterSelectionProvider selectionProvider : dimensionSelectionProviders) {
-                selectionProvider.resizeToHeight(heightInPX);
-            }
-        }
     }
 
 }

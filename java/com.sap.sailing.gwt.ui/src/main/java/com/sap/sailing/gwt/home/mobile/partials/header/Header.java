@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.shared.DropdownHandler;
-import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -38,17 +38,15 @@ public class Header extends Composite {
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
     private DropdownHandler dropdownHandler;
-//    private MobileApplicationClientFactory appContext;
     
-    public Header(final MobileApplicationClientFactory appContext) {
-//        this.appContext = appContext;
+    public Header(final MobilePlacesNavigator placeNavigator) {
         HeaderResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
         
-        addNavigation(appContext.getNavigator().getHomeNavigation(), StringMessages.INSTANCE.home());
-        addNavigation(appContext.getNavigator().getEventsNavigation(), StringMessages.INSTANCE.events());
-        addNavigation(appContext.getNavigator().getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
+        addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
+        addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
+        addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
 
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
         
@@ -58,7 +56,7 @@ public class Header extends Composite {
             public void onBrowserEvent(Event event) {
                 if(LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
-                    appContext.getNavigator().getSearchResultNavigation("").goToPlace();
+                    placeNavigator.getSearchResultNavigation("").goToPlace();
                 }
                 
             }

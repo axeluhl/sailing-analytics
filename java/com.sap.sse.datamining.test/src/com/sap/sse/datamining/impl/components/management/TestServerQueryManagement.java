@@ -19,13 +19,13 @@ import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
 import com.sap.sse.datamining.impl.AdditionalOtherQueryData;
 import com.sap.sse.datamining.impl.AdditionalStatisticQueryData;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.data.Test_HasRaceContext;
@@ -48,8 +48,8 @@ public class TestServerQueryManagement {
         DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
         AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
         
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAndVerifyConflict(session, firstQuery, session, secondQuery);
     }
     
@@ -59,8 +59,8 @@ public class TestServerQueryManagement {
         DataMiningSession secondQuerySession = new UUIDDataMiningSession(UUID.randomUUID());
         AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
         
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAndVerifyNoConflict(firstQuerySession, firstQuery, secondQuerySession, secondQuery);
     }
     
@@ -72,8 +72,8 @@ public class TestServerQueryManagement {
         dimensions.add(functionFactory.createMethodWrappingFunction(getYear));
         AdditionalQueryData additionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
         
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAndVerifyConflict(session, firstQuery, session, secondQuery);
     }
 
@@ -85,13 +85,13 @@ public class TestServerQueryManagement {
         Method getYear = FunctionTestsUtil.getMethodFromClass(Test_HasRaceContext.class, "getYear");
         firstQueryDimensions.add(functionFactory.createMethodWrappingFunction(getYear));
         AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), firstQueryDimensions);
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(firstQueryAdditionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, firstQueryAdditionalData);
 
         Collection<Function<?>> secondQueryDimensions = new ArrayList<>();
         Method getLegNumber = FunctionTestsUtil.getMethodFromClass(Test_HasLegOfCompetitorContext.class, "getLegNumber");
         secondQueryDimensions.add(functionFactory.createMethodWrappingFunction(getLegNumber));
         AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), secondQueryDimensions);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(secondQueryAdditionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, secondQueryAdditionalData);
         
         runQueriesAndVerifyNoConflict(session, firstQuery, session, secondQuery);
     }
@@ -105,9 +105,9 @@ public class TestServerQueryManagement {
         dimensions.add(functionFactory.createMethodWrappingFunction(getYear));
         
         AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(firstQueryAdditionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, firstQueryAdditionalData);
         AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(secondQueryAdditionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, secondQueryAdditionalData);
         
         runQueriesAndVerifyNoConflict(firstQuerySession, firstQuery, secondQuerySession, secondQuery);
     }
@@ -117,8 +117,8 @@ public class TestServerQueryManagement {
         DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
         AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
         
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(additionalData);
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAndVerifyNoConflict(session, firstQuery, session, secondQuery);
     }
     
@@ -159,7 +159,7 @@ public class TestServerQueryManagement {
     public void testControllablePseudoQuery() {
         AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
         
-        final ControllablePseudoQuery<Double> normalQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final ControllablePseudoQuery<Double> normalQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         assertThat(normalQuery.getState(), is(QueryState.NOT_STARTED));
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -177,7 +177,7 @@ public class TestServerQueryManagement {
         ConcurrencyTestsUtil.sleepFor(50);
         assertThat(normalQuery.getState(), is(QueryState.NORMAL));
         
-        final Query<Double> abortedQuery = new ControllablePseudoQuery<Double>(additionalData);
+        final Query<Double> abortedQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -190,22 +190,29 @@ public class TestServerQueryManagement {
         assertThat(abortedQuery.getState(), is(QueryState.ABORTED));
     }
     
-    private static class ControllablePseudoQuery<AggregatedType> implements Query<AggregatedType> {
+    private static class ControllablePseudoQuery<ResultType> implements Query<ResultType> {
 
-        private final AdditionalQueryData additionalData;
         private QueryState state;
+        private final Class<ResultType> resultType;
+        private final AdditionalQueryData additionalData;
         
         private boolean processEnabled;
         private boolean aborted;
 
-        public ControllablePseudoQuery(AdditionalQueryData additionalData) {
-            this.additionalData = additionalData;
+        public ControllablePseudoQuery(Class<ResultType> resultType, AdditionalQueryData additionalData) {
             state = QueryState.NOT_STARTED;
+            this.resultType = resultType;
+            this.additionalData = additionalData;
         }
 
         @Override
         public QueryState getState() {
             return state;
+        }
+        
+        @Override
+        public Class<ResultType> getResultType() {
+            return resultType;
         }
 
         @Override
@@ -227,7 +234,7 @@ public class TestServerQueryManagement {
         }
 
         @Override
-        public QueryResult<AggregatedType> run() {
+        public QueryResult<ResultType> run() {
             state = QueryState.RUNNING;
             while (!processEnabled && !aborted) {
                 ConcurrencyTestsUtil.sleepFor(100);
@@ -244,7 +251,7 @@ public class TestServerQueryManagement {
         }
 
         @Override
-        public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException {
+        public QueryResult<ResultType> run(long timeout, TimeUnit unit) throws TimeoutException {
             throw new UnsupportedOperationException();
         }
 
@@ -288,17 +295,21 @@ public class TestServerQueryManagement {
         }
         
         try {
-            Query<Double> query = new NullQuery<Double>();
+            Query<Object> query = new NullQuery();
             server.runNewQueryAndAbortPreviousQueries(null, query);
             fail("Expected a NullPointerException");
         } catch (NullPointerException e) {
         }
     }
     
-    private static class NullQuery<AggregatedType> implements Query<AggregatedType> {
+    private static class NullQuery implements Query<Object> {
         @Override
         public QueryState getState() {
             return QueryState.NOT_STARTED;
+        }
+        @Override
+        public Class<Object> getResultType() {
+            return Object.class;
         }
         @Override
         public AdditionalQueryData getAdditionalData() {
@@ -309,11 +320,11 @@ public class TestServerQueryManagement {
             return null;
         }
         @Override
-        public QueryResult<AggregatedType> run() {
+        public QueryResult<Object> run() {
             return null;
         }
         @Override
-        public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException {
+        public QueryResult<Object> run(long timeout, TimeUnit unit) throws TimeoutException {
             return null;
         }
         @Override

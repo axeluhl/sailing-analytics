@@ -14,7 +14,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.datamining.shared.SailingDataMiningSerializationDummy;
 import com.sap.sailing.gwt.ui.datamining.DataMiningService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
@@ -22,17 +21,18 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.SSEDataMiningSerializationDummy;
+import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
@@ -172,7 +172,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public QueryResult<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+    public QueryResultDTO<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
             int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName) {
         DataMiningServer dataMiningServer = getDataMiningServer();
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
@@ -180,8 +180,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
-        QueryResult<Set<Object>> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
-        return result;
+        QueryResult<Set<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        return dataMiningServer.convertToDTO(result);
     }
 
     private Collection<Function<?>> functionDTOsAsFunctions(Iterable<FunctionDTO> functionDTOs) {
@@ -217,20 +217,16 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public <ResultType extends Number> QueryResult<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
-        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = getDataMiningServer().getQueryDefinitionForDTO(queryDefinitionDTO);
-        Query<ResultType> query = getDataMiningServer().createQuery(queryDefinition);
-        QueryResult<ResultType> result = getDataMiningServer().runNewQueryAndAbortPreviousQueries(session, query);
-        return result;
+    public <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinitionDTO) {
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
+        QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+        return dataMiningServer.convertToDTO(result);
     }
     
     @Override
-    public SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
-        return null;
-    }
-    
-    @Override
-    public SailingDataMiningSerializationDummy pseudoMethodSoThatSomeSailingDataMiningClassesAreAddedToTheGWTSerializationPolicy() {
+    public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }
 

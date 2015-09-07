@@ -27,11 +27,10 @@ public class RaceLogWindFixEventDeserializer extends BaseRaceLogEventDeserialize
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
-        JSONObject windJsonObject = Helpers.getNestedObjectSafe(object, RaceLogWindFixEventSerializer.FIELD_WIND);
-        
-        Wind wind = windDeserializer.deserialize(windJsonObject);
-        
-        return factory.createWindFixEvent(createdAt, author, timePoint, id, competitors, passId, wind);
+        final JSONObject windJsonObject = Helpers.getNestedObjectSafe(object, RaceLogWindFixEventSerializer.FIELD_WIND);
+        final Wind wind = windDeserializer.deserialize(windJsonObject);
+        final Boolean isMagnetic = (Boolean) object.get(RaceLogWindFixEventSerializer.FIELD_MAGNETIC);
+        return factory.createWindFixEvent(createdAt, author, timePoint, id, competitors, passId, wind, isMagnetic == null ? true : isMagnetic);
     }
 
 }

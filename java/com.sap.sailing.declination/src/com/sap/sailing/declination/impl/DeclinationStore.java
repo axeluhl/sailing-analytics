@@ -41,7 +41,7 @@ public class DeclinationStore {
     /**
      * Returns <code>null</code> if no stored declinations exist for the <code>year</code> requested.
      */
-    public QuadTree<Declination> getStoredDeclinations(int year) throws IOException, ClassNotFoundException, ParseException {
+    public QuadTree<Declination> getStoredDeclinations(int year) throws IOException, ParseException {
         Declination record;
         QuadTree<Declination> result = null;
         InputStream is = getInputStreamForYear(year);

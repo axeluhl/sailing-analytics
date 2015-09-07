@@ -66,7 +66,7 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     protected RacingEventService getService() {
         return racingEventServiceTracker.getService(); 
     }
-    
+
     @Override
     public StartViewDTO getStartView() throws MalformedURLException {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();

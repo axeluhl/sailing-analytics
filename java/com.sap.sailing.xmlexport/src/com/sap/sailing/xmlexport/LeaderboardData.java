@@ -446,9 +446,9 @@ public class LeaderboardData extends ExportAction {
 
             GPSFixTrack<Competitor, GPSFixMoving> gpsFixesForCompetitor = race.getTrack(competitor);
             if (gpsFixesForCompetitor != null) {
-                Duration averageIntervall = gpsFixesForCompetitor.getAverageIntervalBetweenFixes();
-                if (averageIntervall != null) {
-                    addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_outliers_removed_as_millis", averageIntervall.asMillis());
+                Duration averageInterval = gpsFixesForCompetitor.getAverageIntervalBetweenFixes();
+                if (averageInterval != null) {
+                    addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_outliers_removed_as_millis", averageInterval.asMillis());
                 }
                 Duration averageIntervallRaw = gpsFixesForCompetitor.getAverageIntervalBetweenRawFixes();
                 if (averageIntervallRaw != null) {
