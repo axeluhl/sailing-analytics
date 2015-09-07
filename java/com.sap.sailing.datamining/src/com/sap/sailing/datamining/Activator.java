@@ -16,6 +16,10 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMedianAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataMiningBundleService;
@@ -105,6 +109,10 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
         aggregators.add(ParallelBoolSumAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceSumAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDistanceAverageAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDistanceMaxAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDistanceMinAggregationProcessor.getDefinition());
+        aggregators.add(ParallelDistanceMedianAggregationProcessor.getDefinition());
         return aggregators;
     }
     

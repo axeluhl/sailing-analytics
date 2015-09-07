@@ -7,8 +7,11 @@ import static org.junit.Assert.assertThat;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +20,7 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
@@ -80,9 +84,13 @@ public class TestFunctionManagerAsFunctionProvider {
     public void testGetDimensionsForDataRetrieverChainDefinition() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
 
-        Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition), is(expectedDimensions));
+        List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = new HashMap<>();
+        for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
+            expectedDimensions.put(dataRetrieverLevel, functionRegistryUtil.getExpectedDimensionsFor(dataRetrieverLevel.getRetrievedDataType()));
+        }
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+        assertThat(dimensionsMappedByLevel, is(expectedDimensions));
     }
     
     @SuppressWarnings("unchecked")
