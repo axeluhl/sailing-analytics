@@ -47,7 +47,7 @@ public class Header extends Composite {
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
         addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
-
+        addUrl("http://blog.sapsailing.com", TextMessages.INSTANCE.blog());
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
         
         Event.sinkEvents(searchUi, Event.ONCLICK);
@@ -66,7 +66,6 @@ public class Header extends Composite {
     private void addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
         HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, placeNavigation.getTargetUrl());
         navigationItem.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
@@ -79,6 +78,11 @@ public class Header extends Composite {
         dropdownListUi.add(navigationItem);
     }
     
+    private void addUrl(String url, String name) {
+        HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, url);
+        dropdownListUi.add(navigationItem);
+    }
+
     public void setLocationTitle(String locationTitle) {
         locationTitleUi.setInnerText(locationTitle);
     }
