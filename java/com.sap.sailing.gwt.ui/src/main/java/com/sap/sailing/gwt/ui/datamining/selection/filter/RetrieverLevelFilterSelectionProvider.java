@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -30,8 +31,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final DataMiningSession session;
     private final ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider;
     private final DataRetrieverChainDefinitionDTO retrieverChain;
-    private final LocalizedTypeDTO retrievedDataType;
-    private final int retrieverLevel;
+    private final DataRetrieverLevelDTO retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalPanel mainPanel;
@@ -39,14 +39,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
-            LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
+            DataRetrieverLevelDTO retrieverLevel) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         
         this.session = session;
         this.retrieverChainSelectionProvider = retrieverChainSelectionProvider;
         this.retrieverChain = retrieverChain;
-        this.retrievedDataType = retrievedDataType;
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
@@ -194,11 +193,11 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     }
     
     public int getRetrieverLevel() {
-        return retrieverLevel;
+        return retrieverLevel.getLevel();
     }
     
     public LocalizedTypeDTO getRetrievedDataType() {
-        return retrievedDataType;
+        return retrieverLevel.getRetrievedDataType();
     }
 
     @Override

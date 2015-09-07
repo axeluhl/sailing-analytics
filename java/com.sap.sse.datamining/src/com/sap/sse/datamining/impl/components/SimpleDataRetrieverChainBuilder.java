@@ -19,14 +19,14 @@ import com.sap.sse.datamining.components.Processor;
 public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetrieverChainBuilder<DataSourceType> {
     
     private final ExecutorService executor;
-    private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
+    private final List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation;
 
     private final Map<Integer, FilterCriterion<?>> filters;
     private final Map<Integer, Collection<Processor<?, ?>>> receivers;
     private int currentRetrieverTypeIndex;
 
     /**
-     * Creates a data retriever chain builder for the given list of {@link DataRetrieverTypeWithInformation}.</br>
+     * Creates a data retriever chain builder for the given list of {@link DataRetrieverLevel}.</br>
      * The list has to match the following conditions to build a valid data retriever chain:
      * <ul>
      *  <li>The first data retriever type has the <code>DataSourceType</code> as <code>InputType</code>.</li>
@@ -42,7 +42,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
      * @param dataRetrieverTypesWithInformation
      */
     SimpleDataRetrieverChainBuilder(ExecutorService executor,
-            List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation) {
+            List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation) {
         this.executor = executor;
         this.dataRetrieverTypesWithInformation = new ArrayList<>(dataRetrieverTypesWithInformation);
         
@@ -122,7 +122,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         
         Processor<?, ?> firstRetriever = null;
         for (int retrieverTypeIndex = currentRetrieverTypeIndex; retrieverTypeIndex >= 0; retrieverTypeIndex--) {
-            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrieverTypeIndex);
+            DataRetrieverLevel<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrieverTypeIndex);
             firstRetriever = createRetriever(dataRetrieverTypeWithInformation, firstRetriever, retrieverTypeIndex);
         }
         
@@ -134,7 +134,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     }
     
     @SuppressWarnings("unchecked")
-    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation, Processor<?, ?> previousRetriever, int retrieverTypeIndex) {
+    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverLevel<?, ?> dataRetrieverTypeWithInformation, Processor<?, ?> previousRetriever, int retrieverTypeIndex) {
         Class<ResultType> retrievedDataType = (Class<ResultType>) dataRetrieverTypeWithInformation.getRetrievedDataType();
         
         Collection<?> storedResultReceivers = receivers.get(retrieverTypeIndex);

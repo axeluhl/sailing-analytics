@@ -3,9 +3,11 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
+import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
@@ -163,6 +165,27 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
             first = false;
         }
         return parameterBuilder.toString();
+    }
+    
+    @Override
+    public boolean isLogicalEqualTo(Function<?> function) {
+        if (function.getClass().equals(MethodWrappingFunction.class)) {
+            return equals(function);
+        }
+        if (function.getClass().equals(ConcatenatingCompoundFunction.class)) {
+            ConcatenatingCompoundFunction<?> concatenatingCompoundFunction = (ConcatenatingCompoundFunction<?>) function;
+            List<Function<?>> functions = concatenatingCompoundFunction.getFunctions();
+            if (functions.size() == 1) {
+                return isLogicalEqualTo(functions.get(0));
+            } else if (functions.size() == 2) {
+                return functions.get(1).getClass().equals(MethodWrappingFunction.class) &&
+                       equals(functions.get(1));
+            } else {
+                return false;
+            }
+        }
+        throw new IllegalArgumentException("Can't compare " + MethodWrappingFunction.class.getSimpleName() +
+                                           " with " + function.getClass().getSimpleName());
     }
 
     @Override

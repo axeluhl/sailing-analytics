@@ -2,8 +2,6 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
@@ -13,7 +11,7 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     private String name;
     private String dataSourceTypeName;
     
-    private List<LocalizedTypeDTO> retrievedDataTypesChain;
+    private ArrayList<DataRetrieverLevelDTO> retrieverLevels;
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -21,12 +19,12 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     @Deprecated
     DataRetrieverChainDefinitionDTO() { }
 
-    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, Collection<LocalizedTypeDTO> retrievedDataTypesChain) {
+    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, ArrayList<DataRetrieverLevelDTO> retrieverLevels) {
         this.id = id;
         this.name = name;
         this.dataSourceTypeName = dataSourceTypeName;
         
-        this.retrievedDataTypesChain = new ArrayList<>(retrievedDataTypesChain);
+        this.retrieverLevels = new ArrayList<>(retrieverLevels);
     }
 
     public UUID getId() {
@@ -42,19 +40,19 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     }
 
     public String getRetrievedDataTypeName() {
-        return retrievedDataTypesChain.get(retrievedDataTypesChain.size() - 1).getTypeName();
+        return retrieverLevels.get(retrieverLevels.size() - 1).getRetrievedDataType().getTypeName();
     }
     
-    public Collection<LocalizedTypeDTO> getRetrievedDataTypesChain() {
-        return retrievedDataTypesChain;
+    public ArrayList<DataRetrieverLevelDTO> getRetrieverLevels() {
+        return retrieverLevels;
     }
     
     public int size() {
-        return retrievedDataTypesChain.size();
+        return retrieverLevels.size();
     }
     
-    public LocalizedTypeDTO getRetrievedDataType(int retrieverLevel) {
-        return retrievedDataTypesChain.get(retrieverLevel);
+    public DataRetrieverLevelDTO getRetrieverLevel(int retrieverLevel) {
+        return retrieverLevels.get(retrieverLevel);
     }
 
     @Override
@@ -69,7 +67,7 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
         result = prime * result + ((dataSourceTypeName == null) ? 0 : dataSourceTypeName.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((retrievedDataTypesChain == null) ? 0 : retrievedDataTypesChain.hashCode());
+        result = prime * result + ((retrieverLevels == null) ? 0 : retrieverLevels.hashCode());
         return result;
     }
 
@@ -97,10 +95,10 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
                 return false;
         } else if (!name.equals(other.name))
             return false;
-        if (retrievedDataTypesChain == null) {
-            if (other.retrievedDataTypesChain != null)
+        if (retrieverLevels == null) {
+            if (other.retrieverLevels != null)
                 return false;
-        } else if (!retrievedDataTypesChain.equals(other.retrievedDataTypesChain))
+        } else if (!retrieverLevels.equals(other.retrieverLevels))
             return false;
         return true;
     }

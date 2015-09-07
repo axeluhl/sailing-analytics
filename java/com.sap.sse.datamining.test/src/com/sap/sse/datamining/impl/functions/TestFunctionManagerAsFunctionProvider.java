@@ -82,7 +82,7 @@ public class TestFunctionManagerAsFunctionProvider {
 
         Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(server.getDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
+        assertThat(server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition), is(expectedDimensions));
     }
     
     @SuppressWarnings("unchecked")

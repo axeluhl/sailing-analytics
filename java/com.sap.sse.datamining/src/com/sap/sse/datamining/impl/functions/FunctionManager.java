@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
@@ -19,7 +21,7 @@ import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
 import com.sap.sse.datamining.functions.FunctionRegistry;
-import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
@@ -235,14 +237,53 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        Collection<Function<?>> dimensions = new HashSet<>();
-        for (DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation : dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation()) {
-            dimensions.addAll(getDimensionsFor(dataRetrieverTypeWithInformation.getRetrievedDataType()));
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = new HashMap<>();
+        List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
+        for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
+            dimensions.put(dataRetrieverLevel, getDimensionsFor(dataRetrieverLevel.getRetrievedDataType()));
         }
         return dimensions;
     }
     
+    @Override
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = new HashMap<>();
+        List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
+        for (Entry<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> entry : dimensionsMappedByLevel.entrySet()) {
+            DataRetrieverLevel<?, ?> retrieverLevel = entry.getKey();
+            Iterable<Function<?>> dimensions = entry.getValue();
+            Iterable<Function<?>> previousDimensions = retrieverLevel.getLevel() > 0 ?
+                                                            dimensionsMappedByLevel.get(retrieverLevels.get(retrieverLevel.getLevel() - 1)) :
+                                                            Collections.emptySet();
+            if (reducedDimensions.isEmpty() || Util.isEmpty(previousDimensions)) {
+                reducedDimensions.put(retrieverLevel, dimensions);
+            } else {
+                reducedDimensions.put(retrieverLevel, reduce(dimensions, previousDimensions));
+            }
+        }
+        return reducedDimensions;
+    }
+    
+    private Iterable<Function<?>> reduce(Iterable<Function<?>> dimensionsToReduce, Iterable<Function<?>> byDimensions) {
+        Collection<Function<?>> reducedDimensions = new HashSet<>();
+        for (Function<?> dimension : dimensionsToReduce) {
+            boolean isDimensionAllowed = true;
+            for (Function<?> forbiddenDimension : byDimensions) {
+                if (dimension.isLogicalEqualTo(forbiddenDimension)) {
+                    isDimensionAllowed = false;
+                    break;
+                }
+            }
+            if (isDimensionAllowed) {
+                reducedDimensions.add(dimension);
+            }
+        }
+        return reducedDimensions;
+    }
+
     @Override
     public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
         return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Statistics);

@@ -17,13 +17,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
-import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, FilterSelectionChangedListener,
@@ -69,8 +69,8 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
         boolean first = true;
         for (Integer levelIndex : sortedLevels) {
             Map<FunctionDTO, Collection<? extends Serializable>> levelSelection = selection.get(levelIndex);
-            LocalizedTypeDTO level = retrieverChain.getRetrievedDataType(levelIndex);
-            RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(level, levelSelection);
+            DataRetrieverLevelDTO retrieverLevel = retrieverChain.getRetrieverLevel(levelIndex);
+            RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(retrieverLevel, levelSelection);
             if (!first) {
                 levelSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(5, Unit.PX);
             }
@@ -83,10 +83,10 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
         
         private final HorizontalPanel mainPanel;
 
-        public RetrieverLevelFilterSelectionPresenter(LocalizedTypeDTO level,
+        public RetrieverLevelFilterSelectionPresenter(DataRetrieverLevelDTO retrieverLevel,
                 Map<FunctionDTO, Collection<? extends Serializable>> levelSelection) {
             
-            Label levelLabel = new Label(level.getDisplayName());
+            Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
             levelLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             levelLabel.setWidth("75px");
             

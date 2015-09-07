@@ -3,6 +3,8 @@ package com.sap.sse.datamining.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
+import com.sap.sse.datamining.shared.annotations.Connector;
+import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -11,6 +13,16 @@ public interface Function<ReturnType> {
     public Class<?> getDeclaringType();
     public Iterable<Class<?>> getParameters();
     public Class<ReturnType> getReturnType();
+    
+    /**
+     * Checks if this function and the given function would return the same result or if they are {@link #equals(Object)}.
+     * This can be the case, if the only difference between the two functions is a {@link Connector} to a Data Type
+     * to inherit its {@link Dimension Dimensions}. 
+     * 
+     * @param function The function to compare.
+     * @return <code>true</code>, if this function and the given function would return the same result.
+     */
+    public boolean isLogicalEqualTo(Function<?> function);
 
     public boolean isDimension();
     

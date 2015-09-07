@@ -169,6 +169,29 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     public String toString() {
         return getSimpleName();
     }
+    
+    @Override
+    public boolean isLogicalEqualTo(Function<?> function) {
+        if (function.getClass().equals(MethodWrappingFunction.class)) {
+            MethodWrappingFunction<?> methodWrappingFunction = (MethodWrappingFunction<?>) function;
+            if (getFunctions().size() == 1) {
+                return isLogicalEqualTo(methodWrappingFunction);
+            } else if (getFunctions().size() == 2) {
+                return getFunctions().get(1).getClass().equals(MethodWrappingFunction.class) &&
+                       equals(methodWrappingFunction);
+            } else {
+                return false;
+            }
+        }
+        if (function.getClass().equals(ConcatenatingCompoundFunction.class)) {
+            ConcatenatingCompoundFunction<?> concatenatingCompoundFunction = (ConcatenatingCompoundFunction<?>) function;
+            return getParameters().equals(function.getParameters()) &&
+                   (getFunctions().equals(concatenatingCompoundFunction.getFunctions().subList(1, concatenatingCompoundFunction.getFunctions().size())) ||
+                    getFunctions().subList(1, getFunctions().size()).equals(concatenatingCompoundFunction.getFunctions()));
+        }
+        throw new IllegalArgumentException("Can't compare " + MethodWrappingFunction.class.getSimpleName() +
+                " with " + function.getClass().getSimpleName());
+    }
 
     @Override
     public int hashCode() {

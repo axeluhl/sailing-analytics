@@ -1,8 +1,10 @@
 package com.sap.sse.datamining.functions;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface FunctionProvider {
@@ -15,7 +17,10 @@ public interface FunctionProvider {
 
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
     
-    public Collection<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>

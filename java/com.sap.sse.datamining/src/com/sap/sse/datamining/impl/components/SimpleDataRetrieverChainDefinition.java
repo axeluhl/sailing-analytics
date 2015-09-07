@@ -20,7 +20,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     
     private final Class<DataSourceType> dataSourceType;
     private final Class<DataType> retrievedDataType;
-    private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
+    private final List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation;
     
     protected boolean isComplete;
 
@@ -37,7 +37,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
 
     public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
         this(dataRetrieverChainDefinition.getDataSourceType(), retrievedDataType, nameMessageKey);
-        dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation());
+        dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverLevels());
     }
     
     @Override
@@ -69,7 +69,8 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         }
         checkThatRetrieverHasUsableConstructor(retrieverType);
         
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
+                dataRetrieverTypesWithInformation.size(), retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
@@ -88,7 +89,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         if (isComplete) {
             throw new IllegalStateException("This retriever chain definition is already complete");
         }
-        DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
+        DataRetrieverLevel<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
         @SuppressWarnings("unchecked")
         Class<Processor<?, ?>> lastRetrieverInList = (Class<Processor<?, ?>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
         if (!lastRetrieverInList.equals(previousRetrieverType)) {
@@ -98,7 +99,9 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         }
         checkThatRetrieverHasUsableConstructor(nextRetrieverType);
 
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
+                dataRetrieverTypesWithInformation.size(), nextRetrieverType, retrievedDataType,
+                retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
@@ -122,7 +125,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     }
     
     @Override
-    public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
+    public List<? extends DataRetrieverLevel<?, ?>> getDataRetrieverLevels() {
         return dataRetrieverTypesWithInformation;
     }
 

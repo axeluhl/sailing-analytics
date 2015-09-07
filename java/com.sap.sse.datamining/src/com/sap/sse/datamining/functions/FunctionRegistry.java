@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.functions;
 
+
 public interface FunctionRegistry extends FunctionProvider {
 
     public boolean registerAllClasses(Iterable<Class<?>> classesToScan);

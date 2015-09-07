@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.impl.components.DataRetrieverTypeWithInformation;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
@@ -103,10 +103,10 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
                      Class<DataType> retrievedDataType, String retrievedDataTypeMessageKey);
     
     /**
-     * @return The chain represented as list of the retriever types with additional informations like their
-     *         <code>ResultType</code> or message key
+     * @return The chain represented as list of the retriever levels with additional informations like their
+     *         <code>RetrieverType</code>, <code>ResultType</code> or message key
      */
-    public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation();
+    public List<? extends DataRetrieverLevel<?, ?>> getDataRetrieverLevels();
 
     /**
      * Returns a {@link DataRetrieverChainBuilder}, that is used to construct the chain. {@link #endWith(Class, Class, Class, String)}

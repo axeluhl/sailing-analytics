@@ -15,6 +15,7 @@ import com.sap.sse.datamining.components.management.DataRetrieverChainDefinition
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -35,7 +36,10 @@ public interface DataMiningServer {
     public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
     public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
      */
