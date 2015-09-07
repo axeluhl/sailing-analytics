@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
@@ -58,6 +59,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
+        this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {

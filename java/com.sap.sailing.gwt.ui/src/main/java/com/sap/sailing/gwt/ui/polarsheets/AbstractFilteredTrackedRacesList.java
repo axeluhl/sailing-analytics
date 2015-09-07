@@ -17,6 +17,7 @@ public abstract class AbstractFilteredTrackedRacesList extends AbstractTrackedRa
             StringMessages stringMessages, boolean hasMultiSelection, RaceFilter filter) {
         super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection);
         this.filter = filter;
+        createUI();
     }
     
     @Override

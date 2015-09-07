@@ -25,16 +25,20 @@ import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {
     private final DispatchSystem dispatch = new DispatchSystemImpl();
     
-    public TabletAndDesktopApplicationClientFactory() {
-        this(new SimpleEventBus());
+    public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
+        this(new SimpleEventBus(), isStandaloneServer);
     }
     
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus) {
-        this(eventBus, new PlaceController(eventBus));
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, boolean isStandaloneServer) {
+        this(eventBus, new PlaceController(eventBus), isStandaloneServer);
     }
 
-    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new TabletAndDesktopApplicationView(new DesktopPlacesNavigator(placeController), eventBus), eventBus, placeController);
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, boolean isStandaloneServer) {
+        this(eventBus, placeController, new DesktopPlacesNavigator(placeController, isStandaloneServer));
+    }
+
+    private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
+        super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
     }
 
     @Override

@@ -12,6 +12,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String manage2Sail();
+    String raceCommitteeApp();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -382,7 +383,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
-    String sailingServers();
+    String remoteServerInstances();
+    String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
     String errorRemovingSailingServers(String message);
@@ -1258,12 +1260,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     
     String dashboardNewStartAnalysisAvailable();
     
-    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantagesByWind();
     String dashboardStartlineAdvantageByGeometry();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    
+    String dashboardAdvantageInSeconds();
+    String dashboardSecondsAbreviation();
+    String dashboardDistanceToRCBoat();
+    String dashboardPinEnd();
+    String dashboardRCBoat();
+    
     String fixedMarkPassing();
     String suppressedMarkPassing();
     String windUp();

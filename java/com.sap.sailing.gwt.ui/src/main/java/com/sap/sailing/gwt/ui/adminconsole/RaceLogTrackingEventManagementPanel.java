@@ -301,10 +301,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
 
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {}
-
-    @Override
-    protected void addLeaderboardCreateControls(Panel createPanel) {}
+    protected void addLeaderboardControls(Panel controlsPanel) {}
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
