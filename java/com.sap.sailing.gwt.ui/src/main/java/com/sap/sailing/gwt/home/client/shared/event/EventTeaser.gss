@@ -1,6 +1,7 @@
 /**
  * A event teaser with image
  */
+ @def SERIES_CORNER_SIZE 6em;
 .eventteasercontainer {
   font-size: 1rem;
   text-align: center;
@@ -40,6 +41,34 @@
   position: absolute;
   bottom: 0;
   right: 0;
+  width: SERIES_CORNER_SIZE;
+  height: SERIES_CORNER_SIZE;
+  overflow: hidden;
+}
+.eventteaser_series .eventteaser_series_corner {
+  position: absolute;
+  border-style: solid;
+  border-color: rgba(240, 171, 0, 0.75) transparent;
+  border-width: 0 0 SERIES_CORNER_SIZE SERIES_CORNER_SIZE;
+}
+.eventteaser_series .eventteaser_series_text {
+  display: block;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 120%;
+  width: 7em;
+  height: 3.5em;
+  transform: rotate(315deg) translate(-1.25em, 1.6em);
+}
+.eventteaser_series .eventteaser_series_eventcount {
+  position: absolute;
+  bottom: 0.5em;
+  right: 0.5em;
+  text-align: right;
+  font-weight: 600;
+  color: white;
+  font-size: 120%;
 }
 .eventteaser_name {
   width: 100%;

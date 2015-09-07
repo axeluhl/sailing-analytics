@@ -72,6 +72,11 @@ public class EventsOverviewRecentYear extends Composite {
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId().toString(), eventDTO.getBaseURL(), eventDTO.isOnRemoteServer());
             RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, eventDTO, eventDTO.getState().getListStateMarker());
+            if (eventDTO.getEventSeries() != null) {
+                String seriesId = eventDTO.getEventSeries().getId().toString(), baseUrl = eventDTO.getBaseURL();
+                PlaceNavigation<?> seriesNavigation = navigator.getEventSeriesNavigation(seriesId, baseUrl, eventDTO.isOnRemoteServer());
+                recentEvent.setSeriesInformation(seriesNavigation, eventDTO.getEventSeries());
+            }
             recentEventsTeaserPanel.add(recentEvent);
         }
         headerDiv.addDomHandler(new ClickHandler() {

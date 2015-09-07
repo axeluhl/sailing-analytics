@@ -59,7 +59,7 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupOverviewStage(Panel container) {
         overviewStageUi = new EventOverviewStage(currentPresenter);
-        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(getEventId()));
+        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(getEventId(), true));
         container.add(overviewStageUi);
     }
     

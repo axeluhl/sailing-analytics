@@ -70,7 +70,7 @@ public class EventOverviewStage extends Composite {
     
     public void setupRefresh(RefreshManager refreshManager) {
         this.refreshManager = refreshManager;
-        refreshManager.add(refreshable, new GetEventOverviewStageAction(presenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(refreshable, new GetEventOverviewStageAction(presenter.getCtx().getEventDTO().getId(), false));
         
         if(presenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
             refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId(), 15));

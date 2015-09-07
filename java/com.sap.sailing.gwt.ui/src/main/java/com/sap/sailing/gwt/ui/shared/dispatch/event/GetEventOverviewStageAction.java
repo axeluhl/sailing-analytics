@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import static com.sap.sailing.gwt.server.HomeServiceUtil.findEventThumbnailImageUrlAsString;
+import static com.sap.sailing.gwt.server.HomeServiceUtil.getStageImageURLAsString;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -23,13 +26,15 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
     private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.STAGE, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
     
     private UUID eventId;
+    private boolean useTeaserImage;
     
     @SuppressWarnings("unused")
     private GetEventOverviewStageAction() {
     }
 
-    public GetEventOverviewStageAction(UUID eventId) {
+    public GetEventOverviewStageAction(UUID eventId, boolean useTeaserImage) {
         this.eventId = eventId;
+        this.useTeaserImage = useTeaserImage;
     }
     
     @Override
@@ -63,7 +68,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         if(stageVideo != null) {
             return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, HomeServiceUtil.toVideoDTO(stageVideo));
         }
-        String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
+        String stageImageUrl = useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event);
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
             return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), stageImageUrl);
         }

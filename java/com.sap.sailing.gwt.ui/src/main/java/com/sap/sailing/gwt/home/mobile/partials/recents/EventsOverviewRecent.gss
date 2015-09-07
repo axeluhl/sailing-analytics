@@ -197,3 +197,14 @@
 .togglecontainerhidden {
   display: none;
 }
+.seriesInfo {
+	display: block;
+	padding: 0.5rem;
+    padding-left: 3em;
+}
+.seriesInfo .eventteaser_title {
+    font-size: 93.3333333333%;
+}
+.seriesInfo .eventteaser_title_name {
+    color: #bcbcbc;
+}
