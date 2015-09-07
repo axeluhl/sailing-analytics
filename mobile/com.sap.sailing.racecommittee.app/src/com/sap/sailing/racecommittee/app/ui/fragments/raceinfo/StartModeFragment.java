@@ -90,16 +90,17 @@ public class StartModeFragment extends BaseFragment {
         int position = 0;
         int selected = -1;
         for (Flags flag : flags) {
-            if (mProcedure.getStartModeFlag() != null) {
-                selected = position;
-            }
             StartModeItem startMode = new StartModeItem(flag);
             startMode.setImage(FlagsResources.getFlagDrawable(getActivity(), startMode.getFlagName(), mFlagSize));
             startModes.add(startMode);
+        }
+        Collections.sort(startModes, new StartModeComparator());
+        for(StartModeItem startModeItem: startModes){
+            if(startModeItem.getFlag().equals(mProcedure.getStartModeFlag())){
+                selected = position;
+            }
             position++;
         }
-
-        Collections.sort(startModes, new StartModeComparator());
         final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), startModes);
         adapter.setCheckedPosition(selected);
         mListView.setAdapter(adapter);
