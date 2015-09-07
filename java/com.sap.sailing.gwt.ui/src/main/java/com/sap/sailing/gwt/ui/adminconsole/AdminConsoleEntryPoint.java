@@ -217,9 +217,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), Permission.MANAGE_MASTERDATA_IMPORT);
 
-        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, getStringMessages());
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteSailingServerInstancesManagementPanel>(sailingServerInstancesManagementPanel),
-                getStringMessages().serverInstances(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
+        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(sailingService, this, getStringMessages());
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
+                getStringMessages().remoteServerInstances(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
+
+        LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(sailingService, this, getStringMessages());
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
+                getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
                 SailingPermissionsForRoleProvider.INSTANCE);

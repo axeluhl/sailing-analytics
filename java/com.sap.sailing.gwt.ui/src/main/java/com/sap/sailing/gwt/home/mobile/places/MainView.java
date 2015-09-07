@@ -9,7 +9,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
@@ -21,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link MainView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class MainView extends Composite {
+public class MainView extends Composite implements ApplicationTopLevelView {
     interface MyBinder extends UiBinder<Widget, MainView> {
     }
 
@@ -38,11 +40,11 @@ public class MainView extends Composite {
     @UiField
     SimplePanel mainContentPanel;
 
-    public MainView(MobileApplicationClientFactory clientFactory) {
-        headerPanel = new Header(clientFactory);
-        footerPanel = new Footer(clientFactory);
+    public MainView(MobilePlacesNavigator placeNavigator, EventBus eventBus) {
+        headerPanel = new Header(placeNavigator);
+        footerPanel = new Footer(placeNavigator);
         initWidget(uiBinder.createAndBindUi(this));
-        clientFactory.getEventBus().addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
+        eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {
             @Override
             public void onPlaceChange(PlaceChangeEvent event) {
                 Place newPlace = event.getNewPlace();
@@ -54,12 +56,17 @@ public class MainView extends Composite {
         });
     }
 
+    @Override
     public AcceptsOneWidget getContent() {
         return mainContentPanel;
     }
-
+    
+    @Override
+    public void showLoading(boolean visible) {
+    }
+    
+    @Override
     public ErrorReporter getErrorReporter() {
         return errorReporter;
     }
-
 }
