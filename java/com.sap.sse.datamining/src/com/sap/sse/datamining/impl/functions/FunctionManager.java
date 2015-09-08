@@ -90,8 +90,14 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     public boolean registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
         boolean functionsHaveBeenRegistered = false;
         for (Class<?> internalClass : internalClassesToScan) {
+            logger.info("Registering functions of class " + internalClass.getName() + " with internal policy");
             boolean functionsOfClassHaveBeenRegistered = scanInternalClass(internalClass);
             functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionsOfClassHaveBeenRegistered;
+            if (functionsOfClassHaveBeenRegistered) {
+                logger.info("Finished the registration of class " + internalClass.getName() + " with internal policy");
+            } else {
+                logger.info("Couldn't find any functions for class " + internalClass.getName() + " with internal policy");
+            }
         }
         return functionsHaveBeenRegistered;
     }
@@ -132,6 +138,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         if (!dimensions.containsKey(declaringType)) {
             dimensions.put(declaringType, new HashSet<Function<?>>());
         }
+        logger.finer("Registering dimension " + dimension + " for the internal class " + declaringType.getName());
         return dimensions.get(declaringType).add(dimension);
     }
 
@@ -140,6 +147,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         if (!statistics.containsKey(declaringType)) {
             statistics.put(declaringType, new HashSet<Function<?>>());
         }
+        logger.finer("Registering statistic " + statistic + " for the internal class " + declaringType.getName());
         return statistics.get(declaringType).add(statistic);
     }
 
@@ -155,12 +163,18 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     public boolean registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan) {
         boolean functionsHaveBeenRegistered = false;
         for (Class<?> externalClass : externalClassesToScan) {
+            logger.info("Registering functions of class " + externalClass.getName() + " with external policy");
             for (Method method : externalClass.getMethods()) {
                 if (isValidExternalFunction.matches(method)) {
                     Function<?> function = functionFactory.createMethodWrappingFunction(method);
                     boolean functionsOfClassHaveBeenRegistered = addExternalFunction(function);
                     functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionsOfClassHaveBeenRegistered;
                 }
+            }
+            if (functionsHaveBeenRegistered) {
+                logger.info("Finished the registration of class " + externalClass.getName() + " with external policy");
+            } else {
+                logger.info("Couldn't find any functions for class " + externalClass.getName() + " with external policy");
             }
         }
         return functionsHaveBeenRegistered;
@@ -171,6 +185,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         if (!externalFunctions.containsKey(declaringType)) {
             externalFunctions.put(declaringType, new HashSet<Function<?>>());
         }
+        logger.finer("Registering external function " + function + " for the external class " + declaringType.getName());
         return externalFunctions.get(declaringType).add(function);
     }
 
@@ -355,9 +370,9 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
 
     private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {
-        logger.log(Level.FINER, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
+        logger.log(Level.INFO, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
         for (Function<?> function : functionsMatchingDTO) {
-            logger.log(Level.FINEST, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
+            logger.log(Level.FINER, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
         }
     }
 

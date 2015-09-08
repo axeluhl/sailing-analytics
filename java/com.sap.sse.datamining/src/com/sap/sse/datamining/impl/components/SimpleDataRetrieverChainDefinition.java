@@ -137,6 +137,12 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         
         return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
     }
+    
+    @Override
+    public String toString() {
+        return getDataSourceType().getSimpleName() + " -> " + getRetrievedDataType().getSimpleName() +
+               "[ID: " + getID() + ", messageKey: " + nameMessageKey + ", isComplete: " + isComplete + "]";
+    }
 
     @Override
     public int hashCode() {

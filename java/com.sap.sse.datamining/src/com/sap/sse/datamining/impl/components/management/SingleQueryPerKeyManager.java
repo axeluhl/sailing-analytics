@@ -2,6 +2,7 @@ package com.sap.sse.datamining.impl.components.management;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
@@ -10,6 +11,8 @@ import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
 
 public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryManager {
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final ConcurrentMap<T, Query<?>> queryMap;
 
@@ -29,6 +32,7 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
         
         abortPreviousQueries(keys);
         registerNewQuery(keys, query);
+        logger.info("Running query " + query + ", that has been registered for the keys " + keys);
         QueryResult<ResultType> result = query.run();
         unregisterQuery(keys, query);
         return result;
@@ -55,6 +59,7 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
             if (queryMap.containsKey(key)) {
                 Query<?> previousQuery = queryMap.get(key);
                 if (previousQuery.getState() == QueryState.RUNNING) {
+                    logger.info("Aborting query " + previousQuery + ", because a new query for the key " + key + " has been requested");
                     previousQuery.abort();
                 }
                 queryMap.remove(key, previousQuery);
@@ -66,7 +71,7 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
         for (T key : keys) {
             Query<?> previousValue = queryMap.putIfAbsent(key, query);
             if (previousValue != null) {
-                throw new UnsupportedOperationException("There's allready a Query for the session: " + key);
+                throw new UnsupportedOperationException("There's allready a query for the key: " + key);
             }
         }
     }
