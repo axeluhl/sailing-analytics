@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.impl.functions;
+package com.sap.sse.datamining.impl.components.management;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,12 +15,14 @@ import java.util.logging.Logger;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
+import com.sap.sse.datamining.components.management.FunctionProvider;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionProvider;
-import com.sap.sse.datamining.functions.FunctionRegistry;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.functions.ConcatenatingCompoundFunction;
+import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
