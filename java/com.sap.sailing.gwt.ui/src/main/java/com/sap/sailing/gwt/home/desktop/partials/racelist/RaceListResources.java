@@ -1,13 +1,13 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-public interface RacesListLiveResources extends ClientBundle {
-    public static final RacesListLiveResources INSTANCE = GWT.create(RacesListLiveResources.class);
+public interface RaceListResources extends ClientBundle {
+    public static final RaceListResources INSTANCE = GWT.create(RaceListResources.class);
 
-    @Source("RacesListLive.gss")
+    @Source("RaceList.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

@@ -11,8 +11,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
 import com.sap.sailing.gwt.ui.shared.dispatch.CollectionResult;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
@@ -35,7 +35,7 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
     
     public RaceListContainer(String title, String noContentPlaceholderText, AbstractRaceList<T> raceList) {
         this.noContentPlaceholderText = noContentPlaceholderText;
-        RacesListLiveResources.INSTANCE.css().ensureInjected();
+        RaceListResources.INSTANCE.css().ensureInjected();
         this.raceListUi = raceList;
         initWidget(uiBinder.createAndBindUi(this));
         this.titleUi.setInnerText(title);

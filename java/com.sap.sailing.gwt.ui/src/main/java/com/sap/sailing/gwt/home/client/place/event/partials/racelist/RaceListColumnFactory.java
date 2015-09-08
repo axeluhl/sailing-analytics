@@ -29,8 +29,8 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -55,7 +55,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceListColumnFactory {
     
-    private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css(); 
+    private static final LocalCss CSS = RaceListResources.INSTANCE.css(); 
     private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
     private static final TextMessages I18N_UBI = TextMessages.INSTANCE;

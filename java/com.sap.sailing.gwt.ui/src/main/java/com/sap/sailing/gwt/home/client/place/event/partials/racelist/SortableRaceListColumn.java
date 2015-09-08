@@ -7,7 +7,7 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 
@@ -91,7 +91,7 @@ public abstract class SortableRaceListColumn<T, C> extends SortableColumn<T, C> 
     
     private String getCurrentStyle(String baseStyle) {
         return getStyleNamesString(baseStyle, isShowDetails() ? columnVisibility.getAdditionalStyle()
-                : RacesListLiveResources.INSTANCE.css().racesListHideColumn());
+                : RaceListResources.INSTANCE.css().racesListHideColumn());
     }
         
     private static class WrappedTextHeader extends SafeHtmlHeader {

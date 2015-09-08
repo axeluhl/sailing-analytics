@@ -14,9 +14,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLiveResources.LocalCss;
 import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuil
 
 public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>> extends Composite {
 
-    private static final LocalCss CSS = RacesListLiveResources.INSTANCE.css();
+    private static final LocalCss CSS = RaceListResources.INSTANCE.css();
 
     private final SimplePanel cellTableContainer = new SimplePanel();
     
