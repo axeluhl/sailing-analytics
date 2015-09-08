@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.updatesBox;
+package com.sap.sailing.gwt.home.desktop.partials.updates;
 
 import java.util.Collection;
 import java.util.Date;
