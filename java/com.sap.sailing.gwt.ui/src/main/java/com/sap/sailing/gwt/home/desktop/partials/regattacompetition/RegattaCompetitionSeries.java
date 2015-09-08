@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.raceCompetition;
+package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
 import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
 
