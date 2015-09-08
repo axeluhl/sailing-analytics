@@ -24,11 +24,11 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
+import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;

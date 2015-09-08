@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList;
+package com.sap.sailing.gwt.home.desktop.partials.multiregattalist;
 
 import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
 
