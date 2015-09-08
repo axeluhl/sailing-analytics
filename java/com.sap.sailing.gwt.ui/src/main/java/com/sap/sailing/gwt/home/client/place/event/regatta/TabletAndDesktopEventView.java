@@ -20,32 +20,28 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event.partials.header.EventHeader;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
 public class TabletAndDesktopEventView extends Composite implements EventRegattaView {
-    private static final ApplicationHistoryMapper historyMapper = GWT
-            .<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
-
-    private static MyBinder uiBinder = GWT.create(MyBinder.class);
-
-    private Presenter currentPresenter;
+    
+    private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
 
     interface MyBinder extends UiBinder<Widget, TabletAndDesktopEventView> {
     }
+    
+    private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
-    @UiField
-    StringMessages i18n;
+    @UiField StringMessages i18n;
 
-    @UiField(provided = true)
-    TabPanel<EventRegattaView.Presenter> tabPanelUi;
-
-    @UiField(provided = true)
-    EventHeader eventHeader;
+    @UiField(provided = true) TabPanel<EventRegattaView.Presenter> tabPanelUi;
+    @UiField(provided = true) EventHeader eventHeader;
+    
+    private Presenter currentPresenter;
 
     public TabletAndDesktopEventView() {
     }
@@ -54,11 +50,8 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     public void registerPresenter(final Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
-
         eventHeader = new EventHeader(currentPresenter);
-
         initWidget(uiBinder.createAndBindUi(this));
-
         initBreadCrumbs();
         
         if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
@@ -66,7 +59,6 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
             Anchor seriesAnchor = new Anchor(currentPresenter.getCtx().getEventDTO().getSeriesName());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
             seriesAnchor.addClickHandler(new ClickHandler() {
-                
                 @Override
                 public void onClick(ClickEvent event) {
                     if (LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {

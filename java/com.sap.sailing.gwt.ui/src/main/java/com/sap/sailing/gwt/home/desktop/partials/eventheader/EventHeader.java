@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.header;
+package com.sap.sailing.gwt.home.desktop.partials.eventheader;
 
 import java.util.Date;
 
@@ -41,8 +41,7 @@ public class EventHeader extends Composite {
     @UiField StringMessages i18n;
     
     @UiField DivElement eventLogo;
-    @UiField
-    AnchorElement eventLogoAnchorUi;
+    @UiField AnchorElement eventLogoAnchorUi;
     @UiField HeadingElement staticTitle;
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
@@ -58,22 +57,17 @@ public class EventHeader extends Composite {
     @UiField DivElement races;
     @UiField DivElement eventCategory;
     @UiField DivElement courseAreaUi;
-    
     @UiField FlowPanel dropdownContent;
-    
     @UiField SharingButtons sharing;
 
     private EventViewDTO event;
-
     private Presenter presenter;
     
     public EventHeader(EventView.Presenter presenter) {
         this.event = presenter.getCtx().getEventDTO();
         this.presenter = presenter;
-        
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         initFields();
         initSharing();
     }
@@ -168,7 +162,6 @@ public class EventHeader extends Composite {
             dropdownEventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
             hide(staticTitle);
-            
             initDropdown();
         }
     }
