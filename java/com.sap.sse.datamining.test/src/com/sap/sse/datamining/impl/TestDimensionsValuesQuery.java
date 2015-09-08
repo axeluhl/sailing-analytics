@@ -84,7 +84,7 @@ public class TestDimensionsValuesQuery {
     public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;

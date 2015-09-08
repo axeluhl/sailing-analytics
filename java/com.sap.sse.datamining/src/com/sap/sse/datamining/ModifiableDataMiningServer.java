@@ -17,8 +17,8 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan);
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
     
-    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
-    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
+    public void registerDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
+    public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
     
     public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry();
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);

@@ -3,7 +3,6 @@ package com.sap.sse.datamining.impl;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +21,7 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -47,11 +47,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final DataMiningQueryManager dataMiningQueryManager;
     
     private final FunctionRegistry functionRegistry;
-    private final Map<Class<?>, DataSourceProvider<?>> dataSourceProviderMappedByDataSourceType;
+    private final DataSourceProviderRegistry dataSourceProviderRegistry;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
     private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
+                                DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
                                 AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -60,7 +61,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
         this.functionRegistry = functionRegistry;
-        dataSourceProviderMappedByDataSourceType = new HashMap<>();
+        this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
     }
@@ -171,14 +172,16 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        dataSourceProviderMappedByDataSourceType.put(dataSourceProvider.getDataSourceType(), dataSourceProvider);
-        updateComponentsChangedTimepoint();
+    public void registerDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.register(dataSourceProvider);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
-    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        boolean componentsChanged = dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType()) != null;
+    public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.unregister(dataSourceProvider);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
         }
@@ -328,12 +331,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale, getStringMessages(), getExecutorService());
     }
 
-    @SuppressWarnings("unchecked")
     private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
-        if (!dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType)) {
+        DataSourceProvider<DataSourceType> dataSourceProvider = dataSourceProviderRegistry.get(dataSourceType);
+        if (dataSourceProvider == null) {
             throw new NullPointerException("No DataSourceProvider found for '" + dataSourceType + "'");
         }
-        return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
+        return dataSourceProvider;
     }
     
     @Override

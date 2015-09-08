@@ -49,7 +49,7 @@ public class TestStatisticQuery {
         
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;
