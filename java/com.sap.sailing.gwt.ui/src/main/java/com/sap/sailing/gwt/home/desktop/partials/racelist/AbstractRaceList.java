@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +14,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
-import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;

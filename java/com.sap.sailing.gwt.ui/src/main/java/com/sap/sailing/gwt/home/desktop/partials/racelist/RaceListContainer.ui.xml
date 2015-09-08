@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"
-		xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.racelist"
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
@@ -10,6 +9,6 @@
     	<h3 ui:field="titleUi"></h3>
     	<div style="display: none;" ui:field="infoUi"></div>
     	<div style="display: none; font-weight: bold; font-style: italic;" ui:field="noContentPlaceholderUi"></div>
-    	<r:AbstractRaceList ui:field="raceListUi"/>
+    	<dp:racelist.AbstractRaceList ui:field="raceListUi"/>
 	</g:HTMLPanel>
 </ui:UiBinder> 

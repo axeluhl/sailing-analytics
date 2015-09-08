@@ -40,7 +40,7 @@
                     	<ui:text from="{i18n.racesOverview}" />
                     </a>
                 </div>
-                <p:racelist.RaceListContainer ui:field="raceListContainerUi" />
+                <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
             <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
             	<g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label>

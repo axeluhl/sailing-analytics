@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -7,7 +7,6 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
 import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sse.common.Util;
 

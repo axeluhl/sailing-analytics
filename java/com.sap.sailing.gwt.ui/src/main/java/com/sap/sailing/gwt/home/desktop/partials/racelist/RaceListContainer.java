@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 
 import java.util.Collection;
@@ -12,7 +12,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
-import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
 import com.sap.sailing.gwt.ui.shared.dispatch.CollectionResult;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 

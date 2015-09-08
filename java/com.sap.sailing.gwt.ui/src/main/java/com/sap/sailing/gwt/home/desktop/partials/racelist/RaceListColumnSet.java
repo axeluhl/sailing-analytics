@@ -1,13 +1,13 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
-import static com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn.ColumnVisibility.ALWAYS;
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn.ColumnVisibility.LARGE;
+import static com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn.ColumnVisibility.MEDIUM;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.sap.sailing.gwt.home.client.place.event.partials.racelist.SortableRaceListColumn.ColumnVisibility;
+import com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn.ColumnVisibility;
 
 public class RaceListColumnSet {
     

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import java.util.Comparator;
 

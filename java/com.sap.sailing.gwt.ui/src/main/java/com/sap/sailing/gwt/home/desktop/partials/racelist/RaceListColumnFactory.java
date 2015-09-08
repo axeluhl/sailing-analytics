@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.racelist;
+package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import static com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
 
@@ -29,7 +29,6 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
 import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
