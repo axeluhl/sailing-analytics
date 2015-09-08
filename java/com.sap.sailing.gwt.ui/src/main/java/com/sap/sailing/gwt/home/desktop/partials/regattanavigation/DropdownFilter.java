@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.listNavigation;
+package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
 
 import java.util.Collection;
 
@@ -14,15 +14,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RegattaNavigationResources.LocalCss;
 import com.sap.sailing.gwt.home.client.shared.DropdownHandler;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources.LocalCss;
 
 public class DropdownFilter<T> extends Composite {
 
     private static final LocalCss CSS = RegattaNavigationResources.INSTANCE.css();
-    private static ListDropdownFilterUiBinder uiBinder = GWT.create(ListDropdownFilterUiBinder.class);
+    private static DropdownFilterUiBinder uiBinder = GWT.create(DropdownFilterUiBinder.class);
 
-    interface ListDropdownFilterUiBinder extends UiBinder<Widget, DropdownFilter<?>> {
+    interface DropdownFilterUiBinder extends UiBinder<Widget, DropdownFilter<?>> {
     }
     
     @UiField DivElement dropdownContainerUi;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.listNavigation;
+package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;

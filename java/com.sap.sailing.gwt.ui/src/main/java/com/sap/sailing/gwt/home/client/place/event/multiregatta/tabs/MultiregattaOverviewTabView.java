@@ -24,13 +24,13 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.DropdownFilter;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaList;
 import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -153,8 +153,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
 
     @Override
     public void stop() {
-
     }
+    
     @Override
     public MultiregattaOverviewPlace placeToFire() {
         return new MultiregattaOverviewPlace(currentPresenter.getCtx());

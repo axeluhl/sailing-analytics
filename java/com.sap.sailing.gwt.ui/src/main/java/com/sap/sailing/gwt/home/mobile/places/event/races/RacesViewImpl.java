@@ -6,7 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RegattaNavigationResources;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;

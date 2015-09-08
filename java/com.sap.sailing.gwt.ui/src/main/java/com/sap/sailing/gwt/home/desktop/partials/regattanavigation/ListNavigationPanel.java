@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.listNavigation;
+package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Display;
@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.ListNavigationPanel.ListNavigationAction;
-import com.sap.sailing.gwt.home.client.place.event.partials.listNavigation.RegattaNavigationResources.LocalCss;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.ListNavigationAction;
+import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources.LocalCss;
 
 public class ListNavigationPanel<T extends ListNavigationAction> extends Composite {
     
