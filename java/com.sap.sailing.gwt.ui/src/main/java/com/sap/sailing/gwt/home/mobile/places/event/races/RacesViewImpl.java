@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
@@ -26,7 +25,6 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
 
     public RacesViewImpl(RacesView.Presenter presenter) {
         super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
-        RegattaNavigationResources.INSTANCE.css().ensureInjected();
         regattaCompetitionUi = new RegattaCompetition(presenter);
         refreshManager.add(regattaCompetitionUi, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
         setViewContent(uiBinder.createAndBindUi(this));

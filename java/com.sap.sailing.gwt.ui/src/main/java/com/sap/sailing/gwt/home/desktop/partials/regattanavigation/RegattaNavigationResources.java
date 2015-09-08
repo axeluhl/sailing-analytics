@@ -25,11 +25,5 @@ public interface RegattaNavigationResources extends ClientBundle {
         String regattanavigation_filter_current();
         String regattanavigation_filter_dropdown_link();
         String regattanavigation_filter_dropdown_linkactive();
-        String regattanavigation_legend();
-        String regattanavigation_legend_item();
-        String regattanavigation_legend_itemtracked();
-        String regattanavigation_legend_itemuntracked();
-        String regattanavigation_legend_itemlive();
-        String regattanavigation_legend_itemplanned();
     }
 }

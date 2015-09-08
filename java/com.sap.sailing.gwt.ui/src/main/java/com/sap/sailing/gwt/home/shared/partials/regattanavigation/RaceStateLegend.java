@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
+package com.sap.sailing.gwt.home.shared.partials.regattanavigation;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -13,6 +13,7 @@ public class RaceStateLegend extends Widget {
     }
 
     public RaceStateLegend() {
+        RegattaNavigationResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
     }
 

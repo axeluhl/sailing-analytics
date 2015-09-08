@@ -3,7 +3,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.regattanavigation.RegattaNavigationResources" />
 	<div class="{local_res.css.regattanavigation_legend}">
 	    <div class="{local_res.css.regattanavigation_legend_item} {local_res.css.regattanavigation_legend_itemtracked}">
 	      <ui:text from='{i18n.tracked}' />
