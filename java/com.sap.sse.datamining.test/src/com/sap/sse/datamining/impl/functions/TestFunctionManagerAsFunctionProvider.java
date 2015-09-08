@@ -53,8 +53,8 @@ public class TestFunctionManagerAsFunctionProvider {
         server.addStringMessages(TestsUtil.getTestStringMessages());
         
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
-        internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
+        internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
         server.registerAllClasses(internalClassesToScan);
         
         Collection<Class<?>> externalClassesToScan = new HashSet<>();
@@ -87,7 +87,7 @@ public class TestFunctionManagerAsFunctionProvider {
         List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = new HashMap<>();
         for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
-            expectedDimensions.put(dataRetrieverLevel, functionRegistryUtil.getExpectedDimensionsFor(dataRetrieverLevel.getRetrievedDataType()));
+            expectedDimensions.put(dataRetrieverLevel, server.getDimensionsFor(dataRetrieverLevel.getRetrievedDataType()));
         }
         final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         assertThat(dimensionsMappedByLevel, is(expectedDimensions));

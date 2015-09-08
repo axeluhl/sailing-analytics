@@ -32,6 +32,13 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
     public String getRetrievedDataTypeMessageKey() {
         return retrievedDataTypeMessageKey;
     }
+    
+    @Override
+    public String toString() {
+        return "Level " + retrieverLevel + " [retrieverType: " + retrieverType.getSimpleName() 
+                                         + ", retrievedDataType: " + retrievedDataType.getSimpleName()
+                                         + ", messageKey: " + retrievedDataTypeMessageKey + "]";
+    }
 
     @Override
     public int hashCode() {
