@@ -37,7 +37,7 @@ public class QueryFactory {
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
             @Override
-            protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor() {
+            protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, ResultType>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Function<ExtractedType> extractionFunction = queryDefinition.getStatisticToCalculate();
@@ -125,7 +125,7 @@ public class QueryFactory {
         Class<Set<Object>> resultType = (Class<Set<Object>>)(Class<?>) Set.class;
         return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
-            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor() {
+            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Set<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
@@ -139,9 +139,9 @@ public class QueryFactory {
                         chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
                     }
                 }
-                for (Processor<?, ?> resultReceiver : processorFactory.createGroupingExtractorsForDimensions(
+                for (Processor<?, ?> groupingExtractor : processorFactory.createGroupingExtractorsForDimensions(
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {
-                    chainBuilder.addResultReceiver(resultReceiver);
+                    chainBuilder.addResultReceiver(groupingExtractor);
                 }
                 
                 return chainBuilder.build();
