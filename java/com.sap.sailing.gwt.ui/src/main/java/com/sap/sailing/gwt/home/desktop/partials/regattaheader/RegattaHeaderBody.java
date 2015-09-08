@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.regattaHeader;
+package com.sap.sailing.gwt.home.desktop.partials.regattaheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
