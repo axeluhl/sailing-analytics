@@ -24,9 +24,9 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverviewStage;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
@@ -57,8 +57,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
     @UiField SimplePanel content;
-    @UiField(provided = true) EventOverviewStage stage;
-    @UiField(provided = true) RacesListLive racesListLive;
+    @UiField(provided = true) EventOverviewStage stageUi;
+    @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField DivElement newContentContainerUi;
     @UiField DivElement legendAndFilterUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
@@ -85,8 +85,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
 
     @Override
     public void start(MultiregattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
-        stage = new EventOverviewStage(currentPresenter);
-        racesListLive = new RacesListLive(currentPresenter, true);
+        stageUi = new EventOverviewStage(currentPresenter);
+        liveRacesListUi = new LiveRacesList(currentPresenter, true);
         MultiregattaOverviewRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaOverviewRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, false);
@@ -95,8 +95,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         regattaOverviewLinkUi.setHref(currentPresenter.getRegattaOverviewLink());
         regattaOverviewLinkUi.addClassName(currentPresenter.isEventOrRegattaLive() ? MAIN_CSS.buttonred() : MAIN_CSS.buttonprimary());
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        stage.setupRefresh(refreshManager);
-        refreshManager.add(racesListLive.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        stageUi.setupRefresh(refreshManager);
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
         if (ExperimentalFeatures.SHOW_NEW_REGATTA_LIST) {
             refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));

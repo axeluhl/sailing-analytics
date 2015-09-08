@@ -1,5 +1,4 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-		xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
@@ -16,7 +15,7 @@
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}" ui:field="newContentContainerUi">
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
-				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
+				<dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
 				<div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}" ui:field="legendAndFilterUi" style="display:none;">
 					<dp:multiregattalist.MultiRegattaListStepsLegend ui:field="regattaProgressLegendUi" />
 			        <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" />

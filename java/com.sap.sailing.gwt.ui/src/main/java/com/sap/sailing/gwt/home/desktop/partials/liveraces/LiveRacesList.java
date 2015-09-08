@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.raceListLive;
+package com.sap.sailing.gwt.home.desktop.partials.liveraces;
 
 import java.util.Collection;
 
@@ -16,12 +16,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.CollectionResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 
-public class RacesListLive extends Composite {
+public class LiveRacesList extends Composite {
 
     private final RaceListLiveRaces raceList;
     private final RaceListContainer<LiveRaceDTO> raceListContainer;
 
-    public RacesListLive(EventView.Presenter presenter, boolean showRegattaDetails) {
+    public LiveRacesList(EventView.Presenter presenter, boolean showRegattaDetails) {
         raceList = new RaceListLiveRaces(presenter, showRegattaDetails);
         raceListContainer = new RaceListContainer<LiveRaceDTO>(StringMessages.INSTANCE.liveNow(), raceList);
         initWidget(raceListContainer);

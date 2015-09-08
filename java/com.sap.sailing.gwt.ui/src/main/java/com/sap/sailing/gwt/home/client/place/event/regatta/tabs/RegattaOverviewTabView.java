@@ -9,12 +9,12 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.overview.EventOverviewStage;
-import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
@@ -41,9 +41,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField SimplePanel regattaInfoContainerUi;
-    @UiField(provided = true)
-    RacesListLive racesListLive;
-    @UiField(provided = true) EventOverviewStage stage;
+    @UiField(provided = true) LiveRacesList liveRacesListUi;
+    @UiField(provided = true) EventOverviewStage stageUi;
     @UiField(provided = true) StandingsList standingsUi;
     @UiField(provided = true) StatisticsBox statisticsBoxUi;
 
@@ -67,8 +66,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
     @Override
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
-        racesListLive = new RacesListLive(currentPresenter, false);
-        stage = new EventOverviewStage(currentPresenter);
+        liveRacesListUi = new LiveRacesList(currentPresenter, false);
+        stageUi = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
         standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(myPlace.getRegattaId()));
 
@@ -82,8 +81,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
             }
         }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
 
-        stage.setupRefresh(refreshManager);
-        refreshManager.add(racesListLive.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
+        stageUi.setupRefresh(refreshManager);
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
         refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(myPlace.getCtx().getEventDTO().getId(), true));
