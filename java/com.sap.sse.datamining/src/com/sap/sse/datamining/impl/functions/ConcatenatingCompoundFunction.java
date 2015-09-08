@@ -157,6 +157,25 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return functions;
     }
 
+    /**
+     * @return The list of functions as simple functions (like {@link MethodWrappingFunction}).
+     */
+    public List<MethodWrappingFunction<?>> getSimpleFunctions() {
+        List<MethodWrappingFunction<?>> simpleFunctions = new ArrayList<>();
+        for (Function<?> function : functions) {
+            if (function.getClass().equals(MethodWrappingFunction.class)) {
+                simpleFunctions.add((MethodWrappingFunction<?>) function);
+                continue;
+            }
+            if (function.getClass().equals(ConcatenatingCompoundFunction.class)) {
+                simpleFunctions.addAll(((ConcatenatingCompoundFunction<?>) function).getSimpleFunctions());
+                continue;
+            }
+            throw new IllegalArgumentException("Can't simplify functions of type " + function.getClass().getSimpleName());
+        }
+        return simpleFunctions;
+    }
+
     private Function<?> getFirstFunction() {
         return functions.get(0);
     }
@@ -169,35 +188,12 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     public String toString() {
         return getSimpleName();
     }
-    
-    @Override
-    public boolean isLogicalEqualTo(Function<?> function) {
-        if (function.getClass().equals(MethodWrappingFunction.class)) {
-            MethodWrappingFunction<?> methodWrappingFunction = (MethodWrappingFunction<?>) function;
-            if (getFunctions().size() == 1) {
-                return isLogicalEqualTo(methodWrappingFunction);
-            } else if (getFunctions().size() == 2) {
-                return getFunctions().get(1).getClass().equals(MethodWrappingFunction.class) &&
-                       equals(methodWrappingFunction);
-            } else {
-                return false;
-            }
-        }
-        if (function.getClass().equals(ConcatenatingCompoundFunction.class)) {
-            ConcatenatingCompoundFunction<?> concatenatingCompoundFunction = (ConcatenatingCompoundFunction<?>) function;
-            return getParameters().equals(function.getParameters()) &&
-                   (getFunctions().equals(concatenatingCompoundFunction.getFunctions().subList(1, concatenatingCompoundFunction.getFunctions().size())) ||
-                    getFunctions().subList(1, getFunctions().size()).equals(concatenatingCompoundFunction.getFunctions()));
-        }
-        throw new IllegalArgumentException("Can't compare " + MethodWrappingFunction.class.getSimpleName() +
-                " with " + function.getClass().getSimpleName());
-    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((functions == null) ? 0 : functions.hashCode());
+        result = prime * result + ((functions == null) ? 0 : getSimpleFunctions().hashCode());
         return result;
     }
 
@@ -213,7 +209,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         if (functions == null) {
             if (other.functions != null)
                 return false;
-        } else if (!functions.equals(other.functions))
+        } else if (!getSimpleFunctions().equals(other.getSimpleFunctions()))
             return false;
         return true;
     }

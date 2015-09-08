@@ -70,12 +70,11 @@ public class TestFunctionManagerAsFunctionProvider {
 
     @Test
     public void testGetDimensionsForType() {
-        
         Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
         assertThat(server.getDimensionsFor(Test_HasRaceContext.class), is(expectedDimensions));
         assertThat(server.getDimensionsFor(Test_HasRaceContextImpl.class), is(expectedDimensions));
 
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
+        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class);
         assertThat(server.getDimensionsFor(Test_HasLegOfCompetitorContext.class), is(expectedDimensions));
         assertThat(server.getDimensionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedDimensions));
     }
@@ -91,6 +90,28 @@ public class TestFunctionManagerAsFunctionProvider {
         }
         final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         assertThat(dimensionsMappedByLevel, is(expectedDimensions));
+    }
+    
+    @Test
+    public void testGetReducedDimensionsForDataRetrieverChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> retrieverChain = createDataRetrieverChainDefinition();
+
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = server.getDimensionsMappedByLevelFor(retrieverChain);
+        for (DataRetrieverLevel<?, ?> retrieverLevel : expectedDimensions.keySet()) {
+            if (retrieverLevel.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class)) {
+                Collection<Function<?>> reducedLegDimensions = new HashSet<>();
+                for (Function<?> dimension : expectedDimensions.get(retrieverLevel)) {
+                    if (!(dimension instanceof ConcatenatingCompoundFunction) ||
+                        !((ConcatenatingCompoundFunction<?>) dimension).getSimpleFunctions().get(0).getReturnType().equals(Test_HasRaceContext.class)) {
+                        reducedLegDimensions.add(dimension);
+                    }
+                }
+                expectedDimensions.put(retrieverLevel, reducedLegDimensions);
+                break;
+            }
+        }
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain);
+        assertThat(reducedDimensionsMappedByLevel, is(expectedDimensions));
     }
     
     @SuppressWarnings("unchecked")
@@ -123,9 +144,7 @@ public class TestFunctionManagerAsFunctionProvider {
     
     @Test
     public void testGetAllFunctionsForType() {
-        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        expectedFunctions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        expectedFunctions.addAll(functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class));
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedFunctionsFor(Test_HasLegOfCompetitorContext.class);
         assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
         assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
     }

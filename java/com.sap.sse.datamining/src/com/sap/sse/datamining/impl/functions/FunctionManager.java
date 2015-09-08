@@ -3,7 +3,6 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -252,32 +251,39 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
-        for (Entry<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> entry : dimensionsMappedByLevel.entrySet()) {
-            DataRetrieverLevel<?, ?> retrieverLevel = entry.getKey();
-            Iterable<Function<?>> dimensions = entry.getValue();
-            Iterable<Function<?>> previousDimensions = retrieverLevel.getLevel() > 0 ?
-                                                            dimensionsMappedByLevel.get(retrieverLevels.get(retrieverLevel.getLevel() - 1)) :
-                                                            Collections.emptySet();
-            if (reducedDimensions.isEmpty() || Util.isEmpty(previousDimensions)) {
+        for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
+            Iterable<Function<?>> dimensions = dimensionsMappedByLevel.get(retrieverLevel);
+            DataRetrieverLevel<?, ?> previousRetrieverLevel = retrieverLevel.getLevel() > 0 ? retrieverLevels.get(retrieverLevel.getLevel() - 1) : null;
+            if (reducedDimensions.isEmpty() || previousRetrieverLevel == null) {
                 reducedDimensions.put(retrieverLevel, dimensions);
             } else {
-                reducedDimensions.put(retrieverLevel, reduce(dimensions, previousDimensions));
+                reducedDimensions.put(retrieverLevel, reduce(dimensions, previousRetrieverLevel, dimensionsMappedByLevel.get(previousRetrieverLevel)));
             }
         }
         return reducedDimensions;
     }
     
-    private Iterable<Function<?>> reduce(Iterable<Function<?>> dimensionsToReduce, Iterable<Function<?>> byDimensions) {
+    private Iterable<Function<?>> reduce(Iterable<Function<?>> dimensionsToReduce, DataRetrieverLevel<?, ?> previousRetrieverLevel, Iterable<Function<?>> previousDimensions) {
+        if (Util.isEmpty(previousDimensions)) {
+            return dimensionsToReduce;
+        }
+        
         Collection<Function<?>> reducedDimensions = new HashSet<>();
         for (Function<?> dimension : dimensionsToReduce) {
-            boolean isDimensionAllowed = true;
-            for (Function<?> forbiddenDimension : byDimensions) {
-                if (dimension.isLogicalEqualTo(forbiddenDimension)) {
-                    isDimensionAllowed = false;
-                    break;
+            boolean isAllowed = true;
+            if (ConcatenatingCompoundFunction.class.isAssignableFrom(dimension.getClass())) {
+                ConcatenatingCompoundFunction<?> compoundDimension = (ConcatenatingCompoundFunction<?>) dimension;
+                List<MethodWrappingFunction<?>> simpleFunctions = compoundDimension.getSimpleFunctions();
+                if (previousRetrieverLevel.getRetrievedDataType().isAssignableFrom(simpleFunctions.get(0).getReturnType())) {
+                    List<MethodWrappingFunction<?>> subList = simpleFunctions.subList(1, compoundDimension.getSimpleFunctions().size());
+                    Function<?> subFunction = subList.size() == 1 ? subList.get(0)
+                                                                        : functionFactory.createCompoundFunction(subList);
+                    if (Util.contains(previousDimensions, subFunction)) {
+                        isAllowed = false;
+                    }
                 }
             }
-            if (isDimensionAllowed) {
+            if (isAllowed) {
                 reducedDimensions.add(dimension);
             }
         }
