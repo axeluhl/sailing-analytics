@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -84,6 +85,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private CellTable<TracTracRaceRecordDTO> racesTable;
 
+    private final static String ZERO_AS_STRING = "0";
+    
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
@@ -276,10 +279,27 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
-        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithStartTimeNow());
+        final TextBox minutesBeforeSimulatedRaceStartTextBox = new TextBox();
+        minutesBeforeSimulatedRaceStartTextBox.setWidth("25px");
+        minutesBeforeSimulatedRaceStartTextBox.setEnabled(false);
+        minutesBeforeSimulatedRaceStartTextBox.setValue(ZERO_AS_STRING);
+        
+        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithNowMinutesBeforeRaceStart());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
+        simulateWithStartTimeNowCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                minutesBeforeSimulatedRaceStartTextBox.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
+                minutesBeforeSimulatedRaceStartTextBox.setFocus(simulateWithStartTimeNowCheckBox.getValue());
+            }
+        });
+        final FlowPanel simulateStartTimePanel = new FlowPanel();
+        simulateStartTimePanel.add(simulateWithStartTimeNowCheckBox);
+        simulateStartTimePanel.add(minutesBeforeSimulatedRaceStartTextBox);
+        
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
@@ -287,7 +307,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(1, 0, trackSettingsLabel);
         layoutTable.setWidget(1, 1, trackWindCheckBox);
         layoutTable.setWidget(2, 1, correctWindCheckBox);
-        layoutTable.setWidget(3, 1, simulateWithStartTimeNowCheckBox);
+        layoutTable.setWidget(3, 1, simulateStartTimePanel);
         layoutTable.setWidget(4, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
