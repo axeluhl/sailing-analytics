@@ -5,7 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.event.EventTeaser;
+import com.sap.sailing.gwt.home.desktop.partials.event.EventTeaser;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
