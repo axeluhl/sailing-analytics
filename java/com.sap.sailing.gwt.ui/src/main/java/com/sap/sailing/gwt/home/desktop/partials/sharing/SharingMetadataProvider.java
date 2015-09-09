@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.sharing;
+package com.sap.sailing.gwt.home.desktop.partials.sharing;
 
 public interface SharingMetadataProvider {
     

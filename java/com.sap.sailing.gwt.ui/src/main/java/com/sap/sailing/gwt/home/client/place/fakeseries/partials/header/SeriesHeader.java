@@ -18,8 +18,8 @@ import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
-import com.sap.sailing.gwt.home.client.shared.sharing.SharingButtons;
-import com.sap.sailing.gwt.home.client.shared.sharing.SharingMetadataProvider;
+import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
+import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
@@ -38,13 +38,10 @@ public class SeriesHeader extends Composite {
     @UiField SpanElement eventName;
     @UiField DivElement eventState;
     @UiField FlowPanel venues;
-    
     @UiField SharingButtons sharing;
 
     private EventSeriesViewDTO series;
-
     private Presenter presenter;
-
     boolean dropdownShown = false;
     
     public SeriesHeader(SeriesView.Presenter presenter) {
