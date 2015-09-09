@@ -49,25 +49,21 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
      * Or caused by quick changes of the filter selection.
      */
     private static final int queryBufferTimeInMillis = 200;
+
+    private static final double headerPanelHeight = 45;
+    private static final double footerPanelHeight = 50;
     
-    private final ProviderListener providerListener;
-    /**
-     * This effects the incoming change notifications.<br>
-     * If <code>true</code>, the outgoing change notification is blocked and the next provider (in
-     * the hierarchy) is told to update its components. This will automatically be set to <code>false</code>
-     * when the last provider notifies a change and then the listeners will be notified.<br>
-     * See {@link BufferingQueryDefinitionProviderWithControls#ProviderListener} for the concrete implemenation.
-     */
     private final Timer queryDefinitionReleaseTimer;
     
     private final DockLayoutPanel mainPanel;
     private FlowPanel controlsPanel;
     
+    private final ProviderListener providerListener;
+    private final Collection<DataMiningComponentProvider> providers;
     private DataRetrieverChainDefinitionProvider retrieverChainProvider;
     private StatisticProvider statisticProvider;
     private GroupingProvider groupingProvider;
     private FilterSelectionProvider filterSelectionProvider;
-    private Collection<DataMiningComponentProvider> providers;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(stringMessages, dataMiningService, errorReporter);
@@ -79,12 +75,19 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         };
         
-        mainPanel = new DockLayoutPanel(Unit.PX);
-        mainPanel.addNorth(createFunctionsPanel(), 92);
-
+        // The header panel has to be created before the footer panel, because the component provider in the footer panel depend on
+        // the retriever chain provider. To be more exact: The retriever chain provider mustn't be null, when createFooterPanel() is called.
+        Widget headerPanel = createHeaderPanel();
+        
+        SplitLayoutPanel filterSplitPanel = new SplitLayoutPanel(15);
+        filterSplitPanel.addSouth(createFooterPanel(), footerPanelHeight);
         filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
-        mainPanel.add(filterSelectionProvider.getEntryWidget());
+        filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
+        
+        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel.addNorth(headerPanel, headerPanelHeight);
+        mainPanel.add(filterSplitPanel);
         
         providers = new ArrayList<>();
         providers.add(retrieverChainProvider);
@@ -93,20 +96,9 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         providers.add(filterSelectionProvider);
     }
 
-    private Widget createFunctionsPanel() {
-        FlowPanel statisticAndRetrieverChainPanel = new FlowPanel();
-        
+    private Widget createHeaderPanel() {
         retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
-        statisticAndRetrieverChainPanel.add(retrieverChainProvider.getEntryWidget());
-        
-        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
-        statisticProvider.addStatisticChangedListener(providerListener);
-        statisticAndRetrieverChainPanel.add(statisticProvider.getEntryWidget());
-
-        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
-        groupingProvider.addGroupingChangedListener(providerListener);
-        ScrollPanel groupBySelectionScrollPanel = new ScrollPanel(groupingProvider.getEntryWidget());
         
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
@@ -129,13 +121,25 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         });
         addControl(reloadButton);
         
+        SplitLayoutPanel headerSplitPanel = new SplitLayoutPanel(15);
+        headerSplitPanel.addWest(retrieverChainProvider.getEntryWidget(), 600);
+        headerSplitPanel.add(controlsPanel);
+        return headerSplitPanel;
+    }
+
+    private Widget createFooterPanel() {
+        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        statisticProvider.addStatisticChangedListener(providerListener);
+
+        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
+        groupingProvider.addGroupingChangedListener(providerListener);
+        
         SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
-        controlsSplitPanel.addWest(new ScrollPanel(statisticAndRetrieverChainPanel), 530);
-        controlsSplitPanel.addEast(new ScrollPanel(controlsPanel), 150);
-        controlsSplitPanel.add(groupBySelectionScrollPanel);
+        controlsSplitPanel.addWest(new ScrollPanel(statisticProvider.getEntryWidget()), 400);
+        controlsSplitPanel.add(new ScrollPanel(groupingProvider.getEntryWidget()));
         return controlsSplitPanel;
     }
-    
+
     private void scheduleQueryDefinitionChanged() {
         queryDefinitionReleaseTimer.schedule(queryBufferTimeInMillis);
     }

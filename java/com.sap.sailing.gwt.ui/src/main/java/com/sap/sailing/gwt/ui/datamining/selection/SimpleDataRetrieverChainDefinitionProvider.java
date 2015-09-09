@@ -45,7 +45,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
-        mainPanel.add(new Label(this.stringMessages.retrieveWith()));
+        mainPanel.add(new Label(this.stringMessages.analyse()));
         
         retrieverChainsListBox = createRetrieverChainsListBox();
         mainPanel.add(retrieverChainsListBox);

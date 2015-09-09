@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,10 +19,12 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
@@ -36,6 +39,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 class DimensionFilterSelectionProvider {
+
+    private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -78,8 +83,8 @@ class DimensionFilterSelectionProvider {
         dimensionChangedHandler = new DimensionChangedHandler();
         dimensionListBox.addValueChangeHandler(dimensionChangedHandler);
         controlsPanel.add(dimensionListBox);
-        
-        toggleFilterButton = new ToggleButton("S");
+
+        toggleFilterButton = new ToggleButton(new Image(resources.searchIcon()));
         toggleFilterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
