@@ -64,6 +64,16 @@
 	</servlet-mapping>
 
 	<servlet>
+	    <display-name>Server Configuration Service</display-name>
+	    <servlet-name>ServerConfigurationService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.server.ServerConfigurationServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ServerConfigurationService</servlet-name>
+		<url-pattern>/service/serverconfiguration</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 	    <display-name>Dispatch Service</display-name>
 	    <servlet-name>DispatchService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.dispatch.DispatchRPCImpl</servlet-class>

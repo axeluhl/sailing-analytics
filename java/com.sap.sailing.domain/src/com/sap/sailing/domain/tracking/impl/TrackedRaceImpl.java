@@ -611,6 +611,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
@@ -1862,6 +1863,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        logger.info("waypoint at zero-based index "+zeroBasedIndex+" ("+waypointThatGotAdded+") added; updating tracked race "+this+
+                "'s data structures...");
         // expecting to hold the course's write lock
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(getSerializationLock());
@@ -1892,6 +1895,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             updated(/* time point */null); // no maneuver cache invalidation required because we don't yet have mark
             // passings for new waypoint
+            logger.info("done updating tracked race "+this+"'s data structures...");
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
         }
@@ -1961,6 +1965,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        logger.info("waypoint at zero-based index "+zeroBasedIndex+" ("+waypointThatGotRemoved+") removed; updating tracked race "+this+
+                "'s data structures...");
         // expecting to hold the course's write lock
         invalidateMarkPassingTimes();
         LockUtil.lockForRead(getSerializationLock());
@@ -2017,6 +2023,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     triggerManeuverCacheRecalculation(competitor);
                 }
             }
+            logger.info("done updating tracked race "+this+"'s data structures...");
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
         }
