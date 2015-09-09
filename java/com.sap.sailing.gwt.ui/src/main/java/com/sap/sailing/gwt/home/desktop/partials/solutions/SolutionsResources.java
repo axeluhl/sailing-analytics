@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.solutions;
+package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -8,7 +8,7 @@ import com.google.gwt.resources.client.CssResource.Shared;
 public interface SolutionsResources extends ClientBundle {
     public static final SolutionsResources INSTANCE = GWT.create(SolutionsResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/shared/solutions/Solutions.gss")
+    @Source("Solutions.gss")
     LocalCss css();
 
     @Shared
