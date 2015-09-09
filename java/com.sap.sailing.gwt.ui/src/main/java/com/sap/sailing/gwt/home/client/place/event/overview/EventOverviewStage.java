@@ -13,10 +13,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.updates.UpdatesBox;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown;
+import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown.CountdownNavigationProvider;
 import com.sap.sailing.gwt.home.shared.partials.message.Message;
 import com.sap.sailing.gwt.home.shared.partials.video.Video;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
@@ -59,6 +61,7 @@ public class EventOverviewStage extends Composite {
     private Widget lastContent;
 
     private final EventView.Presenter presenter;
+    private final StageCountdownNavigationProvider countdownNavigationProvider = new StageCountdownNavigationProvider();
     private RefreshManager refreshManager;
     
     public EventOverviewStage(EventView.Presenter presenter) {
@@ -91,7 +94,7 @@ public class EventOverviewStage extends Composite {
             } 
         } else if (data instanceof EventOverviewTickerStageDTO) {
             if (!(lastContent instanceof Countdown)) {
-                lastContent = new Countdown(presenter);
+                lastContent = new Countdown(countdownNavigationProvider);
             }
             ((Countdown) lastContent).setData((EventOverviewTickerStageDTO) data);
         } else {
@@ -114,6 +117,13 @@ public class EventOverviewStage extends Composite {
             updatesUi.setData(news, refreshManager.getDispatchSystem().getCurrentServerTime());
             stage.addStyleName(mediaCss.medium7());
             stage.addStyleName(mediaCss.large8());
+        }
+    }
+    
+    private class StageCountdownNavigationProvider implements CountdownNavigationProvider {
+        @Override
+        public PlaceNavigation<?> getRegattaNavigation(String regattaName) {
+            return presenter.getRegattaNavigation(regattaName);
         }
     }
 }

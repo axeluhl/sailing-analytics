@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.countdown;
+package com.sap.sailing.gwt.home.shared.partials.countdown;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -17,12 +17,10 @@ import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.EventView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event.partials.countdown.CountdownResources.LocalCss;
-import com.sap.sailing.gwt.home.client.place.event.partials.countdownTimer.CountdownTimer;
 import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.LocalCss;
+import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRaceTickerStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRegattaTickerStageDTO;
@@ -47,9 +45,9 @@ public class Countdown extends Composite {
     @UiField(provided = true) NavigationAnchor navigationButton;
     @UiField DivElement image;
 
-    public Countdown(EventView.Presenter presenter) {
+    public Countdown(CountdownNavigationProvider navigationProvider) {
         CSS.ensureInjected();
-        this.navigationButton = new NavigationAnchor(presenter);
+        this.navigationButton = new NavigationAnchor(navigationProvider);
         initWidget(uiBinder.createAndBindUi(this));
     }
 
@@ -92,24 +90,24 @@ public class Countdown extends Composite {
 
     private class NavigationAnchor extends Anchor {
 
-        private final EventView.Presenter presenter;
+        private final CountdownNavigationProvider navigationProvider;
         private PlaceNavigation<?> currentPlaceNavigation;
 
-        private NavigationAnchor(Presenter presenter) {
-            this.presenter = presenter;
+        private NavigationAnchor(CountdownNavigationProvider navigationProvider) {
+            this.navigationProvider = navigationProvider;
         }
 
         private void linkToRaceViewer(EventOverviewRaceTickerStageDTO data) {
-            // TODO implement correctly
-//            String url = presenter.getRaceViewerURL(data.getRegattaAndRaceIdentifier());
-            String url = "";
+            String url = ""; // TODO implement correctly
+            // String url = navigationProvider.getRaceViewerURL(data.getRegattaAndRaceIdentifier());
             this.update(MAIN_CSS.buttonprimary(), MAIN_CSS.buttonred(), I18N_UBI.watchNow(), null, url);
         }
 
         private void linkToRegatta(EventOverviewRegattaTickerStageDTO data) {
-            PlaceNavigation<?> nav = presenter.getRegattaNavigation(data.getRegattaIdentifier().getRegattaName());
-            this.update(MAIN_CSS.buttonred(), MAIN_CSS.buttonprimary(), I18N_UBI.regattaDetails(), nav,
-                    nav.getTargetUrl());
+            PlaceNavigation<?> nav = navigationProvider.getRegattaNavigation(data.getRegattaIdentifier().getRegattaName());
+            if (nav != null) {
+                this.update(MAIN_CSS.buttonred(), MAIN_CSS.buttonprimary(), I18N_UBI.regattaDetails(), nav, nav.getTargetUrl());
+            }
         }
         
         private void update(String removeStyle, String addStyle, String text, PlaceNavigation<?> navigation, String url) {
@@ -128,5 +126,10 @@ public class Countdown extends Composite {
                 }
             }
         }
+    }
+    
+    public interface CountdownNavigationProvider {
+        PlaceNavigation<?> getRegattaNavigation(String regattaName);
+        // String getRaceViewerURL(RegattaAndRaceIdentifier raceIdentifier);
     }
 }

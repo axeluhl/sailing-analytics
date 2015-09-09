@@ -5,10 +5,8 @@
   font-size: 1rem;
 }
 .countdowntimer_content {
-  font-size: inherit;
-}
-.countdowntimer_content_panewrapper {
-  font-size: 0;
+  margin: auto;
+  text-align: center;
 }
 .countdowntimer_content_pane {
   border: 0.2em solid #fff;
@@ -38,4 +36,5 @@
 }
 .countdowntimer_content_pane_unit {
   font-size: 0.8em;
+  line-height: 1.25em;
 }

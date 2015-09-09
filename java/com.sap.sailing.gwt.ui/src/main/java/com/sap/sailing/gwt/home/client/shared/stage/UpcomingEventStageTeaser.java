@@ -9,10 +9,9 @@ public class UpcomingEventStageTeaser extends StageTeaser {
 
     public UpcomingEventStageTeaser(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
         super(event);
-
         title.setInnerText(event.getDisplayName());
         subtitle.setInnerText(event.getLocationAndVenue());
-        
+        countdownTimerUi.setVisible(true);
         bandCount.setAttribute("data-bandcount", "1");
         teaserBand = new UpcomingEventStageTeaserBand(event, placeNavigator);
         stageTeaserBandsPanel.getElement().appendChild(teaserBand.getElement());

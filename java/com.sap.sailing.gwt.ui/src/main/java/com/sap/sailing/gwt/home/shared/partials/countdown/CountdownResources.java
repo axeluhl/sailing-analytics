@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.partials.countdown;
+package com.sap.sailing.gwt.home.shared.partials.countdown;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
