@@ -434,9 +434,9 @@
     <string name="error_wrong_race_state">Der RaceState hat nicht den korrekten Status (benötigt: %1$s - aktuell: %2$s)</string>
     <string name="wind_map_button_show">Windkarte</string>
     <string name="wind_map_button_hide">Schließen</string>
-    <string name="wind_latitude">Breite</string>
-    <string name="wind_longitude">Länge</string>
-    <string name="wind_accuracy">Genauigkeit</string>
+    <string name="wind_latitude">Breite:</string>
+    <string name="wind_longitude">Länge:</string>
+    <string name="wind_accuracy">Genauigkeit:</string>
     <string name="dependent_races_absolute">Absolute Startzeit</string>
     <string name="dependent_races_relative">Relative Startzeit</string>
     <string name="dependent_races_prompt">Bitte Rennen auswählen</string>
@@ -445,5 +445,7 @@
     <string name="wind_accuracy_ago">alt</string>
     <string name="gate_time_schedule_long">%1$d + %2$d = %3$d Minuten</string>
     <string name="gate_time_schedule_short">%d Minuten</string>
+    <string name="not_available">N/A</string>
+    <string name="accuracy_timestamp">(vor %s)</string>
 
 </resources>

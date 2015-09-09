@@ -56,21 +56,28 @@
 
         <TextView
             android:id="@+id/header_text"
-            android:drawableLeft="?chevron_left_24dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginStart="@dimen/default_margin"
             android:layout_toLeftOf="@id/wind_off"
             android:layout_toStartOf="@id/wind_off"
-            android:layout_gravity="center_vertical"
+            android:drawableLeft="?chevron_left_24dp"
             android:orientation="horizontal"
             android:text="@string/wind"
-            android:textAppearance="?textNormal" />
+            android:textAppearance="?textNormal"/>
 
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -181,51 +188,100 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_margin="@dimen/default_margin"
+                    android:layout_marginTop="@dimen/default_margin"
                     android:text="@string/wind_position"
                     android:textAppearance="?textSmall"/>
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/position_header">
+                    android:layout_below="@+id/position_header"
+                    android:orientation="vertical"
+                    android:padding="@dimen/default_margin">
 
-                    <TextView
-                        android:id="@+id/position_latitude"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/default_margin"
-                        android:text="@string/wind_latitude"
-                        android:textAppearance="?textSmall"/>
+                        android:layout_marginBottom="@dimen/default_margin"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/position_longitude"
+                        <TextView
+                            android:id="@+id/latitude_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/side_padding"
+                            android:text="@string/wind_latitude"
+                            android:textAppearance="?textSmall"/>
+
+                        <TextView
+                            android:id="@+id/latitude_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_available"
+                            android:textAppearance="?textSmall"/>
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/default_margin"
-                        android:layout_below="@+id/position_latitude"
-                        android:text="@string/wind_longitude"
-                        android:textAppearance="?textSmall"/>
+                        android:layout_marginBottom="@dimen/default_margin"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/position_accuracy"
+                        <TextView
+                            android:id="@+id/longitude_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/side_padding"
+                            android:text="@string/wind_longitude"
+                            android:textAppearance="?textSmall"/>
+
+                        <TextView
+                            android:id="@+id/longitude_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/not_available"
+                            android:textAppearance="?textSmall"/>
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/default_margin"
-                        android:layout_below="@+id/position_longitude"
-                        android:text="@string/wind_accuracy"
-                        android:textAppearance="?textSmall"/>
+                        android:layout_marginBottom="@dimen/default_margin"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/accuracy_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/side_padding"
+                            android:text="@string/wind_accuracy"
+                            android:textAppearance="?textSmall"/>
+
+                        <TextView
+                            android:id="@+id/accuracy_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/side_padding"
+                            android:text="@string/not_available"
+                            android:textAppearance="?textSmall"/>
+
+                        <TextView
+                            android:id="@+id/accuracy_timestamp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?textSmall"
+                            tools:text="(12/31/2015 12:21:21)"/>
+                    </LinearLayout>
 
                     <Button
                         android:id="@+id/position_show"
                         style="?attr/buttonSolidNormal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/position_accuracy"
-                        android:layout_centerHorizontal="true"
+                        android:layout_gravity="center_horizontal"
                         android:text="@string/wind_map_button_show"/>
 
-                </RelativeLayout>
+                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
     </RelativeLayout>
@@ -247,44 +303,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
-
-            <!-- the following layout is for a future implementation -->
-            <!--<LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <Button
-                    style="?attr/buttonSolidNormal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Overall"/>
-
-                <Button
-                    style="?attr/buttonSolidNormal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="#1"/>
-
-                <Button
-                    style="?attr/buttonSolidNormal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="#2"/>
-
-                <Button
-                    style="?attr/buttonSolidNormal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="#3"/>
-
-            </LinearLayout>-->
         </LinearLayout>
 
         <Button
@@ -292,11 +310,11 @@
             style="?attr/buttonSolidNormal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginRight="@dimen/wind_hide_button_right_margin"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
             android:layout_marginEnd="@dimen/wind_hide_button_right_margin"
+            android:layout_marginRight="@dimen/wind_hide_button_right_margin"
             android:layout_marginTop="@dimen/wind_hide_button_top_margin"
             android:text="@string/wind_map_button_hide"/>
 

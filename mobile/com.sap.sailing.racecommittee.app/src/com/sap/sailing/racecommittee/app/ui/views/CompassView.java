@@ -155,6 +155,9 @@ public class CompassView extends RelativeLayout {
             if (degree < 0) {
                 degree += 360;
             }
+            if (degree >= 359.5f) {
+                degree = 0;
+            }
             degreeView.setText(String.format("%.0f°", degree));
         }
     }

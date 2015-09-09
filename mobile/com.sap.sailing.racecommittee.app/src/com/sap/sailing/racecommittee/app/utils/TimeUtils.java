@@ -1,18 +1,19 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import android.content.Context;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 public class TimeUtils {
 
@@ -78,18 +79,13 @@ public class TimeUtils {
     }
 
     /**
-     * Formats milliseconds to a string like: 01h23'45''
-     *
-     * @return
+     * Formats milliseconds to a string like: 01h23'45"
      */
-    public static String formatTimeAgo(long milliseconds) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTimeInMillis(milliseconds);
-        String hours = String.format("%02d", calendar.get(Calendar.HOUR)) + "h";
-        String minutes = String.format("%02d", calendar.get(Calendar.MINUTE)) + "'";
-        String seconds = String.format("%02d", calendar.get(Calendar.SECOND)) + "''";
-        return hours + minutes + seconds;
+    public static String formatTimeAgo(Context context, long milliseconds) {
+        Calendar time = Calendar.getInstance();
+        time.setTimeZone(TimeZone.getTimeZone("UTC"));
+        time.setTimeInMillis(milliseconds);
+        return context.getString(R.string.time_ago, time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), time.get(Calendar.SECOND));
     }
 
     public static String calcDuration(Calendar from, Calendar to) {

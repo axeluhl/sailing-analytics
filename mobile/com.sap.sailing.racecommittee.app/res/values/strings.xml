@@ -454,9 +454,9 @@
     <string name="error_wrong_race_state">The RaceState isn\'t in the correct state (needed: %1$s - current: %2$s)</string>
     <string name="wind_map_button_show">Wind Map</string>
     <string name="wind_map_button_hide">Hide</string>
-    <string name="wind_latitude">Latitude</string>
-    <string name="wind_longitude">Longitude</string>
-    <string name="wind_accuracy">Accuracy</string>
+    <string name="wind_latitude">Latitude:</string>
+    <string name="wind_longitude">Longitude_</string>
+    <string name="wind_accuracy">Accuracy:</string>
     <string name="dependent_races_absolute">Absolute Start Time</string>
     <string name="dependent_races_relative">Relative Start Time</string>
     <string name="dependent_races_prompt">Please select the race</string>
@@ -465,5 +465,11 @@
     <string name="wind_accuracy_ago">ago</string>
     <string name="gate_time_schedule_long">%1$d + %2$d = %3$d Minutes</string>
     <string name="gate_time_schedule_short">%d Minutes</string>
+    <string name="not_available">n/a</string>
+    <string name="latitude_value" translatable="false">%.5f</string>
+    <string name="longitude_value" translatable="false">%.5f</string>
+    <string name="accuracy_value" translatable="false"><![CDATA[~%.0fm]]></string>
+    <string name="accuracy_timestamp">(since %s)</string>
+    <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
 
 </resources>
