@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.videoPlayer;
+package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

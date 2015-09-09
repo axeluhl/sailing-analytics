@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.videoPlayer;
+package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
 import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.event.dom.client.ClickEvent;

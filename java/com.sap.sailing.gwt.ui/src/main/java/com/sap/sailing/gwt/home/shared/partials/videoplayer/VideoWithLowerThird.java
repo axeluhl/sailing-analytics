@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.videoPlayer;
+package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
 import com.sap.sailing.gwt.home.shared.partials.lowerthird.LowerThird;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
