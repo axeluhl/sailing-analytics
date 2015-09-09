@@ -2,7 +2,7 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 
-public class DataRetrieverLevelDTO implements Serializable {
+public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetrieverLevelDTO> {
     private static final long serialVersionUID = 6911713148350359643L;
     
     private int retrieverLevel;
@@ -31,6 +31,11 @@ public class DataRetrieverLevelDTO implements Serializable {
 
     public LocalizedTypeDTO getRetrievedDataType() {
         return retrievedDataType;
+    }
+    
+    @Override
+    public int compareTo(DataRetrieverLevelDTO otherRetrieverLevel) {
+        return Integer.compare(getLevel(), otherRetrieverLevel.getLevel());
     }
 
     @Override

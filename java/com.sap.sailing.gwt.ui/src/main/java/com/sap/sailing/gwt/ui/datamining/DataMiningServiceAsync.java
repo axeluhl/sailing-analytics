@@ -38,8 +38,8 @@ public interface DataMiningServiceAsync {
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
             AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
-            HashSet<FunctionDTO> dimensionDTOs, HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+            HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
     <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);

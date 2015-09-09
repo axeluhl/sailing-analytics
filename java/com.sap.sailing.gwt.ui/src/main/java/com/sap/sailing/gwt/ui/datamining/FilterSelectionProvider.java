@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface FilterSelectionProvider extends DataMiningComponentProvider, DataRetrieverChainDefinitionChangedListener {
 
     public void addSelectionChangedListener(FilterSelectionChangedListener listener);
 
-    public HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection();
+    public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection();
 
     public void applySelection(StatisticQueryDefinitionDTO queryDefinition);
 

@@ -34,8 +34,8 @@ public interface DataMiningService extends RemoteService {
     ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName);
     ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
-    QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
-            HashSet<FunctionDTO> dimensionDTOs, HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName);
+    QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+            HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName);
     
     <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
 

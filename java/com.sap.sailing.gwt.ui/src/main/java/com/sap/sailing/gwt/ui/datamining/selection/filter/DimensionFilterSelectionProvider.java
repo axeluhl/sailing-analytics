@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQuerie
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -158,15 +159,15 @@ class DimensionFilterSelectionProvider {
         final FunctionDTO dimension = getSelectedDimension();
         HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
-        HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO = retrieverLevelSelectionProvider.getCompleteFilterSelection();
-        int retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO = retrieverLevelSelectionProvider.getCompleteFilterSelection();
+        DataRetrieverLevelDTO retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
         if (filterSelectionDTO.containsKey(retrieverLevel)) {
             filterSelectionDTO.get(retrieverLevel).remove(dimension);
         }
         busyIndicator.setVisible(true);
         counter.increase();
         dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
-                retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
+                retrieverLevel, dimensionDTOs, filterSelectionDTO,
                 LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
                     @Override
                     protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {

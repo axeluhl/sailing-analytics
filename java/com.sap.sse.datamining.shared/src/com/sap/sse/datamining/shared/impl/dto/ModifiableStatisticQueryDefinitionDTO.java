@@ -15,7 +15,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
     private ArrayList<FunctionDTO> dimensionsToGroupBy;
     private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
-    private HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
+    private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
     
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -32,7 +32,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }
     
-    public void setFilterSelectionFor(Integer retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
+    public void setFilterSelectionFor(DataRetrieverLevelDTO retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
         filterSelection.put(retrieverLevel, levelFilterSelection);
     }
     
@@ -51,7 +51,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
 
     @Override
-    public HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection() {
+    public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection() {
         return filterSelection;
     }
 

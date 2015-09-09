@@ -22,6 +22,7 @@ import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
 import com.sap.sse.datamining.impl.AdditionalStatisticQueryData;
 import com.sap.sse.datamining.impl.ProcessorQuery;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.criterias.AndCompoundFilterCriterion;
 import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
@@ -49,7 +50,7 @@ public class QueryFactory {
                 Processor<DataType, GroupedDataEntry<DataType>> groupingProcessor = processorFactory.createGroupingProcessor(dataTypeToRetrieve, extractionProcessor, getParameterProvidersFor(queryDefinition.getDimensionsToGroupBy(), stringMessages, queryDefinition.getLocale()));
 
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
-                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
                     
@@ -98,9 +99,9 @@ public class QueryFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private <DataType> Map<Integer, FilterCriterion<?>> createFilterCriteria(Map<Integer, Map<Function<?>, Collection<?>>> filterSelection) {
-        Map<Integer, CompoundFilterCriterion<?>> criteriaMappedByRetrieverLevel = new HashMap<>();
-        for (Entry<Integer, Map<Function<?>, Collection<?>>> levelFilterSelection : filterSelection.entrySet()) {
+    private <DataType> Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> createFilterCriteria(Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection) {
+        Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = new HashMap<>();
+        for (Entry<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> levelFilterSelection : filterSelection.entrySet()) {
             for (Entry<Function<?>, Collection<?>> levelFilterSelectionEntry : levelFilterSelection.getValue().entrySet()) {
                 Function<?> function = levelFilterSelectionEntry.getKey();
                 ParameterProvider parameterProvider = ParameterProvider.NULL;
@@ -114,25 +115,25 @@ public class QueryFactory {
                 ((CompoundFilterCriterion<DataType>) criteriaMappedByRetrieverLevel.get(levelFilterSelection.getKey())).addCriteria(new FunctionValuesFilterCriterion<>(dataType, function, parameterProvider, filterValues));
             }
         }
-        return (Map<Integer, FilterCriterion<?>>)(Map<Integer, ?>) criteriaMappedByRetrieverLevel;
+        return criteriaMappedByRetrieverLevel;
     }
 
-    public <DataSource> Query<HashSet<Object>> createDimensionValuesQuery(DataSource dataSource,
-            final DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, final int retrieverLevel,
-            final Iterable<Function<?>> dimensions, final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
+    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataSourceType dataSource,
+            final DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, final DataRetrieverLevel<?, ?> retrieverLevel,
+            final Iterable<Function<?>> dimensions, final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         @SuppressWarnings("unchecked")
         Class<HashSet<Object>> resultType = (Class<HashSet<Object>>)(Class<?>) HashSet.class;
-        return new ProcessorQuery<HashSet<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
+        return new ProcessorQuery<HashSet<Object>, DataSourceType>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
-            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
+            protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
-                Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
-                DataRetrieverChainBuilder<DataSource> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
-                while (chainBuilder.getCurrentRetrieverLevel() < retrieverLevel) {
+                Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
+                DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
+                while (!chainBuilder.hasBeenInitialized() || chainBuilder.getCurrentRetrieverLevel().getLevel() < retrieverLevel.getLevel()) {
                     chainBuilder.stepFurther();
                     
                     if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {

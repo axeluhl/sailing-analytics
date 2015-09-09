@@ -177,15 +177,16 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         }
     }
     
-    void updateFilterSelectionProviders(int beginningWithLevel, final FunctionDTO exceptForDimension) {
+    void updateFilterSelectionProviders(DataRetrieverLevelDTO beginningWithLevel, final FunctionDTO exceptForDimension) {
+        DataRetrieverLevelDTO currentLevel = beginningWithLevel;
         DataRetrieverLevelDTO retrieverLevelToUpdate = null;
-        for (int retrieverLevelIndex = beginningWithLevel; retrieverLevelIndex < retrieverChain.size(); retrieverLevelIndex++) {
-            DataRetrieverLevelDTO retrieverLevel = retrieverChain.getRetrieverLevel(retrieverLevelIndex);
-            if (selectionProvidersMappedByRetrievedDataType.containsKey(retrieverLevel)) {
-                retrieverLevelToUpdate = retrieverLevel;
+        do {
+            if (selectionProvidersMappedByRetrievedDataType.containsKey(currentLevel)) {
+                retrieverLevelToUpdate = currentLevel;
                 break;
             }
-        }
+            currentLevel = retrieverChain.getNextRetrieverLevel(currentLevel);
+        } while (currentLevel != null);
         
         if (retrieverLevelToUpdate != null) {
             selectionProvidersMappedByRetrievedDataType.get(retrieverLevelToUpdate).updateAvailableData(exceptForDimension);
@@ -201,8 +202,8 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection() {
-        HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
+    public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection() {
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
             Map<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = selectionProvider.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
@@ -215,8 +216,8 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     @Override
     public void applySelection(StatisticQueryDefinitionDTO queryDefinition) {
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
-            Map<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
-            int retrieverLevel = selectionProvider.getRetrieverLevel();
+            Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
+            DataRetrieverLevelDTO retrieverLevel = selectionProvider.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
                 selectionProvider.applySelection(filterSelection.get(retrieverLevel));
             }

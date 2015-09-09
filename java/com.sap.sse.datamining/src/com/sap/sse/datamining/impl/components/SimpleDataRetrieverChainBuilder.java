@@ -109,8 +109,8 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     }
     
     @Override
-    public int getCurrentRetrieverLevel() {
-        return currentRetrieverTypeIndex;
+    public DataRetrieverLevel<?, ?> getCurrentRetrieverLevel() {
+        return hasBeenInitialized() ? dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex) : null;
     }
 
     @SuppressWarnings("unchecked")
@@ -129,7 +129,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         return (Processor<DataSourceType, ?>) firstRetriever;
     }
 
-    private boolean hasBeenInitialized() {
+    public boolean hasBeenInitialized() {
         return currentRetrieverTypeIndex >= 0;
     }
     

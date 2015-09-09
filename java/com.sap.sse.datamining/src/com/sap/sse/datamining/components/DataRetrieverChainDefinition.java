@@ -109,6 +109,12 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
     public List<? extends DataRetrieverLevel<?, ?>> getDataRetrieverLevels();
 
     /**
+     * @param levelIndex
+     * @return The retriever level for the given index or <code>null</code>, if the index is out of bounds.
+     */
+    public DataRetrieverLevel<?, ?> getDataRetrieverLevel(int levelIndex);
+
+    /**
      * Returns a {@link DataRetrieverChainBuilder}, that is used to construct the chain. {@link #endWith(Class, Class, Class, String)}
      * has to be called before you can use this method. Otherwise an exception will be thrown.
      * 

@@ -19,7 +19,6 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -142,7 +141,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
             }
         } else {
             // Update for this level is completed. Continue with the next level.
-            retrieverChainSelectionProvider.updateFilterSelectionProviders(getRetrieverLevel() + 1, exceptForDimension);
+            retrieverChainSelectionProvider.updateFilterSelectionProviders(retrieverChain.getNextRetrieverLevel(getRetrieverLevel()), exceptForDimension);
         }
     }
 
@@ -150,7 +149,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this, dimensionFilterSelectionProvider);
     }
 
-    HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getCompleteFilterSelection() {
+    HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getCompleteFilterSelection() {
         return retrieverChainSelectionProvider.getSelection();
     }
 
@@ -193,12 +192,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return retrieverChain;
     }
     
-    public int getRetrieverLevel() {
-        return retrieverLevel.getLevel();
-    }
-    
-    public LocalizedTypeDTO getRetrievedDataType() {
-        return retrieverLevel.getRetrievedDataType();
+    public DataRetrieverLevelDTO getRetrieverLevel() {
+        return retrieverLevel;
     }
 
     @Override

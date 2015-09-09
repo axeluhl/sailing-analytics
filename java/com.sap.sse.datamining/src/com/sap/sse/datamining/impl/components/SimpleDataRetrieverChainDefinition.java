@@ -128,6 +128,14 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public List<? extends DataRetrieverLevel<?, ?>> getDataRetrieverLevels() {
         return dataRetrieverTypesWithInformation;
     }
+    
+    @Override
+    public DataRetrieverLevel<?, ?> getDataRetrieverLevel(int levelIndex) {
+        if (levelIndex < 0 || levelIndex >= getDataRetrieverLevels().size()) {
+            return null;
+        }
+        return getDataRetrieverLevels().get(levelIndex);
+    }
 
     @Override
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor) {

@@ -47,27 +47,53 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
         return retrieverLevels;
     }
     
-    public int size() {
+    public int getLevelAmount() {
         return retrieverLevels.size();
     }
     
-    public DataRetrieverLevelDTO getRetrieverLevel(int retrieverLevel) {
-        return retrieverLevels.get(retrieverLevel);
+    /**
+     * @param levelIndex
+     * @return The retriever level for the given index or <code>null</code>, if the index is out of bounds.
+     */
+    public DataRetrieverLevelDTO getRetrieverLevel(int levelIndex) {
+        if (levelIndex < 0 || levelIndex >= getLevelAmount()) {
+            return null;
+        }
+        return retrieverLevels.get(levelIndex);
+    }
+    
+    /**
+     * @param retrieverLevel
+     * @return The retriever level after the given one or <code>null</code>, if the given one is the last one in the chain.
+     */
+    public DataRetrieverLevelDTO getNextRetrieverLevel(DataRetrieverLevelDTO retrieverLevel) {
+        return getRetrieverLevel(retrieverLevel.getLevel() + 1);
+    }
+    
+    /**
+     * @param retrieverLevel
+     * @return The retriever level before the given one or <code>null</code>, if the given one is the first one in the chain.
+     */
+    public DataRetrieverLevelDTO getPreviousRetrieverLevel(DataRetrieverLevelDTO retrieverLevel) {
+        return getRetrieverLevel(retrieverLevel.getLevel() - 1);
     }
 
     @Override
     public int compareTo(DataRetrieverChainDefinitionDTO d) {
         return this.getName().compareTo(d.getName());
     }
+    
+    @Override
+    public String toString() {
+        return getDataSourceTypeName() + " -> " + getRetrievedDataTypeName() +
+               "[ID: " + id + ", name: " + name + "]";
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((dataSourceTypeName == null) ? 0 : dataSourceTypeName.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((retrieverLevels == null) ? 0 : retrieverLevels.hashCode());
         return result;
     }
 
@@ -80,25 +106,10 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
         if (getClass() != obj.getClass())
             return false;
         DataRetrieverChainDefinitionDTO other = (DataRetrieverChainDefinitionDTO) obj;
-        if (dataSourceTypeName == null) {
-            if (other.dataSourceTypeName != null)
-                return false;
-        } else if (!dataSourceTypeName.equals(other.dataSourceTypeName))
-            return false;
         if (id == null) {
             if (other.id != null)
                 return false;
         } else if (!id.equals(other.id))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (retrieverLevels == null) {
-            if (other.retrieverLevels != null)
-                return false;
-        } else if (!retrieverLevels.equals(other.retrieverLevels))
             return false;
         return true;
     }

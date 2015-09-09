@@ -65,13 +65,12 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
     public void selectionChanged() {
         presentationPanel.clear();
         
-        Map<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = filterSelectionProvider.getSelection();
-        List<Integer> sortedLevels = new ArrayList<>(selection.keySet());
+        Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = filterSelectionProvider.getSelection();
+        List<DataRetrieverLevelDTO> sortedLevels = new ArrayList<>(selection.keySet());
         Collections.sort(sortedLevels);
         boolean first = true;
-        for (Integer levelIndex : sortedLevels) {
-            Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection = selection.get(levelIndex);
-            DataRetrieverLevelDTO retrieverLevel = retrieverChain.getRetrieverLevel(levelIndex);
+        for (DataRetrieverLevelDTO retrieverLevel : sortedLevels) {
+            Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection = selection.get(retrieverLevel);
             RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(retrieverLevel, levelSelection);
             if (!first) {
                 levelSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(5, Unit.PX);

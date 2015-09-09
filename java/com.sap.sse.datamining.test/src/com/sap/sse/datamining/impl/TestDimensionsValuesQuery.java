@@ -19,6 +19,7 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -95,8 +96,8 @@ public class TestDimensionsValuesQuery {
         raceDimensions.add(dimensionRaceName);
         raceDimensions.add(dimensionBoatClassName);
         raceDimensions.add(dimensionYear);
-        Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
-        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 1 /*race*/, raceDimensions, filterSelection, locale);
+        Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
+        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*race*/ 1), raceDimensions, filterSelection, locale);
         
         Map<GroupKey, HashSet<Object>> expectedRaceResultData = buildExpectedRaceResultData();
         QueryResult<HashSet<Object>> result = dimensionsValueQuery.run();
@@ -106,7 +107,7 @@ public class TestDimensionsValuesQuery {
         legDimensions.add(dimensionLegNumber);
         legDimensions.add(dimensionCompetitorName);
         legDimensions.add(dimensionCompetitorSailID);
-        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 2 /*leg*/, legDimensions, filterSelection, locale);
+        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*leg*/ 2), legDimensions, filterSelection, locale);
 
         Map<GroupKey, HashSet<Object>> expectedLegResultData = buildExpectedLegResultData();
         result = dimensionsValueQuery.run();
