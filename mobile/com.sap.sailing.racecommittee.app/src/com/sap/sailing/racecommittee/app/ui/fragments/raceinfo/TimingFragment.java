@@ -18,10 +18,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimingFragment extends BaseFragment {
 
+    public final static int ONE_MINUTE_MILLISECONDS = 60000;
     private final static String START_MODE = "startMode";
-    private final static int ONE_MINUTE_MILLISECONDS = 60000;
-    private final static String NAT = "nationality";
-    private final static String NUM = "number";
 
     private final static int MIN_VALUE = 0;
     private final static int MAX_VALUE = 60;
@@ -31,16 +29,14 @@ public class TimingFragment extends BaseFragment {
     private NumberPicker mTimeGolf;
     private GateStartRacingProcedure mProcedure;
 
-    public static TimingFragment newInstance(String nat, String num) {
-        return newInstance(0, nat, num);
+    public static TimingFragment newInstance() {
+        return newInstance(0);
     }
 
-    public static TimingFragment newInstance(int startMode, String nat, String num) {
+    public static TimingFragment newInstance(int startMode) {
         TimingFragment fragment = new TimingFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
-        args.putString(NAT, nat);
-        args.putString(NUM, num);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,7 +51,7 @@ public class TimingFragment extends BaseFragment {
 
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(PathFinderFragment.newInstance(getArguments().getString(NAT, null), getArguments().getString(NUM, null)));
+                    openMainScheduleFragment();
                 }
             });
         }

@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -175,13 +176,21 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
 
+                    String timing = null;
+                    long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
+                    long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
+                    if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
+                        timing = getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
+                    } else {
+                        timing = getString(R.string.gate_time_schedule_short, launchTime);
+                    }
                     Runnable runnableTiming = new Runnable() {
                         @Override
                         public void run() {
-                            openFragment(TimingFragment.newInstance(0, "", ""));
+                            openFragment(TimingFragment.newInstance(0));
                         }
                     };
-                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), null, null, runnableTiming));
+                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), timing, null, runnableTiming));
                 }
             }
         }

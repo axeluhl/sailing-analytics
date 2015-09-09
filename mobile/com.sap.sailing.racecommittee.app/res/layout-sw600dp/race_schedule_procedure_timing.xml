@@ -93,14 +93,6 @@
                 android:visibility="gone"
                 tools:visibility="visible">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/default_margin_twice"
-                    android:text="+"
-                    android:textAppearance="?textXLarge"/>
-
                 <LinearLayout
                     android:id="@+id/linearLayout"
                     android:layout_width="wrap_content"
@@ -116,43 +108,66 @@
                         android:text="@string/time_golf"
                         android:textAppearance="?textSmall"/>
 
-                    <NumberPicker
-                        android:id="@+id/time_golf"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="@dimen/default_margin_twice"
-                        android:layout_marginTop="@dimen/default_margin_twice"
-                        android:scaleX="@integer/picker_scale"
-                        android:scaleY="@integer/picker_scale"/>
-                </LinearLayout>
+                        android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/default_margin_twice"
-                    android:text="="
-                    android:textAppearance="?textXLarge"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="@dimen/default_margin"
+                            android:layout_marginRight="@dimen/default_margin_twice"
+                            android:text="+"
+                            android:textAppearance="?textXLarge"/>
+
+                        <NumberPicker
+                            android:id="@+id/time_golf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/default_margin_twice"
+                            android:layout_marginTop="@dimen/default_margin_twice"
+                            android:scaleX="@integer/picker_scale"
+                            android:scaleY="@integer/picker_scale"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="@dimen/default_margin_twice"
+                            android:text="="
+                            android:textAppearance="?textXLarge"/>
+                    </LinearLayout>
+                </LinearLayout>
 
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent">
 
                     <TextView
+                        android:id="@+id/time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:text="@string/time_total"
                         android:textAppearance="?textSmall"/>
 
-                    <TextView
-                        android:id="@+id/total_time_text"
+                    <RelativeLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:textAppearance="?textXLarge"
-                        tools:text="12"/>
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/time"
+                        android:layout_centerInParent="true">
+
+                        <TextView
+                            android:id="@+id/total_time_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:textAppearance="?textXLarge"
+                            tools:text="12"/>
+                    </RelativeLayout>
+
                 </RelativeLayout>
             </LinearLayout>
 

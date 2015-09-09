@@ -443,5 +443,7 @@
     <string name="minutes_after">Minuten nach</string>
     <string name="minutes_after_long">%1$.0f Minuten nach %2$s</string>
     <string name="wind_accuracy_ago">alt</string>
+    <string name="gate_time_schedule_long">%1$d + %2$d = %3$d Minuten</string>
+    <string name="gate_time_schedule_short">%d Minuten</string>
 
 </resources>
