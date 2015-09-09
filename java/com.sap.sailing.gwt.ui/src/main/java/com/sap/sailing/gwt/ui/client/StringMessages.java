@@ -1374,5 +1374,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
-    String analyse();
+    String analyze();
 }

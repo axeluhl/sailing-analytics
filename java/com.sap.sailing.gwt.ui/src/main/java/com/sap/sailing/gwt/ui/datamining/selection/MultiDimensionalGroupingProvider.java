@@ -95,9 +95,9 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     private void updateAvailableDimensions() {
         if (currentStatisticToCalculate != null) {
             dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
-                    .getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
+                    .getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
                 @Override
-                public void onSuccess(Iterable<FunctionDTO> dimensions) {
+                public void onSuccess(HashSet<FunctionDTO> dimensions) {
                     clearAvailableDimensionsAndGroupByBoxes();
                     for (FunctionDTO dimension : dimensions) {
                         availableDimensions.add(dimension);

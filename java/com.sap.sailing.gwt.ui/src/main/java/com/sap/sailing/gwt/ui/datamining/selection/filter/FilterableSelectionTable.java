@@ -176,8 +176,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         }
     }
 
-    public Collection<ContentType> getSelection() {
-        return selectionModel.getSelectedSet();
+    public HashSet<ContentType> getSelection() {
+        return new HashSet<>(selectionModel.getSelectedSet());
     }
 
     public void setSelection(Iterable<?> elements, boolean notifyListenersWhenSelectionChanged) {

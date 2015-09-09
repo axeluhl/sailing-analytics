@@ -107,9 +107,9 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     private void updateContent() {
-        dataMiningService.getStatisticsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
+        dataMiningService.getStatisticsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
             @Override
-            public void onSuccess(Iterable<FunctionDTO> functions) {
+            public void onSuccess(HashSet<FunctionDTO> functions) {
                 extractionFunctions.clear();
                 
                 if (functions.iterator().hasNext()) {
@@ -132,13 +132,13 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
     
     private void updateAggregators() {
-        dataMiningService.getAggregatorDefinitionsFor(getStatisticToCalculate(), LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<AggregationProcessorDefinitionDTO>>() {
+        dataMiningService.getAggregatorDefinitionsFor(getStatisticToCalculate(), LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the available aggregators from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Iterable<AggregationProcessorDefinitionDTO> definitions) {
+            public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> definitions) {
                 aggregatorDefinitions.clear();
                 
                 if (definitions.iterator().hasNext()) {

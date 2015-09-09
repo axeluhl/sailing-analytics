@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -155,11 +156,9 @@ class DimensionFilterSelectionProvider {
     private void fetchAndDisplayAvailableData(final boolean isUpdate, final boolean notifyListenersWhenSelectionChanged,
             final Iterator<DimensionFilterSelectionProvider> retrieverLevelSelectionProviderIterator) {
         final FunctionDTO dimension = getSelectedDimension();
-        Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
+        HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
-        @SuppressWarnings("unchecked")
-        Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO = 
-                (Map<Integer, Map<FunctionDTO, Collection<?>>>)(Map<?, ?>) retrieverLevelSelectionProvider.getCompleteFilterSelection();
+        HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO = retrieverLevelSelectionProvider.getCompleteFilterSelection();
         int retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
         if (filterSelectionDTO.containsKey(retrieverLevel)) {
             filterSelectionDTO.get(retrieverLevel).remove(dimension);
@@ -168,10 +167,10 @@ class DimensionFilterSelectionProvider {
         counter.increase();
         dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
                 retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<Set<Object>>(counter) {
+                LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
                     @Override
-                    protected void handleSuccess(QueryResultDTO<Set<Object>> result) {
-                        Map<GroupKey, Set<Object>> results = result.getResults();
+                    protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
+                        Map<GroupKey, HashSet<Object>> results = result.getResults();
                         List<Object> content = new ArrayList<Object>();
                         
                         if (!results.isEmpty()) {
@@ -226,7 +225,7 @@ class DimensionFilterSelectionProvider {
         return dimensionListBox.getValue();
     }
 
-    public Collection<? extends Serializable> getSelection() {
+    public HashSet<? extends Serializable> getSelection() {
         return selectionTable.getSelection();
     }
     

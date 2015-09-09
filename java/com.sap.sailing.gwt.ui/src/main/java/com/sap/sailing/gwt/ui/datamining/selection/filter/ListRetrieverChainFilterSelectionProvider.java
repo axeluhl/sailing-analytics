@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining.selection.filter;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -202,13 +201,12 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getSelection() {
-        Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = new HashMap<>();
+    public HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getSelection() {
+        HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = new HashMap<>();
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
-            Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection = selectionProvider.getFilterSelection();
+            Map<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = selectionProvider.getFilterSelection();
             if (!levelFilterSelection.isEmpty()) {
-                filterSelection.put(selectionProvider.getRetrieverLevel(),
-                        new HashMap<FunctionDTO, Collection<? extends Serializable>>(levelFilterSelection));
+                filterSelection.put(selectionProvider.getRetrieverLevel(), new HashMap<>(levelFilterSelection));
             }
         }
         return filterSelection;
@@ -217,7 +215,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     @Override
     public void applySelection(StatisticQueryDefinitionDTO queryDefinition) {
         for (RetrieverLevelFilterSelectionProvider selectionProvider : selectionProvidersMappedByRetrievedDataType.values()) {
-            Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
+            Map<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
             int retrieverLevel = selectionProvider.getRetrieverLevel();
             if (filterSelection.containsKey(retrieverLevel)) {
                 selectionProvider.applySelection(filterSelection.get(retrieverLevel));

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -149,14 +150,14 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this, dimensionFilterSelectionProvider);
     }
 
-    Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getCompleteFilterSelection() {
+    HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getCompleteFilterSelection() {
         return retrieverChainSelectionProvider.getSelection();
     }
 
-    public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
-        HashMap<FunctionDTO, Collection<? extends Serializable>> filterSelection = new HashMap<>();
+    public Map<FunctionDTO, HashSet<? extends Serializable>> getFilterSelection() {
+        HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection = new HashMap<>();
         for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
-            Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
+            HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
             }
@@ -164,7 +165,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return filterSelection;
     }
 
-    public void applySelection(Map<FunctionDTO, Collection<? extends Serializable>> filterSelection) {
+    public void applySelection(HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection) {
         dimensionSelectionProviders.clear();
         mainPanel.clear();
         

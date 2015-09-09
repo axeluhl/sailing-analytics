@@ -2,10 +2,8 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
@@ -15,9 +13,9 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     private String localeInfoName;
     private FunctionDTO statisticToCalculate;
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
-    private List<FunctionDTO> dimensionsToGroupBy;
+    private ArrayList<FunctionDTO> dimensionsToGroupBy;
     private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
-    private Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection;
+    private HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
     
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -34,7 +32,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }
     
-    public void setFilterSelectionFor(Integer retrieverLevel, Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection) {
+    public void setFilterSelectionFor(Integer retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
         filterSelection.put(retrieverLevel, levelFilterSelection);
     }
     
@@ -53,12 +51,12 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
 
     @Override
-    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
+    public HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection() {
         return filterSelection;
     }
 
     @Override
-    public List<FunctionDTO> getDimensionsToGroupBy() {
+    public ArrayList<FunctionDTO> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 

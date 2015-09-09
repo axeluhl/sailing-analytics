@@ -45,7 +45,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
-        mainPanel.add(new Label(this.stringMessages.analyse()));
+        mainPanel.add(new Label(this.stringMessages.analyze()));
         
         retrieverChainsListBox = createRetrieverChainsListBox();
         mainPanel.add(retrieverChainsListBox);
@@ -87,9 +87,9 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     
     private void updateRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitions(LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>>() {
+                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>>() {
                     @Override
-                    public void onSuccess(Iterable<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
+                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
                         if (dataRetrieverChainDefinitions.iterator().hasNext()) {
                             List<DataRetrieverChainDefinitionDTO> sortedRetrieverChains = new ArrayList<>();
                             for (DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {

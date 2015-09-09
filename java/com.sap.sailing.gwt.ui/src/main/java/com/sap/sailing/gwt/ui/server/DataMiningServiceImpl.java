@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -69,20 +69,20 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Iterable<FunctionDTO> getAllStatistics(String localeInfoName) {
+    public HashSet<FunctionDTO> getAllStatistics(String localeInfoName) {
         Iterable<Function<?>> statistics = getDataMiningServer().getAllStatistics();
         return functionsAsDTOs(statistics, localeInfoName);
     }
     
     @Override
-    public Iterable<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
+    public HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
         Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinition(retrieverChainDefinition.getId()).getRetrievedDataType();
         Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
         return functionsAsDTOs(statistics, localeInfoName);
     }
     
     @Override
-    public Iterable<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
+    public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName) {
         Class<?> returnType = getReturnType(extractionFunction);
         @SuppressWarnings("unchecked")
         Iterable<AggregationProcessorDefinition<?, ?>> definitions = 
@@ -94,12 +94,12 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         return getDataMiningServer().getFunctionForDTO(extractionFunction).getReturnType();
     }
 
-    private Iterable<AggregationProcessorDefinitionDTO> aggregatorDefinitionsAsDTOs(
+    private HashSet<AggregationProcessorDefinitionDTO> aggregatorDefinitionsAsDTOs(
             Iterable<AggregationProcessorDefinition<?, ?>> definitions, String localeInfoName) {
         ResourceBundleStringMessages stringMessages = getDataMiningServer().getStringMessages();
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         
-        Collection<AggregationProcessorDefinitionDTO> definitionDTOs = new HashSet<>();
+        HashSet<AggregationProcessorDefinitionDTO> definitionDTOs = new HashSet<>();
         for (AggregationProcessorDefinition<?,?> definition : definitions) {
             definitionDTOs.add(dtoFactory.createAggregationProcessorDefinitionDTO(definition, stringMessages, locale));
         }
@@ -107,7 +107,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public Iterable<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+    public HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
         return functionsAsDTOs(dimensions, localeInfoName);
@@ -159,25 +159,25 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
+    public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     @Override
-    public Iterable<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
+    public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
-    private Collection<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
+    private ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
             Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
         ResourceBundleStringMessages serverStringMessages = getDataMiningServer().getStringMessages();
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         
-        Collection<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
+        ArrayList<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
             DTOs.add(dtoFactory.createDataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition,
                                                                       serverStringMessages, locale));
@@ -186,15 +186,15 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public QueryResultDTO<Set<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
-            int retrieverLevel, Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO, String localeInfoName) {
+    public QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
+            int retrieverLevel, HashSet<FunctionDTO> dimensionDTOs, HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName) {
         DataMiningServer dataMiningServer = getDataMiningServer();
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO);
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        Query<Set<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
-        QueryResult<Set<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale);
+        QueryResult<HashSet<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
         return dataMiningServer.convertToDTO(result);
     }
 
@@ -211,10 +211,10 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     private Map<Integer, Map<Function<?>, Collection<?>>> filterSelectionDTOAsFilterSelection(
-            Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO) {
+            HashMap<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO) {
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
         for (Integer retrieverLevel : filterSelectionDTO.keySet()) {
-            Map<FunctionDTO, Collection<?>> retrievalLevelSelection = filterSelectionDTO.get(retrieverLevel);
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> retrievalLevelSelection = filterSelectionDTO.get(retrieverLevel);
             for (FunctionDTO dimensionDTO : retrievalLevelSelection.keySet()) {
                 if (!retrievalLevelSelection.get(dimensionDTO).isEmpty()) {
                     Function<?> function = getDataMiningServer().getFunctionForDTO(dimensionDTO);

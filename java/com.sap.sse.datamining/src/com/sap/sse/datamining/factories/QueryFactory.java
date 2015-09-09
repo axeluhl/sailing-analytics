@@ -3,11 +3,11 @@ package com.sap.sse.datamining.factories;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.Query;
@@ -117,18 +117,18 @@ public class QueryFactory {
         return (Map<Integer, FilterCriterion<?>>)(Map<Integer, ?>) criteriaMappedByRetrieverLevel;
     }
 
-    public <DataSource> Query<Set<Object>> createDimensionValuesQuery(DataSource dataSource,
+    public <DataSource> Query<HashSet<Object>> createDimensionValuesQuery(DataSource dataSource,
             final DataRetrieverChainDefinition<DataSource, ?> dataRetrieverChainDefinition, final int retrieverLevel,
             final Iterable<Function<?>> dimensions, final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         @SuppressWarnings("unchecked")
-        Class<Set<Object>> resultType = (Class<Set<Object>>)(Class<?>) Set.class;
-        return new ProcessorQuery<Set<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
+        Class<HashSet<Object>> resultType = (Class<HashSet<Object>>)(Class<?>) HashSet.class;
+        return new ProcessorQuery<HashSet<Object>, DataSource>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
             @Override
-            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Set<Object>>, Void> resultReceiver) {
+            protected Processor<DataSource, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
                 
-                Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
+                Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
 
                 Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
                 DataRetrieverChainBuilder<DataSource> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);

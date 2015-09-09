@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
@@ -97,11 +96,11 @@ public class TestDimensionsValuesQuery {
         raceDimensions.add(dimensionBoatClassName);
         raceDimensions.add(dimensionYear);
         Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
-        Query<Set<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 1 /*race*/, raceDimensions, filterSelection, locale);
+        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 1 /*race*/, raceDimensions, filterSelection, locale);
         
-        Map<GroupKey, Set<Object>> expectedRaceResultData = buildExpectedRaceResultData();
-        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
-        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedRaceResultData);
+        Map<GroupKey, HashSet<Object>> expectedRaceResultData = buildExpectedRaceResultData();
+        QueryResult<HashSet<Object>> result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), expectedRaceResultData);
         
         Collection<Function<?>> legDimensions = new ArrayList<>();
         legDimensions.add(dimensionLegNumber);
@@ -109,13 +108,13 @@ public class TestDimensionsValuesQuery {
         legDimensions.add(dimensionCompetitorSailID);
         dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 2 /*leg*/, legDimensions, filterSelection, locale);
 
-        Map<GroupKey, Set<Object>> expectedLegResultData = buildExpectedLegResultData();
+        Map<GroupKey, HashSet<Object>> expectedLegResultData = buildExpectedLegResultData();
         result = dimensionsValueQuery.run();
-        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedLegResultData);
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), expectedLegResultData);
     }
     
-    private Map<GroupKey, Set<Object>> buildExpectedRaceResultData() {
-        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+    private Map<GroupKey, HashSet<Object>> buildExpectedRaceResultData() {
+        Map<GroupKey, HashSet<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasRaceContext dimensions
         GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
@@ -139,8 +138,8 @@ public class TestDimensionsValuesQuery {
         return expectedResultData;
     }
     
-    private Map<GroupKey, Set<Object>> buildExpectedLegResultData() {
-        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+    private Map<GroupKey, HashSet<Object>> buildExpectedLegResultData() {
+        Map<GroupKey, HashSet<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasLegContext dimensions
         GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));

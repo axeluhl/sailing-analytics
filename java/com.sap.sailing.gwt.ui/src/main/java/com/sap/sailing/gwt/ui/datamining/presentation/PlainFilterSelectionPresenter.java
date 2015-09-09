@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,12 +65,12 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
     public void selectionChanged() {
         presentationPanel.clear();
         
-        Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> selection = filterSelectionProvider.getSelection();
+        Map<Integer, HashMap<FunctionDTO, HashSet<? extends Serializable>>> selection = filterSelectionProvider.getSelection();
         List<Integer> sortedLevels = new ArrayList<>(selection.keySet());
         Collections.sort(sortedLevels);
         boolean first = true;
         for (Integer levelIndex : sortedLevels) {
-            Map<FunctionDTO, Collection<? extends Serializable>> levelSelection = selection.get(levelIndex);
+            Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection = selection.get(levelIndex);
             DataRetrieverLevelDTO retrieverLevel = retrieverChain.getRetrieverLevel(levelIndex);
             RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(retrieverLevel, levelSelection);
             if (!first) {
@@ -84,7 +86,7 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
         private final HorizontalPanel mainPanel;
 
         public RetrieverLevelFilterSelectionPresenter(DataRetrieverLevelDTO retrieverLevel,
-                Map<FunctionDTO, Collection<? extends Serializable>> levelSelection) {
+                Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection) {
             
             Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
             levelLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
