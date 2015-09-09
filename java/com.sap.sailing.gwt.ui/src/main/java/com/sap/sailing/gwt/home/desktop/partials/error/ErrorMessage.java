@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.error;
+package com.sap.sailing.gwt.home.desktop.partials.error;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
