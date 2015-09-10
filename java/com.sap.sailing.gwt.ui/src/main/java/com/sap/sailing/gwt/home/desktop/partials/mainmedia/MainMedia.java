@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.mainmedia;
+package com.sap.sailing.gwt.home.desktop.partials.mainmedia;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,11 +20,8 @@ public class MainMedia extends Composite {
 
     private static final int MAX_VIDEO_COUNT = 3;
 
-    @UiField
-    HTMLPanel videosPanel;
-
-    @UiField
-    ImageCarousel<SailingImageDTO> imageCarousel;
+    @UiField HTMLPanel videosPanel;
+    @UiField ImageCarousel<SailingImageDTO> imageCarousel;
 
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }

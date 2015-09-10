@@ -7,7 +7,7 @@
    	    <s:stage.Stage ui:field='stage'/>
    	    <s:mainsponsors.MainSponsors ui:field='mainSponsors'/>
    	    <dp:mainevents.MainEvents ui:field='mainEvents'/>
-   	    <s:mainmedia.MainMedia ui:field='mainMedia'/>
+   	    <dp:mainmedia.MainMedia ui:field='mainMedia'/>
    	    <dp:socialfooter.SocialFooter/>
 	</g:HTMLPanel>
 </ui:UiBinder>    

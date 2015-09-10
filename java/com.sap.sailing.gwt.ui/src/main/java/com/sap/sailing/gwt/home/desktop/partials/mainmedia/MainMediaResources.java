@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.mainmedia;
+package com.sap.sailing.gwt.home.desktop.partials.mainmedia;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface MainMediaResources extends ClientBundle {
     public static final MainMediaResources INSTANCE = GWT.create(MainMediaResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/shared/mainmedia/MainMedia.css")
+    @Source("MainMedia.css")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
