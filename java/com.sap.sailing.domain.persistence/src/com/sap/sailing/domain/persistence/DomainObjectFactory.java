@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -108,6 +109,8 @@ public interface DomainObjectFactory {
      * have finished loading. This method implements this step of loading and establishing the links.
      */
     void loadLeaderboardGroupLinksForEvents(EventResolver eventResolver, LeaderboardGroupResolver leaderboardGroupResolver);
+
+    SailingServerConfiguration loadServerConfiguration();
 
     Iterable<RemoteSailingServerReference> loadAllRemoteSailingServerReferences();
     

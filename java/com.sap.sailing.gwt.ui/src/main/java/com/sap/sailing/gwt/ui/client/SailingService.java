@@ -76,6 +76,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -95,6 +96,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -322,6 +324,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
+    ServerInfoDTO getServerInfo();
+
+    ServerConfigurationDTO getServerConfiguration();
+
+    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration);
+    
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences();
 
     void removeSailingServers(Set<String> toRemove) throws Exception;
@@ -392,8 +400,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, List<String> visibleRegattas)
             throws Exception;
-
-    String getBuildVersion();
 
     void stopReplicatingFromMaster();
 
