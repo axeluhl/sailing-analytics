@@ -18,7 +18,6 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
@@ -208,22 +207,25 @@ public class MetadataParserImpl implements MetadataParser {
     }
 
     @Override
-    public Pair<String, String> parseCompetitorBoatAndColor(IRaceCompetitor competitor) {
-        Pair<String, String> result = null;
-        String parsedBoat = null;
+    public Util.Triple<String, String, String> parseCompetitorBoat(IRaceCompetitor competitor) {
+        Util.Triple<String, String, String> result = null;
+        String parsedBoatName = null;
+        String parsedBoatId = null;
         String parsedColor = null;
         String raceCompetitorMetadataString = competitor.getMetadata() != null ? competitor.getMetadata().getText() : null;
         if (raceCompetitorMetadataString != null) {
             Map<String, String> competitorMetadata = parseMetadata(raceCompetitorMetadataString);
             for (Entry<String, String> entry : competitorMetadata.entrySet()) {
-                if (entry.getKey().startsWith("Boot")) {
-                    parsedBoat = entry.getValue();
-                } else if (entry.getKey().startsWith("Color")) {
+                if (entry.getKey().startsWith("boatName")) {
+                    parsedBoatName = entry.getValue();
+                } else if (entry.getKey().startsWith("boatId")) {
+                    parsedBoatId = entry.getValue();
+                } else if (entry.getKey().startsWith("boatColor")) {
                     parsedColor = entry.getValue();
                 }
             }
-            if(parsedBoat != null || parsedColor != null) {
-                result = new Pair<String, String>(parsedBoat, parsedColor);
+            if(parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
+                result = new Util.Triple<String, String, String>(parsedBoatName, parsedBoatId, parsedColor);
             }
         }
         

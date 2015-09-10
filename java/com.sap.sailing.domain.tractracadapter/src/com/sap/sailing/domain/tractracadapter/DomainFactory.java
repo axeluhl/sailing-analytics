@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -41,13 +43,14 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
-import com.tractrac.model.lib.api.data.IPosition;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
+import com.tractrac.model.lib.impl.event.Race;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -253,6 +256,8 @@ public interface DomainFactory {
      *            no race definition is found for <code>race</code>.
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
+
+    Iterable<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
 
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     

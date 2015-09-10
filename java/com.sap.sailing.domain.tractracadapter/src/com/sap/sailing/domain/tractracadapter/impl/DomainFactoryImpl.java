@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -79,6 +80,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -581,23 +583,35 @@ public class DomainFactoryImpl implements DomainFactory {
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
+
+    @Override
+    public Iterable<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
+        final List<Util.Pair<Competitor, Boat>> competitorBoatInfos = new ArrayList<>();
+        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
+            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            if(existingCompetitor != null && competitorBoatInfo != null) {
+                Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
+                        competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
+                competitorBoatInfos.add(new Util.Pair<Competitor, Boat>(existingCompetitor, boatOfCompetitor));
+            }
+        }
+        return competitorBoatInfos;
+    }
+
     
     @Override
-    public com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
+    public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
-            Pair<String, String> competitorBoatNameAndBoatColor = getMetadataParser().parseCompetitorBoatAndColor(rc);
-            if(competitorBoatNameAndBoatColor != null) {
-                // TODO: How to add this information to the competitor for a race?
-            }
             // also add those whose race class doesn't match the dominant one (such as camera boats)
             // because they may still send data that we would like to record in some tracks
             competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
+        Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
                 competitors, dominantBoatClass);
         return competitorsAndDominantBoatClass;
     }
