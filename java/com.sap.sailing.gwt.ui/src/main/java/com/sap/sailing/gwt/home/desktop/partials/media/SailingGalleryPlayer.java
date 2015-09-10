@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.media;
+package com.sap.sailing.gwt.home.desktop.partials.media;
 
 import java.util.Collection;
 
