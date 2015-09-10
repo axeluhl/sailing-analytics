@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.searchresult;
+package com.sap.sailing.gwt.home.desktop.partials.searchresult;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;

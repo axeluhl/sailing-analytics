@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.searchresult;
+package com.sap.sailing.gwt.home.desktop.partials.searchresult;
 
 import java.util.ArrayList;
 import java.util.List;
