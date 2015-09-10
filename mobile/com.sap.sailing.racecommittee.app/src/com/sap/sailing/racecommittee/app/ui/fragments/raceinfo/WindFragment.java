@@ -72,7 +72,7 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-    //    private View mWindOn;
+//    private View mWindOn;
 //    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
@@ -300,7 +300,17 @@ public class WindFragment extends BaseFragment
      * configures the wind speed picker views and attaches all relevant listener functions to them
      */
     public void setupWindSpeedPicker() {
-        if (mWindSpeed != null) {
+        double enteredWindSpeed = preferences.getWindSpeed();
+        double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
+        if (getRace() != null && getRaceState() != null) {
+            Wind enteredWind = getRaceState().getWindFix();
+            if (enteredWind != null) {
+                enteredWindSpeed = enteredWind.getKnots();
+                enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
+            }
+        }
+
+        if (mWindSpeed != null && mCompassView != null) {
             String numbers[] = generateNumbers();
             ViewHelper.disableSave(mWindSpeed);
             ThemeHelper.setPickerColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
@@ -311,19 +321,11 @@ public class WindFragment extends BaseFragment
             mWindSpeed.setDisplayedValues(numbers);
             mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-            double enteredWindSpeed = preferences.getWindSpeed();
-            double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
-
-            if (getRace() != null && getRaceState() != null) {
-                Wind enteredWind = getRaceState().getWindFix();
-                if (enteredWind != null) {
-                    enteredWindSpeed = enteredWind.getKnots();
-                    enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
-                }
-            }
-
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+        } else if (mWindInputDirection != null && mWindInputSpeed != null) {
+            mWindInputDirection.setText(String.valueOf(enteredWindBearingFrom));
+            mWindInputSpeed.setText(String.valueOf(enteredWindSpeed));
         }
     }
 
