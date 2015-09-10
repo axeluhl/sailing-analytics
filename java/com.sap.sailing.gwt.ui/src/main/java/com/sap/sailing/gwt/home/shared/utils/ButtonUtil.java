@@ -1,9 +1,14 @@
-package com.sap.sailing.gwt.home.client.shared;
+package com.sap.sailing.gwt.home.shared.utils;
 
 import com.google.gwt.dom.client.Element;
 import com.sap.sailing.gwt.common.client.SharedResources;
 
 public final class ButtonUtil {
+    
+    public enum ButtonType {
+        DEFAULT, PRIMARY, RED
+    }
+    
     private ButtonUtil() {
     }
     
