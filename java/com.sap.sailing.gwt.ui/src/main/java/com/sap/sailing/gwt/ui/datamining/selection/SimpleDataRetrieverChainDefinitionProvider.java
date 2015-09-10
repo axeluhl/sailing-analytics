@@ -208,6 +208,8 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         SettingsDialogComponent<? extends Settings> result = null;
         if (hasSettings()) {
             Settings settings = getDataRetrieverChainDefinition().getSettings();
+            // FIXME here the association between settings and their dialogs is done
+            // Maybe someone will come up with something smarter
             if (settings instanceof PolarSheetGenerationSettings) {
                 PolarSheetGenerationSettings polarSettings = (PolarSheetGenerationSettings) settings;
                 result = new PolarSheetGenerationSettingsDialogComponent(polarSettings);
