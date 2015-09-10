@@ -11,13 +11,16 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -43,6 +46,7 @@ import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
+import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
@@ -50,11 +54,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindFragment extends BaseFragment
-    implements CompassDirectionListener,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener,
-        OnRaceUpdatedListener {
+    implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
+    OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static String START_MODE = "startMode";
@@ -71,18 +72,17 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-//    private View mWindOn;
+    //    private View mWindOn;
 //    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
     private NumberPicker mWindSpeed;
-    private TextView mLatitudeLabel;
     private TextView mLatitude;
-    private TextView mLongitudeLabel;
     private TextView mLongitude;
-    private TextView mAccuracyLabel;
     private TextView mAccuracy;
     private TextView mAccuracyTimestamp;
+    private EditText mWindInputDirection;
+    private EditText mWindInputSpeed;
     private Button mContentMapShow;
     private WebView mMapWebView;
     private Button mMapHide;
@@ -142,13 +142,15 @@ public class WindFragment extends BaseFragment
         mSetData = ViewHelper.get(layout, R.id.set_data);
         mCompassView = ViewHelper.get(layout, R.id.compass_view);
         mWindSpeed = ViewHelper.get(layout, R.id.wind_speed);
-        mLatitudeLabel = ViewHelper.get(layout, R.id.latitude_label);
         mLatitude = ViewHelper.get(layout, R.id.latitude_value);
-        mLongitudeLabel = ViewHelper.get(layout, R.id.longitude_label);
         mLongitude = ViewHelper.get(layout, R.id.longitude_value);
-        mAccuracyLabel = ViewHelper.get(layout, R.id.accuracy_label);
         mAccuracy = ViewHelper.get(layout, R.id.accuracy_value);
         mAccuracyTimestamp = ViewHelper.get(layout, R.id.accuracy_timestamp);
+        mWindInputDirection = ViewHelper.get(layout, R.id.wind_input_direction);
+        if (mWindInputDirection != null) {
+            mWindInputDirection.setFilters(new InputFilter[] { new RangeInputFilter(0, 360) });
+        }
+        mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
         mMapWebView = ViewHelper.get(layout, R.id.web_view);
         mMapHide = ViewHelper.get(layout, R.id.position_hide);
@@ -163,7 +165,9 @@ public class WindFragment extends BaseFragment
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
-            mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind.getKnots()));
+            mHeaderWindSensor
+                .setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+                    .getKnots()));
         }
 
         setupButtons();
@@ -185,31 +189,38 @@ public class WindFragment extends BaseFragment
      * disable mSetData button if gps data is missing or inaccurate
      */
     private void refreshUI() {
-        mLatitude.setText(getString(R.string.not_available));
-        mLatitude.setTextColor(Color.RED);
-        mLongitude.setText(getString(R.string.not_available));
-        mLongitude.setTextColor(Color.RED);
-        mAccuracy.setText(getString(R.string.not_available));
-        mAccuracy.setTextColor(Color.RED);
-        mAccuracyTimestamp.setText(null);
+        int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+        int redColor = getActivity().getResources().getColor(R.color.sap_red);
+        setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
+        setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
+        setTextAndColor(mAccuracy, getString(R.string.not_available), redColor);
+        setTextAndColor(mAccuracyTimestamp, null, whiteColor);
 
         mSetData.setEnabled(false);
         if (mCurrentLocation != null) {
-            int textColor = ThemeHelper.getColor(getActivity(), R.attr.white);
             double latitude = mCurrentLocation.getLatitude();
             double longitude = mCurrentLocation.getLongitude();
             float accuracy = mCurrentLocation.getAccuracy();
             long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-            mLatitude.setText(getString(R.string.latitude_value, latitude));
-            mLatitude.setTextColor(textColor);
-            mLongitude.setText(getString(R.string.longitude_value, longitude));
-            mLongitude.setTextColor(textColor);
-            mAccuracy.setText(getString(R.string.accuracy_value, mCurrentLocation.getAccuracy()));
-            mAccuracyTimestamp.setText(getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)));
+            setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
+            setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
+            setTextAndColor(mAccuracy, getString(R.string.accuracy_value, mCurrentLocation.getAccuracy()), whiteColor);
+            setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
+                .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+
             mSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
 
             // highlight accuracy problem if location is invalid
-            mAccuracy.setTextColor(mSetData.isEnabled() ? textColor : Color.RED);
+            if (mAccuracy != null) {
+                mAccuracy.setTextColor(mSetData.isEnabled() ? whiteColor : Color.RED);
+            }
+        }
+    }
+
+    private void setTextAndColor(TextView textView, String text, @ColorRes int color) {
+        if (textView != null) {
+            textView.setText(text);
+            textView.setTextColor(color);
         }
     }
 
@@ -289,29 +300,31 @@ public class WindFragment extends BaseFragment
      * configures the wind speed picker views and attaches all relevant listener functions to them
      */
     public void setupWindSpeedPicker() {
-        String nums[] = generateNumbers();
-        ViewHelper.disableSave(mWindSpeed);
-        ThemeHelper.setPickerColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-            .getColor(getActivity(), R.attr.sap_yellow_1));
-        mWindSpeed.setMaxValue(nums.length - 1);
-        mWindSpeed.setMinValue(0);
-        mWindSpeed.setWrapSelectorWheel(false);
-        mWindSpeed.setDisplayedValues(nums);
-        mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        if (mWindSpeed != null) {
+            String numbers[] = generateNumbers();
+            ViewHelper.disableSave(mWindSpeed);
+            ThemeHelper.setPickerColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
+            mWindSpeed.setMaxValue(numbers.length - 1);
+            mWindSpeed.setMinValue(0);
+            mWindSpeed.setWrapSelectorWheel(false);
+            mWindSpeed.setDisplayedValues(numbers);
+            mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-        double enteredWindSpeed = preferences.getWindSpeed();
-        double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
+            double enteredWindSpeed = preferences.getWindSpeed();
+            double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
 
-        if (getRace() != null && getRaceState() != null) {
-            Wind enteredWind = getRaceState().getWindFix();
-            if (enteredWind != null) {
-                enteredWindSpeed = enteredWind.getKnots();
-                enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
+            if (getRace() != null && getRaceState() != null) {
+                Wind enteredWind = getRaceState().getWindFix();
+                if (enteredWind != null) {
+                    enteredWindSpeed = enteredWind.getKnots();
+                    enteredWindBearingFrom = enteredWind.getFrom().getDegrees();
+                }
             }
-        }
 
-        mCompassView.setDirection((float) enteredWindBearingFrom);
-        mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+            mCompassView.setDirection((float) enteredWindBearingFrom);
+            mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+        }
     }
 
     // the map view needs java script
@@ -355,7 +368,9 @@ public class WindFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        mCompassView.setDirectionListener(this);
+        if (mCompassView != null) {
+            mCompassView.setDirectionListener(this);
+        }
     }
 
     @Override
@@ -433,9 +448,16 @@ public class WindFragment extends BaseFragment
     }
 
     private Wind getResultingWindFix() throws NumberFormatException {
+        double windSpeed = 0;
+        double windBearing = 0;
         Position currentPosition = new DegreePosition(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        double windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
-        double windBearing = mCompassView.getDirection();
+        if (mCompassView != null && mWindSpeed != null) {
+            windBearing = mCompassView.getDirection();
+            windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
+        } else if (mWindInputDirection != null && mWindInputSpeed != null) {
+            windBearing = Double.parseDouble(mWindInputDirection.getText().toString());
+            windSpeed = Double.parseDouble(mWindInputSpeed.getText().toString());
+        }
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
@@ -456,9 +478,9 @@ public class WindFragment extends BaseFragment
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            if (mContentMapShow != null) {
+                mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            }
         }
-
     }
-
 }

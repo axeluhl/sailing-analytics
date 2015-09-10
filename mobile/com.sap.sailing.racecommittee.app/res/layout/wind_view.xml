@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/windFragment"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:background="?sap_gray">
+
+        <TextView
+            android:id="@+id/wind_sensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/side_padding"
+            android:text="@string/wind_off"
+            android:textAppearance="?textNormal"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/wind_off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:layout_toLeftOf="@id/wind_sensor"
+            android:src="?wind_off"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
+        <ImageView
+            android:id="@+id/wind_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:layout_toLeftOf="@id/wind_sensor"
+            android:layout_toStartOf="@id/wind_sensor"
+            android:src="?wind_on"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:layout_toLeftOf="@id/wind_off"
+            android:drawableLeft="?chevron_left_24dp"
+            android:orientation="horizontal"
+            android:text="@string/wind"
+            android:textAppearance="?textNormal"/>
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header_layout"
+        android:background="?sap_gray_black_30"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/set_data"
+            style="?attr/buttonSolidNormal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="@dimen/default_margin_half"
+            android:enabled="false"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/wind_set_data"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/set_data">
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:columnCount="3">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="0"
+                    android:text="@string/wind_from"
+                    android:textAppearance="?textSmall"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="1"
+                    android:text="@string/wind_speed"
+                    android:textAppearance="?textSmall"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_row="2"
+                    android:text="@string/wind_position"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:textAppearance="?textSmall"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:layout_row="0"
+                    android:layout_marginLeft="@dimen/side_padding"
+                    android:text="°"
+                    android:textAppearance="?textSmall"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:layout_row="1"
+                    android:text="@string/wind_kn"
+                    android:layout_marginLeft="@dimen/side_padding"
+                    android:textAppearance="?textSmall"/>
+
+                <EditText
+                    android:inputType="number"
+                    android:layout_width="@dimen/wind_input_width"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textSmall"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_row="0"
+                    android:layout_column="1"
+                    android:id="@+id/wind_input_direction"/>
+
+                <EditText
+                    android:inputType="numberDecimal"
+                    android:layout_width="@dimen/wind_input_width"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textSmall"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_row="1"
+                    android:layout_column="1"
+                    android:id="@+id/wind_input_speed"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textSmall"
+                    tools:text="ca 5m"
+                    android:layout_row="2"
+                    android:layout_column="1"
+                    android:id="@+id/accuracy_value"/>
+
+                <TextView
+                    android:layout_row="3"
+                    android:layout_column="1"
+                    android:id="@+id/accuracy_timestamp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textSmall"
+                    tools:text="(since 0h 23' 12'')"/>
+            </GridLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+</RelativeLayout>
