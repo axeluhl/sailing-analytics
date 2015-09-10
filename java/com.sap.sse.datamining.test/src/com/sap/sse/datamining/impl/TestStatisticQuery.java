@@ -49,7 +49,7 @@ public class TestStatisticQuery {
         
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;
@@ -82,7 +82,7 @@ public class TestStatisticQuery {
         definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));
         
         Method getValueMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getValue");
-        definition.setFilterSelection(0, functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
+        definition.setFilterSelection(retrieverChain.getDataRetrieverLevel(0), functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
         
         return definition;
     }

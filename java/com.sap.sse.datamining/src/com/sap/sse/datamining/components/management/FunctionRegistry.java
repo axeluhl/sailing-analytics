@@ -1,4 +1,5 @@
-package com.sap.sse.datamining.functions;
+package com.sap.sse.datamining.components.management;
+
 
 public interface FunctionRegistry extends FunctionProvider {
 

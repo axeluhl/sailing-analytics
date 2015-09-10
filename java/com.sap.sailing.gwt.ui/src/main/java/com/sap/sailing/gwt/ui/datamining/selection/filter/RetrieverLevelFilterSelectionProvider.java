@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,8 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -30,8 +31,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final DataMiningSession session;
     private final ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider;
     private final DataRetrieverChainDefinitionDTO retrieverChain;
-    private final LocalizedTypeDTO retrievedDataType;
-    private final int retrieverLevel;
+    private final DataRetrieverLevelDTO retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
     private final HorizontalPanel mainPanel;
@@ -39,14 +39,13 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
-            LocalizedTypeDTO retrievedDataType, int retrieverLevel) {
+            DataRetrieverLevelDTO retrieverLevel) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         
         this.session = session;
         this.retrieverChainSelectionProvider = retrieverChainSelectionProvider;
         this.retrieverChain = retrieverChain;
-        this.retrievedDataType = retrievedDataType;
         this.retrieverLevel = retrieverLevel;
         availableDimensions = new ArrayList<>();
         
@@ -142,7 +141,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
             }
         } else {
             // Update for this level is completed. Continue with the next level.
-            retrieverChainSelectionProvider.updateFilterSelectionProviders(getRetrieverLevel() + 1, exceptForDimension);
+            retrieverChainSelectionProvider.updateFilterSelectionProviders(retrieverChain.getNextRetrieverLevel(getRetrieverLevel()), exceptForDimension);
         }
     }
 
@@ -150,14 +149,14 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this, dimensionFilterSelectionProvider);
     }
 
-    Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getCompleteFilterSelection() {
+    HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getCompleteFilterSelection() {
         return retrieverChainSelectionProvider.getSelection();
     }
 
-    public Map<FunctionDTO, Collection<? extends Serializable>> getFilterSelection() {
-        HashMap<FunctionDTO, Collection<? extends Serializable>> filterSelection = new HashMap<>();
+    public Map<FunctionDTO, HashSet<? extends Serializable>> getFilterSelection() {
+        HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection = new HashMap<>();
         for (DimensionFilterSelectionProvider dimensionFilter : dimensionSelectionProviders) {
-            Collection<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
+            HashSet<? extends Serializable> dimensionFilterSelection = dimensionFilter.getSelection();
             if (!dimensionFilterSelection.isEmpty()) {
                 filterSelection.put(dimensionFilter.getSelectedDimension(), dimensionFilterSelection);
             }
@@ -165,7 +164,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return filterSelection;
     }
 
-    public void applySelection(Map<FunctionDTO, Collection<? extends Serializable>> filterSelection) {
+    public void applySelection(HashMap<FunctionDTO, HashSet<? extends Serializable>> filterSelection) {
         dimensionSelectionProviders.clear();
         mainPanel.clear();
         
@@ -193,12 +192,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return retrieverChain;
     }
     
-    public int getRetrieverLevel() {
+    public DataRetrieverLevelDTO getRetrieverLevel() {
         return retrieverLevel;
-    }
-    
-    public LocalizedTypeDTO getRetrievedDataType() {
-        return retrievedDataType;
     }
 
     @Override

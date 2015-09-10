@@ -2,9 +2,9 @@ package com.sap.sse.datamining;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -12,9 +12,10 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionProvider;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -35,7 +36,10 @@ public interface DataMiningServer {
     public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
     public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     /**
      * @return The first function, that matches the given DTO or <code>null</code>
      */
@@ -51,8 +55,8 @@ public interface DataMiningServer {
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id);
     
-    public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
-            Iterable<Function<?>> dimensions, Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, Locale locale);
+    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
+            Iterable<Function<?>> dimensions, Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, Locale locale);
     public <DataSourceType, DataType, ExtractedType, ResultType> StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> getQueryDefinitionForDTO(StatisticQueryDefinitionDTO queryDefinitionDTO);
     public <DataSourceType, ResultType> Query<ResultType> createQuery(StatisticQueryDefinition<DataSourceType, ?, ?, ResultType> queryDefinition);
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query);

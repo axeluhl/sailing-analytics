@@ -1,5 +1,7 @@
 package com.sap.sse.datamining.components;
 
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+
 
 /**
  * Used to construct a chain of retriever processors step by step. Allows to set the filter and result
@@ -10,6 +12,11 @@ package com.sap.sse.datamining.components;
  * @param <DataSourceType> The type of the data source and the <code>InputType</code> of the first Processor.
  */
 public interface DataRetrieverChainBuilder<DataSourceType> {
+    
+    /**
+     * @return <code>true</code>, if {@link #canStepFurther()} has been called.
+     */
+    public boolean hasBeenInitialized();
     
     /**
      * @return <code>true</code>, if there's a next data retriever in the chain.
@@ -30,9 +37,9 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public Class<?> getCurrentRetrievedDataType();
     
     /**
-     * @return The current retriever level or <code>-1</code> if {@link #stepFurther()} has not yet been called.
+     * @return The current retriever level or <code>null</code> if {@link #stepFurther()} has not yet been called.
      */
-    public int getCurrentRetrieverLevel();
+    public DataRetrieverLevel<?, ?> getCurrentRetrieverLevel();
 
     /**
      * Sets the filter for the data retriever of the current level.

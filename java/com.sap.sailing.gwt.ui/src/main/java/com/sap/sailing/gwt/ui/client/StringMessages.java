@@ -1154,7 +1154,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterCarryValueFor(String competitorName);
     String advanced();
     String basedOn();
-    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
@@ -1375,4 +1374,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String analyze();
 }

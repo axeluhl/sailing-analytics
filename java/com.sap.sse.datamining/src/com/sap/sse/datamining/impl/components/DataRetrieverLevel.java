@@ -2,18 +2,24 @@ package com.sap.sse.datamining.impl.components;
 
 import com.sap.sse.datamining.components.Processor;
 
-public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
+public class DataRetrieverLevel<InputType, RetrievedDataType> {
 
+    private final int retrieverLevel;
     private final Class<? extends Processor<InputType, RetrievedDataType>> retrieverType;
     private final Class<RetrievedDataType> retrievedDataType;
     private final String retrievedDataTypeMessageKey;
 
-    public DataRetrieverTypeWithInformation(Class<? extends Processor<InputType, RetrievedDataType>> retrieverType,
-                                            Class<RetrievedDataType> retrievedDataType,
-                                            String retrievedDataTypeMessageKey) {
+    public DataRetrieverLevel(int retrieverLevel,
+                                            Class<? extends Processor<InputType, RetrievedDataType>> retrieverType,
+                                            Class<RetrievedDataType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        this.retrieverLevel = retrieverLevel;
         this.retrieverType = retrieverType;
         this.retrievedDataType = retrievedDataType;
         this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
+    }
+    
+    public int getLevel() {
+        return retrieverLevel;
     }
 
     public Class<? extends Processor<InputType, RetrievedDataType>> getRetrieverType() {
@@ -26,6 +32,13 @@ public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
     public String getRetrievedDataTypeMessageKey() {
         return retrievedDataTypeMessageKey;
     }
+    
+    @Override
+    public String toString() {
+        return "Level " + retrieverLevel + " [retrieverType: " + retrieverType.getSimpleName() 
+                                         + ", retrievedDataType: " + retrievedDataType.getSimpleName()
+                                         + ", messageKey: " + retrievedDataTypeMessageKey + "]";
+    }
 
     @Override
     public int hashCode() {
@@ -33,6 +46,7 @@ public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
         int result = 1;
         result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
         result = prime * result + ((retrievedDataTypeMessageKey == null) ? 0 : retrievedDataTypeMessageKey.hashCode());
+        result = prime * result + retrieverLevel;
         result = prime * result + ((retrieverType == null) ? 0 : retrieverType.hashCode());
         return result;
     }
@@ -45,7 +59,7 @@ public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        DataRetrieverTypeWithInformation<?, ?> other = (DataRetrieverTypeWithInformation<?, ?>) obj;
+        DataRetrieverLevel<?, ?> other = (DataRetrieverLevel<?, ?>) obj;
         if (retrievedDataType == null) {
             if (other.retrievedDataType != null)
                 return false;
@@ -55,6 +69,8 @@ public class DataRetrieverTypeWithInformation<InputType, RetrievedDataType> {
             if (other.retrievedDataTypeMessageKey != null)
                 return false;
         } else if (!retrievedDataTypeMessageKey.equals(other.retrievedDataTypeMessageKey))
+            return false;
+        if (retrieverLevel != other.retrieverLevel)
             return false;
         if (retrieverType == null) {
             if (other.retrieverType != null)

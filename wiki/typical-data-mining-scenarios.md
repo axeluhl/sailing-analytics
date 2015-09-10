@@ -4,12 +4,12 @@
 
 ## Adding a new Data Mining Bundle
 
-* Add a new java project bundle according to the [Typical Development Scenarios](wiki/typical-development-scenarios#Adding-a-Java-Project-Bundle)
+* Add a new java project bundle according to the [Typical Development Scenarios](typical-development-scenarios#Adding-a-Java-Project-Bundle)
 * Add the necessary dependencies to the `MANIFEST.MF`
 	* `com.sap.sse` (for the string messages)
     * `com.sap.sse.datamining`
     * `com.sap.sse.datamining.shared`
-* Create an `Activator` for the new data mining bundle and provide a `DataMiningBundleService` to the OSGi-Context (see [Registration and Deregistration of Data Mining Bundles](wiki/data-mining-architecture#Registration-and-Deregistration-of-Data-Mining-Bundles) for detailed information)
+* Create an `Activator` for the new data mining bundle and provide a `DataMiningBundleService` to the OSGi-Context (see [Registration and Deregistration of Data Mining Bundles](data-mining-architecture#Registration-and-Deregistration-of-Data-Mining-Bundles) for detailed information)
 	* This can be done by extending the `AbstractDataMiningActivator` and implementing it's abstract methods
 	* Or by implementing your own `DataMiningBundleService` and register it as OSGi-Service
 * Prepare the string messages
@@ -19,13 +19,13 @@
 	* Create a `ResourceBundleStringMessages` in the `DataMiningBundleService`
 		* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
 		* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
-* **[Optional]** It may be necessary to implement GWT specific components for the new Data Mining Bundle, like DTOs or a [Serialization Dummy](wiki/typical-data-mining-scenarios#Include-a-Type-forcefully-in-the-GWT-Serialization-Policy).
+* **[Optional]** It may be necessary to implement GWT specific components for the new Data Mining Bundle, like DTOs or a [Serialization Dummy](typical-data-mining-scenarios#Include-a-Type-forcefully-in-the-GWT-Serialization-Policy).
 	* This should be done in a separate bundle.
-	* See [Typical Development Scenarios](wiki/typical-development-scenarios#Adding-a-shared-GWT-library-bundle) for instructions, how to add a shared GWT bundle.
+	* See [Typical Development Scenarios](typical-development-scenarios#Adding-a-shared-GWT-library-bundle) for instructions, how to add a shared GWT bundle.
 
 ## Adding an absolute new Data Type
 
-A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](wiki/data-mining-architecture#Data-Mining-Functions).
+A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](data-mining-architecture#Data-Mining-Functions).
 
 ### Create the necessary Data Types
 
@@ -45,7 +45,7 @@ A data type is an atomic unit on which the processing components operate. A data
 	* To get the contextual data of a higher level data type interface annotate the getter for this interface with `@Connector(scanForStatistics=false)`.
 	* There's currently no parameter support for functions, except for signatures exactly like `(Locale, ResourceBundleStringMessages)`.
 	* Cycles in the graph of annotated methods aren't supported and would result in an infinite loop during the function registration.
-	* See [Data Mining Functions](wiki/data-mining-architecture#Data-Mining-Functions) for detailed information about the annotations.
+	* See [Data Mining Functions](data-mining-architecture#Data-Mining-Functions) for detailed information about the annotations.
 * Create implementations for the data type interfaces. The naming convention for data type classes is `<domain element name>WithContext`.
 	* If `TrackedLegOfCompetitor` would be the domain element, then the name of the data type class should be `TrackedLegOfCompetitorWithContext`.
 
@@ -62,7 +62,7 @@ A data type is an atomic unit on which the processing components operate. A data
 	* Each method has a parameter for a message key, that is needed for the internationalization of the chain.
 	* The call order of these methods has to match `startWith addAfter* endWith` or an exception will be thrown.
 	* Every retrieval processor needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)` or an exception will be thrown.
-	* See [Defining and building a Data Retriever Chain](wiki/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain) for examples and more detailed information.
+	* See [Defining and building a Data Retriever Chain](data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain) for examples and more detailed information.
 
 ## Adding a new Data Type with a reusable Retriever Chain
 

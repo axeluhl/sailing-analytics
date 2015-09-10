@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -22,15 +22,18 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
+import com.sap.sse.datamining.components.management.FunctionProvider;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionProvider;
-import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -46,11 +49,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final DataMiningQueryManager dataMiningQueryManager;
     
     private final FunctionRegistry functionRegistry;
-    private final Map<Class<?>, DataSourceProvider<?>> dataSourceProviderMappedByDataSourceType;
+    private final DataSourceProviderRegistry dataSourceProviderRegistry;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
     private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
+                                DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
                                 AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -59,7 +63,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
         this.functionRegistry = functionRegistry;
-        dataSourceProviderMappedByDataSourceType = new HashMap<>();
+        this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
     }
@@ -154,8 +158,14 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getDimensionsFor(dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return functionRegistry.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+    }
+    
+    @Override
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }
 
     @Override
@@ -164,14 +174,16 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        dataSourceProviderMappedByDataSourceType.put(dataSourceProvider.getDataSourceType(), dataSourceProvider);
-        updateComponentsChangedTimepoint();
+    public void registerDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.register(dataSourceProvider);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
-    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        boolean componentsChanged = dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType()) != null;
+    public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.unregister(dataSourceProvider);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
         }
@@ -287,9 +299,9 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition = getAggregationProcessorDefinitionForDTO(queryDefinitionDTO.getAggregatorDefinition());
             queryDefinition = new ModifiableStatisticQueryDefinition<>(locale, retrieverChain, statisticToCalculate, aggregatorDefinition);
              
-            for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
-                Integer retrieverLevel = levelSpecificFilterSelection.getKey();
-                for (Entry<FunctionDTO, Collection<? extends Serializable>> levelSpecificFilterSelectionEntry : levelSpecificFilterSelection.getValue().entrySet()) {
+            for (Entry<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
+                DataRetrieverLevel<?, ?> retrieverLevel = retrieverChain.getDataRetrieverLevel(levelSpecificFilterSelection.getKey().getLevel());
+                for (Entry<FunctionDTO, HashSet<? extends Serializable>> levelSpecificFilterSelectionEntry : levelSpecificFilterSelection.getValue().entrySet()) {
                     Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
                     if (dimensionToFilterBy != null) {
                         queryDefinition.setFilterSelection(retrieverLevel, dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
@@ -315,18 +327,18 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
-            Iterable<Function<?>> dimensions, Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
+    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
+            Iterable<Function<?>> dimensions, Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
         DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(dataRetrieverChainDefinition.getDataSourceType());
         return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale, getStringMessages(), getExecutorService());
     }
 
-    @SuppressWarnings("unchecked")
     private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
-        if (!dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType)) {
+        DataSourceProvider<DataSourceType> dataSourceProvider = dataSourceProviderRegistry.get(dataSourceType);
+        if (dataSourceProvider == null) {
             throw new NullPointerException("No DataSourceProvider found for '" + dataSourceType + "'");
         }
-        return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
+        return dataSourceProvider;
     }
     
     @Override

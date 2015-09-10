@@ -11,13 +11,14 @@ import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 
 public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> implements StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> {
 
     private final Locale locale;
     
     private final DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain;
-    private final Map<Integer, Map<Function<?>, Collection<?>>> filterSelection;
+    private final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection;
     
     private final List<Function<?>> dimensionsToGroupBy;
     
@@ -67,7 +68,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
     }
 
     @Override
-    public Map<Integer, Map<Function<?>, Collection<?>>> getFilterSelection() {
+    public Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> getFilterSelection() {
         return filterSelection;
     }
 
@@ -86,7 +87,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
         return aggregatorDefinition;
     }
 
-    public void setFilterSelection(Integer retrieverLevel, Function<?> dimensionToFilterBy, Collection<?> filterSelection) {
+    public void setFilterSelection(DataRetrieverLevel<?, ?> retrieverLevel, Function<?> dimensionToFilterBy, Collection<?> filterSelection) {
         if (!this.filterSelection.containsKey(retrieverLevel)) {
             this.filterSelection.put(retrieverLevel, new HashMap<Function<?>, Collection<?>>());
         }

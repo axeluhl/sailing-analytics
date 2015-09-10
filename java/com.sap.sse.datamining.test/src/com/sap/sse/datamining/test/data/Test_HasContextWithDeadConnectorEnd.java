@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.test.data;
 
-import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.annotations.Statistic;
