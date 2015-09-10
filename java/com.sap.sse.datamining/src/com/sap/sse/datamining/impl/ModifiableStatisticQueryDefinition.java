@@ -17,7 +17,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
 
     private final Locale locale;
     
-    private final DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain;
+    private final DataRetrieverChainDefinition<DataSourceType, DataType, ?> retrieverChain;
     private final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection;
     
     private final List<Function<?>> dimensionsToGroupBy;
@@ -25,7 +25,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
     private final Function<ExtractedType> statisticToCalculate;
     private final AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition;
 
-    public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain, Function<ExtractedType> statisticToCalculate, AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition) {
+    public ModifiableStatisticQueryDefinition(Locale locale, DataRetrieverChainDefinition<DataSourceType, DataType, ?> retrieverChain, Function<ExtractedType> statisticToCalculate, AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition) {
         this.locale = locale;
         
         this.retrieverChain = retrieverChain;
@@ -63,7 +63,7 @@ public class ModifiableStatisticQueryDefinition<DataSourceType, DataType, Extrac
     }
 
     @Override
-    public DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinition<DataSourceType, DataType, ?> getDataRetrieverChainDefinition() {
         return retrieverChain;
     }
 

@@ -70,7 +70,7 @@ public class TestStatisticQuery {
         FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
         
         @SuppressWarnings("unchecked")
-        DataRetrieverChainDefinition<Collection<Number>, Number> retrieverChain = new SingleDataRetrieverChainDefinition<>((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, "Number");
+        DataRetrieverChainDefinition<Collection<Number>, Number, ?> retrieverChain = new SingleDataRetrieverChainDefinition<>((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, "Number");
         retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
         
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");

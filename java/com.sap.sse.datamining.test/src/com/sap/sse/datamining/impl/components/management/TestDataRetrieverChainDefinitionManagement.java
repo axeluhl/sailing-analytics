@@ -14,6 +14,7 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition.EmptySettings;
 import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.data.Test_HasRaceContext;
 import com.sap.sse.datamining.test.data.Test_HasRaceContextImpl;
@@ -26,8 +27,9 @@ import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor
 
 public class TestDataRetrieverChainDefinitionManagement {
     
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasRaceContext> raceRetrieverChainDefinition;
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> legRetrieverChainDefinition;
+    @SuppressWarnings("rawtypes")
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasRaceContext, EmptySettings> raceRetrieverChainDefinition;
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> legRetrieverChainDefinition;
     private ModifiableDataMiningServer server;
 
     @SuppressWarnings("unchecked")
@@ -61,7 +63,7 @@ public class TestDataRetrieverChainDefinitionManagement {
     public void testGetDataRetrieverChainDefinitions() {
         Class<Collection<Test_Regatta>> dataSourceType = (Class<Collection<Test_Regatta>>)(Class<?>) Collection.class;
         
-        Collection<DataRetrieverChainDefinition<?, ?>> expectedRetrieverChainDefinitions = new HashSet<>();
+        Collection<DataRetrieverChainDefinition<?, ?, ?>> expectedRetrieverChainDefinitions = new HashSet<>();
         expectedRetrieverChainDefinitions.add(raceRetrieverChainDefinition);
         assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasRaceContext.class), is(expectedRetrieverChainDefinitions));
         
@@ -107,7 +109,7 @@ public class TestDataRetrieverChainDefinitionManagement {
         server.unregisterDataRetrieverChainDefinition(legRetrieverChainDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeUnregistration), is(false));
         
-        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
+        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
         assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedEmptyDataRetrieverChainDefinitions));
     }
     
@@ -121,14 +123,14 @@ public class TestDataRetrieverChainDefinitionManagement {
         server.registerDataRetrieverChainDefinition(legRetrieverChainDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
         
-        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext>> expectedDataRetrieverChainDefinitions = new HashSet<>();
+        Collection<DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?>> expectedDataRetrieverChainDefinitions = new HashSet<>();
         expectedDataRetrieverChainDefinitions.add(legRetrieverChainDefinition);
         assertThat(server.getDataRetrieverChainDefinitions(dataSourceType, Test_HasLegOfCompetitorContext.class), is(expectedDataRetrieverChainDefinitions));
     }
 
     @Test
     public void testGetDataRetrieverChainDefinitionsForNotRegisteredChain() {
-        Collection<DataRetrieverChainDefinition<Test_Regatta, Test_HasRaceContextImpl>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
+        Collection<DataRetrieverChainDefinition<Test_Regatta, Test_HasRaceContextImpl, ?>> expectedEmptyDataRetrieverChainDefinitions = new HashSet<>();
         assertThat(server.getDataRetrieverChainDefinitions(Test_Regatta.class, Test_HasRaceContextImpl.class), is(expectedEmptyDataRetrieverChainDefinitions));
     }
 

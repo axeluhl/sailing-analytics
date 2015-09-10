@@ -77,7 +77,7 @@ public class DataMiningDTOFactory {
                                                      displayName);
     }
 
-    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition,
+    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition,
                                                                                  ResourceBundleStringMessages stringMessages, Locale locale) {
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
         for (DataRetrieverLevel<?, ?> retrieverLevel : dataRetrieverChainDefinition.getDataRetrieverLevels()) {

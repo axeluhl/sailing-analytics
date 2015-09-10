@@ -119,7 +119,7 @@ public class QueryFactory {
     }
 
     public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataSourceType dataSource,
-            final DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, final DataRetrieverLevel<?, ?> retrieverLevel,
+            final DataRetrieverChainDefinition<DataSourceType, ?, ?> dataRetrieverChainDefinition, final DataRetrieverLevel<?, ?> retrieverLevel,
             final Iterable<Function<?>> dimensions, final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         @SuppressWarnings("unchecked")

@@ -19,7 +19,7 @@ public interface StatisticQueryDefinition<DataSourceType, DataType, ExtractedTyp
     
     public Locale getLocale();
     
-    public DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition();
+    public DataRetrieverChainDefinition<DataSourceType, DataType, ?> getDataRetrieverChainDefinition();
     public Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> getFilterSelection();
     public List<Function<?>> getDimensionsToGroupBy();
     public Function<ExtractedType> getStatisticToCalculate();

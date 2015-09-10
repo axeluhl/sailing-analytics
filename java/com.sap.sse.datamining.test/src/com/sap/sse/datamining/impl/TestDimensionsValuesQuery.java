@@ -45,7 +45,7 @@ public class TestDimensionsValuesQuery {
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     private static final Locale locale = Locale.ENGLISH;
     
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
     
     //Test_HasRaceContext dimensions

@@ -120,7 +120,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = getDataMiningServer()
                 .getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         return dimensionsMappedByLevelAsDTOs(dimensions, localeInfoName);
@@ -129,7 +129,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = getDataMiningServer()
                 .getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         return dimensionsMappedByLevelAsDTOs(reducedDimensions, localeInfoName);
@@ -160,7 +160,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeInfoName) {
-        Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
+        Iterable<DataRetrieverChainDefinition<?, ?, ?>> dataRetrieverChainDefinitions = getDataMiningServer().getDataRetrieverChainDefinitions();
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
@@ -168,17 +168,17 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
         Class<?> baseDataType = getBaseDataType(statisticToCalculate);
         @SuppressWarnings("unchecked")
-        Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
+        Iterable<DataRetrieverChainDefinition<?, ?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
     }
     
     private ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
-            Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
+            Iterable<DataRetrieverChainDefinition<?, ?, ?>> dataRetrieverChainDefinitions, String localeInfoName) {
         ResourceBundleStringMessages serverStringMessages = getDataMiningServer().getStringMessages();
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         
         ArrayList<DataRetrieverChainDefinitionDTO> DTOs = new ArrayList<>();
-        for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+        for (DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
             DTOs.add(dtoFactory.createDataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition,
                                                                       serverStringMessages, locale));
         }
@@ -189,7 +189,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO,
             DataRetrieverLevelDTO retrieverLevelDTO, HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName) {
         DataMiningServer dataMiningServer = getDataMiningServer();
-        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<RacingEventService, ?, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
         DataRetrieverLevel<?, ?> retrieverLevel = retrieverChainDefinition.getDataRetrieverLevel(retrieverLevelDTO.getLevel());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
         Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO, retrieverChainDefinition);
@@ -213,7 +213,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelectionDTOAsFilterSelection(
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
-            DataRetrieverChainDefinition<?, ?> retrieverChainDefinition) {
+            DataRetrieverChainDefinition<?, ?, ?> retrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
         for (DataRetrieverLevelDTO retrieverLevelDTO : filterSelectionDTO.keySet()) {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> retrievalLevelSelection = filterSelectionDTO.get(retrieverLevelDTO);

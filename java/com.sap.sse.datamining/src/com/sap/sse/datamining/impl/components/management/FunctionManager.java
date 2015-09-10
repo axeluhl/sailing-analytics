@@ -253,7 +253,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
         for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
@@ -264,7 +264,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
     @Override
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+            DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();

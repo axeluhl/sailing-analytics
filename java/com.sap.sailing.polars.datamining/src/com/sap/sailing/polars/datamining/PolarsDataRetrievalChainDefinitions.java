@@ -21,11 +21,11 @@ import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition
 
 public class PolarsDataRetrievalChainDefinitions {
     
-    private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
+    private final Collection<DataRetrieverChainDefinition<?, ?, ?>> dataRetrieverChainDefinitions;
     
     public PolarsDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
-        DataRetrieverChainDefinition<RacingEventService, HasCompetitorPolarContext> definition1 = new SimpleDataRetrieverChainDefinition<RacingEventService, HasCompetitorPolarContext>(
+        DataRetrieverChainDefinition<RacingEventService, HasCompetitorPolarContext, ?> definition1 = new SimpleDataRetrieverChainDefinition<RacingEventService, HasCompetitorPolarContext>(
                 RacingEventService.class, HasCompetitorPolarContext.class, "PolarChain1");
         definition1.startWith(PolarLeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupPolarContext.class,
                 "LeaderboardGroup");
@@ -42,7 +42,7 @@ public class PolarsDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions.add(definition1);
     }
 
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions;
     }
 

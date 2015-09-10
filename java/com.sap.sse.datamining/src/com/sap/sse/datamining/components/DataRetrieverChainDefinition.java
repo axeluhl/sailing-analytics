@@ -31,7 +31,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * @param <DataSourceType> The type of the data source and the <code>InputType</code> of the first Processor.
  * @param <DataType> The type of the retrieved data elements and the <code>ResultType</code> of the last Processor.
  */
-public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
+public interface DataRetrieverChainDefinition<DataSourceType, DataType, Settings extends com.sap.sse.common.settings.Settings> {
     
     public UUID getID();
     
@@ -123,5 +123,9 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
      * @throws UnsupportedOperationException If the chain hasn't been completed yet
      */
     public DataRetrieverChainBuilder<DataSourceType> startBuilding(ExecutorService executor);
+    
+    public boolean hasSettings();
+    
+    public Settings getSettings();
 
 }

@@ -158,13 +158,13 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         return functionRegistry.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }
     
     @Override
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+            DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }
 
@@ -200,12 +200,12 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitionRegistry.getAll();
     }
     
     @Override
-    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
@@ -213,7 +213,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.unregister(dataRetrieverChainDefinition);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
@@ -221,25 +221,25 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?, ?>> getDataRetrieverChainDefinitionsBySourceType(
             Class<DataSourceType> dataSourceType) {
         return dataRetrieverChainDefinitionRegistry.getBySourceType(dataSourceType);
     }
     
     @Override
-    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType, ?>> getDataRetrieverChainDefinitionsByDataType(
             Class<DataType> dataType) {
         return dataRetrieverChainDefinitionRegistry.getByDataType(dataType);
     }
 
     @Override
-    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
+    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType, ?>> getDataRetrieverChainDefinitions(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
         return dataRetrieverChainDefinitionRegistry.get(dataSourceType, retrievedDataType);
     }
 
     @Override
-    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id) {
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType, ?> getDataRetrieverChainDefinition(UUID id) {
         return dataRetrieverChainDefinitionRegistry.get(id);
     }
 
@@ -291,7 +291,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         ModifiableStatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition = null;
         
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
-        DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
+        DataRetrieverChainDefinition<DataSourceType, DataType, ?> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
         @SuppressWarnings("unchecked")
         Function<ExtractedType> statisticToCalculate = (Function<ExtractedType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
         
@@ -327,7 +327,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
+    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
             Iterable<Function<?>> dimensions, Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
         DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(dataRetrieverChainDefinition.getDataSourceType());
         return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale, getStringMessages(), getExecutorService());
