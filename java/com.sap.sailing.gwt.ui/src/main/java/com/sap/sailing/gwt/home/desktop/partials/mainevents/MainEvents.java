@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.mainevents;
+package com.sap.sailing.gwt.home.desktop.partials.mainevents;
 
 import java.util.List;
 
@@ -32,13 +32,10 @@ public class MainEvents extends Composite {
     
     public MainEvents(DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
-        
         MainEventsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
         eventsNavigation = navigator.getEventsNavigation();
         showAllEventsAnchor.setHref(eventsNavigation.getTargetUrl());
-        
     }
 
     public void setRecentEvents(List<EventListEventDTO> recentEvents) {
