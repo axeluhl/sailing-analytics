@@ -93,13 +93,13 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     }
     
     @Override
-    public Collection<DataRetrieverChainDefinition<?, ?>> getAll() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getAll() {
         return new HashSet<>(chainDefinitionsMappedByID.values());
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
             Class<DataSourceType> dataSourceType) {
         return chainDefinitionsMappedBySourceType.containsKey(dataSourceType) ? 
                (Collection<DataRetrieverChainDefinition<DataSourceType, ?>>)(Collection<?>) 
@@ -109,7 +109,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataType> Collection<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> dataType) {
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> dataType) {
         return chainDefinitionsMappedByDataType.containsKey(dataType) ?
                (Collection<DataRetrieverChainDefinition<?, DataType>>)(Collection<?>)
                new HashSet<>(chainDefinitionsMappedByDataType.get(dataType)) :
@@ -118,7 +118,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
 
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType, DataType> Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
+    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
         Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> dataRetrieverChainDefinitions = new HashSet<>();
         for (DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition : getBySourceType(dataSourceType)) {
