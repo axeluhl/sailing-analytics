@@ -1,13 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,11 +26,11 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.polarsheets.PolarSheetGenerationSettingsDialogComponent;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -44,11 +40,11 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<DataRetrieverChainDefinitionChangedListener> listeners;
-    private final Map<Class<? extends Settings>, Class<? extends SettingsDialogComponent<?>>> settingsDialogRegistration;
     private boolean isAwaitingReload;
     
     private final HorizontalPanel mainPanel;
-    private final ValueListBox<DataRetrieverChainDefinitionDTO<Settings>> retrieverChainsListBox;
+    private final ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> retrieverChainsListBox;
+    private Anchor settingsAnchor;
 
     public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
@@ -64,54 +60,32 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         retrieverChainsListBox = createRetrieverChainsListBox();
         mainPanel.add(retrieverChainsListBox);
         
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(DataMiningEntryPoint.resources.darkSettingsIcon()).getSafeHtml());
+        settingsAnchor = new Anchor(AbstractImagePrototype.create(DataMiningEntryPoint.resources.darkSettingsIcon()).getSafeHtml());
         settingsAnchor.addStyleName("settingsAnchor");
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {        
-                // Hacky because we don't know the type of settings used here.
-                SettingsDialog<?> settingsDialog = null;
-                try {
-                    Constructor<?> constructor = SettingsDialog.class.getConstructor(Component.class, StringMessages.class);
-                    settingsDialog = (SettingsDialog<?>) constructor.newInstance(this, stringMessages);
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    e.printStackTrace();
-                }
-                if (settingsDialog != null) {
-                    settingsDialog.show();
-                }
+                SettingsDialog<?> settingsDialog = new SettingsDialog<SerializableSettings>(SimpleDataRetrieverChainDefinitionProvider.this, stringMessages);
+                settingsDialog.show();
             }
         });
         mainPanel.add(settingsAnchor);
         
         updateRetrieverChains();
-        
-        settingsDialogRegistration = initializeSettingsDialogRegistration();
     }
 
-    /**
-     * Use this method to create a mapping between setting classes and its UI dialogs.
-     * @return
-     */
-    private Map<Class<? extends Settings>, Class<? extends SettingsDialogComponent<?>>> initializeSettingsDialogRegistration() {
-        Map<Class<? extends Settings>, Class<? extends SettingsDialogComponent<?>>> registration = new HashMap<>();
-        registration.put(PolarSheetGenerationSettings.class, PolarSheetGenerationSettingsDialogComponent.class);
-        return registration;
-    }
-
-    private ValueListBox<DataRetrieverChainDefinitionDTO<Settings>> createRetrieverChainsListBox() {
-        ValueListBox<DataRetrieverChainDefinitionDTO<Settings>> retrieverChainsListBox = new ValueListBox<>(new AbstractRenderer<DataRetrieverChainDefinitionDTO<Settings>>() {
+    private ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> createRetrieverChainsListBox() {
+        ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> retrieverChainsListBox = new ValueListBox<>(new AbstractRenderer<DataRetrieverChainDefinitionDTO<SerializableSettings>>() {
             @Override
-            public String render(DataRetrieverChainDefinitionDTO<Settings> retrieverChain) {
+            public String render(DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChain) {
                 return retrieverChain == null ? "" : retrieverChain.getName();
             }
             
         });
-        retrieverChainsListBox.addValueChangeHandler(new ValueChangeHandler<DataRetrieverChainDefinitionDTO<Settings>>() {
+        retrieverChainsListBox.addValueChangeHandler(new ValueChangeHandler<DataRetrieverChainDefinitionDTO<SerializableSettings>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<DataRetrieverChainDefinitionDTO<Settings>> event) {
+            public void onValueChange(ValueChangeEvent<DataRetrieverChainDefinitionDTO<SerializableSettings>> event) {
                 notifyListeners();
             }
         });
@@ -135,18 +109,18 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     
     private void updateRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitions(LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<Settings>>>() {
+                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>>() {
                     @Override
-                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO<Settings>> dataRetrieverChainDefinitions) {
+                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>> dataRetrieverChainDefinitions) {
                         if (dataRetrieverChainDefinitions.iterator().hasNext()) {
-                            List<DataRetrieverChainDefinitionDTO<Settings>> sortedRetrieverChains = new ArrayList<>();
-                            for (DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
+                            List<DataRetrieverChainDefinitionDTO<SerializableSettings>> sortedRetrieverChains = new ArrayList<>();
+                            for (DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
                                 sortedRetrieverChains.add(dataRetrieverChainDefinition);
                             }
                             Collections.sort(sortedRetrieverChains);
                             
-                            DataRetrieverChainDefinitionDTO<Settings> currentRetrieverChain = getDataRetrieverChainDefinition();
-                            DataRetrieverChainDefinitionDTO<Settings> retrieverChainToBeSelected = sortedRetrieverChains.contains(currentRetrieverChain) ?
+                            DataRetrieverChainDefinitionDTO<SerializableSettings> currentRetrieverChain = getDataRetrieverChainDefinition();
+                            DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChainToBeSelected = sortedRetrieverChains.contains(currentRetrieverChain) ?
                                                                                             currentRetrieverChain :
                                                                                             sortedRetrieverChains.get(0);
                             
@@ -159,7 +133,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                             }
                         } else {
                             retrieverChainsListBox.setValue(null);
-                            retrieverChainsListBox.setAcceptableValues(new ArrayList<DataRetrieverChainDefinitionDTO<Settings>>());
+                            retrieverChainsListBox.setAcceptableValues(new ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>());
                             notifyListeners();
                         }
                     }
@@ -171,7 +145,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
 
     @Override
-    public DataRetrieverChainDefinitionDTO<Settings> getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinitionDTO<SerializableSettings> getDataRetrieverChainDefinition() {
         return retrieverChainsListBox.getValue();
     }
 
@@ -181,8 +155,12 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
     
     private void notifyListeners() {
+        DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinition = getDataRetrieverChainDefinition();
         for (DataRetrieverChainDefinitionChangedListener listener : listeners) {
-            listener.dataRetrieverChainDefinitionChanged(getDataRetrieverChainDefinition());
+            listener.dataRetrieverChainDefinitionChanged(dataRetrieverChainDefinition);
+        }
+        if (dataRetrieverChainDefinition != null) {
+            settingsAnchor.setVisible(dataRetrieverChainDefinition.hasSettings());
         }
     }
 
@@ -191,7 +169,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         //FIXME since the sse.datamining.shared bundle cannot have a dependency on sse.common, we can't use extends-wildcards in the classes. They
         // should be limited to Settings objects. This is enforced everywhere but in the shared classes.
-        retrieverChainsListBox.setValue((DataRetrieverChainDefinitionDTO<Settings>) queryDefinition.getDataRetrieverChainDefinition(), false);
+        retrieverChainsListBox.setValue((DataRetrieverChainDefinitionDTO<SerializableSettings>) queryDefinition.getDataRetrieverChainDefinition(), false);
     }
 
     @Override
@@ -226,31 +204,20 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
 
     @SuppressWarnings("unchecked")
     @Override
-    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
-        SettingsDialogComponent<Settings> result;
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+        SettingsDialogComponent<? extends Settings> result = null;
         if (hasSettings()) {
             Settings settings = getDataRetrieverChainDefinition().getSettings();
-            if (settingsDialogRegistration.containsKey(settings.getClass())) {
-                Class<? extends SettingsDialogComponent<?>> dialogClass = settingsDialogRegistration.get(settings.getClass());
-                try {
-                    Constructor<?> constructor = dialogClass.getConstructor(settings.getClass());
-                    result = (SettingsDialogComponent<Settings>) constructor.newInstance(settings);
-                } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-                        | IllegalArgumentException | InvocationTargetException e) {
-                    e.printStackTrace();
-                    result = null;
-                }
-            } else {
-                result = null;
+            if (settings instanceof PolarSheetGenerationSettings) {
+                PolarSheetGenerationSettings polarSettings = (PolarSheetGenerationSettings) settings;
+                result = new PolarSheetGenerationSettingsDialogComponent(polarSettings);
             }
-        } else {
-            result = null;
         }
-        return result;
+        return (SettingsDialogComponent<SerializableSettings>) result;
     }
 
     @Override
-    public void updateSettings(Settings newSettings) { 
+    public void updateSettings(SerializableSettings newSettings) { 
         getDataRetrieverChainDefinition().setSettings(newSettings);
     }
 

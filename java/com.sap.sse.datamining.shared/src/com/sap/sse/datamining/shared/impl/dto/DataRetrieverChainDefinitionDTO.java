@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class DataRetrieverChainDefinitionDTO<Settings> implements Serializable, Comparable<DataRetrieverChainDefinitionDTO<?>> {
+public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> implements Serializable, Comparable<DataRetrieverChainDefinitionDTO<Settings>> {
     private static final long serialVersionUID = 7806173601799997214L;
     
     private UUID id;
@@ -89,7 +89,7 @@ public class DataRetrieverChainDefinitionDTO<Settings> implements Serializable, 
     }
 
     @Override
-    public int compareTo(DataRetrieverChainDefinitionDTO<?> d) {
+    public int compareTo(DataRetrieverChainDefinitionDTO<Settings> d) {
         return this.getName().compareTo(d.getName());
     }
     

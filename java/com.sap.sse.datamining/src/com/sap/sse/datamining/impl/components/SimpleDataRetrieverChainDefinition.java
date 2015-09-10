@@ -2,9 +2,9 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Map;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Setting;
 import com.sap.sse.common.settings.SettingType;
-import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition.EmptySettings;
 
@@ -34,7 +34,9 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> extend
         return new EmptySettings();
     }
     
-    public class EmptySettings implements Settings {
+    public class EmptySettings extends SerializableSettings {
+
+        private static final long serialVersionUID = 2731413350062447794L;
 
         @Override
         public SettingType getType() {

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -30,16 +30,16 @@ public interface DataMiningServiceAsync {
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
     void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
-    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, String localeInfoName,
+    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
-    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, String localeInfoName,
+    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
     
-    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<Settings>>> asyncCallback);
+    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>> asyncCallback);
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
-            AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<Settings>>> callback);
+            AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
             HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 

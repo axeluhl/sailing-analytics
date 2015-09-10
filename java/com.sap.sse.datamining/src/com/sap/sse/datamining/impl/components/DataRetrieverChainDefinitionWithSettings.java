@@ -1,11 +1,12 @@
 package com.sap.sse.datamining.impl.components;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 
-public class DataRetrieverChainDefinitionWithSettings<DataSourceType, DataType, Settings extends com.sap.sse.common.settings.Settings> extends
+public class DataRetrieverChainDefinitionWithSettings<DataSourceType, DataType, Settings extends com.sap.sse.common.settings.SerializableSettings> extends
         AbstractDataRetrieverChainDefinition<DataSourceType, DataType, Settings> {
 
-    private final Settings settings;
+    private final SerializableSettings settings;
 
     public DataRetrieverChainDefinitionWithSettings(Class<DataSourceType> dataSourceType,
             Class<DataType> retrievedDataType, String nameMessageKey, Settings settings) {
@@ -26,7 +27,7 @@ public class DataRetrieverChainDefinitionWithSettings<DataSourceType, DataType, 
     }
 
     @Override
-    public Settings getSettings() {
+    public SerializableSettings getSettings() {
         return settings;
     }
     

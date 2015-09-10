@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -126,6 +127,6 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType, Settings
     
     public boolean hasSettings();
     
-    public Settings getSettings();
+    public SerializableSettings getSettings();
 
 }
