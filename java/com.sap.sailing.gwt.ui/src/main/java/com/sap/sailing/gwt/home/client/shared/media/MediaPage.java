@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.shared.placeholder.InfoPlaceholder;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;

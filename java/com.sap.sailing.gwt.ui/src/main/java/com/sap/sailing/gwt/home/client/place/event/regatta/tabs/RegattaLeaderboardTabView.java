@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 

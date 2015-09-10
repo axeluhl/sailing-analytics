@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard
 import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
-import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**

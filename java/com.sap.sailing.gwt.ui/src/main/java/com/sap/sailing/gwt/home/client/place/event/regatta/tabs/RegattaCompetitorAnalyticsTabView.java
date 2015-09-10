@@ -21,8 +21,8 @@ import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompet
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sse.common.Util;
