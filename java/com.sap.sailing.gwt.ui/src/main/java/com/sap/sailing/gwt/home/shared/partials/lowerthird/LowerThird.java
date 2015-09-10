@@ -14,8 +14,8 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.ButtonUtil;
+import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.ButtonUtil.ButtonType;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
