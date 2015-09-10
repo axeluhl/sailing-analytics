@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.WithControls;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -230,12 +230,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) { }
+    public void updateSettings(Settings newSettings) { }
 
     @Override
     public String getDependentCssClassName() {
@@ -263,7 +263,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         }
 
         @Override
-        public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
+        public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<Settings> newDataRetrieverChainDefinition) {
             if (isAwatingReload()) {
                 statisticProvider.dataRetrieverChainDefinitionChanged(retrieverChainProvider.getDataRetrieverChainDefinition());
                 statisticProvider.reloadComponents();

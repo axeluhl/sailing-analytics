@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.PlainFilterSelectionPresenter;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -49,7 +49,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     private boolean isAwaitingReload;
     private boolean blockDataUpdates;
-    private DataRetrieverChainDefinitionDTO retrieverChain;
+    private DataRetrieverChainDefinitionDTO<Settings> retrieverChain;
     private final Map<DataRetrieverLevelDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
     
     private final DockLayoutPanel mainPanel;
@@ -115,7 +115,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<Settings> newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
             if (!isAwaitingReload && retrieverChain != null) {
@@ -314,12 +314,12 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) {
+    public void updateSettings(Settings newSettings) {
     }
 
 }

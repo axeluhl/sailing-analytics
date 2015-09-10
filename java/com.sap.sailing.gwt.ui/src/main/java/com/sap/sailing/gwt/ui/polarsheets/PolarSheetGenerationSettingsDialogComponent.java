@@ -35,9 +35,9 @@ public class PolarSheetGenerationSettingsDialogComponent implements SettingsDial
     private DoubleBox windSteppingMaxDistanceBox;
     private CheckBox splitByWindGaugesBox;
 
-    public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings, StringMessages stringMessages) {
+    public PolarSheetGenerationSettingsDialogComponent(PolarSheetGenerationSettings settings) {
         this.settings = settings;
-        this.stringMessages = stringMessages;
+        this.stringMessages = StringMessages.INSTANCE;
     }
 
     @Override

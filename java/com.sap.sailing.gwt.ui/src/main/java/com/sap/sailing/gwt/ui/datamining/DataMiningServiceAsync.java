@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -22,23 +23,23 @@ public interface DataMiningServiceAsync {
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
     void getAllStatistics(String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
-    void getStatisticsFor(DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition, String localeName,
+    void getStatisticsFor(DataRetrieverChainDefinitionDTO<?> currentRetrieverChainDefinition, String localeName,
             AsyncCallback<HashSet<FunctionDTO>> asyncCallback);
 
     void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
     void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
-    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
+    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
-    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
+    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
     
-    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> asyncCallback);
+    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<Settings>>> asyncCallback);
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
-            AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> callback);
+            AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<Settings>>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO<Settings> dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
             HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 

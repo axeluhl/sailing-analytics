@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionPresenter;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -32,7 +33,7 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
                                                       DataRetrieverChainDefinitionChangedListener {
 
     private final FilterSelectionProvider filterSelectionProvider;
-    private DataRetrieverChainDefinitionDTO retrieverChain;
+    private DataRetrieverChainDefinitionDTO<Settings> retrieverChain;
     
     private final HorizontalPanel mainPanel;
     private final VerticalPanel presentationPanel;
@@ -54,7 +55,7 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<Settings> newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
             presentationPanel.clear();

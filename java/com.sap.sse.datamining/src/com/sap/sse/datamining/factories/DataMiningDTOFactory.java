@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
@@ -77,16 +78,17 @@ public class DataMiningDTOFactory {
                                                      displayName);
     }
 
-    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition,
+    public DataRetrieverChainDefinitionDTO<Settings> createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition,
                                                                                  ResourceBundleStringMessages stringMessages, Locale locale) {
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
         for (DataRetrieverLevel<?, ?> retrieverLevel : dataRetrieverChainDefinition.getDataRetrieverLevels()) {
             retrieverLevels.add(createDataRetrieverLevelDTO(retrieverLevel, stringMessages, locale));
         }
-        return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(),
-                dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages),
-                dataRetrieverChainDefinition.getDataSourceType().getSimpleName(), retrieverLevels);
-    }
+        return new DataRetrieverChainDefinitionDTO<Settings>(dataRetrieverChainDefinition.getID(),
+                dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages), dataRetrieverChainDefinition
+                        .getDataSourceType().getSimpleName(), retrieverLevels,
+                dataRetrieverChainDefinition.hasSettings() ? dataRetrieverChainDefinition.getSettings() : null);
+   }
 
     public DataRetrieverLevelDTO createDataRetrieverLevelDTO(DataRetrieverLevel<?, ?> retrieverLevel,
                                                              ResourceBundleStringMessages stringMessages, Locale locale) {

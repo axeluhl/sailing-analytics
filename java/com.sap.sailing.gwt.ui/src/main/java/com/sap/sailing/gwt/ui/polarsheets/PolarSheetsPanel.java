@@ -346,7 +346,7 @@ public class PolarSheetsPanel extends SplitLayoutPanel implements RaceSelectionC
 
     @Override
     public SettingsDialogComponent<PolarSheetGenerationSettings> getSettingsDialogComponent() {
-        return new PolarSheetGenerationSettingsDialogComponent(settings, stringMessages);
+        return new PolarSheetGenerationSettingsDialogComponent(settings);
     }
 
     @Override

@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -41,7 +41,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final Set<StatisticChangedListener> listeners;
     
     private boolean isAwaitingReload;
-    private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
+    private DataRetrieverChainDefinitionDTO<Settings> currentRetrieverChainDefinition;
     private final Collection<FunctionDTO> extractionFunctions;
     private final Collection<AggregationProcessorDefinitionDTO> aggregatorDefinitions;
     
@@ -95,7 +95,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<Settings> newRetrieverChainDefinition) {
         if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
             currentRetrieverChainDefinition = newRetrieverChainDefinition;
             if (!isAwaitingReload && currentRetrieverChainDefinition != null) {
@@ -269,12 +269,12 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) { }
+    public void updateSettings(Settings newSettings) { }
     
     @Override
     public String getDependentCssClassName() {

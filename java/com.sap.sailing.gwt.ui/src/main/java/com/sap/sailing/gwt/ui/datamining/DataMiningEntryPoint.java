@@ -29,7 +29,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.resources.Highcharts;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
-    private static final ComponentResources resources = GWT.create(ComponentResources.class);
+    public static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     

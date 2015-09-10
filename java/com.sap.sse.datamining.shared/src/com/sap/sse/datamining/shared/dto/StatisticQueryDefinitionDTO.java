@@ -15,7 +15,7 @@ public interface StatisticQueryDefinitionDTO extends Serializable {
     
     public String getLocaleInfoName();
     
-    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
+    public DataRetrieverChainDefinitionDTO<?> getDataRetrieverChainDefinition();
     public Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection();
     public ArrayList<FunctionDTO> getDimensionsToGroupBy();
     public FunctionDTO getStatisticToCalculate();

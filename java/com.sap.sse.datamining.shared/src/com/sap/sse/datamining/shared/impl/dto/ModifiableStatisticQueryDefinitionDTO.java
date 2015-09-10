@@ -14,7 +14,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     private FunctionDTO statisticToCalculate;
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
     private ArrayList<FunctionDTO> dimensionsToGroupBy;
-    private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinitionDTO<?> dataRetrieverChainDefinition;
     private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
     
     /**
@@ -23,7 +23,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     @Deprecated
     ModifiableStatisticQueryDefinitionDTO() { }
 
-    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
+    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO<?> dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
@@ -46,7 +46,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
     
     @Override
-    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinitionDTO<?> getDataRetrieverChainDefinition() {
         return dataRetrieverChainDefinition;
     }
 

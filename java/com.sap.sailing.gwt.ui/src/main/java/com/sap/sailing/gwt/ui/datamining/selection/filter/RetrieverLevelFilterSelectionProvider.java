@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -30,7 +31,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     
     private final DataMiningSession session;
     private final ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider;
-    private final DataRetrieverChainDefinitionDTO retrieverChain;
+    private final DataRetrieverChainDefinitionDTO<Settings> retrieverChain;
     private final DataRetrieverLevelDTO retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
@@ -38,7 +39,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
+            ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO<Settings> retrieverChain,
             DataRetrieverLevelDTO retrieverLevel) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -188,7 +189,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         initializeDimensionSelectionProviders();
     }
 
-    DataRetrieverChainDefinitionDTO getDataRetrieverChain() {
+    DataRetrieverChainDefinitionDTO<Settings> getDataRetrieverChain() {
         return retrieverChain;
     }
     
