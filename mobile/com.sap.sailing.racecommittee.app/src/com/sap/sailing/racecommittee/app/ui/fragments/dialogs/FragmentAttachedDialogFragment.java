@@ -5,7 +5,7 @@ import android.app.Fragment;
 public abstract class FragmentAttachedDialogFragment extends AttachedDialogFragment {
 
     @Override
-    protected DialogListenerHost getHost() {
+    protected DialogListenerHost getListenerHost() {
         Fragment targetFragment = getTargetFragment();
         if (targetFragment instanceof DialogListenerHost) {
             return (DialogListenerHost) targetFragment;
