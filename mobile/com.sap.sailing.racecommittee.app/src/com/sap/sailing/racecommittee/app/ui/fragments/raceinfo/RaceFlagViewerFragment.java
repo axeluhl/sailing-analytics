@@ -36,6 +36,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
     private ProcedureChangedListener mProcedureListener;
     private FlagsCache mFlagCache;
+    private int mFlagSize;
 
     public RaceFlagViewerFragment() {
         mProcedureListener = new ProcedureChangedListener();
@@ -55,6 +56,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
         mLayout = ViewHelper.get(layout, R.id.flags);
         mRecall = ViewHelper.get(layout, R.id.individual_recall);
+        mFlagSize = getResources().getInteger(R.integer.flag_size_xlarge);
 
         mXrayButton = ViewHelper.get(layout, R.id.flag_down);
         if (mXrayButton != null) {
@@ -68,7 +70,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         }
         mXrayFlag = ViewHelper.get(layout, R.id.flag);
         if (mXrayFlag != null) {
-            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), 96));
+            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), mFlagSize));
         }
         mXrayCountdown = ViewHelper.get(layout, R.id.xray_down);
 
@@ -183,7 +185,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
             line.setVisibility(View.GONE);
         }
 
-        flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 96));
+        flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize));
         flagView.setTag(flag);
         if (flag == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());

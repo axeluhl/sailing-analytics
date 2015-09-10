@@ -53,8 +53,10 @@
 	<item name="picker_scale" format="float" type="integer">1.55</item>
 	<item name="flag_size" format="integer" type="integer">48</item>
     <item name="flag_size_large" format="integer" type="integer">64</item>
+	<item name="flag_size_xlarge" format="integer" type="integer">96</item>
 
 	<dimen name="side_padding">@dimen/default_padding</dimen>
+    <dimen name="arrow_size_large">100dp</dimen>
 
 	<dimen name="checked_item_text">@dimen/textSize_26</dimen>
 	<dimen name="checked_item_small_text">@dimen/textSize_18</dimen>
