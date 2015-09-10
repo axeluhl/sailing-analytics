@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.client.shared.stage;
 
-import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 /**

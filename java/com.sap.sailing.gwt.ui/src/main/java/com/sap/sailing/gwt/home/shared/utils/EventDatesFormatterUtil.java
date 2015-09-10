@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared;
+package com.sap.sailing.gwt.home.shared.utils;
 
 import java.util.Date;
 
