@@ -26,7 +26,6 @@
     </ui:style>
     <g:HTMLPanel ui:field="contentPanel">
         <div class="{res.mediaCss.grid}">
-            <dp:multiregattalist.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" ui:field="regattaProgressLegendUi" />
             <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
         </div>
         <dp:regattanavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>

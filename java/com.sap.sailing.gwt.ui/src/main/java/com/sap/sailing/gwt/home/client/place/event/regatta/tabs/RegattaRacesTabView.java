@@ -31,7 +31,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
-import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnSet;
@@ -98,7 +97,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
     private Presenter currentPresenter;
 
-    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField DivElement listFormatContainerUi;
@@ -166,7 +164,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
             oldContentContainer.removeFromParent();
         } else {
-            regattaProgressLegendUi.removeFromParent();
             regattaInfoContainerUi.removeFromParent();
             listFormatContainerUi.removeFromParent();
             compFormatContainerUi.removeFromParent();

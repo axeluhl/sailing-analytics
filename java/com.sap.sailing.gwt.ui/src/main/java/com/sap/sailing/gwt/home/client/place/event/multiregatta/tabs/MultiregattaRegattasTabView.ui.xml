@@ -17,7 +17,6 @@
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
 				<dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
 				<div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}" ui:field="legendAndFilterUi" style="display:none;">
-					<dp:multiregattalist.MultiRegattaListStepsLegend ui:field="regattaProgressLegendUi" />
 			        <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
 			        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
 			        		target="_blank" ui:field="regattaOverviewLinkUi">

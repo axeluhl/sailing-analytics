@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
-import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
@@ -39,7 +38,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
     
-    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) EventOverviewStage stageUi;

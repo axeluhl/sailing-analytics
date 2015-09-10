@@ -28,7 +28,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
-import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListStepsLegend;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
@@ -62,7 +61,6 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @UiField DivElement newContentContainerUi;
     @UiField DivElement legendAndFilterUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
-    @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
     @UiField AnchorElement regattaOverviewLinkUi;
     @UiField StatisticsBox statisticsBoxUi;
@@ -104,7 +102,6 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
             content.removeFromParent();
         } else {
             boatCategoryFilterUi.removeFromParent();
-            regattaProgressLegendUi.removeFromParent();
             regattaListUi.removeFromParent();
             newContentContainerUi.removeFromParent();
             // TODO: understand, and than move this into appropiate place (probably context)
