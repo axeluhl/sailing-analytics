@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/race_panel_left"
+        android:id="@+id/race_panel_setup"
         android:layout_width="@dimen/side_button"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
     <FrameLayout
-        android:id="@+id/race_panel_right"
+        android:id="@+id/race_panel_flags"
         android:layout_width="@dimen/side_button"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/race_panel_right"
-        android:layout_toRightOf="@id/race_panel_left"
+        android:layout_toLeftOf="@id/race_panel_flags"
+        android:layout_toRightOf="@id/race_panel_setup"
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/race_panel_top"
+            android:id="@+id/race_panel_time"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical" />
+            android:orientation="vertical"/>
 
         <RelativeLayout
             android:id="@+id/race_frame"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="3" />
+            android:layout_weight="3"/>
     </LinearLayout>
 </RelativeLayout>

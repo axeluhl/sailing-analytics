@@ -35,9 +35,9 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_left);
-        replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_right);
-        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_top);
+        replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_setup);
+        replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_flags);
+        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_time);
     }
 
     @Override

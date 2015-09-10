@@ -445,7 +445,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     public void processIntent(Intent intent) {
         String action = intent.getAction();
-        View view = findViewById(R.id.race_panel_top);
+        View view = findViewById(R.id.race_panel_time);
         if (view != null) {
             if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
                 view.setVisibility(View.GONE);

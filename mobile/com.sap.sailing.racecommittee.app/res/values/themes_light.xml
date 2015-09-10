@@ -204,12 +204,12 @@
 
     <style name="AppTheme.Light.Text.PanelHeader">
         <item name="android:textColor">?sap_light_gray</item>
-        <item name="android:textSize">@dimen/textSize_20</item>
+        <item name="android:textSize">@dimen/panel_button_header_size</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
     <style name="AppTheme.Light.Text.PanelCaption">
-        <item name="android:textSize">@dimen/textSize_22</item>
+        <item name="android:textSize">@dimen/panel_button_caption_size</item>
     </style>
 
     <style name="AppTheme.Light.SettingsAlertDialog" parent="AppTheme.AlertDialog">

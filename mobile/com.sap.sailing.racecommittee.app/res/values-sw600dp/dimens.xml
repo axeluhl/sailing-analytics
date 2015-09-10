@@ -37,6 +37,7 @@
 	<dimen name="side_button">168dp</dimen>
 	<dimen name="side_button_large">200dp</dimen>
 	<dimen name="side_button_imageSize">100dp</dimen>
+    <dimen name="side_button_lockSize">18dp</dimen>
 
 	<dimen name="biggerActionBarSize">75dp</dimen>
 
@@ -46,8 +47,8 @@
 	<dimen name="wind_hide_button_right_margin">76dp</dimen>
 	<dimen name="wind_hide_button_top_margin">20dp</dimen>
 
-	<dimen name="panel_button_caption_size">@dimen/textSize_18</dimen>
-	<dimen name="panel_button_header_size">@dimen/textSize_20</dimen>
+	<dimen name="panel_button_caption_size">18sp</dimen>
+	<dimen name="panel_button_header_size">20sp</dimen>
 
 	<!-- custom dimens (float, integer) -->
 	<item name="picker_scale" format="float" type="integer">1.55</item>
