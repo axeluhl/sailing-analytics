@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.stage;
+package com.sap.sailing.gwt.home.desktop.partials.stage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
@@ -7,20 +7,20 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 /**
- * Teaser band for an upcoming event on the homepage stage
+ * Teaser band for a popular but finished event on the homepage stage
  * @author Frank
  *
  */
-public class UpcomingEventStageTeaserBand extends StageTeaserBand {
+public class PopularEventStageTeaserBand extends StageTeaserBand {
 
-    public UpcomingEventStageTeaserBand(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
+    public PopularEventStageTeaserBand(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getDisplayName());
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
 
         actionLink.setVisible(true);
-        actionLink.setText(TextMessages.INSTANCE.moreInfo());
+        actionLink.setText(TextMessages.INSTANCE.viewAnalysis());
         actionLink.setHref(getEventNavigation().getTargetUrl());
     }
 

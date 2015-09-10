@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.shared.stage.StageResources;
+import com.sap.sailing.gwt.home.desktop.partials.stage.StageResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;

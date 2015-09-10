@@ -5,27 +5,27 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.mainsponsors.MainSponsors;
-import com.sap.sailing.gwt.home.client.shared.stage.Stage;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia;
+import com.sap.sailing.gwt.home.desktop.partials.stage.Stage;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public class SmartphoneStartView extends Composite implements StartView {
+   
     private static StartPageMobileViewUiBinder uiBinder = GWT.create(StartPageMobileViewUiBinder.class);
 
     interface StartPageMobileViewUiBinder extends UiBinder<Widget, SmartphoneStartView> {
     }
 
     @UiField(provided=true) Stage stage;
-    @UiField(provided=true) MainSponsors mainSponsors;
+    // @UiField(provided=true) MainSponsors mainSponsors;
     @UiField(provided=true)  MainEvents mainEvents;
     @UiField(provided=true) MainMedia mainMedia;
 
     public SmartphoneStartView(DesktopPlacesNavigator navigator) {
         stage = new Stage(navigator);
-        mainSponsors = new MainSponsors(navigator);
+        // mainSponsors = new MainSponsors(navigator);
         mainEvents = new MainEvents(navigator);
         mainMedia = new MainMedia(navigator);
         initWidget(uiBinder.createAndBindUi(this));

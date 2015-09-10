@@ -3,7 +3,7 @@
 		xmlns:sse="urn:import:com.sap.sse.gwt.client.controls">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-	<ui:with field="local_res" type="com.sap.sailing.gwt.home.client.shared.stage.StageResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.stage.StageResources" />
 	<g:HTMLPanel>
 		<!-- The main stage -->
 		<div class="{local_res.css.stage}">

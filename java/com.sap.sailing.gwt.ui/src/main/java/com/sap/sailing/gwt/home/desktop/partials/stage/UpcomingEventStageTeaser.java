@@ -1,19 +1,19 @@
-package com.sap.sailing.gwt.home.client.shared.stage;
+package com.sap.sailing.gwt.home.desktop.partials.stage;
 
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
-public class LiveEventStageTeaser extends StageTeaser {
+public class UpcomingEventStageTeaser extends StageTeaser {
 
-    private final LiveStageTeaserBand teaserBand;
+    private final UpcomingEventStageTeaserBand teaserBand;
 
-    public LiveEventStageTeaser(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
+    public UpcomingEventStageTeaser(EventStageDTO event, DesktopPlacesNavigator placeNavigator) {
         super(event);
         title.setInnerText(event.getDisplayName());
         subtitle.setInnerText(event.getLocationAndVenue());
-        countdownTimerUi.setVisible(false);
+        countdownTimerUi.setVisible(true);
         bandCount.setAttribute("data-bandcount", "1");
-        teaserBand = new LiveStageTeaserBand(event, placeNavigator);
+        teaserBand = new UpcomingEventStageTeaserBand(event, placeNavigator);
         stageTeaserBandsPanel.getElement().appendChild(teaserBand.getElement());
     }
 
@@ -21,5 +21,4 @@ public class LiveEventStageTeaser extends StageTeaser {
     protected void handleUserAction() {
         teaserBand.actionLinkClicked(null);
     }
-
 }

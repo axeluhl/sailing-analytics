@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.stage;
+package com.sap.sailing.gwt.home.desktop.partials.stage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,31 +14,25 @@ import com.sap.sse.gwt.client.controls.carousel.WidgetCarousel;
 
 public class Stage extends Composite {
 
-    private List<StageTeaser> stageTeaserComposites;
-
-    @UiField
-    WidgetCarousel widgetCarousel;
-
-    private StageTeaser stageTeaser;
-
-    private final DesktopPlacesNavigator placeNavigator;
-
     interface StageUiBinder extends UiBinder<Widget, Stage> {
     }
 
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
+    
+    @UiField WidgetCarousel widgetCarousel;
+    
+    private StageTeaser stageTeaser;
+    private List<StageTeaser> stageTeaserComposites;
+    private final DesktopPlacesNavigator placeNavigator;
 
     public Stage(DesktopPlacesNavigator placeNavigator) {
         this.placeNavigator = placeNavigator;
-
         StageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
         stageTeaserComposites = new ArrayList<StageTeaser>();
     }
 
     public void setFeaturedEvents(List<EventStageDTO> list) {
-
         for (EventStageDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -54,6 +48,5 @@ public class Stage extends Composite {
             widgetCarousel.addWidget(stageTeaser);
             stageTeaserComposites.add(stageTeaser);
         }
-
     }
 }
