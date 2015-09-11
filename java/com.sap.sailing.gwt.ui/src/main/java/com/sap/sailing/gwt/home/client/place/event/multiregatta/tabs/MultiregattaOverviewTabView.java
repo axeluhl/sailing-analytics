@@ -14,8 +14,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
@@ -46,8 +44,6 @@ import com.sap.sse.common.Util.Triple;
  */
 public class MultiregattaOverviewTabView extends Composite implements MultiregattaTabView<MultiregattaOverviewPlace> {
 
-    private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
-    
     interface MyBinder extends UiBinder<HTMLPanel, MultiregattaOverviewTabView> {
     }
     
