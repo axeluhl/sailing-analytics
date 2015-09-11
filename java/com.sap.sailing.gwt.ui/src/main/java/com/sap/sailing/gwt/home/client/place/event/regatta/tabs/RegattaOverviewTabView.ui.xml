@@ -2,12 +2,6 @@
 	  xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview"
 	  xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:style>
-        .legend {
-            margin-top: 2em;
-            margin-bottom: -1.5em;
-        }
-  </ui:style>
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="regattaInfoContainerUi"/>

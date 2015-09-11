@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
@@ -20,7 +19,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
 import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
@@ -104,7 +102,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @UiField SimplePanel oldContentContainer;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) RaceListContainer<RaceListRaceDTO> raceListContainerUi;
-    @UiField AnchorElement regattaOverviewUi;
     private Navigation currentlySelectedTab = Navigation.SORT_LIST_FORMAT;
     private RefreshManager refreshManager;
     
@@ -126,13 +123,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         raceListContainerUi = new RaceListContainer<>(I18N.finishedRaces(), I18N.noFinishedRaces(), new RaceListFinishedRaces(currentPresenter));
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
         
-        regattaOverviewUi.setHref(currentPresenter.getRegattaOverviewLink());
-        if(currentPresenter.isEventOrRegattaLive()) {
-            regattaOverviewUi.addClassName(SharedResources.INSTANCE.mainCss().buttonred());
-        } else {
-            regattaOverviewUi.addClassName(SharedResources.INSTANCE.mainCss().buttonprimary());
-        }
-    
         refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {
             UUID eventId = myPlace.getCtx().getEventDTO().getId();

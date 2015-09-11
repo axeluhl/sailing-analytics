@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,10 +57,8 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @UiField(provided = true) EventOverviewStage stageUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField DivElement newContentContainerUi;
-    @UiField DivElement legendAndFilterUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
-    @UiField AnchorElement regattaOverviewLinkUi;
     @UiField StatisticsBox statisticsBoxUi;
     private Presenter currentPresenter;
 
@@ -90,8 +86,6 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         regattaListUi = new MultiRegattaList(currentPresenter, false);
 
         initWidget(ourUiBinder.createAndBindUi(this));
-        regattaOverviewLinkUi.setHref(currentPresenter.getRegattaOverviewLink());
-        regattaOverviewLinkUi.addClassName(currentPresenter.isEventOrRegattaLive() ? MAIN_CSS.buttonred() : MAIN_CSS.buttonprimary());
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         stageUi.setupRefresh(refreshManager);
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
@@ -161,7 +155,6 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
             DropdownFilterList<String>, RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
         @Override
         public void setData(SortedSetResult<RegattaWithProgressDTO> data) {
-            legendAndFilterUi.getStyle().setDisplay(data.isEmpty() ? Display.NONE : Display.BLOCK);
             regattaListUi.setData(data);
             boatCategoryFilterUi.updateFilterValues();
         }

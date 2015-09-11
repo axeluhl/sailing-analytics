@@ -6,19 +6,6 @@
         .listContainer > div {
             margin-bottom: 2em;
         }
-        .legend {
-            margin-top: 2em;
-            margin-bottom: -1.5em;
-        }
-        .buttonContainer {
-            position: relative;
-            margin: 0 !important;
-        }
-        .regattaOverviewButton {
-            position: absolute;
-            right: 0;
-            top: -0.25em;
-        }
         .temp {
 			font-weight: bold; 
 			font-style: italic;
@@ -32,12 +19,6 @@
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi">
                 <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" />
-                <div class="{style.buttonContainer}">
-                    <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.regattaOverviewButton}" 
-	        				target="_blank" ui:field="regattaOverviewUi">
-                    	<ui:text from="{i18n.racesOverview}" />
-                    </a>
-                </div>
                 <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
             <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">

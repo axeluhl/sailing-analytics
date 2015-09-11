@@ -3,28 +3,13 @@
   			 xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  	<ui:style>
-  		.legend_and_filter {
-			text-align: right;
-		}
-  		.legend_and_filter > div, .legend_and_filter > a {
-			display: inline-block;
-			vertical-align: middle;
-			margin-left: 1.5em;
-		}
-  	</ui:style>
   <g:HTMLPanel>
     <o:EventOverviewStage ui:field="stageUi" />
     <div class="{res.mediaCss.grid}" ui:field="newContentContainerUi">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
         <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
-        <div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}" ui:field="legendAndFilterUi" style="display:none;">
-	        <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
-	        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
-	        		target="_blank" ui:field="regattaOverviewLinkUi">
-	        	<ui:text from="{i18n.racesOverview}" />
-	        </a>
-        </div>
+        <dp:regattanavigation.DropdownFilter ui:field="boatCategoryFilterUi" 
+        		addStyleNames="{res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottombig}"/>
 		<dp:multiregattalist.MultiRegattaList ui:field="regattaListUi" />
 		<dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" ui:field="statisticsBoxUi"/>
       </div>
