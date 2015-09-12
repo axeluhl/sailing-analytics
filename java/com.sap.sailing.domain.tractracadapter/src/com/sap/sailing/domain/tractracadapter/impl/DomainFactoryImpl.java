@@ -585,7 +585,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
+    public List<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
         final List<Util.Pair<Competitor, Boat>> competitorBoatInfos = new ArrayList<>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);

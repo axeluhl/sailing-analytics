@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -878,4 +879,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return getMarks();
     }
 
+    /**
+     * Resolves the boat used by the competitor for this race
+     * @param competitor the competitor
+     * @return the boat
+     */
+    public Boat resolveBoatOfCompetitor(Competitor competitor);
 }

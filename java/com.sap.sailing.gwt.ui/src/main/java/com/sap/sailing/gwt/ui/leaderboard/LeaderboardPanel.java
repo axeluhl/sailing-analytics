@@ -277,7 +277,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * {@link RaceColumnDTO#getRaceIdentifier(String) race identifier} matches the value of this attribute will be
      * added.
      */
-    private final RaceIdentifier preSelectedRace;
+    private final RegattaAndRaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
     
@@ -619,7 +619,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
+            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor,
+                    LeaderboardPanel.this.preSelectedRace).getAsHtml();
             String competitorColorBarStyle;
             if (LeaderboardPanel.this.isEmbedded && preSelectedRace != null) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
@@ -2317,6 +2318,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
+            
+            // here we need to add the competitor colors for the preselected race column or so
+            if(preSelectedRace != null) {
+               // leaderboard.
+            }
+           
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
             if (!initialCompetitorFilterHasBeenApplied) {
                 applyTop30FilterIfCompetitorSizeGreaterEqual40(leaderboard);

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
@@ -232,10 +233,15 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             fireListChanged(getAllCompetitors(), listenersNotToNotify);
         }
     }
-    
+
     @Override
     public Color getColor(CompetitorDTO competitor) {
         return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor) : null;
+    }
+
+    @Override
+    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
+        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor, raceIdentfier) : null;
     }
 
     @Override
