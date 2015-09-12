@@ -21,7 +21,7 @@ public abstract class ActivityAttachedDialogFragment extends AttachedDialogFragm
     }
 
     @Override
-    protected DialogListenerHost getHost() {
+    protected DialogListenerHost getListenerHost() {
         return this.hostActivity;
     }
 
