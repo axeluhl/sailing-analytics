@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,25 +11,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionProvider;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
-import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
+import com.sap.sse.datamining.components.management.MemoryMonitor;
+import com.sap.sse.datamining.components.management.MemoryMonitorAction;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
+import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
+import com.sap.sse.datamining.impl.components.management.RuntimeMemorInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -41,12 +48,16 @@ import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
+    private static final long MEMORY_CHECK_PERIOD = 5;
+    private static final TimeUnit MEMORY_CHECK_PERIOD_UNIT = TimeUnit.SECONDS;
+    
     private final CompoundResourceBundleStringMessages stringMessages;
     private final ExecutorService executorService;
     private Date componentsChangedTimepoint;
     
     private final QueryFactory queryFactory;
-    private final DataMiningQueryManager dataMiningQueryManager;
+    private final StrategyPerQueryTypeManager dataMiningQueryManager;
+    private final MemoryMonitor memoryMonitor;
     
     private final FunctionRegistry functionRegistry;
     private final DataSourceProviderRegistry dataSourceProviderRegistry;
@@ -62,12 +73,44 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
+        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemorInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
+                                                      createMemoryMonitorActions(), MEMORY_CHECK_PERIOD, MEMORY_CHECK_PERIOD_UNIT);
         this.functionRegistry = functionRegistry;
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
     }
     
+    private Iterable<MemoryMonitorAction> createMemoryMonitorActions() {
+        Collection<MemoryMonitorAction> actions = new ArrayList<>();
+        actions.add(new AbstractMemoryMonitorAction(0.10) {
+            @Override
+            public void performAction() {
+                memoryMonitor.logWarning("Yellow Alert free memory is below " + getThreshold() + "%!");
+                int numberOfRunningStatisticQueries = dataMiningQueryManager.getNumberOfRunningQueriesOfType(QueryType.STATISTIC);
+                if (numberOfRunningStatisticQueries > 0) {
+                    memoryMonitor.logWarning("Aborting random statistic query.");
+                    dataMiningQueryManager.abortRandomQueryOfType(QueryType.STATISTIC);
+                } else {
+                    memoryMonitor.logWarning("Can't abort random statistic query, because none are running.");
+                }
+            }
+        });
+        actions.add(new AbstractMemoryMonitorAction(0.05) {
+            @Override
+            public void performAction() {
+                memoryMonitor.logSevere("Red Alert free memory is below " + getThreshold() + "%!");
+                if (dataMiningQueryManager.getNumberOfRunningQueries() > 0) {
+                    memoryMonitor.logSevere("Aborting all queries.");
+                    dataMiningQueryManager.abortAllQueries();
+                } else {
+                    memoryMonitor.logSevere("Can't abort all queries, because none are running.");
+                }
+            }
+        });
+        return actions;
+    }
+
     @Override
     public Date getComponentsChangedTimepoint() {
         return componentsChangedTimepoint;
@@ -344,6 +387,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
         return dataMiningQueryManager.runNewAndAbortPrevious(session, query);
+    }
+    
+    @Override
+    public int getNumberOfRunningQueries() {
+        return dataMiningQueryManager.getNumberOfRunningQueries();
     }
     
     @Override

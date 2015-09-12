@@ -1,5 +1,12 @@
 package com.sap.sse.datamining.impl.components.management;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
@@ -37,6 +44,35 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
         unregisterQuery(keys, query);
         return result;
     }
+    
+    @Override
+    public void abortRandomQuery() {
+        Random generator = new Random();
+        boolean abortedQuery = false;
+        final Set<T> keySet = queryMap.keySet(); // Changes to the map will be reflected to this set
+        while (!abortedQuery) {
+            List<T> keys = new ArrayList<>(keySet);
+            T randomKey = keys.get(generator.nextInt(keys.size()));
+            abortedQuery = abortQuery(randomKey);
+        }
+    }
+    
+    @Override
+    public void abortAllQueries() {
+        Collection<Entry<T, Query<?>>> queries = new HashSet<>(queryMap.entrySet());
+        queryMap.clear();
+        queries.parallelStream().forEach(element -> {
+            T key = element.getKey();
+            Query<?> query = element.getValue();
+            logger.info("Aborting query " + query + " for the key " + key);
+            query.abort();
+        });
+    }
+    
+    @Override
+    public int getNumberOfRunningQueries() {
+        return queryMap.size();
+    }
 
     protected abstract <ResultType> Iterable<T> getKeysFor(DataMiningSession session, Query<ResultType> query);
     
@@ -57,14 +93,21 @@ public abstract class SingleQueryPerKeyManager<T> implements DataMiningQueryMana
     private void abortPreviousQueries(Iterable<T> keys) {
         for (T key : keys) {
             if (queryMap.containsKey(key)) {
-                Query<?> previousQuery = queryMap.get(key);
-                if (previousQuery.getState() == QueryState.RUNNING) {
-                    logger.info("Aborting query " + previousQuery + ", because a new query for the key " + key + " has been requested");
-                    previousQuery.abort();
-                }
-                queryMap.remove(key, previousQuery);
+                abortQuery(key);
             }
         }
+    }
+
+    private boolean abortQuery(T key) {
+        boolean abortedQuery = false;
+        Query<?> query = queryMap.get(key);
+        if (query.getState() == QueryState.RUNNING) {
+            logger.info("Aborting query " + query + " for the key " + key);
+            query.abort();
+            abortedQuery = true;
+        }
+        queryMap.remove(key, query);
+        return abortedQuery;
     }
 
     private <ResultType> void registerNewQuery(Iterable<T> keys, Query<ResultType> query) {
