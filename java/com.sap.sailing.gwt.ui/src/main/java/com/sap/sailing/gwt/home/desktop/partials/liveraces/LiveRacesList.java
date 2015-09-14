@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.client.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnSet;

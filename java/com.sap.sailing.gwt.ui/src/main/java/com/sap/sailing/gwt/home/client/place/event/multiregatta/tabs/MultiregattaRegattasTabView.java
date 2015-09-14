@@ -19,8 +19,8 @@ import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregatt
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.client.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.client.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;

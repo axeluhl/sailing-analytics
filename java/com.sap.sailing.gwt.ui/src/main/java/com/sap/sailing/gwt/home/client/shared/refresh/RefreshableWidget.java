@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload;
+package com.sap.sailing.gwt.home.client.shared.refresh;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
