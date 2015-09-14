@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -107,7 +107,8 @@ public class BitmapHelper {
 
     public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableResId);
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawable = DrawableCompat.wrap(drawable).mutate();
+        DrawableCompat.setTint(drawable, color);
         return drawable;
     }
 }

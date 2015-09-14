@@ -69,6 +69,8 @@
         <item name="arrow_up_large">@drawable/arrow_up_large_light</item>
         <item name="arrow_up_normal">@drawable/arrow_up_normal_light</item>
         <item name="button_filled_bordered">@drawable/button_filled_bordered_light</item>
+        <item name="button_next">@drawable/button_next_light</item>
+        <item name="button_prev">@drawable/button_prev_light</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
         <item name="chevron_left_36dp">@drawable/ic_chevron_left_black_36dp</item>
