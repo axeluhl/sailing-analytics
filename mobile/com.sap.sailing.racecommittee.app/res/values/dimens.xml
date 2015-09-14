@@ -65,6 +65,7 @@
 
     <dimen name="panel_button_caption_size">14sp</dimen>
     <dimen name="panel_button_header_size">16sp</dimen>
+    <dimen name="flags">64dp</dimen>
 
     <!-- custom dimens (float, integer) -->
     <item name="picker_scale" format="float" type="integer">1</item>
