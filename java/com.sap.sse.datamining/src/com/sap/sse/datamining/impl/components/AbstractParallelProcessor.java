@@ -3,7 +3,9 @@ package com.sap.sse.datamining.impl.components;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -12,10 +14,8 @@ import java.util.logging.Logger;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
-import com.sap.sse.datamining.components.ProcessorInstructionHandler;
 
-public abstract class AbstractParallelProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType>
-                                                                       implements ProcessorInstructionHandler<ResultType> {
+public abstract class AbstractParallelProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
@@ -45,12 +45,30 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
             final ProcessorInstruction<ResultType> instruction = createInstruction(element);
             if (isInstructionValid(instruction)) {
                 unfinishedInstructionsCounter.getAndIncrement();
+                ResultType result;
                 try {
-                    executor.execute(instruction);
-                } catch (RejectedExecutionException exc) {
-                    LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName()
-                            + " appeared during the processing.");
-                    instruction.run();
+                    try {
+                        FutureTask<ResultType> task = new ProcessorInstructionFutureTask<>(instruction);
+                        executor.execute(task);
+                        result = task.get();
+                    } catch (RejectedExecutionException exc) {
+                        LOGGER.log(Level.WARNING, "A " + RejectedExecutionException.class.getSimpleName()
+                                + " appeared during the processing.");
+                        result = instruction.call();
+                    }
+                    forwardResultToReceivers(result);
+                } catch (Exception e) {
+                    if (!isAborted) {
+                        Throwable failure;
+                        if (ExecutionException.class.isAssignableFrom(e.getClass())) {
+                            failure = ((ExecutionException) e).getCause();
+                        } else {
+                            failure = e;
+                        }
+                        onFailure(failure);
+                    }
+                } finally {
+                    unfinishedInstructionsCounter.getAndDecrement();
                 }
             }
         }
@@ -58,20 +76,6 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
 
     private boolean isInstructionValid(ProcessorInstruction<ResultType> instruction) {
         return instruction != null;
-    }
-    
-    public void instructionSucceeded(ResultType result) {
-        forwardResultToReceivers(result);
-    }
-    
-    public void instructionFailed(Exception e) {
-        if (!isAborted() || !(e instanceof InterruptedException)) {
-            onFailure(e);
-        }
-    }
-    
-    public void afterInstructionFinished() {
-        unfinishedInstructionsCounter.getAndDecrement();
     }
     
     /**

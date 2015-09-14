@@ -22,7 +22,7 @@ public class ParallelFilteringProcessor<InputType> extends AbstractParallelProce
 
     @Override
     protected ProcessorInstruction<InputType> createInstruction(final InputType element) {
-        return new AbstractProcessorInstruction<InputType>(this, ProcessorInstructionPriority.Filtration) {
+        return new AbstractProcessorInstruction<InputType>(ProcessorInstructionPriority.Filtration) {
             @Override
             public InputType computeResult() {
                 if (filterCriterion.matches(element)) {

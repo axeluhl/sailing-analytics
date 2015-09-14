@@ -30,7 +30,7 @@ public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends 
 
     @Override
     protected ProcessorInstruction<ResultType> createInstruction(final InputType element) {
-        return new AbstractProcessorInstruction<ResultType>(this, ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
+        return new AbstractProcessorInstruction<ResultType>(ProcessorInstructionPriority.createRetrievalPriority(retrievalLevel)) {
             @Override
             public ResultType computeResult() {
                 for (ResultType retrievedElement : retrieveData(element)) {

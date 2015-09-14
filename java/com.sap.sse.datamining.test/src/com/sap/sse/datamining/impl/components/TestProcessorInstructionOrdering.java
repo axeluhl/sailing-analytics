@@ -16,12 +16,12 @@ public class TestProcessorInstructionOrdering {
     public void testOrderInPriorityQueue() {
         Queue<NullProcessorInstruction<?>> priorityQueue = new PriorityQueue<>();
 
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.createRetrievalPriority(0)));
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.createRetrievalPriority(1)));
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.Grouping));
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.Extraction));
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.Filtration));
-        priorityQueue.add(new NullProcessorInstruction<>(null, ProcessorInstructionPriority.Aggregation));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.createRetrievalPriority(0)));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.createRetrievalPriority(1)));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.Grouping));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.Extraction));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.Filtration));
+        priorityQueue.add(new NullProcessorInstruction<>(ProcessorInstructionPriority.Aggregation));
 
         assertThat(priorityQueue.poll().getPriority(), is(0));
         assertThat(priorityQueue.poll().getPriority(), is(1));

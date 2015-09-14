@@ -21,7 +21,7 @@ public abstract class BlockingProcessor<InputType, ResultType> extends AbstractP
 
     @Override
     protected ProcessorInstruction<ResultType> createInstruction(InputType element) {
-        return new AbstractProcessorInstruction<ResultType>(this) {
+        return new AbstractProcessorInstruction<ResultType>() {
             @Override
             public ResultType computeResult() throws Exception {
                 Thread.sleep(timeToBlockInMillis);

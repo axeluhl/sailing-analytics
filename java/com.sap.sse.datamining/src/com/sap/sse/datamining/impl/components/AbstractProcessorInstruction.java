@@ -1,11 +1,9 @@
 package com.sap.sse.datamining.impl.components;
 
 import com.sap.sse.datamining.components.ProcessorInstruction;
-import com.sap.sse.datamining.components.ProcessorInstructionHandler;
 
 public abstract class AbstractProcessorInstruction<ResultType> implements ProcessorInstruction<ResultType> {
     
-    private final ProcessorInstructionHandler<ResultType> handler;
     private final int priority;
 
     /**
@@ -18,8 +16,8 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
      * @param handler The handler, that handles the result of the instruction.
      *                In most cases the processor, that processes the instruction.
      */
-    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> handler) {
-        this(handler, 0);
+    public AbstractProcessorInstruction() {
+        this(0);
     }
     
     /**
@@ -28,9 +26,8 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
      * @param handler The processor, that processes this instruction
      * @param priority The priority of this instruction
      */
-    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> handler,
-                                ProcessorInstructionPriority priority) {
-        this(handler, priority.asIntValue());
+    public AbstractProcessorInstruction(ProcessorInstructionPriority priority) {
+        this(priority.asIntValue());
     }
 
     /**
@@ -43,22 +40,13 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
      * @param processor The processor, that processes this instruction
      * @param priority The priority of this instruction. <code>0</code> is the highest priority.
      */
-    public AbstractProcessorInstruction(ProcessorInstructionHandler<ResultType> processor,
-                                int priority) {
-        this.handler = processor;
+    public AbstractProcessorInstruction(int priority) {
         this.priority = priority;
     }
-
+    
     @Override
-    public void run() {
-        try {
-            ResultType result = computeResult();
-            handler.instructionSucceeded(result);
-        } catch (Exception e) {
-            handler.instructionFailed(e);
-        } finally {
-            handler.afterInstructionFinished();
-        }
+    public ResultType call() throws Exception {
+        return computeResult();
     }
 
     protected abstract ResultType computeResult() throws Exception;
@@ -70,7 +58,7 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
     
     @Override
     public int compareTo(ProcessorInstruction<?> instruction) {
-        return Integer.compare(getPriority(), instruction.getPriority());
+        return Integer.compare(priority, instruction.getPriority());
     }
 
 }

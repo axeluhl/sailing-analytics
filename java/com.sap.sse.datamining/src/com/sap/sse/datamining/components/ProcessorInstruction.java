@@ -1,6 +1,8 @@
 package com.sap.sse.datamining.components;
 
-public interface ProcessorInstruction<ResultType> extends Runnable, Comparable<ProcessorInstruction<?>> {
+import java.util.concurrent.Callable;
+
+public interface ProcessorInstruction<ResultType> extends Callable<ResultType>, Comparable<ProcessorInstruction<?>> {
 
     public int getPriority();
 
