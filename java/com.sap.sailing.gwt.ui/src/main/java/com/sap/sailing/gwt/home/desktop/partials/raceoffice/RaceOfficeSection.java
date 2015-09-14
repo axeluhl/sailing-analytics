@@ -8,7 +8,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 
 public class RaceOfficeSection extends Widget {
 
@@ -31,7 +30,6 @@ public class RaceOfficeSection extends Widget {
         anchor.setTarget("_blank");
         anchor.setHref(url);
         anchor.addClassName(local_res.css().raceoffice_link());
-        anchor.addClassName(SharedResources.INSTANCE.mainCss().buttonarrowrightwhite());
         linkContainerUi.appendChild(anchor);
     }
 
