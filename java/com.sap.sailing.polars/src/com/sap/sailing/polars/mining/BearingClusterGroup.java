@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -15,21 +14,18 @@ import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
 import com.sap.sse.datamining.impl.data.ComparatorClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
-import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class BearingClusterGroup extends FixClusterGroup<Bearing> {
 
-    private static final long serialVersionUID = -3810975212669767738L;
-
     public BearingClusterGroup(int startAngle, int endAngle, int clusterSize) {
-        super("", createClusters(startAngle, endAngle, clusterSize));
+        super(createClusters(startAngle, endAngle, clusterSize));
     }
 
     private static Collection<Cluster<Bearing>> createClusters(int startAngle, int endAngle, int clusterSize) {
         int numberOfClusters = (endAngle - startAngle) / clusterSize;
         List<Cluster<Bearing>> clusters = new ArrayList<Cluster<Bearing>>();
         for (int i = 0; i < numberOfClusters; i++) {
-            clusters.add(new ClusterWithLowerAndUpperBoundaries<Bearing>("", createBoundary(startAngle + i
+            clusters.add(new ClusterWithLowerAndUpperBoundaries<Bearing>(createBoundary(startAngle + i
                     * clusterSize, ComparisonStrategy.GREATER_THAN), createBoundary(startAngle + (i + 1) * clusterSize,
                     ComparisonStrategy.LOWER_EQUALS_THAN)));
         }
@@ -40,11 +36,6 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing> {
         Bearing angle = new DegreeBearingImpl(angleInDeg);
         Comparator<Bearing> comparator = new BearingComparator();
         return new ComparatorClusterBoundary<Bearing>(angle, strategy, comparator);
-    }
-
-    @Override
-    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
-        return "";
     }
 
     private static class BearingComparator implements Comparator<Bearing>, Serializable {
