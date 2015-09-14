@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard;
+package com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard;
 
 import java.util.Date;
 
@@ -63,7 +63,6 @@ public class OldMultiLeaderboard extends Composite {
     public OldMultiLeaderboard(OldMultiLeaderboardDelegate delegate) {
         this.multiLeaderboardPanel = null;
         EventRegattaLeaderboardResources.INSTANCE.css().ensureInjected();
-        OldMultiLeaderboardResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());

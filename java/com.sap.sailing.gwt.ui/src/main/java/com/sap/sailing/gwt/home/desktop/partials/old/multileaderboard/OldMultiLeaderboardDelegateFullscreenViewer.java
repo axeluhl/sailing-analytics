@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard;
+package com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard;
 
-import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard.OldMultiLeaderboardDelegate;
 import com.sap.sailing.gwt.home.desktop.partials.old.AbstractLeaderboardFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLeaderboard.OldMultiLeaderboardDelegate;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 
 public class OldMultiLeaderboardDelegateFullscreenViewer extends

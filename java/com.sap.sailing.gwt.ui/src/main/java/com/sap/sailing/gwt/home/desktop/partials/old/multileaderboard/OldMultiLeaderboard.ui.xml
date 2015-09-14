@@ -3,7 +3,6 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
-    <ui:with field="local_res2" type="com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboardResources" />
 	<g:HTMLPanel styleName=" {local_res.css.marginFix}">
 		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
@@ -26,7 +25,7 @@
 				<table class="{local_res.css.regattaleaderboard_table}">
 					<tr>
 						<td>
-							<g:HTMLPanel ui:field="oldMultiLeaderboardPanel" styleName="{local_res2.css.oldMultiLeaderboardPanel}"></g:HTMLPanel>
+							<g:HTMLPanel ui:field="oldMultiLeaderboardPanel"></g:HTMLPanel>
 						</td>
 					</tr>
 				</table>
