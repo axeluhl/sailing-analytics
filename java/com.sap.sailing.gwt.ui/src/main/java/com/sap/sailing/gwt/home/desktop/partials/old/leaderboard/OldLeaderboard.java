@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldleaderboard;
+package com.sap.sailing.gwt.home.desktop.partials.old.leaderboard;
 
 import java.util.Date;
 

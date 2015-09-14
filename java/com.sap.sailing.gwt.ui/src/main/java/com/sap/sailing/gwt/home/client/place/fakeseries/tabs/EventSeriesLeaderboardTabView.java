@@ -10,10 +10,10 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboardDelegateFullscreenViewer;
-import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesView;
+import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
+import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 

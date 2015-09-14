@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.home.client.place.event.oldleaderboard;
+package com.sap.sailing.gwt.home.desktop.partials.old.leaderboard;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.gwt.home.client.place.event.oldleaderboard.OldLeaderboard.OldLeaderboardDelegate;
 import com.sap.sailing.gwt.home.desktop.partials.old.AbstractLeaderboardFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard.OldLeaderboardDelegate;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 public class OldLeaderboardDelegateFullscreenViewer extends AbstractLeaderboardFullscreenViewer<LeaderboardPanel>
