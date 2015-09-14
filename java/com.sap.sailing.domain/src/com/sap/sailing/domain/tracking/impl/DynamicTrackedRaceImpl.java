@@ -830,6 +830,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void setBoatForCompetitor(Competitor competitor, Boat boat) {
-        boatsForCompetitor.put(competitor, boat);        
+        super.setBoatForCompetitor(competitor, boat);
     }
 }

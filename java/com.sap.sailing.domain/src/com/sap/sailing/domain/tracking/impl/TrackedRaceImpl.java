@@ -258,7 +258,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
 
-    protected final Map<Competitor, Boat> boatsForCompetitor;
+    private final Map<Competitor, Boat> boatsForCompetitor;
 
     /**
      * The mark passing sets used as values are ordered by time stamp.
@@ -3115,6 +3115,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else if (oldStatus == TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
             resumeAllCachesNotUpdatingWhileLoading();
         }
+    }
+
+    protected void setBoatForCompetitor(Competitor competitor, Boat boat) {
+        boatsForCompetitor.put(competitor, boat);        
     }
 
     private void suspendAllCachesNotUpdatingWhileLoading() {
