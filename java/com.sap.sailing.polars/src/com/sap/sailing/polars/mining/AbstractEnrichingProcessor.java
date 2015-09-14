@@ -18,7 +18,7 @@ public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends 
 
     @Override
     protected ProcessorInstruction<ResultType> createInstruction(final InputType element) {
-        return new AbstractProcessorInstruction<ResultType>() {
+        return new AbstractProcessorInstruction<ResultType>(this) {
 
             @Override
             public ResultType computeResult() {

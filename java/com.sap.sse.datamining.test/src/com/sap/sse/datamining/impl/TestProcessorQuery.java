@@ -173,7 +173,7 @@ public class TestProcessorQuery {
                                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(final Iterable<Number> element) {
-                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>() {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             public Map<GroupKey, Double> computeResult() {
                                 Map<GroupKey, Double> result = new HashMap<>();
@@ -247,7 +247,7 @@ public class TestProcessorQuery {
                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
-                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>() {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {
                                 throw new RejectedExecutionException("This should cause an error during the query processing");
@@ -287,7 +287,7 @@ public class TestProcessorQuery {
                                                                                     resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
-                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>() {
+                        return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
                             @Override
                             protected Map<GroupKey, Double> computeResult() throws Exception {
                                 throw new NullPointerException("This should cause a failure during the query processing");

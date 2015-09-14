@@ -40,7 +40,7 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
             @Override
             protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
-                return new AbstractProcessorInstruction<Integer>() {
+                return new AbstractProcessorInstruction<Integer>(this) {
                     @Override
                     public Integer computeResult() {
                         return element;

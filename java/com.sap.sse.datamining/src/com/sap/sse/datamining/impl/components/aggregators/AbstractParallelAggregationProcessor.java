@@ -29,7 +29,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
 
     @Override
     protected AbstractProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
-        return new AbstractProcessorInstruction<AggregatedType>(ProcessorInstructionPriority.Aggregation) {
+        return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
             public AggregatedType computeResult() {
                 writeLock.lock();
