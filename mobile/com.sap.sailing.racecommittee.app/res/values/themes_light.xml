@@ -60,6 +60,7 @@
         <item name="floatLabel">@style/AppTheme.Light.Text.FloatLabel</item>
 
         <!-- drawables -->
+        <item name="access_time_24dp">@drawable/ic_access_time_black_24dp</item>
         <item name="access_time_36dp">@drawable/ic_access_time_black_36dp</item>
         <item name="arrow_down">@drawable/arrow_down_light</item>
         <item name="arrow_down_large">@drawable/arrow_down_large_light</item>

@@ -11,10 +11,10 @@
         android:id="@+id/timer_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/side_padding"
+        android:layout_marginTop="@dimen/default_margin"
         android:gravity="center"
         android:textColor="?white"
-        android:textSize="@dimen/textSize_32"
+        android:textSize="@dimen/textSize_40"
         tools:text="@string/time"/>
 
     <ImageView
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/side_padding"
+        android:layout_marginBottom="@dimen/default_margin"
         android:baselineAligned="false"
         android:orientation="horizontal">
 
@@ -42,32 +42,33 @@
                 android:id="@+id/time_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textAppearance="?textSmall"
                 tools:text="@string/time_start"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="6dp"
+                android:layout_marginRight="@dimen/default_margin_half"
                 android:layout_toLeftOf="@+id/time_start"
+                android:layout_toStartOf="@+id/time_start"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/time_start_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:src="?lock_outline"
                     android:visibility="gone"
                     tools:visibility="visible"/>
 
                 <ImageView
                     android:id="@+id/linked_race"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:src="?link_24dp"
                     android:visibility="gone"
@@ -87,11 +88,11 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:layout_centerVertical="true"
-                android:drawableLeft="?access_time_24dp"
-                android:drawablePadding="6dp"
+                android:drawableLeft="?access_time_36dp"
+                android:drawablePadding="@dimen/default_padding_half"
+                android:drawableStart="?access_time_36dp"
                 android:gravity="center"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textAppearance="?textSmall"
                 android:visibility="invisible"
                 tools:text="@string/time"
                 tools:visibility="visible"/>
@@ -110,8 +111,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:text="@string/time_finish"
-                android:textColor="?white"
-                android:textSize="@dimen/textSize_18"
+                android:textAppearance="?textSmall"
                 android:visibility="invisible"
                 tools:visibility="visible"/>
         </RelativeLayout>

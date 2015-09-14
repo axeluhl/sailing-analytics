@@ -5,5 +5,6 @@
     <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_hor</item>
     <item name="race_main" type="layout">@layout/race_main_small</item>
     <item name="race_panel_flags" type="layout">@layout/race_panel_flags_small</item>
+    <item name="race_panel_setup" type="layout">@layout/race_panel_setup_large</item>
 
 </resources>
