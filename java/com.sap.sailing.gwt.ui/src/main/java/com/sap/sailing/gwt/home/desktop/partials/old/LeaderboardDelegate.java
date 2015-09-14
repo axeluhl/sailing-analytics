@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldleaderboards;
+package com.sap.sailing.gwt.home.desktop.partials.old;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.CloseHandler;
