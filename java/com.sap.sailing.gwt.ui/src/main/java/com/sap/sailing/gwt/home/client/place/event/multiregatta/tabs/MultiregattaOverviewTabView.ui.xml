@@ -1,10 +1,9 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
-        	 xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'
-  			 xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview">
+        	 xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
   	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <g:HTMLPanel>
-    <o:EventOverviewStage ui:field="stageUi" />
+    <dp:eventstage.EventOverviewStage ui:field="stageUi" />
     <div class="{res.mediaCss.grid}" ui:field="newContentContainerUi">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
         <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />

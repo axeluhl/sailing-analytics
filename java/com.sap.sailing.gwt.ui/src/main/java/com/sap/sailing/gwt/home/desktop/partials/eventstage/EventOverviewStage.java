@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.overview;
+package com.sap.sailing.gwt.home.desktop.partials.eventstage;
 
 import java.util.List;
 
