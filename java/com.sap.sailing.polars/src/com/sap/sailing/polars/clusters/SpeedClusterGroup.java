@@ -14,8 +14,6 @@ import com.sap.sse.datamining.impl.data.FixClusterGroup;
 
 public class SpeedClusterGroup extends FixClusterGroup<Speed> {
     
-    private static final long serialVersionUID = -3428022721991223921L;
-
     /**
      * A {@link SpeedClusterGroup} lets the user set the level mids for all its clusters. The Boundaries will
      * automatically be determined. They are in the middle between each level mid but only if the distance between level
@@ -28,8 +26,8 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
      * @param maxDistanceInKnots
      *            the clusters will max span <-maxDistanceInKnots-|mid|-maxDistanceinKnots->
      */
-    public SpeedClusterGroup(String messageKey, double[] levelMidsInKnots, double maxDistanceInKnots) {
-        super(messageKey, createClustersForLevelMids(levelMidsInKnots, maxDistanceInKnots));
+    public SpeedClusterGroup(double[] levelMidsInKnots, double maxDistanceInKnots) {
+        super(createClustersForLevelMids(levelMidsInKnots, maxDistanceInKnots));
     }
 
     private static Collection<Cluster<Speed>> createClustersForLevelMids(double[] levelMidsInKnots,
@@ -38,8 +36,7 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
         for (int index = 0; index < levelMidsInKnots.length; index++) {
             ClusterBoundary<Speed> lowerBoundary = createLowerBoundary(levelMidsInKnots, maxDistanceInKnots, index);
             ClusterBoundary<Speed> upperBoundary = createUpperBoundary(levelMidsInKnots, maxDistanceInKnots, index);
-            Cluster<Speed> cluster = new ClusterWithLowerAndUpperBoundaries<Speed>(levelMidsInKnots[index] + "kn", lowerBoundary,
-                    upperBoundary);
+            Cluster<Speed> cluster = new ClusterWithLowerAndUpperBoundaries<Speed>(lowerBoundary, upperBoundary);
             clusterList.add(cluster);
         }
         return clusterList;
