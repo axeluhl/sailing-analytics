@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts;
+package com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts;
 
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.shared.HandlerRegistration;

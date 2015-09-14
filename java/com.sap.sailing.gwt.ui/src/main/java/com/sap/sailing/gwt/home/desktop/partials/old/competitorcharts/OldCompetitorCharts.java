@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts;
+package com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts;
 
 import java.util.ArrayList;
 import java.util.List;
