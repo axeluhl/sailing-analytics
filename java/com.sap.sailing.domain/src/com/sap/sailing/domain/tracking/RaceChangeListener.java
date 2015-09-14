@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
@@ -39,6 +40,8 @@ public interface RaceChangeListener extends CourseListener {
     void endOfTrackingChanged(TimePoint endOfTracking);
     
     void startTimeReceivedChanged(TimePoint startTimeReceived);
+    
+    void competitorToBoatAssigmentChanged(Competitor competitor, Boat boat);
     
     /**
      * Fired when the {@link TrackedRace#getStartOfRace() start of race} time point has changed for the tracked race

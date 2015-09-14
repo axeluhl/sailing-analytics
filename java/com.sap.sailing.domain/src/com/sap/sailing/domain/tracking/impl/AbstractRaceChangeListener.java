@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -113,5 +114,9 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         defaultAction();
     }
-    
+
+    @Override
+    public void competitorToBoatAssigmentChanged(Competitor competitor, Boat boat) {
+        defaultAction();
+    }
 }

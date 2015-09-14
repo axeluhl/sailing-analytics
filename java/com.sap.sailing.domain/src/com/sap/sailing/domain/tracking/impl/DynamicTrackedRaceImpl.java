@@ -410,6 +410,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
     }
 
+    private void notifyListenersCompetitorToBoatAssignmentChanged(Competitor competitor, Boat boat) {
+        notifyListeners(listener -> listener.competitorToBoatAssigmentChanged(competitor, boat));
+    }
+
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         notifyListeners(listener -> listener.waypointAdded(zeroBasedIndex, waypointThatGotAdded));
     }
@@ -831,5 +835,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void setBoatForCompetitor(Competitor competitor, Boat boat) {
         super.setBoatForCompetitor(competitor, boat);
+        notifyListenersCompetitorToBoatAssignmentChanged(competitor, boat);
     }
 }
