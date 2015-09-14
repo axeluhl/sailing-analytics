@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.events;
+package com.sap.sailing.gwt.home.shared.utils;
 
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.Scheduler;
