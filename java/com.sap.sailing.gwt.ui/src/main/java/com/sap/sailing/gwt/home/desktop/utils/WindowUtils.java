@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.utils;
+package com.sap.sailing.gwt.home.desktop.utils;
 
 import com.google.gwt.user.client.Window;
 

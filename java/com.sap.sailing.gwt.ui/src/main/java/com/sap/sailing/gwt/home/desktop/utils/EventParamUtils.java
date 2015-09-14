@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.utils;
+package com.sap.sailing.gwt.home.desktop.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,19 +26,6 @@ public class EventParamUtils {
                     parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
         } else {
             result = null;
-        }
-        return result;
-    }
-
-    public static List<DetailType> getDetailTypeListFromParamValue(List<String> list) {
-        List<DetailType> result = new ArrayList<DetailType>();
-        if (list != null) {
-            for (String entry : list) {
-                try {
-                    result.add(DetailType.valueOf(entry));
-                } catch (IllegalArgumentException e) {
-                }
-            }
         }
         return result;
     }
@@ -125,8 +112,21 @@ public class EventParamUtils {
         }
         return result;
     }
+    
+    private static List<DetailType> getDetailTypeListFromParamValue(List<String> list) {
+        List<DetailType> result = new ArrayList<DetailType>();
+        if (list != null) {
+            for (String entry : list) {
+                try {
+                    result.add(DetailType.valueOf(entry));
+                } catch (IllegalArgumentException e) {
+                }
+            }
+        }
+        return result;
+    }
 
-    public static List<String> getStringListFromParamValue(List<String> list) {
+    private static List<String> getStringListFromParamValue(List<String> list) {
         List<String> result = new ArrayList<String>();
         if (list != null) {
             result.addAll(list);
