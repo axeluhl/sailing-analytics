@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.events.upcoming;
+package com.sap.sailing.gwt.home.desktop.partials.eventsupcoming;
 
 import java.util.ArrayList;
 import java.util.List;

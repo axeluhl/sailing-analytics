@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.events.upcoming;
+package com.sap.sailing.gwt.home.desktop.partials.eventsupcoming;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -7,7 +7,7 @@ import com.google.gwt.resources.client.CssResource;
 public interface EventsOverviewUpcomingResources extends ClientBundle {
     public static final EventsOverviewUpcomingResources INSTANCE = GWT.create(EventsOverviewUpcomingResources.class);
 
-    @Source("com/sap/sailing/gwt/home/client/place/events/upcoming/EventsOverviewUpcoming.gss")
+    @Source("EventsOverviewUpcoming.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {
