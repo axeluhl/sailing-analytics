@@ -14,6 +14,8 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
     
     private ArrayList<DataRetrieverLevelDTO> retrieverLevels;
 
+    private boolean settingsHaveChanged = false;
+
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
      */
@@ -126,6 +128,15 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
 
     public void setSettings(Settings newSettings) {
         settings = newSettings;
+        settingsHaveChanged = true;
+    }
+
+    public boolean settingsHaveChanged() {
+        return settingsHaveChanged ;
+    }
+
+    public void resetSettingsChangeFlag() {
+        settingsHaveChanged = false;
     }
     
 }

@@ -7,12 +7,14 @@ import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.polars.datamining.components.PolarCompetitorRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarFleetRetrievalProcessor;
+import com.sap.sailing.polars.datamining.components.PolarGPSFixRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarLeaderboardGroupRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarLeaderboardRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarLegRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarRaceColumnRetrievalProcessor;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
+import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
@@ -27,8 +29,8 @@ public class PolarsDataRetrievalChainDefinitions {
     
     public PolarsDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
-        DataRetrieverChainDefinition<RacingEventService, HasCompetitorPolarContext, ?> definition1 = new DataRetrieverChainDefinitionWithSettings<RacingEventService, HasCompetitorPolarContext, PolarSheetGenerationSettings>(
-                RacingEventService.class, HasCompetitorPolarContext.class, "PolarChain1",
+        DataRetrieverChainDefinition<RacingEventService, HasGPSFixPolarContext, ?> definition1 = new DataRetrieverChainDefinitionWithSettings<RacingEventService, HasGPSFixPolarContext, PolarSheetGenerationSettings>(
+                RacingEventService.class, HasGPSFixPolarContext.class, "PolarChain1",
                 PolarSheetGenerationSettingsImpl.createStandardPolarSettings());
         definition1.startWith(PolarLeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupPolarContext.class,
                 "LeaderboardGroup");
@@ -40,8 +42,10 @@ public class PolarsDataRetrievalChainDefinitions {
                 HasFleetPolarContext.class, "Fleet");
         definition1.addAfter(PolarFleetRetrievalProcessor.class, PolarLegRetrievalProcessor.class,
                 HasLegPolarContext.class, "Leg");
-        definition1.endWith(PolarLegRetrievalProcessor.class, PolarCompetitorRetrievalProcessor.class,
+        definition1.addAfter(PolarLegRetrievalProcessor.class, PolarCompetitorRetrievalProcessor.class,
                 HasCompetitorPolarContext.class, "Competitor");
+        definition1.endWith(PolarCompetitorRetrievalProcessor.class, PolarGPSFixRetrievalProcessor.class,
+                HasGPSFixPolarContext.class, "GPSFix");
         dataRetrieverChainDefinitions.add(definition1);
     }
 

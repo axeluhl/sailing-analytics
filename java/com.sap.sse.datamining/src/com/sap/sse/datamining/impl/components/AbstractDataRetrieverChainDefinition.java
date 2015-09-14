@@ -143,7 +143,7 @@ public abstract class AbstractDataRetrieverChainDefinition<DataSourceType, DataT
             throw new IllegalStateException("This retriever chain definition hasn't been completed yet");
         }
         
-        return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
+        return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation, hasSettings() ? getSettings() : null);
     }
     
     @Override

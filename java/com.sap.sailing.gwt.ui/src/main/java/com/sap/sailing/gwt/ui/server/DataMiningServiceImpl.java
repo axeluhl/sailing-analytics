@@ -131,6 +131,9 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, String localeInfoName) {
         DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        if (dataRetrieverChainDefinitionDTO.hasSettings()) {
+            dataRetrieverChainDefinition.setSettings(dataRetrieverChainDefinitionDTO.getSettings());
+        }
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = getDataMiningServer()
                 .getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         return dimensionsMappedByLevelAsDTOs(reducedDimensions, localeInfoName);

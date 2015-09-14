@@ -50,4 +50,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> extend
 
     }
 
+    @Override
+    public void setSettings(SerializableSettings settings) {}
+
 }

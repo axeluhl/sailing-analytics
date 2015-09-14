@@ -16,8 +16,9 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -190,6 +191,18 @@ public class CubicRegressionPerCourseProcessor implements
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public SerializableSettings getSettings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setSettings(SerializableSettings settings) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

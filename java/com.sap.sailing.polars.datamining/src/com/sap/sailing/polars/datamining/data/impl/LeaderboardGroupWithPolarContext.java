@@ -15,5 +15,4 @@ public class LeaderboardGroupWithPolarContext implements HasLeaderboardGroupPola
     public LeaderboardGroup getLeaderboardGroup() {
         return leaderboardGroup;
     }
-
 }

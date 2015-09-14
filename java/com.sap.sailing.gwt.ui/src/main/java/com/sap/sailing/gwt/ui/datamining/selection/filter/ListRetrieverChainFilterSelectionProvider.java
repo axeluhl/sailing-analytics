@@ -123,6 +123,9 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             } else if (!isAwaitingReload) {
                 clearContent();
             }
+        } else if (retrieverChain != null && retrieverChain.settingsHaveChanged() && !isAwaitingReload) {
+            updateRetrievalLevels();
+            retrieverChain.resetSettingsChangeFlag();
         }
     }
 

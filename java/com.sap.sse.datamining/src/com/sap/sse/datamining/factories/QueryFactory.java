@@ -142,6 +142,9 @@ public class QueryFactory {
                 }
                 for (Processor<?, ?> groupingExtractor : processorFactory.createGroupingExtractorsForDimensions(
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {
+                    if (dataRetrieverChainDefinition.hasSettings()) {
+                        groupingExtractor.setSettings(dataRetrieverChainDefinition.getSettings());
+                    }
                     chainBuilder.addResultReceiver(groupingExtractor);
                 }
                 

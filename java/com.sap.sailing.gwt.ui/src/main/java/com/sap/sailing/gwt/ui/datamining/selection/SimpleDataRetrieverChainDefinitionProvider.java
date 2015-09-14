@@ -221,6 +221,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     @Override
     public void updateSettings(SerializableSettings newSettings) { 
         getDataRetrieverChainDefinition().setSettings(newSettings);
+        notifyListeners();
     }
 
 }

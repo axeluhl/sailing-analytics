@@ -129,4 +129,6 @@ public interface DataRetrieverChainDefinition<DataSourceType, DataType, Settings
     
     public SerializableSettings getSettings();
 
+    public void setSettings(SerializableSettings settings);
+
 }

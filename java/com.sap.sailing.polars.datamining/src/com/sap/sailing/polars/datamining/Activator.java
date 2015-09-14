@@ -10,6 +10,7 @@ import com.sap.sailing.datamining.RacingEventServiceProvider;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
+import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
@@ -74,6 +75,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         internalClasses.add(HasFleetPolarContext.class);
         internalClasses.add(HasCompetitorPolarContext.class);
         internalClasses.add(HasLegPolarContext.class);
+        internalClasses.add(HasGPSFixPolarContext.class);
         return internalClasses;
     }
 

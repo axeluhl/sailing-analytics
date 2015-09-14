@@ -14,6 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.AdditionalQueryData;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
@@ -329,6 +330,18 @@ public abstract class ProcessorQuery<ResultType, DataSourceType> implements Quer
         @Override
         public Class<Void> getResultType() {
             return Void.class;
+        }
+
+        @Override
+        public SerializableSettings getSettings() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void setSettings(SerializableSettings settings) {
+            // TODO Auto-generated method stub
+            
         }
         
     }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -24,6 +25,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     private final Map<Integer, FilterCriterion<?>> filters;
     private final Map<Integer, Collection<Processor<?, ?>>> receivers;
     private int currentRetrieverTypeIndex;
+    private final SerializableSettings settings;
 
     /**
      * Creates a data retriever chain builder for the given list of {@link DataRetrieverLevel}.</br>
@@ -42,7 +44,9 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
      * @param dataRetrieverTypesWithInformation
      */
     SimpleDataRetrieverChainBuilder(ExecutorService executor,
-            List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation) {
+            List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation,
+            SerializableSettings settings) {
+        this.settings = settings;
         this.executor = executor;
         this.dataRetrieverTypesWithInformation = new ArrayList<>(dataRetrieverTypesWithInformation);
         
@@ -178,7 +182,11 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                 // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
                 retrieverConstructor.setAccessible(true);
             }
-            return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
+            Processor<?, ResultType> newRetriever = retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
+            if (settings != null) {
+                newRetriever.setSettings(settings);
+            }
+            return newRetriever;
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "

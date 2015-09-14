@@ -1,12 +1,14 @@
-package com.sap.sailing.polars.clusters;
+package com.sap.sailing.polars.datamining.data.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
@@ -81,5 +83,17 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
                 ComparisonStrategy.GREATER_EQUALS_THAN);
         return lowerBoundary;
     }
+    
+    public static ClusterGroup<Speed> createSpeedClusterGroupFrom(WindSpeedSteppingWithMaxDistance windStepping) {
+        double maxDistance = windStepping.getMaxDistance();
+        double[] rawIntegerStepping = windStepping.getRawStepping();
+        double[] rawDoubleLevelMids = new double[rawIntegerStepping.length];
+        for (int i = 0; i < rawIntegerStepping.length; i++) {
+            rawDoubleLevelMids[i] = rawIntegerStepping[i];
+        }
+
+        return new SpeedClusterGroup("SpeedClusterGroup", rawDoubleLevelMids, maxDistance);
+    }
+
 
 }

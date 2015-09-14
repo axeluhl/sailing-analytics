@@ -1,5 +1,7 @@
 package com.sap.sse.datamining.components;
 
+import com.sap.sse.common.settings.SerializableSettings;
+
 
 public interface Processor<InputType, ResultType> {
     
@@ -50,5 +52,9 @@ public interface Processor<InputType, ResultType> {
      *         construct the additional data of the executed processor chain. 
      */
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder);
+    
+    SerializableSettings getSettings();
+    
+    void setSettings(SerializableSettings settings);
 
 }
