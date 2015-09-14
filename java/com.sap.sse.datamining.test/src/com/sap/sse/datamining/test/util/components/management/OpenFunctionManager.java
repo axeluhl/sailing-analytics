@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.test.util;
+package com.sap.sse.datamining.test.util.components.management;
 
 import java.util.Collection;
 

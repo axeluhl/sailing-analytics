@@ -27,8 +27,8 @@ import com.sap.sse.datamining.test.data.Test_HasRaceContext;
 import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
-import com.sap.sse.datamining.test.util.OpenFunctionManager;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.components.management.OpenFunctionManager;
 
 
 public class TestFunctionManagerAsFunctionRegistry {
