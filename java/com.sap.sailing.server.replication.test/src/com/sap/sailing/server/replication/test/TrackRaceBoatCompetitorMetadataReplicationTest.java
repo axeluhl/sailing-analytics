@@ -1,0 +1,169 @@
+package com.sap.sailing.server.replication.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.replication.OperationExecutionListener;
+import com.sap.sse.replication.OperationWithResult;
+
+public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServerReplicationTest {
+    private TrackedRace masterTrackedRace;
+    private RegattaAndRaceIdentifier raceIdentifier;
+    private RaceHandle racesHandle;
+    private final boolean[] notifier = new boolean[1];
+    private RaceTrackingConnectivityParameters trackingParams;
+
+    @Test
+    public void testTearDownIsNotBeingCalledWhenSetUpFailsWithAnException() {
+        // no-op
+    }
+    
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        URL paramURL = new URL("http://event.tractrac.com/events/event_20150818_Bundesliga/4c54e750-27c2-0133-5064-60a44ce903c3.txt");
+        URI liveURI = AbstractTracTracLiveTest.getLiveURI();
+        URI storedURI = AbstractTracTracLiveTest.getStoredURI();
+        URI courseDesignUpdateURI = AbstractTracTracLiveTest.getCourseDesignUpdateURI();
+        String tracTracUsername = AbstractTracTracLiveTest.getTracTracUsername();
+        String tracTracPassword = AbstractTracTracLiveTest.getTracTracPassword();
+        GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        cal.set(2015, 8, 22, 9, 23, 57);
+        MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
+        cal.set(2015, 8, 22, 15, 26, 34);
+        MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(cal.getTimeInMillis());
+        master.addOperationExecutionListener(new OperationExecutionListener<RacingEventService>() {
+            @Override
+            public <T> void executed(OperationWithResult<RacingEventService, T> operation) {
+                if (operation instanceof CreateTrackedRace) {
+                    synchronized (notifier) {
+                        notifier[0] = true;
+                        notifier.notifyAll();
+                    }
+                }
+            }
+        });
+        trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
+                .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
+                        startOfTracking, endOfTracking, /* delayToLiveInMillis */
+                        0l, /* simulateWithStartTimeNow */false, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
+    }
+
+    private void startTracking() throws Exception, InterruptedException {
+        startTrackingOnMaster();
+        waitForTrackRaceReplicationTrigger();
+        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifiers().iterator().next();
+        masterTrackedRace = master.getTrackedRace(raceIdentifier);
+    }
+
+    private void startTrackingOnMaster() throws Exception {
+        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, /* timeoutInMilliseconds */ 60000);
+    }
+
+    private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {
+        while (!notifier[0]) {
+            synchronized (notifier) {
+                notifier.wait();
+            }
+        }
+        replicaReplicator.waitUntilQueueIsEmpty();
+    }
+    
+    @Test
+    public void testStartTrackingRaceReplication() throws Exception {
+        final String boat1CompetitorName = "CYC"; 
+        final String boat1Name = "Boot 1"; 
+        final String boat1Color = "#ff0000"; 
+
+        final String boat2CompetitorName = "SVI"; 
+        final String boat2Name = "Boot 2"; 
+        final String boat2Color = "#ffff00"; 
+
+        final String boat3CompetitorName = "BCCÜ"; 
+        final String boat3Name = "Boot 3"; 
+        final String boat3Color = "#ff00ff"; 
+        
+        startTracking();
+        Thread.sleep(5000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        assertNotNull(replicaTrackedRace);
+        
+        Iterable<Competitor> masterCompetitors = masterTrackedRace.getRace().getCompetitors();
+        Iterable<Competitor> replicaCompetitors = replicaTrackedRace.getRace().getCompetitors();
+        
+        assertNotSame(masterTrackedRace, replicaTrackedRace);
+        assertNotSame(masterTrackedRace.getRace(), replicaTrackedRace.getRace());
+        assertEquals(Util.size(masterCompetitors), 6);
+        assertEquals(Util.size(masterCompetitors), Util.size(replicaCompetitors));
+        
+        for (Competitor competitor : masterCompetitors) {
+            Competitor replicaCompetitor = findCompetitor(replicaCompetitors, competitor);
+            switch (competitor.getBoat().getSailID()) {
+                case boat1CompetitorName:
+                    compareBoatOfCompetitors(masterTrackedRace.resolveBoatOfCompetitor(competitor),
+                            replicaTrackedRace.resolveBoatOfCompetitor(replicaCompetitor), boat1Name, boat1Color);
+                    break;
+                case boat2CompetitorName:
+                    compareBoatOfCompetitors(masterTrackedRace.resolveBoatOfCompetitor(competitor),
+                            replicaTrackedRace.resolveBoatOfCompetitor(replicaCompetitor), boat2Name, boat2Color);
+                    break;
+                case boat3CompetitorName:
+                    compareBoatOfCompetitors(masterTrackedRace.resolveBoatOfCompetitor(competitor),
+                            replicaTrackedRace.resolveBoatOfCompetitor(replicaCompetitor), boat3Name, boat3Color);
+                    break;
+            }
+        }
+    }
+
+    private void compareBoatOfCompetitors(Boat masterBoat, Boat replicaBoat, String expectedBoatName, String expectedBoatColor) {
+        assertNotNull(masterBoat);
+        assertNotNull(replicaBoat);
+        assertEquals(masterBoat.getName(), replicaBoat.getName());
+        assertEquals(masterBoat.getColor(), replicaBoat.getColor());
+        assertEquals(replicaBoat.getName(), expectedBoatName);
+        assertEquals(replicaBoat.getColor().getAsHtml(), expectedBoatColor);
+    }        
+
+    private Competitor findCompetitor(Iterable<Competitor> competitors, Competitor otherCompetitor) {
+        for (Competitor competitor : competitors) {
+            if(competitor.getId().equals(otherCompetitor.getId())) {
+                return competitor;
+            }
+        }
+        return null;
+    }
+    
+    @After
+    @Override
+    public void tearDown() throws Exception {
+        if (racesHandle != null) {
+            racesHandle.getRaceTracker().stop(/* preemptive */ false);
+        }
+        super.tearDown();
+    }
+}
