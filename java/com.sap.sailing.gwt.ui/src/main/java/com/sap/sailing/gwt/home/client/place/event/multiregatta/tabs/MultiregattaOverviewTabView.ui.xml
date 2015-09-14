@@ -15,5 +15,6 @@
       </div>
     </div>
     <g:SimplePanel ui:field="content" />
+    <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
   </g:HTMLPanel>
 </ui:UiBinder>

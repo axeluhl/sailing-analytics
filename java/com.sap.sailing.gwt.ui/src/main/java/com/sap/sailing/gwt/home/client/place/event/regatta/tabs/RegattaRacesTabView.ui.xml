@@ -11,7 +11,7 @@
 			font-style: italic;
 		} 
     </ui:style>
-    <g:HTMLPanel ui:field="contentPanel">
+    <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
             <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
         </div>
@@ -26,5 +26,6 @@
             </g:FlowPanel>
         </div>
         <g:SimplePanel ui:field="oldContentContainer"/>
+        <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
     </g:HTMLPanel>
 </ui:UiBinder>

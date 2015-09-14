@@ -16,7 +16,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -35,6 +34,7 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnSet;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn;
+import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetitionSeries;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.ListNavigationAction;
@@ -88,7 +88,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
 
-    interface MyBinder extends UiBinder<HTMLPanel, RegattaRacesTabView> {
+    interface MyBinder extends UiBinder<Widget, RegattaRacesTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
@@ -102,6 +102,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @UiField SimplePanel oldContentContainer;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) RaceListContainer<RaceListRaceDTO> raceListContainerUi;
+    @UiField RaceOfficeSection raceOfficeSectionUi;
     private Navigation currentlySelectedTab = Navigation.SORT_LIST_FORMAT;
     private RefreshManager refreshManager;
     
@@ -122,6 +123,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         raceListContainerUi = new RaceListContainer<>(I18N.finishedRaces(), I18N.noFinishedRaces(), new RaceListFinishedRaces(currentPresenter));
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
+        raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {

@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshMa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
+import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
@@ -51,6 +52,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
+    @UiField RaceOfficeSection raceOfficeSectionUi;
     private Presenter currentPresenter;
 
     @Override
@@ -74,8 +76,9 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, true);
-        
         initWidget(ourUiBinder.createAndBindUi(this));
+        raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
+        
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
