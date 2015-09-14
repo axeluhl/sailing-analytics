@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.partials.header;
+package com.sap.sailing.gwt.home.desktop.partials.seriesheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
