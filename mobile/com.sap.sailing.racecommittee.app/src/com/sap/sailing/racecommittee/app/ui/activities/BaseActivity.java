@@ -29,7 +29,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        AppUtils.lockOrientation(this);
+        AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
 
         this.preferences = AppPreferences.on(getApplicationContext());
