@@ -19,6 +19,9 @@
 	* Create a `ResourceBundleStringMessages` in the `DataMiningBundleService`
 		* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
 		* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
+* **[Optional]** It may be necessary to implement GWT specific components for the new Data Mining Bundle, like DTOs or a [Serialization Dummy](wiki/typical-data-mining-scenarios#Include-a-Type-forcefully-in-the-GWT-Serialization-Policy).
+	* This should be done in a separate bundle.
+	* See [Typical Development Scenarios](wiki/typical-development-scenarios#Adding-a-shared-GWT-library-bundle) for instructions, how to add a shared GWT bundle.
 
 ## Adding an absolute new Data Type
 
@@ -120,9 +123,14 @@ It can happen, that a necessary type isn't included in the GWT Serialization Pol
 
 * Create a dummy class in a shared bundle, if such a dummy class doesn't exist already in the scope of the type.
 	* For example like `SSEDataMiningSerializationDummy`.
-	* The class has to implement `Serializable` and should only have a private standard constructor, to prevent an accidental instantiation.
+	* The class has to implement the interface `SerializationDummy` and should only have a private standard constructor, to prevent an accidental instantiation.
+	* Implementing this interface adds the dummy automatically to the serialization policy, without changing the `DataMiningService`.
 * Add a private non-final instance variable of the type to the dummy.
-* Add a pseudo method to the GWT-Service, that uses the dummy class, if such a method doesn't exist already.
-	* For example like `SSEDataMiningSerializationDummy pseudoMethodSoThatSomeSSEDataMiningClassesAreAddedToTheGWTSerializationPolicy()`.
 
-The type will be included in the GWT Serialization Policy, because the GWT-Service has a method, that uses the dummy class, that uses the type.
+The type will be included in the GWT Serialization Policy, because the `DataMiningService` has a method, that uses the interface `SerializationDummy`, that uses the type.
+
+If you can't implement `SerializationDummy` for any reasons do the following:
+
+* Implement the interface `Serializable` or `IsSerializable` instead.
+* Add a pseudo method to the GWT-Service, that uses the dummy class.
+	* For example like `SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy()`.

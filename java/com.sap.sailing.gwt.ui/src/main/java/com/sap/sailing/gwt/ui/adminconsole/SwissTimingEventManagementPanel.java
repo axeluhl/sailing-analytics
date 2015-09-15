@@ -66,7 +66,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringConstants);
         this.errorReporter = errorReporter;
 
         VerticalPanel mainPanel = new VerticalPanel();

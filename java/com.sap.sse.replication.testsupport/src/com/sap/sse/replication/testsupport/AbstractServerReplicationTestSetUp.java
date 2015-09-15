@@ -115,7 +115,9 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
     }
 
     /**
-     * Calls {@link #persistenceSetUp(boolean)} first. 
+     * Calls {@link #persistenceSetUp(boolean)} first. Doesn't {@link
+     * ReplicationServiceImpl#registerReplica(ReplicaDescriptor) register the replica} yet with the master.
+     * 
      * @param master
      *            if not <code>null</code>, the value will be used for {@link #master}; otherwise, a new racing event
      *            service will be created as master
@@ -146,7 +148,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
-        masterReplicator.registerReplica(replicaDescriptor);
+        
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
@@ -281,6 +283,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             } else if (request.contains("REGISTER")) {
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
+                                masterReplicationService.registerReplica(replicaDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
                                 Channel channel = masterReplicationService.createMasterChannel();

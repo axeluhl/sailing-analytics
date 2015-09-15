@@ -3,9 +3,9 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -108,7 +108,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             if (extra_key != null) {
                 intent.putExtra(extra_key, extra_value);
             }
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            BroadcastManager.getInstance(getActivity()).addIntent(intent);
         }
     }
 

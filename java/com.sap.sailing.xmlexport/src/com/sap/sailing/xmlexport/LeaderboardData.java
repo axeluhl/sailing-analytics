@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -316,6 +317,40 @@ public class LeaderboardData extends ExportAction {
         boolean isDiscarded = leaderboard.isDiscarded(allCompetitors.get(0), column, race.getEndOfRace());
         addNamedElementWithValue(raceElement, "is_discarded_by_looking_at_first_competitor", isDiscarded == true ? "true" : "false");
         
+        long numberOfGPSFixes = 0, numberOfWindFixes = 0;
+        for (Competitor competitor : race.getRace().getCompetitors()) {
+            GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = race.getTrack(competitor);
+            competitorTrack.lockForRead();
+            try {
+                numberOfGPSFixes += Util.size(competitorTrack.getRawFixes());
+            } finally {
+                competitorTrack.unlockAfterRead();
+            }
+        }
+        for (Mark mark : race.getMarks()) {
+            GPSFixTrack<Mark, GPSFix> markTrack = race.getOrCreateTrack(mark);
+            markTrack.lockForRead();
+            try {
+                numberOfGPSFixes += Util.size(markTrack.getRawFixes());
+            } finally {
+                markTrack.unlockAfterRead();
+            }
+        }
+        for (WindSource windSource : race.getWindSources()) {
+            // don't count the "virtual" wind sources
+            if (windSource.canBeStored() || windSource.getType() == WindSourceType.RACECOMMITTEE) {
+                WindTrack windTrack = race.getOrCreateWindTrack(windSource);
+                windTrack.lockForRead();
+                try {
+                    numberOfWindFixes += Util.size(windTrack.getRawFixes());
+                } finally {
+                    windTrack.unlockAfterRead();
+                }
+            }
+        }        
+        addNamedElementWithValue(raceElement, "numberOfGPSFixes", numberOfGPSFixes);
+        addNamedElementWithValue(raceElement, "numberOfWindFixes", numberOfWindFixes);
+        
         // sort competitors according to their distance to the starboard side of the start line
         List<Competitor> allCompetitorsSortedByDistanceToStarboardSide = new ArrayList<Competitor>(allCompetitors.size());
         allCompetitorsSortedByDistanceToStarboardSide.addAll(allCompetitors);
@@ -411,9 +446,9 @@ public class LeaderboardData extends ExportAction {
 
             GPSFixTrack<Competitor, GPSFixMoving> gpsFixesForCompetitor = race.getTrack(competitor);
             if (gpsFixesForCompetitor != null) {
-                Duration averageIntervall = gpsFixesForCompetitor.getAverageIntervalBetweenFixes();
-                if (averageIntervall != null) {
-                    addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_outliers_removed_as_millis", averageIntervall.asMillis());
+                Duration averageInterval = gpsFixesForCompetitor.getAverageIntervalBetweenFixes();
+                if (averageInterval != null) {
+                    addNamedElementWithValue(competitorRaceDataElement, "average_interval_between_fixes_outliers_removed_as_millis", averageInterval.asMillis());
                 }
                 Duration averageIntervallRaw = gpsFixesForCompetitor.getAverageIntervalBetweenRawFixes();
                 if (averageIntervallRaw != null) {

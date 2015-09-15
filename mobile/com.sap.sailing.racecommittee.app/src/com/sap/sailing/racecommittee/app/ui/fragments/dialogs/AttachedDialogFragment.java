@@ -18,7 +18,7 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
 
     protected abstract AlertDialog.Builder createDialog(AlertDialog.Builder builder);
 
-    protected abstract DialogListenerHost getHost();
+    protected abstract DialogListenerHost getListenerHost();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -39,16 +39,16 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
     }
 
     protected void onNegativeButton() {
-        if (getHost() != null) {
-            getHost().getListener().onDialogNegativeButton(this);
+        if (getListenerHost() != null) {
+            getListenerHost().getListener().onDialogNegativeButton(this);
         } else {
             ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
     }
 
     protected void onPositiveButton() {
-        if (getHost() != null && getHost().getListener() != null) {
-            getHost().getListener().onDialogPositiveButton(this);
+        if (getListenerHost() != null && getListenerHost().getListener() != null) {
+            getListenerHost().getListener().onDialogPositiveButton(this);
         } else {
             ExLog.w(getActivity(), TAG, "Dialog host was null.");
         }
