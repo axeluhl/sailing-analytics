@@ -49,7 +49,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                 Iterable<GPSFixMoving> fixes = track.getFixes(startTime, true, finishTime, false);
 
                 for (GPSFixMoving fix : fixes) {
-                    result.add(new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup));
+                    result.add(new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor, settings));
                 }
             } finally {
                 track.unlockAfterRead();

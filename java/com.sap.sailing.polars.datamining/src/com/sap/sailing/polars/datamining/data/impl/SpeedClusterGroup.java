@@ -89,7 +89,7 @@ public class SpeedClusterGroup extends FixClusterGroup<Speed> {
             rawDoubleLevelMids[i] = rawIntegerStepping[i];
         }
 
-        return new SpeedClusterGroup("SpeedClusterGroup", rawDoubleLevelMids, maxDistance);
+        return new SpeedClusterGroup(rawDoubleLevelMids, maxDistance);
     }
 
 

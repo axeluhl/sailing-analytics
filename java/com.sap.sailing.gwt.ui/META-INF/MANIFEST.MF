@@ -48,7 +48,9 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.filestorage,
  org.apache.shiro.core;bundle-version="1.2.2",
  com.sap.sse.gwt.theme,
- com.sap.sailing.news
+ com.sap.sailing.news,
+ com.sap.sailing.polars.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.polars.datamining
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

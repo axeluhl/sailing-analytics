@@ -4,7 +4,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Statistic;
 
 public interface HasCompetitorPolarContext {
     
@@ -14,8 +13,5 @@ public interface HasCompetitorPolarContext {
     TrackedRace getTrackedRace();
     
     Leg getLeg();
-    
-    @Statistic(messageKey="PolarData")
-    PolarStatistic getPolarStatistics();
 
 }

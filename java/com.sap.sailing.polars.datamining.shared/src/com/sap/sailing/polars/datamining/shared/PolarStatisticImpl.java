@@ -1,0 +1,119 @@
+package com.sap.sailing.polars.datamining.shared;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
+
+public class PolarStatisticImpl implements PolarStatistic {
+
+    private final SpeedWithBearing boatSpeed;
+    private final Wind windSpeed;
+    private final double trueWindAngleDeg;
+
+    public PolarStatisticImpl(TrackedRace trackedRace, Competitor competitor, GPSFixMoving fix, PolarSheetGenerationSettings settings) {
+        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
+        Bearing bearing = boatSpeed.getBearing();
+
+        Position position = fix.getPosition();
+        this.windSpeed = trackedRace.getWind(position, fix.getTimePoint(), collectWindSourcesToIgnoreForSpeed(trackedRace));
+        Set<WindSource> windSourcesToExclude;
+        if (settings.useOnlyEstimatedForWindDirection()) {
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(trackedRace, /* exclude course based */true);
+        } else {
+            windSourcesToExclude = new HashSet<WindSource>();
+        }
+
+        Wind windEstimated = trackedRace.getWind(position, fix.getTimePoint(), windSourcesToExclude);
+        if (windEstimated == null) {
+            // no estimated wind; try to include course layout
+            windSourcesToExclude = collectWindSourcesToIgnoreForBearing(trackedRace, /* exclude course based */false);
+            windEstimated = trackedRace.getWind(position, fix.getTimePoint(), windSourcesToExclude);
+        }
+        if (windEstimated == null) {
+            windEstimated = windSpeed; // maybe no upwind start; need to default to measured wind speed/direction
+        }
+        Bearing windBearing = windEstimated.getFrom();
+        trueWindAngleDeg = bearing.getDifferenceTo(windBearing).getDegrees();
+    }
+    
+    @Override
+    public SpeedWithBearing getBoatSpeed() {
+        return boatSpeed;
+    }
+
+    @Override
+    public Speed getWindSpeed() {
+        return windSpeed;
+    }
+
+    @Override
+    public double getTrueWindAngleDeg() {
+        return trueWindAngleDeg;
+    }
+
+    private Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {
+        Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+        Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
+        for (WindSource combinedSource : combinedSources) {
+            windSourcesToExclude.add(combinedSource);
+        }
+        if (excludeCourseBased) {
+            Iterable<WindSource> courseSources = race.getWindSources(WindSourceType.COURSE_BASED);
+            for (WindSource courseSource : courseSources) {
+                windSourcesToExclude.add(courseSource);
+            }
+        }
+        Iterable<WindSource> expSources = race.getWindSources(WindSourceType.EXPEDITION);
+        for (WindSource expSource : expSources) {
+            windSourcesToExclude.add(expSource);
+        }
+        Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
+        for (WindSource rcSource : rcSources) {
+            windSourcesToExclude.add(rcSource);
+        }
+        Iterable<WindSource> webSources = race.getWindSources(WindSourceType.WEB);
+        for (WindSource webSource : webSources) {
+            windSourcesToExclude.add(webSource);
+        }
+        return windSourcesToExclude;
+    }
+    
+    private Set<WindSource> collectWindSourcesToIgnoreForSpeed(TrackedRace race) {
+        Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
+        Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
+        for (WindSource combinedSource : combinedSources) {
+            windSourcesToExclude.add(combinedSource);
+        }
+        Iterable<WindSource> courseSources = race.getWindSources(WindSourceType.COURSE_BASED);
+        for (WindSource courseSource : courseSources) {
+            windSourcesToExclude.add(courseSource);
+        }
+        Iterable<WindSource> trackBasedSources = race.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION);
+        for (WindSource trackBasedSource : trackBasedSources) {
+            windSourcesToExclude.add(trackBasedSource);
+        }
+        Iterable<WindSource> rcSources = race.getWindSources(WindSourceType.RACECOMMITTEE);
+        for (WindSource rcSource : rcSources) {
+            windSourcesToExclude.add(rcSource);
+        }
+        Iterable<WindSource> webSources = race.getWindSources(WindSourceType.WEB);
+        for (WindSource webSource : webSources) {
+            windSourcesToExclude.add(webSource);
+        }
+        return windSourcesToExclude;
+    }
+
+}
