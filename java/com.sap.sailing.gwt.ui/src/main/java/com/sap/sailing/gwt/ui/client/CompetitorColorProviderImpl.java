@@ -37,7 +37,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
         }
         // fallback
         if(result == null) {
-            competitorsColorMap.getColorByID(competitor); 
+            result = competitorsColorMap.getColorByID(competitor); 
         }
 
         return result;
