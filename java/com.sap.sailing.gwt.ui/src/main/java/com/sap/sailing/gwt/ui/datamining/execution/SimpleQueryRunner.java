@@ -28,12 +28,12 @@ public class SimpleQueryRunner implements QueryRunner {
 
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider queryDefinitionProvider;
-    private final ResultsPresenter resultsPresenter;
+    private final ResultsPresenter<Object> resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
-            ResultsPresenter resultsPresenter) {
+            ResultsPresenter<Object> resultsPresenter) {
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -63,14 +63,14 @@ public class SimpleQueryRunner implements QueryRunner {
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Number>(counter) {
+            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Object>(counter) {
                 @Override
                 protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
                 @Override
-                protected void handleSuccess(QueryResultDTO<Number> result) {
+                protected void handleSuccess(QueryResultDTO<Object> result) {
                     resultsPresenter.showResult(result);
                 }
             });

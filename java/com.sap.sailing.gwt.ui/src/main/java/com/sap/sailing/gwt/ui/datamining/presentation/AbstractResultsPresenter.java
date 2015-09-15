@@ -1,12 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -19,17 +12,12 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
-import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenter implements ResultsPresenterWithControls {
+public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenterWithControls<ResultType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
@@ -38,25 +26,17 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
     
     private final DockLayoutPanel mainPanel;
     private final HorizontalPanel controlsPanel;
-    private final ValueListBox<String> dataSelectionListBox;
-    private final DeckLayoutPanel presentationPanel;
+    protected final ValueListBox<String> dataSelectionListBox;
+    protected final DeckLayoutPanel presentationPanel;
     
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private final NumberDataProvider numberDataProvider;
-    private final Map<String, AbstractResultDataProvider<?>> dataProviders;
-    private AbstractResultDataProvider<?> currentDataProvider;
-    private QueryResultDTO<?> currentResult;
+    private QueryResultDTO<ResultType> currentResult;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
-        
-        numberDataProvider = new NumberDataProvider();
-        dataProviders = new HashMap<>();
-        AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
-        dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -84,8 +64,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowResult(resultValues);
+                onDataSelectionValueChange();
             }
         });
         addControl(dataSelectionListBox);
@@ -102,13 +81,15 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         showError(getStringMessages().runAQuery());
     }
     
+    abstract protected void onDataSelectionValueChange();
+
     @Override
     public void addControl(Widget controlWidget) {
         controlsPanel.add(controlWidget);
     }
     
     @Override
-    public void showResult(QueryResultDTO<?> result) {
+    public void showResult(QueryResultDTO<ResultType> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, false);
@@ -117,47 +98,18 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
             }
             
             this.currentResult = result;
-            currentDataProvider = selectCurrentDataProvider();
-            updateDataSelectionListBox();
-            if (currentDataProvider != null) {
-                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowResult(resultValues);
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        presentationPanel.onResize();
-                    }
-                });
-            } else {
-                showError(getStringMessages().cantDisplayDataOfType(getCurrentResult().getResultType()));
-            }
+            
+            internalShowResults(getCurrentResult());
+            
         } else {
             this.currentResult = null;
             showError(getStringMessages().noDataFound() + ".");
         }
     }
 
-    private AbstractResultDataProvider<?> selectCurrentDataProvider() {
-        if (numberDataProvider.acceptsResultsOfType(getCurrentResult().getResultType())) {
-            return numberDataProvider;
-        }
-        return dataProviders.get(getCurrentResult().getResultType());
-    }
-    
-    private void updateDataSelectionListBox() {
-        if (currentDataProvider == null) {
-            dataSelectionListBox.setAcceptableValues(Collections.<String>emptyList());
-        } else {
-            Collection<String> dataKeys = currentDataProvider.getDataKeys();
-            String keyToSelect = currentDataProvider.getDefaultDataKeyFor(getCurrentResult());
-            dataSelectionListBox.setValue(keyToSelect, false);
-            dataSelectionListBox.setAcceptableValues(dataKeys);
-        }
-    }
+    abstract protected void internalShowResults(QueryResultDTO<ResultType> result);
 
     protected abstract Widget getPresentationWidget();
-    
-    protected abstract void internalShowResult(Map<GroupKey, Number> resultValues);
 
     @Override
     public void showError(String error) {
@@ -196,7 +148,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
     }
     
     @Override
-    public QueryResultDTO<?> getCurrentResult() {
+    public QueryResultDTO<ResultType> getCurrentResult() {
         return currentResult;
     }
 

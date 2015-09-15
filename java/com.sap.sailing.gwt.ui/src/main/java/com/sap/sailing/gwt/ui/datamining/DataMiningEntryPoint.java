@@ -53,7 +53,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
 
-        ResultsPresenter resultsPresenter = new TabbedResultsPresenter(getStringMessages());
+        ResultsPresenter<Object> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
         splitPanel.addSouth(resultsPresenter.getWidget(), 350);
         
         splitPanel.add(selectionDockPanel);

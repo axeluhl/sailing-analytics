@@ -20,14 +20,14 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class TabbedResultsPresenter implements ResultsPresenter {
+public class TabbedResultsPresenter implements ResultsPresenter<Object> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final StringMessages stringMessages;
     
     private final ScrolledTabLayoutPanel tabPanel;
-    private final Map<Widget, ResultsPresenter> presentersMappedByHeader;
+    private final Map<Widget, ResultsPresenter<Object>> presentersMappedByHeader;
     
     public TabbedResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -63,7 +63,7 @@ public class TabbedResultsPresenter implements ResultsPresenter {
     }
 
     @Override
-    public void showResult(QueryResultDTO<?> result) {
+    public void showResult(QueryResultDTO<Object> result) {
         getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
     }
@@ -87,7 +87,7 @@ public class TabbedResultsPresenter implements ResultsPresenter {
     }
     
     @Override
-    public QueryResultDTO<?> getCurrentResult() {
+    public QueryResultDTO<? extends Object> getCurrentResult() {
         return getSelectedPresenter().getCurrentResult();
     }
     
@@ -95,13 +95,13 @@ public class TabbedResultsPresenter implements ResultsPresenter {
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }
 
-    private ResultsPresenter getSelectedPresenter() {
+    private ResultsPresenter<Object> getSelectedPresenter() {
         return presentersMappedByHeader.get(getSelectedHeader());
     }
 
     private void addTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter tabPresenter = new MultiResultsPresenter(stringMessages);
+        ResultsPresenter<Object> tabPresenter = new MultiResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);

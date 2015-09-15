@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
-public class ResultsChart extends AbstractResultsPresenter {
+public class ResultsChart extends AbstractResultsPresenterWithDataProviders {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -143,7 +143,7 @@ public class ResultsChart extends AbstractResultsPresenter {
     }
 
     @Override
-    protected void internalShowResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
         updateKeyComparatorListBox();
         resetChartSeries();

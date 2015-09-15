@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class PlainResultsPresenter extends AbstractResultsPresenter {
+public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProviders {
     
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
@@ -25,7 +25,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenter {
     }
 
     @Override
-    protected void internalShowResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
         QueryResultDTO<?> result = getCurrentResult();
         
         StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");

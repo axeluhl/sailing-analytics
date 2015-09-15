@@ -18,16 +18,16 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class MultiResultsPresenter implements ResultsPresenter {
+public class MultiResultsPresenter implements ResultsPresenter<Object> {
     
     private final StringMessages stringMessages;
     
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
-    private final ValueListBox<Descriptor> presentersListBox;
-    private ResultsPresenter currentPresenter;
+    private final ValueListBox<Descriptor<Object>> presentersListBox;
+    private ResultsPresenter<Object> currentPresenter;
 
-    private List<Descriptor> availableDescriptors;
+    private List<Descriptor<Object>> availableDescriptors;
     
     public MultiResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -40,15 +40,15 @@ public class MultiResultsPresenter implements ResultsPresenter {
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
         controlsPanel.add(new Label(stringMessages.choosePresentation() + ":"));
-        presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<Descriptor>() {
+        presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<Descriptor<? extends Object>>() {
             @Override
-            protected String convertObjectToString(Descriptor nonNullObject) {
+            protected String convertObjectToString(Descriptor<? extends Object> nonNullObject) {
                 return nonNullObject.getName();
             }
         });
-        presentersListBox.addValueChangeHandler(new ValueChangeHandler<Descriptor>() {
+        presentersListBox.addValueChangeHandler(new ValueChangeHandler<Descriptor<Object>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<Descriptor> event) {
+            public void onValueChange(ValueChangeEvent<Descriptor<Object>> event) {
                 setCurrentPresenter(event.getValue().getPresenter());
             }
         });
@@ -59,7 +59,7 @@ public class MultiResultsPresenter implements ResultsPresenter {
         setCurrentPresenter(availableDescriptors.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls presenter) {
+    private void setCurrentPresenter(ResultsPresenterWithControls<Object> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
@@ -79,49 +79,49 @@ public class MultiResultsPresenter implements ResultsPresenter {
     }
 
     @Override
-    public QueryResultDTO<?> getCurrentResult() {
+    public QueryResultDTO<? extends Object> getCurrentResult() {
         return currentPresenter.getCurrentResult();
     }
 
     @Override
-    public void showResult(QueryResultDTO<?> result) {
-        for (Descriptor descriptor : availableDescriptors) {
+    public void showResult(QueryResultDTO<Object> result) {
+        for (Descriptor<Object> descriptor : availableDescriptors) {
             descriptor.getPresenter().showResult(result);
         }
     }
 
     @Override
     public void showError(String error) {
-        for (Descriptor descriptor : availableDescriptors) {
+        for (Descriptor<Object> descriptor : availableDescriptors) {
             descriptor.getPresenter().showError(error);
         }
     }
 
     @Override
     public void showError(String mainError, Iterable<String> detailedErrors) {
-        for (Descriptor descriptor : availableDescriptors) {
+        for (Descriptor<Object> descriptor : availableDescriptors) {
             descriptor.getPresenter().showError(mainError, detailedErrors);
         }
     }
 
     @Override
     public void showBusyIndicator() {
-        for (Descriptor descriptor : availableDescriptors) {
+        for (Descriptor<Object> descriptor : availableDescriptors) {
             descriptor.getPresenter().showBusyIndicator();
         }
     }
 
-    private interface Descriptor {
+    private interface Descriptor<ResultType> {
         
         public String getName();
         
-        public ResultsPresenterWithControls getPresenter();
+        public ResultsPresenterWithControls<ResultType> getPresenter();
         
     }
     
-    private class PlainDescriptor implements Descriptor {
+    private class PlainDescriptor implements Descriptor<Object> {
         
-        private final AbstractResultsPresenter presenter;
+        private final AbstractResultsPresenter<Object> presenter;
         
         public PlainDescriptor() {
             presenter = new PlainResultsPresenter(stringMessages);
@@ -133,13 +133,13 @@ public class MultiResultsPresenter implements ResultsPresenter {
         }
         
         @Override
-        public AbstractResultsPresenter getPresenter() {
+        public AbstractResultsPresenter<Object> getPresenter() {
             return presenter;
         }
         
     }
     
-    private class ColumnChartDescriptor implements Descriptor {
+    private class ColumnChartDescriptor implements Descriptor<Object> {
         
         private final ResultsChart presenter;
 
@@ -153,7 +153,7 @@ public class MultiResultsPresenter implements ResultsPresenter {
         }
 
         @Override
-        public AbstractResultsPresenter getPresenter() {
+        public AbstractResultsPresenter<Object> getPresenter() {
             return presenter;
         }
         
