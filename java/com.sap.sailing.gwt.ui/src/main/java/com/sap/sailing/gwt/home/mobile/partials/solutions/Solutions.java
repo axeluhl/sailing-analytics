@@ -10,7 +10,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.events.CollapseAnimation;
+import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 
 public class Solutions extends Composite {
 

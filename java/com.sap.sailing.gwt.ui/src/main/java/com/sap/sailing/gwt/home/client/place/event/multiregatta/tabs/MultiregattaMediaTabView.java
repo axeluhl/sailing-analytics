@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
-import com.sap.sailing.gwt.home.client.shared.media.MediaPage;
+import com.sap.sailing.gwt.home.desktop.partials.media.MediaPage;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 /**

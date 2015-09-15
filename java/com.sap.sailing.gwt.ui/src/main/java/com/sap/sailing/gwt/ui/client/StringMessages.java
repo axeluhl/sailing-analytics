@@ -1329,7 +1329,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String regattaQuickfinder();
     String resultsQuickfinder();
+    String racesQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1365,6 +1367,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
     String racesOverview();
+    String listFormatLabel();
+    String competitionFormatLabel();
     String empty();
     String runAQuery();
     String latestRegattaStandings();
@@ -1375,4 +1379,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String progress();
+    String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);
+    String raceOffice();
 }

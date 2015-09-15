@@ -16,11 +16,13 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.oldcompetitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.shared.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
+import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sse.common.Util;
@@ -42,8 +44,9 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         super();
     }
 
-    @UiField
-    protected OldCompetitorCharts competitorCharts;
+    @UiField(provided = true)
+    protected OldCompetitorCharts competitorCharts = new OldCompetitorCharts(
+            ExperimentalFeatures.SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER ? new OldCompetitorChartsDelegateFullscreenViewer() : null);
 
     @Override
     public Class<RegattaCompetitorAnalyticsPlace> getPlaceClassForActivation() {

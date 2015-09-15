@@ -1,0 +1,93 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.media.MediaPageResources" />
+	<ui:style gss="true">
+		@external video-js, vjs-tech, videoThumbnail;
+		.fullSize {
+			width: 100%;
+			height: 100px;
+		}
+		.debug {
+			border: 1px solid red;
+			margin: 2px;
+			padding: 2px;
+		}
+		.videoList {
+			overflow-y: hidden;
+			overflow-x: scroll;
+			height: 160px;
+			margin-top:20px;
+			white-space: nowrap;
+		}
+		.videoList .videoThumbnail {
+			display: inline-block;
+			margin-right: 10px;
+			width: 256px;
+			height: 144px;
+		}
+		.videoList .videoThumbnail:last-of-type {
+			margin-right: 0;
+		}
+		
+		@media (min-width:61em) {
+			.videoList {
+				white-space: normal;
+				overflow-y: scroll;
+				overflow-x: hidden;
+				height: 490px;
+				margin-top: 0px;
+			}
+			.videoList .videoThumbnail {
+				display: inline-block;
+				margin-bottom: 10px;
+				width: 100%;
+				height: auto;
+			}
+			.videoList .videoThumbnail:last-of-type {
+				margin-right: 10px;
+				margin-bottom: 0;
+			}
+		}
+		
+		.videoPlayerBox {
+			position: relative;
+			padding-top: 56.25% !important;
+			height: 0px;
+		}
+		.videoPlayer {
+			position: absolute;
+			top: 0px;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
+			<div class="{res.mediaCss.grid} {res.mainCss.lightbox}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+					<h1><ui:text from='{i18n.videos}' /></h1>
+				</div>
+				<div ui:field="videoDisplayOuterBoxUi" class="{res.mediaCss.columns}">
+					<div class="{style.videoPlayerBox}">
+						<g:SimplePanel ui:field="videoDisplayHolderUi" addStyleNames="{style.videoPlayer}" />
+					</div>
+				</div>
+				<div ui:field="videoListOuterBoxUi" class=" {res.mediaCss.columns}">
+					<g:FlowPanel ui:field="videosListUi" styleName="{style.videoList}"/>
+				</div>
+			</div>
+		</div>
+		<div ui:field="photoSectionUi" style="display: none;"
+			class="{res.mediaCss.grid} {local_res.css.media}">
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+				<h1><ui:text from='{i18n.photos}' /></h1>
+			</div>
+		</div>
+		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
+			<g:FlowPanel ui:field="photoListOuterBoxUi"  />
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

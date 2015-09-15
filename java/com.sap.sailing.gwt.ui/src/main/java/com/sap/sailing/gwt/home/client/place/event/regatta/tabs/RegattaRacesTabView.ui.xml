@@ -1,44 +1,30 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui' 
-        xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'>
+        xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style>
         .listContainer > div {
             margin-bottom: 2em;
         }
-        .legend {
-            margin-top: 2em;
-            margin-bottom: -1.5em;
-        }
-        .buttonContainer {
-            position: relative;
-            margin: 0 !important;
-        }
-        .regattaOverviewButton {
-            position: absolute;
-            right: 0;
-            top: -0.25em;
-        }
+        .temp {
+			font-weight: bold; 
+			font-style: italic;
+		} 
     </ui:style>
-    <g:HTMLPanel ui:field="contentPanel">
+    <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
-            <p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" ui:field="regattaProgressLegendUi" />
             <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
         </div>
-        <p:listNavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
+        <dp:regattanavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
         <div class="{res.mediaCss.grid}">
             <div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi">
-                <p:raceListLive.RacesListLive ui:field="liveRacesListUi" />
-                <div class="{style.buttonContainer}">
-                    <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite} {style.regattaOverviewButton}" 
-	        				target="_blank" ui:field="regattaOverviewUi">
-                    	<ui:text from="{i18n.racesOverview}" />
-                    </a>
-                </div>
-                <p:racelist.RaceListContainer ui:field="raceListContainerUi" />
+                <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" />
+                <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
-            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
+            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
+            	<g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label>
+            </g:FlowPanel>
         </div>
-        <g:SimplePanel ui:field="oldContentContainer"/>
+        <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -11,10 +11,6 @@ import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardActivityProxy;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
@@ -22,7 +18,6 @@ import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
-import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -36,7 +31,7 @@ public class MobileActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place rawPlace) {
         Place place = placeUpdater.getRealPlace(rawPlace);
-        if (!(place instanceof HasMobileVersion)) {
+        if (!SwitchingEntryPoint.hasMobileVersion(place)) {
             GWT.log("Place has no mobile view: " + place.getClass().getName());
             SwitchingEntryPoint.reloadApp();
             return null;
@@ -45,10 +40,6 @@ public class MobileActivityMapper implements ActivityMapper {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);
-        } else if (place instanceof MiniLeaderboardPlace) {
-            return new MiniLeaderboardActivityProxy((MiniLeaderboardPlace) place, clientFactory);
-        } else if (place instanceof LatestNewsPlace) {
-            return new LatestNewsActivityProxy((LatestNewsPlace) place, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
             return new EventActivityProxy((AbstractEventPlace) place, clientFactory);
         } else if (place instanceof SeriesMiniOverallLeaderboardPlace) {

@@ -8,8 +8,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.client.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
@@ -35,6 +35,7 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     public SeriesMiniOverallLeaderboardViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
         minileaderboardUi = new MinileaderboardBox(true);
+        minileaderboardUi.setShowIfEmpty(true);
         eventHeaderUi = new SeriesHeader(presenter.getCtx().getSeriesDTO(), presenter.getSeriesNavigation());
         initWidget(uiBinder.createAndBindUi(this));
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
@@ -45,6 +46,6 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
     
     @Override
     public void setQuickFinderValues(String seriesName, Collection<EventMetadataDTO> eventsOfSeries) {
-        new QuickfinderPresenter(quickFinderUi, currentPresenter, seriesName, eventsOfSeries);
+        QuickfinderPresenter.getForSeriesLeaderboards(quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
     }
 }

@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -133,6 +133,15 @@ public final class HomeServiceUtil {
         return event.findImageWithTag(MediaTagConstants.TEASER);
     }
     
+    public static ImageDescriptor getFeaturedImage(EventBase event) {
+        return event.findImageWithTag(MediaTagConstants.FEATURED);
+    }
+    
+    public static String getFeaturedImageUrlAsString(EventBase event) {
+        ImageDescriptor image = getFeaturedImage(event);
+        return image == null ? null : image.getURL().toString();
+    }
+    
     public static String getStageImageURLAsString(final EventBase event) {
         ImageDescriptor image = getStageImage(event);
         return image == null ? null : image.getURL().toString();
@@ -178,7 +187,11 @@ public final class HomeServiceUtil {
     }
     
     public static int calculateRaceColumnCount(Leaderboard sl) {
-        return Util.size(sl.getRaceColumns());
+        int nonCarryForwardRacesCount = 0;
+        for (RaceColumn rc : sl.getRaceColumns()) {
+            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
+        }
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateTrackedRaceCount(Leaderboard sl) {
@@ -411,12 +424,9 @@ public final class HomeServiceUtil {
         }
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(leaderboard instanceof RegattaLeaderboard) {
-                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                    continue;
-                }
+            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
             }
-            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
     }

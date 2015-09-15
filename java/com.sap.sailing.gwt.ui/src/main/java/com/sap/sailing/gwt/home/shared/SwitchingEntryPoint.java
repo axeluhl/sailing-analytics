@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 
 public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
@@ -41,7 +42,7 @@ public class SwitchingEntryPoint implements EntryPoint {
         Place rawPlace = hisMap.getPlace(hash);
         Place place = placeUpdater.getRealPlace(rawPlace);
         String userWantsMobileUi = Cookies.getCookie(SAPSAILING_MOBILE);
-        if (place != null && !(place instanceof HasMobileVersion)) {
+        if (place != null && !hasMobileVersion(place)) {
             LOG.info("We have a dedicated desktop place: " + hash);
             startDesktop();
         } else if (userWantsMobileUi != null) {
@@ -62,6 +63,20 @@ public class SwitchingEntryPoint implements EntryPoint {
                 startDesktop();
             }
         }
+    }
+
+    /**
+     * Checks if the given {@link Place} has a mobile view which is indicated either by the {@link HasMobileVersion}
+     * interface or the {@link MobileSupport#hasMobileVersion()} method.
+     * 
+     * @param place
+     *            {@link Place} to check
+     * @return <code>true</code> if the given {@link Place} implements {@link HasMobileVersion} interface or the implemented
+     *         {@link MobileSupport#hasMobileVersion()} method returns <code>true</code>, <code>false</code> otherwise
+     */
+    public static boolean hasMobileVersion(Place place) {
+        return place instanceof HasMobileVersion
+                || (place instanceof MobileSupport && ((MobileSupport) place).hasMobileVersion());
     }
 
     /**

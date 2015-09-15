@@ -1,25 +1,14 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-  xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:r="urn:import:com.sap.sailing.gwt.home.client.place.event.partials.raceListLive"
-  xmlns:o="urn:import:com.sap.sailing.gwt.home.client.place.event.overview"
-  xmlns:p='urn:import:com.sap.sailing.gwt.home.client.place.event.partials'
-  xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	  xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-  <ui:style>
-        .legend {
-            margin-top: 2em;
-            margin-bottom: -1.5em;
-        }
-  </ui:style>
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
-      <p:multiRegattaList.MultiRegattaListStepsLegend addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {style.legend}" ui:field="regattaProgressLegendUi" />
       <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="regattaInfoContainerUi"/>
+	  <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermargintopmedium}" />
     </div>
-    <o:EventOverviewStage ui:field="stage" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopsmall}" />
+    <dp:eventstage.EventOverviewStage ui:field="stageUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopsmall}" />
     <div class="{res.mediaCss.grid}">
       <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-        <r:RacesListLive ui:field="racesListLive" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
         <dp:standings.StandingsList ui:field="standingsUi" addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium}" />
         <dp:statistics.StatisticsBox addStyleNames="{res.mainCss.spacermargin} {res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottommedium}" ui:field="statisticsBoxUi" />
       </div>

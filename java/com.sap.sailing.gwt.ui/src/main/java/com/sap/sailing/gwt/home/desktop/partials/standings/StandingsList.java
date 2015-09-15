@@ -10,9 +10,9 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
-import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
+import com.sap.sailing.gwt.home.client.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
@@ -31,13 +31,12 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField SpanElement headerLabelUi;
     @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
-    @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
 
     public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
-        
+        setVisible(false);
         headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
         if(headerNavigation == null) {
             headerArrowUi.removeFromParent();
@@ -54,13 +53,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         updateScoreInformation(data);
         
         LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        
-        if(data.getItems().isEmpty()) {
-            noResultsUi.getStyle().clearDisplay();
-            return;
-        }
-        noResultsUi.getStyle().setDisplay(Display.NONE);
-        
+        setVisible(!data.getItems().isEmpty());
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
