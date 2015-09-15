@@ -57,6 +57,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -256,6 +257,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
 
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
+
+    private final Map<Competitor, Boat> boatsForCompetitor;
 
     /**
      * The mark passing sets used as values are ordered by time stamp.
@@ -464,6 +467,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             race.getCourse().unlockAfterRead();
         }
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
+        boatsForCompetitor = new HashMap<Competitor, Boat>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
             markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(
@@ -3113,6 +3117,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
+    protected void setBoatForCompetitor(Competitor competitor, Boat boat) {
+        boatsForCompetitor.put(competitor, boat);        
+    }
+
     private void suspendAllCachesNotUpdatingWhileLoading() {
         cachesSuspended = true;
         for (GPSFixTrack<Competitor, GPSFixMoving> competitorTrack : tracks.values()) {
@@ -3878,5 +3886,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          Set<Mark> marksDefinedInRaceLog = new MultiLogAnalyzer<>(analyzerFactory, new SetReducer<Mark>(), raceLogs).analyze();
          result.addAll(marksDefinedInRaceLog);
          return result;
+    }
+    
+    @Override
+    public Boat resolveBoatOfCompetitor(Competitor competitor) {
+        Boat result = boatsForCompetitor.get(competitor);
+        if(result == null) {
+            result = competitor.getBoat();
+        }
+        return result;
     }
 }

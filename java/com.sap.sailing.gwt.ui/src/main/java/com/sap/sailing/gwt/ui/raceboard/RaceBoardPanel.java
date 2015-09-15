@@ -26,7 +26,10 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
@@ -89,7 +92,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentDetails userAgent;
-    private final CompetitorSelectionModel competitorSelectionModel;
+    private final CompetitorSelectionProvider competitorSelection;
     private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
@@ -151,13 +154,14 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
-        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
+        competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(),
+                competitorSelection, colorProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(),
                 selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
-        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
+        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelection, stringMessages, raceMap,
                 new LeaderboardFetcher() {
                     @Override
                     public LeaderboardDTO getLeaderboard() {
@@ -202,7 +206,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
+        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelection, raceSelectionProvider,
                     timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
@@ -215,7 +219,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
         editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
-                stringMessages, competitorSelectionModel, errorReporter, timer);
+                stringMessages, competitorSelection, errorReporter, timer);
         editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
         editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
         components.add(editMarkPassingPanel);
@@ -261,7 +265,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false,
                         /*showCompetitorSailIdColumn*/true, /*showCompetitorFullNameColumn*/true);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
-                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
+                competitorSelection, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,

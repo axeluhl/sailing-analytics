@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -161,6 +162,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
                     competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver);
+            List<Pair<Competitor, Boat>> boatsInfoForCompetitors = getDomainFactory().getBoatsInfoForCompetitors(tractracRace, competitorsAndDominantBoatClass.getB());
+            if(boatsInfoForCompetitors != null) {
+                for(Pair<Competitor, Boat> competitorAndBoat: boatsInfoForCompetitors) {
+                    trackedRace.setBoatForCompetitor(competitorAndBoat.getA(), competitorAndBoat.getB());
+                }
+            }
             needToUpdateRaceTimes = true;
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);

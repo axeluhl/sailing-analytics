@@ -90,6 +90,7 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -179,6 +180,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
@@ -1572,6 +1574,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean extrapolate, LegIdentifier simulationLegIdentifier) throws NoWindException {
         final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositions(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
+        final Map<CompetitorDTO, BoatDTO> competitorBoats = getBoatsOfCompetitors(raceIdentifier);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
@@ -1580,7 +1583,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
-        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion);
+        return new CompactRaceMapDataDTO(boatPositions, competitorBoats, coursePositions, courseSidelines, quickRanks, simulationResultVersion);
     }
 
     /**
@@ -1722,6 +1725,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             }
                         }
                     }
+                }
+            }
+        }
+        return result;
+    }
+
+    private Map<CompetitorDTO, BoatDTO> getBoatsOfCompetitors(RegattaAndRaceIdentifier raceIdentifier) {
+        Map<CompetitorDTO, BoatDTO> result = new HashMap<CompetitorDTO, BoatDTO>();
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                Boat boatOfCompetitor = trackedRace.resolveBoatOfCompetitor(competitor);
+                if(boatOfCompetitor != null) {
+                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                    BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
+                    result.put(competitorDTO, boatDTO);
                 }
             }
         }

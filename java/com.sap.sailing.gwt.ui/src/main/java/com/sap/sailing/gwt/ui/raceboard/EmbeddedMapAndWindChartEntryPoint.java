@@ -23,6 +23,8 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -158,9 +160,10 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     timePanelSettings.setRefreshInterval(refreshInterval);
                     timePanel.updateSettings(timePanelSettings);
                     raceMapResources.combinedWindPanelStyle().ensureInjected();
-                    final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
+                    final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
+                    final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
-                            competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
+                            competitorSelection, colorProvider, getStringMessages(), showMapControls, showViewStreamlets,
                             showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false) {
                         @Override
                         protected void showAdditionalControls(MapWidget map) {
@@ -194,8 +197,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         });
     }  
 
-    private CompetitorSelectionProvider createEmptyFilterCompetitorModel() {
-        final CompetitorSelectionModel result = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+    private CompetitorSelectionProvider createEmptyFilterCompetitorModel(CompetitorColorProvider colorProvider) {
+        final CompetitorSelectionModel result = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
         final FilterSet<CompetitorDTO, Filter<CompetitorDTO>> filterSet = result.getOrCreateCompetitorsFilterSet("Empty");
         filterSet.addFilter(new Filter<CompetitorDTO>() {
             @Override public boolean matches(CompetitorDTO object) { return false; }
