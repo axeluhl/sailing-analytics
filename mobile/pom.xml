@@ -34,17 +34,10 @@
         	<dependency>
             	<groupId>android</groupId>
             	<artifactId>android</artifactId>
-            	<version>4.4.2_r4</version>
+            	<version>5.1.1_r2</version>
             	<scope>provided</scope>
         	</dependency>
-
-       		<!-- needed on remote repository -->
-        	<dependency>
-          		<groupId>android.support</groupId>
-          		<artifactId>compatibility-v4</artifactId>
-          		<version>19</version>
-        	</dependency>
-        	</dependencies>
+		</dependencies>
     </dependencyManagement>
 
     <build>
@@ -56,7 +49,7 @@
 		    <version>3.9.0-rc.1</version>
 		    <configuration>
 			<sdk>
-			    <platform>19</platform>
+			    <platform>22</platform>
 			</sdk>
 		    </configuration>
                     <extensions>true</extensions>
