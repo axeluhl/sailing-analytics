@@ -42,7 +42,6 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
 
     @Override
     public int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
-        assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
         int result = o2Wins - o1Wins;

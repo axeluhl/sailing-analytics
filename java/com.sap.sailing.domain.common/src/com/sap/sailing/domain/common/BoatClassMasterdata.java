@@ -64,6 +64,7 @@ public enum BoatClassMasterdata {
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
+    SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
     STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL, false, "STR"),
     STREAMLINE ("Streamline", true, 7.15, 2.55, BoatHullType.MONOHULL, true),
     SWAN_45 ("Swan 45", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "Swan", "Swan-45"),
