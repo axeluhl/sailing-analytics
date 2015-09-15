@@ -133,6 +133,15 @@ public final class HomeServiceUtil {
         return event.findImageWithTag(MediaTagConstants.TEASER);
     }
     
+    public static ImageDescriptor getFeaturedImage(EventBase event) {
+        return event.findImageWithTag(MediaTagConstants.FEATURED);
+    }
+    
+    public static String getFeaturedImageUrlAsString(EventBase event) {
+        ImageDescriptor image = getFeaturedImage(event);
+        return image == null ? null : image.getURL().toString();
+    }
+    
     public static String getStageImageURLAsString(final EventBase event) {
         ImageDescriptor image = getStageImage(event);
         return image == null ? null : image.getURL().toString();
