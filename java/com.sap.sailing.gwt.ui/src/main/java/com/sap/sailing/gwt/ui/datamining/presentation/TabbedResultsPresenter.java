@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.polarsheets.PolarResultsPresenter;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class TabbedResultsPresenter implements ResultsPresenter<Object> {
@@ -64,6 +65,9 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
 
     @Override
     public void showResult(QueryResultDTO<Object> result) {
+        if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
+            addPolarTabAndFocus();
+        }
         getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
     }
@@ -102,6 +106,17 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
     private void addTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
         ResultsPresenter<Object> tabPresenter = new MultiResultsPresenter(stringMessages);
+        presentersMappedByHeader.put(tabHeader, tabPresenter);
+        
+        tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
+        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getWidget());
+        tabPanel.selectTab(presenterIndex);
+        tabPanel.scrollToTab(presenterIndex);
+    }
+    
+    private void addPolarTabAndFocus() {
+        CloseableTabHeader tabHeader = new CloseableTabHeader();
+        ResultsPresenter<Object> tabPresenter = new PolarResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);

@@ -23,7 +23,7 @@ public class PolarAggregationImpl implements PolarAggregation {
         double[] averages = new double[360];
         for (int i = 0; i < 360; i++) {
             if (countPerAngle[i] > 0) {
-                averages[i] = sumSpeedsPerAngle[0] / countPerAngle[0];
+                averages[i] = sumSpeedsPerAngle[i] / countPerAngle[i];
             }
         }
         return averages;
