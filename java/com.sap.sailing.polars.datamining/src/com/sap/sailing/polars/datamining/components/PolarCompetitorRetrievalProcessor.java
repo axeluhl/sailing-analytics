@@ -25,7 +25,7 @@ public class PolarCompetitorRetrievalProcessor extends AbstractRetrievalProcesso
         TrackedRace trackedRace = element.getTrackedRace();
         Set<HasCompetitorPolarContext> competitorWithContext = new HashSet<>();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            competitorWithContext.add(new CompetitorWithPolarContext(competitor, trackedRace, element.getLeg()));
+            competitorWithContext.add(new CompetitorWithPolarContext(competitor, trackedRace, element.getLeg(), element));
         }
         return competitorWithContext;
     }

@@ -7,5 +7,8 @@ public interface HasLeaderboardPolarContext {
     
     @Connector(messageKey="Leaderboard")
     Leaderboard getLeaderboard();
+    
+    @Connector(scanForStatistics=false)
+    HasLeaderboardGroupPolarContext getLeaderboardGroupPolarContext();
 
 }

@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
 import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
@@ -19,14 +20,16 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     private final ClusterGroup<Speed> windSpeedRangeGroup;
     private final Competitor competitor;
     private final PolarSheetGenerationSettings settings;
+    private final HasCompetitorPolarContext competitorPolarContext;
 
     public GPSFixWithPolarContext(GPSFixMoving fix, TrackedRace trackedRace, ClusterGroup<Speed> windSpeedRangeGroup, Competitor competitor,
-            PolarSheetGenerationSettings settings) {
+            PolarSheetGenerationSettings settings, HasCompetitorPolarContext competitorPolarContext) {
         this.fix = fix;
         this.trackedRace = trackedRace;
         this.windSpeedRangeGroup = windSpeedRangeGroup;
         this.competitor = competitor;
         this.settings = settings;
+        this.competitorPolarContext = competitorPolarContext;
     }
 
     @Override
@@ -39,6 +42,11 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     @Override
     public PolarStatistic getPolarStatistics() {
         return new PolarStatisticImpl(trackedRace, competitor, fix, settings);
+    }
+
+    @Override
+    public HasCompetitorPolarContext getCompetitorPolarContext() {
+        return competitorPolarContext;
     }
 
 }

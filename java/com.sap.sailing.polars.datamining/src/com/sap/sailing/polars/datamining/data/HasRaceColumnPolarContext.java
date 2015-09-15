@@ -7,5 +7,8 @@ public interface HasRaceColumnPolarContext {
     
     @Connector(messageKey="RaceColumn")
     RaceColumn getRaceColumn();
+    
+    @Connector(scanForStatistics=false)
+    HasLeaderboardPolarContext getLeaderboardPolarContext();
 
 }

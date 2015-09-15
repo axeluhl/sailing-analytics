@@ -18,4 +18,7 @@ public interface HasFleetPolarContext {
     @Connector(messageKey="BoatClass")
     BoatClass getBoatClass();
     
+    @Connector(scanForStatistics=false)
+    HasRaceColumnPolarContext getRaceColumnPolarContext();
+    
 }

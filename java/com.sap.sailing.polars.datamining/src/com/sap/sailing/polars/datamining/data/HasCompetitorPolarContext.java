@@ -13,5 +13,8 @@ public interface HasCompetitorPolarContext {
     TrackedRace getTrackedRace();
     
     Leg getLeg();
+    
+    @Connector(scanForStatistics=false)
+    HasLegPolarContext getLegPolarContext();
 
 }

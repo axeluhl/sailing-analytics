@@ -23,7 +23,7 @@ public class PolarLeaderboardRetrievalProcessor extends AbstractRetrievalProcess
     protected Iterable<HasLeaderboardPolarContext> retrieveData(HasLeaderboardGroupPolarContext element) {
         Set<HasLeaderboardPolarContext> leaderboardsWithContext = new HashSet<>();
         for (Leaderboard leaderboard : element.getLeaderboardGroup().getLeaderboards()) {
-            leaderboardsWithContext.add(new LeaderboardWithPolarContext(leaderboard));
+            leaderboardsWithContext.add(new LeaderboardWithPolarContext(leaderboard, element));
         }
         return leaderboardsWithContext;
     }

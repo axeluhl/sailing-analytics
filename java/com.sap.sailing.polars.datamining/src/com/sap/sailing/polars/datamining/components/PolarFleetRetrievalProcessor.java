@@ -25,7 +25,7 @@ public class PolarFleetRetrievalProcessor extends AbstractRetrievalProcessor<Has
         Set<HasFleetPolarContext> fleetWithContext = new HashSet<>();
         RaceColumn raceColumn = element.getRaceColumn();
         for (Fleet fleet : raceColumn.getFleets()) {
-            fleetWithContext.add(new FleetWithPolarContext(fleet, raceColumn));
+            fleetWithContext.add(new FleetWithPolarContext(fleet, raceColumn, element));
         }
         return fleetWithContext;
     }
