@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.imagegallery;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -19,11 +19,11 @@ public class ImageGalleryItem extends Widget implements HasClickHandlers {
     interface ImageGalleryItemUiBinder extends UiBinder<Element, ImageGalleryItem> {
     }
     
-    @UiField ImageElement imageUi;
+    @UiField DivElement imageUi;
     
     public ImageGalleryItem(ImageDTO image) {
         setElement(uiBinder.createAndBindUi(this));
-        imageUi.setSrc(image.getSourceRef());
+        imageUi.getStyle().setBackgroundImage("url('" + image.getSourceRef() + "')");
     }
     
     @Override

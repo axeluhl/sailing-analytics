@@ -17,6 +17,9 @@
 .imagegallery_column_item {
   cursor: pointer;
   margin-bottom: 0.666666666666667em;
+  background-size: cover;
+  width: 100%;
+  padding-top: 100%;
 }
 .imagegallery_column_item img {
   width: 100%;
