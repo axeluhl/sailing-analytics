@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
 import com.sap.sse.common.Util;
 
@@ -87,8 +88,8 @@ public class HighPointFirstGets10Or8AndLastBreaksTie extends HighPointFirstGetsF
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        Double effectiveScore = super.getScoreForRank(raceColumn, competitor, rank, numberOfCompetitorsInRaceFetcher, numberOfCompetitorsInLeaderboardFetcher);
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+        Double effectiveScore = super.getScoreForRank(leaderboard, raceColumn, competitor, rank, numberOfCompetitorsInRaceFetcher, numberOfCompetitorsInLeaderboardFetcher);
         return checkForOverwrittenScore(raceColumn, rank, effectiveScore);
     }
     

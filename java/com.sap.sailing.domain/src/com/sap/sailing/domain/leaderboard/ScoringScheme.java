@@ -51,8 +51,8 @@ public interface ScoringScheme extends Serializable {
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+    Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
+            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher,
             NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
     
     /**

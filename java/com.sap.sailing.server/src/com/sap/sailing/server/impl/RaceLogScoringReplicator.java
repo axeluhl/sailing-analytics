@@ -176,8 +176,8 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             final int numberOfCompetitorsInRace, 
             Competitor competitor, int rankByRaceCommittee) throws NoWindException {
         boolean scoreHasBeenCorrected = false;
-        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(raceColumn, competitor, rankByRaceCommittee,
-                new Callable<Integer>() {
+        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+                rankByRaceCommittee, new Callable<Integer>() {
                     @Override
                     public Integer call() {
                         return numberOfCompetitorsInRace;

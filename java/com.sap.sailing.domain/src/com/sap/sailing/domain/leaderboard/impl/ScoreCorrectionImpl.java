@@ -401,8 +401,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             public Double getUncorrectedScore() {
                 Double resultUncorrected = 0.0;
                 try {
-                    resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor,
-                            trackedRankProvider.call(), new Callable<Integer>() {
+                    resultUncorrected = scoringScheme.getScoreForRank(leaderboard, raceColumn,
+                            competitor, trackedRankProvider.call(), new Callable<Integer>() {
                                 @Override
                                 public Integer call() {
                                     return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
@@ -448,8 +448,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
             try {
                 int trackedRank = trackedRankProvider.call();
-                result = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRank,
-                        new Callable<Integer>() {
+                result = scoringScheme.getScoreForRank(leaderboard, raceColumn, competitor,
+                        trackedRank, new Callable<Integer>() {
                             @Override
                             public Integer call() {
                                 return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
