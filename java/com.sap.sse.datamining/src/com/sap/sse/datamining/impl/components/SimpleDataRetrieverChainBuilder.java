@@ -146,24 +146,33 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         FilterCriterion<ResultType> filter = (FilterCriterion<ResultType>) filters.get(retrieverTypeIndex);
         
         Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
-        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
+        Class<?> settingsType = dataRetrieverTypeWithInformation.getSettingsType();
+        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, settingsType, retrieverTypeIndex);
     }
 
     private <ResultType> Processor<?, ResultType> createRetriever(Class<Processor<?, ResultType>> retrieverType, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Class<?> settingsType, int retrieverTypeIndex) {
         Constructor<Processor<?, ResultType>> retrieverConstructor = null;
         try {
-            retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            if (settingsType == null) {
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            } else {
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+            }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
                     + retrieverType.getSimpleName() + "'", e);
         }
         
-        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
+        Object settings = null;
+        if (settingsType != null) {
+            // TODO Get Settings for retriever.
+        }
+        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, retrieverTypeIndex);
     }
 
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Object settings, int retrieverTypeIndex) {
         try {
             Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
             if (filter != null) {
@@ -178,7 +187,12 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                 // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
                 retrieverConstructor.setAccessible(true);
             }
-            return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
+            
+            if (settings == null) {
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
+            } else {
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, settings, retrieverTypeIndex);
+            }
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "

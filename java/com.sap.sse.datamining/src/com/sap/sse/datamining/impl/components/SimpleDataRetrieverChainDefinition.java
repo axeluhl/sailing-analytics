@@ -59,30 +59,44 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public Class<DataType> getRetrievedDataType() {
         return retrievedDataType;
     }
-
+    
     @Override
     public <ResultType> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
-                                       Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+            Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        startWith(retrieverType, retrievedDataType, null, retrievedDataTypeMessageKey);
+    }
+
+    @Override
+    public <ResultType, SettingsType> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
+                                       Class<ResultType> retrievedDataType, Class<SettingsType> settingsType, String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
             throw new IllegalStateException("This retriever chain definition already has been started with '"
                                                     + dataRetrieverTypesWithInformation.get(0).getRetrieverType().getSimpleName() + "'");
         }
-        checkThatRetrieverHasUsableConstructor(retrieverType);
+        checkThatRetrieverHasUsableConstructor(retrieverType, settingsType);
         
         DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
-                dataRetrieverTypesWithInformation.size(), retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+                dataRetrieverTypesWithInformation.size(), retrieverType, retrievedDataType, settingsType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
     private boolean isInitialized() {
         return !dataRetrieverTypesWithInformation.isEmpty();
     }
-
+    
     @Override
     public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
-            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
             Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
             Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        addAfter(lastAddedRetrieverType, nextRetrieverType, retrievedDataType, null, retrievedDataTypeMessageKey);
+    }
+
+    @Override
+    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType, SettingsType> void addAfter(
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
+            Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
+            Class<NextResultType> retrievedDataType, Class<SettingsType> settingsType, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
             throw new IllegalStateException("This retriever chain definition hasn't been started yet");
         }
@@ -92,23 +106,27 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         DataRetrieverLevel<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
         @SuppressWarnings("unchecked")
         Class<Processor<?, ?>> lastRetrieverInList = (Class<Processor<?, ?>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
-        if (!lastRetrieverInList.equals(previousRetrieverType)) {
-            throw new IllegalArgumentException("The given previousRetrieverType '" + previousRetrieverType.getSimpleName()
+        if (!lastRetrieverInList.equals(lastAddedRetrieverType)) {
+            throw new IllegalArgumentException("The given previousRetrieverType '" + lastAddedRetrieverType.getSimpleName()
                                                + "' doesn't match the last retriever type in the chain '" 
                                                + lastRetrieverInList.getSimpleName() + "'");
         }
-        checkThatRetrieverHasUsableConstructor(nextRetrieverType);
+        checkThatRetrieverHasUsableConstructor(nextRetrieverType, settingsType);
 
         DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
                 dataRetrieverTypesWithInformation.size(), nextRetrieverType, retrievedDataType,
-                retrievedDataTypeMessageKey);
+                settingsType, retrievedDataTypeMessageKey);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
-    private <InputType, ResultType> void checkThatRetrieverHasUsableConstructor(
-            Class<? extends Processor<InputType, ResultType>> retrieverType) {
+    private <InputType, ResultType, SettingsType> void checkThatRetrieverHasUsableConstructor(
+            Class<? extends Processor<InputType, ResultType>> retrieverType, Class<SettingsType> settingsType) {
         try {
-            retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            if (settingsType == null) {
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            } else {
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+            }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"
                     + retrieverType.getSimpleName() + "'", e);
@@ -117,10 +135,18 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     
     @Override
     public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType> void endWith(
-            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
             Class<? extends Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
             String retrievedDataTypeMessageKey) {
-        addAfter(previousRetrieverType, lastRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        endWith(lastAddedRetrieverType, lastRetrieverType, retrievedDataType, null, retrievedDataTypeMessageKey);
+    }
+    
+    @Override
+    public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType, SettingsType> void endWith(
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
+            Class<? extends Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
+            Class<SettingsType> settingsType, String retrievedDataTypeMessageKey) {
+        addAfter(lastAddedRetrieverType, lastRetrieverType, retrievedDataType, settingsType, retrievedDataTypeMessageKey);
         isComplete = true;
     }
     
