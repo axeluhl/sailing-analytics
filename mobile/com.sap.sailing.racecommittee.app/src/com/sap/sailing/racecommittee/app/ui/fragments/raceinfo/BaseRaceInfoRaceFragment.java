@@ -69,7 +69,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     }
 
     protected void replaceFragment(RaceFragment fragment) {
-        replaceFragment(fragment, R.id.race_frame);
+        replaceFragment(fragment, getFrameId(fragment.getActivity()));
     }
 
     protected void replaceFragment(RaceFragment fragment, @IdRes int id) {

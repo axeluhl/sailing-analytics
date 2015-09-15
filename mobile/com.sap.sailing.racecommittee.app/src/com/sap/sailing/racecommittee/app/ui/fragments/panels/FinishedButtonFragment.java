@@ -46,6 +46,16 @@ public class FinishedButtonFragment extends BasePanelFragment {
         return fragment;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static boolean isCameraAvailable(Context context) {
+        PackageManager manager = context.getPackageManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+        } else {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finished_buttons, container, false);
@@ -96,29 +106,19 @@ public class FinishedButtonFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRecord)) {
-                resetFragment(null, R.id.race_frame, StartProcedureFragment.class);
+                resetFragment(null, getFrameId(getActivity()), StartProcedureFragment.class);
                 setMarkerLevel(mRecord, R.id.record_marker, 0);
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, R.id.race_frame, StartModeFragment.class);
+                resetFragment(null, getFrameId(getActivity()), StartModeFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, 0);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, R.id.race_frame, CourseFragment.class);
+                resetFragment(null, getFrameId(getActivity()), CourseFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, 0);
             }
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static  boolean isCameraAvailable(Context context) {
-        PackageManager manager = context.getPackageManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-        } else {
-            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
         }
     }
 

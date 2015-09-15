@@ -64,12 +64,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     @Override
     public void showMore(MoreFlag flag) {
         switch (flag.flag) {
-        case BLUE:
-            replaceFragment(FinishTimeFragment.newInstance(0), R.id.race_frame);
-            break;
+            case BLUE:
+                replaceFragment(FinishTimeFragment.newInstance(0), getFrameId(getActivity()));
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -143,32 +143,33 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             super.onActivityCreated(savedInstanceState);
 
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1: // Race-State: Finishing -> End Finishing
-                View header = ViewHelper.get(getView(), R.id.header_text);
-                if (header != null) {
-                    header.setOnClickListener(this);
-                }
+                case 1: // Race-State: Finishing -> End Finishing
+                    View header = ViewHelper.get(getView(), R.id.header_text);
+                    if (header != null) {
+                        header.setOnClickListener(this);
+                    }
 
-                View back = ViewHelper.get(getView(), R.id.header_back);
-                if (back != null) {
-                    back.setVisibility(View.VISIBLE);
-                }
+                    View back = ViewHelper.get(getView(), R.id.header_back);
+                    if (back != null) {
+                        back.setVisibility(View.VISIBLE);
+                    }
 
-                ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
-                if (flag != null) {
-                    int resId = R.drawable.flag_blue_48dp;
-                    Drawable drawable = ContextCompat.getDrawable(getActivity(), resId);
-                    flag.setImageDrawable(drawable);
-                }
+                    ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
+                    if (flag != null) {
+                        int resId = R.drawable.flag_blue_48dp;
+                        Drawable drawable = ContextCompat.getDrawable(getActivity(), resId);
+                        flag.setImageDrawable(drawable);
+                    }
 
-                TextView headline = ViewHelper.get(getView(), R.id.header_headline);
-                if (headline != null) {
-                    headline.setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
-                }
-                break;
+                    TextView headline = ViewHelper.get(getView(), R.id.header_headline);
+                    if (headline != null) {
+                        headline
+                            .setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
+                    }
+                    break;
 
-            default: // Race-State: Running -> Start Finishing
-                break;
+                default: // Race-State: Running -> Start Finishing
+                    break;
             }
         }
 
@@ -189,17 +190,17 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
-            case R.id.finish_current:
-                setFinishTime();
-                break;
+                case R.id.finish_current:
+                    setFinishTime();
+                    break;
 
-            case R.id.finish_custom:
-                setFinishTime(getCustomFinishTime());
-                break;
+                case R.id.finish_custom:
+                    setFinishTime(getCustomFinishTime());
+                    break;
 
-            default:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                default:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
             }
         }
 
@@ -229,21 +230,21 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         private void setFinishTime(TimePoint finishTime) {
             Result result = new Result();
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1: // Race-State: Finishing -> End Finishing
-                if (RaceLogRaceStatus.FINISHING.equals(getRace().getStatus())) {
-                    result = getRace().setFinishedTime(finishTime);
-                } else {
-                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.FINISHING.name(), getRace().getStatus().name());
-                }
-                break;
+                case 1: // Race-State: Finishing -> End Finishing
+                    if (RaceLogRaceStatus.FINISHING.equals(getRace().getStatus())) {
+                        result = getRace().setFinishedTime(finishTime);
+                    } else {
+                        result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.FINISHING.name(), getRace().getStatus().name());
+                    }
+                    break;
 
-            default: // Race-State: Running -> Start Finishing
-                if (RaceLogRaceStatus.RUNNING.equals(getRace().getStatus())) {
-                    result = getRace().setFinishingTime(finishTime);
-                } else {
-                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.RUNNING.name(), getRace().getStatus().name());
-                }
-                break;
+                default: // Race-State: Running -> Start Finishing
+                    if (RaceLogRaceStatus.RUNNING.equals(getRace().getStatus())) {
+                        result = getRace().setFinishingTime(finishTime);
+                    } else {
+                        result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.RUNNING.name(), getRace().getStatus().name());
+                    }
+                    break;
             }
 
             if (result.hasError()) {

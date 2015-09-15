@@ -100,6 +100,8 @@ public class TimePanelFragment extends BasePanelFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -160,7 +162,8 @@ public class TimePanelFragment extends BasePanelFragment {
                 if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
                     SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
-                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
+                    mHeaderTime
+                        .setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
                 }
             }
         }
@@ -173,7 +176,7 @@ public class TimePanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRaceHeader)) {
-                resetFragment(mTimeLock, R.id.race_frame, StartTimeFragment.class);
+                resetFragment(mTimeLock, getFrameId(getActivity()), StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
             }
         }
@@ -272,6 +275,17 @@ public class TimePanelFragment extends BasePanelFragment {
                     } else {
                         uncheckMarker(view);
                     }
+                }
+            }
+
+            view = getActivity().findViewById(R.id.race_panel_time);
+            if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
+                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                    view.setVisibility(View.GONE);
+                }
+
+                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                    view.setVisibility(View.VISIBLE);
                 }
             }
         }

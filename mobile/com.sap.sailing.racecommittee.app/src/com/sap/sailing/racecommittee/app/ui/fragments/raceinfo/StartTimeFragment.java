@@ -731,7 +731,7 @@ public class StartTimeFragment extends BaseFragment
                     getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier);
                 }
                 fragment = RaceFlagViewerFragment.newInstance();
-                viewId = R.id.race_frame;
+                viewId = getFrameId(getActivity());
             }
             args.putAll(getArguments());
             args.putSerializable(MainScheduleFragment.START_TIME, startTime);

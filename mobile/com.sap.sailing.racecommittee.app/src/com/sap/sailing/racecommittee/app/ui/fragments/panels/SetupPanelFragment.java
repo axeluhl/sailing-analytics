@@ -166,96 +166,96 @@ public class SetupPanelFragment extends BasePanelFragment {
 
     private void checkStatus() {
         switch (getRace().getStatus()) {
-        case UNSCHEDULED:
-            changeVisibility(mStartProcedureLock, View.GONE);
-            changeVisibility(mStartModeLock, View.GONE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            break;
+            case UNSCHEDULED:
+                changeVisibility(mStartProcedureLock, View.GONE);
+                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                break;
 
-        case PRESCHEDULED:
-            changeVisibility(mStartProcedureLock, View.GONE);
-            changeVisibility(mStartModeLock, View.GONE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            break;
+            case PRESCHEDULED:
+                changeVisibility(mStartProcedureLock, View.GONE);
+                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                break;
 
-        case SCHEDULED:
-            changeVisibility(mStartProcedureLock, View.GONE);
-            changeVisibility(mStartModeLock, View.GONE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            break;
+            case SCHEDULED:
+                changeVisibility(mStartProcedureLock, View.GONE);
+                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                break;
 
-        case STARTPHASE:
-            changeVisibility(mStartProcedureLock, View.VISIBLE);
-            changeVisibility(mStartModeLock, View.VISIBLE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            break;
+            case STARTPHASE:
+                changeVisibility(mStartProcedureLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                break;
 
-        case RUNNING:
-            changeVisibility(mStartProcedureLock, View.VISIBLE);
-            changeVisibility(mStartModeLock, View.VISIBLE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            uncheckMarker(mStartProcedure);
-            uncheckMarker(mStartMode);
-            break;
+            case RUNNING:
+                changeVisibility(mStartProcedureLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                uncheckMarker(mStartProcedure);
+                uncheckMarker(mStartMode);
+                break;
 
-        case FINISHING:
-            changeVisibility(mStartProcedureLock, View.VISIBLE);
-            changeVisibility(mStartModeLock, View.VISIBLE);
-            changeVisibility(mCourseLock, View.VISIBLE);
-            changeVisibility(mWindLock, View.GONE);
-            uncheckMarker(mStartProcedure);
-            uncheckMarker(mStartMode);
-            uncheckMarker(mCourseLock);
-            break;
+            case FINISHING:
+                changeVisibility(mStartProcedureLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mCourseLock, View.VISIBLE);
+                changeVisibility(mWindLock, View.GONE);
+                uncheckMarker(mStartProcedure);
+                uncheckMarker(mStartMode);
+                uncheckMarker(mCourseLock);
+                break;
 
-        case FINISHED:
-            changeVisibility(mStartProcedureLock, View.GONE);
-            changeVisibility(mStartModeLock, View.GONE);
-            changeVisibility(mCourseLock, View.GONE);
-            changeVisibility(mWindLock, View.GONE);
-            uncheckMarker(mStartProcedure);
-            uncheckMarker(mStartMode);
-            uncheckMarker(mCourse);
-            uncheckMarker(mWind);
-            break;
+            case FINISHED:
+                changeVisibility(mStartProcedureLock, View.GONE);
+                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mCourseLock, View.GONE);
+                changeVisibility(mWindLock, View.GONE);
+                uncheckMarker(mStartProcedure);
+                uncheckMarker(mStartMode);
+                uncheckMarker(mCourse);
+                uncheckMarker(mWind);
+                break;
 
-        default:
-            changeVisibility(mStartProcedureLock, View.VISIBLE);
-            changeVisibility(mStartModeLock, View.VISIBLE);
-            changeVisibility(mCourseLock, View.VISIBLE);
-            changeVisibility(mWindLock, View.VISIBLE);
-            uncheckMarker(mStartProcedure);
-            uncheckMarker(mStartMode);
-            uncheckMarker(mCourse);
-            uncheckMarker(mWind);
-            break;
+            default:
+                changeVisibility(mStartProcedureLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mCourseLock, View.VISIBLE);
+                changeVisibility(mWindLock, View.VISIBLE);
+                uncheckMarker(mStartProcedure);
+                uncheckMarker(mStartMode);
+                uncheckMarker(mCourse);
+                uncheckMarker(mWind);
+                break;
         }
     }
 
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mStartProcedure)) {
-                resetFragment(mStartProcedureLock, R.id.race_frame, StartProcedureFragment.class);
+                resetFragment(mStartProcedureLock, getFrameId(getActivity()), StartProcedureFragment.class);
                 setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, 0);
             }
 
             if (!view.equals(mStartMode)) {
-                resetFragment(mStartModeLock, R.id.race_frame, StartModeFragment.class);
+                resetFragment(mStartModeLock, getFrameId(getActivity()), StartModeFragment.class);
                 setMarkerLevel(mStartMode, R.id.start_mode_marker, 0);
             }
 
             if (!view.equals(mCourse)) {
-                resetFragment(mCourseLock, R.id.race_frame, CourseFragment.class);
+                resetFragment(mCourseLock, getFrameId(getActivity()), CourseFragment.class);
                 setMarkerLevel(mCourse, R.id.course_marker, 0);
             }
 
             if (!view.equals(mWind)) {
-                resetFragment(mWindLock, R.id.race_frame, WindFragment.class);
+                resetFragment(mWindLock, getFrameId(getActivity()), WindFragment.class);
                 setMarkerLevel(mWind, R.id.wind_marker, 0);
             }
         }
@@ -345,17 +345,17 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(StartProcedureFragment.newInstance(1));
-                break;
+                case 1:
+                    replaceFragment(StartProcedureFragment.newInstance(1));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
-                break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
             disableToggle(container, markerId);
         }
@@ -385,16 +385,16 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MODE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(StartModeFragment.newInstance(1));
-                break;
+                case 1:
+                    replaceFragment(StartModeFragment.newInstance(1));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -425,16 +425,16 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(CourseFragment.newInstance(1, getRace()));
-                break;
+                case 1:
+                    replaceFragment(CourseFragment.newInstance(1, getRace()));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -465,16 +465,16 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_WIND);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case 0:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(WindFragment.newInstance(1));
-                break;
+                case 1:
+                    replaceFragment(WindFragment.newInstance(1));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }

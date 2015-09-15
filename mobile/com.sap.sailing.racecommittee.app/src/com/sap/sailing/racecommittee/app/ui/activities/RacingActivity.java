@@ -201,8 +201,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
@@ -445,30 +443,29 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     public void processIntent(Intent intent) {
         String action = intent.getAction();
-        View view = findViewById(R.id.race_panel_time);
-        if (view != null) {
-            if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
-                view.setVisibility(View.GONE);
-            }
-
-            if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
-                view.setVisibility(View.VISIBLE);
-            }
-        }
-
         Bundle args = new Bundle();
         args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
         Fragment fragment;
 
-        if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action) && findViewById(R.id.race_frame) != null) {
-            if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
-                fragment = RaceFlagViewerFragment.newInstance();
-            } else {
-                fragment = RaceFinishingFragment.newInstance();
-            }
-            fragment.setArguments(args);
+        if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.race_frame, fragment).commit();
+            Fragment editFragment = null;
+            if (findViewById(R.id.race_edit) != null) {
+                editFragment = getFragmentManager().findFragmentById(R.id.race_edit);
+                if (editFragment != null) {
+                    transaction.remove(editFragment);
+                }
+            }
+            if (editFragment == null && findViewById(R.id.race_frame) != null) {
+                if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
+                    fragment = RaceFlagViewerFragment.newInstance();
+                } else {
+                    fragment = RaceFinishingFragment.newInstance();
+                }
+                fragment.setArguments(args);
+                transaction.replace(R.id.race_frame, fragment);
+            }
+            transaction.commit();
         }
 
         if (AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {

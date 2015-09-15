@@ -9,6 +9,7 @@ import android.support.annotation.IdRes;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
+
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
@@ -84,13 +85,13 @@ public abstract class BasePanelFragment extends RaceFragment {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
                     switch (retValue) {
-                    case 1: // clicked
-                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
-                        break;
+                        case 1: // clicked
+                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
+                            break;
 
-                    default:
-                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
-                        break;
+                        default:
+                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
+                            break;
                     }
                 }
             }
@@ -120,7 +121,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     protected void replaceFragment(RaceFragment fragment) {
-        replaceFragment(fragment, R.id.race_frame);
+        replaceFragment(fragment, getFrameId(getActivity()));
     }
 
     protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {

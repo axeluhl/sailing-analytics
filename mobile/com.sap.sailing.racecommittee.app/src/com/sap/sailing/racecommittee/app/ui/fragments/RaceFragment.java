@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -23,16 +24,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
     private static final String TAG = RaceFragment.class.getName();
+    protected ManagedRace managedRace;
+    protected AppPreferences preferences;
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
         arguments.putString(AppConstants.RACE_ID_KEY, race.getId());
         return arguments;
     }
-
-    protected ManagedRace managedRace;
-
-    protected AppPreferences preferences;
 
     public ManagedRace getRace() {
         return managedRace;
@@ -44,7 +43,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
 
     /**
      * Creates a bundle that contains the race id as parameter for the next fragment
-     * 
+     *
      * @return a bundle containing the race id
      */
     protected Bundle getRecentArguments() {
@@ -75,7 +74,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             ExLog.i(getActivity(), TAG, "no arguments!?");
         }
     }
-    
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -127,5 +126,17 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             }
         }
         return courseName;
+    }
+
+    protected
+    @IdRes
+    int getFrameId(Activity activity) {
+        int frame = 0;
+        if (activity.findViewById(R.id.race_edit) != null) {
+            frame = R.id.race_edit;
+        } else if (activity.findViewById(R.id.race_frame) != null) {
+            frame = R.id.race_frame;
+        }
+        return frame;
     }
 }

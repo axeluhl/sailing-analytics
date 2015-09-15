@@ -90,10 +90,15 @@
         android:layout_height="@dimen/side_button"
         android:layout_alignParentBottom="true"/>
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/race_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/race_panel_flags"
         android:layout_below="@id/panel_switcher"/>
+
+    <FrameLayout
+        android:id="@+id/race_edit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>
