@@ -151,7 +151,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (toolbar != null) {
             if (AppUtils.with(this).isTablet()) {
                 setOverflowIcon();
-                toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
+                toolbar.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.biggerActionBarSize));
             }
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
@@ -422,9 +422,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 }
                 // Actual replacement of the icon
                 TintImageView overflow = (TintImageView) outViews.get(0);
-                overflow.setMinimumWidth((int) getResources().getDimension(R.dimen.bigger_over_flow_width));
-                overflow.setMinimumHeight((int) getResources().getDimension(R.dimen.bigger_over_flow_height));
-                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
+                overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
+                overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
+                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon, 6, 8);
                 overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
                 // Remove listener on layout
                 removeOnGlobalLayoutListener(decorView, this);
