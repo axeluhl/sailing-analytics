@@ -48,7 +48,7 @@ public class EventsOverviewRecentYear extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         this.year.setInnerText(String.valueOf(yearDTO.getYear()));
-        this.eventsCount.setInnerText(i18n.eventsCount(events.size()));
+        this.eventsCount.setInnerText(i18n.eventsCount(yearDTO.getEventCount()));
         boolean first = true;
         for (EventListEventDTO eventDTO : events) {
             PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(eventDTO.getId()
