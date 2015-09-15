@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -387,11 +386,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
-    /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
-
-    /** the replacement service for getRegattaStructureForEvent() */
-    List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId);
 
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForRaceGroup(UUID eventId, List<UUID> visibleCourseAreas,
             List<String> visibleRegattas, boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay)
@@ -618,8 +613,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
-    
-    ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 
