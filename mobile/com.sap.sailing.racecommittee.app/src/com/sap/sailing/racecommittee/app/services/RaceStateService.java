@@ -82,9 +82,9 @@ public class RaceStateService extends Service {
 
         this.poller = new RaceLogPoller(this);
 
-        this.registeredLogListeners = new HashMap<ManagedRace, RaceLogEventVisitor>();
-        this.registeredStateEventSchedulers = new HashMap<ManagedRace, RaceStateEventScheduler>();
-        this.managedIntents = new HashMap<Serializable, List<Pair<PendingIntent, RaceStateEvents>>>();
+        this.registeredLogListeners = new HashMap<>();
+        this.registeredStateEventSchedulers = new HashMap<>();
+        this.managedIntents = new HashMap<>();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         setupNotificationBuilder();
@@ -99,7 +99,7 @@ public class RaceStateService extends Service {
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
         notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_directions_boat)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setContentTitle(getText(R.string.service_info))
             .setContentText(getText(R.string.service_text_no_races))
