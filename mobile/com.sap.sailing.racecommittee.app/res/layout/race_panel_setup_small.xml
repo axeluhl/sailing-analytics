@@ -250,7 +250,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:drawableTop="?wind_off"
                     android:gravity="center"
                     android:text="@string/wind_no_data"
                     android:textAppearance="?textPanelCaption"/>

@@ -325,7 +325,7 @@
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
     <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kn]]></string>
-    <string name="wind_panel"><![CDATA[from %1$.0f°\n%2$.1f kn]]></string>
+    <string name="wind_panel"><![CDATA[from %1$.0f° with %2$.1f kn]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
