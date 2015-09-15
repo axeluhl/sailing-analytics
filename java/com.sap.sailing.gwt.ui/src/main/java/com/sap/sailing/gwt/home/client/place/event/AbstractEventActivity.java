@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -25,16 +23,11 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -185,89 +178,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaId) {
         return homePlacesNavigator.getEventNavigation(getPlaceForRegattaLeaderboard(regattaId), null, false);
-    }
-
-    @Override
-    public void ensureRegattaStructure(final AsyncCallback<List<RaceGroupDTO>> callback) {
-        if (ctx.getRaceGroups() != null) {
-            callback.onSuccess(ctx.getRaceGroups());
-            return;
-        }
-
-        final EventViewDTO eventDTO = ctx.getEventDTO();
-
-        ensureLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
-            @Override
-            public void onSuccess(final List<LeaderboardGroupDTO> leaderboardGroups) {
-                final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-                
-                getSailingService().getRegattaStructureOfEvent(eventDTO.getId(),
-                        new AsyncCallback<List<RaceGroupDTO>>() {
-                    @Override
-                    public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                        if (raceGroups.size() > 0) {
-                            for (LeaderboardGroupDTO leaderboardGroupDTO : leaderboardGroups) {
-                                final long clientTimeWhenResponseWasReceived = System.currentTimeMillis();
-                                if (leaderboardGroupDTO.getAverageDelayToLiveInMillis() != null) {
-                                    timerForClientServerOffset.setLivePlayDelayInMillis(leaderboardGroupDTO
-                                            .getAverageDelayToLiveInMillis());
-                                }
-                                timerForClientServerOffset.adjustClientServerOffset(clientTimeWhenRequestWasSent,
-                                        leaderboardGroupDTO.getCurrentServerTime(), clientTimeWhenResponseWasReceived);
-                            }
-                            ctx.withRaceGroups(raceGroups);
-                            callback.onSuccess(raceGroups);
-                        } else {
-                            getView().showErrorInCurrentTab(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
-                        }
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        // TODO @FM: extract error message
-                        ErrorView errorView = clientFactory.createErrorView(
-                                "Error while loading the regatta structure with service getRegattaStructureOfEvent()", caught);
-                        getView().showErrorInCurrentTab(errorView);
-                        // TODO: notify callback of failure?
-                        // callback.onFailure(caught);
-                        
-                    }
-                });
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
-    }
-    
-    @Override
-    public void ensureLeaderboardGroups(final AsyncCallback<List<LeaderboardGroupDTO>> callback) {
-        if (ctx.getLeaderboardGroups() != null) {
-            callback.onSuccess(ctx.getLeaderboardGroups());
-            return;
-        }
-
-        final EventViewDTO eventDTO = ctx.getEventDTO();
-
-        getSailingService().getLeaderboardGroupsByEventId(eventDTO.getId(),
-                new AsyncCallback<ArrayList<LeaderboardGroupDTO>>() {
-            @Override
-            public void onSuccess(ArrayList<LeaderboardGroupDTO> leaderboardGroups) {
-                ctx.withLeaderboardGroups(leaderboardGroups);
-                callback.onSuccess(leaderboardGroups);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO @FM: extract error message
-                ErrorView errorView = clientFactory.createErrorView(
-                        "Error while loading the leaderboard structure with service getLeaderboardGroupsByEventId()", caught);
-                getView().showErrorInCurrentTab(errorView);
-                // TODO: notify callback of failure?
-                // callback.onFailure(caught);
-
-            }
-        });
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -12,7 +9,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -20,12 +16,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.partials.regattaraces.EventRegattaRaces;
 import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.home.client.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.client.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.home.client.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
@@ -42,9 +37,6 @@ import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigatio
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.regattanavigation.RaceStateLegend;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
@@ -56,7 +48,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
-import com.sap.sse.common.Util.Triple;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -99,7 +90,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField DivElement listFormatContainerUi;
     @UiField FlowPanel compFormatContainerUi;
-    @UiField SimplePanel oldContentContainer;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) RaceListContainer<RaceListRaceDTO> raceListContainerUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
@@ -126,62 +116,32 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        if (ExperimentalFeatures.SHOW_NEW_RACES_LIST) {
-            UUID eventId = myPlace.getCtx().getEventDTO().getId();
-            String regattaId = myPlace.getRegattaId();
-            refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
-                @Override
-                public void setData(RegattaWithProgressDTO data) {
-                    regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
-                }
-            }, new GetRegattaWithProgressAction(eventId, regattaId));
-            addRacesAction(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
-            addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
-            
-            if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
-                listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
-                listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
-                addRacesAction(new RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>() {
-                    @Override
-                    public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
-                        compFormatContainerUi.clear();
-                        for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
-                            compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
-                        }
-                    }
-                }, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
-            } else {
-                listNavigationPanelUi.removeFromParent();
-                compFormatContainerUi.removeFromParent();
+        UUID eventId = myPlace.getCtx().getEventDTO().getId();
+        String regattaId = myPlace.getRegattaId();
+        refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
+            @Override
+            public void setData(RegattaWithProgressDTO data) {
+                regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
             }
-            oldContentContainer.removeFromParent();
-        } else {
-            regattaInfoContainerUi.removeFromParent();
-            listFormatContainerUi.removeFromParent();
-            compFormatContainerUi.removeFromParent();
-            // TODO: understand, and than move this into appropiate place (probably context)
-            final String selectedRegattaId = myPlace.getCtx().getRegattaId();
-            currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
+        }, new GetRegattaWithProgressAction(eventId, regattaId));
+        addRacesAction(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
+        addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
+        
+        if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
+            listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+            listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
+            addRacesAction(new RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>() {
                 @Override
-                public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                    if (raceGroups.size() > 0) {
-                        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> rs = getRegattaStructure();
-                        Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO> selectedRegatta = rs .get(selectedRegattaId);
-                        EventRegattaRaces regattaRaces = new EventRegattaRaces(currentPresenter);
-                        oldContentContainer.setWidget(regattaRaces);
-                        regattaRaces.setRaces(selectedRegatta.getC(), false, selectedRegatta.getB(), selectedRegatta.getA());
-                    } else {
-                        // createEventWithoutRegattasView(event, panel);
+                public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+                    compFormatContainerUi.clear();
+                    for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
+                        compFormatContainerUi.add(new RegattaCompetitionSeries(currentPresenter, series));
                     }
                 }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    // createErrorView(
-                    // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
-                    // caught, panel);
-                }
-            });
+            }, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
+        } else {
+            listNavigationPanelUi.removeFromParent();
+            compFormatContainerUi.removeFromParent();
         }
         contentArea.setWidget(RegattaRacesTabView.this);
     }
@@ -205,23 +165,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         return RegattaRacesPlace.class;
     }
     
-    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
-        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
-        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
-        for (RaceGroupDTO raceGroup : currentPresenter.getCtx().getRaceGroups()) {
-            raceGroupsMap.put(raceGroup.getName(), raceGroup);
-        }
-
-        for (LeaderboardGroupDTO leaderboardGroup : currentPresenter.getCtx().getLeaderboardGroups()) {
-            for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
-                String leaderboardName = leaderboard.name;
-                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(
-                        raceGroupsMap.get(leaderboardName), leaderboard, leaderboardGroup));
-            }
-        }
-        return result;
-    }
-
     private class RegattaRacesTabViewNavigationSelectionCallback implements SelectionCallback<Navigation> {
 
         @Override

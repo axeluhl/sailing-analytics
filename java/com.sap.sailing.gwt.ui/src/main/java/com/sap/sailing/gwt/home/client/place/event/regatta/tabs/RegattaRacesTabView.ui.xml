@@ -25,7 +25,6 @@
             	<g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label>
             </g:FlowPanel>
         </div>
-        <g:SimplePanel ui:field="oldContentContainer"/>
         <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
     </g:HTMLPanel>
 </ui:UiBinder>

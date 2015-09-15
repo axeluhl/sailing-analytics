@@ -1,24 +1,17 @@
 package com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.MultiregattaTabView;
-import com.sap.sailing.gwt.home.client.place.event.partials.eventregatta.EventRegattaList;
 import com.sap.sailing.gwt.home.client.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.client.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
@@ -26,16 +19,11 @@ import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaLi
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
-import com.sap.sse.common.Util.Triple;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -47,8 +35,6 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
-    @UiField SimplePanel content;
-    @UiField DivElement newContentContainerUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
@@ -82,58 +68,10 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
-        if (ExperimentalFeatures.SHOW_NEW_REGATTA_LIST) {
-            refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
-            content.removeFromParent();
-        } else {
-            boatCategoryFilterUi.removeFromParent();
-            regattaListUi.removeFromParent();
-            newContentContainerUi.removeFromParent();
-            // TODO: understand, and than move this into appropiate place (probably context)
-            currentPresenter.ensureRegattaStructure(new AsyncCallback<List<RaceGroupDTO>>() {
-                @Override
-                public void onSuccess(List<RaceGroupDTO> raceGroups) {
-                    if (raceGroups.size() > 0) {
-                        initView();
-                    } else {
-                        // createEventWithoutRegattasView(event, panel);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    // createErrorView(
-                    // "Error while loading the regatta structure with service getRegattaStructureOfEvent()",
-                    // caught, panel);
-                }
-            });
-        }
+        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
         contentArea.setWidget(this);
     }
     
-    protected void initView() {
-        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> regattaStructure = getRegattaStructure();
-        EventRegattaList eventRegattaList = new EventRegattaList(regattaStructure, currentPresenter);
-        content.setWidget(eventRegattaList);
-    }
-    
-    private Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> getRegattaStructure() {
-        Map<String, Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>> result = new HashMap<>();
-        Map<String, RaceGroupDTO> raceGroupsMap = new HashMap<>();
-        for (RaceGroupDTO raceGroup: currentPresenter.getCtx().getRaceGroups()) {
-            raceGroupsMap.put(raceGroup.getName(), raceGroup);
-        }            
-        
-        for (LeaderboardGroupDTO leaderboardGroup : currentPresenter.getCtx().getLeaderboardGroups()) {
-            for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
-                String leaderboardName = leaderboard.name;
-                result.put(leaderboardName, new Triple<RaceGroupDTO, StrippedLeaderboardDTO, LeaderboardGroupDTO>(raceGroupsMap.get(leaderboardName),
-                        leaderboard, leaderboardGroup));
-            }
-        }
-        return result;
-    }
-
     @Override
     public void stop() {
     }

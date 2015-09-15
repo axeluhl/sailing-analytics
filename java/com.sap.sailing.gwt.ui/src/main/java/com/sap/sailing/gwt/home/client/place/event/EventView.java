@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.client.place.event;
 
-import java.util.List;
-
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -19,8 +17,6 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -63,8 +59,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
         PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaName);
         
-        void ensureRegattaStructure(AsyncCallback<List<RaceGroupDTO>> callback);
-        void ensureLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
         void ensureMedia(AsyncCallback<MediaDTO> asyncCallback);
 
         boolean hasMedia();
