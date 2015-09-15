@@ -76,7 +76,7 @@ public class EventContext {
         if(regattaId != null) {
             return regattaId;
         }
-        if(eventDTO != null && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+        if(eventDTO != null && !eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;
