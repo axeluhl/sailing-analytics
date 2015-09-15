@@ -19,7 +19,8 @@
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.columns}">
 			<div class="{res.mediaCss.small12} {style.pageTitle}"><ui:text from="{i18n.races}" /></div>
-			<sp:regattanavigation.RaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}"/>
+			<mp:regattacompetition.TempMobileRaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}" />
+			<!-- <sp:regattanavigation.RaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}"/> -->
 		</div>
 		<mp:regattacompetition.RegattaCompetition ui:field="regattaCompetitionUi" />
 	</g:HTMLPanel>	
