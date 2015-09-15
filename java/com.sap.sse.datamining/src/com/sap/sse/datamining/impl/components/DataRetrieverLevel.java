@@ -45,7 +45,7 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
     public String toString() {
         return "Level " + retrieverLevel + " [retrieverType: " + retrieverType.getSimpleName() 
                                          + ", retrievedDataType: " + retrievedDataType.getSimpleName()
-                                         + ", settingsType: " + settingsType.getSimpleName()
+                                         + ", settingsType: " + (settingsType == null ? "null" : settingsType.getSimpleName())
                                          + ", messageKey: " + retrievedDataTypeMessageKey + "]";
     }
 

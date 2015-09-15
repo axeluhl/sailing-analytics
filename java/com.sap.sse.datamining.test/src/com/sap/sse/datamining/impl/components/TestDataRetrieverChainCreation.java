@@ -1,8 +1,10 @@
 package com.sap.sse.datamining.impl.components;
 
+import static com.sap.sse.datamining.test.util.ConcurrencyTestsUtil.getExecutor;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,8 +26,10 @@ import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.TestNullRetrievalProcessorWithSettings;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
+import com.sap.sse.datamining.test.util.components.Test_NullRetrievalProcessorSettings;
 
 public class TestDataRetrieverChainCreation {
 
@@ -96,18 +100,27 @@ public class TestDataRetrieverChainCreation {
 
         try {
             chainBuilder.getCurrentRetrievedDataType();
+            fail("An IllegalStateException is expected.");
         } catch (IllegalStateException e) {
         }
         try {
             chainBuilder.setFilter(null);
+            fail("An IllegalStateException is expected.");
+        } catch (IllegalStateException e) {
+        }
+        try {
+            chainBuilder.setSettings(null);
+            fail("An IllegalStateException is expected.");
         } catch (IllegalStateException e) {
         }
         try {
             chainBuilder.addResultReceiver(null);
+            fail("An IllegalStateException is expected.");
         } catch (IllegalStateException e) {
         }
         try {
             chainBuilder.build();
+            fail("An IllegalStateException is expected.");
         } catch (IllegalStateException e) {
         }
     }
@@ -242,6 +255,56 @@ public class TestDataRetrieverChainCreation {
                                                Test_HasRaceContext.class, "race");
         
         dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testSteppingToFar() {
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        while (chainBuilder.canStepFurther()) {
+            chainBuilder.stepFurther();
+        }
+        chainBuilder.stepFurther();
+    }
+    
+    @Test
+    public void testRetrieverChainWithSettingsCreation() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> chainWithSettings = 
+                new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
+        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, TestNullRetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
+                Test_NullRetrievalProcessorSettings.class, "legOfCompetitor");
+        
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
+        while (chainBuilder.canStepFurther()) {
+            chainBuilder.stepFurther();
+        }
+        
+        chainBuilder.build();
+        
+        Test_NullRetrievalProcessorSettings settings = new Test_NullRetrievalProcessorSettings("Settings Value");
+        chainBuilder.setSettings(settings);
+        
+        chainBuilder.build();
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testRetrieverChainWithWrongSettingsCreation() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> chainWithSettings = 
+                new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
+        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, TestNullRetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
+                Test_NullRetrievalProcessorSettings.class, "legOfCompetitor");
+        
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
+        while (chainBuilder.canStepFurther()) {
+            chainBuilder.stepFurther();
+        }
+        chainBuilder.setSettings("Error");
+    }
+    
+    @Test(expected=IllegalStateException.class)
+    public void testRetrieverWithNoSettingsButSettedSettingsCreated() {
+        DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
+        chainBuilder.stepFurther(); // Initialization
+        chainBuilder.setSettings("Error");
     }
 
 }
