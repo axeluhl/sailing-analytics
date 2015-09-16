@@ -81,7 +81,7 @@ public class TestFunctionManagerAsFunctionProvider {
     
     @Test
     public void testGetDimensionsForDataRetrieverChainDefinition() {
-        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
 
         List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = new HashMap<>();
@@ -94,7 +94,7 @@ public class TestFunctionManagerAsFunctionProvider {
     
     @Test
     public void testGetReducedDimensionsForDataRetrieverChainDefinition() {
-        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> retrieverChain = createDataRetrieverChainDefinition();
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> retrieverChain = createDataRetrieverChainDefinition();
 
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = server.getDimensionsMappedByLevelFor(retrieverChain);
         for (DataRetrieverLevel<?, ?> retrieverLevel : expectedDimensions.keySet()) {
@@ -115,8 +115,8 @@ public class TestFunctionManagerAsFunctionProvider {
     }
     
     @SuppressWarnings("unchecked")
-    public DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> createDataRetrieverChainDefinition() {
-        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
+    public DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> createDataRetrieverChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         Class<Processor<Collection<Test_Regatta>, Test_Regatta>> regattaRetrieverClass = (Class<Processor<Collection<Test_Regatta>, Test_Regatta>>)(Class<?>) TestRegattaRetrievalProcessor.class;
         dataRetrieverChainDefinition.startWith(regattaRetrieverClass, Test_Regatta.class, "regatta");
         

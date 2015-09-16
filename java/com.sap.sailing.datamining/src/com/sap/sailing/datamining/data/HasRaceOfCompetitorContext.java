@@ -3,9 +3,9 @@ package com.sap.sailing.datamining.data;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.annotations.data.Unit;
 
 public interface HasRaceOfCompetitorContext {
     

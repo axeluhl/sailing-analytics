@@ -1,7 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface BasePolarClusterKey {
 

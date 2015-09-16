@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
@@ -51,11 +52,16 @@ public class QueryFactory {
 
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = queryDefinition.getDataRetrieverChainDefinition().startBuilding(executor);
                 Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(queryDefinition.getFilterSelection());
+                Map<DataRetrieverLevel<?, ?>, SerializableSettings> settingsMappedByRetrieverLevel = queryDefinition.getRetrieverSettings();
                 while (chainBuilder.canStepFurther()) {
                     chainBuilder.stepFurther();
                     
-                    if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
-                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
+                    DataRetrieverLevel<?, ?> currentLevel = chainBuilder.getCurrentRetrieverLevel();
+                    if (settingsMappedByRetrieverLevel.containsKey(currentLevel)) {
+                        chainBuilder.setSettings(settingsMappedByRetrieverLevel.get(currentLevel));
+                    }
+                    if (criteriaMappedByRetrieverLevel.containsKey(currentLevel)) {
+                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(currentLevel));
                     }
                 }
                 chainBuilder.addResultReceiver(groupingProcessor);
@@ -119,8 +125,9 @@ public class QueryFactory {
     }
 
     public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataSourceType dataSource,
-            final DataRetrieverChainDefinition<DataSourceType, ?, ?> dataRetrieverChainDefinition, final DataRetrieverLevel<?, ?> retrieverLevel,
-            final Iterable<Function<?>> dimensions, final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
+            final DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, final DataRetrieverLevel<?, ?> retrieverLevel,
+            final Iterable<Function<?>> dimensions, final Map<DataRetrieverLevel<?, ?>, ? extends SerializableSettings> settings,
+            final Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, final Locale locale,
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         @SuppressWarnings("unchecked")
         Class<HashSet<Object>> resultType = (Class<HashSet<Object>>)(Class<?>) HashSet.class;
@@ -135,16 +142,17 @@ public class QueryFactory {
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
                 while (!chainBuilder.hasBeenInitialized() || chainBuilder.getCurrentRetrieverLevel().getLevel() < retrieverLevel.getLevel()) {
                     chainBuilder.stepFurther();
-                    
-                    if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
-                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
+
+                    DataRetrieverLevel<?, ?> currentLevel = chainBuilder.getCurrentRetrieverLevel();
+                    if (settings.containsKey(currentLevel)) {
+                        chainBuilder.setSettings(settings.get(currentLevel));
+                    }
+                    if (criteriaMappedByRetrieverLevel.containsKey(currentLevel)) {
+                        chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(currentLevel));
                     }
                 }
                 for (Processor<?, ?> groupingExtractor : processorFactory.createGroupingExtractorsForDimensions(
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {
-                    if (dataRetrieverChainDefinition.hasSettings()) {
-                        groupingExtractor.setSettings(dataRetrieverChainDefinition.getSettings());
-                    }
                     chainBuilder.addResultReceiver(groupingExtractor);
                 }
                 

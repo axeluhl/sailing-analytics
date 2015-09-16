@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
@@ -19,7 +20,8 @@ public interface StatisticQueryDefinition<DataSourceType, DataType, ExtractedTyp
     
     public Locale getLocale();
     
-    public DataRetrieverChainDefinition<DataSourceType, DataType, ?> getDataRetrieverChainDefinition();
+    public DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition();
+    public Map<DataRetrieverLevel<?, ?>, SerializableSettings> getRetrieverSettings();
     public Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> getFilterSelection();
     public List<Function<?>> getDimensionsToGroupBy();
     public Function<ExtractedType> getStatisticToCalculate();

@@ -2,19 +2,19 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
-public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> implements Serializable, Comparable<DataRetrieverChainDefinitionDTO<Settings>> {
+import com.sap.sse.common.settings.SerializableSettings;
+
+public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
     private static final long serialVersionUID = 7806173601799997214L;
     
     private UUID id;
     private String name;
     private String dataSourceTypeName;
-    private Settings settings;
     
     private ArrayList<DataRetrieverLevelDTO> retrieverLevels;
-
-    private boolean settingsHaveChanged = false;
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -22,12 +22,10 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
     @Deprecated
     DataRetrieverChainDefinitionDTO() { }
 
-    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, ArrayList<DataRetrieverLevelDTO> retrieverLevels,
-            Settings settings) {
+    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, ArrayList<DataRetrieverLevelDTO> retrieverLevels) {
         this.id = id;
         this.name = name;
         this.dataSourceTypeName = dataSourceTypeName;
-        this.settings = settings;
         this.retrieverLevels = new ArrayList<>(retrieverLevels);
     }
 
@@ -37,14 +35,6 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
 
     public String getName() {
         return name;
-    }
-    
-    public boolean hasSettings() {
-        return settings != null;
-    }
-    
-    public Settings getSettings() {
-        return settings;
     }
 
     public String getDataSourceTypeName() {
@@ -90,9 +80,35 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
         return getRetrieverLevel(retrieverLevel.getLevel() - 1);
     }
 
+    /**
+     * @return <code>true</code>, if any retriever level of this chain has settings.
+     */
+    public boolean hasSettings() {
+        for (DataRetrieverLevelDTO retrieverLevel : retrieverLevels) {
+            if (retrieverLevel.hasSettings()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 
+     * @return the default settings mapped by the retriever levels or an empty map, if there are {@link #hasSettings() no settings}.
+     */
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getDefaultSettings() {
+        HashMap<DataRetrieverLevelDTO, SerializableSettings> settings = new HashMap<>();
+        for (DataRetrieverLevelDTO retrieverLevel : retrieverLevels) {
+            if (retrieverLevel.hasSettings()) {
+                settings.put(retrieverLevel, retrieverLevel.getDefaultSettings());
+            }
+        }
+        return settings;
+    }
+
     @Override
-    public int compareTo(DataRetrieverChainDefinitionDTO<Settings> d) {
-        return this.getName().compareTo(d.getName());
+    public int compareTo(DataRetrieverChainDefinitionDTO other) {
+        return this.getName().compareTo(other.getName());
     }
     
     @Override
@@ -117,26 +133,13 @@ public class DataRetrieverChainDefinitionDTO<Settings extends Serializable> impl
             return false;
         if (getClass() != obj.getClass())
             return false;
-        DataRetrieverChainDefinitionDTO<?> other = (DataRetrieverChainDefinitionDTO<?>) obj;
+        DataRetrieverChainDefinitionDTO other = (DataRetrieverChainDefinitionDTO) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
         } else if (!id.equals(other.id))
             return false;
         return true;
-    }
-
-    public void setSettings(Settings newSettings) {
-        settings = newSettings;
-        settingsHaveChanged = true;
-    }
-
-    public boolean settingsHaveChanged() {
-        return settingsHaveChanged ;
-    }
-
-    public void resetSettingsChangeFlag() {
-        settingsHaveChanged = false;
     }
     
 }

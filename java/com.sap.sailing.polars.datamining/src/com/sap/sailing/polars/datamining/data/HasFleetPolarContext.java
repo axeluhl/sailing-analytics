@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.datamining.shared.annotations.Connector;
+import com.sap.sse.datamining.annotations.Connector;
 
 public interface HasFleetPolarContext {
     

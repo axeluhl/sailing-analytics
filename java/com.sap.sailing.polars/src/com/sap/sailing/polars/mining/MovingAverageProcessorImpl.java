@@ -22,7 +22,6 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.regression.MovingAverageBoatSpeedEstimator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -219,18 +218,6 @@ public class MovingAverageProcessorImpl implements MovingAverageProcessor {
     @Override
     public ClusterGroup<Speed> getSpeedCluster() {
         return speedClusterGroup;
-    }
-
-    @Override
-    public SerializableSettings getSettings() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setSettings(SerializableSettings settings) {
-        // TODO Auto-generated method stub
-        
     }
 
 }

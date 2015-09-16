@@ -41,7 +41,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final Set<StatisticChangedListener> listeners;
     
     private boolean isAwaitingReload;
-    private DataRetrieverChainDefinitionDTO<SerializableSettings> currentRetrieverChainDefinition;
+    private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final Collection<FunctionDTO> extractionFunctions;
     private final Collection<AggregationProcessorDefinitionDTO> aggregatorDefinitions;
     
@@ -95,7 +95,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<SerializableSettings> newRetrieverChainDefinition) {
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
         if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
             currentRetrieverChainDefinition = newRetrieverChainDefinition;
             if (!isAwaitingReload && currentRetrieverChainDefinition != null) {

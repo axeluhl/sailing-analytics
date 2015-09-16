@@ -21,8 +21,8 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
     
     public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry();
-    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition);
-    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition);
+    public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
+    public void unregisterDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     
     public AggregationProcessorDefinitionRegistry getAggregationProcessorRegistry();
     public void registerAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition);

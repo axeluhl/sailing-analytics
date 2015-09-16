@@ -179,6 +179,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
+        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : filterSelectionProvider.getRetrieverSettings().entrySet()) {
+            queryDTO.setRetrieverSettings(retrieverSettingsEntry.getKey(), retrieverSettingsEntry.getValue());
+        }
+        
         for (Entry<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionEntry : filterSelectionProvider.getSelection().entrySet()) {
             queryDTO.setFilterSelectionFor(filterSelectionEntry.getKey(), filterSelectionEntry.getValue());
         }
@@ -263,7 +267,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         }
 
         @Override
-        public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<SerializableSettings> newDataRetrieverChainDefinition) {
+        public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
             if (isAwatingReload()) {
                 statisticProvider.dataRetrieverChainDefinitionChanged(retrieverChainProvider.getDataRetrieverChainDefinition());
                 statisticProvider.reloadComponents();

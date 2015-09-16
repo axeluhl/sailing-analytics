@@ -19,9 +19,9 @@ public interface FunctionProvider {
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
     
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition);
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition);
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**
      * @return The first function, that matches the given DTO or <code>null</code>

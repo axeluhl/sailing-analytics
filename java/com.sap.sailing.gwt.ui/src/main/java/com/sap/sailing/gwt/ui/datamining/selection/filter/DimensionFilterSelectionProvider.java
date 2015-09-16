@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallback;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -159,6 +160,7 @@ class DimensionFilterSelectionProvider {
         final FunctionDTO dimension = getSelectedDimension();
         HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
+        HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsDTO = retrieverLevelSelectionProvider.getRetrieverSettings();
         HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO = retrieverLevelSelectionProvider.getCompleteFilterSelection();
         DataRetrieverLevelDTO retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
         if (filterSelectionDTO.containsKey(retrieverLevel)) {
@@ -167,7 +169,7 @@ class DimensionFilterSelectionProvider {
         busyIndicator.setVisible(true);
         counter.increase();
         dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
-                retrieverLevel, dimensionDTOs, filterSelectionDTO,
+                retrieverLevel, dimensionDTOs, retrieverSettingsDTO, filterSelectionDTO,
                 LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
                     @Override
                     protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {

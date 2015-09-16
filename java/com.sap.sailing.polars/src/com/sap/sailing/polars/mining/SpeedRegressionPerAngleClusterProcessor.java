@@ -21,7 +21,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
-import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
@@ -215,18 +214,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     public ClusterGroup<Bearing> getAngleCluster() {
         return angleClusterGroup;
-    }
-
-    @Override
-    public SerializableSettings getSettings() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setSettings(SerializableSettings settings) {
-        // TODO Auto-generated method stub
-        
     }
 
 }

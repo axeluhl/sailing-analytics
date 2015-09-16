@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -78,16 +77,15 @@ public class DataMiningDTOFactory {
                                                      displayName);
     }
 
-    public DataRetrieverChainDefinitionDTO<SerializableSettings> createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition,
+    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition,
                                                                                  ResourceBundleStringMessages stringMessages, Locale locale) {
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
         for (DataRetrieverLevel<?, ?> retrieverLevel : dataRetrieverChainDefinition.getDataRetrieverLevels()) {
             retrieverLevels.add(createDataRetrieverLevelDTO(retrieverLevel, stringMessages, locale));
         }
-        return new DataRetrieverChainDefinitionDTO<SerializableSettings>(dataRetrieverChainDefinition.getID(),
+        return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(),
                 dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages), dataRetrieverChainDefinition
-                        .getDataSourceType().getSimpleName(), retrieverLevels,
-                dataRetrieverChainDefinition.hasSettings() ? dataRetrieverChainDefinition.getSettings() : null);
+                        .getDataSourceType().getSimpleName(), retrieverLevels);
    }
 
     public DataRetrieverLevelDTO createDataRetrieverLevelDTO(DataRetrieverLevel<?, ?> retrieverLevel,
@@ -99,7 +97,7 @@ public class DataMiningDTOFactory {
         LocalizedTypeDTO localizedRetrievedDataType = new LocalizedTypeDTO(typeName, displayName);
         return new DataRetrieverLevelDTO(retrieverLevel.getLevel(),
                                          retrieverLevel.getRetrieverType().getName(),
-                                         localizedRetrievedDataType);
+                                         localizedRetrievedDataType, retrieverLevel.getDefaultSettings());
     }
 
 }

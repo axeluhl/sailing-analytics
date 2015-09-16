@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -15,8 +15,9 @@ public interface StatisticQueryDefinitionDTO extends Serializable {
     
     public String getLocaleInfoName();
     
-    public DataRetrieverChainDefinitionDTO<?> getDataRetrieverChainDefinition();
-    public Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection();
+    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition();
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings();
+    public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection();
     public ArrayList<FunctionDTO> getDimensionsToGroupBy();
     public FunctionDTO getStatisticToCalculate();
     public AggregationProcessorDefinitionDTO getAggregatorDefinition();

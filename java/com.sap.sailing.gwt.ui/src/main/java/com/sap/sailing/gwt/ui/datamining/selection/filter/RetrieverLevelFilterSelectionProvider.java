@@ -31,7 +31,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     
     private final DataMiningSession session;
     private final ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider;
-    private final DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChain;
+    private final DataRetrieverChainDefinitionDTO retrieverChain;
     private final DataRetrieverLevelDTO retrieverLevel;
     private final Collection<FunctionDTO> availableDimensions;
     
@@ -39,7 +39,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
 
     public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChain,
+            ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
             DataRetrieverLevelDTO retrieverLevel) {
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -150,6 +150,10 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         retrieverChainSelectionProvider.retrieverLevelFilterSelectionChanged(this, dimensionFilterSelectionProvider);
     }
 
+    HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        return retrieverChainSelectionProvider.getRetrieverSettings();
+    }
+
     HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getCompleteFilterSelection() {
         return retrieverChainSelectionProvider.getSelection();
     }
@@ -189,7 +193,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         initializeDimensionSelectionProviders();
     }
 
-    DataRetrieverChainDefinitionDTO<SerializableSettings> getDataRetrieverChain() {
+    DataRetrieverChainDefinitionDTO getDataRetrieverChain() {
         return retrieverChain;
     }
     

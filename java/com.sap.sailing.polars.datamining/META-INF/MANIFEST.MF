@@ -8,6 +8,7 @@ Bundle-Vendor: SAP
 Require-Bundle: org.eclipse.osgi;bundle-version="3.10.1",
  com.sap.sse;bundle-version="1.0.0",
  com.sap.sse.datamining;bundle-version="1.0.0",
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.datamining,
  com.sap.sailing.server;bundle-version="1.0.0",

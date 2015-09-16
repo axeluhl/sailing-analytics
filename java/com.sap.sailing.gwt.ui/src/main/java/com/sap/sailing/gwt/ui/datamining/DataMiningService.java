@@ -22,21 +22,22 @@ public interface DataMiningService extends RemoteService {
     Date getComponentsChangedTimepoint();
 
     HashSet<FunctionDTO> getAllStatistics(String localeInfoName);
-    HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChainDefinition, String localeInfoName);
+    HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName);
     
     HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, String localeInfoName);
+            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, String localeInfoName);
+            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
 
-    ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>> getDataRetrieverChainDefinitions(String localeName);
-    ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
+    ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitions(String localeName);
+    ArrayList<DataRetrieverChainDefinitionDTO> getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
 
-    QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
-            HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName);
+    QueryResultDTO<HashSet<Object>> getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+            HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings,
+            HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName);
     
     <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
 
