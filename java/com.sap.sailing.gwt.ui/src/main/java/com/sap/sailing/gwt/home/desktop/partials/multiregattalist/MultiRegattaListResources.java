@@ -49,7 +49,9 @@ public interface MultiRegattaListResources extends ClientBundle {
         String regattalistitem_steps_step();
         String regattalistitem_steps_stepinactive();
         String regattalistitem_steps_step_infowrapper();
+        String regattalistitem_steps_step_textwrapper();
         String regattalistitem_steps_step_name();
+        String regattalistitem_steps_step_name_dummy();
         String regattalistitem_steps_step_check();
         String regattalistitem_steps_step_progress();
         String regattalistitem_steps_step_fleets();

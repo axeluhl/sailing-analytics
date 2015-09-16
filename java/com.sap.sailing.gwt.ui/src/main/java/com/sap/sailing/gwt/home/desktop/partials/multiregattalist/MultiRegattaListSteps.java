@@ -65,6 +65,9 @@ public class MultiRegattaListSteps extends Composite {
 
     @Override
     protected void onLoad() {
+        for (MultiRegattaListStepsBody widget : allMultiregattaSteps) {
+            widget.init();
+        }
         windowResizeHandlerRegistration = Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {

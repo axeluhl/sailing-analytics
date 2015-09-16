@@ -30,18 +30,24 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
     interface MultiRegattaListStepsBodyUiBinder extends UiBinder<Element, MultiRegattaListStepsBody> {
     }
     
+    @UiField DivElement longNameDummyUi;
+    @UiField DivElement mediumNameDummyUi;
+    
     @UiField DivElement nameUi;
     @UiField DivElement checkUi;
     @UiField DivElement progressUi;
     @UiField DivElement fleetsContainerUi;
+    @UiField DivElement textContainerUi;
 
-    private final String seriesName;
+    private final String seriesName, seriesNameMedium, seriesNameShort;
+    private int seriesNameLength, seriesNameMediumLength;
 
     public MultiRegattaListStepsBody(RegattaProgressSeriesDTO seriesProgress) {
         setElement(uiBinder.createAndBindUi(this));
-        nameUi.getStyle().setVisibility(Visibility.HIDDEN);
-        seriesName = DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName();
-        nameUi.setInnerText(seriesName);
+        textContainerUi.getStyle().setVisibility(Visibility.HIDDEN);
+        longNameDummyUi.setInnerText(seriesName = caculateSeriesName(seriesProgress));
+        mediumNameDummyUi.setInnerText(seriesNameMedium = caculateSeriesNameMedium());
+        seriesNameShort = caculateSeriesNameShort();
         if (seriesProgress.isCompleted()) {
             progressUi.setInnerText(String.valueOf(seriesProgress.getTotalRaceCount()));
         } else {
@@ -51,9 +57,18 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         }
         addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
         setFleetsTooltip(seriesProgress.getFleetNames());
+    }
+    
+    void init() {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
+                int textContainerLength = textContainerUi.getOffsetWidth();
+                seriesNameLength = longNameDummyUi.getOffsetWidth() + textContainerLength;
+                seriesNameMediumLength= mediumNameDummyUi.getOffsetWidth() + textContainerLength;
+                longNameDummyUi.removeFromParent();
+                mediumNameDummyUi.removeFromParent();
+                textContainerUi.getStyle().clearVisibility();
                 renderNames();
             }
         });
@@ -78,20 +93,33 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         }
     }
     
-    private void renderNames() {
-        if (getElement().getOffsetWidth() < nameUi.getOffsetWidth() + checkUi.getOffsetWidth()
-                + progressUi.getOffsetWidth()) {
-            String[] tokens = seriesName.split(" ");
-            StringBuilder initials = new StringBuilder();
-            for (int i = 0; i < tokens.length; i++) {
-                initials.append(tokens[i].charAt(0));
-            }
-            nameUi.setInnerText(initials.toString());
-        }
-        nameUi.setTitle(seriesName);
-        nameUi.getStyle().setVisibility(Visibility.VISIBLE);
+    private String caculateSeriesName(RegattaProgressSeriesDTO seriesProgress) {
+        return DEFAULT_SERIES_NAME.equals(seriesProgress.getName()) ? I18N.races() : seriesProgress.getName();
     }
-
+    
+    private String caculateSeriesNameMedium() {
+        String[] tokens = seriesName.split(" ");
+        StringBuilder initials = new StringBuilder();
+        for (int i = 0; i < tokens.length; i++) {
+            initials.append(tokens[i].charAt(0));
+        }
+        return initials.toString();
+    }
+    
+    private String caculateSeriesNameShort() {
+        return seriesName.substring(0, 1);
+    }
+    
+    private void renderNames() {
+        if (fleetsContainerUi.getOffsetWidth() >= seriesNameLength) {
+            nameUi.setInnerText(seriesName);
+        } else if (fleetsContainerUi.getOffsetWidth() >= seriesNameMediumLength) {
+            nameUi.setInnerText(seriesNameMedium);
+        } else {
+            nameUi.setInnerText(seriesNameShort);
+        }
+    }
+    
     @Override
     public void onResize() {
         renderNames();

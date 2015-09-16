@@ -7,9 +7,13 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListResources" />
 	<div class="{local_res.css.regattalistitem_steps_step}">
 		<div class="{local_res.css.regattalistitem_steps_step_infowrapper}">
-			<div class="{local_res.css.regattalistitem_steps_step_name}" ui:field="nameUi"></div>
-			<div class="{local_res.css.regattalistitem_steps_step_check}" ui:field="checkUi"></div>
-			<div class="{local_res.css.regattalistitem_steps_step_progress}" ui:field="progressUi"></div>
+			<div class="{local_res.css.regattalistitem_steps_step_textwrapper}" ui:field="textContainerUi">
+				<div class="{local_res.css.regattalistitem_steps_step_name_dummy}" ui:field="longNameDummyUi"></div>
+				<div class="{local_res.css.regattalistitem_steps_step_name_dummy}" ui:field="mediumNameDummyUi"></div>
+				<div class="{local_res.css.regattalistitem_steps_step_name}" ui:field="nameUi"></div>
+				<div class="{local_res.css.regattalistitem_steps_step_check}" ui:field="checkUi"></div>
+				<div class="{local_res.css.regattalistitem_steps_step_progress}" ui:field="progressUi"></div>
+			</div>
 			<div class="{local_res.css.regattalistitem_steps_step_fleets}" ui:field="fleetsContainerUi"></div>
 		</div>
 	</div>
