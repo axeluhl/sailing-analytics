@@ -150,7 +150,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, colorProvider,
+        raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
                 resources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));
