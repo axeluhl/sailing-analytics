@@ -84,7 +84,8 @@
   background: #008fcc;
 }
 .regattacompetition_phase_fleet_raceuntracked {
-  background: #666;
+/* background: #666; */
+  background: #f0ab00;
 }
 .regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_title:after {
   display: none;

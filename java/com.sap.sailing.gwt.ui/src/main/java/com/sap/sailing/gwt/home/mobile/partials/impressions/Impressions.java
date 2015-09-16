@@ -60,6 +60,15 @@ public class Impressions extends Composite {
         GWT.log("Got " + images.size() + " images");
         ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<SailingImageDTO>();
         imageCarousel.registerFullscreenViewer(new MobileFullscreenGallery());
+        int count = addImages(imageCarousel, images);
+        if (count > 1) {
+            mobileSectionUi.clearContent();
+            if (count == 2) addImages(imageCarousel, images);
+            mobileSectionUi.addContent(imageCarousel);
+        }
+    }
+    
+    private int addImages(ImageCarousel<SailingImageDTO> imageCarousel, Collection<SailingImageDTO> images) {
         int count = 0;
         for (SailingImageDTO imageDTO : images) {
             if (imageDTO.getHeightInPx() == null || imageDTO.getWidthInPx() == null) {
@@ -70,10 +79,7 @@ public class Impressions extends Composite {
             count++;
             imageCarousel.addImage(imageDTO);
         }
-        if (count > 1) {
-            mobileSectionUi.clearContent();
-            mobileSectionUi.addContent(imageCarousel);
-        }
+        return count;
     }
 
 }

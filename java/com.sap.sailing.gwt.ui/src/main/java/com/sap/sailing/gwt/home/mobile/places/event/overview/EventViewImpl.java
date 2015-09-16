@@ -39,9 +39,18 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     public EventViewImpl(EventView.Presenter presenter) {
         super(presenter, false, false);
         FlowPanel container = new FlowPanel();
-        this.setupOverviewStage(container);
-        this.setupProgress(container);
-        this.setupListContent(container);
+        if (isMultiRegattaEvent()) {
+            this.setupOverviewStage(container);
+            this.setupRegattaStatusList(container);
+        } else {
+            this.setupProgress(container);
+            this.setupLiveRaces(container);
+            this.setupOverviewStage(container);
+            this.setupMiniLeaderboard(container);
+            if (ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE) {
+                initRacesNavigation(container);
+            }
+        }
         this.setupUpdateBox(container);
         this.setupImpressions(container);
         this.setupStatisticsBox(container);
@@ -50,8 +59,7 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupProgress(Panel container) {
         eventStepsUi = new EventSteps();
-        boolean showRegattaProgress = !isMultiRegattaEvent() && ExperimentalFeatures.SHOW_REGATTA_PROGRESS_ON_MOBILE;
-        if (showRegattaProgress) {
+        if (ExperimentalFeatures.SHOW_REGATTA_PROGRESS_ON_MOBILE) {
             refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
             container.add(eventStepsUi);
         }
@@ -63,25 +71,25 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
         container.add(overviewStageUi);
     }
     
-    private void setupListContent(Panel container) {
-        if (isMultiRegattaEvent()) {
-            RegattaStatus regattaStatus = new RegattaStatus(currentPresenter);
-            container.add(regattaStatus);
-            refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(getEventId()));
-        } else {
-            if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
-                liveRacesUi = new RegattaLiveRaces();
-                refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
-                container.add(liveRacesUi);
-            }
-            MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
-            miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
-            container.add(miniLeaderboard);
-            if (ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE) {
-                initRacesNavigation(container);
-            }
+    private void setupRegattaStatusList(Panel container) {
+        RegattaStatus regattaStatus = new RegattaStatus(currentPresenter);
+        container.add(regattaStatus);
+        refreshManager.add(regattaStatus, new GetRegattasAndLiveRacesForEventAction(getEventId()));
+    }
+    
+    private void setupLiveRaces(Panel container) {
+        if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
+            liveRacesUi = new RegattaLiveRaces();
+            refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
+            container.add(liveRacesUi);
         }
+    }
+    
+    private void setupMiniLeaderboard(Panel container) {
+        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
+        miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
+        refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+        container.add(miniLeaderboard);
     }
     
     private void setupUpdateBox(Panel container) {

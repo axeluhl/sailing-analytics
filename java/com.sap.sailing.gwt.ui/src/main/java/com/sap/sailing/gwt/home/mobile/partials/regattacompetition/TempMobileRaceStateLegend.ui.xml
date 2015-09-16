@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.regattanavigation.RegattaNavigationResources" />
+	<div class="{local_res.css.regattanavigation_legend}">
+	    <div class="{local_res.css.regattanavigation_legend_item} {local_res.css.regattanavigation_legend_itemuntracked}"
+	    	style="background-color:#f0ab00; border-color:#f0ab00;">
+	      <ui:text from='{i18n.raceIsFinished}' />
+	    </div>
+	    <div class="{local_res.css.regattanavigation_legend_item} {local_res.css.regattanavigation_legend_itemlive}">
+	      <ui:text from='{i18n.playModeLive}' />
+	    </div>
+	    <div class="{local_res.css.regattanavigation_legend_item} {local_res.css.regattanavigation_legend_itemplanned}">
+	      <ui:text from='{i18n.raceIsPlanned}' />
+	    </div>
+     </div>
+</ui:UiBinder>

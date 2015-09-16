@@ -40,9 +40,11 @@ public class RegattaCompetitionFleetRace extends UIObject {
         } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceplanned());
         }
-        if (trackingState != RaceTrackingState.TRACKED_VALID_DATA) {
-            anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
-        }
+        // TODO: As long as there is no mobile race viewer, show all races as untracked (with different background-color)
+        anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
+        // if (trackingState != RaceTrackingState.TRACKED_VALID_DATA) {
+        // anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
+        // }
     }
 
 }
