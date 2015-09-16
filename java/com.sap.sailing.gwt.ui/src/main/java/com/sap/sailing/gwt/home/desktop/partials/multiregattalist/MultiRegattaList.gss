@@ -198,28 +198,39 @@ img.race_item_windflag {
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
+  overflow-x: visible;         
+}
+.regattalistitem_steps_step_textwrapper {
+  display: inline-block;	
   white-space: nowrap;
 }
 .regattalistitem_steps_step_name {
   font-weight: 600;
   display: inline-block;
   margin-right: 0.333333333333333em;
-  font-size: 0;
+/*   font-size: 0; */
+  font-size: 0.866666666666667em;
 }
-.regattalistitem_steps_step_name::first-letter {
-  font-size: 0.866666666666667rem;
-  margin-right: 0.333333333333333rem;
+.regattalistitem_steps_step_name_dummy {
+  font-weight: 600;
+  display: inline-block;
+  font-size: 0.866666666666667em;
+  position: absolute;
 }
-@media (min-width: 49.0625em) {
-  .regattalistitem_steps_step_name::first-letter {
-    margin-right: 0;
-  }
-}
-@media (min-width: 49.0625em) {
-  .regattalistitem_steps_step_name {
-    font-size: 0.866666666666667em;
-  }
-}
+/* .regattalistitem_steps_step_name::first-letter { */
+/*   font-size: 0.866666666666667rem; */
+/*   margin-right: 0.333333333333333rem; */
+/* } */
+/* @media (min-width: 49.0625em) { */
+/*   .regattalistitem_steps_step_name::first-letter { */
+/*     margin-right: 0; */
+/*   } */
+/* } */
+/* @media (min-width: 49.0625em) { */
+/*   .regattalistitem_steps_step_name { */
+/*     font-size: 0.866666666666667em; */
+/*   } */
+/* } */
 .regattalistitem_steps_step_check {
   display: inline-block;
   vertical-align: middle;
