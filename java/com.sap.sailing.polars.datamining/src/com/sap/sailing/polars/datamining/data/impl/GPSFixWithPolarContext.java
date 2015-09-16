@@ -44,7 +44,7 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
 
     @Override
     public PolarStatistic getPolarStatistics() {
-        return new PolarStatisticImpl(trackedRace, competitor, fix, settings);
+        return new PolarStatisticImpl(trackedRace, competitor, fix, settings, wind.getObject());
     }
 
     @Override
