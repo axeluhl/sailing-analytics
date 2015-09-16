@@ -1,41 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>root</artifactId>
-    <groupId>com.sap.sailing</groupId>
-    <version>1.0.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>com.sap.sailing.domain.shared.android</artifactId>
-  <packaging>eclipse-plugin</packaging>
-  <build>
-	<plugins>
-		<plugin>
-			<groupId>org.eclipse.tycho</groupId>
-			<artifactId>tycho-compiler-plugin</artifactId>
-			<version>${tycho-version}</version>
-			<configuration>
-				<source>1.7</source>
-				<target>1.7</target>
-			</configuration>
-		</plugin>
-		<plugin>
-			<groupId>org.eclipse.tycho</groupId>
-			<artifactId>tycho-source-plugin</artifactId>
-			<version>${tycho-version}</version>
-			<executions>
-				<execution>
-					<id>plugin-source</id>
-					<phase>generate-sources</phase>
-					<goals>
-						<goal>plugin-source</goal>
-					</goals>
-				</execution>
-			</executions>
-		</plugin>
-	</plugins>
-  </build>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>root</artifactId>
+		<groupId>com.sap.sailing</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>com.sap.sailing.domain.shared.android</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<profiles>
 		<profile>
 			<!-- deactivate with parameter '-P !with-mobile' -->
@@ -56,9 +57,13 @@
 							<destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
 							<classesJarExcludes>
 								<classesJarExclude>*.jar</classesJarExclude>
-								<classesJarExclude>generated-sources</classesJarExclude>
-								<classesJarExclude>maven-archiver</classesJarExclude>
+								<classesJarExclude>generated-sources/**</classesJarExclude>
+								<classesJarExclude>maven-archiver/**</classesJarExclude>
+								<classesJarExclude>sourcebundle-l10n-gen/**</classesJarExclude>
 								<classesJarExclude>p2*</classesJarExclude>
+								<classesJarExclude>MANIFEST.MF</classesJarExclude>
+								<classesJarExclude>*.ap_</classesJarExclude>
+								<classesJarExclude>local-artifacts.properties</classesJarExclude>
 							</classesJarExcludes>
 							<sdk>
 								<platform>22</platform>
