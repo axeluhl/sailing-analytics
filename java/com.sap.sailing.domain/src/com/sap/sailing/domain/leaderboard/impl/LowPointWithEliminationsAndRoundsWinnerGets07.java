@@ -1,6 +1,13 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.concurrent.Callable;
+
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Implements an elimination scheme as used by surfing championships, based on a general low point scoring scheme. A
@@ -46,4 +53,20 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
     public ScoringSchemeType getType() {
         return ScoringSchemeType.LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07;
     }
+
+    @Override
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+        // TODO Auto-generated method stub
+        return super.getScoreForRank(leaderboard, raceColumn, competitor, rank, numberOfCompetitorsInRaceFetcher,
+                numberOfCompetitorsInLeaderboardFetcher);
+    }
+
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+        // TODO Auto-generated method stub
+        return super.isValidInTotalScore(leaderboard, raceColumn, at);
+    }
+    
 }
