@@ -1,11 +1,23 @@
 package com.sap.sailing.polars.datamining.shared;
 
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
+
 
 public class PolarAggregationImpl implements PolarAggregation {
     
     private static final long serialVersionUID = 9177124509619315748L;
     private double[] sumSpeedsPerAngle = new double[360];
-    private double[] countPerAngle = new double[360];
+    private int[] countPerAngle = new int[360];
+    private int count = 0;
+    private PolarSheetGenerationSettings settings;
+    
+    public PolarAggregationImpl() {
+        //GWT
+    }
+    
+    public PolarAggregationImpl(PolarSheetGenerationSettings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public void addElement(PolarStatistic dataEntry) {
@@ -16,6 +28,7 @@ public class PolarAggregationImpl implements PolarAggregation {
         }
         sumSpeedsPerAngle[angleDeg] += dataEntry.getBoatSpeed().getKnots();
         countPerAngle[angleDeg]++;
+        count++;
     }
     
     @Override
@@ -28,5 +41,22 @@ public class PolarAggregationImpl implements PolarAggregation {
         }
         return averages;
     }
+
+    @Override
+    public int[] getCountPerAngle() {
+        return countPerAngle;
+    }
+
+    @Override
+    public int getCount() {
+        return count;
+    }
+
+    @Override
+    public PolarSheetGenerationSettings getSettings() {
+        return settings;
+    }
+    
+    
 
 }
