@@ -66,7 +66,9 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
     @Override
     public void showResult(QueryResultDTO<Object> result) {
         if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
+            CloseableTabHeader oldHeader = getSelectedHeader();
             addPolarTabAndFocus();
+            removeTab(oldHeader);
         }
         getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);

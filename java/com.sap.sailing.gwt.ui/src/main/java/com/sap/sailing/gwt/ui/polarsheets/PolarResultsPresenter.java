@@ -4,12 +4,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
@@ -39,6 +42,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Object> {
         Chart polarSheetChart = new Chart().setType(Series.Type.LINE)
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(1))
                 .setPolar(true).setHeight100().setWidth100();
+        polarSheetChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         polarSheetChart.getYAxis().setMin(0);
         polarSheetChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
         polarSheetChart.setOption("/pane/startAngle", 180);
@@ -61,17 +65,22 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Object> {
     protected void internalShowResults(QueryResultDTO<Object> result) {
         Map<GroupKey, Object> results = result.getResults();
         for (Entry<GroupKey, Object> entry : results.entrySet()) {
-            Series series = polarChart.createSeries();
             PolarAggregation aggregation = (PolarAggregation) entry.getValue();
             double[] speedsPerAngle = aggregation.getAverageSpeedsPerAngle();
-            for (int i = 0; i < 360; i++) {
-                double speed = speedsPerAngle[i];
-                if (speed > 0) {
-                    series.addPoint(i - 179, speed, false, false, false);
+            int count = aggregation.getCount();
+            int[] countPerAngle = aggregation.getCountPerAngle();
+            PolarSheetGenerationSettings settings = aggregation.getSettings();
+            if (settings.getMinimumDataCountPerGraph() < count) {
+                Series series = polarChart.createSeries();
+                for (int i = 0; i < 360; i++) {
+                    double speed = speedsPerAngle[i];
+                    if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed > 0) {
+                        series.addPoint(i - 179, speed, false, false, false);
+                    }
                 }
+                series.setName(entry.getKey().asString());
+                polarChart.addSeries(series, false, false);
             }
-            series.setName(entry.getKey().asString());
-            polarChart.addSeries(series);
         }
         wrapperPanel.onResize();
     }

@@ -18,7 +18,6 @@ import com.sap.sse.datamining.shared.GroupKey;
 public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataAggregationProcessor<PolarStatistic, PolarAggregation> {
 
     private static final String POLARS_MESSAGE_KEY = "Polars";
-    //FIXME!!! Replace Integer with actual result data type
     private final Map<GroupKey, PolarAggregation> resultMap = new HashMap<>();
     
     public PolarDataAggregationProcessor(ExecutorService executor,
@@ -37,7 +36,7 @@ public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataAg
     protected void handleElement(GroupedDataEntry<PolarStatistic> element) {
         PolarAggregation polarAggregation = resultMap.get(element.getKey());
         if (polarAggregation == null) {
-            polarAggregation = new PolarAggregationImpl();
+            polarAggregation = new PolarAggregationImpl(element.getDataEntry().getSettings());
             resultMap.put(element.getKey(), polarAggregation);
         }
         polarAggregation.addElement(element.getDataEntry());

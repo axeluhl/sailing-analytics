@@ -21,8 +21,10 @@ public class PolarStatisticImpl implements PolarStatistic {
     private final SpeedWithBearing boatSpeed;
     private final Wind windSpeed;
     private final double trueWindAngleDeg;
+    private final PolarSheetGenerationSettings settings;
 
     public PolarStatisticImpl(TrackedRace trackedRace, Competitor competitor, GPSFixMoving fix, PolarSheetGenerationSettings settings) {
+        this.settings = settings;
         GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         boatSpeed = track.getEstimatedSpeed(fix.getTimePoint());
         Bearing bearing = boatSpeed.getBearing();
@@ -64,7 +66,7 @@ public class PolarStatisticImpl implements PolarStatistic {
         return trueWindAngleDeg;
     }
 
-    private Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {
+    public static Set<WindSource> collectWindSourcesToIgnoreForBearing(TrackedRace race, boolean excludeCourseBased) {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {
@@ -91,7 +93,7 @@ public class PolarStatisticImpl implements PolarStatistic {
         return windSourcesToExclude;
     }
     
-    private Set<WindSource> collectWindSourcesToIgnoreForSpeed(TrackedRace race) {
+    public static Set<WindSource> collectWindSourcesToIgnoreForSpeed(TrackedRace race) {
         Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
         Iterable<WindSource> combinedSources = race.getWindSources(WindSourceType.COMBINED);
         for (WindSource combinedSource : combinedSources) {
@@ -114,6 +116,11 @@ public class PolarStatisticImpl implements PolarStatistic {
             windSourcesToExclude.add(webSource);
         }
         return windSourcesToExclude;
+    }
+
+    @Override
+    public PolarSheetGenerationSettings getSettings() {
+        return settings;
     }
 
 }
