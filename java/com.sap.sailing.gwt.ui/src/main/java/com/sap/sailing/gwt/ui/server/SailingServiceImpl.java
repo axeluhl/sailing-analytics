@@ -325,6 +325,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
+import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogEventDTO;
@@ -1569,12 +1570,77 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public RaceboardDataDTO getRaceboardData(String regattaName, String raceName,
+            String leaderboardName, String leaderboardGroupName, UUID eventId) {
+        RaceWithCompetitorsDTO raceDTO = null;
+        Map<CompetitorDTO, BoatDTO> competitorBoats = null;
+        Regatta regatta = getService().getRegattaByName(regattaName);
+        if(regatta != null) {
+            RaceDefinition race = regatta.getRaceByName(raceName);
+            if(race != null) {
+                RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
+                TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
+                List<CompetitorDTO> competitors = convertToCompetitorDTOs(race.getCompetitors());
+                TrackedRaceDTO trackedRaceDTO = null; 
+                if (trackedRace != null) {
+                    trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+
+                    HashMap<String, CompetitorDTO> competitorsMap = new HashMap<>();
+                    for(CompetitorDTO competitorDTO: competitors) {
+                        competitorsMap.put(competitorDTO.getIdAsString(), competitorDTO);
+                    }
+
+                    competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
+                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                        Boat boatOfCompetitor = trackedRace.resolveBoatOfCompetitor(competitor);
+                        if(boatOfCompetitor != null) {
+                            BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
+                            competitorBoats.put(competitorsMap.get(competitor.getId().toString()), boatDTO);
+                        }
+                    }
+                }
+                raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, competitors, trackedRaceDTO, getService().isRaceBeingTracked(regatta, race));
+                if (trackedRace != null) {
+                    getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
+                }
+                raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
+            }                
+        }
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        LeaderboardGroup leaderboardGroup = leaderboardGroupName != null ? getService().getLeaderboardGroupByName(leaderboardGroupName) : null;
+        Event event = eventId != null ? getService().getEvent(eventId)  : null;
+        
+        boolean isValidLeaderboard = leaderboard != null; 
+        boolean isValidLeaderboardGroup = false;
+        if(leaderboardGroup != null) {
+            for(Leaderboard leaderboardInGroup: leaderboardGroup.getLeaderboards()) {
+                if(leaderboardInGroup.getName().equals(leaderboard.getName())) {
+                    isValidLeaderboardGroup = true;
+                    break;
+                }
+            }
+        }
+        boolean isValidEvent = event != null;
+        if(event != null && leaderboardGroup != null) {
+            isValidEvent = false;
+            for(LeaderboardGroup leaderboardGroupInEvent: event.getLeaderboardGroups()) {
+                if(leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())) {
+                    isValidEvent = true;
+                    break;
+                }
+            }
+        }
+
+        RaceboardDataDTO result = new RaceboardDataDTO(raceDTO, competitorBoats, isValidLeaderboard, isValidLeaderboardGroup, isValidEvent);
+        return result;
+    }
+
+    @Override
     public CompactRaceMapDataDTO getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier) throws NoWindException {
         final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositions(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
-        final Map<CompetitorDTO, BoatDTO> competitorBoats = getBoatsOfCompetitors(raceIdentifier);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
         final QuickRanksDTO quickRanks = getQuickRanks(raceIdentifier, date);
@@ -1583,7 +1649,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
-        return new CompactRaceMapDataDTO(boatPositions, competitorBoats, coursePositions, courseSidelines, quickRanks, simulationResultVersion);
+        return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks, simulationResultVersion);
     }
 
     /**
@@ -1725,22 +1791,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             }
                         }
                     }
-                }
-            }
-        }
-        return result;
-    }
-
-    private Map<CompetitorDTO, BoatDTO> getBoatsOfCompetitors(RegattaAndRaceIdentifier raceIdentifier) {
-        Map<CompetitorDTO, BoatDTO> result = new HashMap<CompetitorDTO, BoatDTO>();
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        if (trackedRace != null) {
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                Boat boatOfCompetitor = trackedRace.resolveBoatOfCompetitor(competitor);
-                if(boatOfCompetitor != null) {
-                    CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                    BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
-                    result.put(competitorDTO, boatDTO);
                 }
             }
         }

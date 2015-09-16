@@ -163,7 +163,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
                     final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
-                            competitorSelection, colorProvider, getStringMessages(), showMapControls, showViewStreamlets,
+                            competitorSelection, getStringMessages(), showMapControls, showViewStreamlets,
                             showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false) {
                         @Override
                         protected void showAdditionalControls(MapWidget map) {
