@@ -15,11 +15,16 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSe
 
 public class CompositeSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     
-    private final Iterable<Component<?>> components;
+    private final Collection<Component<?>> components;
     private final Map<Component<?>, SettingsDialogComponent<?>> dialogComponents;
 
     public CompositeSettingsDialogComponent(Iterable<Component<?>> components) {
-        this.components = components;
+        this.components = new HashSet<>();
+        for (Component<?> component : components) {
+            if (component.hasSettings()) {
+                this.components.add(component);
+            }
+        }
         dialogComponents = new HashMap<>();
     }
 

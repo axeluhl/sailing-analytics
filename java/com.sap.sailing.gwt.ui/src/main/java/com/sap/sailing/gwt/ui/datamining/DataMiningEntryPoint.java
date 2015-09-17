@@ -72,7 +72,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 Collection<Component<?>> components = new HashSet<>();
                 components.add(queryRunner);
                 components.add(resultsPresenter);
-                new CompositeTabbedSettingsDialog(getStringMessages(), components, getStringMessages().dataMiningSettings()).show();
+                new CompositeTabbedSettingsDialog(getStringMessages(), components, getStringMessages().dataMining()).show();
             }
         });
         queryDefinitionProviderWithControls.addControl(settingsAnchor);
