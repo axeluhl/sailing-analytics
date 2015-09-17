@@ -345,26 +345,17 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             
             Map<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = queryDefinitionDTO.getRetrieverSettings();
             Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinitionDTO.getFilterSelection();
-            for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverChain.getDataRetrieverLevels()) {
-                if (retrieverSettings.containsKey(retrieverLevel)) {
-                    queryDefinition.setRetrieverSettings(retrieverLevel, retrieverSettings.get(retrieverLevel));
+            for (DataRetrieverLevelDTO retrieverLevelDTO : queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevels()) {
+                if (retrieverSettings.containsKey(retrieverLevelDTO)) {
+                    queryDefinition.setRetrieverSettings(retrieverChain.getDataRetrieverLevel(retrieverLevelDTO.getLevel()), retrieverSettings.get(retrieverLevelDTO));
                 }
                 
-                if (filterSelection.containsKey(retrieverLevel)) {
-                    for (Entry<FunctionDTO, HashSet<? extends Serializable>> levelSpecificFilterSelectionEntry : filterSelection.get(retrieverLevel).entrySet()) {
+                if (filterSelection.containsKey(retrieverLevelDTO)) {
+                    for (Entry<FunctionDTO, HashSet<? extends Serializable>> levelSpecificFilterSelectionEntry : filterSelection.get(retrieverLevelDTO).entrySet()) {
                         Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
                         if (dimensionToFilterBy != null) {
-                            queryDefinition.setFilterSelection(retrieverLevel, dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
+                            queryDefinition.setFilterSelection(retrieverChain.getDataRetrieverLevel(retrieverLevelDTO.getLevel()), dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
                         }
-                    }
-                }
-            }
-            for (Entry<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
-                DataRetrieverLevel<?, ?> retrieverLevel = retrieverChain.getDataRetrieverLevel(levelSpecificFilterSelection.getKey().getLevel());
-                for (Entry<FunctionDTO, HashSet<? extends Serializable>> levelSpecificFilterSelectionEntry : levelSpecificFilterSelection.getValue().entrySet()) {
-                    Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
-                    if (dimensionToFilterBy != null) {
-                        queryDefinition.setFilterSelection(retrieverLevel, dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
                     }
                 }
             }

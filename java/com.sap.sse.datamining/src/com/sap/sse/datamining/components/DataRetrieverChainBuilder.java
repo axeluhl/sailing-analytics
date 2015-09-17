@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.components;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 
 
@@ -57,7 +58,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
      * @throws IllegalArgumentException if the <code>SettingsType</code> isn't applicable for the
      *         {@link DataRetrieverLevel#getSettingsType() settings of the current retriever level}.
      */
-    public <SettingsType> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings);
+    public <SettingsType extends SerializableSettings> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings);
     
     /**
      * Adds a result receiver to the data retriever of the current level.

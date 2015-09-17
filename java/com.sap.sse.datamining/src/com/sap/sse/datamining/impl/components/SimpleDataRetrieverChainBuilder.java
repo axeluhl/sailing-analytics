@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -23,7 +24,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
 
     private final Map<Integer, FilterCriterion<?>> filters;
     private final Map<Integer, Collection<Processor<?, ?>>> receivers;
-    private final Map<Integer, Object> settings;
+    private final Map<Integer, SerializableSettings> settings;
     private int currentRetrieverLevelIndex;
 
     /**
@@ -83,7 +84,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
     }
     
     @Override
-    public <SettingsType> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings) {
+    public <SettingsType extends SerializableSettings> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings) {
         if (!hasBeenInitialized()) {
             throw new IllegalStateException("The builder hasn't been initialized");
         }
@@ -184,15 +185,16 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                     + retrieverType.getSimpleName() + "'", e);
         }
         
-        Object settings = null;
+        SerializableSettings settings = null;
         if (settingsType != null) {
-            this.settings.get(retrieverLevelIndex);
+            settings = this.settings.containsKey(retrieverLevelIndex) ? this.settings.get(retrieverLevelIndex)
+                                                                      : retrieverLevels.get(retrieverLevelIndex).getDefaultSettings();
         }
         return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, settingsType, retrieverLevelIndex);
     }
 
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Object settings, Class<?> settingsType, int retrieverLevelIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, SerializableSettings settings, Class<?> settingsType, int retrieverLevelIndex) {
         try {
             Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
             if (filter != null) {

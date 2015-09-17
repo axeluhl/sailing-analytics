@@ -30,6 +30,7 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
         this.dataRetrieverChainDefinition = dataRetrieverChainDefinition;
+        this.retrieverSettings = new HashMap<>();
         this.filterSelection = new HashMap<>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }

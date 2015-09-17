@@ -12,6 +12,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -24,10 +26,10 @@ import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
 import com.sap.sse.datamining.test.util.components.TestLegOfCompetitorWithContextRetrievalProcessor;
-import com.sap.sse.datamining.test.util.components.TestNullRetrievalProcessorWithSettings;
 import com.sap.sse.datamining.test.util.components.TestRaceWithContextRetrievalProcessor;
 import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor;
-import com.sap.sse.datamining.test.util.components.Test_NullRetrievalProcessorSettings;
+import com.sap.sse.datamining.test.util.components.Test_RetrievalProcessorSettings;
+import com.sap.sse.datamining.test.util.components.Test_RetrievalProcessorWithSettings;
 
 public class TestDataRetrieverChainCreation {
 
@@ -268,49 +270,65 @@ public class TestDataRetrieverChainCreation {
     public void testRetrieverChainWithSettingsCreation() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> chainWithSettings = 
                 new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
-        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, TestNullRetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
-                Test_NullRetrievalProcessorSettings.class, new Test_NullRetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
+        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, Test_RetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
+                Test_RetrievalProcessorSettings.class, new Test_RetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
         
         DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
         while (chainBuilder.canStepFurther()) {
             chainBuilder.stepFurther();
         }
         
-        chainBuilder.build();
+        Processor<Collection<Test_Regatta>, ?> firstRetriever = chainBuilder.build();
+        Test_RetrievalProcessorWithSettings lastRetriever = getLastRetriever(firstRetriever);
+        assertThat(lastRetriever.getSettings().getValue(), is("Default Settings"));
         
-        Test_NullRetrievalProcessorSettings settings = new Test_NullRetrievalProcessorSettings("Settings Value");
+        Test_RetrievalProcessorSettings settings = new Test_RetrievalProcessorSettings("Settings Value");
         chainBuilder.setSettings(settings);
         
-        chainBuilder.build();
+        firstRetriever = chainBuilder.build();
+        lastRetriever = getLastRetriever(firstRetriever);
+        assertThat(lastRetriever.getSettings().getValue(), is("Settings Value"));
     }
     
+    private Test_RetrievalProcessorWithSettings getLastRetriever(Processor<Collection<Test_Regatta>, ?> firstRetriever) {
+        TestRaceWithContextRetrievalProcessor raceRetriever = (TestRaceWithContextRetrievalProcessor) Util.get(((TestRegattaRetrievalProcessor) firstRetriever).getResultReceivers(), 0);
+        TestLegOfCompetitorWithContextRetrievalProcessor legRetriever = (TestLegOfCompetitorWithContextRetrievalProcessor) Util.get(raceRetriever.getResultReceivers(), 0);
+        Test_RetrievalProcessorWithSettings lastRetriever = (Test_RetrievalProcessorWithSettings) Util.get(legRetriever.getResultReceivers(), 0);
+        return lastRetriever;
+    }
+
     @Test(expected=NullPointerException.class)
     public void testRetrieverChainDefinitionWithSettingsButWithoutDefaultSettings() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> chainWithSettings = 
                 new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
-        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, TestNullRetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
-                Test_NullRetrievalProcessorSettings.class, null, "legOfCompetitor");
+        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, Test_RetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
+                Test_RetrievalProcessorSettings.class, null, "legOfCompetitor");
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testRetrieverChainWithWrongSettingsCreation() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> chainWithSettings = 
                 new SimpleDataRetrieverChainDefinition<>(dataRetrieverChainDefinition, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
-        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, TestNullRetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
-                Test_NullRetrievalProcessorSettings.class, new Test_NullRetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
+        chainWithSettings.endWith(TestLegOfCompetitorWithContextRetrievalProcessor.class, Test_RetrievalProcessorWithSettings.class, Test_HasLegOfCompetitorContext.class,
+                Test_RetrievalProcessorSettings.class, new Test_RetrievalProcessorSettings("Default Settings"), "legOfCompetitor");
         
         DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = chainWithSettings.startBuilding(getExecutor());
         while (chainBuilder.canStepFurther()) {
             chainBuilder.stepFurther();
         }
-        chainBuilder.setSettings("Error");
+        chainBuilder.setSettings(new WrongSettings());
     }
     
     @Test(expected=IllegalStateException.class)
     public void testRetrieverWithNoSettingsButSettedSettingsCreated() {
         DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
         chainBuilder.stepFurther(); // Initialization
-        chainBuilder.setSettings("Error");
+        chainBuilder.setSettings(new WrongSettings());
+    }
+    
+    public class WrongSettings extends SerializableSettings {
+        private static final long serialVersionUID = 8114560334614499761L;
+        
     }
 
 }
