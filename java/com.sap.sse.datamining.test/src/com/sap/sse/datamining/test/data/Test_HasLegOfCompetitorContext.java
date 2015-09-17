@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.test.data;
 
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.test.domain.Test_Competitor;
 import com.sap.sse.datamining.test.domain.Test_Leg;
 

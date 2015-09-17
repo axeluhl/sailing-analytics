@@ -1,43 +1,34 @@
-package com.sap.sse.datamining.shared.annotations;
+package com.sap.sse.datamining.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Locale;
 
 /**
- * Methods marked with this annotation will be used as dimensions for the data mining framework. The method will be called,
- * if the dimension value of a data element is requested.<br />
+ * Methods marked with this annotation indicate, that the result type contains marked methods.<br />
  * The marked method has to match the following conditions or the data mining could fail:
  * <ul>
- *      <li>Has no parameters (except if the parameter list is exactly {@link Locale}, {@link ResourceBundleStringMessages})</li>
+ *      <li>Has no parameters</li>
  *      <li>The return type isn't <code>void</code></li>
  *      <li>Is side effect free</li>
  * </ul>
- * 
- * The return type of a marked method should be:
- * <ul>
- *      <li>A primitive type or wrapper class.</li>
- *      <li>Classes that implement <code>equals()</code>, <code>hashCode()</code> and <code>toString()</code>.
- * </ul>
- * Otherwise the grouping could become incorrect and the result presentation will be unreadable.
  * 
  * @author Lennart Hensler (D054527)
  */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Dimension {
-
+public @interface Connector {
+    
     /**
      * The message key used for internationalization.<br />
      * If there are more than one ordinal in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
      * then the messages will be concatenated (separated by a space).
      */
-    public String messageKey();
-    
+    public String messageKey() default "";
+
     /**
      * The ordinal used for the sorting of functions. The default value is {@link Integer#MAX_VALUE}.<br />
      * <br />
@@ -48,4 +39,9 @@ public @interface Dimension {
      */
     public int ordinal() default Integer.MAX_VALUE;
     
+    /**
+     * If <code>false</code>, the connection won't be used to find {@link Statistic Statistics}.
+     */
+    public boolean scanForStatistics() default true;
+
 }

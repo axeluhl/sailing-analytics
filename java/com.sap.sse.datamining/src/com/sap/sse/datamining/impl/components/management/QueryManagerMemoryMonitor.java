@@ -83,7 +83,7 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
         double totalMemoryMB = (double) totalMemory / 1024 / 1024;
         logInfo(MEMORY_STATUS_LOG_PREFIX + "Free " + String.format("%1$,.2f", freeMemoryMB) + " MB, Total " +
                 String.format("%1$,.2f", totalMemoryMB) + " MB, Free in Percent " +
-                freeMemoryInPercent + "% with " + numberOfRunningQueries + " queries running.");
+                String.format("%1$,.2f", freeMemoryInPercent * 100) + "% with " + numberOfRunningQueries + " queries running.");
     }
 
     @Override

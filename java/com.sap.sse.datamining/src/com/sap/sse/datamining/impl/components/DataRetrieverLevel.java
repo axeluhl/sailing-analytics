@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.Processor;
 
 public class DataRetrieverLevel<InputType, RetrievedDataType> {
@@ -8,14 +9,19 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
     private final Class<? extends Processor<InputType, RetrievedDataType>> retrieverType;
     private final Class<RetrievedDataType> retrievedDataType;
     private final String retrievedDataTypeMessageKey;
+    private final Class<?> settingsType;
+    private final SerializableSettings defaultSettings;
 
     public DataRetrieverLevel(int retrieverLevel,
-                                            Class<? extends Processor<InputType, RetrievedDataType>> retrieverType,
-                                            Class<RetrievedDataType> retrievedDataType, String retrievedDataTypeMessageKey) {
+                              Class<? extends Processor<InputType, RetrievedDataType>> retrieverType,
+                              Class<RetrievedDataType> retrievedDataType, Class<?> settingsType,
+                              String retrievedDataTypeMessageKey, SerializableSettings defaultSettings) {
         this.retrieverLevel = retrieverLevel;
         this.retrieverType = retrieverType;
         this.retrievedDataType = retrievedDataType;
         this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
+        this.settingsType = settingsType;
+        this.defaultSettings = defaultSettings;
     }
     
     public int getLevel() {
@@ -29,14 +35,28 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
     public Class<RetrievedDataType> getRetrievedDataType() {
         return retrievedDataType;
     }
+    
     public String getRetrievedDataTypeMessageKey() {
         return retrievedDataTypeMessageKey;
+    }
+    
+    public boolean hasSettings() {
+        return getDefaultSettings() != null;
+    }
+
+    public Class<?> getSettingsType() {
+        return settingsType;
+    }
+
+    public SerializableSettings getDefaultSettings() {
+        return defaultSettings;
     }
     
     @Override
     public String toString() {
         return "Level " + retrieverLevel + " [retrieverType: " + retrieverType.getSimpleName() 
                                          + ", retrievedDataType: " + retrievedDataType.getSimpleName()
+                                         + ", settingsType: " + (settingsType == null ? "null" : settingsType.getSimpleName())
                                          + ", messageKey: " + retrievedDataTypeMessageKey + "]";
     }
 
@@ -48,6 +68,7 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
         result = prime * result + ((retrievedDataTypeMessageKey == null) ? 0 : retrievedDataTypeMessageKey.hashCode());
         result = prime * result + retrieverLevel;
         result = prime * result + ((retrieverType == null) ? 0 : retrieverType.hashCode());
+        result = prime * result + ((settingsType == null) ? 0 : settingsType.hashCode());
         return result;
     }
 
@@ -76,6 +97,11 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
             if (other.retrieverType != null)
                 return false;
         } else if (!retrieverType.equals(other.retrieverType))
+            return false;
+        if (settingsType == null) {
+            if (other.settingsType != null)
+                return false;
+        } else if (!settingsType.equals(other.settingsType))
             return false;
         return true;
     }

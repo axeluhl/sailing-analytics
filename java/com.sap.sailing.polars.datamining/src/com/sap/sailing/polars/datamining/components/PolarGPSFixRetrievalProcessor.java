@@ -29,14 +29,16 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasCompetitorPolarContext, HasGPSFixPolarContext> {
 
-    public PolarGPSFixRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers, int retrievalLevel) {
+    private final PolarSheetGenerationSettings settings;
+
+    public PolarGPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers,
+            PolarSheetGenerationSettings settings, int retrievalLevel) {
         super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel);
+        this.settings = settings;
     }
 
     @Override
     protected Iterable<HasGPSFixPolarContext> retrieveData(HasCompetitorPolarContext element) {
-        PolarDataMiningSettings settings = (PolarDataMiningSettings) getSettings();
         ClusterGroup<Speed> windSpeedRangeGroup = toClusterGroup(settings.getWindSpeedStepping());
         TrackedRace trackedRace = element.getTrackedRace();
         Competitor competitor = element.getCompetitor();

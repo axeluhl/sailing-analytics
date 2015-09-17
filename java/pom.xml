@@ -23,6 +23,7 @@
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
     <module>com.sap.sse.datamining</module>
+    <module>com.sap.sse.datamining.annotations</module>
     <module>com.sap.sse.datamining.shared</module>
     <module>com.sap.sse.security</module>
     <module>com.sap.sse.security.common</module>

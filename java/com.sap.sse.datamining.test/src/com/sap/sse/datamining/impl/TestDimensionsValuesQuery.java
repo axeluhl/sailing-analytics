@@ -45,7 +45,7 @@ public class TestDimensionsValuesQuery {
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     private static final Locale locale = Locale.ENGLISH;
     
-    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext, ?> dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition;
     private Collection<Test_Regatta> dataSource;
     
     //Test_HasRaceContext dimensions
@@ -97,7 +97,7 @@ public class TestDimensionsValuesQuery {
         raceDimensions.add(dimensionBoatClassName);
         raceDimensions.add(dimensionYear);
         Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
-        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*race*/ 1), raceDimensions, filterSelection, locale);
+        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*race*/ 1), raceDimensions, new HashMap<>(), filterSelection, locale);
         
         Map<GroupKey, HashSet<Object>> expectedRaceResultData = buildExpectedRaceResultData();
         QueryResult<HashSet<Object>> result = dimensionsValueQuery.run();
@@ -107,7 +107,7 @@ public class TestDimensionsValuesQuery {
         legDimensions.add(dimensionLegNumber);
         legDimensions.add(dimensionCompetitorName);
         legDimensions.add(dimensionCompetitorSailID);
-        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*leg*/ 2), legDimensions, filterSelection, locale);
+        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*leg*/ 2), legDimensions, new HashMap<>(), filterSelection, locale);
 
         Map<GroupKey, HashSet<Object>> expectedLegResultData = buildExpectedLegResultData();
         result = dimensionsValueQuery.run();

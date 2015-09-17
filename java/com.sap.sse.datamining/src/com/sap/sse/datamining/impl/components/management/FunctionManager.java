@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.management.FunctionProvider;
@@ -28,7 +29,6 @@ import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFil
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
-import com.sap.sse.datamining.shared.annotations.Connector;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.util.Classes;
 
@@ -253,7 +253,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     }
     
     @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
         for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
@@ -264,7 +264,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
     @Override
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?, ?> dataRetrieverChainDefinition) {
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = new HashMap<>();
         List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();

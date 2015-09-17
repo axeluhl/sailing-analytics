@@ -2,7 +2,7 @@ package com.sap.sse.datamining.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.data.Unit;
 
 public interface AdditionalResultData extends Serializable {
 

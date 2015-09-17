@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
 public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefinitionDTO {
@@ -14,7 +15,8 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     private FunctionDTO statisticToCalculate;
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
     private ArrayList<FunctionDTO> dimensionsToGroupBy;
-    private DataRetrieverChainDefinitionDTO<? extends Serializable> dataRetrieverChainDefinition;
+    private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
+    private HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings;
     private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
     
     /**
@@ -23,13 +25,18 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     @Deprecated
     ModifiableStatisticQueryDefinitionDTO() { }
 
-    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO<? extends Serializable> dataRetrieverChainDefinition) {
+    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
         this.dataRetrieverChainDefinition = dataRetrieverChainDefinition;
+        this.retrieverSettings = new HashMap<>();
         this.filterSelection = new HashMap<>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
+    }
+    
+    public void setRetrieverSettings(DataRetrieverLevelDTO retrieverLevel, SerializableSettings settings) {
+        retrieverSettings.put(retrieverLevel, settings);
     }
     
     public void setFilterSelectionFor(DataRetrieverLevelDTO retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
@@ -46,8 +53,13 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
     
     @Override
-    public DataRetrieverChainDefinitionDTO<?> getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
         return dataRetrieverChainDefinition;
+    }
+    
+    @Override
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        return retrieverSettings;
     }
 
     @Override

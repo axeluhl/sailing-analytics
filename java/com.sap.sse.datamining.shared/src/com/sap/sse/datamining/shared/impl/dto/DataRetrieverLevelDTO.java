@@ -2,12 +2,16 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.settings.SerializableSettings;
+
 public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetrieverLevelDTO> {
     private static final long serialVersionUID = 6911713148350359643L;
     
     private int retrieverLevel;
     private String retrieverTypeName;
     private LocalizedTypeDTO retrievedDataType;
+    private SerializableSettings defaultSettings;
+
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -15,10 +19,12 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
     @Deprecated
     DataRetrieverLevelDTO() { }
     
-    public DataRetrieverLevelDTO(int retrieverLevel, String retrieverTypeName, LocalizedTypeDTO retrievedDataType) {
+    public DataRetrieverLevelDTO(int retrieverLevel, String retrieverTypeName,
+            LocalizedTypeDTO retrievedDataType, SerializableSettings defaultSettings) {
         this.retrieverLevel = retrieverLevel;
         this.retrieverTypeName = retrieverTypeName;
         this.retrievedDataType = retrievedDataType;
+        this.defaultSettings = defaultSettings;
     }
 
     public int getLevel() {
@@ -31,6 +37,14 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
 
     public LocalizedTypeDTO getRetrievedDataType() {
         return retrievedDataType;
+    }
+
+    public boolean hasSettings() {
+        return getDefaultSettings() != null;
+    }
+    
+    public SerializableSettings getDefaultSettings() {
+        return defaultSettings;
     }
     
     @Override

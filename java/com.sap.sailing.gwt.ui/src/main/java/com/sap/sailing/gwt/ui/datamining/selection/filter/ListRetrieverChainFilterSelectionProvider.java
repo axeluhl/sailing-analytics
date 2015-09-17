@@ -49,7 +49,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     private boolean isAwaitingReload;
     private boolean blockDataUpdates;
-    private DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChain;
+    private DataRetrieverChainDefinitionDTO retrieverChain;
     private final Map<DataRetrieverLevelDTO, RetrieverLevelFilterSelectionProvider> selectionProvidersMappedByRetrievedDataType;
     
     private final DockLayoutPanel mainPanel;
@@ -59,6 +59,9 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final ScrollPanel selectionPanel;
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
+    
+    // TODO This is just a quick fix. Delete, after the settings have been improved. 
+    private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
 
     public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -67,6 +70,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        this.retrieverChainProvider = retrieverChainProvider;
         listeners = new HashSet<>();
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
         
@@ -115,7 +119,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     }
     
     @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO<SerializableSettings> newDataRetrieverChainDefinition) {
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
             if (!isAwaitingReload && retrieverChain != null) {
@@ -123,9 +127,8 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
             } else if (!isAwaitingReload) {
                 clearContent();
             }
-        } else if (retrieverChain != null && retrieverChain.settingsHaveChanged() && !isAwaitingReload) {
+        } else if (retrieverChain != null && !isAwaitingReload) {
             updateRetrievalLevels();
-            retrieverChain.resetSettingsChangeFlag();
         }
     }
 
@@ -202,6 +205,11 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private void forwardSelectionChanged() {
         mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
         notifyListeners();
+    }
+    
+    @Override
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        return retrieverChainProvider.getRetrieverSettings();
     }
 
     @Override

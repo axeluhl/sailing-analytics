@@ -2,8 +2,9 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,6 +31,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -43,8 +45,11 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     private boolean isAwaitingReload;
     
     private final HorizontalPanel mainPanel;
-    private final ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> retrieverChainsListBox;
+    private final ValueListBox<DataRetrieverChainDefinitionDTO> retrieverChainsListBox;
     private Anchor settingsAnchor;
+    
+    // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
+    private Map<DataRetrieverChainDefinitionDTO, PolarSheetGenerationSettings> settingsMappedByRetrieverChain;
 
     public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
@@ -52,6 +57,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
         isAwaitingReload = false;
+        settingsMappedByRetrieverChain = new HashMap<>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -75,17 +81,17 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         updateRetrieverChains();
     }
 
-    private ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> createRetrieverChainsListBox() {
-        ValueListBox<DataRetrieverChainDefinitionDTO<SerializableSettings>> retrieverChainsListBox = new ValueListBox<>(new AbstractRenderer<DataRetrieverChainDefinitionDTO<SerializableSettings>>() {
+    private ValueListBox<DataRetrieverChainDefinitionDTO> createRetrieverChainsListBox() {
+        ValueListBox<DataRetrieverChainDefinitionDTO> retrieverChainsListBox = new ValueListBox<>(new AbstractRenderer<DataRetrieverChainDefinitionDTO>() {
             @Override
-            public String render(DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChain) {
+            public String render(DataRetrieverChainDefinitionDTO retrieverChain) {
                 return retrieverChain == null ? "" : retrieverChain.getName();
             }
             
         });
-        retrieverChainsListBox.addValueChangeHandler(new ValueChangeHandler<DataRetrieverChainDefinitionDTO<SerializableSettings>>() {
+        retrieverChainsListBox.addValueChangeHandler(new ValueChangeHandler<DataRetrieverChainDefinitionDTO>() {
             @Override
-            public void onValueChange(ValueChangeEvent<DataRetrieverChainDefinitionDTO<SerializableSettings>> event) {
+            public void onValueChange(ValueChangeEvent<DataRetrieverChainDefinitionDTO> event) {
                 notifyListeners();
             }
         });
@@ -109,23 +115,21 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     
     private void updateRetrieverChains() {
         dataMiningService.getDataRetrieverChainDefinitions(LocaleInfo.getCurrentLocale().getLocaleName(),
-                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>>() {
+                new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>>() {
                     @Override
-                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>> dataRetrieverChainDefinitions) {
-                        if (dataRetrieverChainDefinitions.iterator().hasNext()) {
-                            List<DataRetrieverChainDefinitionDTO<SerializableSettings>> sortedRetrieverChains = new ArrayList<>();
-                            for (DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinition : dataRetrieverChainDefinitions) {
-                                sortedRetrieverChains.add(dataRetrieverChainDefinition);
-                            }
-                            Collections.sort(sortedRetrieverChains);
+                    public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
+                        settingsMappedByRetrieverChain.clear();
+                        if (!dataRetrieverChainDefinitions.isEmpty()) {
+                            fillSettings(dataRetrieverChainDefinitions);
+                            Collections.sort(dataRetrieverChainDefinitions);
                             
-                            DataRetrieverChainDefinitionDTO<SerializableSettings> currentRetrieverChain = getDataRetrieverChainDefinition();
-                            DataRetrieverChainDefinitionDTO<SerializableSettings> retrieverChainToBeSelected = sortedRetrieverChains.contains(currentRetrieverChain) ?
+                            DataRetrieverChainDefinitionDTO currentRetrieverChain = getDataRetrieverChainDefinition();
+                            DataRetrieverChainDefinitionDTO retrieverChainToBeSelected = dataRetrieverChainDefinitions.contains(currentRetrieverChain) ?
                                                                                             currentRetrieverChain :
-                                                                                            sortedRetrieverChains.get(0);
+                                                                                            dataRetrieverChainDefinitions.get(0);
                             
                             retrieverChainsListBox.setValue(retrieverChainToBeSelected);
-                            retrieverChainsListBox.setAcceptableValues(sortedRetrieverChains);
+                            retrieverChainsListBox.setAcceptableValues(dataRetrieverChainDefinitions);
                             
                             if (isAwaitingReload || !retrieverChainToBeSelected.equals(currentRetrieverChain)) {
                                 isAwaitingReload = false;
@@ -133,7 +137,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                             }
                         } else {
                             retrieverChainsListBox.setValue(null);
-                            retrieverChainsListBox.setAcceptableValues(new ArrayList<DataRetrieverChainDefinitionDTO<SerializableSettings>>());
+                            retrieverChainsListBox.setAcceptableValues(new ArrayList<DataRetrieverChainDefinitionDTO>());
                             notifyListeners();
                         }
                     }
@@ -144,8 +148,21 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                 });
     }
 
+    private void fillSettings(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
+        for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
+            if (retrieverChain.hasSettings()) {
+                // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
+                for (SerializableSettings settings : retrieverChain.getDefaultSettings().values()) {
+                    if (settings instanceof PolarSheetGenerationSettings) {
+                        settingsMappedByRetrieverChain.put(retrieverChain, (PolarSheetGenerationSettings) settings);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
-    public DataRetrieverChainDefinitionDTO<SerializableSettings> getDataRetrieverChainDefinition() {
+    public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
         return retrieverChainsListBox.getValue();
     }
 
@@ -155,7 +172,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     }
     
     private void notifyListeners() {
-        DataRetrieverChainDefinitionDTO<SerializableSettings> dataRetrieverChainDefinition = getDataRetrieverChainDefinition();
+        DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition = getDataRetrieverChainDefinition();
         for (DataRetrieverChainDefinitionChangedListener listener : listeners) {
             listener.dataRetrieverChainDefinitionChanged(dataRetrieverChainDefinition);
         }
@@ -164,12 +181,9 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
-        //FIXME since the sse.datamining.shared bundle cannot have a dependency on sse.common, we can't use extends-wildcards in the classes. They
-        // should be limited to Settings objects. This is enforced everywhere but in the shared classes.
-        retrieverChainsListBox.setValue((DataRetrieverChainDefinitionDTO<SerializableSettings>) queryDefinition.getDataRetrieverChainDefinition(), false);
+        retrieverChainsListBox.setValue(queryDefinition.getDataRetrieverChainDefinition(), false);
     }
 
     @Override
@@ -196,6 +210,20 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     public String getDependentCssClassName() {
         return "simpleDataRetrieverChainDefinition";
     }
+    
+    // TODO This is just a quick fix. Delete, after the settings have been improved.
+    @Override
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = new HashMap<>();
+        if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
+            for (DataRetrieverLevelDTO retrieverLevel : getDataRetrieverChainDefinition().getRetrieverLevels()) {
+                if (retrieverLevel.getDefaultSettings() instanceof PolarSheetGenerationSettings) {
+                    retrieverSettings.put(retrieverLevel, settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
+                }
+            }
+        }
+        return retrieverSettings;
+    }
 
     @Override
     public boolean hasSettings() {
@@ -206,21 +234,16 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     @Override
     public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
         SettingsDialogComponent<? extends Settings> result = null;
-        if (hasSettings()) {
-            Settings settings = getDataRetrieverChainDefinition().getSettings();
-            // FIXME here the association between settings and their dialogs is done
-            // Maybe someone will come up with something smarter
-            if (settings instanceof PolarSheetGenerationSettings) {
-                PolarSheetGenerationSettings polarSettings = (PolarSheetGenerationSettings) settings;
-                result = new PolarSheetGenerationSettingsDialogComponent(polarSettings);
-            }
+        if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
+            result = new PolarSheetGenerationSettingsDialogComponent(settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
         }
         return (SettingsDialogComponent<SerializableSettings>) result;
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) { 
-        getDataRetrieverChainDefinition().setSettings(newSettings);
+    public void updateSettings(SerializableSettings newSettings) {
+        // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
+        settingsMappedByRetrieverChain.put(getDataRetrieverChainDefinition(), (PolarSheetGenerationSettings) newSettings);
         notifyListeners();
     }
 

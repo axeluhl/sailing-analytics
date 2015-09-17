@@ -1,9 +1,9 @@
 package com.sap.sse.datamining;
 
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.Statistic;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
@@ -35,7 +35,7 @@ public interface DataMiningBundleService {
      * @return a collection of {@link DataRetrieverChainDefinition DataRetrieverChainDefinitions}, that are used by this
      *         bundle to retrieve the data
      */
-    public Iterable<DataRetrieverChainDefinition<?, ?, ?>> getDataRetrieverChainDefinitions();
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
 
     /**
      * @return a collection of {@link DataSourceProvider DataSourceProviders}, that are used to get the data sources for the queries

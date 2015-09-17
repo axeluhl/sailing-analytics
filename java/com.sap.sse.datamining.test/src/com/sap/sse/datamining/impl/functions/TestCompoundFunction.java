@@ -10,8 +10,8 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.test.data.impl.ContainerElement;
 import com.sap.sse.datamining.test.data.impl.ContainerElementImpl;
 import com.sap.sse.datamining.test.data.impl.MarkedContainer;

@@ -2,8 +2,8 @@ package com.sap.sailing.polars.datamining.data;
 
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface HasLegPolarContext {
     

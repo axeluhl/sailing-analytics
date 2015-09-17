@@ -21,17 +21,16 @@ import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
 import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.impl.components.DataRetrieverChainDefinitionWithSettings;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 
 public class PolarsDataRetrievalChainDefinitions {
     
-    private final Collection<DataRetrieverChainDefinition<?, ?, ?>> dataRetrieverChainDefinitions;
+    private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
     
     public PolarsDataRetrievalChainDefinitions() {
         dataRetrieverChainDefinitions = new ArrayList<>();
-        DataRetrieverChainDefinition<RacingEventService, HasGPSFixPolarContext, ?> definition1 = new DataRetrieverChainDefinitionWithSettings<RacingEventService, HasGPSFixPolarContext, PolarSheetGenerationSettings>(
-                RacingEventService.class, HasGPSFixPolarContext.class, "PolarChain1",
-                PolarSheetGenerationSettingsImpl.createStandardPolarSettings());
+        DataRetrieverChainDefinition<RacingEventService, HasGPSFixPolarContext> definition1 = new SimpleDataRetrieverChainDefinition<>(
+                RacingEventService.class, HasGPSFixPolarContext.class, "PolarChain1");
         definition1.startWith(PolarLeaderboardGroupRetrievalProcessor.class, HasLeaderboardGroupPolarContext.class,
                 "LeaderboardGroup");
         definition1.addAfter(PolarLeaderboardGroupRetrievalProcessor.class, PolarLeaderboardRetrievalProcessor.class,
@@ -45,11 +44,11 @@ public class PolarsDataRetrievalChainDefinitions {
         definition1.addAfter(PolarLegRetrievalProcessor.class, PolarCompetitorRetrievalProcessor.class,
                 HasCompetitorPolarContext.class, "Competitor");
         definition1.endWith(PolarCompetitorRetrievalProcessor.class, PolarGPSFixRetrievalProcessor.class,
-                HasGPSFixPolarContext.class, "GPSFix");
+                HasGPSFixPolarContext.class, PolarSheetGenerationSettings.class, PolarSheetGenerationSettingsImpl.createStandardPolarSettings(), "GPSFix");
         dataRetrieverChainDefinitions.add(definition1);
     }
 
-    public Iterable<DataRetrieverChainDefinition<?, ?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions;
     }
 

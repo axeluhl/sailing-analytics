@@ -19,6 +19,7 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
@@ -29,7 +30,6 @@ import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberD
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.QueryResultState;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -70,7 +70,7 @@ public class TestStatisticQuery {
         FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
         
         @SuppressWarnings("unchecked")
-        DataRetrieverChainDefinition<Collection<Number>, Number, ?> retrieverChain = new SingleDataRetrieverChainDefinition<>((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, "Number");
+        DataRetrieverChainDefinition<Collection<Number>, Number> retrieverChain = new SingleDataRetrieverChainDefinition<>((Class<Collection<Number>>)(Class<?>) Collection.class, Number.class, "Number");
         retrieverChain.startWith(NumberRetrievalProcessor.class, Number.class, "Number");
         
         Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");

@@ -91,7 +91,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     }
 
     @Override
-    public Iterable<DataRetrieverChainDefinition<?, ?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
         return dataRetrieverChainDefinitions.getDataRetrieverChainDefinitions();
     }
     
