@@ -12,10 +12,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenterWithDataProviders extends AbstractResultsPresenter<Object> {
+public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Object, Settings> {
     
     private final NumberDataProvider numberDataProvider;
     private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;

@@ -15,9 +15,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenterWithControls<ResultType> {
+public abstract class AbstractResultsPresenter<ResultType, SettingsType extends Settings> implements ResultsPresenterWithControls<ResultType, SettingsType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
@@ -153,8 +154,18 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget getEntryWidget() {
         return mainPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
     }
 
 }

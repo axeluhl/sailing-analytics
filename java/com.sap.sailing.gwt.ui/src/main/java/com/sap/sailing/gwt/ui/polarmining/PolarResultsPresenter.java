@@ -18,11 +18,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 
-public class PolarResultsPresenter extends AbstractResultsPresenter<Object> {
+public class PolarResultsPresenter extends AbstractResultsPresenter<Object, Settings> {
 
     private final Chart polarChart;
     private final SimpleLayoutPanel wrapperPanel;
@@ -95,5 +97,28 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Object> {
         timer.schedule(200);
     }
 
+    @Override
+    public String getLocalizedShortName() {
+        return getStringMessages().polarResultsPresenter();
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "polarResultsPresenter";
+    }
 
 }

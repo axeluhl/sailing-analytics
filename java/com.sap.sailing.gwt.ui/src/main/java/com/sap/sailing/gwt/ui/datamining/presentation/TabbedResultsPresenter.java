@@ -19,16 +19,18 @@ import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class TabbedResultsPresenter implements ResultsPresenter<Object> {
+public class TabbedResultsPresenter implements ResultsPresenter<Object, Settings> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final StringMessages stringMessages;
     
     private final ScrolledTabLayoutPanel tabPanel;
-    private final Map<Widget, ResultsPresenter<Object>> presentersMappedByHeader;
+    private final Map<Widget, ResultsPresenter<Object, ?>> presentersMappedByHeader;
     
     public TabbedResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -56,11 +58,6 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
                 }
             }
         });
-    }
-
-    @Override
-    public Widget getWidget() {
-        return tabPanel;
     }
 
     @Override
@@ -99,7 +96,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
     }
     
     @Override
-    public QueryResultDTO<? extends Object> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return getSelectedPresenter().getCurrentResult();
     }
     
@@ -107,28 +104,28 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }
 
-    private ResultsPresenter<Object> getSelectedPresenter() {
+    private ResultsPresenter<Object, ?> getSelectedPresenter() {
         return presentersMappedByHeader.get(getSelectedHeader());
     }
 
     private void addTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<Object> tabPresenter = new MultiResultsPresenter(stringMessages);
+        ResultsPresenter<Object, ?> tabPresenter = new MultiResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
-        tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
-        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getWidget());
+        tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
+        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
     }
     
     private void addPolarTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<Object> tabPresenter = new PolarResultsPresenter(stringMessages);
+        ResultsPresenter<Object, ?> tabPresenter = new PolarResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
-        tabPanel.insert(tabPresenter.getWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
-        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getWidget());
+        tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
+        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
     }
@@ -136,6 +133,45 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
     private void removeTab(CloseableTabHeader header) {
         header.removeFromParent();
         presentersMappedByHeader.remove(header);
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.tabbedResultsPresenter();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return tabPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return tabPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        tabPanel.setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "tabbedResultsPresenters";
     }
     
     private class CloseableTabHeader extends HorizontalPanel {

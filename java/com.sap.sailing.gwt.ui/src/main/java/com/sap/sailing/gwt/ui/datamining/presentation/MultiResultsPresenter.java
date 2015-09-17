@@ -16,16 +16,18 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiResultsPresenter implements ResultsPresenter<Object> {
+public class MultiResultsPresenter implements ResultsPresenter<Object, Settings> {
     
     private final StringMessages stringMessages;
     
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor<Object>> presentersListBox;
-    private ResultsPresenter<Object> currentPresenter;
+    private ResultsPresenter<Object, ?> currentPresenter;
 
     private List<Descriptor<Object>> availableDescriptors;
     
@@ -59,23 +61,18 @@ public class MultiResultsPresenter implements ResultsPresenter<Object> {
         setCurrentPresenter(availableDescriptors.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls<Object> presenter) {
+    private void setCurrentPresenter(ResultsPresenterWithControls<Object, ?> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
         currentPresenter = presenter;
-        presenterPanel.setWidget(currentPresenter.getWidget());
+        presenterPanel.setWidget(currentPresenter.getEntryWidget());
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 presenterPanel.onResize();
             }
         });
-    }
-
-    @Override
-    public Widget getWidget() {
-        return presenterPanel;
     }
 
     @Override
@@ -111,17 +108,56 @@ public class MultiResultsPresenter implements ResultsPresenter<Object> {
         }
     }
 
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.multiResultsPresenter();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return presenterPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return presenterPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        presenterPanel.setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "multiResultsPresenter";
+    }
+
     private interface Descriptor<ResultType> {
         
         public String getName();
         
-        public ResultsPresenterWithControls<ResultType> getPresenter();
+        public ResultsPresenterWithControls<ResultType, ?> getPresenter();
         
     }
     
     private class PlainDescriptor implements Descriptor<Object> {
         
-        private final AbstractResultsPresenter<Object> presenter;
+        private final AbstractResultsPresenter<Object, ?> presenter;
         
         public PlainDescriptor() {
             presenter = new PlainResultsPresenter(stringMessages);
@@ -133,7 +169,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object> {
         }
         
         @Override
-        public AbstractResultsPresenter<Object> getPresenter() {
+        public AbstractResultsPresenter<Object, ?> getPresenter() {
             return presenter;
         }
         
@@ -153,7 +189,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object> {
         }
 
         @Override
-        public AbstractResultsPresenter<Object> getPresenter() {
+        public AbstractResultsPresenter<Object, ?> getPresenter() {
             return presenter;
         }
         
