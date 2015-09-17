@@ -21,7 +21,7 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     private ResultsPresenterState state;
     
     private final DockLayoutPanel mainPanel;
