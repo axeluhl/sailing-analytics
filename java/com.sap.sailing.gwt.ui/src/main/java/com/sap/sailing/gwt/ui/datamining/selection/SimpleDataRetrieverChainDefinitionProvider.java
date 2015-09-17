@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
@@ -218,7 +217,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = new HashMap<>();
         if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
             for (DataRetrieverLevelDTO retrieverLevel : getDataRetrieverChainDefinition().getRetrieverLevels()) {
-                if (retrieverLevel.getDefaultSettings() instanceof PolarSheetGenerationSettings) {
+                if (retrieverLevel.getDefaultSettings() instanceof PolarDataMiningSettings) {
                     retrieverSettings.put(retrieverLevel, settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
                 }
             }

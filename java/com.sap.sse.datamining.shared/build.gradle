@@ -5,3 +5,9 @@ sourceSets {
         java.srcDirs = ["src"]
     }
 }
+
+dependencies {
+    /* local dependencies */
+    compile project(":java:com.sap.sse.datamining.shared")
+    compile project(":java:com.sap.sse.common")
+}

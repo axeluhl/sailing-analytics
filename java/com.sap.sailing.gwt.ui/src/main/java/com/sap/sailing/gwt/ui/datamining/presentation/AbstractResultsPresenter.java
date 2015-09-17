@@ -22,7 +22,7 @@ public abstract class AbstractResultsPresenter<ResultType, SettingsType extends 
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     private ResultsPresenterState state;
     
     private final DockLayoutPanel mainPanel;

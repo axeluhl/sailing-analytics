@@ -7,6 +7,7 @@ public class PolarAggregationImpl implements PolarAggregation {
     private static final long serialVersionUID = 9177124509619315748L;
     private double[] sumSpeedsPerAngle = new double[360];
     private int[] countPerAngle = new int[360];
+    private int[][] histogramData;
     private int count = 0;
     private PolarDataMiningSettings settings;
     
@@ -16,6 +17,10 @@ public class PolarAggregationImpl implements PolarAggregation {
     
     public PolarAggregationImpl(PolarDataMiningSettings polarDataMiningSettings) {
         this.settings = polarDataMiningSettings;
+        histogramData = new int[360][];
+        for (int i = 0; i < 360; i++) {
+            histogramData[i] = new int[settings.getNumberOfHistogramColumns()];
+        }
     }
 
     @Override
@@ -27,6 +32,8 @@ public class PolarAggregationImpl implements PolarAggregation {
         }
         sumSpeedsPerAngle[angleDeg] += dataEntry.getBoatSpeed().getKnots();
         countPerAngle[angleDeg]++;
+        // TODO add 1 to correct histogram column, for that we need to know min and max
+        //histogramData[angleDeg][]
         count++;
     }
     
