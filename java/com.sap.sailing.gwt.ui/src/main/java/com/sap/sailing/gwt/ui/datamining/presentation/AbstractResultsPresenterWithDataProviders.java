@@ -16,7 +16,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Object, Settings> {
+public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
     private final NumberDataProvider numberDataProvider;
     private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;
@@ -30,7 +30,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
     }
     
-    protected void internalShowResults(QueryResultDTO<Object> result) {
+    protected void internalShowResults(QueryResultDTO<?> result) {
         currentDataProvider = selectCurrentDataProvider();
         updateDataSelectionListBox();
         if (currentDataProvider != null) {

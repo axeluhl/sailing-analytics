@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenter<ResultType, SettingsType extends Settings> implements ResultsPresenterWithControls<ResultType, SettingsType> {
+public abstract class AbstractResultsPresenter<SettingsType extends Settings> implements ResultsPresenterWithControls<SettingsType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
@@ -33,7 +33,7 @@ public abstract class AbstractResultsPresenter<ResultType, SettingsType extends 
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private QueryResultDTO<ResultType> currentResult;
+    private QueryResultDTO<?> currentResult;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -90,7 +90,7 @@ public abstract class AbstractResultsPresenter<ResultType, SettingsType extends 
     }
     
     @Override
-    public void showResult(QueryResultDTO<ResultType> result) {
+    public void showResult(QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, false);
@@ -108,7 +108,7 @@ public abstract class AbstractResultsPresenter<ResultType, SettingsType extends 
         }
     }
 
-    abstract protected void internalShowResults(QueryResultDTO<ResultType> result);
+    abstract protected void internalShowResults(QueryResultDTO<?> result);
 
     protected abstract Widget getPresentationWidget();
 
@@ -149,7 +149,7 @@ public abstract class AbstractResultsPresenter<ResultType, SettingsType extends 
     }
     
     @Override
-    public QueryResultDTO<ResultType> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return currentResult;
     }
 

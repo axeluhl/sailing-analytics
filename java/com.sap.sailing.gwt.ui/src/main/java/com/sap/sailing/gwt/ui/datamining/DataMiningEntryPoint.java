@@ -55,7 +55,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
 
-        final ResultsPresenter<Object, ?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
+        final ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
         splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
         
         splitPanel.add(selectionDockPanel);
@@ -72,7 +72,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 Collection<Component<?>> components = new HashSet<>();
                 components.add(queryRunner);
                 components.add(resultsPresenter);
-                new CompositeTabbedSettingsDialog(getStringMessages(), components, getStringMessages().dataMiningSettings()).show();
+                new CompositeTabbedSettingsDialog(getStringMessages(), components, getStringMessages().dataMining()).show();
             }
         });
         queryDefinitionProviderWithControls.addControl(settingsAnchor);

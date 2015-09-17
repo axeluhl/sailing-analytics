@@ -37,7 +37,7 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 
-public class PolarResultsPresenter extends AbstractResultsPresenter<Object, Settings> {
+public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;
     
@@ -153,9 +153,9 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Object, Sett
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<Object> result) {
-        Map<GroupKey, Object> results = result.getResults();
-        for (Entry<GroupKey, Object> entry : results.entrySet()) {
+    protected void internalShowResults(QueryResultDTO<?> result) {
+        Map<GroupKey, ?> results = result.getResults();
+        for (Entry<GroupKey, ?> entry : results.entrySet()) {
             PolarAggregation aggregation = (PolarAggregation) entry.getValue();
             double[] speedsPerAngle = aggregation.getAverageSpeedsPerAngle();
             int count = aggregation.getCount();

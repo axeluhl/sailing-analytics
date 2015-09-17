@@ -20,14 +20,14 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiResultsPresenter implements ResultsPresenter<Object, Settings> {
+public class MultiResultsPresenter implements ResultsPresenter<Settings> {
     
     private final StringMessages stringMessages;
     
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
     private final ValueListBox<Descriptor<Object>> presentersListBox;
-    private ResultsPresenter<Object, ?> currentPresenter;
+    private ResultsPresenter<?> currentPresenter;
 
     private List<Descriptor<Object>> availableDescriptors;
     
@@ -61,7 +61,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object, Settings>
         setCurrentPresenter(availableDescriptors.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls<Object, ?> presenter) {
+    private void setCurrentPresenter(ResultsPresenterWithControls<?> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
         
@@ -81,7 +81,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object, Settings>
     }
 
     @Override
-    public void showResult(QueryResultDTO<Object> result) {
+    public void showResult(QueryResultDTO<?> result) {
         for (Descriptor<Object> descriptor : availableDescriptors) {
             descriptor.getPresenter().showResult(result);
         }
@@ -151,13 +151,13 @@ public class MultiResultsPresenter implements ResultsPresenter<Object, Settings>
         
         public String getName();
         
-        public ResultsPresenterWithControls<ResultType, ?> getPresenter();
+        public ResultsPresenterWithControls<?> getPresenter();
         
     }
     
     private class PlainDescriptor implements Descriptor<Object> {
         
-        private final AbstractResultsPresenter<Object, ?> presenter;
+        private final AbstractResultsPresenter<?> presenter;
         
         public PlainDescriptor() {
             presenter = new PlainResultsPresenter(stringMessages);
@@ -169,7 +169,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object, Settings>
         }
         
         @Override
-        public AbstractResultsPresenter<Object, ?> getPresenter() {
+        public AbstractResultsPresenter<?> getPresenter() {
             return presenter;
         }
         
@@ -189,7 +189,7 @@ public class MultiResultsPresenter implements ResultsPresenter<Object, Settings>
         }
 
         @Override
-        public AbstractResultsPresenter<Object, ?> getPresenter() {
+        public AbstractResultsPresenter<?> getPresenter() {
             return presenter;
         }
         
