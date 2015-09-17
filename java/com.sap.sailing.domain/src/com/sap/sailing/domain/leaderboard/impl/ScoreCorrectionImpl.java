@@ -407,7 +407,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                                 public Integer call() {
                                     return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                                 }
-                            }, numberOfCompetitorsInLeaderboardFetcher);
+                            }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -454,7 +454,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                             public Integer call() {
                                 return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                             }
-                        }, numberOfCompetitorsInLeaderboardFetcher);
+                        }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while computing corrected non maxed score", e);
                 throw new RuntimeException(e);

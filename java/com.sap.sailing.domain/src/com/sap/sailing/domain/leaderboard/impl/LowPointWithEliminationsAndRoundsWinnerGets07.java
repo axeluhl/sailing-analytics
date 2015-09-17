@@ -3,11 +3,17 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Implements an elimination scheme as used by surfing championships, based on a general low point scoring scheme. A
@@ -41,32 +47,155 @@ import com.sap.sse.common.TimePoint;
  * 
  * Should a planned heat not be sailed then all competitors assigned to that heat will obtain equal points based on the
  * average of the ranks for which they would have sailed. For example, if the final heat cannot be sailed, all competitors
- * who qualified for the final race obtain the average of 0.7, 2, 3, 4, 5, 6, 7 and 8 points (4.46 points).
+ * who qualified for the final race obtain the average of 0.7, 2, 3, 4, 5, 6, 7 and 8 points (4.46 points).<p>
+ * 
+ * The regatta is expected to be modeled such that fleet ordering numbers are used in a special way. Ordering <code>1</code>
+ * is to be used to identify the Final heat, <code>2</code> for the Losers Final heat. For each earlier round the
+ * ordering is increased by one and applied equally to all heats of that round. Therefore, the two semi-final heats
+ * use ordering <code>3</code>, the four quarter-final heats use <code>4</code>, and so on.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
     private static final long serialVersionUID = -2318652113347853873L;
+    
+    private static int FINAL_FLEET_ORDERING = 1;
+    private static int LOSERS_FINAL_FLEET_ORDERING = 2;
 
     @Override
     public ScoringSchemeType getType() {
         return ScoringSchemeType.LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07;
     }
-
-    @Override
-    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher,
-            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        // TODO Auto-generated method stub
-        return super.getScoreForRank(leaderboard, raceColumn, competitor, rank, numberOfCompetitorsInRaceFetcher,
-                numberOfCompetitorsInLeaderboardFetcher);
-    }
-
-    @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
-        // TODO Auto-generated method stub
-        return super.isValidInTotalScore(leaderboard, raceColumn, at);
-    }
     
+    /**
+     * A competitor will obtain a score in a column if she has no score in any of the subsequent columns of the same
+     * elimination. Assuming that each series has a single race column only, the next column is identical to the single
+     * race column of the next series. If the <code>raceColumn</code> is the last column (representing the last round)
+     * of the elimination, the round is a final round, and all competitors participating in any of the races linked to
+     * any of the fleets in that column are eligible to receive a score in that column.
+     * <p>
+     * 
+     * The rationale behind this rule is that if a competitor got promoted to the next round of the elimination, no
+     * score will be assigned to that competitor in the round from which she got promoted unless the next heat that
+     * the competitor would have raced in is not sailed, in which case average points will be assigned to all competitors
+     * promoted to the heat that did not get sailed.
+     */
+    private boolean competitorGetsScoreInColumn(Leaderboard leaderboard, RaceColumnInSeries raceColumn, Competitor competitor, TimePoint timePoint) {
+        final Series series = raceColumn.getSeries();
+        final Regatta regatta = series.getRegatta();
+        boolean foundColumn = false;
+        boolean result = true;
+        // remember the ordering of any heat in raceColumn; the next column that has a greater ordering
+        // belongs to the next elimination
+        final int heatOrdering = raceColumn.getFleets().iterator().next().getOrdering();
+        for (Series seriesInRegatta : regatta.getSeries()) {
+            if (foundColumn && series.getFleets().iterator().next().getOrdering() > heatOrdering) {
+                // reached next elimination; abort
+                break;
+            }
+            if (!foundColumn && seriesInRegatta == series) {
+                foundColumn = true;
+            } else {
+                if (foundColumn && hasScoreInSeries(leaderboard, competitor, seriesInRegatta, timePoint)) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    private boolean hasScoreInSeries(Leaderboard leaderboard, Competitor competitor, Series series, TimePoint timePoint) {
+        final RaceColumn singleRaceColumnInSeries = series.getRaceColumns().iterator().next();
+        return leaderboard.getNetPoints(competitor, singleRaceColumnInSeries, timePoint) != null;
+    }
+
+    @Override
+    public Double getScoreForRank(final Leaderboard leaderboard, final RaceColumn raceColumn, final Competitor competitor, final int rank,
+            final Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
+        assert raceColumn instanceof RaceColumnInSeries;
+        final Double result;
+        if (rank == 0) {
+            result = null;
+        } else if (isFinalRound((RaceColumnInSeries) raceColumn)) {
+            final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
+            result = effectiveRank == 0 ? null : effectiveRank == 1 ? 0.7 : (double) effectiveRank;
+        } else if (competitorGetsScoreInColumn(leaderboard, (RaceColumnInSeries) raceColumn, competitor, timePoint)) {
+            // calculate the average rank or all competitors with the same rank in their respective heat in the round
+            // to which raceColumn belongs:
+            final int numberOfCompetitorsWithSameRankInRound = getNumberOfCompetitorsWithSameRankInRound((RaceColumnInSeries) raceColumn, competitor, rank);
+            final int numberOfCompetitorsWithBetterScoresInRound = Util.size(((RaceColumnInSeries) raceColumn).getSeries().getFleets()) * (rank-1);
+            final int bestOverallRankForRank = numberOfCompetitorsWithBetterScoresInRound+1;
+            final int worstOverallRankForRank = numberOfCompetitorsWithBetterScoresInRound+numberOfCompetitorsWithSameRankInRound;
+            result = (double) bestOverallRankForRank + ((double) worstOverallRankForRank-(double) bestOverallRankForRank)/2.0;
+        } else {
+            result = null; // not in final round; competitor was promoted from raceColumn to the next round and has
+            // a non-null score in a subsequent round of the elimination
+        }
+        return result;
+    }
+
+    /**
+     * Assumption: no fleet has a number of competitors exceeding that of any other fleet in the same round by two or
+     * more.
+     * <p>
+     * 
+     * Background: an additional competitor will always be added to the fleet with the fewest competitors, implying
+     * above rule.
+     * <p>
+     * 
+     * Reason for assumption: with this, we can infer that there will be as many competitors ranking one rank better
+     * than "rank" as there are fleets; were the assumption not fulfilled then there could be a fleet in the round that
+     * has no competitor ranking one rank better. With this assumption we easily infer the best possible rank for all
+     * competitors with "rank" which is the number of fleets in the round times "rank" plus 1.
+     * <p>
+     * 
+     * Example: If rank is 7 and we have eight fleets, the best rank for all competitors with this rank will be 7*8+1 =
+     * 57. The worst rank for all competitors with "rank" therefore can be calculated by the adding to the best rank the
+     * number of competitors with this rank. We have to assume that this number may not be equal to the number of heats
+     * in this round because with different heat sizes in a round the worst rank may be different for different heats
+     * (e.g., 7 in some, and 8 in others, therefore fewer 8th ranks than 7th ranks will exist). This "uneven" case can
+     * only apply if the competitor ranks last in the heat which is easy to exclude by looking at the tracked race, from
+     * there the RaceDefinition and for that the number of competitors in that race.
+     */
+    private int getNumberOfCompetitorsWithSameRankInRound(final RaceColumnInSeries raceColumn, final Competitor competitor, final int rank) {
+        final int numberOfCompetitorsWithSameRankInRound;
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        if (trackedRace == null) {
+            // Can't determine number of competitors in heat; assuming equal fleet distribution
+            numberOfCompetitorsWithSameRankInRound = getNumberOfFleets(raceColumn);
+        } else {
+            final boolean isWorstRank = rank == Util.size(trackedRace.getRace().getCompetitors());
+            if (!isWorstRank) {
+                numberOfCompetitorsWithSameRankInRound = getNumberOfFleets(raceColumn);
+            } else {
+                // for all other fleets in the round that have tracked races attached, we can count how many of them
+                // have fewer than "rank" competitors; for fleets with no tracked race attached we then again assume
+                // maximum competitor number
+                int count = 0;
+                for (final Fleet fleet : raceColumn.getSeries().getFleets()) {
+                    final TrackedRace trackedRaceForFleet = raceColumn.getTrackedRace(fleet);
+                    if (trackedRaceForFleet == null) {
+                        count++; // by default assume that other race has at least as many competitors as the competitor's heat
+                    } else {
+                        if (Util.size(trackedRaceForFleet.getRace().getCompetitors()) >= rank) {
+                            count++;
+                        }
+                    }
+                }
+                numberOfCompetitorsWithSameRankInRound = count;
+            }
+        }
+        return numberOfCompetitorsWithSameRankInRound;
+    }
+
+    private int getNumberOfFleets(final RaceColumnInSeries raceColumn) {
+        return Util.size(raceColumn.getSeries().getFleets());
+    }
+
+    private boolean isFinalRound(RaceColumnInSeries raceColumn) {
+        return raceColumn.getFleets().iterator().next().getOrdering() <= LOSERS_FINAL_FLEET_ORDERING;
+    }
 }

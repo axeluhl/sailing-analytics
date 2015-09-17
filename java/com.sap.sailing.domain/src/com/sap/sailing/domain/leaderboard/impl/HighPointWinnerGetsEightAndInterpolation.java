@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher;
+import com.sap.sse.common.TimePoint;
 
 /**
  * High point system with a fixed 'highest score' (eight points) and
@@ -32,7 +33,7 @@ public class HighPointWinnerGetsEightAndInterpolation extends HighPointFirstGets
     }
     
     @Override
-    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
         final Double result;
         if (effectiveRank == 0) {

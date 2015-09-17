@@ -27,10 +27,18 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        final int effectiveRank;
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         final Double result;
-        int competitorFleetOrdering;
+        final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
+        result = effectiveRank == 0 ? null : (double) effectiveRank;
+        return result;
+    }
+
+    protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+        final int competitorFleetOrdering;
+        final int effectiveRank;
         if (rank == 0) {
             effectiveRank = 0;
         } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
@@ -39,8 +47,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
         } else {
             effectiveRank = rank;
         }
-        result = effectiveRank == 0 ? null : (double) effectiveRank;
-        return result;
+        return effectiveRank;
     }
 
     @Override

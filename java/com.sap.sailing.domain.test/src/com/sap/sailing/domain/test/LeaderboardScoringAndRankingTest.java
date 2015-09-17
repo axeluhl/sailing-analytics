@@ -672,7 +672,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testBasicElminationScoringScheme() throws NoWindException {
         Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         Competitor[] c = createCompetitors(64).toArray(new Competitor[64]);
         // first round with 64 competitors, eight per heat:
@@ -715,11 +716,13 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertSame(c[0], rankedCompetitors.get(0)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
-        assertSame(c[1], rankedCompetitors.get(1)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
         assertEquals(0.7, leaderboard.getTotalPoints(c[0], later), 0.000000001);
+        assertSame(c[1], rankedCompetitors.get(1)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
         assertEquals(2, leaderboard.getTotalPoints(c[1], later), 0.000000001);
     }
 
+    // TODO add test case for multi-elimination case, testing that the races from the next elimination do not influence whether a competitor gets a score in the previous elimination
+    
     @Test
     public void testScoringConsideringNotAllRaces() throws NoWindException {
         // one discard at four races

@@ -37,7 +37,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
 
     @Override
     public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
-            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double result;
         if (rank == 0) {
             result = null;

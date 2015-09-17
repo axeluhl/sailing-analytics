@@ -182,7 +182,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                     public Integer call() {
                         return numberOfCompetitorsInRace;
                     }
-                }, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher());
+                }, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
         
         // Do ALWAYS apply score corrections from race committee
         applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
