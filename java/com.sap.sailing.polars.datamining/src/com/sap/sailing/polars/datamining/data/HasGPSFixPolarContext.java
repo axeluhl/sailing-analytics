@@ -11,9 +11,6 @@ public interface HasGPSFixPolarContext {
     @Dimension(messageKey="WindRange")
     ClusterDTO getWindSpeedRange();
     
-    @Dimension(messageKey="WindIsConfident")
-    Boolean windIsConfident();
-    
     @Statistic(messageKey="PolarData")
     PolarStatistic getPolarStatistics();
     

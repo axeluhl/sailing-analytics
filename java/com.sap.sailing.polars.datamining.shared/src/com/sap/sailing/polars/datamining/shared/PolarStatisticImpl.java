@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -21,9 +20,9 @@ public class PolarStatisticImpl implements PolarStatistic {
     private final SpeedWithBearing boatSpeed;
     private final Wind windSpeed;
     private final double trueWindAngleDeg;
-    private final PolarSheetGenerationSettings settings;
+    private final PolarDataMiningSettings settings;
 
-    public PolarStatisticImpl(TrackedRace trackedRace, Competitor competitor, GPSFixMoving fix, PolarSheetGenerationSettings settings,
+    public PolarStatisticImpl(TrackedRace trackedRace, Competitor competitor, GPSFixMoving fix, PolarDataMiningSettings settings,
             Wind windSpeed) {
         this.settings = settings;
         this.windSpeed = windSpeed;
@@ -122,7 +121,7 @@ public class PolarStatisticImpl implements PolarStatistic {
     }
 
     @Override
-    public PolarSheetGenerationSettings getSettings() {
+    public PolarDataMiningSettings getSettings() {
         return settings;
     }
 

@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
@@ -20,6 +19,7 @@ import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.GPSFixWithPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.SpeedClusterGroup;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -29,10 +29,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasCompetitorPolarContext, HasGPSFixPolarContext> {
 
-    private final PolarSheetGenerationSettings settings;
+    private final PolarDataMiningSettings settings;
 
     public PolarGPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers,
-            PolarSheetGenerationSettings settings, int retrievalLevel) {
+            PolarDataMiningSettings settings, int retrievalLevel) {
         super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel);
         this.settings = settings;
     }
@@ -59,7 +59,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                             fix.getPosition(),
                             fix.getTimePoint(),
                             PolarStatisticImpl.collectWindSourcesToIgnoreForSpeed(trackedRace, settings.useOnlyWindGaugesForWindSpeed()));
-                    if (wind != null) {
+                    if (wind != null && (settings.applyMinimumWindConfidence() ?  wind.getConfidence() >= settings.getMinimumWindConfidence() : true)) {
                         result.add(new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
                                 settings, wind, element));
                     }

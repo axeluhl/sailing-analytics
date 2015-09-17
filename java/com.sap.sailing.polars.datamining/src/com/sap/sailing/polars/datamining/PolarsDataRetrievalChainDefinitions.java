@@ -3,8 +3,6 @@ package com.sap.sailing.polars.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationSettingsImpl;
 import com.sap.sailing.polars.datamining.components.PolarCompetitorRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarFleetRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarGPSFixRetrievalProcessor;
@@ -19,6 +17,8 @@ import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
 import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
@@ -44,7 +44,7 @@ public class PolarsDataRetrievalChainDefinitions {
         definition1.addAfter(PolarLegRetrievalProcessor.class, PolarCompetitorRetrievalProcessor.class,
                 HasCompetitorPolarContext.class, "Competitor");
         definition1.endWith(PolarCompetitorRetrievalProcessor.class, PolarGPSFixRetrievalProcessor.class,
-                HasGPSFixPolarContext.class, PolarSheetGenerationSettings.class, PolarSheetGenerationSettingsImpl.createStandardPolarSettings(), "GPSFix");
+                HasGPSFixPolarContext.class, PolarDataMiningSettings.class, PolarDataMiningSettingsImpl.createStandardPolarSettings(), "GPSFix");
         dataRetrieverChainDefinitions.add(definition1);
     }
 
