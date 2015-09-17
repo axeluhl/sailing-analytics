@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
@@ -20,6 +19,7 @@ import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.GPSFixWithPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.SpeedClusterGroup;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -36,7 +36,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
 
     @Override
     protected Iterable<HasGPSFixPolarContext> retrieveData(HasCompetitorPolarContext element) {
-        PolarSheetGenerationSettings settings = (PolarSheetGenerationSettings) getSettings();
+        PolarDataMiningSettings settings = (PolarDataMiningSettings) getSettings();
         ClusterGroup<Speed> windSpeedRangeGroup = toClusterGroup(settings.getWindSpeedStepping());
         TrackedRace trackedRace = element.getTrackedRace();
         Competitor competitor = element.getCompetitor();
@@ -57,7 +57,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                             fix.getPosition(),
                             fix.getTimePoint(),
                             PolarStatisticImpl.collectWindSourcesToIgnoreForSpeed(trackedRace, settings.useOnlyWindGaugesForWindSpeed()));
-                    if (wind != null) {
+                    if (wind != null && wind.getConfidence() >= settings.getMinimumWindConfidence()) {
                         result.add(new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
                                 settings, wind, element));
                     }

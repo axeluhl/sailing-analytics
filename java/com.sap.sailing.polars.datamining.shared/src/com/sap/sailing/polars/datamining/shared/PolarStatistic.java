@@ -1,6 +1,5 @@
 package com.sap.sailing.polars.datamining.shared;
 
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 
@@ -12,6 +11,6 @@ public interface PolarStatistic {
 
     public double getTrueWindAngleDeg();
     
-    public PolarSheetGenerationSettings getSettings();
+    public PolarDataMiningSettings getSettings();
 
 }

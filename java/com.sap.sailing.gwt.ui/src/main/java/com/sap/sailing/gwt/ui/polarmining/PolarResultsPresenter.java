@@ -14,10 +14,10 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
@@ -71,7 +71,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Object> {
             double[] speedsPerAngle = aggregation.getAverageSpeedsPerAngle();
             int count = aggregation.getCount();
             int[] countPerAngle = aggregation.getCountPerAngle();
-            PolarSheetGenerationSettings settings = aggregation.getSettings();
+            PolarDataMiningSettings settings = aggregation.getSettings();
             if (settings.getMinimumDataCountPerGraph() < count) {
                 Series series = polarChart.createSeries();
                 for (int i = 0; i < 360; i++) {

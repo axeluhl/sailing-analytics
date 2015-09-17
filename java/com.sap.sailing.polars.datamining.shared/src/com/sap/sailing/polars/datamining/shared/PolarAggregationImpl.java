@@ -1,6 +1,5 @@
 package com.sap.sailing.polars.datamining.shared;
 
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 
 
 public class PolarAggregationImpl implements PolarAggregation {
@@ -9,14 +8,14 @@ public class PolarAggregationImpl implements PolarAggregation {
     private double[] sumSpeedsPerAngle = new double[360];
     private int[] countPerAngle = new int[360];
     private int count = 0;
-    private PolarSheetGenerationSettings settings;
+    private PolarDataMiningSettings settings;
     
     public PolarAggregationImpl() {
         //GWT
     }
     
-    public PolarAggregationImpl(PolarSheetGenerationSettings settings) {
-        this.settings = settings;
+    public PolarAggregationImpl(PolarDataMiningSettings polarDataMiningSettings) {
+        this.settings = polarDataMiningSettings;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class PolarAggregationImpl implements PolarAggregation {
     }
 
     @Override
-    public PolarSheetGenerationSettings getSettings() {
+    public PolarDataMiningSettings getSettings() {
         return settings;
     }
     

@@ -1,7 +1,6 @@
 package com.sap.sailing.polars.datamining.data.impl;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -9,6 +8,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
 import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
 import com.sap.sse.common.TimePoint;
@@ -22,12 +22,12 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
     private final TrackedRace trackedRace;
     private final ClusterGroup<Speed> windSpeedRangeGroup;
     private final Competitor competitor;
-    private final PolarSheetGenerationSettings settings;
+    private final PolarDataMiningSettings settings;
     private final HasCompetitorPolarContext competitorPolarContext;
     private WindWithConfidence<Pair<Position, TimePoint>> wind;
 
     public GPSFixWithPolarContext(GPSFixMoving fix, TrackedRace trackedRace, ClusterGroup<Speed> windSpeedRangeGroup, Competitor competitor,
-            PolarSheetGenerationSettings settings, WindWithConfidence<Pair<Position, TimePoint>> wind, HasCompetitorPolarContext competitorPolarContext) {
+            PolarDataMiningSettings settings, WindWithConfidence<Pair<Position, TimePoint>> wind, HasCompetitorPolarContext competitorPolarContext) {
         this.fix = fix;
         this.trackedRace = trackedRace;
         this.windSpeedRangeGroup = windSpeedRangeGroup;
