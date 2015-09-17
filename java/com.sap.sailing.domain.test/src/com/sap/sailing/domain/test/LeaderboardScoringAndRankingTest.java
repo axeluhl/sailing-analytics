@@ -670,6 +670,57 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
+    public void testBasicElminationScoringScheme() throws NoWindException {
+        Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Competitor[] c = createCompetitors(64).toArray(new Competitor[64]);
+        // first round with 64 competitors, eight per heat:
+        Competitor[][] competitorsForHeatsInRound1 = new Competitor[8][];
+        TimePoint later = null;
+        for (int heat=0; heat<8; heat++) {
+            competitorsForHeatsInRound1[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInRound1[heat][i] = c[8*heat+i];
+            }
+            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), competitorsForHeatsInRound1[heat]);
+        }
+        // quarter-finals has promoted top four competitors of first round in heats with eight competitors each:
+        Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
+        for (int heat=0; heat<4; heat++) {
+            competitorsForHeatsInQuarterFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInQuarterFinals[heat][i] = c[8*(2*heat+(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), competitorsForHeatsInQuarterFinals[heat]);
+        }
+        // semi-finals has promoted top four competitors of quarter finals which are the top four of each other first-round heat:
+        Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
+        for (int heat=0; heat<2; heat++) {
+            competitorsForHeatsInSemiFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInSemiFinals[heat][i] = c[8*(4*heat+2*(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), competitorsForHeatsInSemiFinals[heat]);
+        }
+        // finals has promoted top four competitors of semi finals which are the top four of first and fifth first-round heats
+        // for the final, and the top four of the first round's third and seventh heat
+        Competitor[][] competitorsForHeatsInFinals = new Competitor[2][];
+        for (int heat=0; heat<2; heat++) {
+            competitorsForHeatsInFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInFinals[heat][i] = c[8*(2*heat+4*(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(3), "Heat "+(heat+15), competitorsForHeatsInFinals[heat]);
+        }
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertSame(c[0], rankedCompetitors.get(0)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
+        assertSame(c[1], rankedCompetitors.get(1)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
+        assertEquals(0.7, leaderboard.getTotalPoints(c[0], later), 0.000000001);
+        assertEquals(2, leaderboard.getTotalPoints(c[1], later), 0.000000001);
+    }
+
+    @Test
     public void testScoringConsideringNotAllRaces() throws NoWindException {
         // one discard at four races
         Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
@@ -1360,6 +1411,52 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
                 /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
+        return regatta;
+    }
+    
+    private Regatta createRegattaWithEliminations(final int numberOfEliminations, final int[] numbersOfHeatsPerRound,
+            final String regattaBaseName, BoatClass boatClass, ScoringScheme scoringScheme) {
+        series = new ArrayList<Series>();
+        // example for numbersOfHeatsPerRound: [8, 4, 2, 2]
+        int heatNumber = 1;
+        for (int elimination=1; elimination<=numberOfEliminations; elimination++) {
+            // create one elimination consisting of a number of rounds, each consisting of a number of heats
+            int roundNumber = 1;
+            for (int numberOfHeatsPerRound : numbersOfHeatsPerRound) {
+                final boolean isFinalRound = roundNumber == numbersOfHeatsPerRound.length;
+                // create one round as a series that has one fleet per heat
+                List<Fleet> fleetsInRound = new ArrayList<Fleet>();
+                for (int heatInRound=1; heatInRound<=numberOfHeatsPerRound; heatInRound++) {
+                    final int ordering = numbersOfHeatsPerRound.length-roundNumber+1+
+                            // in final round distinguish Final and Losers Final
+                            (isFinalRound ? heatInRound-1 : 1);
+                    fleetsInRound.add(new FleetImpl("Heat "+(heatNumber++), ordering));
+                }
+                List<String> raceColumnNameForRound = new ArrayList<String>();
+                raceColumnNameForRound.add("E"+elimination+"R"+roundNumber);
+                final String roundName;
+                if (numbersOfHeatsPerRound.length-roundNumber == 2) {
+                    roundName = "Quarter-Final";
+                } else if (numbersOfHeatsPerRound.length-roundNumber == 1) {
+                    roundName = "Semi-Final";
+                } else if (numbersOfHeatsPerRound.length-roundNumber == 0) {
+                    roundName = "Final";
+                } else {
+                    roundName = "Round "+roundNumber;
+                }
+                Series seriesForRound = new SeriesImpl("E"+elimination+" "+roundName, /* isMedal */ false, fleetsInRound,
+                        raceColumnNameForRound, /* trackedRegattaRegistry */null);
+                if (isFinalRound) {
+                    // last "Final" round; here, the fleets are contiguously scored
+                    seriesForRound.setSplitFleetContiguousScoring(true);
+                }
+                series.add(seriesForRound);
+                roundNumber++;
+            }
+        }
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
+                /*startDate*/ null, /*endDate*/ null, series, /* persistent */ false, scoringScheme,
+                /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
         return regatta;
     }
     
