@@ -65,7 +65,7 @@ public class PolarDataMiningSettingsDialogComponent implements SettingsDialogCom
         applyMinimumWindConfidenceLabel.setTitle(stringMessages.applyMinimumWindConfidenceTooltip());
         grid.setWidget(3, 0, applyMinimumWindConfidenceLabel);
         applyMinimumWindConfidenceBox = dialog.createCheckbox("");
-        applyMinimumWindConfidenceBox.setValue(settings.useOnlyEstimatedForWindDirection());
+        applyMinimumWindConfidenceBox.setValue(settings.applyMinimumWindConfidence());
         grid.setWidget(3, 1, applyMinimumWindConfidenceBox);
         Label useOnlyWindGaugesForWindSpeedLabel = new Label(stringMessages.polarSheetUseOnlyWindGaugeData() + ":");
         useOnlyWindGaugesForWindSpeedLabel.setTitle(stringMessages.polarSheetUseOnlyWindGaugeDataTooltip());
