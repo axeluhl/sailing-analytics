@@ -128,7 +128,10 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
             final int numberOfCompetitorsWithBetterScoresInRound = Util.size(((RaceColumnInSeries) raceColumn).getSeries().getFleets()) * (rank-1);
             final int bestOverallRankForRank = numberOfCompetitorsWithBetterScoresInRound+1;
             final int worstOverallRankForRank = numberOfCompetitorsWithBetterScoresInRound+numberOfCompetitorsWithSameRankInRound;
-            result = (double) bestOverallRankForRank + ((double) worstOverallRankForRank-(double) bestOverallRankForRank)/2.0;
+            final int numberOfRanks = worstOverallRankForRank-bestOverallRankForRank+1;
+            result = (double) bestOverallRankForRank + ((double) numberOfRanks-1)/2.0
+                    // now subtract the difference between 1.0 and 0.7 in case the first place is contained:
+                    - (bestOverallRankForRank==1 ? (1.0-0.7)/numberOfRanks : 0);
         } else {
             result = null; // not in final round; competitor was promoted from raceColumn to the next round and has
             // a non-null score in a subsequent round of the elimination
