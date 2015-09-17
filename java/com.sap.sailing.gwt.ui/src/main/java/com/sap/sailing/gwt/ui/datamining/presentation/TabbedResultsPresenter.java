@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sailing.gwt.ui.polarsheets.PolarResultsPresenter;
+import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public class TabbedResultsPresenter implements ResultsPresenter<Object> {
