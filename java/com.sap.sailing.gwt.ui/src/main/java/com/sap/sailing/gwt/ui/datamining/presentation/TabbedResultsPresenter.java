@@ -23,14 +23,14 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class TabbedResultsPresenter implements ResultsPresenter<Object, Settings> {
+public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final StringMessages stringMessages;
     
     private final ScrolledTabLayoutPanel tabPanel;
-    private final Map<Widget, ResultsPresenter<Object, ?>> presentersMappedByHeader;
+    private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     
     public TabbedResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -61,7 +61,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object, Settings
     }
 
     @Override
-    public void showResult(QueryResultDTO<Object> result) {
+    public void showResult(QueryResultDTO<?> result) {
         if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
             CloseableTabHeader oldHeader = getSelectedHeader();
             addPolarTabAndFocus();
@@ -104,13 +104,13 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object, Settings
         return (CloseableTabHeader) tabPanel.getTabWidget(tabPanel.getSelectedIndex());
     }
 
-    private ResultsPresenter<Object, ?> getSelectedPresenter() {
+    private ResultsPresenter<?> getSelectedPresenter() {
         return presentersMappedByHeader.get(getSelectedHeader());
     }
 
     private void addTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<Object, ?> tabPresenter = new MultiResultsPresenter(stringMessages);
+        ResultsPresenter<?> tabPresenter = new MultiResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
@@ -121,7 +121,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object, Settings
     
     private void addPolarTabAndFocus() {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<Object, ?> tabPresenter = new PolarResultsPresenter(stringMessages);
+        ResultsPresenter<?> tabPresenter = new PolarResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
