@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -20,12 +22,12 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
-import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
-import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialog;
 import com.sap.sse.gwt.resources.Highcharts;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
@@ -67,7 +69,10 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         settingsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<QueryRunnerSettings>(queryRunner, getStringMessages()).show();
+                Collection<Component<?>> components = new HashSet<>();
+                components.add(queryRunner);
+                new CompositeTabbedSettingsDialog(getStringMessages(), components, getStringMessages().dataMiningSettings()).show();
+//                new SettingsDialog<QueryRunnerSettings>(queryRunner, getStringMessages()).show();
             }
         });
         queryDefinitionProviderWithControls.addControl(settingsAnchor);

@@ -123,8 +123,7 @@ public class SimpleQueryRunner implements QueryRunner {
 
     @Override
     public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
-        QueryRunnerSettings dataMiningSettings = new QueryRunnerSettings(settings);
-        return new QueryRunnerSettingsDialogComponent(dataMiningSettings, stringMessages);
+        return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override

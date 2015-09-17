@@ -1,10 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
@@ -16,9 +13,12 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSe
  *
  */
 public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSettings> {
-    private final Map<Component<?>, SettingsDialogComponent<?>> settingsDialogComponents;
     
-    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Component<?>... components) {
+    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<Component<?>> components) {
+        this(stringConstants, components, null);
+    }
+
+    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<Component<?>> components, final String title) {
         super(new Component<CompositeSettings>() {
             @Override
             public boolean hasSettings() {
@@ -42,23 +42,27 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
                 }
             }
 
-            private <SettingsType extends AbstractSettings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+            private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
                 componentAndSettings.getA().updateSettings(componentAndSettings.getB());
             }
 
             @Override
             public String getLocalizedShortName() {
-                StringBuilder result = new StringBuilder();
-                boolean first = true;
-                for (Component<?> component : components) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        result.append(" / ");
+                if (title != null && !title.isEmpty()) {
+                    return title;
+                } else {
+                    StringBuilder result = new StringBuilder();
+                    boolean first = true;
+                    for (Component<?> component : components) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            result.append(" / ");
+                        }
+                        result.append(component.getLocalizedShortName());
                     }
-                    result.append(component.getLocalizedShortName());
+                    return result.toString();
                 }
-                return result.toString();
             }
 
             @Override
@@ -81,12 +85,6 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
                 return null;
             }
         }, stringConstants);
-        settingsDialogComponents = new HashMap<Component<?>, SettingsDialogComponent<?>>();
-        for (Component<?> component : components) {
-            if (component.hasSettings()) {
-                settingsDialogComponents.put(component, component.getSettingsDialogComponent());
-            }
-        }
     }
     
 }
