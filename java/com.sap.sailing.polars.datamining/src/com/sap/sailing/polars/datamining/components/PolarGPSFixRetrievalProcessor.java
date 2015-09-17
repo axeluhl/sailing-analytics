@@ -29,10 +29,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasCompetitorPolarContext, HasGPSFixPolarContext> {
 
-    private final PolarSheetGenerationSettings settings;
+    private final PolarDataMiningSettings settings;
 
     public PolarGPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers,
-            PolarSheetGenerationSettings settings, int retrievalLevel) {
+            PolarDataMiningSettings settings, int retrievalLevel) {
         super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel);
         this.settings = settings;
     }

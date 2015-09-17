@@ -26,7 +26,8 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
-import com.sap.sailing.gwt.ui.polarsheets.PolarSheetGenerationSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -49,7 +50,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     private Anchor settingsAnchor;
     
     // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
-    private Map<DataRetrieverChainDefinitionDTO, PolarSheetGenerationSettings> settingsMappedByRetrieverChain;
+    private Map<DataRetrieverChainDefinitionDTO, PolarDataMiningSettings> settingsMappedByRetrieverChain;
 
     public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
@@ -153,8 +154,8 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
             if (retrieverChain.hasSettings()) {
                 // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
                 for (SerializableSettings settings : retrieverChain.getDefaultSettings().values()) {
-                    if (settings instanceof PolarSheetGenerationSettings) {
-                        settingsMappedByRetrieverChain.put(retrieverChain, (PolarSheetGenerationSettings) settings);
+                    if (settings instanceof PolarDataMiningSettings) {
+                        settingsMappedByRetrieverChain.put(retrieverChain, (PolarDataMiningSettings) settings);
                     }
                 }
             }
@@ -235,7 +236,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
         SettingsDialogComponent<? extends Settings> result = null;
         if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
-            result = new PolarSheetGenerationSettingsDialogComponent(settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
+            result = new PolarDataMiningSettingsDialogComponent(settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
         }
         return (SettingsDialogComponent<SerializableSettings>) result;
     }
@@ -243,7 +244,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     @Override
     public void updateSettings(SerializableSettings newSettings) {
         // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
-        settingsMappedByRetrieverChain.put(getDataRetrieverChainDefinition(), (PolarSheetGenerationSettings) newSettings);
+        settingsMappedByRetrieverChain.put(getDataRetrieverChainDefinition(), (PolarDataMiningSettings) newSettings);
         notifyListeners();
     }
 

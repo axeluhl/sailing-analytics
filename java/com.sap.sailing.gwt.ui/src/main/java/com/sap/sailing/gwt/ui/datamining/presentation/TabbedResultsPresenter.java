@@ -69,6 +69,12 @@ public class TabbedResultsPresenter implements ResultsPresenter<Object> {
             CloseableTabHeader oldHeader = getSelectedHeader();
             addPolarTabAndFocus();
             removeTab(oldHeader);
+        } else {
+            if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus();
+                removeTab(oldHeader);
+            }
         }
         getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
