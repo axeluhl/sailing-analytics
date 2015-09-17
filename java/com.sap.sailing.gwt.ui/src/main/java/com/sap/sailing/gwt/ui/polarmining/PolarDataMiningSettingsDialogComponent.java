@@ -28,6 +28,7 @@ public class PolarDataMiningSettingsDialogComponent implements SettingsDialogCom
     private CheckBox useOnlyEstimationForWindDirectionBox;
     private WindSpeedSteppingConfiguratorPanel windSteppingBox;
     private DoubleBox windSteppingMaxDistanceBox;
+    private CheckBox applyMinimumWindConfidenceBox;
 
     public PolarDataMiningSettingsDialogComponent(PolarDataMiningSettings settings) {
         this.settings = settings;
@@ -37,7 +38,7 @@ public class PolarDataMiningSettingsDialogComponent implements SettingsDialogCom
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        Grid grid = new Grid(14, 2);
+        Grid grid = new Grid(10, 2);
         grid.setCellPadding(5);
         vp.add(grid);
         setupGrid(grid, dialog);
@@ -60,6 +61,12 @@ public class PolarDataMiningSettingsDialogComponent implements SettingsDialogCom
         grid.setWidget(2, 0, minimumWindConfidenceLabel);
         minimumWindConfidenceBox = dialog.createDoubleBox(settings.getMinimumWindConfidence(), 6);
         grid.setWidget(2, 1, minimumWindConfidenceBox);
+        Label applyMinimumWindConfidenceLabel = new Label(stringMessages.applyMinimumWindConfidence() + ":");
+        applyMinimumWindConfidenceLabel.setTitle(stringMessages.applyMinimumWindConfidenceTooltip());
+        grid.setWidget(3, 0, applyMinimumWindConfidenceLabel);
+        applyMinimumWindConfidenceBox = dialog.createCheckbox("");
+        applyMinimumWindConfidenceBox.setValue(settings.useOnlyEstimatedForWindDirection());
+        grid.setWidget(3, 1, applyMinimumWindConfidenceBox);
         Label useOnlyWindGaugesForWindSpeedLabel = new Label(stringMessages.polarSheetUseOnlyWindGaugeData() + ":");
         useOnlyWindGaugesForWindSpeedLabel.setTitle(stringMessages.polarSheetUseOnlyWindGaugeDataTooltip());
         grid.setWidget(4, 0, useOnlyWindGaugesForWindSpeedLabel);
@@ -68,30 +75,31 @@ public class PolarDataMiningSettingsDialogComponent implements SettingsDialogCom
         grid.setWidget(4, 1, useOnlyWindGaugesForWindSpeedBox);
         Label useOnlyEstimationForWindDirectionLabel = new Label(stringMessages.polarSheetUseOnlyEstimationData() + ":");
         useOnlyEstimationForWindDirectionLabel.setTitle(stringMessages.polarSheetUseOnlyEstimationDataTooltip());
-        grid.setWidget(6, 0, useOnlyEstimationForWindDirectionLabel);
+        grid.setWidget(5, 0, useOnlyEstimationForWindDirectionLabel);
         useOnlyEstimationForWindDirectionBox = dialog.createCheckbox("");
         useOnlyEstimationForWindDirectionBox.setValue(settings.useOnlyEstimatedForWindDirection());
-        grid.setWidget(6, 1, useOnlyEstimationForWindDirectionBox);
-        grid.setWidget(10, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
+        grid.setWidget(5, 1, useOnlyEstimationForWindDirectionBox);
+        grid.setWidget(6, 0, new Label(stringMessages.polarSheetNumberOfHistogramColumns() + ":"));
         numberOfHistogramColumnsBox = dialog.createIntegerBox(settings.getNumberOfHistogramColumns(), 3);
-        grid.setWidget(10, 1, numberOfHistogramColumnsBox);
-        grid.setWidget(11, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
+        grid.setWidget(6, 1, numberOfHistogramColumnsBox);
+        grid.setWidget(7, 0, new Label(stringMessages.polarSheetWindSteppingInKnots() + ":"));
         windSteppingBox = new WindSpeedSteppingConfiguratorPanel(settings.getWindSpeedStepping());
-        grid.setWidget(11, 1, windSteppingBox);
+        grid.setWidget(7, 1, windSteppingBox);
         Label windSteppingMaxDistanceLabel = new Label(stringMessages.polarSheetWindSteppingMaxDistance() + ":");
         windSteppingMaxDistanceLabel.setTitle(stringMessages.polarSheetWindSteppingMaxDistanceTooltip());
-        grid.setWidget(12, 0, windSteppingMaxDistanceLabel);
+        grid.setWidget(8, 0, windSteppingMaxDistanceLabel);
         windSteppingMaxDistanceBox = dialog.createDoubleBox(settings.getWindSpeedStepping().getMaxDistance(), 6);
-        grid.setWidget(12, 1, windSteppingMaxDistanceBox);
-        grid.setWidget(13, 0, new Label(stringMessages.pleaseSeeToolTips()));
+        grid.setWidget(8, 1, windSteppingMaxDistanceBox);
+        grid.setWidget(9, 0, new Label(stringMessages.pleaseSeeToolTips()));
     }
 
     @Override
     public PolarDataMiningSettings getResult() {
         return new PolarDataMiningSettingsImpl(minimumGraphDataSizeBox.getValue(), minimumWindConfidenceBox.getValue(),
-                minimumDataCountPerAngleBox.getValue(), numberOfHistogramColumnsBox.getValue(),
-                useOnlyWindGaugesForWindSpeedBox.getValue(), useOnlyEstimationForWindDirectionBox.getValue(),
-                windSteppingBox.getStepping(windSteppingMaxDistanceBox.getValue()));
+                applyMinimumWindConfidenceBox.getValue(), minimumDataCountPerAngleBox.getValue(),
+                numberOfHistogramColumnsBox.getValue(), useOnlyWindGaugesForWindSpeedBox.getValue(),
+                useOnlyEstimationForWindDirectionBox.getValue(), windSteppingBox.getStepping(windSteppingMaxDistanceBox
+                        .getValue()));
     }
 
     @Override

@@ -52,9 +52,4 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
         return competitorPolarContext;
     }
 
-    @Override
-    public Boolean windIsConfident() {
-        return wind.getConfidence() >= settings.getMinimumWindConfidence();
-    }
-
 }

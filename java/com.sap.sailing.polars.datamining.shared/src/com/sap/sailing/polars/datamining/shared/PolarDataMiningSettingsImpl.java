@@ -7,7 +7,7 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
     public static PolarDataMiningSettingsImpl createStandardPolarSettings() {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.5);
-        return new PolarDataMiningSettingsImpl(50, 0.01, 20, 20, true, true, windStepping);
+        return new PolarDataMiningSettingsImpl(50, 0.01, true, 20, 20, true, true, windStepping);
     }
 
     private static final long serialVersionUID = 2731616509404813790L;
@@ -18,16 +18,18 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
     private boolean useOnlyWindGaugesForWindSpeed;
     private boolean useOnlyEstimationForWindDirection;
     private WindSpeedSteppingWithMaxDistance windStepping;
+    private boolean applyMinimumWindConfidence;
     
     //GWT
     PolarDataMiningSettingsImpl() {};
 
     public PolarDataMiningSettingsImpl(Integer minimumDataCountPerGraph, double minimumWindConfidence,
-            Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns,
-            boolean useOnlyWindGaugesForWindSpeed,
-            boolean useOnlyEstimationForWindDirection, WindSpeedSteppingWithMaxDistance windStepping) {
+            boolean applyMinimumWindConfidence, Integer minimumDataCountPerAngle, Integer numberOfHistogramColumns,
+            boolean useOnlyWindGaugesForWindSpeed, boolean useOnlyEstimationForWindDirection,
+            WindSpeedSteppingWithMaxDistance windStepping) {
         this.minimumDataCountPerGraph = minimumDataCountPerGraph;
         this.minimumWindConfidence = minimumWindConfidence;
+        this.applyMinimumWindConfidence = applyMinimumWindConfidence;
         this.minimumDataCountPerAngle = minimumDataCountPerAngle;
         this.numberOfHistogramColumns = numberOfHistogramColumns;
         this.useOnlyWindGaugesForWindSpeed = useOnlyWindGaugesForWindSpeed;
@@ -69,6 +71,11 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
     public WindSpeedSteppingWithMaxDistance getWindSpeedStepping() {
         return windStepping;
     }
+    
+    @Override
+    public boolean applyMinimumWindConfidence() {
+        return applyMinimumWindConfidence;
+    }
 
     @Override
     public boolean areDefault() {
@@ -79,6 +86,7 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (applyMinimumWindConfidence ? 1231 : 1237);
         result = prime * result + ((minimumDataCountPerAngle == null) ? 0 : minimumDataCountPerAngle.hashCode());
         result = prime * result + ((minimumDataCountPerGraph == null) ? 0 : minimumDataCountPerGraph.hashCode());
         long temp;
@@ -100,6 +108,8 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
         if (getClass() != obj.getClass())
             return false;
         PolarDataMiningSettingsImpl other = (PolarDataMiningSettingsImpl) obj;
+        if (applyMinimumWindConfidence != other.applyMinimumWindConfidence)
+            return false;
         if (minimumDataCountPerAngle == null) {
             if (other.minimumDataCountPerAngle != null)
                 return false;
@@ -128,7 +138,6 @@ public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
             return false;
         return true;
     }
-    
     
 
 }

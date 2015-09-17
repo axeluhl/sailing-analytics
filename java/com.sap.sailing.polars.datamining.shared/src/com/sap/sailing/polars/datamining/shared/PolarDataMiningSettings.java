@@ -10,6 +10,8 @@ public abstract class PolarDataMiningSettings extends SerializableSettings {
     public abstract Integer getMinimumDataCountPerGraph();
 
     public abstract double getMinimumWindConfidence();
+    
+    public abstract boolean applyMinimumWindConfidence();
 
     public abstract Integer getMinimumDataCountPerAngle();
 

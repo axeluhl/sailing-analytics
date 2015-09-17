@@ -561,6 +561,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String polarSheetWindSteppingMaxDistanceTooltip();
     String polarSheetSplitByWindGauges();
     String polarSheetSplitByWindGaugesTooltip();
+    String applyMinimumWindConfidence();
+    String applyMinimumWindConfidenceTooltip();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
