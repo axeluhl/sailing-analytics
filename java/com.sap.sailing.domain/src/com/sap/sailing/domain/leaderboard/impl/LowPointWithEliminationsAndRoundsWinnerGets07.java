@@ -60,7 +60,6 @@ import com.sap.sse.common.Util;
 public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
     private static final long serialVersionUID = -2318652113347853873L;
     
-    private static int FINAL_FLEET_ORDERING = 1;
     private static int LOSERS_FINAL_FLEET_ORDERING = 2;
 
     @Override
