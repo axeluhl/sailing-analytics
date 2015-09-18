@@ -61,7 +61,7 @@ public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<R
                 Helpers.tryUuidConversion(id),
                 new MillisecondsTimePoint(createdAt.longValue()),
                 author, 
-                new MillisecondsTimePoint(timeStamp.longValue()),
+                timeStamp == null ? null : new MillisecondsTimePoint(timeStamp.longValue()),
                 passId.intValue(), competitors);
     }
 
