@@ -9,16 +9,16 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSe
  *  
  * @author Axel Uhl (d043530), Lennart Hensler (D054527)
  */
-public class CompositeSettingsComponent implements Component<CompositeSettings> {
+public class CompositeTabbedSettingsComponent implements Component<CompositeSettings> {
     
     private final Iterable<Component<?>> components;
     private final String title;
     
-    public CompositeSettingsComponent(Iterable<Component<?>> components) {
+    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components) {
         this(components, null);
     }
 
-    public CompositeSettingsComponent(Iterable<Component<?>> components, String title) {
+    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components, String title) {
         this.components = components;
         this.title = title;
     }
@@ -35,7 +35,7 @@ public class CompositeSettingsComponent implements Component<CompositeSettings> 
 
     @Override
     public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
-        return new CompositeSettingsDialogComponent(components);
+        return new CompositeTabbedSettingsDialogComponent(components);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
     }
 
     public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<Component<?>> components, final String title) {
-        super(new CompositeSettingsComponent(components, title), stringConstants);
+        super(new CompositeTabbedSettingsComponent(components, title), stringConstants);
     }
     
 }
