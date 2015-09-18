@@ -81,9 +81,9 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
                 bgColor = ThemeHelper.getColor(mContext, R.attr.sap_gray);
             } else {
-                bgColor = android.R.color.transparent;
+                bgColor = mContext.getResources().getColor(android.R.color.transparent);
             }
-            holder.container.setBackgroundColor(mContext.getResources().getColor(bgColor));
+            holder.container.setBackgroundColor(bgColor);
         }
     }
 

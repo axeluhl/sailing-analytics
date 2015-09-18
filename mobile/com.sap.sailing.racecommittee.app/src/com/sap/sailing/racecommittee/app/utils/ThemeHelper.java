@@ -104,7 +104,7 @@ public class ThemeHelper {
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
 
-    public static @ColorRes int getColor(Context context, @AttrRes int colorId) {
+    public static int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

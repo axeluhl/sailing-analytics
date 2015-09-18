@@ -220,7 +220,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                 } else {
                     if (race_name != null) {
-                        race_name.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.white)));
+                        race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
                 }
             }
@@ -319,13 +319,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 race_unscheduled.setVisibility(View.GONE);
             }
             if (race_name != null) {
-                race_name.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray)));
+                race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
             }
             if (has_dependent_races != null) {
                 has_dependent_races.setVisibility(View.GONE);
             }
             if (depends_on != null) {
-                depends_on.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray)));
+                depends_on.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
                 depends_on.setVisibility(View.GONE);
             }
             setMarker(0);

@@ -86,11 +86,11 @@ public abstract class BasePanelFragment extends RaceFragment {
                     retValue = drawable.getLevel();
                     switch (retValue) {
                         case 1: // clicked
-                            view.setBackgroundColor(getResources().getColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20)));
+                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
                             break;
 
                         default:
-                            view.setBackgroundColor(getResources().getColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray)));
+                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
                             break;
                     }
                 }

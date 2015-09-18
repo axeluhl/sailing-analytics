@@ -50,13 +50,13 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
         }
 
         if (mSelectedItem == position) {
-            layout.setBackgroundColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray)));
+            layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
         } else {
-            layout.setBackgroundColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30)));
+            layout.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
         }
         layout.setClickable(false);
         if (mainText != null) {
-            mainText.setTextColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.white)));
+            mainText.setTextColor(ThemeHelper.getColor(mContext, R.attr.white));
         }
 
         return layout;
