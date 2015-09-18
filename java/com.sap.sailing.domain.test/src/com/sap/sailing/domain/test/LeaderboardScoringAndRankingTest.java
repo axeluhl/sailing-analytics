@@ -70,6 +70,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndZeroRanks;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -645,7 +646,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 /* medal */ false, "testTieBreakWithTwoVersusOneWins",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), rankedCompetitors);
@@ -664,7 +665,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
@@ -685,7 +686,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInRound1[heat][i] = c[8*heat+i];
             }
-            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), competitorsForHeatsInRound1[heat]);
+            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
         }
         // quarter-finals has promoted top four competitors of first round in heats with eight competitors each:
         Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
@@ -694,7 +695,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInQuarterFinals[heat][i] = c[8*(2*heat+(i/4))+(i%4)];
             }
-            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), competitorsForHeatsInQuarterFinals[heat]);
+            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), /* withScores */ true, competitorsForHeatsInQuarterFinals[heat]);
         }
         // semi-finals has promoted top four competitors of quarter finals which are the top four of each other first-round heat:
         Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
@@ -703,7 +704,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInSemiFinals[heat][i] = c[8*(4*heat+2*(i/4))+(i%4)];
             }
-            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), competitorsForHeatsInSemiFinals[heat]);
+            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), /* withScores */ true, competitorsForHeatsInSemiFinals[heat]);
         }
         // finals has promoted top four competitors of semi finals which are the top four of first and fifth first-round heats
         // for the final, and the top four of the first round's third and seventh heat
@@ -713,7 +714,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInFinals[heat][i] = c[8*(2*heat+4*(i/4))+(i%4)];
             }
-            later = createAndAttachTrackedRaces(series.get(3), "Heat "+(heat+15), competitorsForHeatsInFinals[heat]);
+            later = createAndAttachTrackedRaces(series.get(3), "Heat "+(heat+15), /* withScores */ true, competitorsForHeatsInFinals[heat]);
         }
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertSame(c[0], rankedCompetitors.get(0)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
@@ -745,7 +746,6 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     // TODO add test case for elimination heats with different numbers of competitors
     // TODO add test case for elimination based on score correction with no tracked race
 
-    // TODO add test case for elimination that has no scores for the final round and therefore needs to score by averages, considering the .7 for the first place
     @Test
     public void testElminationScoringSchemeWithFinalNotSailed() throws NoWindException {
         Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
@@ -761,7 +761,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInRound1[heat][i] = c[8*heat+i];
             }
-            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), competitorsForHeatsInRound1[heat]);
+            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
         }
         // quarter-finals has promoted top four competitors of first round in heats with eight competitors each:
         Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
@@ -770,7 +770,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInQuarterFinals[heat][i] = c[8*(2*heat+(i/4))+(i%4)];
             }
-            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), competitorsForHeatsInQuarterFinals[heat]);
+            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), /* withScores */ true, competitorsForHeatsInQuarterFinals[heat]);
         }
         // semi-finals has promoted top four competitors of quarter finals which are the top four of each other first-round heat:
         Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
@@ -779,11 +779,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInSemiFinals[heat][i] = c[8*(4*heat+2*(i/4))+(i%4)];
             }
-            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), competitorsForHeatsInSemiFinals[heat]);
+            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), /* withScores */ true, competitorsForHeatsInSemiFinals[heat]);
         }
-        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        // TODO is it this, or will the two first places in the two semi-final heats obtain (0.7+2)/2 points, and the two second places (3+4)/2?
-        final double expectedPointsForFirstEightBoats = (0.7 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8;
+        // 1 instead of 0.7 for a final that was not sailed; clarified with Juergen Bonne in an e-mail as of 18-09-2015T09:03:00Z
+        final double expectedPointsForFirstEightBoats = (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8;
         for (int i=0; i<4; i++) {
             assertEquals(expectedPointsForFirstEightBoats, leaderboard.getTotalPoints(c[i], later), 0.000000001);
         }
@@ -807,7 +806,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i=0; i<8; i++) {
                 competitorsForHeatsInRound1[heat][i] = c[8*heat+i];
             }
-            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), competitorsForHeatsInRound1[heat]);
+            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
         }
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         final double expectedPointsForFirstEightBoats = (0.7 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8;
@@ -864,7 +863,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5, f6);
         Map<RaceColumn, List<Competitor>> rankedCompetitorsFromBestToWorstAfterEachRaceColumn =
                 leaderboard.getRankedCompetitorsFromBestToWorstAfterEachRaceColumn(later);
         assertEquals(Arrays.asList(c[2], c[0], c[1], c[3]),
@@ -917,8 +916,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 /* medal */ true, "testTieBreakWithTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2);
-        createAndAttachTrackedRaces(series.get(2), "Medal", m1);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
+        createAndAttachTrackedRaces(series.get(2), "Medal", /* withScores */ true, m1);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         // assert that both have equal score
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
@@ -940,7 +939,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
@@ -960,7 +959,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
@@ -1422,13 +1421,18 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(0., leaderboard1.getTotalPoints(c[3], beforeStartOfR1), 0.00000001); // not even the R1 scores apply before the start time of R1
     }
 
-    private TimePoint createAndAttachTrackedRaces(Series theSeries, String fleetName, Competitor[]... competitorLists) {
+    private TimePoint createAndAttachTrackedRaces(Series theSeries, String fleetName, boolean withScores, Competitor[]... competitorLists) {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
         Iterator<? extends RaceColumn> columnIter = theSeries.getRaceColumns().iterator();
         for (Competitor[] competitorList : competitorLists) {
             RaceColumn raceColumn = columnIter.next();
-            TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitorList));
+            final TrackedRace trackedRace;
+            if (withScores) {
+                trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitorList));
+            } else {
+                trackedRace = new MockedTrackedRaceWithStartTimeAndZeroRanks(now, Arrays.asList(competitorList));
+            }
             raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
         }
         return later;

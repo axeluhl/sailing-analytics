@@ -20,9 +20,9 @@ import com.sap.sse.common.Util;
  * regatta is divided into "eliminations" where each elimination consists of a sequence of "rounds." Each round is in
  * turn divided into a number of "heats" (races). The final round in an elimination consists of a "final" race and a
  * "losers final" race. They constitute, in our terminology, one series with contiguous scoring. The winner of the
- * "losers final" gets one point more than the competitor ranking last in the "final" race. The winner of the final
- * race obtains 0.7 points. All other ranks are assigned points equal to the rank or the average of the ranks attained
- * by competitors ranking equal.
+ * "losers final" gets one point more than the competitor ranking last in the "final" race. The winner of the final race
+ * obtains 0.7 points. All other ranks are assigned points equal to the rank or the average of the ranks attained by
+ * competitors ranking equal.
  * <p>
  * 
  * The semi-final has two heats, and the better half of the competitors in those heats get promoted to the "final," the
@@ -30,15 +30,20 @@ import com.sap.sse.common.Util;
  * (exceptions for races not sailed see below).
  * <p>
  * 
- * In the quarter-final there are four heats. The competitors ranking in the top half of their heat are promoted to the
- * semi-final and are not awarded points for the quarter-final round (exceptions for races not sailed see below). Those
- * ranking in the bottom half of their heat are not promoted to the next round and are instead awarded points for the
- * elimination based on their rank in their heat. Across all quarter-final heats, competitors not promoted and having
- * the same rank obtain equal points regardless their heat. The number of points is calculated as the average of their
- * rank in the elimination. Quarter-final participants rank better than those eliminated in earlier rounds. Eliminated
- * competitors rank better in the elimination if they obtained a better rank in their heat than other competitors
- * eliminated in the same round. For example, if each of the four quarter-final heat has eight competitors, the
- * four competitors ranking last (8th) in their heat get the average points for ranks 29-32 (30.5 points), whereas
+ * In the quarter-final there are four heats. Usually, the competitors ranking in the top half of their heat are
+ * promoted to the semi-final and are not awarded points for the quarter-final round (exceptions for races not sailed
+ * see below). However, the race committee may decide how many competitors are promoted, also based on the number of
+ * participant and resulting number and set-up of heats. Therefore, successful promotion can only be detected by looking
+ * at the competitor assignments in the next round.
+ * <p>
+ * 
+ * Those competitors ranking in the bottom part of their heat are not promoted to the next round and are instead awarded
+ * points for the elimination based on their rank in their heat. Across all quarter-final heats, competitors not
+ * promoted and having the same rank obtain equal points regardless their heat. The number of points is calculated as
+ * the average of their rank in the elimination. Quarter-final participants rank better than those eliminated in earlier
+ * rounds. Eliminated competitors rank better in the elimination if they obtained a better rank in their heat than other
+ * competitors eliminated in the same round. For example, if each of the four quarter-final heat has eight competitors,
+ * the four competitors ranking last (8th) in their heat get the average points for ranks 29-32 (30.5 points), whereas
  * the four competitors ranking 7th in their heat get the average points for ranks 25-28 (26.5 points), and so on.
  * <p>
  * 
@@ -46,13 +51,24 @@ import com.sap.sse.common.Util;
  * <p>
  * 
  * Should a planned heat not be sailed then all competitors assigned to that heat will obtain equal points based on the
- * average of the ranks for which they would have sailed. For example, if the final heat cannot be sailed, all competitors
- * who qualified for the final race obtain the average of 0.7, 2, 3, 4, 5, 6, 7 and 8 points (4.46 points).<p>
+ * average of the ranks for which they would have sailed. For example, if the final heat cannot be sailed, all
+ * competitors who qualified for the final race obtain the average of 0.7, 2, 3, 4, 5, 6, 7 and 8 points (4.46 points).
+ * <p>
  * 
- * The regatta is expected to be modeled such that fleet ordering numbers are used in a special way. Ordering <code>1</code>
- * is to be used to identify the Final heat, <code>2</code> for the Losers Final heat. For each earlier round the
- * ordering is increased by one and applied equally to all heats of that round. Therefore, the two semi-final heats
- * use ordering <code>3</code>, the four quarter-final heats use <code>4</code>, and so on.
+ * During live tracking promotions cannot generally be decided due to the race committee's decision authority.
+ * Therefore, also those competitors who ultimately will be promoted have to be given scores in their heat based on the
+ * average points obtained by all competitors taking the same rank in their respective heat in the same round. This will
+ * usually lead to a change in points awarded to the competitors promoted as soon as the promotion becomes "official"
+ * which technically needs to be expressed by assigning the competitors to their heat in the next round. As soon as this
+ * happens, the scores in the heat from which a competitor got promoted are set to <code>null</code>, and a score
+ * corresponding to the average points given to the competitors of the heat to which the competitor got promoted is
+ * inferred for that heat. Only when the race in that next heat produces non-zero ranks, the scoring rules for that
+ * heat are applied again normally.<p>
+ * 
+ * The regatta is expected to be modeled such that fleet ordering numbers are used in a special way. Ordering
+ * <code>1</code> is to be used to identify the Final heat, <code>2</code> for the Losers Final heat. For each earlier
+ * round the ordering is increased by one and applied equally to all heats of that round. Therefore, the two semi-final
+ * heats use ordering <code>3</code>, the four quarter-final heats use <code>4</code>, and so on.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -68,37 +84,47 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
     }
     
     /**
-     * A competitor will obtain a score in a column if she has no score in any of the subsequent columns of the same
+     * A competitor will obtain a score in a column if she obtained an explicit score correction for that column or if
+     * she is assigned to a race linked to that column and has no score in any of the subsequent columns of the same
      * elimination. Assuming that each series has a single race column only, the next column is identical to the single
      * race column of the next series. If the <code>raceColumn</code> is the last column (representing the last round)
-     * of the elimination, the round is a final round, and all competitors participating in any of the races linked to
-     * any of the fleets in that column are eligible to receive a score in that column.
+     * of the elimination (identified by being the last series in the regatta or having fleet ordering numbers less than
+     * the fleet ordering of the next column), the round is a final round, and all competitors participating in any of
+     * the races linked to any of the fleets in that column are eligible to receive a score in that column.
      * <p>
      * 
      * The rationale behind this rule is that if a competitor got promoted to the next round of the elimination, no
-     * score will be assigned to that competitor in the round from which she got promoted unless the next heat that
-     * the competitor would have raced in is not sailed, in which case average points will be assigned to all competitors
-     * promoted to the heat that did not get sailed.
+     * score will be assigned to that competitor in the round from which she got promoted.
      */
     private boolean competitorGetsScoreInColumn(Leaderboard leaderboard, RaceColumnInSeries raceColumn, Competitor competitor, TimePoint timePoint) {
         final Series series = raceColumn.getSeries();
         final Regatta regatta = series.getRegatta();
-        boolean foundColumn = false;
-        boolean result = true;
-        // remember the ordering of any heat in raceColumn; the next column that has a greater ordering
-        // belongs to the next elimination
-        final int heatOrdering = raceColumn.getFleets().iterator().next().getOrdering();
-        for (Series seriesInRegatta : regatta.getSeries()) {
-            if (foundColumn && series.getFleets().iterator().next().getOrdering() > heatOrdering) {
-                // reached next elimination; abort
-                break;
-            }
-            if (!foundColumn && seriesInRegatta == series) {
-                foundColumn = true;
-            } else {
-                if (foundColumn && hasScoreInSeries(leaderboard, competitor, seriesInRegatta, timePoint)) {
-                    result = false;
+        boolean result;
+        if (leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint)) {
+            // explicit score provided for competitor in raceColumn; this overrules everything else
+            result = true;
+        } else if (raceColumn.getFleetOfCompetitor(competitor) == null) {
+            // competitor is not assigned to any race in this column; no points will be awarded unless explicitly corrected
+            // which is the case handled by the previous "if" statement
+            result = false;
+        } else {
+            result = true;
+            // remember the ordering of any heat in raceColumn; the next column that has a greater ordering
+            // belongs to the next elimination
+            final int heatOrdering = raceColumn.getFleets().iterator().next().getOrdering();
+            boolean foundColumn = false;
+            for (Series seriesInRegatta : regatta.getSeries()) {
+                if (foundColumn && series.getFleets().iterator().next().getOrdering() > heatOrdering) {
+                    // reached next elimination; abort
                     break;
+                }
+                if (!foundColumn && seriesInRegatta == series) {
+                    foundColumn = true;
+                } else {
+                    if (foundColumn && hasScoreInSeries(leaderboard, competitor, seriesInRegatta, timePoint)) {
+                        result = false;
+                        break;
+                    }
                 }
             }
         }
@@ -117,9 +143,19 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
         assert raceColumn instanceof RaceColumnInSeries;
         final Double result;
         if (rank == 0) {
+            // Note that 0 can mean the race hasn't started but can also mean that the competitor is not assigned to any TrackedRace in the raceColumn
+            // FIXME this is not correct in case the competitor is assigned to the heat, is not assigned to heats in subsequent rounds and the race has not started yet; then, average points are to be awarded to be consistent with the case that the race is not sailed at all
             result = null;
         } else if (isFinalRound((RaceColumnInSeries) raceColumn)) {
             final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
+            // FIXME presumably assign 0.7 only if the final race has actually been raced; otherwise, assign average of 1..n for the n participants of the final race
+
+            // Clarified with Juergen Bonne in an e-mail as of 18-09-2015T09:03:00Z that a final race's winner
+            // is scored with 0.7 only if the final race has actually been sailed. If the competitors are qualified
+            // for the final race but it's not sailed, average scores are to be assigned to all competitors qualified
+            // for the final race, but this average assumes 1.0 points for the first rank instead of the 0.7 assigned
+            // to the winner if the race is actually sailed.
+
             result = effectiveRank == 0 ? null : effectiveRank == 1 ? 0.7 : (double) effectiveRank;
         } else if (competitorGetsScoreInColumn(leaderboard, (RaceColumnInSeries) raceColumn, competitor, timePoint)) {
             // calculate the average rank or all competitors with the same rank in their respective heat in the round
