@@ -26,7 +26,9 @@
 
     <style name="DrawerButton" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="thickness">4dp</item>
+<!--
         <item name="barSize">30dp</item>
+-->
         <item name="gapBetweenBars">6dp</item>
         <item name="drawableSize">32dp</item>
         <item name="spinBars">false</item>
