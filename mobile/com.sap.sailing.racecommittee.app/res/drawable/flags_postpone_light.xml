@@ -14,7 +14,7 @@
         android:top="0dp">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/flag_shape_02_outline_96dp"/>
+            android:src="@drawable/flag_shape_01_outline_96dp"/>
     </item>
 
 </layer-list>
