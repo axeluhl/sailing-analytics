@@ -89,7 +89,7 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
             
             Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
             levelLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            levelLabel.setWidth("75px");
+            levelLabel.setWidth("100px");
             
             VerticalPanel presentationPanel = new VerticalPanel();
             List<FunctionDTO> sortedDimensions = new ArrayList<>(levelSelection.keySet());

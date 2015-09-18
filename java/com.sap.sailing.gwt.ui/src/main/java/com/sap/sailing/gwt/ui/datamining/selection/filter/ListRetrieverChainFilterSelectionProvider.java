@@ -186,13 +186,13 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     void updateFilterSelectionProviders(DataRetrieverLevelDTO beginningWithLevel, final FunctionDTO exceptForDimension) {
         DataRetrieverLevelDTO currentLevel = beginningWithLevel;
         DataRetrieverLevelDTO retrieverLevelToUpdate = null;
-        do {
+        while (currentLevel != null) {
             if (selectionProvidersMappedByRetrievedDataType.containsKey(currentLevel)) {
                 retrieverLevelToUpdate = currentLevel;
                 break;
             }
             currentLevel = retrieverChain.getNextRetrieverLevel(currentLevel);
-        } while (currentLevel != null);
+        }
         
         if (retrieverLevelToUpdate != null) {
             selectionProvidersMappedByRetrievedDataType.get(retrieverLevelToUpdate).updateAvailableData(exceptForDimension);
