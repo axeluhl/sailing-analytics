@@ -48,11 +48,11 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
         mainTextView.setText(item.getText());
         if (checkedPosition != -1) {
             if (position != checkedPosition) {
-                mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+                mainTextView.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray)));
                 mainTextView.setTypeface(Typeface.DEFAULT);
                 checkImageView.setVisibility(View.GONE);
             } else {
-                mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
+                mainTextView.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.white)));
                 mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
                 checkImageView.setVisibility(View.VISIBLE);
             }
@@ -60,9 +60,9 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
 
         if (!TextUtils.isEmpty(item.getSubtext())) {
             subTextView.setText(item.getSubtext());
-            subTextView.setTextColor(ThemeHelper.getColor(getContext(), position == checkedPosition ? R.attr.white : R.attr.sap_light_gray));
+            subTextView.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), position == checkedPosition ? R.attr.white : R.attr.sap_light_gray)));
             subTextView.setVisibility(View.VISIBLE);
-            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
+            mainTextView.setTextColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.white)));
         } else {
             subTextView.setVisibility(View.GONE);
         }

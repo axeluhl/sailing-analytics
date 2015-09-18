@@ -152,8 +152,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAdapter.notifyDataSetChanged();
 
         if (mCurrentRacesButton != null && mAllRacesButton != null) {
-            int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
-            int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
+            int colorGrey = getResources().getColor(ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray));
+            int colorOrange = getResources().getColor(ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
             mCurrentRacesButton.setTextColor(colorGrey);
             mAllRacesButton.setTextColor(colorGrey);
             BitmapHelper.setBackground(mCurrentRacesButton, null);
@@ -367,7 +367,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public void setUp(DrawerLayout drawerLayout, String course, String author) {
         mDrawerLayout = drawerLayout;
-        mDrawerLayout.setStatusBarBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.colorPrimaryDark));
+        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(ThemeHelper.getColor(getActivity(), R.attr.colorPrimaryDark)));
         mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity()
             .findViewById(R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
             @Override

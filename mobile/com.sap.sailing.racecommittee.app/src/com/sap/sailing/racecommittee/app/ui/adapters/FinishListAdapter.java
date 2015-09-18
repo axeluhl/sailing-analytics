@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorRes;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,9 +81,9 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
                 bgColor = ThemeHelper.getColor(mContext, R.attr.sap_gray);
             } else {
-                bgColor = mContext.getResources().getColor(android.R.color.transparent);
+                bgColor = android.R.color.transparent;
             }
-            holder.container.setBackgroundColor(bgColor);
+            holder.container.setBackgroundColor(mContext.getResources().getColor(bgColor));
         }
     }
 
@@ -160,7 +161,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             break;
         }
 
-        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        viewHolder.container.setBackgroundColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30)));
         Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
         BitmapHelper.setBackground(viewHolder.itemView, background);
     }

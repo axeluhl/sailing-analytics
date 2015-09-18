@@ -94,9 +94,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
                 bgColor = ThemeHelper.getColor(mContext, R.attr.sap_gray);
             } else {
-                bgColor = mContext.getResources().getColor(android.R.color.transparent);
+                bgColor = android.R.color.transparent;
             }
-            holder.container.setBackgroundColor(bgColor);
+            holder.container.setBackgroundColor(mContext.getResources().getColor(bgColor));
         }
     }
 
@@ -198,7 +198,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
             break;
         }
 
-        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        viewHolder.container.setBackgroundColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30)));
         Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
         BitmapHelper.setBackground(viewHolder.itemView, background);
     }

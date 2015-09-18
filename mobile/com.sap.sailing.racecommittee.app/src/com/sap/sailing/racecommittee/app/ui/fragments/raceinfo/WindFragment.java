@@ -190,7 +190,7 @@ public class WindFragment extends BaseFragment
      */
     private void refreshUI() {
         int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
-        int redColor = getActivity().getResources().getColor(R.color.sap_red);
+        int redColor = R.color.sap_red;
         setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
         setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
         setTextAndColor(mAccuracy, getString(R.string.not_available), redColor);
