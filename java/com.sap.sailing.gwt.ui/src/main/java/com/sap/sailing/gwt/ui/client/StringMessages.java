@@ -1383,4 +1383,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String resultsChart();
     String tabbedResultsPresenter();
     String polarResultsPresenter();
+    String dataMiningRetrieval();
 }

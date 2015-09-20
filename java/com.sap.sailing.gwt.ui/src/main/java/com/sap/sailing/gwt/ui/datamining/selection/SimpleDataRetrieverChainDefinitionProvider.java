@@ -171,7 +171,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
 
     @Override
     public String getLocalizedShortName() {
-        return SimpleDataRetrieverChainDefinitionProvider.class.getSimpleName();
+        return stringMessages.dataMiningRetrieval();
     }
 
     @Override
