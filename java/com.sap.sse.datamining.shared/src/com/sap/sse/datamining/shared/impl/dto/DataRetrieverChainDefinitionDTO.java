@@ -93,7 +93,6 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     }
 
     /**
-     * 
      * @return the default settings mapped by the retriever levels or an empty map, if there are {@link #hasSettings() no settings}.
      */
     public HashMap<DataRetrieverLevelDTO, SerializableSettings> getDefaultSettings() {

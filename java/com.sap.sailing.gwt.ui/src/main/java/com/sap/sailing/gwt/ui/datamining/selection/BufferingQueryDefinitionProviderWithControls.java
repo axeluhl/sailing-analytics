@@ -63,7 +63,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final DataMiningSettingsControl settingsControl;
     
     private final ProviderListener providerListener;
-    private final Collection<DataMiningComponentProvider> providers;
+    private final Collection<DataMiningComponentProvider<?>> providers;
     private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
     private final StatisticProvider statisticProvider;
     private final GroupingProvider groupingProvider;
@@ -105,7 +105,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         });
         addControl(reloadButton);
 
-        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
+        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
         
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
@@ -153,7 +153,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     @Override
     public boolean isAwatingReload() {
-        for (DataMiningComponentProvider provider : providers) {
+        for (DataMiningComponentProvider<?> provider : providers) {
             if (provider.isAwatingReload()) {
                 return true;
             }
@@ -179,7 +179,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : filterSelectionProvider.getRetrieverSettings().entrySet()) {
+        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : retrieverChainProvider.getRetrieverSettings().entrySet()) {
             queryDTO.setRetrieverSettings(retrieverSettingsEntry.getKey(), retrieverSettingsEntry.getValue());
         }
         

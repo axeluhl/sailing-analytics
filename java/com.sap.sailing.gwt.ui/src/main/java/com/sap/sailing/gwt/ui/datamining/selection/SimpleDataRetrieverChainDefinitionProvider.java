@@ -1,39 +1,38 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsControl;
+import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsInfoManager;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
-import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
-import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.SerializableSettings;
-import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class SimpleDataRetrieverChainDefinitionProvider implements DataRetrieverChainDefinitionProvider {
@@ -46,18 +45,22 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     
     private final HorizontalPanel mainPanel;
     private final ValueListBox<DataRetrieverChainDefinitionDTO> retrieverChainsListBox;
-    private Anchor settingsAnchor;
     
-    // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
-    private Map<DataRetrieverChainDefinitionDTO, PolarDataMiningSettings> settingsMappedByRetrieverChain;
+    private final DataMiningSettingsInfoManager settingsManager;
+    private final DataMiningSettingsControl settingsControl;
+    private final Map<DataRetrieverChainDefinitionDTO, HashMap<DataRetrieverLevelDTO, SerializableSettings>> settingsMap;
 
-    public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+            ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<>();
         isAwaitingReload = false;
-        settingsMappedByRetrieverChain = new HashMap<>();
+        settingsManager = new DataMiningSettingsInfoManager();
+        this.settingsControl = settingsControl;
+        this.settingsControl.addSettingsComponent(this);
+        settingsMap = new HashMap<>();
         
         mainPanel = new HorizontalPanel();
         mainPanel.setSpacing(5);
@@ -65,18 +68,6 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         
         retrieverChainsListBox = createRetrieverChainsListBox();
         mainPanel.add(retrieverChainsListBox);
-        
-        settingsAnchor = new Anchor(AbstractImagePrototype.create(DataMiningEntryPoint.resources.darkSettingsIcon()).getSafeHtml());
-        settingsAnchor.addStyleName("settingsAnchor");
-        settingsAnchor.setTitle(stringMessages.settings());
-        settingsAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {        
-                SettingsDialog<?> settingsDialog = new SettingsDialog<SerializableSettings>(SimpleDataRetrieverChainDefinitionProvider.this, stringMessages);
-                settingsDialog.show();
-            }
-        });
-        mainPanel.add(settingsAnchor);
         
         updateRetrieverChains();
     }
@@ -97,7 +88,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         });
         return retrieverChainsListBox;
     }
-    
+
     @Override
     public void awaitReloadComponents() {
         isAwaitingReload = true;
@@ -118,9 +109,9 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                 new AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>>() {
                     @Override
                     public void onSuccess(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
-                        settingsMappedByRetrieverChain.clear();
+                        settingsMap.clear();
                         if (!dataRetrieverChainDefinitions.isEmpty()) {
-                            fillSettings(dataRetrieverChainDefinitions);
+                            fillSettingsMap(dataRetrieverChainDefinitions);
                             Collections.sort(dataRetrieverChainDefinitions);
                             
                             DataRetrieverChainDefinitionDTO currentRetrieverChain = getDataRetrieverChainDefinition();
@@ -148,15 +139,10 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
                 });
     }
 
-    private void fillSettings(ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitions) {
-        for (DataRetrieverChainDefinitionDTO retrieverChain : dataRetrieverChainDefinitions) {
+    private void fillSettingsMap(ArrayList<DataRetrieverChainDefinitionDTO> retrieverChains) {
+        for (DataRetrieverChainDefinitionDTO retrieverChain : retrieverChains) {
             if (retrieverChain.hasSettings()) {
-                // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
-                for (SerializableSettings settings : retrieverChain.getDefaultSettings().values()) {
-                    if (settings instanceof PolarDataMiningSettings) {
-                        settingsMappedByRetrieverChain.put(retrieverChain, (PolarDataMiningSettings) settings);
-                    }
-                }
+                settingsMap.put(retrieverChain, retrieverChain.getDefaultSettings());
             }
         }
     }
@@ -175,9 +161,6 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition = getDataRetrieverChainDefinition();
         for (DataRetrieverChainDefinitionChangedListener listener : listeners) {
             listener.dataRetrieverChainDefinitionChanged(dataRetrieverChainDefinition);
-        }
-        if (dataRetrieverChainDefinition != null) {
-            settingsAnchor.setVisible(dataRetrieverChainDefinition.hasSettings());
         }
     }
 
@@ -211,18 +194,13 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         return "simpleDataRetrieverChainDefinition";
     }
     
-    // TODO This is just a quick fix. Delete, after the settings have been improved.
     @Override
     public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
-        HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = new HashMap<>();
-        if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
-            for (DataRetrieverLevelDTO retrieverLevel : getDataRetrieverChainDefinition().getRetrieverLevels()) {
-                if (retrieverLevel.getDefaultSettings() instanceof PolarDataMiningSettings) {
-                    retrieverSettings.put(retrieverLevel, settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
-                }
-            }
+        if (settingsMap.containsKey(getDataRetrieverChainDefinition())) {
+            return settingsMap.get(getDataRetrieverChainDefinition());
+        } else {
+            return new HashMap<>();
         }
-        return retrieverSettings;
     }
 
     @Override
@@ -230,20 +208,39 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         return getDataRetrieverChainDefinition().hasSettings();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
-        SettingsDialogComponent<? extends Settings> result = null;
-        if (settingsMappedByRetrieverChain.containsKey(getDataRetrieverChainDefinition())) {
-            result = new PolarDataMiningSettingsDialogComponent(settingsMappedByRetrieverChain.get(getDataRetrieverChainDefinition()));
+    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
+        return new CompositeTabbedSettingsDialogComponent(createSettingsComponentsFor(getDataRetrieverChainDefinition()));
+    }
+
+    private Iterable<Component<?>> createSettingsComponentsFor(final DataRetrieverChainDefinitionDTO retrieverChain) {
+        Collection<Component<?>> settingsComponents = new ArrayList<>();
+        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(retrieverChain).entrySet()) {
+            final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
+            final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
+            settingsComponents.add(new RetrieverLevelSettingsComponent(retrieverLevel, settingsManager.getSettingsInfo(settingsType).getLocalizedName(stringMessages)) {
+                @Override
+                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+                    return settingsManager.getSettingsInfo(settingsType).createSettingsDialogComponent(settingsMap.get(retrieverChain).get(retrieverLevel));
+                }
+                @Override
+                public void updateSettings(SerializableSettings newSettings) {
+                    settingsMap.get(retrieverChain).put(retrieverLevel, newSettings);
+                }
+                
+            });
         }
-        return (SettingsDialogComponent<SerializableSettings>) result;
+        return settingsComponents;
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) {
-        // TODO FIXME This is currently the only use case for processors with settings. That's why it's hard coded.
-        settingsMappedByRetrieverChain.put(getDataRetrieverChainDefinition(), (PolarDataMiningSettings) newSettings);
+    public void updateSettings(CompositeSettings newSettings) {
+        Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
+        for (ComponentAndSettingsPair<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
+            RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) settingsPerComponent.getA();
+            SerializableSettings settings = (SerializableSettings) settingsPerComponent.getB();
+            chainSettings.put(component.getRetrieverLevel(), settings);
+        }
         notifyListeners();
     }
 

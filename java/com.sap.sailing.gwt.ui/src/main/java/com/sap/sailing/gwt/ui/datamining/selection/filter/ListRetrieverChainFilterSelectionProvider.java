@@ -45,6 +45,7 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
+    private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
     private final Set<FilterSelectionChangedListener> listeners;
 
     private boolean isAwaitingReload;
@@ -59,9 +60,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private final ScrollPanel selectionPanel;
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
-    
-    // TODO This is just a quick fix. Delete, after the settings have been improved. 
-    private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
 
     public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
@@ -176,6 +174,10 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
         forwardSelectionChanged();
     }
     
+    HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        return retrieverChainProvider.getRetrieverSettings();
+    }
+    
     void retrieverLevelFilterSelectionChanged(RetrieverLevelFilterSelectionProvider retrieverLevelFilterSelectionProvider, DimensionFilterSelectionProvider dimensionFilterSelectionProvider) {
         if (!blockDataUpdates) {
             updateFilterSelectionProviders(retrieverLevelFilterSelectionProvider.getRetrieverLevel(),
@@ -205,11 +207,6 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
     private void forwardSelectionChanged() {
         mainPanel.setWidgetHidden(selectionPresenterScrollPanel, getSelection().isEmpty());
         notifyListeners();
-    }
-    
-    @Override
-    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
-        return retrieverChainProvider.getRetrieverSettings();
     }
 
     @Override
