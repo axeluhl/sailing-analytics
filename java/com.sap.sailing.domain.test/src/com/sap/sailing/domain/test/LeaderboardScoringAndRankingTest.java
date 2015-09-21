@@ -781,13 +781,31 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             }
             later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), /* withScores */ true, competitorsForHeatsInSemiFinals[heat]);
         }
+        // finals has promoted top four competitors of semi finals which are the top four of first and fifth first-round heats
+        // for the final, and the top four of the first round's third and seventh heat; we assume here that the finals have not
+        // been sailed and therefore expect the scores to be obtained by interpolating, using 1.0 instead of 0.7 for averaging.
+        Competitor[][] competitorsForHeatsInFinals = new Competitor[2][];
+        for (int heat=0; heat<2; heat++) {
+            competitorsForHeatsInFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInFinals[heat][i] = c[8*(2*heat+4*(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(3), "Heat "+(heat+15), /* withScores */ false, competitorsForHeatsInFinals[heat]);
+        }
         // 1 instead of 0.7 for a final that was not sailed; clarified with Juergen Bonne in an e-mail as of 18-09-2015T09:03:00Z
-        final double expectedPointsForFirstEightBoats = (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8;
+        final double expectedPointsForFirstEightBoats = (1.0 + 2.0 + 3.0 + 4.0 + 5.0 + 6.0 + 7.0 + 8.0) / 8.0;
         for (int i=0; i<4; i++) {
             assertEquals(expectedPointsForFirstEightBoats, leaderboard.getTotalPoints(c[i], later), 0.000000001);
         }
-        for (int i=32; i<40; i++) {
+        for (int i=32; i<36; i++) {
             assertEquals(expectedPointsForFirstEightBoats, leaderboard.getTotalPoints(c[i], later), 0.000000001);
+        }
+        final double expectedPointsForLastEightBoats = (9.0 + 10.0 + 11.0 + 12.0 + 13.0 + 14.0 + 15.0 + 16.0) / 8.0;
+        for (int i=16; i<20; i++) {
+            assertEquals(expectedPointsForLastEightBoats, leaderboard.getTotalPoints(c[i], later), 0.000000001);
+        }
+        for (int i=48; i<52; i++) {
+            assertEquals(expectedPointsForLastEightBoats, leaderboard.getTotalPoints(c[i], later), 0.000000001);
         }
     }
 
@@ -809,7 +827,13 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
         }
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        final double expectedPointsForFirstEightBoats = (0.7 + 2 + 3 + 4 + 5 + 6 + 7 + 8) / 8;
+        // Clarified with Juergen Bonne in an e-mail as of 18-09-2015T09:03:00Z that a final race's winner
+        // is scored with 0.7 only if the final race has actually been sailed. If the competitors are qualified
+        // for the final race but it's not sailed, average scores are to be assigned to all competitors qualified
+        // for the final race, but this average assumes 1.0 points for the first rank instead of the 0.7 assigned
+        // to the winner if the race is actually sailed. Similarly, if not even the semi-finals have been sailed,
+        // score averaging uses 1.0 for the first rank.
+        final double expectedPointsForFirstEightBoats = (1.0 + 2.0 + 3.0 + 4.0 + 5.0 + 6.0 + 7.0 + 8.0) / 8.0;
         for (int i=0; i<8; i++) {
             assertEquals(expectedPointsForFirstEightBoats, leaderboard.getTotalPoints(c[8*i], later), 0.0000001);
             assertEquals("Competitor "+rankedCompetitors.get(i)+" not in list of best eight ",

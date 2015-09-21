@@ -36,6 +36,11 @@ public class LowPoint extends AbstractScoringSchemeImpl {
         return result;
     }
 
+    /**
+     * Considers contiguous scoring for split-fleet columns, finding out in which fleet the <code>competitor</code> races
+     * in the <code>raceColumn</code> and figuring out how many competitors race in better fleets. For non-contiguous
+     * scoring, the effective rank equals the <code>rank</code> in the competitor's fleet.
+     */
     protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
         final int competitorFleetOrdering;
         final int effectiveRank;
