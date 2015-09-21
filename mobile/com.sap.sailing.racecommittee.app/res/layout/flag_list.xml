@@ -4,6 +4,44 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:background="?sap_gray"
+        android:clickable="true">
+
+        <LinearLayout
+            android:id="@+id/header_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/header_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="?chevron_left_24dp"
+                android:layout_gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/header_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/not_available"
+                android:textAppearance="?textHeader"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
+    </RelativeLayout>
+
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"

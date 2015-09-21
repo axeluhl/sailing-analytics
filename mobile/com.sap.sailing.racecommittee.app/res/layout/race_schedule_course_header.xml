@@ -17,14 +17,15 @@
             android:id="@+id/header_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             android:src="?chevron_left_24dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/course"
-            android:textAppearance="?textHeader"/>
+            android:textAppearance="?textHeader"
+            android:layout_gravity="center"/>
     </LinearLayout>
 
     <View

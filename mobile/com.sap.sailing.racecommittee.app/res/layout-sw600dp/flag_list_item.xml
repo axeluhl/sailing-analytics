@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
     android:id="@+id/line"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -12,7 +13,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:padding="5dp"
-        tools:src="?flag_ap_hotel_96dp" />
+        tools:src="?flag_ap_hotel_96dp"/>
 
     <ImageView
         android:id="@+id/more_data"
@@ -20,9 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginRight="@dimen/side_padding"
         android:src="@drawable/ic_chevron_right_grey600_24dp"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/confirm"
@@ -31,19 +32,19 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginRight="@dimen/side_padding"
         android:layout_toLeftOf="@id/more_data"
         android:text="@string/set_signal"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_marginBottom="@dimen/side_padding"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/default_margin_half"
-        android:layout_marginTop="@dimen/default_margin"
+        android:layout_marginTop="@dimen/side_padding"
         android:layout_toLeftOf="@id/confirm"
         android:layout_toRightOf="@id/flag"
         android:orientation="vertical">
@@ -53,16 +54,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?textNormal"
-            tools:text="Xray" />
+            android:textColor="?white"
+            android:textSize="@dimen/checked_item_text"
+            tools:text="Xray"/>
 
         <TextView
             android:id="@+id/second_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?textXSmall"
-            tools:text="Individual Recall" />
+            android:textColor="?white"
+            android:textSize="@dimen/checked_item_small_text"
+            tools:text="Individual Recall"/>
     </LinearLayout>
 
     <View
@@ -70,7 +73,7 @@
         android:layout_height="@dimen/thick_line"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/default_margin_half"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginRight="@dimen/side_padding"
         android:layout_toRightOf="@id/flag"
-        android:background="?sap_gray" />
+        android:background="?sap_gray"/>
 </RelativeLayout>

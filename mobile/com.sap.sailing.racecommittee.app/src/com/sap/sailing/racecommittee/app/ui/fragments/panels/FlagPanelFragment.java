@@ -312,7 +312,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 break;
 
             case 1:
-                replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER));
+                replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER, getString(R.string.flags_abandon)));
                 break;
 
             default:
@@ -351,7 +351,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 break;
 
             case 1:
-                replaceFragment(RecallFlagsFragment.newInstance());
+                replaceFragment(RecallFlagsFragment.newInstance(getString(R.string.flags_recall)));
                 break;
 
             default:
@@ -390,7 +390,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 break;
 
             case 1:
-                replaceFragment(AbortFlagsFragment.newInstance(Flags.AP));
+                replaceFragment(AbortFlagsFragment.newInstance(Flags.AP, getString(R.string.flags_postpone)));
                 break;
 
             default:
