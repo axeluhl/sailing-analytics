@@ -26,6 +26,7 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -35,7 +36,6 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.Number;
-import com.sap.sse.datamining.test.util.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestStatisticQuery {

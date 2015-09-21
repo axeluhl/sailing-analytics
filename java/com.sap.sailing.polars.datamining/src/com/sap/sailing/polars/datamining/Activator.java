@@ -8,6 +8,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.RacingEventServiceProvider;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarDataAggregationProcessor;
+import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
@@ -76,6 +77,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         internalClasses.add(HasCompetitorPolarContext.class);
         internalClasses.add(HasLegPolarContext.class);
         internalClasses.add(HasGPSFixPolarContext.class);
+        internalClasses.add(HasBackendPolarBoatClassContext.class);
         return internalClasses;
     }
 

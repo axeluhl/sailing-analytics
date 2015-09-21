@@ -1,7 +1,6 @@
-package com.sap.sse.datamining.test.util.components;
+package com.sap.sse.datamining.impl.components;
 
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 
 public class SingleDataRetrieverChainDefinition<DataSourceType, DataType> extends SimpleDataRetrieverChainDefinition<DataSourceType, DataType> {
 
