@@ -133,14 +133,16 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
         Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
         NavigableSet<Candidate> fixed = fixedPassings.get(c);
-        if (!fixed.add(fixedCan)) {
-            Candidate old = fixed.ceiling(fixedCan);
-            fixed.remove(old);
-            removeCandidates(c, Arrays.asList(old));
-            fixed.add(fixedCan);
+        if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
+            if (!fixed.add(fixedCan)) {
+                Candidate old = fixed.ceiling(fixedCan);
+                fixed.remove(old);
+                removeCandidates(c, Arrays.asList(old));
+                fixed.add(fixedCan);
+            }
+            addCandidates(c, Arrays.asList(fixedCan));
+            findShortestPath(c);
         }
-        addCandidates(c, Arrays.asList(fixedCan));
-        findShortestPath(c);
     }
 
     @Override

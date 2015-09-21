@@ -301,14 +301,14 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
 
     private void processCompetitorSelectionChange(boolean visible) {
-            waypointSelectionModel.clear();
-            if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
-                selectCompetitorLabel.setText("");
-                refillList();
-            } else {
-                disableEditing();
-                selectCompetitorLabel.setText(stringMessages.selectCompetitor());
-            }
+        waypointSelectionModel.clear();
+        if (visible && Util.size(competitorSelectionModel.getSelectedCompetitors()) == 1) {
+            selectCompetitorLabel.setText("");
+            refillList();
+        } else {
+            disableEditing();
+            selectCompetitorLabel.setText(stringMessages.selectCompetitor());
+        }
     }
 
     private void disableEditing() {
