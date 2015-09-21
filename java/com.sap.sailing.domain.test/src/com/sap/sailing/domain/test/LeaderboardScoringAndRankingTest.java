@@ -827,7 +827,63 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
     }
     
-    // TODO add test case for elimination heats with different numbers of competitors
+    @Test
+    public void testElminationScoringSchemeWithDifferentlySizedHeatsInFirstRound() throws NoWindException {
+        Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Competitor[] c = createCompetitors(65).toArray(new Competitor[64]);
+        // first round with 64 competitors, eight per heat:
+        Competitor[][] competitorsForHeatsInRound1 = new Competitor[8][];
+        TimePoint later = null;
+        for (int heat=0; heat<8; heat++) {
+            final int numberOfCompetitorsInHeat = heat==7?9:8;
+            competitorsForHeatsInRound1[heat] = new Competitor[numberOfCompetitorsInHeat];
+            for (int i=0; i<numberOfCompetitorsInHeat; i++) {
+                competitorsForHeatsInRound1[heat][i] = c[8*heat+i];
+            }
+            later = createAndAttachTrackedRaces(series.get(0), "Heat "+(heat+1), /* withScores */ true, competitorsForHeatsInRound1[heat]);
+        }
+        // quarter-finals has promoted top four competitors of first round in heats with eight competitors each:
+        Competitor[][] competitorsForHeatsInQuarterFinals = new Competitor[4][];
+        for (int heat=0; heat<4; heat++) {
+            competitorsForHeatsInQuarterFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInQuarterFinals[heat][i] = c[8*(2*heat+(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(1), "Heat "+(heat+9), /* withScores */ true, competitorsForHeatsInQuarterFinals[heat]);
+        }
+        // semi-finals has promoted top four competitors of quarter finals which are the top four of each other first-round heat:
+        Competitor[][] competitorsForHeatsInSemiFinals = new Competitor[2][];
+        for (int heat=0; heat<2; heat++) {
+            competitorsForHeatsInSemiFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInSemiFinals[heat][i] = c[8*(4*heat+2*(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(2), "Heat "+(heat+13), /* withScores */ true, competitorsForHeatsInSemiFinals[heat]);
+        }
+        // finals has promoted top four competitors of semi finals which are the top four of first and fifth first-round heats
+        // for the final, and the top four of the first round's third and seventh heat
+        Competitor[][] competitorsForHeatsInFinals = new Competitor[2][];
+        for (int heat=0; heat<2; heat++) {
+            competitorsForHeatsInFinals[heat] = new Competitor[8];
+            for (int i=0; i<8; i++) {
+                competitorsForHeatsInFinals[heat][i] = c[8*(2*heat+4*(i/4))+(i%4)];
+            }
+            later = createAndAttachTrackedRaces(series.get(3), "Heat "+(heat+15), /* withScores */ true, competitorsForHeatsInFinals[heat]);
+        }
+        // validate first-round points for drop-outs; competitor #64 (the 9th in heat #8) shall have 65 points
+        assertEquals(65, leaderboard.getTotalPoints(c[64], later), 0.0000001);
+        for (int heat = 0; heat < 8; heat++) {
+            for (int i = 4; i < 8; i++) {
+                assertEquals((8.0*i+1.0  // best overall rank for drop-outs ranking i+1 in own fleet
+                             +8.0*i+8.0) // worst overall rank for drop-outs ranking i+1 in own fleet
+                             /2.0, leaderboard.getTotalPoints(c[8*heat+i], later), 0.0000001);
+            }
+        }
+    }
+    
     @Test
     public void testElminationScoringSchemeWithFinalNotSailed() throws NoWindException {
         Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
