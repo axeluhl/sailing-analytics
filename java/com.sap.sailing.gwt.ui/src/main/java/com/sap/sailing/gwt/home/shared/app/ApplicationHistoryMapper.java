@@ -24,9 +24,9 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallL
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
 import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;

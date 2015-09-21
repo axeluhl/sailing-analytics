@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.solutions;
+package com.sap.sailing.gwt.home.desktop.places.solutions;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
