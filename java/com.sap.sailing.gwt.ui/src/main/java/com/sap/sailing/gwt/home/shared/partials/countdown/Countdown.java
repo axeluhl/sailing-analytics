@@ -71,7 +71,7 @@ public class Countdown extends Composite {
         }
         
         if(data.getStartTime() != null) {
-            this.tickerContainer.setWidget(new CountdownTimer(data.getStartTime()));
+            this.tickerContainer.setWidget(new CountdownTimer(data.getStartTime(), true));
         } else {
             this.tickerContainer.setWidget(null);
         }
