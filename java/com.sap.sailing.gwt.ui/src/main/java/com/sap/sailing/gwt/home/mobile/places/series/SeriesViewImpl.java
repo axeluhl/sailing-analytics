@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetSeriesStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -75,6 +75,6 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     
     private void setupStatisticsBox(EventSeriesViewDTO series) {
         statisticsBoxUi = new StatisticsBox(true);
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(series.getId(), false));
+        refreshManager.add(statisticsBoxUi, new GetSeriesStatisticsAction(series.getId()));
     }
 }

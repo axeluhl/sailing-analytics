@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
@@ -108,7 +109,8 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupStatisticsBox(Panel container) {
         statisticsBoxUi = new StatisticsBox(isMultiRegattaEvent());
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(getEventId()));
+        refreshManager.add(statisticsBoxUi, isMultiRegattaEvent() ? new GetEventStatisticsAction(getEventId())
+                : new GetRegattaStatisticsAction(getEventId(), getRegattaId()));
         container.add(statisticsBoxUi);
     }
 

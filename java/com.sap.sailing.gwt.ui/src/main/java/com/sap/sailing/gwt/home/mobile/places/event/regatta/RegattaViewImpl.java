@@ -12,9 +12,9 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
@@ -57,8 +57,7 @@ public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> im
     
     private void initStatisticsUi(Panel container) {
         statisticsUi = new StatisticsBox(false);
-        // FIXME only show statistics of the regatta
-        refreshManager.add(statisticsUi, new GetEventStatisticsAction(getEventId(), true));
+        refreshManager.add(statisticsUi, new GetRegattaStatisticsAction(getEventId(), getRegattaId()));
         container.add(statisticsUi);
     }
     

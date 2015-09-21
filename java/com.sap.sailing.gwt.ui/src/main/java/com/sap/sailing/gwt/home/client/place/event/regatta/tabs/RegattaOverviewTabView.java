@@ -19,9 +19,9 @@ import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaLi
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -83,7 +83,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
                 .getId(), currentPresenter.getCtx().getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(myPlace.getCtx().getEventDTO().getId(), true));
+        refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
         contentArea.setWidget(this);
     }
 

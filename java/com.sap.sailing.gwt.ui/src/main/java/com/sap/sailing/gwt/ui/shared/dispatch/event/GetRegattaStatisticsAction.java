@@ -7,22 +7,25 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 
-public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStatisticsDTO>> {
+public class GetRegattaStatisticsAction implements Action<ResultWithTTL<EventStatisticsDTO>>{
     
     private UUID eventId;
-
-    protected GetEventStatisticsAction() {
+    private String regattaId;
+    
+    protected GetRegattaStatisticsAction() {
     }
 
-    public GetEventStatisticsAction(UUID eventId) {
+    public GetRegattaStatisticsAction(UUID eventId, String regattaId) {
         this.eventId = eventId;
+        this.regattaId = regattaId;
     }
 
     @Override
     @GwtIncompatible
     public ResultWithTTL<EventStatisticsDTO> execute(DispatchContext context) throws Exception {
         StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
-        EventActionUtil.forLeaderboardsOfEvent(context, eventId, statisticsCalculator);
+        statisticsCalculator.doForLeaderboard(EventActionUtil.getLeaderboardContext(context, eventId, regattaId));
         return statisticsCalculator.getResult();
     }
+
 }
