@@ -41,7 +41,7 @@ public class RaceFinishingFragment extends BaseFragment {
 
         ImageView flag = ViewHelper.get(layout, R.id.flag);
         if (flag != null) {
-            flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), 96));
+            flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size_xlarge)));
         }
 
         Button down = ViewHelper.get(layout, R.id.flag_down);

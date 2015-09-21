@@ -110,6 +110,8 @@
     </style>
 
     <style name="AppTheme.Light.Flags" parent="Theme.AppCompat.NoActionBar">
+        <item name="flag_first_blue">@drawable/flag_first_blue_32dp_light</item>
+
         <item name="flags_abandon">@drawable/flags_abandon_64dp_light</item>
         <item name="flags_course">@drawable/flags_course_64dp_light</item>
         <item name="flags_more">@drawable/flags_more_64dp_light</item>

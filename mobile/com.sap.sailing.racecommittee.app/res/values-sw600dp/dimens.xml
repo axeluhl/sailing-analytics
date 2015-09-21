@@ -77,6 +77,9 @@
 	<dimen name="unscheduled_padding_dependend_race_item">@dimen/default_padding_half</dimen>
 	<dimen name="unscheduled_spinner_width">470dp</dimen>
 
+	<!-- finishing -->
+	<dimen name="finishing_text_size">@dimen/textSize_26</dimen>
+
 	<!-- finished -->
 	<dimen name="finished_header_text_size">@dimen/textSize_40</dimen>
 	<dimen name="finished_default_text_size">@dimen/textSize_26</dimen>

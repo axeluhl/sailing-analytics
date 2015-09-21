@@ -3,9 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +13,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -23,6 +23,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -142,23 +143,34 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
+            View header = ViewHelper.get(getView(), R.id.header_text);
+            if (header != null) {
+                header.setOnClickListener(this);
+            }
+
+            View back = ViewHelper.get(getView(), R.id.header_back);
+            if (back != null) {
+                back.setVisibility(View.VISIBLE);
+            }
+
             switch (getArguments().getInt(START_MODE, 0)) {
+                case 0: // Race-State: Running -> Start Finishing
+                    if (AppUtils.with(getActivity()).isTablet()) {
+                        if (header != null) {
+                            header.setOnClickListener(null);
+                        }
+
+                        if (back != null) {
+                            back.setVisibility(View.GONE);
+                        }
+                    }
+                    break;
+
                 case 1: // Race-State: Finishing -> End Finishing
-                    View header = ViewHelper.get(getView(), R.id.header_text);
-                    if (header != null) {
-                        header.setOnClickListener(this);
-                    }
-
-                    View back = ViewHelper.get(getView(), R.id.header_back);
-                    if (back != null) {
-                        back.setVisibility(View.VISIBLE);
-                    }
-
                     ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                     if (flag != null) {
-                        int resId = R.drawable.flag_blue_48dp;
-                        Drawable drawable = ContextCompat.getDrawable(getActivity(), resId);
-                        flag.setImageDrawable(drawable);
+                        flag.setImageDrawable(
+                            FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
                     }
 
                     TextView headline = ViewHelper.get(getView(), R.id.header_headline);
@@ -168,7 +180,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     }
                     break;
 
-                default: // Race-State: Running -> Start Finishing
+                default:
                     break;
             }
         }
@@ -199,6 +211,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     break;
 
                 default:
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
             }

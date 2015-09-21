@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -15,8 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginLeft="@dimen/side_padding"
             android:orientation="horizontal">
 
             <ImageView
@@ -32,17 +34,18 @@
                 android:id="@+id/header_flag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:src="@drawable/flag_first_blue_48dp"/>
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/side_padding"
+                android:layout_marginRight="@dimen/side_padding"
+                android:src="?flag_first_blue"/>
 
             <TextView
                 android:id="@+id/header_headline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center"
                 android:text="@string/race_begin_finish_header"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?textHeader"/>
         </LinearLayout>
 
         <View
@@ -56,7 +59,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
+        android:background="?sap_gray_black_30"
         android:orientation="vertical">
 
         <LinearLayout
@@ -90,15 +93,11 @@
             <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="9">
+                android:layout_weight="9"
+                android:padding="@dimen/side_padding">
 
-                <Button
-                    android:id="@+id/finish_current"
-                    style="?attr/buttonSolidSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_current"/>
+                <include
+                    layout="@layout/finish_current_button"/>
             </RelativeLayout>
         </LinearLayout>
 
@@ -127,16 +126,12 @@
             <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="9">
+                android:layout_weight="9"
+                android:padding="@dimen/side_padding">
 
-                <Button
-                    android:id="@+id/finish_custom"
-                    style="?attr/buttonSolidSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_custom"/>
+                <include
+                    layout="@layout/finish_custom_button"/>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

@@ -28,7 +28,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/start_mode"
-                android:textAppearance="?textHeader"/>
+                android:textAppearance="?textHeader"
+                android:layout_gravity="center"/>
         </LinearLayout>
 
         <View
