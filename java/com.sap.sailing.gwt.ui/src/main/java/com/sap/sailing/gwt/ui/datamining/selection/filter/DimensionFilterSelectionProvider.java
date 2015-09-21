@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallback;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
 import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
@@ -182,7 +183,8 @@ class DimensionFilterSelectionProvider {
                             Collections.sort(content, new Comparator<Object>() {
                                 @Override
                                 public int compare(Object o1, Object o2) {
-                                    return o1.toString().compareTo(o2.toString());
+                                    Comparator<String> naturalComparator = new NaturalComparator();
+                                    return naturalComparator.compare(o1.toString(), o2.toString());
                                 }
                             });
                         }
