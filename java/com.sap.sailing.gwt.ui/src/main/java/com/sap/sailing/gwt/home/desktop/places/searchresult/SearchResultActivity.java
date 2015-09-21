@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.searchresult;
+package com.sap.sailing.gwt.home.desktop.places.searchresult;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;

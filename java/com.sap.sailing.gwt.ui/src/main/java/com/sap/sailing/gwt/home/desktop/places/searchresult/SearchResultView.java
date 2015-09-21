@@ -1,10 +1,9 @@
-package com.sap.sailing.gwt.home.client.place.searchresult;
+package com.sap.sailing.gwt.home.desktop.places.searchresult;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
-public interface SearchResultView {
-    Widget asWidget();
+public interface SearchResultView extends IsWidget {
 
     void initSearchResult(String searchText);
     
