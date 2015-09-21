@@ -229,4 +229,8 @@ public class LeaderboardContext {
     public boolean isPartOfEvent() {
         return HomeServiceUtil.isPartOfEvent(event, leaderboard);
     }
+    
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
+    }
 }
