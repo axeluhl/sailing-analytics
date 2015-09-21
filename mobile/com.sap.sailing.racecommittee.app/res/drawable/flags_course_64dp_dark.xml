@@ -6,15 +6,15 @@
         android:top="30dp">
         <bitmap
             android:gravity="top"
-            android:src="@drawable/flag_alpha_96dp" />
+            android:src="@drawable/flag_sierra_64dp"/>
     </item>
 
     <item
         android:left="-35dp"
-        android:top="2dp">
+        android:top="1dp">
         <bitmap
             android:gravity="top"
-            android:src="@drawable/flag_shape_01_96dp_dark" />
+            android:src="@drawable/flag_shape_01_64dp_dark"/>
     </item>
 
     <item
@@ -22,7 +22,7 @@
         android:top="-30dp">
         <bitmap
             android:gravity="center"
-            android:src="@drawable/flag_ap_96dp" />
+            android:src="@drawable/flag_charlie_64dp"/>
     </item>
 
 </layer-list>

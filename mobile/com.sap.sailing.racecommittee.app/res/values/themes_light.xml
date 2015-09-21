@@ -4,7 +4,7 @@
     <!-- Base application theme -->
     <style name="AppTheme.Light" parent="AppTheme.Light.Base"/>
 
-    <style name="AppTheme.Light.Base" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Light.Base" parent="AppTheme.Light.Flags">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:tabWidgetStyle">@style/AppTheme.Light.TabWidget</item>
@@ -103,16 +103,18 @@
         <item name="wind_off">@drawable/wind_off_light</item>
         <item name="wind_on">@drawable/wind_on_light</item>
 
-        <!-- drawable drawable -->
         <item name="flag_ap_alpha_96dp">@drawable/flag_ap_alpha_96dp_light</item>
         <item name="flag_ap_hotel_96dp">@drawable/flag_ap_hotel_96dp_light</item>
         <item name="flag_november_alpha_96dp">@drawable/flag_november_alpha_96dp_light</item>
         <item name="flag_november_hotel_96dp">@drawable/flag_november_hotel_96dp_light</item>
-        <item name="flags_abandon">@drawable/flags_abandon_light</item>
-        <item name="flags_course">@drawable/flags_course_light</item>
-        <item name="flags_more">@drawable/flags_more_light</item>
-        <item name="flags_postpone">@drawable/flags_postpone_light</item>
-        <item name="flags_recall">@drawable/flags_recall_light</item>
+    </style>
+
+    <style name="AppTheme.Light.Flags" parent="Theme.AppCompat.NoActionBar">
+        <item name="flags_abandon">@drawable/flags_abandon_64dp_light</item>
+        <item name="flags_course">@drawable/flags_course_64dp_light</item>
+        <item name="flags_more">@drawable/flags_more_64dp_light</item>
+        <item name="flags_postpone">@drawable/flags_postpone_64dp_light</item>
+        <item name="flags_recall">@drawable/flags_recall_64dp_light</item>
     </style>
 
     <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">

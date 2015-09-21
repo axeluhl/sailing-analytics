@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="AppTheme.Light.Flags" parent="Theme.AppCompat.NoActionBar">
+        <item name="flags_abandon">@drawable/flags_abandon_96dp_light</item>
+        <item name="flags_course">@drawable/flags_course_96dp_light</item>
+        <item name="flags_more">@drawable/flags_more_96dp_light</item>
+        <item name="flags_postpone">@drawable/flags_postpone_96dp_light</item>
+        <item name="flags_recall">@drawable/flags_recall_96dp_light</item>
+    </style>
+
     <style name="AppTheme.Light.Text.Header" parent="AppTheme.Light.Text.Normal"/>
 
 </resources>

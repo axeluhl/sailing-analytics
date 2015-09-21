@@ -4,7 +4,7 @@
     <!-- Base application theme -->
     <style name="AppTheme.Dark" parent="AppTheme.Dark.Base"/>
 
-    <style name="AppTheme.Dark.Base" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Dark.Base" parent="AppTheme.Dark.Flags">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:tabWidgetStyle">@style/AppTheme.Dark.TabWidget</item>
@@ -94,16 +94,18 @@
         <item name="wind_off">@drawable/wind_off_dark</item>
         <item name="wind_on">@drawable/wind_on_dark</item>
 
-        <!-- drawable drawable -->
         <item name="flag_ap_alpha_96dp">@drawable/flag_ap_alpha_96dp_dark</item>
         <item name="flag_ap_hotel_96dp">@drawable/flag_ap_hotel_96dp_dark</item>
         <item name="flag_november_alpha_96dp">@drawable/flag_november_alpha_96dp_dark</item>
         <item name="flag_november_hotel_96dp">@drawable/flag_november_hotel_96dp_dark</item>
-        <item name="flags_abandon">@drawable/flags_abandon_dark</item>
-        <item name="flags_course">@drawable/flags_course_dark</item>
-        <item name="flags_more">@drawable/flags_more_dark</item>
-        <item name="flags_postpone">@drawable/flags_postpone_dark</item>
-        <item name="flags_recall">@drawable/flags_recall_dark</item>
+    </style>
+
+    <style name="AppTheme.Dark.Flags" parent="Theme.AppCompat.NoActionBar">
+        <item name="flags_abandon">@drawable/flags_abandon_64dp_dark</item>
+        <item name="flags_course">@drawable/flags_course_64dp_dark</item>
+        <item name="flags_more">@drawable/flags_more_64dp_dark</item>
+        <item name="flags_postpone">@drawable/flags_postpone_64dp_dark</item>
+        <item name="flags_recall">@drawable/flags_recall_64dp_dark</item>
     </style>
 
     <style name="AppTheme.Dark.Widget.DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">

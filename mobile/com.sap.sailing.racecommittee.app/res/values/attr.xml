@@ -81,7 +81,7 @@
     <attr name="wind_on" format="reference"/>
     <attr name="wind_off" format="reference"/>
 
-    <!-- drawable drawables -->
+    <!-- flag drawables -->
     <attr name="flag_ap_alpha_96dp" format="reference"/>
     <attr name="flag_ap_hotel_96dp" format="reference"/>
     <attr name="flag_november_alpha_96dp" format="reference"/>

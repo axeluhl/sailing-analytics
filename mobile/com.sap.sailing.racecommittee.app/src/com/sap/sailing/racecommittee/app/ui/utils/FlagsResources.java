@@ -27,7 +27,7 @@ public class FlagsResources {
 
         case AP:
             flag = "flag_ap_" + size + "dp";
-            outline = outline.replace("XX", "02");
+            outline = outline.replace("XX", "01");
             break;
 
         case BLACK:
@@ -91,7 +91,7 @@ public class FlagsResources {
             break;
 
         case INDIA_ZULU:
-            flag = "flag_india_zulu_" + AppPreferences.on(context).getTheme();
+            flag = "flag_india_zulu_96dp_" + AppPreferences.on(context).getTheme();
             outline = null; // because of custom xml
             break;
 
