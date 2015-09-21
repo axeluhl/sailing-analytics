@@ -73,7 +73,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
 

@@ -186,6 +186,15 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
         return result;
     }
 
+    @Override
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
+        final RaceColumnInSeries raceColumnInSeries = (RaceColumnInSeries) raceColumn;
+        final Iterator<? extends Series> seriesInRegattaIter = raceColumnInSeries.getSeries().getRegatta().getSeries().iterator();
+        while (seriesInRegattaIter.hasNext() && seriesInRegattaIter.next() != raceColumnInSeries.getSeries())
+            ;
+        return !participatesInNextRound(leaderboard, (RaceColumnInSeries) raceColumn, competitor, at, seriesInRegattaIter);
+    }
+
     private int getNumberOfFleetsWithOrdering(Series series, int ordering) {
         int result = 0;
         for (final Fleet fleet : series.getFleets()) {

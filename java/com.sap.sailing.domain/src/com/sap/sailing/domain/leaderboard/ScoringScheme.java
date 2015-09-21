@@ -95,9 +95,11 @@ public interface ScoringScheme extends Serializable {
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
      * for the leaderboard's total scores. This may, e.g., be the case if a column is split into more than one fleet and
      * those fleets are unordered. In that case, scores need to be available for all fleets before the column counts
-     * for the total scores.
+     * for the total scores. Another example is a scoring scheme that defines elimination rounds and awards no points
+     * to a competitor in a round from which the competitor got promoted to the next round. Such promotion columns
+     * then have no scores and don't count in the number of races starting from where discards are applied.<p>
      */
-    boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
+    boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at);
 
     /**
      * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These instances of a

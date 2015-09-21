@@ -295,10 +295,14 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         // expect all results to be valid because a fleet will have its score counted even if not all fleets have raced;
         // see discussion for bug 961, but more importantly later on bug 1023.
-        assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
+        for (final Competitor competitor : competitors) {
+            assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, competitor, later));
+        }
         // now add a score correction for Q2/Blue to make it count:
         leaderboard.getScoreCorrection().correctScore(competitors.get(9), q2Column, 42.);
-        assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, later));
+        for (final Competitor competitor : competitors) {
+            assertTrue(leaderboard.getScoringScheme().isValidInTotalScore(leaderboard, q2Column, competitor, later));
+        }
         // the new order in Q2 expected to be { (9, 3), ... } (we don't know about any competitor in q2Blue but #9
         // therefore the new total points for #9 are
         // { 9: 5+42=47 }
@@ -791,36 +795,37 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 later = createAndAttachTrackedRaces(series.get(4*elimination+3), "Heat "+(heat+15), /* withScores */ true, competitorsForHeatsInFinals[heat]);
             }
         }
-        assertEquals(NUMBER_OF_ELIMINATIONS*18.5, leaderboard.getTotalPoints(c[ 8], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*22.5, leaderboard.getTotalPoints(c[ 9], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*26.5, leaderboard.getTotalPoints(c[10], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*30.5, leaderboard.getTotalPoints(c[11], later), 0.000000001);
-        // last four competitors in last heat of first round don't get promoted and have null scores in all other rounds but the first
-        assertEquals(NUMBER_OF_ELIMINATIONS*36.5, leaderboard.getTotalPoints(c[60], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*44.5, leaderboard.getTotalPoints(c[61], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*52.5, leaderboard.getTotalPoints(c[62], later), 0.000000001);
-        assertEquals(NUMBER_OF_ELIMINATIONS*60.5, leaderboard.getTotalPoints(c[63], later), 0.000000001);
-        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertSame(c[0], rankedCompetitors.get(0)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
-        assertEquals(NUMBER_OF_ELIMINATIONS*0.7, leaderboard.getTotalPoints(c[0], later), 0.000000001);
-        assertSame(c[1], rankedCompetitors.get(1)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
-        assertEquals(NUMBER_OF_ELIMINATIONS*2, leaderboard.getTotalPoints(c[1], later), 0.000000001);
-        for (int elimination=0; elimination<NUMBER_OF_ELIMINATIONS; elimination++) {
-            // first four of second heat get promoted to quarter final but lose their heat
-            assertNull(leaderboard.getTotalPoints(c[ 8], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
-            assertNull(leaderboard.getTotalPoints(c[ 9], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
-            assertNull(leaderboard.getTotalPoints(c[10], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
-            assertNull(leaderboard.getTotalPoints(c[11], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
-            for (int i=1; i<=3; i++) {
-                for (int j=60; j<=63; j++) {
-                    assertNull(leaderboard.getTotalPoints(c[j], series.get(4*elimination+i).getRaceColumns().iterator().next(), later));
+        for (int numberOfEliminationsExpectedToScore=NUMBER_OF_ELIMINATIONS; numberOfEliminationsExpectedToScore>=NUMBER_OF_ELIMINATIONS-1; numberOfEliminationsExpectedToScore--) {
+            assertEquals(numberOfEliminationsExpectedToScore*18.5, leaderboard.getTotalPoints(c[ 8], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*22.5, leaderboard.getTotalPoints(c[ 9], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*26.5, leaderboard.getTotalPoints(c[10], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*30.5, leaderboard.getTotalPoints(c[11], later), 0.000000001);
+            // last four competitors in last heat of first round don't get promoted and have null scores in all other rounds but the first
+            assertEquals(numberOfEliminationsExpectedToScore*36.5, leaderboard.getTotalPoints(c[60], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*44.5, leaderboard.getTotalPoints(c[61], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*52.5, leaderboard.getTotalPoints(c[62], later), 0.000000001);
+            assertEquals(numberOfEliminationsExpectedToScore*60.5, leaderboard.getTotalPoints(c[63], later), 0.000000001);
+            List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+            assertSame(c[0], rankedCompetitors.get(0)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
+            assertEquals(numberOfEliminationsExpectedToScore*0.7, leaderboard.getTotalPoints(c[0], later), 0.000000001);
+            assertSame(c[1], rankedCompetitors.get(1)); // should be the winner of the final round's Final heat and take the "crown" for the elimination
+            assertEquals(numberOfEliminationsExpectedToScore*2, leaderboard.getTotalPoints(c[1], later), 0.000000001);
+            for (int elimination=0; elimination<NUMBER_OF_ELIMINATIONS; elimination++) {
+                // first four of second heat get promoted to quarter final but lose their heat
+                assertNull(leaderboard.getTotalPoints(c[ 8], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
+                assertNull(leaderboard.getTotalPoints(c[ 9], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
+                assertNull(leaderboard.getTotalPoints(c[10], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
+                assertNull(leaderboard.getTotalPoints(c[11], series.get(4*elimination+0).getRaceColumns().iterator().next(), later));
+                for (int i=1; i<=3; i++) {
+                    for (int j=60; j<=63; j++) {
+                        assertNull(leaderboard.getTotalPoints(c[j], series.get(4*elimination+i).getRaceColumns().iterator().next(), later));
+                    }
                 }
             }
+            // for next loop iteration discard the appropriate number of races
+            leaderboard.setCrossLeaderboardResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { numberOfEliminationsExpectedToScore }));
         }
     }
-
-
-    
     
     // TODO add test case for elimination heats with different numbers of competitors
     @Test
