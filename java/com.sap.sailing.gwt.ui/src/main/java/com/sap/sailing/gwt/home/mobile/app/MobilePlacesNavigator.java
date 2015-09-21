@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.home.mobile.app;
 import java.util.List;
 
 import com.google.gwt.place.shared.PlaceController;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
@@ -12,6 +10,8 @@ import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace.SolutionsNavigationTabs;

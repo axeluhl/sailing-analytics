@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.aboutus;
+package com.sap.sailing.gwt.home.desktop.places.aboutus;
 
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 

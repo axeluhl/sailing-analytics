@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.aboutus;
+package com.sap.sailing.gwt.home.desktop.places.aboutus;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;

@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
@@ -25,6 +23,8 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
