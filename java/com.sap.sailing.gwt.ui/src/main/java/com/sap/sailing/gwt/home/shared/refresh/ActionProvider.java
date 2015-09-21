@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.refresh;
+package com.sap.sailing.gwt.home.shared.refresh;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 

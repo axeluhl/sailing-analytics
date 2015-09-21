@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared.refresh;
+package com.sap.sailing.gwt.home.shared.refresh;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,8 @@ import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.refresh.ActionProvider.DefaultActionProvider;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.DefaultActionProvider;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
