@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.error;
+package com.sap.sailing.gwt.home.desktop.places.error;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;

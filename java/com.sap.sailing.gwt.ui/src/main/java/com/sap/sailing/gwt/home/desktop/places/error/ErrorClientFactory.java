@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.error;
+package com.sap.sailing.gwt.home.desktop.places.error;
 
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 
