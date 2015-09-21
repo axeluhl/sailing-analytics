@@ -202,7 +202,7 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
             result = false;
         } else {
             final Series nextSeries = seriesInRegattaIter.next();
-            result = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumnInSeries, timePoint) ||
+            result = leaderboard.getScoreCorrection().isScoreCorrected(competitor, nextSeries.getRaceColumns().iterator().next(), timePoint) ||
                     nextSeries.getRaceColumns().iterator().next().getFleetOfCompetitor(competitor) != null;
         }
         return result;
