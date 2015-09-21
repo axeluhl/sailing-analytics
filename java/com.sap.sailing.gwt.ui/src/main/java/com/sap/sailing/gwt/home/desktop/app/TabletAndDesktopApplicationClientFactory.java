@@ -15,9 +15,9 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.client.place.start.StartView;
 import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
-import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 

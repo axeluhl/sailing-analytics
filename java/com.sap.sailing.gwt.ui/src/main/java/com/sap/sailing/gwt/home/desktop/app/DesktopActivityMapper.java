@@ -22,8 +22,8 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 

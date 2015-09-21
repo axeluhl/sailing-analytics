@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.whatsnew;
+package com.sap.sailing.gwt.home.desktop.places.whatsnew;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 
 public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewView {

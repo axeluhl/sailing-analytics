@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.whatsnew;
+package com.sap.sailing.gwt.home.desktop.places.whatsnew;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -17,7 +17,7 @@ public interface WhatsNewResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/home/solutions/RaceCommitteeAppNotes.html")
     public TextResource getRaceCommitteeAppNotesHtml();
     
-    @Source("com/sap/sailing/gwt/home/client/place/whatsnew/WhatsNew.css")
+    @Source("WhatsNew.css")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultClientFact
 import com.sap.sailing.gwt.home.client.place.solutions.SolutionsClientFactory;
 import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringClientFactory;
 import com.sap.sailing.gwt.home.client.place.start.StartClientFactory;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewClientFactory;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
 
 public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
