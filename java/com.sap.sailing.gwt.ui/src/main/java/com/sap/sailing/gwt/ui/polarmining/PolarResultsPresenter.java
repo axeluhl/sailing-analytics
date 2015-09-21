@@ -1,8 +1,11 @@
 package com.sap.sailing.gwt.ui.polarmining;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -32,6 +35,7 @@ import com.sap.sailing.gwt.ui.datamining.presentation.AbstractResultsPresenter;
 import com.sap.sailing.polars.datamining.shared.PolarAggregation;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -53,23 +57,19 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         super(stringMessages);
         
         polarChart = createPolarChart();
+        dataCountHistogramChart = createDataCountHistogramChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
                 polarChart.setSizeToMatchContainer();
                 polarChart.redraw();
-            }
-        };
-        polarChartWrapperPanel.add(polarChart);
-        
-        dataCountHistogramChart = createDataCountHistogramChart();
-        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel() {
-            @Override
-            public void onResize() {
                 dataCountHistogramChart.setSizeToMatchContainer();
                 dataCountHistogramChart.redraw();
             }
         };
+        polarChartWrapperPanel.add(polarChart);
+        
+        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel();
         dataCountHistogramChartWrapperPanel.add(dataCountHistogramChart);
         
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
@@ -155,8 +155,16 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
         Map<GroupKey, ?> results = result.getResults();
-        for (Entry<GroupKey, ?> entry : results.entrySet()) {
-            PolarAggregation aggregation = (PolarAggregation) entry.getValue();
+        List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
+        Collections.sort(sortedNaturally, new Comparator<GroupKey>() {
+            @Override
+            public int compare(GroupKey o1, GroupKey o2) {
+                Comparator<String> naturalComparator = new NaturalComparator();
+                return naturalComparator.compare(o1.asString(), o2.asString());
+            }
+        });
+        for (GroupKey key : sortedNaturally) {
+            PolarAggregation aggregation = (PolarAggregation) results.get(key);
             double[] speedsPerAngle = aggregation.getAverageSpeedsPerAngle();
             int count = aggregation.getCount();
             int[] countPerAngle = aggregation.getCountPerAngle();
@@ -170,10 +178,10 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
                     if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed > 0) {
                         polarSeries.addPoint(convertedAngle, speed, false, false, false);
                     }  
-                    histogramSeries.addPoint(convertedAngle, countPerAngle[i]);
+                    histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
                 }
-                polarSeries.setName(entry.getKey().asString());
-                histogramSeries.setName(entry.getKey().asString());
+                polarSeries.setName(key.asString());
+                histogramSeries.setName(key.asString());
                 polarChart.addSeries(polarSeries, false, false);
                 histogramSeries.setVisible(false, false);
                 histogramSeriesForPolarSeries.put(polarSeries, histogramSeries);
