@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,12 +23,12 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final StringMessages stringMessages;
-    private final Set<Component<?>> components;
+    private final Collection<Component<?>> components;
     private final Anchor anchor;
     
     public AnchorDataMiningSettingsControl(final StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        components = new HashSet<>();
+        components = new LinkedHashSet<>();
         
         anchor = new Anchor(AbstractImagePrototype.create(resources.darkSettingsIcon()).getSafeHtml());
         anchor.addStyleName("settingsAnchor");
