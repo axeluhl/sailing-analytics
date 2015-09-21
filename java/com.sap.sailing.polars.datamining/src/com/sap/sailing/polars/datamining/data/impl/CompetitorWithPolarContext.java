@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CompetitorWithPolarContext implements HasCompetitorPolarContext {
     
@@ -39,6 +40,11 @@ public class CompetitorWithPolarContext implements HasCompetitorPolarContext {
     @Override
     public HasLegPolarContext getLegPolarContext() {
         return legPolarContext;
+    }
+
+    @Override
+    public int getRank() {
+        return trackedRace.getRank(competitor, new MillisecondsTimePoint(System.currentTimeMillis()));
     }
 
 }

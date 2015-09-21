@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface HasCompetitorPolarContext {
     
@@ -16,5 +17,8 @@ public interface HasCompetitorPolarContext {
     
     @Connector(scanForStatistics=false)
     HasLegPolarContext getLegPolarContext();
+    
+    @Dimension(messageKey = "Rank")
+    int getRank();
 
 }
