@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningComponentProvider;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsControl;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
@@ -58,16 +59,18 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final Timer queryDefinitionReleaseTimer;
     
     private final DockLayoutPanel mainPanel;
-    private FlowPanel controlsPanel;
+    private final FlowPanel controlsPanel;
+    private final DataMiningSettingsControl settingsControl;
     
     private final ProviderListener providerListener;
-    private final Collection<DataMiningComponentProvider> providers;
-    private DataRetrieverChainDefinitionProvider retrieverChainProvider;
-    private StatisticProvider statisticProvider;
-    private GroupingProvider groupingProvider;
-    private FilterSelectionProvider filterSelectionProvider;
+    private final Collection<DataMiningComponentProvider<?>> providers;
+    private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
+    private final StatisticProvider statisticProvider;
+    private final GroupingProvider groupingProvider;
+    private final FilterSelectionProvider filterSelectionProvider;
 
-    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
         super(stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         queryDefinitionReleaseTimer = new Timer() {
@@ -77,33 +80,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         };
         
-        // The header panel has to be created before the footer panel, because the component provider in the footer panel depend on
-        // the retriever chain provider. To be more exact: The retriever chain provider mustn't be null, when createFooterPanel() is called.
-        Widget headerPanel = createHeaderPanel();
-        
-        SplitLayoutPanel filterSplitPanel = new SplitLayoutPanel(15);
-        filterSplitPanel.addSouth(createFooterPanel(), footerPanelHeight);
-        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
-        filterSelectionProvider.addSelectionChangedListener(providerListener);
-        filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
-        
-        mainPanel = new DockLayoutPanel(Unit.PX);
-        mainPanel.addNorth(headerPanel, headerPanelHeight);
-        mainPanel.add(filterSplitPanel);
-        
-        providers = new ArrayList<>();
-        providers.add(retrieverChainProvider);
-        providers.add(statisticProvider);
-        providers.add(groupingProvider);
-        providers.add(filterSelectionProvider);
-    }
-
-    private Widget createHeaderPanel() {
-        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter());
-        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
-        
+        // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
         controlsPanel.addStyleName("definitionProviderControls");
+        
+        this.settingsControl = settingsControl;
+        addControl(this.settingsControl.getEntryWidget());
 
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -122,24 +104,42 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         addControl(reloadButton);
-        
-        SplitLayoutPanel headerSplitPanel = new SplitLayoutPanel(15);
-        headerSplitPanel.addWest(retrieverChainProvider.getEntryWidget(), 600);
-        headerSplitPanel.add(controlsPanel);
-        return headerSplitPanel;
-    }
 
-    private Widget createFooterPanel() {
+        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
+        
+        SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
+        headerPanel.addWest(retrieverChainProvider.getEntryWidget(), 600);
+        headerPanel.add(controlsPanel);
+        
+        // Creating the footer panel, that contains the statistic provider and the grouping provider
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
         statisticProvider.addStatisticChangedListener(providerListener);
 
         groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         
-        SplitLayoutPanel controlsSplitPanel = new SplitLayoutPanel(15);
-        controlsSplitPanel.addEast(new ScrollPanel(statisticProvider.getEntryWidget()), 400);
-        controlsSplitPanel.add(new ScrollPanel(groupingProvider.getEntryWidget()));
-        return controlsSplitPanel;
+        SplitLayoutPanel footerPanel = new SplitLayoutPanel(15);
+        footerPanel.addEast(new ScrollPanel(statisticProvider.getEntryWidget()), 400);
+        footerPanel.add(new ScrollPanel(groupingProvider.getEntryWidget()));
+        
+        // Composing the different components
+        SplitLayoutPanel filterSplitPanel = new SplitLayoutPanel(15);
+        filterSplitPanel.addSouth(footerPanel, footerPanelHeight);
+        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider.addSelectionChangedListener(providerListener);
+        filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
+        
+        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel.addNorth(headerPanel, headerPanelHeight);
+        mainPanel.add(filterSplitPanel);
+        
+        // Storing the different component providers in a list
+        providers = new ArrayList<>();
+        providers.add(retrieverChainProvider);
+        providers.add(statisticProvider);
+        providers.add(groupingProvider);
+        providers.add(filterSelectionProvider);
     }
 
     private void scheduleQueryDefinitionChanged() {
@@ -153,7 +153,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     @Override
     public boolean isAwatingReload() {
-        for (DataMiningComponentProvider provider : providers) {
+        for (DataMiningComponentProvider<?> provider : providers) {
             if (provider.isAwatingReload()) {
                 return true;
             }
@@ -179,7 +179,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             queryDTO.appendDimensionToGroupBy(dimension);
         }
         
-        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : filterSelectionProvider.getRetrieverSettings().entrySet()) {
+        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsEntry : retrieverChainProvider.getRetrieverSettings().entrySet()) {
             queryDTO.setRetrieverSettings(retrieverSettingsEntry.getKey(), retrieverSettingsEntry.getValue());
         }
         

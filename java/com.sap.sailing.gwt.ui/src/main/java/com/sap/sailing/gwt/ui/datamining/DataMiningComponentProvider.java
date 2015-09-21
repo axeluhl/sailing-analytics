@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 
-public interface DataMiningComponentProvider extends Component<SerializableSettings> {
+public interface DataMiningComponentProvider<SettingsType extends Settings> extends Component<SettingsType> {
 
     /**
      * Tells the provider, that {@link #reloadComponents()} will be called in the future.

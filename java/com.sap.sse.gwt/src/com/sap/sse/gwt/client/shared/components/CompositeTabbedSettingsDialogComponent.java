@@ -13,12 +13,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
-public class CompositeSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
+public class CompositeTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     
     private final Collection<Component<?>> components;
     private final Map<Component<?>, SettingsDialogComponent<?>> dialogComponents;
 
-    public CompositeSettingsDialogComponent(Iterable<Component<?>> components) {
+    public CompositeTabbedSettingsDialogComponent(Iterable<Component<?>> components) {
         this.components = new HashSet<>();
         for (Component<?> component : components) {
             if (component.hasSettings()) {
