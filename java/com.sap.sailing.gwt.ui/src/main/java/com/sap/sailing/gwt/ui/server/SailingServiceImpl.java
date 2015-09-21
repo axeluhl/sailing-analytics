@@ -364,7 +364,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
-import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -380,7 +380,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
-import com.sap.sailing.server.operationaltransformation.RemoveCourseArea;
+import com.sap.sailing.server.operationaltransformation.RemoveCourseAreas;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -3311,20 +3311,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         officialWebsiteURL, sailorsInfoWebsiteURL, eventImages, eventVideos));
-        for (String courseAreaName : courseAreaNames) {
-            createCourseArea(eventUuid, courseAreaName);
-        }
+        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
         return getEventById(eventUuid, false);
     }
 
     @Override
-    public void createCourseArea(UUID eventId, String courseAreaName) {
-        getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
+    public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+        final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
+        for (int i=0; i<courseAreaNames.length; i++) {
+            courseAreaIDs[i] = UUID.randomUUID();
+        }
+        getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIDs));
     }
 
     @Override
-    public void removeCourseArea(UUID eventId, UUID courseAreaId) {
-        getService().apply(new RemoveCourseArea(eventId, courseAreaId));
+    public void removeCourseAreas(UUID eventId, UUID[] courseAreaIds) {
+        getService().apply(new RemoveCourseAreas(eventId, courseAreaIds));
     }
 
     @Override

@@ -372,11 +372,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
             PolarSheetGenerationSettings settings, String name) throws Exception;
     
-    void createCourseArea(UUID eventId, String courseAreaName);
+    void createCourseAreas(UUID eventId, String[] courseAreaNames);
     
     List<String> getBoatClassNamesWithPolarSheetsAvailable();
     
-    void removeCourseArea(UUID eventId, UUID courseAreaId);
+    void removeCourseAreas(UUID eventId, UUID[] courseAreaIds);
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
 

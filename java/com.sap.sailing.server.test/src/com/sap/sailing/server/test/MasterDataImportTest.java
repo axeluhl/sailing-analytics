@@ -1344,7 +1344,7 @@ public class MasterDataImportTest {
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(),
                 /* officialWebsiteURL */ null, /* sailorsInfoWebsiteURL */ null, 
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
-        CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
+        CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] {"ECHO"}, new UUID[] {UUID.randomUUID()})[0];
 
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, /*startDate*/ null, /*endDate*/ null,
@@ -1409,7 +1409,7 @@ public class MasterDataImportTest {
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(), 
                 /* officialWebsiteURL */ null, /* sailorsInfoWebsiteURL */ null, 
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
-        CourseArea defaultCourseArea = sourceService.addCourseArea(event.getId(), "ECHO", UUID.randomUUID());
+        CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] {"ECHO"}, new UUID[] {UUID.randomUUID()})[0];
 
         List<String> raceColumnNames = new ArrayList<String>();
         String raceColumnName = "T1";

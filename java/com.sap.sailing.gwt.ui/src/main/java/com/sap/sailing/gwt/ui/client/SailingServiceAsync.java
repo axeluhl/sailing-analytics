@@ -375,9 +375,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
-    void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<Void> callback);
+    void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
 
-    void removeCourseArea(UUID eventId, UUID courseAreaId, AsyncCallback<Void> callback);
+    void removeCourseAreas(UUID eventId, UUID[] idsOfCourseAreasToRemove, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 

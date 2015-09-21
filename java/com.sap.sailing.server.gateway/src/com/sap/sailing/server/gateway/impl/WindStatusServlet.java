@@ -50,8 +50,8 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     
     protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
 
-    protected final int NUMBER_OF_MESSAGES_TO_SHOW=20;
-    protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=5;
+    protected final int NUMBER_OF_MESSAGES_TO_SHOW=100;
+    protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=10;
 
     protected static final DecimalFormat decimalFormatter2Digits = new DecimalFormat("#.##");
     protected static final DecimalFormat decimalFormatter1Digit = new DecimalFormat("#.#");

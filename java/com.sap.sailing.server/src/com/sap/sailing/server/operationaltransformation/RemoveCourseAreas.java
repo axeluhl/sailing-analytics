@@ -13,20 +13,20 @@ import com.sap.sailing.server.RacingEventServiceOperation;
  * @author Axel Uhl (d043530)
  *
  */
-public class RemoveCourseArea extends AbstractRacingEventServiceOperation<Void> {
+public class RemoveCourseAreas extends AbstractRacingEventServiceOperation<Void> {
     private static final long serialVersionUID = -3650109848260363949L;
-    private final UUID courseAreaId;
+    private final UUID[] courseAreaIds;
     private final UUID eventId;
 
-    public RemoveCourseArea(UUID eventId, UUID courseAreaId) {
+    public RemoveCourseAreas(UUID eventId, UUID[] courseAreaIds) {
         super();
         this.eventId = eventId;
-        this.courseAreaId = courseAreaId;
+        this.courseAreaIds = courseAreaIds;
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        toState.removeCourseAreaWithoutReplication(eventId, courseAreaId);
+        toState.removeCourseAreaWithoutReplication(eventId, courseAreaIds);
         return null;
     }
 
