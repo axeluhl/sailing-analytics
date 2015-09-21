@@ -57,23 +57,19 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         super(stringMessages);
         
         polarChart = createPolarChart();
+        dataCountHistogramChart = createDataCountHistogramChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
                 polarChart.setSizeToMatchContainer();
                 polarChart.redraw();
-            }
-        };
-        polarChartWrapperPanel.add(polarChart);
-        
-        dataCountHistogramChart = createDataCountHistogramChart();
-        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel() {
-            @Override
-            public void onResize() {
                 dataCountHistogramChart.setSizeToMatchContainer();
                 dataCountHistogramChart.redraw();
             }
         };
+        polarChartWrapperPanel.add(polarChart);
+        
+        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel();
         dataCountHistogramChartWrapperPanel.add(dataCountHistogramChart);
         
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
@@ -182,7 +178,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
                     if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed > 0) {
                         polarSeries.addPoint(convertedAngle, speed, false, false, false);
                     }  
-                    histogramSeries.addPoint(convertedAngle, countPerAngle[i]);
+                    histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
                 }
                 polarSeries.setName(key.asString());
                 histogramSeries.setName(key.asString());

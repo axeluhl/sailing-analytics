@@ -60,8 +60,11 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                             fix.getTimePoint(),
                             PolarStatisticImpl.collectWindSourcesToIgnoreForSpeed(trackedRace, settings.useOnlyWindGaugesForWindSpeed()));
                     if (wind != null && (settings.applyMinimumWindConfidence() ?  wind.getConfidence() >= settings.getMinimumWindConfidence() : true)) {
-                        result.add(new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
-                                settings, wind, element));
+                        GPSFixWithPolarContext potentialResult = new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
+                                settings, wind, element);
+                        if (!potentialResult.getWindSpeedRange().getSignifier().equals("null")) {
+                            result.add(potentialResult);
+                        }
                     }
                 }
             } finally {
