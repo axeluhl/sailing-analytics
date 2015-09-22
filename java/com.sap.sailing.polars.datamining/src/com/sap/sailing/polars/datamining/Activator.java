@@ -15,7 +15,6 @@ import com.sap.sailing.polars.datamining.data.HasLeaderboardGroupPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLeaderboardPolarContext;
 import com.sap.sailing.polars.datamining.data.HasLegPolarContext;
 import com.sap.sailing.polars.datamining.data.HasRaceColumnPolarContext;
-import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -23,7 +22,7 @@ import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class Activator extends AbstractDataMiningActivator implements DataMiningBundleService {
+public class Activator extends AbstractDataMiningActivator {
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Polars_StringMessages";
     
@@ -54,11 +53,6 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         this.context = null;
         INSTANCE = null;
         super.stop(context);
-    }
-    
-    @Override
-    protected DataMiningBundleService getDataMiningBundleService() {
-        return this;
     }
     
     @Override
