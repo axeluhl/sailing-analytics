@@ -46,6 +46,7 @@ import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
+import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -151,6 +152,9 @@ public class WindFragment extends BaseFragment
             mWindInputDirection.setFilters(new InputFilter[] { new RangeInputFilter(0, 360) });
         }
         mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
+        if (mWindInputSpeed != null) {
+            mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
+        }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
         mMapWebView = ViewHelper.get(layout, R.id.web_view);
         mMapHide = ViewHelper.get(layout, R.id.position_hide);
@@ -324,7 +328,7 @@ public class WindFragment extends BaseFragment
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
-            mWindInputDirection.setText(String.valueOf(enteredWindBearingFrom));
+            mWindInputDirection.setText(String.valueOf((int)enteredWindBearingFrom));
             mWindInputSpeed.setText(String.valueOf(enteredWindSpeed));
         }
     }

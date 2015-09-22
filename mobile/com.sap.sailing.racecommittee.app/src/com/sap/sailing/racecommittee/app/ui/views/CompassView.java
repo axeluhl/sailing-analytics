@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.views;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -75,6 +76,9 @@ public class CompassView extends RelativeLayout {
                     String value = degreeView.getText().toString();
                     value = value.replace("°", "");
                     value = value.replace(" ", "");
+                    if (TextUtils.isEmpty(value)) {
+                        value = "0";
+                    }
                     float degree = Float.valueOf(value);
                     if (degree >= 0 && degree <= 360) {
                         setDirection(degree);

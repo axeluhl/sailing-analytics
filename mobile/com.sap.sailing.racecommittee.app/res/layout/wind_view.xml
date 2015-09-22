@@ -83,15 +83,16 @@
 
         <Button
             android:id="@+id/set_data"
-            style="?attr/buttonSolidNormal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="?attr/button"
+            android:layout_width="@dimen/default_button_width"
+            android:layout_height="@dimen/default_button_height"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/default_margin_half"
             android:enabled="false"
             android:padding="@dimen/default_padding_half"
+            android:textSize="@dimen/textSize_18"
             android:text="@string/wind_set_data"/>
 
         <RelativeLayout
