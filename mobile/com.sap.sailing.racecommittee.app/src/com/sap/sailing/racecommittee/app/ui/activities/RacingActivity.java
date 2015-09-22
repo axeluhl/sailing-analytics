@@ -445,34 +445,41 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         String action = intent.getAction();
         Bundle args = new Bundle();
         args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
-        Fragment fragment;
+        Fragment contentFragment;
+        Fragment editFragment = null;
 
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            Fragment editFragment = null;
             if (findViewById(R.id.race_edit) != null) {
                 editFragment = getFragmentManager().findFragmentById(R.id.race_edit);
                 if (editFragment != null) {
                     transaction.remove(editFragment);
                 }
             }
-            if (editFragment == null && findViewById(R.id.race_frame) != null) {
+            if (editFragment == null && findViewById(R.id.race_content) != null) {
                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
-                    fragment = RaceFlagViewerFragment.newInstance();
+                    contentFragment = RaceFlagViewerFragment.newInstance();
                 } else {
-                    fragment = RaceFinishingFragment.newInstance();
+                    contentFragment = RaceFinishingFragment.newInstance();
                 }
-                fragment.setArguments(args);
-                transaction.replace(R.id.race_frame, fragment);
+                contentFragment.setArguments(args);
+                transaction.replace(R.id.race_content, contentFragment);
             }
-            transaction.commit();
         }
 
         if (AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
-            fragment = RaceSummaryFragment.newInstance(args);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.finished_content, fragment).commit();
+            if (findViewById(R.id.finished_edit) != null) {
+                editFragment = getFragmentManager().findFragmentById(R.id.finished_edit);
+                if (editFragment != null) {
+                    transaction.remove(editFragment);
+                }
+            }
+            if (editFragment == null && findViewById(R.id.finished_content) != null) {
+                contentFragment = RaceSummaryFragment.newInstance(args);
+                transaction.replace(R.id.finished_content, contentFragment);
+            }
         }
+        transaction.commit();
     }
 
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {

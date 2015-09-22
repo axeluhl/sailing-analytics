@@ -49,7 +49,7 @@ public class RaceFinishingFragment extends BaseFragment {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1), getFrameId(getActivity()));
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1), getFrameId(getActivity(), R.id.race_edit, R.id.race_content));
                 }
             });
         }

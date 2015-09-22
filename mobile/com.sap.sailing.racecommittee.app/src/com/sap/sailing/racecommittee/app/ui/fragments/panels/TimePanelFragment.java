@@ -176,7 +176,7 @@ public class TimePanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mRaceHeader)) {
-                resetFragment(mTimeLock, getFrameId(getActivity()), StartTimeFragment.class);
+                resetFragment(mTimeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartTimeFragment.class);
                 setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
             }
         }

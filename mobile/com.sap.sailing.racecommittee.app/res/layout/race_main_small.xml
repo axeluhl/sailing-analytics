@@ -91,7 +91,7 @@
         android:layout_alignParentBottom="true"/>
 
     <FrameLayout
-        android:id="@+id/race_frame"
+        android:id="@+id/race_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/race_panel_flags"

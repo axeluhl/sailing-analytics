@@ -121,7 +121,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     protected void replaceFragment(RaceFragment fragment) {
-        replaceFragment(fragment, getFrameId(getActivity()));
+        replaceFragment(fragment, getFrameId(getActivity(), R.id.race_edit, R.id.race_content));
     }
 
     protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {

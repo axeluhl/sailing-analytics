@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/default_margin_half"
+            android:layout_marginLeft="@dimen/side_padding"
             android:orientation="horizontal">
 
             <ImageView
@@ -29,9 +29,16 @@
                 android:id="@+id/header_headline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="@string/set_time"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?textHeader"/>
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:background="?black"/>
     </RelativeLayout>
 
     <include

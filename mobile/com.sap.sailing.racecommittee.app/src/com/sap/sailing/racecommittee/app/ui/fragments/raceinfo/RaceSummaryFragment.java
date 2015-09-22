@@ -55,7 +55,7 @@ public class RaceSummaryFragment extends BaseFragment {
             editStartTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE), R.id.finished_content);
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }
@@ -65,7 +65,7 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishingTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), R.id.finished_content);
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }
@@ -75,7 +75,7 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishedTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), R.id.finished_content);
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }

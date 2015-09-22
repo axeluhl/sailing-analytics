@@ -23,4 +23,8 @@
         android:layout_above="@id/finished_panel_desc"
         android:layout_below="@id/finished_panel_buttons"/>
 
+    <FrameLayout
+        android:id="@+id/finished_edit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>

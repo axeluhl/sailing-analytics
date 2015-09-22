@@ -128,14 +128,12 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return courseName;
     }
 
-    protected
-    @IdRes
-    int getFrameId(Activity activity) {
+    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame) {
         int frame = 0;
-        if (activity.findViewById(R.id.race_edit) != null) {
-            frame = R.id.race_edit;
-        } else if (activity.findViewById(R.id.race_frame) != null) {
-            frame = R.id.race_frame;
+        if (activity.findViewById(defaultFrame) != null) {
+            frame = defaultFrame;
+        } else if (activity.findViewById(fallbackFrame) != null) {
+            frame = fallbackFrame;
         }
         return frame;
     }
