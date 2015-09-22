@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.events;
+package com.sap.sailing.gwt.home.desktop.places.events;
 
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 

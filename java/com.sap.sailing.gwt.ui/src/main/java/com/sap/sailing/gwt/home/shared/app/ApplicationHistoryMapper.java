@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboa
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
@@ -23,6 +22,7 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
