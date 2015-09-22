@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
@@ -14,32 +13,18 @@
         android:src="@drawable/backdrop"/>
 
     <RelativeLayout
+        android:id="@+id/delete_photo"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_alignLeft="@id/photo_view"
-        android:layout_alignRight="@id/photo_view"
-        android:background="@color/constant_black_transparent">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@color/constant_white_transparent">
 
         <ImageView
-            android:id="@+id/delete_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/default_margin_half"
-            android:src="@drawable/ic_menu_delete"/>
-
-        <TextView
-            android:id="@+id/date_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/delete_photo"
-            android:paddingLeft="@dimen/default_padding"
-            android:paddingRight="@dimen/default_padding"
-            android:textAppearance="?textSmall"
-            android:textColor="@color/constant_white"
-            tools:text="22.08.15 / 11:20:05"/>
+            android:layout_margin="@dimen/side_padding"
+            android:src="@drawable/ic_delete_24dp"/>
     </RelativeLayout>
 </RelativeLayout>

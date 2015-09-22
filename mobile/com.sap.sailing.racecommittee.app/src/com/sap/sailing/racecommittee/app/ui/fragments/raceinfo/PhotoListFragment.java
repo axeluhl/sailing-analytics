@@ -19,8 +19,8 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAdapter;
-import com.sap.sailing.racecommittee.app.ui.views.DividerItemDecoration;
+import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
+import com.sap.sailing.racecommittee.app.ui.views.decoration.PhotoListItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -39,7 +39,7 @@ public class PhotoListFragment extends BaseFragment {
     private final static int PHOTO_SHOOTING = 9000;
 
     private ArrayList<Uri> mPhotos;
-    private FinishListPhotoAdapter mAdapter;
+    private PhotoListAdapter mAdapter;
     private RecyclerView mPhotoList;
     private Button mSubmit;
     private SimpleDateFormat mDateFormat;
@@ -85,7 +85,7 @@ public class PhotoListFragment extends BaseFragment {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
             mPhotoList.setLayoutManager(layoutManager);
-            mPhotoList.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+            mPhotoList.addItemDecoration(new PhotoListItemDecoration(getResources().getDimensionPixelOffset(R.dimen.side_padding)));
         }
 
         mSubmit = ViewHelper.get(layout, R.id.submit_button);
@@ -105,7 +105,7 @@ public class PhotoListFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
-        mAdapter = new FinishListPhotoAdapter(mPhotos);
+        mAdapter = new PhotoListAdapter(mPhotos);
         mPhotoList.setAdapter(mAdapter);
         refreshPhotoList();
     }

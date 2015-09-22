@@ -9,12 +9,14 @@
         android:id="@+id/photo_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"/>
+        android:layout_weight="2"
+        android:paddingTop="@dimen/side_padding"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <RelativeLayout
@@ -24,11 +26,11 @@
 
             <ImageView
                 android:id="@+id/photo_button"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="@dimen/photo_shutter_size"
+                android:layout_height="@dimen/photo_shutter_size"
                 android:layout_centerInParent="true"
                 android:background="@drawable/round_button_outline"
-                android:padding="@dimen/default_padding"
+                android:padding="@dimen/side_padding"
                 android:src="?photo_camera"/>
         </RelativeLayout>
 
@@ -37,13 +39,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <Button
-                android:id="@+id/submit_button"
-                style="?buttonSolidSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/send_photos" />
+            <include layout="@layout/photo_list_button"/>
         </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

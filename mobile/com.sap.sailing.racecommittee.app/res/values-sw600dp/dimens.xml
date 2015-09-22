@@ -86,4 +86,7 @@
 	<dimen name="finished_line_padding_half">@dimen/default_padding_half</dimen>
 	<dimen name="finished_line_padding">@dimen/default_padding</dimen>
 
+	<!-- photo -->
+	<dimen name="photo_shutter_size">100dp</dimen>
+
 </resources>

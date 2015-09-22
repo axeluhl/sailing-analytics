@@ -50,7 +50,7 @@
     <dimen name="race_flag_margin">50dp</dimen>
 
     <dimen name="side_button">86dp</dimen>
-    <dimen name="side_button_large">120dp</dimen>
+    <dimen name="side_button_large">100dp</dimen>
     <dimen name="side_button_imageSize">50dp</dimen>
     <dimen name="side_button_lockSize">14dp</dimen>
 
@@ -102,5 +102,8 @@
     <dimen name="finished_default_text_size">@dimen/textSize_22</dimen>
     <dimen name="finished_line_padding_half">5dp</dimen>
     <dimen name="finished_line_padding">10dp</dimen>
+
+    <!-- photo -->
+    <dimen name="photo_shutter_size">80dp</dimen>
 
 </resources>

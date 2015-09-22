@@ -25,7 +25,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_postpone"/>
+            <include layout="@layout/panel_button_postpone"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -41,7 +41,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_abandon"/>
+            <include layout="@layout/panel_button_abandon"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -57,7 +57,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_recall"/>
+            <include layout="@layout/panel_button_recall"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -75,7 +75,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_course"/>
+            <include layout="@layout/panel_button_course"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -91,7 +91,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_more"/>
+            <include layout="@layout/panel_button_more"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -109,7 +109,7 @@
                 android:layout_alignParentRight="true"
                 android:src="?marker"/>
 
-            <include layout="@layout/race_panel_flags_record"/>
+            <include layout="@layout/panel_button_voice_record"/>
         </RelativeLayout>
     </LinearLayout>
 

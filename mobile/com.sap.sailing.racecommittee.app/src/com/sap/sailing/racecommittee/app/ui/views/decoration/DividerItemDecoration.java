@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.sap.sailing.racecommittee.app.ui.views;
+package com.sap.sailing.racecommittee.app.ui.views.decoration;
 
 import android.content.Context;
 import android.content.res.TypedArray;

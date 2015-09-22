@@ -2,6 +2,7 @@
 <resources>
 
     <color name="constant_white">#ffffff</color>
+    <color name="constant_white_transparent">#99FFFFFF</color>
     <color name="constant_light_gray">#eeeeee</color>
     <color name="constant_light_gray_pressed">#e0e0e0</color>
     <color name="constant_light_gray_ripple">#d3d3d3</color>
