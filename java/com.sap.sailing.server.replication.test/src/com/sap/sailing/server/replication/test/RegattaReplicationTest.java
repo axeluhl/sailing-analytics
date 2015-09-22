@@ -69,8 +69,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
 
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
-        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
+        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId});
+        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId});
         
         UUID currentCourseAreaId = null;
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("Kiel Week 2012", "49er"), "49er", 
@@ -119,8 +119,8 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
-        master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
+        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId});
+        master.addCourseAreas(event.getId(), new String[] {"Golf"}, new UUID[] {golfCourseAreaId});
         final String regattaName = RegattaImpl.getDefaultName("Kiel Week 2012", "49er");
         Regatta masterRegatta = master.createRegatta(regattaName, "49er", /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
@@ -144,7 +144,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
+        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId});
         
         UUID currentCourseAreaId = null;
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("RR", "49er"), "49er", /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
@@ -302,7 +302,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
-        CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
+        CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()})[0];
         
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), masterCourseArea.getId(), /* useStartTimeInference */ true, OneDesignRankingMetric::new);

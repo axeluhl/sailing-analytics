@@ -14,23 +14,23 @@ import com.sap.sailing.server.RacingEventServiceOperation;
  * @author Axel Uhl (d043530)
  *
  */
-public class AddCourseArea extends AbstractRacingEventServiceOperation<CourseArea> {
+public class AddCourseAreas extends AbstractRacingEventServiceOperation<CourseArea[]> {
 
     private static final long serialVersionUID = -3650109848260363949L;
-    private final String courseAreaName;
-    private final UUID courseAreaId;
+    private final String[] courseAreaNames;
+    private final UUID[] courseAreaIds;
     private final UUID eventId;
 
-    public AddCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
+    public AddCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
         super();
         this.eventId = eventId;
-        this.courseAreaId = courseAreaId;
-        this.courseAreaName = courseAreaName;
+        this.courseAreaIds = courseAreaIds;
+        this.courseAreaNames = courseAreaNames;
     }
 
     @Override
-    public CourseArea internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
+    public CourseArea[] internalApplyTo(RacingEventService toState) throws Exception {
+        return toState.addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
     }
 
     @Override
