@@ -6,9 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.desktop.places.events.EventsPlace;
-import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.desktop.places.start.StartPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.series.SeriesActivityProxy;
@@ -18,6 +15,9 @@ import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;

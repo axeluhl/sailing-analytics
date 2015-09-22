@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.RecentEventTeaser;
-import com.sap.sailing.gwt.home.desktop.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 public class MainEvents extends Composite {

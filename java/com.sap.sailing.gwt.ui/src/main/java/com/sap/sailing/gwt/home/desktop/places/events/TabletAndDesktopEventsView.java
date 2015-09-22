@@ -8,8 +8,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.desktop.partials.eventsupcoming.EventsOverviewUpcoming;
-import com.sap.sailing.gwt.home.desktop.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopEventsView extends AbstractEventsView {

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.start;
+package com.sap.sailing.gwt.home.shared.places.start;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;

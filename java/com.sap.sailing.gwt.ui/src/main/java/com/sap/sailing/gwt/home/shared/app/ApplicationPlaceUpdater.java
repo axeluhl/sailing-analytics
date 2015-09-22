@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.desktop.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 
 /**
  * Helper class to support converting old places to new ones.

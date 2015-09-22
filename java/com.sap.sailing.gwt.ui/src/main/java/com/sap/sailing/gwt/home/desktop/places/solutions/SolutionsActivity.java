@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 
 public class SolutionsActivity extends AbstractActivity {
     private final SolutionsPlace solutionsPlace;

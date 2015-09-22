@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.desktop.places.solutions.TabletAndDesktopSolutionsView;
-import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringView;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.TabletAndDesktopSponsoringView;
 import com.sap.sailing.gwt.home.desktop.places.start.StartView;
@@ -20,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {

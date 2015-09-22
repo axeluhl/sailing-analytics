@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.solutions;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SolutionsActivityProxy extends AbstractActivityProxy {
