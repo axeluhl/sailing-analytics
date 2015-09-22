@@ -74,8 +74,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         polarChartWrapperPanel.add(polarChart);
 
         dataCountHistogramChart = createDataCountHistogramChart(stringMessages.beatAngle() + " ("
-                + stringMessages.degreesShort() + ")");
-        dataCountPerAngleHistogramChart = createDataCountHistogramChart(stringMessages.windSpeed());
+                + stringMessages.degreesShort() + ")", true);
+        dataCountPerAngleHistogramChart = createDataCountHistogramChart(stringMessages.windRangeDistribution(), false);
         histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -93,13 +93,6 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         dockLayoutPanel.addEast(histogramChartsWrapperPanel, 60);
         
         setSeriesShowAndHideHandler();
-        setSeriesPointSelectionHandler();
-    }
-    
-    private void setSeriesPointSelectionHandler() {
-        SeriesPlotOptions seriesPlotOptions = new SeriesPlotOptions();
-        seriesPlotOptions.setPointSelectEventHandler(createPointSelectEventHandler());
-        seriesPlotOptions.setPointUnselectEventHandler(createPointUnselectEventHandler());
     }
 
     private PointUnselectEventHandler createPointUnselectEventHandler() {
@@ -168,11 +161,11 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         };
     }
 
-    private Chart createDataCountHistogramChart(String xAxisLabel) {
+    private Chart createDataCountHistogramChart(String xAxisLabel, boolean showXLabels) {
         Chart histogramChart = new Chart().setType(Type.AREA).setHeight100().setWidth100();
         histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
-        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30))
+        histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(showXLabels))
                 .setAxisTitle(new AxisTitle().setText(xAxisLabel));
         histogramChart.setAreaPlotOptions(new AreaPlotOptions().setLineColor("#666666")
                 .setLineWidth(1).setMarker(new Marker().setLineWidth(1).setLineColor("#666666")));
@@ -235,7 +228,9 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
                     if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed > 0) {
                         point = new Point(convertedAngle, speed);
                         polarSeries.addPoint(point, false, false, false);
-                    }  
+                    }  else {
+                        polarSeries.addPoint(convertedAngle, 0, false, false, false);
+                    }
                     histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
                     Series dataCountPerAngleSeries = dataCountPerAngleHistogramChart.createSeries();
                     int[] histogramDataForAngle = histogramData[i];

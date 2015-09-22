@@ -7,6 +7,10 @@ public class PolarAggregationImpl implements PolarAggregation {
     private static final long serialVersionUID = 9177124509619315748L;
     private double[] sumSpeedsPerAngle = new double[360];
     private int[] countPerAngle = new int[360];
+    /**
+     * FIXME Righnt now the histogram data is only valid, if the results are grouped by windrange.
+     * Otherwise the column-indices of different ranges are mixed in one histogram. 
+     */
     private int[][] histogramData;
     private int count = 0;
     private PolarDataMiningSettings settings;
