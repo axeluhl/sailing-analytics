@@ -24,7 +24,7 @@ public class WindSteppingTest {
     @Test
     public void testSteppingWithMaxDistance() {
         double[] levels = {2.,4.};
-        WindSpeedStepping stepping = new WindSpeedSteppingWithMaxDistance(levels, 1.0);
+        WindSpeedSteppingWithMaxDistance stepping = new WindSpeedSteppingWithMaxDistance(levels, 1.0);
         Assert.assertEquals(0, stepping.getLevelIndexForValue(1));
         Assert.assertEquals(1, stepping.getLevelIndexForValue(5));
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(5.01));
@@ -32,6 +32,8 @@ public class WindSteppingTest {
         Assert.assertEquals(-1, stepping.getLevelIndexForValue(8));
         Assert.assertEquals(2.0, stepping.getSteppedValueForValue(1.064), 0.005);
         Assert.assertEquals(-1.0, stepping.getSteppedValueForValue(7.8365), 0.005);
+        Assert.assertEquals(5, stepping.getHistogramIndex(20, 1.5));
+        Assert.assertEquals(15, stepping.getHistogramIndex(20, 2.5));
     }
 
 }

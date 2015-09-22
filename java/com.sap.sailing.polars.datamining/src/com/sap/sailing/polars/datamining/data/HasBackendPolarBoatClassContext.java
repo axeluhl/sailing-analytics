@@ -7,7 +7,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasBackendPolarBoatClassContext {
     
-    @Connector
+    @Connector(messageKey="BoatClass")
     BoatClass getBoatClass();
 
     PolarDataService getPolarDataService();

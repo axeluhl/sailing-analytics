@@ -80,14 +80,19 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         Chart speedChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
         speedChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         speedChart.setExporting(new Exporting().setEnabled(false));
+        speedChart.getYAxis().setExtremes(0, speedChart.getYAxis().getExtremes().getMax())
+                .setAxisTitleText(stringMessages.boatSpeed() + " (" +  stringMessages.knotsUnit() + ")");
+        speedChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
         return speedChart;
     }
     
     private Chart createAngleChart() {
-        Chart speedChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
-        speedChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
-        speedChart.setExporting(new Exporting().setEnabled(false));
-        return speedChart;
+        Chart angleChart = new Chart().setType(Type.LINE).setHeight100().setWidth100();
+        angleChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
+        angleChart.setExporting(new Exporting().setEnabled(false));
+        angleChart.getYAxis().setAxisTitleText(stringMessages.beatAngle() + " (" + stringMessages.degreesShort() + ")");
+        angleChart.getXAxis().setAxisTitleText(stringMessages.windSpeed());
+        return angleChart;
     }
 
     private Chart createPolarChart() {

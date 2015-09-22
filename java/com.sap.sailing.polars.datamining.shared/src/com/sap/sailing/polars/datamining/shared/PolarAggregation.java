@@ -13,4 +13,6 @@ public interface PolarAggregation extends Serializable {
     int getCount();
     
     PolarDataMiningSettings getSettings();
+    
+    int[][] getCountHistogramPerAngle();
 }

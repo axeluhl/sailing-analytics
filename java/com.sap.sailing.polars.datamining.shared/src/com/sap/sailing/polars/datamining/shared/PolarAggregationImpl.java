@@ -32,8 +32,9 @@ public class PolarAggregationImpl implements PolarAggregation {
         }
         sumSpeedsPerAngle[angleDeg] += dataEntry.getBoatSpeed().getKnots();
         countPerAngle[angleDeg]++;
-        // TODO add 1 to correct histogram column, for that we need to know min and max
-        //histogramData[angleDeg][]
+        int histogramIndex = settings.getWindSpeedStepping().getHistogramIndex(settings.getNumberOfHistogramColumns(),
+                dataEntry.getWindSpeed().getKnots());
+        histogramData[angleDeg][histogramIndex]++;
         count++;
     }
     
@@ -62,7 +63,11 @@ public class PolarAggregationImpl implements PolarAggregation {
     public PolarDataMiningSettings getSettings() {
         return settings;
     }
-    
+
+    @Override
+    public int[][] getCountHistogramPerAngle() {
+        return histogramData;
+    }
     
 
 }
