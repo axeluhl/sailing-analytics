@@ -205,14 +205,35 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
         return result;
     }
 
-    private boolean participatesInNextRound(Leaderboard leaderboard, RaceColumnInSeries raceColumnInSeries, Competitor competitor, TimePoint timePoint, Iterator<? extends Series> seriesInRegattaIter) {
+    /**
+     * A competitor can participate in the next round of an elimination after having been promoted from
+     * <code>raceColumnInSeries</code>. If the round represented by <code>raceColumnInSeries</code> is the last round in
+     * the elimination, the competitor obviously cannot participate in any next round, therefore <code>false</code> is
+     * returned in this case. Otherwise, next round participation is decided by first looking for a score correction.
+     * The score correction for the next column has to be valid at <code>timePoint</code>, then the competitor is considered
+     * having participated in that next round at <code>timePoint</code>. If no score correction is found for the next column,
+     * the next column is checked for a tracked race in which <code>competitor</code> competes. If such a race is found,
+     * the question remains whether this participation is considered "active" at <code>timePoint</code>. This is assumed
+     * if in the current round represented by <code>raceColumnInSeries</code> no tracked race is found for <code>competitor</code>
+     * (unlikely, but it means we cannot tell whether <code>competitor</code> has already finished her current race, and by
+     * default we then have to assume that it's over) or the end of that race was before <code>timePoint</code>.<p>
+     * 
+     * This will keep <code>competitor</code>'s score in <code>raceColumnInSeries</code> for time points where the race
+     * in this column is still running. Only after the race has finished will the promotion become active and competitor
+     * lose her points in the current column.
+     */
+    private boolean participatesInNextRound(Leaderboard leaderboard, RaceColumnInSeries raceColumnInSeries,
+            Competitor competitor, TimePoint timePoint, Iterator<? extends Series> seriesInRegattaIter) {
         final boolean result;
         if (isLastRoundInElimination(raceColumnInSeries, seriesInRegattaIter)) {
             result = false;
         } else {
             final Series nextSeries = seriesInRegattaIter.next();
+            final TrackedRace trackedRace;
             result = leaderboard.getScoreCorrection().isScoreCorrected(competitor, nextSeries.getRaceColumns().iterator().next(), timePoint) ||
-                    nextSeries.getRaceColumns().iterator().next().getFleetOfCompetitor(competitor) != null;
+                    (nextSeries.getRaceColumns().iterator().next().getFleetOfCompetitor(competitor) != null &&
+                     ((trackedRace=raceColumnInSeries.getTrackedRace(competitor)) == null || trackedRace.getEndOfRace() == null ||
+                      trackedRace.getEndOfRace().before(timePoint)));
         }
         return result;
     }
