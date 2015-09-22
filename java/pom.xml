@@ -134,7 +134,7 @@
   <profiles>
     <profile>
       <!-- deactivate with parameter '-P !with-test'-->
-      <id>with-test</id>
+      <id>with-not-android-relevant</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
