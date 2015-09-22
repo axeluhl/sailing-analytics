@@ -83,6 +83,12 @@
 .fleet_races {
   padding: 0 1.333333333333333em 1% 25%;
 }
+.default_fleet > .fleet_corner, .default_fleet > .fleet_details {
+	display: none;
+}
+.default_fleet > .fleet_races {
+	padding-left: calc(1.333333333333333em - 1%);
+}
 @media (min-width: 61em) {
   .fleet_races {
     padding-left: 17%;

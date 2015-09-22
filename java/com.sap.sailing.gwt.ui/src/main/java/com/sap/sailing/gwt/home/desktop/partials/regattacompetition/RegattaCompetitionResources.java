@@ -18,6 +18,7 @@ public interface RegattaCompetitionResources extends ClientBundle {
         String phase_head_info_item();
         String regattalistitem();
         String fleet();
+        String default_fleet();
         String fleet_corner();
         String fleet_details();
         String fleet_details_name();
