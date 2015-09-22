@@ -19,4 +19,14 @@ public class BoatClassWithBackendPolarContext implements HasBackendPolarBoatClas
         return boatClass;
     }
 
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
+    }
+
+    @Override
+    public HasBackendPolarBoatClassContext getBackendPolarBoatClassContext() {
+        return this;
+    }
+
 }

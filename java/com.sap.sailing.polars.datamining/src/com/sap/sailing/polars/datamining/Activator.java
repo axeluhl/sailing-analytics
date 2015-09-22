@@ -7,6 +7,7 @@ import java.util.Set;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.RacingEventServiceProvider;
+import com.sap.sailing.polars.datamining.components.aggregators.PolarBackendDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
@@ -99,6 +100,7 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
     public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
         HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
         aggregators.add(PolarDataAggregationProcessor.getDefinition());
+        aggregators.add(PolarBackendDataAggregationProcessor.getDefinition());
         return aggregators;
     }
     

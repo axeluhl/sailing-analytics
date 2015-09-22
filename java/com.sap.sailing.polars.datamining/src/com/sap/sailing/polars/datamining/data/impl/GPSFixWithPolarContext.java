@@ -10,7 +10,6 @@ import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarStatistic;
-import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.ClusterGroup;

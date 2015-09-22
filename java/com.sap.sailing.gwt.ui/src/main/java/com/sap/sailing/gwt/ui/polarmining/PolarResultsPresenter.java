@@ -57,24 +57,28 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         super(stringMessages);
         
         polarChart = createPolarChart();
-        dataCountHistogramChart = createDataCountHistogramChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
                 polarChart.setSizeToMatchContainer();
                 polarChart.redraw();
-                dataCountHistogramChart.setSizeToMatchContainer();
-                dataCountHistogramChart.redraw();
             }
         };
         polarChartWrapperPanel.add(polarChart);
         
-        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel();
+        dataCountHistogramChart = createDataCountHistogramChart();
+        dataCountHistogramChartWrapperPanel = new SimpleLayoutPanel() {
+            @Override
+            public void onResize() {
+                dataCountHistogramChart.setSizeToMatchContainer();
+                dataCountHistogramChart.redraw();
+            }
+        };
         dataCountHistogramChartWrapperPanel.add(dataCountHistogramChart);
         
         dockLayoutPanel = new DockLayoutPanel(Unit.PCT);
         dockLayoutPanel.addWest(polarChartWrapperPanel, 40);
-        dockLayoutPanel.addEast(dataCountHistogramChart, 60);
+        dockLayoutPanel.addEast(dataCountHistogramChartWrapperPanel, 60);
         
         setSeriesShowAndHideHandler();
     }

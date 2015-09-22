@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.datamining.shared;
+package com.sap.sailing.polars.datamining.data.impl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +14,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
+import com.sap.sailing.polars.datamining.shared.PolarStatistic;
 
 public class PolarStatisticImpl implements PolarStatistic {
 

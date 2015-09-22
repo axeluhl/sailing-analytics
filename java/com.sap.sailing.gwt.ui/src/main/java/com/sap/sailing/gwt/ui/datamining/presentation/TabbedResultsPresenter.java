@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ScrolledTabLayoutPanel;
 import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -41,7 +42,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
         presentersMappedByHeader = new HashMap<>();
         
         addNewTabTab();
-        addTabAndFocus();
+        addTabAndFocus(new MultiResultsPresenter(stringMessages));
     }
 
     private void addNewTabTab() {
@@ -54,7 +55,7 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
             public void onBeforeSelection(BeforeSelectionEvent<Integer> event) {
                 if (event.getItem() == tabPanel.getWidgetCount() - 1) {
                     event.cancel();
-                    addTabAndFocus();
+                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
                 }
             }
         });
@@ -64,12 +65,16 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
     public void showResult(QueryResultDTO<?> result) {
         if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
             CloseableTabHeader oldHeader = getSelectedHeader();
-            addPolarTabAndFocus();
+            addTabAndFocus(new PolarResultsPresenter(stringMessages));
+            removeTab(oldHeader);
+        } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
+            CloseableTabHeader oldHeader = getSelectedHeader();
+            addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
             removeTab(oldHeader);
         } else {
             if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus();
+                addTabAndFocus(new MultiResultsPresenter(stringMessages));
                 removeTab(oldHeader);
             }
         }
@@ -108,20 +113,8 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
         return presentersMappedByHeader.get(getSelectedHeader());
     }
 
-    private void addTabAndFocus() {
+    private void addTabAndFocus(ResultsPresenter<?> tabPresenter) {
         CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<?> tabPresenter = new MultiResultsPresenter(stringMessages);
-        presentersMappedByHeader.put(tabHeader, tabPresenter);
-        
-        tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
-        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
-        tabPanel.selectTab(presenterIndex);
-        tabPanel.scrollToTab(presenterIndex);
-    }
-    
-    private void addPolarTabAndFocus() {
-        CloseableTabHeader tabHeader = new CloseableTabHeader();
-        ResultsPresenter<?> tabPresenter = new PolarResultsPresenter(stringMessages);
         presentersMappedByHeader.put(tabHeader, tabPresenter);
         
         tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);

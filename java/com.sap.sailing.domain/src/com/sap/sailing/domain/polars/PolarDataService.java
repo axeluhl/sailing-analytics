@@ -94,16 +94,6 @@ public interface PolarDataService {
     void competitorPositionChanged(GPSFixMoving fix, Competitor competitor, TrackedRace createdTrackedRace);
 
     /**
-     * Returns underlying datacount for a given boat class and windspeed. 
-     * @param boatClass
-     * @param windSpeed
-     * @param startAngleInclusive between 0 and 359; smaller than (or equal to) endAngleExclusive
-     * @param endAngleExclusive between 0 and 359; bigger than startAngleInclusive
-     * @return array with datacount for all angles in the given area, else -1
-     */
-    int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive, int endAngleExclusive);
-
-    /**
      * From a boat's speed over ground and assuming values for <code>boatClass</code>, the <code>tack</code> the boat is
      * currently sailing on, and the <code>legType</code>, this method estimates the true wind speed candidates at which
      * the boat may most likely have been sailing under these conditions.

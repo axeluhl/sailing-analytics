@@ -8,6 +8,8 @@ public final class PolarsDataMiningSerializationDummy implements SerializationDu
     
     private PolarAggregation polarAggregation;
     private PolarAggregationImpl polarAggregationImpl;
+    private PolarBackendData polarBackendAggregation;
+    private PolarBackendDataImpl polarBackendAggregationImpl;
     private Boolean itsABoolean;
     
     private PolarsDataMiningSerializationDummy() { }
