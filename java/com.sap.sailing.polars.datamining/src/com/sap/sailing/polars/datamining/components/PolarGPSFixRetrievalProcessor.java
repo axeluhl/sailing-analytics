@@ -62,7 +62,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                     if (wind != null && (settings.applyMinimumWindConfidence() ?  wind.getConfidence() >= settings.getMinimumWindConfidence() : true)) {
                         GPSFixWithPolarContext potentialResult = new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
                                 settings, wind, element);
-                        if (!potentialResult.getWindSpeedRange().getSignifier().equals("null")) {
+                        if (!potentialResult.getWindSpeedRange().getSignifier().equals("null") && !track.hasDirectionChange(fix.getTimePoint(), 5)) {
                             result.add(potentialResult);
                         }
                     }
