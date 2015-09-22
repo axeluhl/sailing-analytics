@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetitionResources.LocalCss;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
@@ -34,6 +35,10 @@ public class RegattaCompetitionFleet extends Widget {
         if (fleetCount < 2) raceContainerUi.addClassName(CSS.regattacompetition_phase_fleetfullwidth());
         fleetCornerUi.getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
         fleetNameUi.setInnerText(fleet.getFleet().getFleetName());
+        if (LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getFleet().getFleetName())) {
+            fleetCornerUi.removeFromParent();
+            fleetNameUi.removeFromParent();
+        }
     }
     
     public void addRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {

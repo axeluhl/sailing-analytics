@@ -78,7 +78,6 @@
   padding: 1.066666666666667em 0;
   border-radius: 0.333333333333333em;
   color: #f6f9fc;
-  min-height: 4.4em;
 }
 .regattacompetition_phase_fleet_racetracked {
   background: #008fcc;
@@ -125,4 +124,7 @@
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
+}
+.regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_arrow {
+  display: none;
 }
