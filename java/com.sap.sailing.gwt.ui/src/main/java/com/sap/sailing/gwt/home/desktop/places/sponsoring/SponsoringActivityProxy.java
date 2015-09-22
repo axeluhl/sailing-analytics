@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.sponsoring;
+package com.sap.sailing.gwt.home.desktop.places.sponsoring;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;

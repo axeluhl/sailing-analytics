@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.sponsoring;
+package com.sap.sailing.gwt.home.desktop.places.sponsoring;
 
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 

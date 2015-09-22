@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.sponsoring;
+package com.sap.sailing.gwt.home.desktop.places.sponsoring;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
