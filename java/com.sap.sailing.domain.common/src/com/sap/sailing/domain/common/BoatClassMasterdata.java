@@ -66,7 +66,7 @@ public enum BoatClassMasterdata {
     OPTIMIST ("Optimist", true, 2.34, 1.07, BoatHullType.MONOHULL, false, "Opti", "Optimist Dinghy"),
     PIRATE ("Pirate", true, 5.00, 1.61, BoatHullType.MONOHULL, false, "Pirat", "Piraten"),
     PLATU_25 ("Platu 25", true, 7.53, 2.62, BoatHullType.MONOHULL, true, "Platu", "Platu-25", "PLA", "B25"),
-    PWA ("PWC", true, 5.0, 0.6, BoatHullType.MONOHULL, true, "Professional Windsurfers Association", "PWC World Tour"),
+    PWA ("PWA", true, 5.0, 0.6, BoatHullType.MONOHULL, true, "Professional Windsurfers Association", "PWA World Tour"),
     RC44 ("RC44", true, 13.35, 2.75, BoatHullType.MONOHULL, true),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
