@@ -4,7 +4,7 @@
     <!-- Base application theme -->
     <style name="AppTheme.Dark" parent="AppTheme.Dark.Base"/>
 
-    <style name="AppTheme.Dark.Base" parent="AppTheme.Dark.Flags">
+    <style name="AppTheme.Dark.Base" parent="AppTheme.Dark.Custom">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:tabWidgetStyle">@style/AppTheme.Dark.TabWidget</item>
@@ -65,8 +65,6 @@
         <item name="button_prev">@drawable/button_prev_dark</item>
         <item name="check_18dp">@drawable/ic_check_white_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_white_24dp</item>
-        <item name="chevron_left_36dp">@drawable/ic_chevron_left_white_36dp</item>
-        <item name="chevron_right_36dp">@drawable/ic_chevron_right_white_36dp</item>
         <item name="create">@drawable/ic_create_dark</item>
         <item name="compass_back">@drawable/compass_back_dark</item>
         <item name="compass_needle">@drawable/compass_needle_dark</item>
@@ -100,7 +98,10 @@
         <item name="flag_november_hotel_96dp">@drawable/flag_november_hotel_96dp_dark</item>
     </style>
 
-    <style name="AppTheme.Dark.Flags" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Dark.Custom" parent="Theme.AppCompat.NoActionBar">
+        <item name="chevron_left">@drawable/ic_chevron_left_white_24dp</item>
+        <item name="chevron_right">@drawable/ic_chevron_right_white_24dp</item>
+
         <item name="flag_first_blue">@drawable/flag_first_blue_32dp_dark</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_64dp_dark</item>

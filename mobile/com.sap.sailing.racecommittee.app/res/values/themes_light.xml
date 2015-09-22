@@ -4,7 +4,7 @@
     <!-- Base application theme -->
     <style name="AppTheme.Light" parent="AppTheme.Light.Base"/>
 
-    <style name="AppTheme.Light.Base" parent="AppTheme.Light.Flags">
+    <style name="AppTheme.Light.Base" parent="AppTheme.Light.Custom">
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:tabWidgetStyle">@style/AppTheme.Light.TabWidget</item>
@@ -74,8 +74,6 @@
         <item name="button_prev">@drawable/button_prev_light</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
-        <item name="chevron_left_36dp">@drawable/ic_chevron_left_black_36dp</item>
-        <item name="chevron_right_36dp">@drawable/ic_chevron_right_black_36dp</item>
         <item name="create">@drawable/ic_create_light</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>
@@ -109,7 +107,10 @@
         <item name="flag_november_hotel_96dp">@drawable/flag_november_hotel_96dp_light</item>
     </style>
 
-    <style name="AppTheme.Light.Flags" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Light.Custom" parent="Theme.AppCompat.NoActionBar">
+        <item name="chevron_left">@drawable/ic_chevron_left_black_24dp</item>
+        <item name="chevron_right">@drawable/ic_chevron_right_black_24dp</item>
+
         <item name="flag_first_blue">@drawable/flag_first_blue_32dp_light</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_64dp_light</item>

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme.Light.Flags" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Light.Custom" parent="Theme.AppCompat.NoActionBar">
+        <item name="chevron_left">@drawable/ic_chevron_left_black_36dp</item>
+        <item name="chevron_right">@drawable/ic_chevron_right_black_36dp</item>
+
         <item name="flag_first_blue">@drawable/flag_first_blue_48dp_light</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_96dp_light</item>

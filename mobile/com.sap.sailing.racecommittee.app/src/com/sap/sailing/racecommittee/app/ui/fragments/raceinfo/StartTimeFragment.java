@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -721,6 +722,7 @@ public class StartTimeFragment extends BaseFragment
         Bundle args = getRecentArguments();
         RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
         getRaceState().setRacingProcedure(now, procedureType);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (getArguments() != null && startTime != null) {
             if (getArguments().getInt(START_MODE, MODE_SETUP) != MODE_SETUP) {
                 if (startTimeDiff == null && identifier == null) {
@@ -731,7 +733,7 @@ public class StartTimeFragment extends BaseFragment
                     getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier);
                 }
                 fragment = RaceFlagViewerFragment.newInstance();
-                viewId = getFrameId(getActivity(), R.id.race_edit, R.id.race_content);
+                viewId = R.id.race_content;
             }
             args.putAll(getArguments());
             args.putSerializable(MainScheduleFragment.START_TIME, startTime);
@@ -739,7 +741,8 @@ public class StartTimeFragment extends BaseFragment
             args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, identifier);
         }
         fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
+        transaction.replace(viewId, fragment);
+        transaction.commit();
         Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }

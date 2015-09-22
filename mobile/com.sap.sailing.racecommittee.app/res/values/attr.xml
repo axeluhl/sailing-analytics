@@ -51,9 +51,9 @@
     <attr name="button_next" format="reference"/>
     <attr name="button_prev" format="reference"/>
     <attr name="check_18dp" format="reference"/>
+    <attr name="chevron_left" format="reference"/>
     <attr name="chevron_left_24dp" format="reference"/>
-    <attr name="chevron_left_36dp" format="reference"/>
-    <attr name="chevron_right_36dp" format="reference"/>
+    <attr name="chevron_right" format="reference"/>
     <attr name="create" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>

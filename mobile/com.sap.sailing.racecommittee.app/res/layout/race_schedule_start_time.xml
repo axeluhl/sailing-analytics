@@ -89,7 +89,7 @@
             android:layout_height="match_parent"
             android:background="?sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/buttonBar"
@@ -110,10 +110,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:background="?button_filled_bordered"
-                        android:drawableLeft="?chevron_left_36dp"
+                        android:drawableLeft="?attr/chevron_left"
                         android:paddingRight="@dimen/default_padding_half"
-                        android:textAppearance="?textLarge"
                         android:textColor="?white"
+                        android:textSize="@dimen/textSize_20"
                         tools:text="@string/race_start_time_in"/>
 
                     <TextView
@@ -123,7 +123,8 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="@dimen/default_margin"
                         android:layout_marginRight="@dimen/default_margin"
-                        android:textAppearance="?textXLarge"
+                        android:textColor="?white"
+                        android:textSize="@dimen/textSize_20"
                         android:visibility="visible"
                         tools:text="@string/race_start_time_in"/>
 
@@ -133,10 +134,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:background="?button_filled_bordered"
-                        android:drawableRight="?chevron_right_36dp"
+                        android:drawableRight="?attr/chevron_right"
                         android:paddingLeft="@dimen/default_padding_half"
-                        android:textAppearance="?textLarge"
                         android:textColor="?white"
+                        android:textSize="@dimen/textSize_20"
                         tools:text="@string/race_start_time_in"/>
                 </LinearLayout>
             </RelativeLayout>
@@ -173,7 +174,7 @@
 
             <Button
                 android:id="@+id/set_start_time_absolute"
-                style="?attr/buttonSolidSmall"
+                style="?attr/button"
                 android:layout_width="@dimen/default_button_width"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -202,7 +203,7 @@
             android:layout_height="match_parent"
             android:background="?sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -280,7 +281,7 @@
 
             <Button
                 android:id="@+id/set_start_time_relative"
-                style="?attr/buttonSolidSmall"
+                style="?attr/button"
                 android:layout_width="@dimen/default_button_width"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"

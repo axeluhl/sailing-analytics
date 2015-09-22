@@ -14,11 +14,11 @@
         <ImageView
             android:id="@+id/arrow_up"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/arrow_size_large"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/side_padding"
             android:layout_marginTop="@dimen/race_flag_margin"
-            android:src="?arrow_up_large"
+            android:src="?arrow_up_normal"
             android:visibility="gone"
             tools:visibility="visible"/>
 
@@ -44,10 +44,10 @@
         <ImageView
             android:id="@+id/arrow_down"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/arrow_size_large"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/race_flag_margin"
-            android:src="?arrow_down_large"
+            android:src="?arrow_down_normal"
             android:visibility="gone"
             tools:visibility="visible"/>
     </LinearLayout>
