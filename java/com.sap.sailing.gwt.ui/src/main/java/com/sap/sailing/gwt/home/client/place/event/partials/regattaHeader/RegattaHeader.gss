@@ -31,8 +31,10 @@
   vertical-align: middle;
 }
 .regattaheader_content {
-  float: left;
-  width: 60%;
+/*   float: left; */
+  display: inline-block;
+  width: calc(100% - 4em);
+  white-space: nowrap;
   overflow: hidden;
   border-left: 1px solid #ccc;
   margin-left: 0.666666666666667em;
@@ -43,9 +45,12 @@
   font-weight: 700;
   height: 1.363636363636364em;
   line-height: 1.363636363636364em;
+  overflow: hidden;
 }
 .regattaheader_content_details {
   height: 1.333333333333333em;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .regattaheader_content_details_item {
   float: left;
