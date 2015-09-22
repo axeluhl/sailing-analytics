@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.polarmining;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
@@ -114,6 +116,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        final Set<Series> seriesToHideAfterRendering = new HashSet<>();
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {
@@ -176,6 +179,9 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                     int convertedAngle = j  > 180 ? j  - 360 : j ;
                     polarSeries.addPoint(convertedAngle, hasDataForAngle[j] ? data[j][i] : 0, false, false, false);
                 }
+                if (i!=11) {
+                    seriesToHideAfterRendering.add(polarSeries);
+                }
                 polarChart.addSeries(polarSeries, false, false);
             }
             polarChart.redraw();
@@ -189,6 +195,10 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
                 polarChart.setSizeToMatchContainer();
                 speedChart.setSizeToMatchContainer();
                 angleChart.setSizeToMatchContainer();
+                for (Series seriesToHide : seriesToHideAfterRendering) {
+                    seriesToHide.setVisible(false, false);
+                }
+                polarChart.redraw();
             }
         };
         timer.schedule(200);
