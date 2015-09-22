@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.polars;
 
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
@@ -14,8 +12,6 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -51,30 +47,6 @@ public interface PolarDataService {
      */
     SpeedWithConfidence<Void> getSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException;
-    
-
-    /**
-     * Generates a polar sheet for given races and settings using the provided executor for the worker threads. This
-     * method does not access a cache for now.
-     * 
-     * @param trackedRaces
-     *            The set of races to generate the diagram for.
-     * @param settings
-     *            Settings as supplied by the user.
-     * @param executor
-     *            The executor to run the worker threads with.
-     * @return The generated polar sheet with meta data.
-     */
-    PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
-            Executor executor) throws InterruptedException, ExecutionException;
-
-    /**
-     * 
-     * @param boatClass
-     *            The {@link BoatClass} to obtain the polar sheet for.
-     * @return The polar sheet for all existing races of the {@link BoatClass}.
-     */
-    PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass);
 
     /**
      * 

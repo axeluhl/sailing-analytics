@@ -35,7 +35,6 @@
 	<set-property name="gwt.logging.enabled" value="FALSE"/>
 
 	<source path="datamining" />
-	<source path="polarsheets" />
 	<source path="polarmining" />
 		
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>

@@ -163,7 +163,6 @@
                 <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
                 <module>com.sap.sailing.gwt.ui.Simulator</module>
                 <module>com.sap.sailing.gwt.regattaoverview.RegattaOverview</module>
-                <module>com.sap.sailing.gwt.ui.PolarSheets</module>
               </modules>
               <!-- uncomment the following for PRETTY-printed, non-obfuscated output format
               <style>PRETTY</style>

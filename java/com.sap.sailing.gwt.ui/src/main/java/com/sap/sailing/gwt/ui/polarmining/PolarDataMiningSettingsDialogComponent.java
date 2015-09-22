@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.polarsheets.WindSpeedSteppingConfiguratorPanel;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sse.gwt.client.controls.IntegerBox;

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.polarsheets;
+package com.sap.sailing.gwt.ui.polarmining;
 
 import java.util.ArrayList;
 import java.util.Collections;

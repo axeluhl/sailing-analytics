@@ -9,8 +9,6 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -25,7 +23,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -39,10 +36,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataOperation;
-import com.sap.sailing.polars.aggregation.PolarFixAggregator;
-import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
-import com.sap.sailing.polars.data.PolarFix;
-import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
@@ -137,23 +130,6 @@ public class PolarDataServiceImpl implements PolarDataService,
                     averageSpeedAndCourseOverGround.getConfidence(), null);
         }
         return averageSpeedAndCourseOverGround;
-    }
-
-    @Override
-    public PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
-            Executor executor) throws InterruptedException, ExecutionException {
-        Set<PolarFix> fixes;
-        PolarFixAggregator aggregator = new PolarFixAggregator(new SimplePolarFixRaceInterval(trackedRaces), settings,
-                executor);
-        aggregator.startPolarFixAggregation();
-        fixes = aggregator.getAggregationResultAsSingleList();
-        PolarSheetGenerator generator = new PolarSheetGenerator(fixes, settings);
-        return generator.generate();
-    }
-
-    @Override
-    public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass) {
-        return polarDataMiner.createFullSheetForBoatClass(boatClass);
     }
 
     @Override
