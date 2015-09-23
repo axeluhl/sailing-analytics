@@ -5,7 +5,7 @@ set -o functrace
 # and is used to correctly resolve bundle names
 PROJECT_TYPE="sailing"
 
-find_project_home () 
+find_project_home ()
 {
     if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then
         echo ""
@@ -173,7 +173,7 @@ do
         u) suppress_confirmation=1;;
         v) p2local=1;;
         x) GWT_WORKERS=$OPTARG;;
-        j) TESTCASE_TO_EXECUTE=$OPTARG;; 
+        j) TESTCASE_TO_EXECUTE=$OPTARG;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -306,11 +306,11 @@ MEMORY=4096m
 REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
-     
+
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
-    
+
     cd $PROJECT_HOME
     rm -rf build/*
 
@@ -322,7 +322,7 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     echo "Checking the remote connection..."
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
     echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
-    
+
     `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
     echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
 fi
@@ -654,16 +654,17 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
-        # ./gradlew clean build -xtest | tee -a $START_DIR/build.log
-        # if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        #    exit 100
-        # fi
+
+        mvn -P !with-not-android-relevant,with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            exit 100
+        fi
         if [ $testing -eq 1 ]; then
             echo "Starting JUnit tests..."
-            ./gradlew test | tee -a $START_DIR/build.log
-            if [[ ${PIPESTATUS[0]} != 0 ]]; then
-                exit 103
-            fi
+            # ./gradlew test | tee -a $START_DIR/build.log
+            # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            #    exit 103
+            # fi
             # TODO find a way that the emulator test is stable in hudson
             # adb emu kill
             # echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
@@ -690,9 +691,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             # adb emu kill
             # "$ANDROID" delete avd --name ${AVD_NAME}
         fi
-    else
-        echo "INFO: Deactivating mobile modules"
-        extra="$extra -P !with-mobile"
     fi
 
     if [ $reporting -eq 1 ]; then
@@ -706,7 +704,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
     echo "Maven version used: `mvn --version`"
-    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+    mvn $extra -P with-not-android-relevant,!with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
     # now get the exit status from mvn, and not that of tee which is what $? contains now
     MVN_EXIT_CODE=${PIPESTATUS[0]}
     echo "Maven exit code is $MVN_EXIT_CODE"
@@ -888,13 +886,13 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/logging.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     fi
