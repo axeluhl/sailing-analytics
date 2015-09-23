@@ -27,7 +27,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.LASER_RADIAL, BoatClassMasterdata.LASER_4_7, BoatClassMasterdata.LASER_2,
                 BoatClassMasterdata.CONTENDER,
                 BoatClassMasterdata.FINN, BoatClassMasterdata.MUSTO_SKIFF, BoatClassMasterdata.OPEN_BIC,
-                BoatClassMasterdata.OPTIMIST, BoatClassMasterdata.RS_X, BoatClassMasterdata.STAR);
+                BoatClassMasterdata.OPTIMIST, BoatClassMasterdata.PWA, BoatClassMasterdata.RS_X, BoatClassMasterdata.STAR);
         BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
                 BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,

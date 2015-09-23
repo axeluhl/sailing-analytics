@@ -9,9 +9,6 @@ import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 
 public class BroadcastManager {
-
-    private final static String TAG = BroadcastManager.class.getName();
-
     private static BroadcastManager mInstance;
     private final Context mContext;
     private Queue<Intent> mQueue;
