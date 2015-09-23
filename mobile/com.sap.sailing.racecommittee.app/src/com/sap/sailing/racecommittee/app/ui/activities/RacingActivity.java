@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -404,6 +405,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setOverflowIcon() {
         // Required to set overflow icon
         final String overflowDescription = getString(R.string.abc_action_menu_overflow_description);
@@ -423,6 +425,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
                 Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon, 6, 8);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    overflow.setScaleType(ImageView.ScaleType.FIT_END);
+                }
                 overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
                 // Remove listener on layout
                 removeOnGlobalLayoutListener(decorView, this);

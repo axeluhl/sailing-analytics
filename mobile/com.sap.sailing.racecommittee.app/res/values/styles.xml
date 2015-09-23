@@ -35,9 +35,9 @@
     </style>
 
     <style name="OverFlow" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:minWidth">32dp</item>
-        <item name="android:minHeight">32dp</item>
-        <item name="android:contentDescription">@android:string/unknownName</item>
+        <item name="android:minWidth">@dimen/bigger_over_flow_width</item>
+        <item name="android:minHeight">@dimen/bigger_over_flow_height</item>
+        <item name="android:contentDescription">@string/abc_action_menu_overflow_description</item>
     </style>
 
     <style name="RacingToolBarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
