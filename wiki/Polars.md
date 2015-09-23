@@ -34,11 +34,22 @@ _TODO_
 
 ## Polar Datamining Architecture
 
-_TODO_
+For general information about the Datamining Architecture please see [this wikipage][wiki/wiki/data-mining-architecture].
+
+This section will focus on the polar specific datamining functionality.
+
+At the time of writing there are two different retrieval chains for polar data. One is for displaying the PolarDataService Data which is automatically gathered in the backend. Most classes for that feature contain the word "Backend". It is quite simple and only allows filtering by boat class name.
+
+Most of the classes are for custom polar datamining. In this section we will concentrate on this feature.
 
 ### File Locations / Project Structure
 
-_TODO_
+The project structure sticks to the best practices described [here][wiki/typical-development-scenarios]. There are two bundles:
+com.sap.sailing.polars.datamining and com.sap.sailing.polars.datamining.shared; the latter containing classes that are serializable by the GWT engine.
+
+An Activator registeres the polar datamining functionality with the main datamining server. The data package contains the retrieval data classes, the component package contains retrieval processors and the aggregators package contains the two aggregators.
+
+The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.gwt.ui.polarmining package.
 
 ### Extending the Feature
 
