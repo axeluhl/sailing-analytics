@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
+import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 public class RegattaMediaPlace extends AbstractEventRegattaPlace implements MobileSupport {
     public RegattaMediaPlace(String id, String regattaId) {
@@ -22,7 +22,7 @@ public class RegattaMediaPlace extends AbstractEventRegattaPlace implements Mobi
         return new RegattaMediaPlace(ctx);
     }
 
-    @Prefix(EventPrefixes.RegattaMedia)
+    @Prefix(PlaceTokenPrefixes.RegattaMedia)
     public static class Tokenizer extends AbstractEventPlace.Tokenizer<RegattaMediaPlace> {
 
         @Override

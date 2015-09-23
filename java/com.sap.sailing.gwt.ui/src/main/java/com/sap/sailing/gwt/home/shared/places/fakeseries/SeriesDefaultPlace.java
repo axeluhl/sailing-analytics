@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 
 public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobileVersion {
@@ -15,7 +15,7 @@ public class SeriesDefaultPlace extends AbstractSeriesPlace implements HasMobile
         super(eventUuidAsString);
     }
 
-    @Prefix(EventPrefixes.SeriesDefault)
+    @Prefix(PlaceTokenPrefixes.SeriesDefault)
     public static class Tokenizer extends AbstractSeriesPlace.Tokenizer<SeriesDefaultPlace> {
         @Override
         protected SeriesDefaultPlace getRealPlace(SeriesContext context) {

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.client.place.event;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 public class EventDefaultPlace extends AbstractEventPlace implements HasMobileVersion {
 
@@ -13,7 +14,7 @@ public class EventDefaultPlace extends AbstractEventPlace implements HasMobileVe
         super(eventUuidAsString);
     }
 
-    @Prefix(EventPrefixes.EventDefault)
+    @Prefix(PlaceTokenPrefixes.EventDefault)
     public static class Tokenizer extends AbstractEventPlace.Tokenizer<EventDefaultPlace> {
         @Override
         protected EventDefaultPlace getRealPlace(EventContext context) {

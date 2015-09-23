@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs;
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
+import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace implements MobileSupport {
     public MultiregattaMediaPlace(String id) {
@@ -17,7 +17,7 @@ public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace imple
         super(context);
     }
 
-    @Prefix(EventPrefixes.MultiregattaMedia)
+    @Prefix(PlaceTokenPrefixes.MultiregattaMedia)
     public static class Tokenizer extends AbstractEventPlace.Tokenizer<MultiregattaMediaPlace> {
         @Override
         protected MultiregattaMediaPlace getRealPlace(EventContext context) {

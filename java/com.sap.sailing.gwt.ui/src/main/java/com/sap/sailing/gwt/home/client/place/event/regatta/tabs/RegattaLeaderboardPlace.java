@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
+import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 public class RegattaLeaderboardPlace extends AbstractEventRegattaPlace {
     public RegattaLeaderboardPlace(String id, String regattaId) {
@@ -20,7 +20,7 @@ public class RegattaLeaderboardPlace extends AbstractEventRegattaPlace {
         return new RegattaLeaderboardPlace(ctx);
     }
 
-    @Prefix(EventPrefixes.RegattaLeaderboard)
+    @Prefix(PlaceTokenPrefixes.RegattaLeaderboard)
     public static class Tokenizer extends AbstractEventPlace.Tokenizer<RegattaLeaderboardPlace> {
         @Override
         protected RegattaLeaderboardPlace getRealPlace(EventContext context) {
