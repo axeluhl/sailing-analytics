@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.home.client.place.event.multiregatta;
+package com.sap.sailing.gwt.home.desktop.places.event.multiregatta;
 
-import com.sap.sailing.gwt.home.client.place.event.EventView;
+import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 
 public interface EventMultiregattaView extends EventView<AbstractMultiregattaEventPlace, EventMultiregattaView.Presenter> {
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event;
+package com.sap.sailing.gwt.home.desktop.places.event;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,16 +1,16 @@
-package com.sap.sailing.gwt.home.client.place.event.multiregatta;
+package com.sap.sailing.gwt.home.desktop.places.event.multiregatta;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventActivity;
-import com.sap.sailing.gwt.home.client.place.event.EventClientFactory;
-import com.sap.sailing.gwt.home.client.place.event.EventView;
-import com.sap.sailing.gwt.home.client.place.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.places.event.AbstractEventActivity;
+import com.sap.sailing.gwt.home.desktop.places.event.EventClientFactory;
+import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 
 public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
 
-    private EventMultiregattaView currentView = new TabletAndDesktopEventView();
+    private EventMultiregattaView currentView = new TabletAndDesktopMultiRegattaEventView();
 
     public EventMultiregattaActivity(AbstractMultiregattaEventPlace place, EventClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator) {

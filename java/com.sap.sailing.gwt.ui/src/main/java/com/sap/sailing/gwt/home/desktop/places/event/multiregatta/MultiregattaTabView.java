@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.multiregatta;
+package com.sap.sailing.gwt.home.desktop.places.event.multiregatta;
 
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 
