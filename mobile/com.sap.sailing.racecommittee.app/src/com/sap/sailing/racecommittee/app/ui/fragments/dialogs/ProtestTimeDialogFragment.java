@@ -79,7 +79,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     @Override
-    protected DialogListenerHost getHost() {
+    protected DialogListenerHost getListenerHost() {
         return new DialogListenerHost() {
             @Override
             public DialogResultListener getListener() {

@@ -400,7 +400,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRemoteSailingServerReference(String name);
 
     
-    CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
+    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -473,9 +473,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
-    CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
+    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames);
 
-    CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId);
+    CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds);
 
     /**
      * Returns a mobile device's configuration.
