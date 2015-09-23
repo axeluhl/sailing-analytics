@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places;
+package com.sap.sailing.gwt.home.mobile.app;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
-import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
@@ -21,10 +20,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
- * {@link MainView} will add its content of the target inside the {@code mainContantPanel}.
+ * {@link MobileApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class MainView extends Composite implements ApplicationTopLevelView {
-    interface MyBinder extends UiBinder<Widget, MainView> {
+public class MobileApplicationView extends Composite implements ApplicationTopLevelView {
+    interface MyBinder extends UiBinder<Widget, MobileApplicationView> {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -40,7 +39,7 @@ public class MainView extends Composite implements ApplicationTopLevelView {
     @UiField
     SimplePanel mainContentPanel;
 
-    public MainView(MobilePlacesNavigator placeNavigator, EventBus eventBus) {
+    public MobileApplicationView(MobilePlacesNavigator placeNavigator, EventBus eventBus) {
         headerPanel = new Header(placeNavigator);
         footerPanel = new Footer(placeNavigator);
         initWidget(uiBinder.createAndBindUi(this));

@@ -7,7 +7,6 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
-import com.sap.sailing.gwt.home.mobile.places.MainView;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -40,7 +39,7 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
     }
 
     private MobileApplicationClientFactory(EventBus eventBus, PlaceController placeController, MobilePlacesNavigator navigator) {
-        this(new MainView(navigator, eventBus), eventBus, placeController, navigator);
+        this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator);
     }
 
     public MobileApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
