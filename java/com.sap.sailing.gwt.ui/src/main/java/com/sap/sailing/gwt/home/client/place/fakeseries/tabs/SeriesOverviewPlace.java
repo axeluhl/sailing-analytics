@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
-import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesTabPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 
 public class SeriesOverviewPlace extends AbstractSeriesTabPlace implements HasMobileVersion {
     public SeriesOverviewPlace(String id) {

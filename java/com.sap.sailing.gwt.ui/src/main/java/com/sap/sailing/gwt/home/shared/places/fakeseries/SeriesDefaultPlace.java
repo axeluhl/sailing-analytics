@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries;
+package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;
