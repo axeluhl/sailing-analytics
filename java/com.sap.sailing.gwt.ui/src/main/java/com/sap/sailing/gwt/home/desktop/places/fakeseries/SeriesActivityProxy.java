@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import java.util.UUID;
 

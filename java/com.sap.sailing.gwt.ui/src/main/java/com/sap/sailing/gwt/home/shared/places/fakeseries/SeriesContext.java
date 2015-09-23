@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
-import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
