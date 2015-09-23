@@ -1,11 +1,8 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.home.desktop.places.fakeseries.AbstractSeriesTabPlace;
-import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
-import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;

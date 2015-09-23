@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompeti
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;

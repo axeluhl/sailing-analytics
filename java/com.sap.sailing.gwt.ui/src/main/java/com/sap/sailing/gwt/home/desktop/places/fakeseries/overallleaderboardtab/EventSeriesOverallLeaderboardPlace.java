@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.client.place.event.EventPrefixes;

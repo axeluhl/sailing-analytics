@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -14,15 +14,16 @@ import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class EventSeriesLeaderboardTabView extends SharedLeaderboardEventSeriesTabView<EventSeriesOverallLeaderboardPlace> {
+public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEventSeriesTabView<EventSeriesOverallLeaderboardPlace> {
 
-    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesLeaderboardTabView> {
+    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesOverallLeaderboardTabView> {
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
@@ -32,7 +33,7 @@ public class EventSeriesLeaderboardTabView extends SharedLeaderboardEventSeriesT
     @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
-    public EventSeriesLeaderboardTabView() {
+    public EventSeriesOverallLeaderboardTabView() {
         leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
 

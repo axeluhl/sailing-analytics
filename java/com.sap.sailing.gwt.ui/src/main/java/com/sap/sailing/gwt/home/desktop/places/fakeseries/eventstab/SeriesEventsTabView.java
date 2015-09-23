@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.fakeseries.tabs;
+package com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

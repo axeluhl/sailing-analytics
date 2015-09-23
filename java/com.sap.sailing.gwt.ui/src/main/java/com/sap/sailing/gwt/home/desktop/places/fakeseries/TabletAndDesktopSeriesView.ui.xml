@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
 	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
-	xmlns:t="urn:import:com.sap.sailing.gwt.home.client.place.fakeseries.tabs">
+	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.fakeseries">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="tm" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
   <ui:style>
@@ -43,16 +43,16 @@
         <dp:seriesheader.SeriesHeader ui:field="seriesHeader" />
       </c:header>
       <c:tabcontent title="{i18n.events}">
-        <t:SeriesEventsTabView />
+        <s:eventstab.SeriesEventsTabView />
       </c:tabcontent>
       <c:tabcontent title="{tm.overallLeaderboard}">
-        <t:EventSeriesLeaderboardTabView />
+        <s:overallleaderboardtab.EventSeriesOverallLeaderboardTabView />
       </c:tabcontent>
       <c:tabcontent title="{tm.regattaLeaderboards}">
-        <t:EventSeriesLeaderboardsTabView />
+        <s:leaderboardstab.EventSeriesLeaderboardsTabView />
       </c:tabcontent>
       <c:tabcontent title="{i18n.competitorsAnalytics}">
-        <t:EventSeriesCompetitorAnalyticsTabView />
+        <s:analyticstab.EventSeriesCompetitorAnalyticsTabView />
       </c:tabcontent>
     </c:TabPanel>
   </g:HTMLPanel>
