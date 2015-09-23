@@ -13,6 +13,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogStartOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
@@ -34,12 +41,42 @@ public class TrackingTimesEventSerializerTest {
         return new RaceLogEndOfTrackingEventSerializer(createCompetitorSerializer());
     }
 
+    private JsonDeserializer<RaceLogEvent> createStartOfTrackingEventDeserializer() {
+        return new RaceLogStartOfTrackingEventDeserializer(createCompetitorDeserializer());
+    }
+
+    private JsonDeserializer<Competitor> createCompetitorDeserializer() {
+        return new CompetitorJsonDeserializer(DomainFactory.INSTANCE.getCompetitorStore());
+    }
+
+    private JsonDeserializer<RaceLogEvent> createEndOfTrackingEventDeserializer() {
+        return new RaceLogEndOfTrackingEventDeserializer(createCompetitorDeserializer());
+    }
+
     private CompetitorJsonSerializer createCompetitorSerializer() {
         return new CompetitorJsonSerializer(new TeamJsonSerializer(
                 new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(
                 new BoatClassJsonSerializer()));
     }
 
+    @Test
+    public void testNullStartOfTrackingTimeAttributeDeserialization() throws JsonDeserializationException {
+        final RaceLogStartOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createStartOfTrackingEvent(/* startOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
+        RaceLogEvent deserialized = createStartOfTrackingEventDeserializer().deserialize(json);
+        assertNull(deserialized.getLogicalTimePoint());
+    }
+    
+    @Test
+    public void testNullEndOfTrackingTimeAttributeDeserialization() throws JsonDeserializationException {
+        final RaceLogEndOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createEndOfTrackingEvent(/* endOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
+        RaceLogEvent deserialized = createEndOfTrackingEventDeserializer().deserialize(json);
+        assertNull(deserialized.getLogicalTimePoint());
+    }
+    
     @Test
     public void testNullStartOfTrackingTimeAttribute() {
         final RaceLogStartOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createStartOfTrackingEvent(/* startOfTracking */null,
