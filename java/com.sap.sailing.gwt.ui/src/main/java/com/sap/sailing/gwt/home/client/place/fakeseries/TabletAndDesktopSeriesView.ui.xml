@@ -57,9 +57,6 @@
       <c:tabcontent title="{i18n.competitorsAnalytics}">
         <t:EventSeriesCompetitorAnalyticsTabView />
       </c:tabcontent>
-      <c:tabcontent title="{i18n.media}">
-        <t:SeriesMediaTabView />
-      </c:tabcontent>
     </c:TabPanel>
   </g:HTMLPanel>
 </ui:UiBinder> 

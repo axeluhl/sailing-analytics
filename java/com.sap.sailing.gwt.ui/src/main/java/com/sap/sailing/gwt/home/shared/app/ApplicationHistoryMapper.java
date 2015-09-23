@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetit
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
@@ -50,17 +49,14 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
         RegattaMediaPlace.Tokenizer.class,
         // Fake series places:
         SeriesDefaultPlace.Tokenizer.class,
-        RegattaOverviewPlace.Tokenizer.class,
         SeriesEventsPlace.Tokenizer.class,
         EventSeriesCompetitorAnalyticsPlace.Tokenizer.class,
         EventSeriesOverallLeaderboardPlace.Tokenizer.class,
         EventSeriesLeaderboardsPlace.Tokenizer.class,
-        SeriesMediaPlace.Tokenizer.class,
         // Mobile only places:
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class
-
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }
