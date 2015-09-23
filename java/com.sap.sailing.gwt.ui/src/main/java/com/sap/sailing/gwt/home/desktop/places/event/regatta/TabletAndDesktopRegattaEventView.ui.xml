@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
 		xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
-		xmlns:t="urn:import:com.sap.sailing.gwt.home.client.place.event.regatta.tabs">
+		xmlns:e="urn:import:com.sap.sailing.gwt.home.desktop.places.event.regatta">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:style>
 		.header {
@@ -43,19 +43,19 @@
 				<dp:eventheader.EventHeader ui:field="eventHeader" />
 			</c:header>
  			<c:tabcontent title="{i18n.overview}">
- 				<t:RegattaOverviewTabView />
+ 				<e:overviewtab.RegattaOverviewTabView />
  			</c:tabcontent>
 			<c:tabcontent title="{i18n.races}">
-				<t:RegattaRacesTabView />
+				<e:racestab.RegattaRacesTabView />
 			</c:tabcontent>
 			<c:tabcontent title="{i18n.leaderboard}">
-				<t:RegattaLeaderboardTabView />
+				<e:leaderboardtab.RegattaLeaderboardTabView />
 			</c:tabcontent>
 			<c:tabcontent title="{i18n.competitorsAnalytics}">
-				<t:RegattaCompetitorAnalyticsTabView />
+				<e:analyticstab.RegattaCompetitorAnalyticsTabView />
 			</c:tabcontent>
 			<c:tabcontent title="{i18n.media}">
-				<t:RegattaMediaTabView />
+				<e:mediatab.RegattaMediaTabView />
 			</c:tabcontent>
 		</c:TabPanel>
 	</g:HTMLPanel>

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
+package com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -15,8 +15,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
@@ -31,6 +29,8 @@ import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigatio
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.regattanavigation.RaceStateLegend;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;

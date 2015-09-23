@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta;
+package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -27,11 +27,11 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
-public class TabletAndDesktopEventView extends Composite implements EventRegattaView {
+public class TabletAndDesktopRegattaEventView extends Composite implements EventRegattaView {
     
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
 
-    interface MyBinder extends UiBinder<Widget, TabletAndDesktopEventView> {
+    interface MyBinder extends UiBinder<Widget, TabletAndDesktopRegattaEventView> {
     }
     
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -43,7 +43,7 @@ public class TabletAndDesktopEventView extends Composite implements EventRegatta
     
     private Presenter currentPresenter;
 
-    public TabletAndDesktopEventView() {
+    public TabletAndDesktopRegattaEventView() {
     }
 
     @Override

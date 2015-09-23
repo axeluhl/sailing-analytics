@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
+package com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,11 +16,12 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.client.place.event.regatta.EventRegattaView.Presenter;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;

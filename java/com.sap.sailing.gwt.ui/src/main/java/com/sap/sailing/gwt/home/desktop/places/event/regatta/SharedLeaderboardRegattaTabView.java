@@ -1,11 +1,8 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta.tabs;
+package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
-import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;

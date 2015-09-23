@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event.regatta;
+package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
