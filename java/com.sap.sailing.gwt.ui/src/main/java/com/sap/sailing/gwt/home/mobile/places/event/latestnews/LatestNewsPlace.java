@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class LatestNewsPlace extends AbstractEventPlace implements HasMobileVersion {

@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 

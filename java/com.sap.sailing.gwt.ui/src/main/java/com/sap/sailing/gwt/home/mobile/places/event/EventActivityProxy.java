@@ -4,8 +4,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
@@ -20,6 +18,8 @@ import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderbo
 import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.regatta.RegattaActivity;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;

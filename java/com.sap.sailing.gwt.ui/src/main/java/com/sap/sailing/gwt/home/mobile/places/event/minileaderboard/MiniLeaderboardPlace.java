@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.home.mobile.places.event.minileaderboard;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 
 public class MiniLeaderboardPlace extends AbstractEventRegattaPlace implements HasLocationTitle, HasMobileVersion {
     public MiniLeaderboardPlace(String id, String regattaId) {

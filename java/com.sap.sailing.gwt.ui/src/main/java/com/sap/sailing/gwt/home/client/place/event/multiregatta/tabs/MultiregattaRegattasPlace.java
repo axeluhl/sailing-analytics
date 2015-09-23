@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 
 public class MultiregattaRegattasPlace extends AbstractMultiregattaEventPlace {
     public MultiregattaRegattasPlace(String id) {

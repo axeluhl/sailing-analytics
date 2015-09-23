@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs;
 
 import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
 import com.sap.sailing.gwt.home.client.place.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 
 public class MultiregattaMediaPlace extends AbstractMultiregattaEventPlace implements MobileSupport {
     public MultiregattaMediaPlace(String id) {

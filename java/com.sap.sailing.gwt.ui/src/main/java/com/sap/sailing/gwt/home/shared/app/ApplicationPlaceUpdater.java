@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
@@ -16,6 +14,8 @@ import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlac
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeriesCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;

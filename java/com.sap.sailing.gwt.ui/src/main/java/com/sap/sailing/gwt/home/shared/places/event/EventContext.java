@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.place.event;
+package com.sap.sailing.gwt.home.shared.places.event;
 
 import com.sap.sailing.gwt.home.client.place.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
