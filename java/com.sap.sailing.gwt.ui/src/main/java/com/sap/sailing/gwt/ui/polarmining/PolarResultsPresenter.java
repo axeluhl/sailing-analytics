@@ -45,7 +45,22 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-
+/**
+ * Allows presentation of {@link PolarAggregation} data.
+ * 
+ * </br></br>
+ * 
+ * Contains a polar chart on the left displaying the actual polar diagram and two histograms on the right. The upper
+ * histogram shows datacount over angle and the second one shows datacount over windrange upon clicking a point in the
+ * polar chart.
+ * 
+ * </br></br>
+ * 
+ * Used in conjunction with the datamining framework.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;

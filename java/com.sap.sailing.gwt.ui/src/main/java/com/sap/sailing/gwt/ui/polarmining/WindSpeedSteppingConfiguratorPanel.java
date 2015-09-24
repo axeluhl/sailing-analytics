@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 /**
  * A Panel which allows the user to configure a {@link WindSpeedStepping}.
  * 
- * @author d054528 Frederik Petersen
+ * @author D054528 (Frederik Petersen)
  *
  */
 public class WindSpeedSteppingConfiguratorPanel extends HorizontalPanel {

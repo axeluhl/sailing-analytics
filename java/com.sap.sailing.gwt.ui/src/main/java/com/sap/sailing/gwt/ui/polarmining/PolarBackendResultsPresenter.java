@@ -31,7 +31,16 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-
+/**
+ * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
+ * x-y-linecharts that show speed and angle over windspeed regressions.
+ * 
+ * </br></br>
+ * Used in conjunction with the datamining framework.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     private final DockLayoutPanel dockLayoutPanel;

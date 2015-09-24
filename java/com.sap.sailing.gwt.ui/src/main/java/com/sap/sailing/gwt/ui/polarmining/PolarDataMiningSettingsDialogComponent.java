@@ -15,6 +15,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * Provides a widget for configuring {@link PolarDataMiningSettings}, including validation.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataMiningSettingsDialogComponent implements SettingsDialogComponent<PolarDataMiningSettings> {
 
     private PolarDataMiningSettings settings;

@@ -4,6 +4,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
+/**
+ * Allows validation of {@link PolarDataMiningSettings}, such that confidence values are not <0 or >1 and so on.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataMiningSettingsValidator implements Validator<PolarDataMiningSettings> {
 
     private final StringMessages stringMessages;
