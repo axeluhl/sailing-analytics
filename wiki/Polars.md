@@ -149,3 +149,17 @@ We could use Axels replication framework. It would allow for a more flexible app
 ### Hard Coded Polars
 
 Some suggested it would be okay to just read out the polars of the archive and hard-code them into the server as an initial polar state, that is then changed by new incoming data. That is a very static approach and defeats the dynamic nature of the whole polar approach but it is very simple to do.
+
+## Other Approaches
+
+Some short notes on other approaches for gathering polar data.
+
+### Manual Polars
+
+We tried creating a tool that allows an expert to gather data for manually creating polars. The development of this tool was triggered by Marcus from STG.
+
+For a given set of races the main algorithm finds situations where two boats on different hulls pass each other closely (locationwise). It then presents these results to the user and the user can have a closer look and decide if this data should be added to the aggregation.
+
+The problem with this approach is that it is a lot of work to get together a set of data that is not tiny. It is also unclear what to do with the data afterwards.
+
+The tool hasn't really been used in production and thus the code has not been merged into the master branch. It resides on the branch marcus-polars.
