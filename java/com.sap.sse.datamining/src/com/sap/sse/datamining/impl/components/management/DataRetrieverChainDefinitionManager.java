@@ -6,12 +6,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 
 public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
 
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedBySourceType;
     private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedByDataType;
     private final Map<UUID, DataRetrieverChainDefinition<?, ?>> chainDefinitionsMappedByID;
@@ -25,12 +27,22 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     @Override
     public boolean register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         if (chainDefinitionsMappedByID.containsKey(dataRetrieverChainDefinition.getID())) {
+            logger.info("Can't register the data retriever chain definition " + dataRetrieverChainDefinition +
+                        ", because there's allready a definition registered for the ID " + dataRetrieverChainDefinition.getID());
             return false;
         }
         
         registerToBySourceTypeMap(dataRetrieverChainDefinition);
         registerToByDataTypeMap(dataRetrieverChainDefinition);
-        chainDefinitionsMappedByID.put(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition);
+        DataRetrieverChainDefinition<?, ?> previousDefinition = chainDefinitionsMappedByID.put(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition);
+        if (previousDefinition == null) {
+            logger.info("Registering the data retriever chain definition " + dataRetrieverChainDefinition +
+                        " for the ID " + dataRetrieverChainDefinition.getID());
+        } else {
+            logger.info("Registering the data retriever chain definition " + dataRetrieverChainDefinition +
+                        " for the ID " + dataRetrieverChainDefinition.getID() +
+                        " replacing " + previousDefinition);
+        }
         return true;
     }
     
@@ -44,7 +56,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
 
     private void registerToByTypeMap(Class<?> key, Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> byTypeMap, DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         if (!byTypeMap.containsKey(key)) {
-            byTypeMap.put(key, new HashSet<DataRetrieverChainDefinition<?,?>>());
+            byTypeMap.put(key, new HashSet<DataRetrieverChainDefinition<?, ?>>());
         }
         byTypeMap.get(key).add(dataRetrieverChainDefinition);
     }
@@ -53,7 +65,17 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     public boolean unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         unregisterFromBySourceTypeMap(dataRetrieverChainDefinition);
         unregisterFromByDataTypeMap(dataRetrieverChainDefinition);
-        return chainDefinitionsMappedByID.remove(dataRetrieverChainDefinition.getID()) != null;
+        DataRetrieverChainDefinition<?, ?> removedDefinition = chainDefinitionsMappedByID.remove(dataRetrieverChainDefinition.getID());
+        
+        if (removedDefinition != null) {
+            logger.info("Unregistering the data retriever chain definition " + dataRetrieverChainDefinition +
+                        " for the ID " + dataRetrieverChainDefinition.getID());
+            return true;
+        } else {
+            logger.info("Can't unregister the data retriever chain definition " + dataRetrieverChainDefinition +
+                        ", because there's no definition registered for the ID" + dataRetrieverChainDefinition.getID());
+            return false;
+        }
     }
     
     private void unregisterFromBySourceTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
@@ -71,13 +93,13 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     }
     
     @Override
-    public Collection<DataRetrieverChainDefinition<?, ?>> getAll() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> getAll() {
         return new HashSet<>(chainDefinitionsMappedByID.values());
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType> Collection<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
+    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
             Class<DataSourceType> dataSourceType) {
         return chainDefinitionsMappedBySourceType.containsKey(dataSourceType) ? 
                (Collection<DataRetrieverChainDefinition<DataSourceType, ?>>)(Collection<?>) 
@@ -87,7 +109,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataType> Collection<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> dataType) {
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> dataType) {
         return chainDefinitionsMappedByDataType.containsKey(dataType) ?
                (Collection<DataRetrieverChainDefinition<?, DataType>>)(Collection<?>)
                new HashSet<>(chainDefinitionsMappedByDataType.get(dataType)) :
@@ -96,7 +118,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
 
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType, DataType> Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
+    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
         Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> dataRetrieverChainDefinitions = new HashSet<>();
         for (DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition : getBySourceType(dataSourceType)) {

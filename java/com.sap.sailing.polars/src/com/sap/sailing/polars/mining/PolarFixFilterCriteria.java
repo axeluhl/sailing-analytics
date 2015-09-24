@@ -22,27 +22,33 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
+/**
+ * Contains several filter criteria for incoming fixes concerning their validity for the polar aggregation.
+ * 
+ * It is used in the backend polar mining pipeline.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
-    
+
     private static final Logger logger = Logger.getLogger(PolarFixFilterCriteria.class.getName());
-    
+
     /**
-     * 0 if every competitor should be included.
-     * 1 if only the leading competitor should be included and so on.
+     * 0 if every competitor should be included. 1 if only the leading competitor should be included and so on.
      */
     private final double pctOfLeadingCompetitorsToInclude;
 
     /**
      * 
-     * @param pctOfLeadingCompetitorsToInclude 
-     *                          0 if only first competitor should be included.<br \>
-     *                          0.1 if the best 10% should be included
-     *                          1 if every competitor should be included
+     * @param pctOfLeadingCompetitorsToInclude
+     *            0 if only first competitor should be included.<br \>
+     *            0.1 if the best 10% should be included 1 if every competitor should be included
      */
     public PolarFixFilterCriteria(double pctOfLeadingCompetitorsToInclude) {
         this.pctOfLeadingCompetitorsToInclude = pctOfLeadingCompetitorsToInclude;
     }
-    
+
     public PolarFixFilterCriteria() {
         this.pctOfLeadingCompetitorsToInclude = 0;
     }
@@ -61,8 +67,9 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
             isInLeadingCompetitors = isInLeadingCompetitors(element.getRace(), element.getCompetitor(),
                     pctOfLeadingCompetitorsToInclude);
         }
-        boolean isValid = importantDataIsNotNull && afterStartTime && beforeFinishTime && noDirectionChange && isInLeadingCompetitors;
-        if (/*Remove boolean for logging of weird input into polar service*/Boolean.FALSE && isValid) {
+        boolean isValid = importantDataIsNotNull && afterStartTime && beforeFinishTime && noDirectionChange
+                && isInLeadingCompetitors;
+        if (/* Remove boolean for logging of weird input into polar service */Boolean.FALSE && isValid) {
             checkForAbnormalFixesAndLog(element);
         }
         return isValid;
@@ -102,8 +109,9 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         }
         return result;
     }
-    
-    public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor, double numberOfLeadingCompetitorsToInclude) {
+
+    public static boolean isInLeadingCompetitors(TrackedRace trackedRace, Competitor competitor,
+            double numberOfLeadingCompetitorsToInclude) {
         boolean result;
         if (!trackedRace.isLive(new MillisecondsTimePoint(System.currentTimeMillis()))) {
             result = isInLeadingCompetitorsForReplayRace(trackedRace, competitor, numberOfLeadingCompetitorsToInclude);
@@ -157,7 +165,8 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         return result;
     }
 
-    private static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor, double pctOfLeadingCompetitorsToInclude) {
+    private static boolean isInLeadingCompetitorsForReplayRace(TrackedRace trackedRace, Competitor competitor,
+            double pctOfLeadingCompetitorsToInclude) {
         boolean result = false;
         Waypoint lastWaypoint = trackedRace.getRace().getCourse().getLastWaypoint();
         if (lastWaypoint != null) {
@@ -221,7 +230,8 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         return isAfterStart;
     }
 
-    private TimePoint calculateStartTime(TrackedRace race, Competitor competitor) throws CompetitorDidNotStartYetException {
+    private TimePoint calculateStartTime(TrackedRace race, Competitor competitor)
+            throws CompetitorDidNotStartYetException {
         MarkPassing startPassing = race.getMarkPassing(competitor, race.getRace().getCourse().getFirstWaypoint());
         if (startPassing == null) {
             throw new CompetitorDidNotStartYetException();
@@ -236,7 +246,7 @@ public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithP
         }
         return startTime;
     }
-    
+
     private class CompetitorDidNotStartYetException extends Exception {
         private static final long serialVersionUID = 7906688735433666009L;
     }

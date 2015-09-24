@@ -2,10 +2,10 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Locale;
 
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 

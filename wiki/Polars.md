@@ -14,7 +14,7 @@ It's important to understand that we have two different approaches for gathering
 
 ### Custom Polars (Datamining)
 
-Custom Polars can be generated in the datamining UI. You can choose filters and groupings as you desire and fire a query at the server. The server than applies these settings and returns your custom polar diagram with some additional information like underlying data sizes. The focus in this approach lies on the configurability of the query to give the user a lot of power to answer the questions they ask concerning polars. Example: You want to compare the polars of the winner of a race with the polars of the sailor who finished last. You can do that with the datamining tools. A more detailed description on how to use the polar datamining features can be found [here](#Using-the-Datamining-UI-for-Polars).
+Custom Polars can be generated in the datamining UI. You can choose filters and groupings as you desire and fire a query at the server. The server than applies these settings and returns your custom polar diagram with some additional information like underlying data sizes. The focus in this approach lies on the configurability of the query to give the user a lot of power to answer the questions they ask concerning polars. Example: You want to compare the polars of the winner of a race with the polars of the sailor who finished last. You can do that with the datamining tools. A more detailed description on how to use the polar datamining features can be found [here](#polars_using-the-datamining-ui-for-polars).
 
 What the polar datamining feature is **not**: It is not very fast for big queries and shouldn't be used (at least as is) for automated queries that are used in real time features. It is not optimized for that purpose. For those kind of things we provide a designated Backend API called *PolarDataService*.
 
@@ -22,7 +22,7 @@ What the polar datamining feature is **not**: It is not very fast for big querie
 
 The PolarDataService is a backend API providing access to polar data that is gathered on the backend. The data structures and aggregation is designed for fast responses and real time usage. The PolarDataService is registered as an OSGi Service and can be used very independently (you only need a dependency to com.sap.sailing.domain). You can for example ask the PolarDataService for an estimated speed and beatangle for a given boatclass, windspeed and legtype (upwind or downwind) or for an estimated speed for a given boatclass, windspeed and beatangle (e.g. for reaching legs). To be light memorywise, the backend structures don't save a lot of additional data, so it does not provide any custom filtering.
 
-For more information on how to use the PolarDataService, please see [this section](#Using-the-PolarDataService).
+For more information on how to use the PolarDataService, please see [this section](#polars_using-the-polardataservice).
 
 ## Using the Datamining UI for Polars
 
@@ -34,7 +34,7 @@ _TODO_
 
 ## Polar Datamining Architecture
 
-For general information about the Datamining Architecture please see [this wikipage][wiki/wiki/data-mining-architecture].
+For general information about the Datamining Architecture please see [this wikipage](wiki/wiki/data-mining-architecture).
 
 This section will focus on the polar specific datamining functionality.
 
@@ -44,7 +44,7 @@ Most of the classes are for custom polar datamining. In this section we will con
 
 ### File Locations / Project Structure
 
-The project structure sticks to the best practices described [here][wiki/typical-development-scenarios]. There are two bundles:
+The project structure sticks to the best practices described [here](wiki/typical-development-scenarios). There are two bundles:
 com.sap.sailing.polars.datamining and com.sap.sailing.polars.datamining.shared; the latter containing classes that are serializable by the GWT engine.
 
 An Activator registeres the polar datamining functionality with the main datamining server. The data package contains the retrieval data classes, the component package contains retrieval processors and the aggregators package contains the two aggregators.
@@ -53,7 +53,10 @@ The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.
 
 ### Extending the Feature
 
-_TODO_
+The feature can be extended by adding dimensions to the types in the polar.datamining bundle.
+This dimensions then serve as a new option in filtering and grouping.
+
+How that works is displayed [here](wiki/typical-development-scenarios).
 
 ### Known Issues
 
@@ -62,7 +65,7 @@ _TODO_
 
 ## PolarDataService Architecture
 
-The PolarDataService is an OSGi Service. The interface lives in com.sap.sailing.domain. Information on how to use the service is provided in [this section](#Using-the-PolarDataService).
+The PolarDataService is an OSGi Service. The interface lives in com.sap.sailing.domain. Information on how to use the service is provided in [this section](#polars_using-the-polardataservice).
 
 This section is addressed at developers who desire to understand the implementation of the service and how it gathers polar data automatically.
 
@@ -104,5 +107,19 @@ It can do online any order regressions with least squares and has optimizations 
 "Bug 2563 - Support replication of polar data service" states the need for interserver communication when it comes to the polars that reside in the backend. The standard event scenario is that we have one event server for each ongoing event and the archive server for the past events. We still want to be able to access polar data of the past when being on the live server. This is obvious when we think about the presentation of the simulator at a live event. It will not work very well in the beginning of the event when no races are loaded yet. Thus it would be great to have the archive data available. Multiple approaches have been discussed and I will list them here trying to sort them descending by feasability.
 
 ### System.properties
-### Replication
+
+We could just let the admin specify a System Property that is read by the polar bundle upon start. The system property should contain a URL to a remote server where polars are available. (E.g. the archive server). The bundle then requests the current polar aggregation from the remote server. If successful it will set this aggregation as the initial aggregation in it. If unsuccessful the server will start with empty containers.
+
+This would be quite simple to implement (as opposed to multiway replication) and still be sufficient for the typical event + archive scenario.
+
 ### Manual Import
+
+The manual import approach is pretty similar to the System.properties approach, but as opposed to defining a system property, the admin could import the polars during the run time of the server similar to the Master Data Import feature. There are some problems with that approach, since merging of to non-empty aggregations in non-trivial and also a UI would have to be created.
+
+### Replication
+
+We could use Axels replication framework. It would allow for a more flexible approach, but a lot of work would have to be done to allow replication in that direction and between multiple servers that are not in a master-replica-configuration.
+
+### Hard Coded Polars
+
+Some suggested it would be okay to just read out the polars of the archive and hard-code them into the server as an initial polar state, that is then changed by new incoming data. That is a very static approach and defeats the dynamic nature of the whole polar approach but it is very simple to do.

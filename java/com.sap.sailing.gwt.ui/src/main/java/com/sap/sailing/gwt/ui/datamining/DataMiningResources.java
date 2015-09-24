@@ -17,4 +17,7 @@ public interface DataMiningResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/plusicon_small.png")
     ImageResource plusIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/magnifier_small.png")
+    ImageResource searchIcon();
+
 }

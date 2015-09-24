@@ -10,12 +10,9 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public abstract class AbstractCluster<ElementType> implements Cluster<ElementType> {
 
-    private static final long serialVersionUID = 1606840566021644768L;
-    private final String messageKey;
     private Collection<ClusterBoundary<ElementType>> boundaries;
 
-    public AbstractCluster(String messageKey, Collection<ClusterBoundary<ElementType>> boundaries) {
-        this.messageKey = messageKey;
+    public AbstractCluster(Collection<ClusterBoundary<ElementType>> boundaries) {
         this.boundaries = new ArrayList<>(boundaries);
     }
     
@@ -35,15 +32,15 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
     }
     
     @Override
-    public String getAsLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages) {
-        return stringMessages.get(locale, messageKey) + " " + getBoundariesAsString();
+    public String asLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages) {
+        return getBoundariesAsString();
     }
     
     protected abstract String getBoundariesAsString();
     
     @Override
     public String toString() {
-        return messageKey + " " + getBoundariesAsString();
+        return getBoundariesAsString();
     }
 
     protected Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
@@ -55,7 +52,6 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
         final int prime = 31;
         int result = 1;
         result = prime * result + ((boundaries == null) ? 0 : boundaries.hashCode());
-        result = prime * result + ((messageKey == null) ? 0 : messageKey.hashCode());
         return result;
     }
 
@@ -72,11 +68,6 @@ public abstract class AbstractCluster<ElementType> implements Cluster<ElementTyp
             if (other.boundaries != null)
                 return false;
         } else if (!boundaries.equals(other.boundaries))
-            return false;
-        if (messageKey == null) {
-            if (other.messageKey != null)
-                return false;
-        } else if (!messageKey.equals(other.messageKey))
             return false;
         return true;
     }

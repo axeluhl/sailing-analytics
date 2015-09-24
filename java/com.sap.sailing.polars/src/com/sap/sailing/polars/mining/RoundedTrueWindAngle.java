@@ -2,6 +2,14 @@ package com.sap.sailing.polars.mining;
 
 import com.sap.sailing.domain.common.Bearing;
 
+/**
+ * Rounds a {@link Bearing} and provides {@link #hashCode()} and {@link #equals(Object)} methods.
+ * 
+ * (Basically an Integer class, but handles rounding in constructor).
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class RoundedTrueWindAngle {
 
     private final int angleDeg;

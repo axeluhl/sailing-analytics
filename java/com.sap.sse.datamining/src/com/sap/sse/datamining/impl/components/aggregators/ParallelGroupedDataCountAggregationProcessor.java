@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.data.Unit;
 
 public class ParallelGroupedDataCountAggregationProcessor
                 extends AbstractParallelGroupedDataAggregationProcessor<Object, Number> {

@@ -35,7 +35,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         
         allData = new ArrayList<ContentType>();
         
-        table = new CellTable<>();
+        table = new CellTable<>(Integer.MAX_VALUE);
         table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);
@@ -176,8 +176,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         }
     }
 
-    public Collection<ContentType> getSelection() {
-        return selectionModel.getSelectedSet();
+    public HashSet<ContentType> getSelection() {
+        return new HashSet<>(selectionModel.getSelectedSet());
     }
 
     public void setSelection(Iterable<?> elements, boolean notifyListenersWhenSelectionChanged) {

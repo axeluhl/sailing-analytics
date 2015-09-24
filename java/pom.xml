@@ -23,6 +23,7 @@
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
     <module>com.sap.sse.datamining</module>
+    <module>com.sap.sse.datamining.annotations</module>
     <module>com.sap.sse.datamining.shared</module>
     <module>com.sap.sse.security</module>
     <module>com.sap.sse.security.common</module>
@@ -133,6 +134,8 @@
     <module>com.sap.sailing.autoload</module>
     <module>com.sap.sailing.feature.p2build</module>
     <module>com.sap.sailing.polars</module>
+	<module>com.sap.sailing.polars.datamining</module>
+	<module>com.sap.sailing.polars.datamining.shared</module>
     <module>com.sap.sailing.polars.test</module>
     <!--
     com.sap.sailing.targetplatform.base
