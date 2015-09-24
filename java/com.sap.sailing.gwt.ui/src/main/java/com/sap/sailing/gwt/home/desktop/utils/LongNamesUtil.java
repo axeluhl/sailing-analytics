@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.client.shared;
+package com.sap.sailing.gwt.home.desktop.utils;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -6,18 +6,9 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 /**
  * A utility class for handling long names
  * @author Frank
- *
  */
 public class LongNamesUtil {
     private static String NAME_SPLIT_RULE1 = " - ";
-
-    public static String shortenLongName(String name, int maxLength) {
-        String result = name;
-        if (name.length() > maxLength) {
-            name = name.substring(0, maxLength - 3) + "...";
-        }
-        return result;
-    }
 
     public static SafeHtml breakLongName(String name) {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -37,23 +28,6 @@ public class LongNamesUtil {
             builder.appendEscaped("");
         }
         return builder.toSafeHtml();
-    }
-
-    /**
-     * Temp -> remove as soon as we have a display name for a leaderboardGroup
-     */
-    public static String shortenLeaderboardGroupName(String eventName, String leaderboardGroupName) {
-        String result = leaderboardGroupName;
-        if (result.startsWith(eventName) && !eventName.equals(leaderboardGroupName)) {
-            result = result.substring(eventName.length(), result.length());
-            result = result.trim();
-
-            if (result.startsWith("-") || result.startsWith("/")) {
-                result = result.substring(1, result.length());
-                result = result.trim();
-            }
-        }
-        return result;
     }
 
 }
