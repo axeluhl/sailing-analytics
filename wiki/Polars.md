@@ -26,7 +26,25 @@ For more information on how to use the PolarDataService, please see [this sectio
 
 ## Using the Datamining UI for Polars
 
-_TODO_
+There are two different data retriever chains that can be used for viewing polars. One of them ("Polars") supports the actual datamining approach with custom filtering and grouping and the queries that run on the server can be very time-intensive. The other one ("Backend Polars") can only be used to look at the data that is aggregated on the backend automatically. The latter option doesn't allow filtering or grouping apart from the boat class. The feature is mostly intended for developers that use or want to use the PolarDataService and want to have a preview for how the data looks, that they get when they use the service.
+
+### Polars
+
+When generating custom polars you can use the settings button in the UI to configure some settings. Most of them have tooltips that explain them in some more detail. After changing the settings, all filters and grouping has to be reconfigured. This is due to the fact that some of the settings actually affect the possible values of the filters. One example for it is the wind range that you can define in the settings.
+
+It makes a lot of sense to the wind range as a grouping dimension. It is allowed not to do it, but in most cases it will generate a useless diagram, since data from a lot of different wind speeds is averaged and thus mixed with each other.
+
+It is important to use the Polars Aggregator (and not Count which is a standard Datamining Aggregator which just counts the elements).
+
+When you run the query be aware, that it can take some time depending on your filtering options and the amount (and size) of races loaded. This is mostly due to wind computation in the backend. Maybe this can be optimized in the future.
+
+#### Presentation
+
+The data is presented in three charts. On the left you find the main polar chart that presents the polar diagrams as grouped. On the upper right there is a histogram that shows the underlying dataCount per Angle. Upon showing and hiding chart series in the polar chart, the connected histograms also show and hide.
+
+The third chart is empty when first shown. It can show how the data for one single point in the polar chart is distributed over the underlying wind range. Just click a point in the polar chart to show that data. When clicking another point, the old data will be hidden and only the data for the new point is shown.
+
+### Backend Polars
 
 ## Using the PolarDataService
 
