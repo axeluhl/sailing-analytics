@@ -86,8 +86,7 @@ How that works is displayed [here](/wiki/typical-data-mining-scenarios).
 
 ### Known Issues
 
-* Bug 3055 - Tooltip at Polarsheets Histogramm disappears
-* Bug 3056 - Polar Sheets Histogram shows average value for number of data points
+none right now
 
 ## PolarDataService Architecture
 
