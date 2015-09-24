@@ -1,5 +1,6 @@
 package com.sap.sailing.manage2sail.resultimport.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,11 +13,12 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
+import com.sap.sailing.competitorimport.CompetitorDescriptor;
 import com.sap.sailing.manage2sail.resultimport.AbstractManage2SailProvider;
-import com.sap.sailing.manage2sail.resultimport.CompetitorDescriptor;
 import com.sap.sailing.manage2sail.resultimport.CompetitorImporter;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
+import com.sap.sse.common.Util;
 
 public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
@@ -24,7 +26,11 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON)));
         final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
-        final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors();
+        final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", null); // get competitors for all regattas in event
         assertNotNull(competitorDescriptors);
+        assertEquals(418, Util.size(competitorDescriptors));
+        final Iterable<CompetitorDescriptor> competitorDescriptors29er = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", "29er"); // get competitors only for 29er regatta
+        assertNotNull(competitorDescriptors29er);
+        assertEquals(134, Util.size(competitorDescriptors29er));
     }
 }

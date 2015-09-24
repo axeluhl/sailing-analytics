@@ -1,5 +1,11 @@
 package com.sap.sailing.competitorimport;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.bind.JAXBException;
+
 /**
  * Competitor data may come from various sources, such as external regatta management systems (RMS),
  * CSV files, Excel spreadsheets and the like. When creating a regatta that uses "RaceLog Tracking"
@@ -16,5 +22,25 @@ package com.sap.sailing.competitorimport;
  * @author Axel Uhl (d043530)
  *
  */
-public class CompetitorProvider {
+public interface CompetitorProvider {
+    /**
+     * @return keys are event names, values are the names of the regatta in the event for which the connector has
+     *         competitor names. Should the value for a key be <code>null</code>, competitors for the event may still
+     *         be available, only they may not be keyed per regatta in that case.
+     */
+    Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException;
+
+    /**
+     * Obtains competitor records from an XRR file
+     * 
+     * @param eventName
+     *            an event name as obtained as a key in {@link #getHasCompetitorsForRegattasInEvent()}'s result
+     * @param regattaName
+     *            <code>null</code> to get the competitors for all regattas in the event specified by
+     *            <code>eventName</code>, or a regatta name as provided in the value set for the key
+     *            <code>eventName</code> as returned by {@link #getHasCompetitorsForRegattasInEvent()}.
+     * @return
+     */
+    Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException,
+            IOException;
 }

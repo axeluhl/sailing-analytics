@@ -1,7 +1,8 @@
-package com.sap.sailing.manage2sail.resultimport;
+package com.sap.sailing.competitorimport;
 
 import com.sap.sailing.domain.base.Person;
 import com.sap.sse.common.CountryCode;
+
 
 public class CompetitorDescriptor {
     private String eventName;
