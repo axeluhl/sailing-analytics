@@ -2,6 +2,7 @@ package com.sap.sse.datamining.components;
 
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
 
 
 /**
@@ -43,7 +44,8 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public DataRetrieverLevel<?, ?> getCurrentRetrieverLevel();
 
     /**
-     * Sets the filter for the data retriever of the current level.
+     * Sets the filter for the data retriever of the current level (replacing any filter that has been set).
+     * Use {@link CompoundFilterCriterion} for complex criteria.
      * 
      * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
      * @throws IllegalArgumentException if the filters <code>ElementType</code> doesn't match the
@@ -52,7 +54,7 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter);
 
     /**
-     * Sets the settings for the data retriever of the current level.
+     * Sets the settings for the data retriever of the current level (replacing any settings that have been set).
      * 
      * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
      * @throws IllegalArgumentException if the <code>SettingsType</code> isn't applicable for the
@@ -70,7 +72,11 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver);
 
     /**
-     * Builds the configured data retriever chain.
+     * Builds the configured data retriever chain until the
+     * <b>{@link #getCurrentRetrieverLevel() current retriever level}</b> and returns its first processor.
+     * <br><br>
+     * This method can be called multiple times and it's legal to modify the builder, after this method
+     * has been called. Previously created retriever chains won't be affected from this changes.
      * 
      * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
      * @return The first processor of the built data retriever chain.

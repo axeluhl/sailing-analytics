@@ -15,7 +15,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
                       extends AbstractParallelProcessor<InputType, AggregatedType> {
 
     private final String aggregationNameMessageKey;
-    private final Lock writeLock;
+    private final Lock lock;
 
     public AbstractParallelAggregationProcessor(Class<InputType> inputType,
                                                 Class<AggregatedType> resultType,
@@ -24,7 +24,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
                                                 String aggregationNameMessageKey) {
         super(inputType, resultType, executor, resultReceivers);
         this.aggregationNameMessageKey = aggregationNameMessageKey;
-        writeLock = new ReentrantLock();
+        lock = new ReentrantLock();
     }
 
     @Override
@@ -32,11 +32,11 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
         return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
             public AggregatedType computeResult() {
-                writeLock.lock();
+                lock.lock();
                 try {
                     handleElement(element);
                 } finally {
-                    writeLock.unlock();
+                    lock.unlock();
                 }
                 return AbstractParallelAggregationProcessor.super.createInvalidResult();
             }

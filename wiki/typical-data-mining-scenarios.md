@@ -13,7 +13,7 @@ The following points describe the steps to create a new data mining bundle. An e
     * `com.sap.sse.datamining.shared`
     * `com.sap.sse.datamining.annotations`
 * Create an `Activator` for the new data mining bundle and provide a `DataMiningBundleService` to the OSGi-Context (see [Registration and Deregistration of Data Mining Bundles](data-mining-architecture#Registration-and-Deregistration-of-Data-Mining-Bundles) for detailed information)
-	* This can be done by extending the `AbstractDataMiningActivator` and implementing it's abstract methods
+	* This can be done by extending the `AbstractDataMiningActivator` and implementing it's abstract methods. (Recommended)
 	* Or by implementing your own `DataMiningBundleService` and register it as OSGi-Service
 * Prepare the string messages
 	* Create the new source folder `resources`
@@ -29,7 +29,12 @@ The following points describe the steps to create a new data mining bundle. An e
 
 ## Adding an absolute new Data Type
 
-A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](data-mining-architecture#Data-Mining-Functions).
+*Konzeptionelle Beschreibung der Statistic Query: DataRetrieval -> Grouping -> Extraction -> Aggregation*
+
+
+
+
+A data type is an atomic unit on which the processing components operate. A data type is normally based on a domain element (like `GPSFixMoving` or `TrackedLegOfCompetitor`) and provides contextual information about it (like the name of the regatta or race) via [Functions](data-mining-architecture#Data-Mining-Functions). *Dimensions and Statistics*
 
 ### Create the necessary Data Types
 
@@ -37,7 +42,8 @@ The following points describe the steps to create a data type, that is based on 
 
 * Create an interface for the domain element. The naming convention for data type interfaces is `Has<domain element name>Context`.
 	* If `TrackedLegOfCompetitor` would be the domain element, then the name of the data type interface should be `HasTrackedLegOfCompetitorContext`.
-* Create a data type interface for the steps from the data source to the domain element
+* Create a data type interface for each important step from the data source to the domain element
+* *Hierbei kann und sollte das Domänenmodell abstrahiert werden.*
 	* In the case of the `TrackedLegOfCompetitor` the steps would be
 		* `LeaderboardGroup`
 		* `Leaderboard`
@@ -45,10 +51,11 @@ The following points describe the steps to create a data type, that is based on 
 		* `TrackedLeg`
 		* `TrackedLegOfCompetitor`
 	* This isn't mandatory for the framework to work, but it improves its performance, because it's possible to build a processor chain, that filters after each step.
-* Add the data type interfaces to the `Classes` return by  the method `getClassesWithMarkedMethods()` of the `DataMiningBundleService` of the data mining bundle.
-* Add methods to get the contextual information and annotate them, so that they get registered as functions.
+* Add the data type interfaces to the classes returned by  the method `getClassesWithMarkedMethods()` of the `DataMiningBundleService` of the data mining bundle.
+* Add methods to get the contextual information and annotate *Referenz zur Architektur* them, so that they get registered as dimensions/statistics.
+	* *Kurze Informationen über die vorhandenen Annotationen*
 	* To get the contextual data of a higher level data type interface annotate the getter for this interface with `@Connector(scanForStatistics=false)`.
-		* If the data type `HasTrackedLegOfCompetitorContext` should have access to the dimensions of the previous data type (in this case `HasTrackedLegContext`), a method like `HasTrackedLegContext getTrackedLegContext()` is necessary.
+		* If the data type `HasTrackedLegOfCompetitorContext` should have access to the dimensions of the previous data type (in this case `HasTrackedLegContext`), an annotated method like `HasTrackedLegContext getTrackedLegContext()` is necessary.
 	* There's currently no parameter support for functions, except for signatures exactly like `(Locale, ResourceBundleStringMessages)`.
 	* Cycles in the graph of annotated methods aren't supported and would result in an infinite loop during the function registration.
 	* See [Data Mining Functions](data-mining-architecture#Data-Mining-Functions) for detailed information about the annotations.
@@ -124,6 +131,17 @@ RetrieverChain markPassingRetrieverChain = new RetrieverChain(trackedRaceRetriev
 markPassingRetrieverChain.endWith(MarkPassingRetrievalProcessor.class);
 </pre>
 * Ensure, that all retriever chains are added to the `DataMiningBundleService`
+
+### Implement your own Aggregators
+
+It may be necessary, that your data mining bundle needs domain specific [aggregator](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific statistics (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
+
+* Implement your own aggregator according to the advice in [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
+* Provide a `AggregationProcessorDefinition` for the new aggregator in the corresponding method of the `DataMiningBundleService` of your data mining bundle.
+	* The current convention is, that every concrete aggregator provides its definition with a static method.
+	* Note that the aggregator needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown upon the construction of the `AggregationProcessorDefinition`.
+
+For example see the `Activator` of the `com.sap.sailing.datamining` bundle and its aggregators in the package `com.sap.sailing.datamining.impl.components.aggregators`.
 
 ## Include a Type forcefully in the GWT Serialization Policy
 
