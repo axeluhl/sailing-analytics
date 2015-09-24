@@ -46,6 +46,12 @@ The third chart is empty when first shown. It can show how the data for one sing
 
 ### Backend Polars
 
+Displaying backend polars in the datamining UI is quite simple: Choose the "Backend Polars" Retriever chain, filter by boat class name, choose the "Polars" aggregator and run the query. The query should not take long since the PolarDataService is optimzed for quick response times.
+
+#### Presentation
+
+Like the custom polars, the backend polars are presented in 3 charts. The main chart is also a polar chart which is quite similar to the on used for custom polars. The other two charts are different. They are not related to underlying data but rather show the regression functions boatspeed over windspeed and beatangle over windspeed for upwind and downwind.
+
 ## Using the PolarDataService
 
 The PolarDataService is the interface to look at, when you want to use access the backend aggregated polar data. Its methods are eqipped with JavaDoc explanations and you can look at the usages of the methods to see typical ways to use the interface.
