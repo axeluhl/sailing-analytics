@@ -41,7 +41,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
     @Override
     public Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException {
         Map<String, Set<String>> result = new HashMap<>();
-        for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
+        for (ResultDocumentDescriptor resultDocDescr : getDocumentProvider().getResultDocumentDescriptors()) {
             final String eventName = resultDocDescr.getEventName();
             final String regattaName = resultDocDescr.getRegattaName();
             Set<String> set = result.get(eventName);
@@ -59,7 +59,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
         final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>();
-        for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
+        for (ResultDocumentDescriptor resultDocDescr : getDocumentProvider().getResultDocumentDescriptors()) {
             if (resultDocDescr.getEventName().equals(eventName) &&
                     (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
                 final Parser parser = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
@@ -138,5 +138,9 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                             race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber, team.getTeamName(),
                             teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
         return competitorDescriptor;
+    }
+
+    protected CompetitorDocumentProvider getDocumentProvider() {
+        return documentProvider;
     }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 
 import javax.xml.bind.JAXBException;
@@ -15,7 +16,10 @@ import javax.xml.bind.JAXBException;
 import org.junit.Test;
 
 import com.sap.sailing.competitorimport.CompetitorDescriptor;
+import com.sap.sailing.competitorimport.CompetitorProvider;
+import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.manage2sail.resultimport.AbstractManage2SailProvider;
+import com.sap.sailing.manage2sail.resultimport.CompetitorDocumentProvider;
 import com.sap.sailing.manage2sail.resultimport.CompetitorImporter;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
@@ -41,7 +45,17 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json")));
-        final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
+        final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+            @Override
+            protected CompetitorDocumentProvider getDocumentProvider() {
+                return new CompetitorDocumentProvider(this) {
+                    @Override
+                    protected URL getDocumentUrlForRegatta(RegattaResultDescriptor regattaResult) {
+                        return getClass().getClassLoader().getResource("VSaW_420_Test.xml");
+                    }
+                };
+            }
+        };
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("IDJM 2015 - 420er"));
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("IDJM 2015 - 420er").contains("420"));
         final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("IDJM 2015 - 420er", "420"); // get competitors for 420 regatta
@@ -53,7 +67,17 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json")));
-        final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
+        final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+            @Override
+            protected CompetitorDocumentProvider getDocumentProvider() {
+                return new CompetitorDocumentProvider(this) {
+                    @Override
+                    protected URL getDocumentUrlForRegatta(RegattaResultDescriptor regattaResult) {
+                        return getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.xml");
+                    }
+                };
+            }
+        };
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("IDJM 2015 - 420er"));
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("IDJM 2015 - 420er").contains("420"));
         final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("IDJM 2015 - 420er", null); // get competitors for all regattas in event
