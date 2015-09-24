@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.AxisTitle;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -25,7 +26,6 @@ import org.moxieapps.gwt.highcharts.client.events.SeriesHideEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesShowEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
-import org.moxieapps.gwt.highcharts.client.plotOptions.AreaPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
@@ -90,7 +90,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
         dataCountHistogramChart = createDataCountHistogramChart(stringMessages.beatAngle() + " ("
                 + stringMessages.degreesShort() + ")", true);
-        dataCountPerAngleHistogramChart = createDataCountHistogramChart(stringMessages.windRangeDistribution(), false);
+        dataCountPerAngleHistogramChart = createDataCountHistogramChart(stringMessages.windSpeed(), true);
         histogramChartsWrapperPanel = new DockLayoutPanel(Unit.PCT) {
             @Override
             public void onResize() {
@@ -177,13 +177,11 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     private Chart createDataCountHistogramChart(String xAxisLabel, boolean showXLabels) {
-        Chart histogramChart = new Chart().setType(Type.AREA).setHeight100().setWidth100();
+        Chart histogramChart = new Chart().setType(Type.COLUMN).setHeight100().setWidth100();
         histogramChart.setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""));
         histogramChart.getYAxis().setMin(0).setAxisTitle(new AxisTitle().setText(stringMessages.numberOfDataPoints()));
         histogramChart.getXAxis().setLabels(new XAxisLabels().setRotation(-90f).setY(30).setEnabled(showXLabels))
                 .setAxisTitle(new AxisTitle().setText(xAxisLabel));
-        histogramChart.setAreaPlotOptions(new AreaPlotOptions().setLineColor("#666666")
-                .setLineWidth(1).setMarker(new Marker().setLineWidth(1).setLineColor("#666666")));
         histogramChart.setLegend(new Legend().setEnabled(false));
         histogramChart.setExporting(new Exporting().setEnabled(false));
         return histogramChart;
@@ -233,7 +231,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
             if (settings.getMinimumDataCountPerGraph() < count) {
                 Series polarSeries = polarChart.createSeries();
                 Series histogramSeries = dataCountHistogramChart.createSeries();
-                int[][] histogramData = aggregation.getCountHistogramPerAngle();
+                Map<Integer, Map<Double, Integer>> histogramData = aggregation.getCountHistogramPerAngle();
                 Map<Long, Series> seriesPerAngle = new HashMap<>();
                 perAngleHistogramSeriesForAngle.put(polarSeries, seriesPerAngle);
                 for (int i = 0; i < 360; i++) {
@@ -248,9 +246,9 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
                     }
                     histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
                     Series dataCountPerAngleSeries = dataCountPerAngleHistogramChart.createSeries();
-                    int[] histogramDataForAngle = histogramData[i];
-                    for (int j = 0; j < settings.getNumberOfHistogramColumns(); j++) {
-                        dataCountPerAngleSeries.addPoint(j, histogramDataForAngle[j]);
+                    Map<Double, Integer> histogramDataForAngle = histogramData.get(i);
+                    for (Entry<Double, Integer> entry : histogramDataForAngle.entrySet()) {
+                        dataCountPerAngleSeries.addPoint(entry.getKey(), entry.getValue());
                     }
                     dataCountPerAngleHistogramChart.addSeries(dataCountPerAngleSeries, false, false);
                     dataCountPerAngleSeries.setVisible(false, false);

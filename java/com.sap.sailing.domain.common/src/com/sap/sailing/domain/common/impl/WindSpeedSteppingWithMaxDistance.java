@@ -40,13 +40,13 @@ public class WindSpeedSteppingWithMaxDistance extends WindSpeedSteppingImpl {
         return maxDistance;
     }
     
-    public int getHistogramIndex(int numberOfHistogramColumns, double knots) {
+    public double getHistogramXValue(int numberOfHistogramColumns, double knots) {
         double minInKnots = getMinValueForIndex(getLevelIndexForValue(knots));
         double maxInKnots = getMaxValueForIndex(getLevelIndexForValue(knots));
         double cutMax = maxInKnots - minInKnots;
         double cutValue = knots - minInKnots;
-        int columnIndex = (int) ((cutValue / cutMax) * 20);
-        return columnIndex;
+        int columnIndex = (int) ((cutValue / cutMax) * numberOfHistogramColumns);
+        return minInKnots + columnIndex * (cutMax / numberOfHistogramColumns) + 0.5 * (cutMax / numberOfHistogramColumns);
     }
 
     private double getMinValueForIndex(int levelIndexForValue) {

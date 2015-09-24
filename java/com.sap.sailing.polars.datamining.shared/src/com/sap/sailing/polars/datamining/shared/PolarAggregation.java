@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.datamining.shared;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public interface PolarAggregation extends Serializable {
 
@@ -14,6 +15,6 @@ public interface PolarAggregation extends Serializable {
     
     PolarDataMiningSettings getSettings();
     
-    int[][] getCountHistogramPerAngle();
+    Map<Integer, Map<Double, Integer>> getCountHistogramPerAngle();
     
 }
