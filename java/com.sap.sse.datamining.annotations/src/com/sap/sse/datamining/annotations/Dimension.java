@@ -9,7 +9,7 @@ import java.util.Locale;
 
 /**
  * Methods marked with this annotation will be used as dimensions for the data mining framework. The method will be called,
- * if the dimension value of a data element is requested.<br />
+ * if the dimension value of a Fact is requested.<br />
  * The marked method has to match the following conditions or the data mining could fail:
  * <ul>
  *      <li>Has no parameters (except if the parameter list is exactly {@link Locale}, {@link ResourceBundleStringMessages})</li>
@@ -33,7 +33,7 @@ public @interface Dimension {
 
     /**
      * The message key used for internationalization.<br />
-     * If there are more than one ordinal in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
+     * If there is more than one message key in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
      * then the messages will be concatenated (separated by a space).
      */
     public String messageKey();
