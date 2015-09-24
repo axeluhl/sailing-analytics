@@ -10,11 +10,11 @@ package com.sap.sailing.competitorimport;
  * In its simplest form, a provider will just produce an otherwise unstructured list of competitor
  * entries with no hint as to the event, regatta or race that the competitor pertains to. More
  * sophisticated providers may structure competitor data into events, regattas or even individual
- * races so that 
+ * races so that importing these competitors into a single fleet of one race column becomes possible.
+ * This will be particularly useful for split-fleet racing.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class CompetitorProvider {
-
 }

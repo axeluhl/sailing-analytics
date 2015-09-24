@@ -134,5 +134,4 @@ public class ParserTest {
         assertNotNull(scoreCorrectionsForRaces);
         assertEquals(8, Util.size(scoreCorrectionsForRaces)); 
     }
-
 }
