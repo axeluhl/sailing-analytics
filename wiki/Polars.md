@@ -30,7 +30,9 @@ _TODO_
 
 ## Using the PolarDataService
 
-_TODO_
+The PolarDataService is the interface to look at, when you want to use access the backend aggregated polar data. Its methods are eqipped with JavaDoc explanations and you can look at the usages of the methods to see typical ways to use the interface.
+
+The PolarDataService is an OSGi service. Above all it is retrieved by the RacingEventService. The RacingEventService supplies some needed objects like DomainFactories and also feeds the PolarDataService with fresh fixes. You can benefit from that because, if you have a chance to obtain the RacingEventService or maybe already have a reference to it, you can simply call service.getPolarDataService() and voila: You can start using the PolarDataService. If not you can look into handling the OSGi service listening yourself to obtain the PolarDataService.
 
 ## Polar Datamining Architecture
 
