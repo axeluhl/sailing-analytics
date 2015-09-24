@@ -47,14 +47,14 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
-import com.sap.sse.util.SmartFutureCache;
 
 /**
- * Uses two chained {@link SmartFutureCache}s. One to store {@link PolarFix}es extracted from {@link TrackedRace}s and
- * the other one for storing one polar sheet per boat class. This enables quick access to desired measures like optimal
- * beat angles.
+ * Uses a custom datamining pipeline to aggregate incoming fixes in two regression based polar containers.
+ * 
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
  * 
  * @author Frederik Petersen (D054528)
+ * @author Axel Uhl
  * 
  */
 public class PolarDataServiceImpl implements PolarDataService,
@@ -79,6 +79,9 @@ public class PolarDataServiceImpl implements PolarDataService,
 
     private DomainFactory domainFactory;
 
+    /**
+     * Constructs the polar data service with default generation settings.
+     */
     public PolarDataServiceImpl() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();

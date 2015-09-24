@@ -10,6 +10,13 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 
+/**
+ * Needed in the context of the datamining pipeline for the polar backend.
+ * It provides the information about grouping classes.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataDimensionCollectionFactory {
 
     private static void addTackAndLegTypeDimensions(Collection<Function<?>> dimensions, FunctionFactory functionFactory)
