@@ -53,11 +53,15 @@ The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.
 
 ### Extending the Feature
 
-_TODO_
+The feature can be extended by adding dimensions to the types in the polar.datamining bundle.
+This dimensions then serve as a new option in filtering and grouping.
+
+How that works is displayed [here][wiki/typical-development-scenarios].
 
 ### Known Issues
 
-_TODO_
+* Bug 3055 - Tooltip at Polarsheets Histogramm disappears
+* Bug 3056 - Polar Sheets Histogram shows average value for number of data points
 
 ## PolarDataService Architecture
 
@@ -97,3 +101,25 @@ The com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor contains dat
 The regression magic is performed by the IncrementalAnyOrderLeastSquaresImpl class, which was inspired by this blog post: <http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/>
 
 It can do online any order regressions with least squares and has optimizations to be especially quick for cubic regressions, as they are used for the regressions in the polar backend.
+
+## Replication with Use Case
+
+"Bug 2563 - Support replication of polar data service" states the need for interserver communication when it comes to the polars that reside in the backend. The standard event scenario is that we have one event server for each ongoing event and the archive server for the past events. We still want to be able to access polar data of the past when being on the live server. This is obvious when we think about the presentation of the simulator at a live event. It will not work very well in the beginning of the event when no races are loaded yet. Thus it would be great to have the archive data available. Multiple approaches have been discussed and I will list them here trying to sort them descending by feasability.
+
+### System.properties
+
+We could just let the admin specify a System Property that is read by the polar bundle upon start. The system property should contain a URL to a remote server where polars are available. (E.g. the archive server). The bundle then requests the current polar aggregation from the remote server. If successful it will set this aggregation as the initial aggregation in it. If unsuccessful the server will start with empty containers.
+
+This would be quite simple to implement (as opposed to multiway replication) and still be sufficient for the typical event + archive scenario.
+
+### Manual Import
+
+The manual import approach is pretty similar to the System.properties approach, but as opposed to defining a system property, the admin could import the polars during the run time of the server similar to the Master Data Import feature. There are some problems with that approach, since merging of to non-empty aggregations in non-trivial and also a UI would have to be created.
+
+### Replication
+
+We could use Axels replication framework. It would allow for a more flexible approach, but a lot of work would have to be done to allow replication in that direction and between multiple servers that are not in a master-replica-configuration.
+
+### Hard Coded Polars
+
+Some suggested it would be okay to just read out the polars of the archive and hard-code them into the server as an initial polar state, that is then changed by new incoming data. That is a very static approach and defeats the dynamic nature of the whole polar approach but it is very simple to do.

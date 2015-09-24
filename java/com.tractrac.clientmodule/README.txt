@@ -7,7 +7,7 @@
 This zip package contains 2 folders:
 
  - lib -> contains the Trac-API compiled library
- - src -> contains some code examples.
+ - src -> contains the source code of the API and some code examples  
  
 The documentation can be retrieved online from http://tracdev.dk/maven-sites-clients/3.0.0/maven-java-parent/.
 
@@ -15,7 +15,27 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+ 
+********************************************
+************* TracAPI 3.0.13 ***************
+********************************************
+This is a final version. Only fixes bugs in the implementation
 
+Release date: 23/09/2015
+Build number: 11448
+
+ 1) Features
+ 
+ - The script that generates the final version also includes a jar with the source code of the APIs
+ (Requested by Axel Uhl, 07/09/2015)
+
+ 2) Bugs
+ 
+ - When a new race is updated, the IRace.getParamsURI() is updated to null. (Reported by Juan Salvador Pérez, 10/09/2015)
+  
+ - The IRace.getMetadata(), ICompetitor.getMetadata and IControl.getMetadata() methods are not refreshed in
+ the model when the objects are updated in the event manager (Reported by Jorge Piera, 23/09/2015)
+ 
 ********************************************
 ************* TracAPI 3.0.12 ***************
 ********************************************
