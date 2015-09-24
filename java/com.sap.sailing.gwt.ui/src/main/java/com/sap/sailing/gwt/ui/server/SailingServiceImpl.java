@@ -4127,13 +4127,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
             CourseArea courseArea, Leaderboard leaderboard, String boatClassName, String regattaName, String seriesName, RaceColumn raceColumn,
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
-
-        for (Fleet fleet : raceColumn.getFleets()) {
-            RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
-                    leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
-                    showOnlyRacesOfSameDay, dayToCheck);
-            if (entry != null) {
-                addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+        if (!raceColumn.isCarryForward()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
+                        leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
+                        showOnlyRacesOfSameDay, dayToCheck);
+                if (entry != null) {
+                    addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+                }
             }
         }
     }
