@@ -57,7 +57,8 @@ _TODO_
 
 ### Known Issues
 
-_TODO_
+* Bug 3055 - Tooltip at Polarsheets Histogramm disappears
+* Bug 3056 - Polar Sheets Histogram shows average value for number of data points
 
 ## PolarDataService Architecture
 
@@ -97,3 +98,11 @@ The com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor contains dat
 The regression magic is performed by the IncrementalAnyOrderLeastSquaresImpl class, which was inspired by this blog post: <http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/>
 
 It can do online any order regressions with least squares and has optimizations to be especially quick for cubic regressions, as they are used for the regressions in the polar backend.
+
+## Replication with Use Case
+
+"Bug 2563 - Support replication of polar data service" states the need for interserver communication when it comes to the polars that reside in the backend. The standard event scenario is that we have one event server for each ongoing event and the archive server for the past events. We still want to be able to access polar data of the past when being on the live server. This is obvious when we think about the presentation of the simulator at a live event. It will not work very well in the beginning of the event when no races are loaded yet. Thus it would be great to have the archive data available. Multiple approaches have been discussed and I will list them here trying to sort them descending by feasability.
+
+### System.properties
+### Replication
+### Manual Import
