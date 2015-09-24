@@ -19,15 +19,16 @@ public class StartAnalysisCreationController extends AbstractStartAnalysisCreati
     }
 
     public StartAnalysisDTO checkStartAnalysisForCompetitorInTrackedRace(Competitor competitor, TrackedRace trackedRace) {
-        StartAnalysisDTO startAnalysisDTO;
+        StartAnalysisDTO result = null;
         if (threeCompetitorsPassedSecondWayPoint(trackedRace) &&
             raceProgressedFarEnough(competitor, trackedRace)) 
         {
-            logger.log(Level.INFO, "Trigger StartAnalysisDTO creation");
-            startAnalysisDTO = startAnalysisDTOFactory.createStartAnalysisForCompetitorAndTrackedRace(competitor,  trackedRace);
-            return startAnalysisDTO;
-        }else{
-            return null;
+            logger.log(Level.INFO, "Creating startanalysis for race "+trackedRace.getRace().getName()+" and competitor: " + competitor.getName());
+            result = startAnalysisDTOFactory.createStartAnalysisForCompetitorAndTrackedRace(competitor, trackedRace);
+
+        }else {
+            logger.log(Level.INFO, "Waiting to create startanalysis for race "+trackedRace.getRace().getName()+" and competitor: " + competitor.getName());
         }
+        return result;
     }
 }
