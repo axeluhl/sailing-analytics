@@ -6,7 +6,7 @@ The data mining framework consists of four major parts. At first the general inf
 
 ## General Infrastructure
 
-The central place to get information about the current state of the data mining and to perform actions is the OSGi-Service `DataMiningServer`. It provides information about the statistics, dimensions, data retriever chains and other data mining components, that are currently available. It also provides methods to create and run queries with a specific structure. For example a query, that returns all dimension values for a data type, or a standard statistic query (that is described in [Building and running Queries](#Building-and-running-Queries)). The server also has methods to get necessary elements to build your own queries (like an `ExecutorService` or the `ResourceBundleStringMessages`) or to convert DTOs to the data mining domain objects.
+The central place to get information about the current state of the data mining and to perform actions is the OSGi-Service `DataMiningServer`. It provides information about the statistics, dimensions, data retriever chains and other data mining components, that are available at runtime. It also provides methods to create and run queries with a specific structure. For example a query, that returns all dimension values for a Fact, or a standard statistic query (that is described in [Building and running Queries](#Building-and-running-Queries)). The server also has methods to get necessary elements to build your own queries (like an `ExecutorService` or the `ResourceBundleStringMessages`) or to convert DTOs to the data mining domain objects.
 
 ### Registration and Deregistration of Data Mining Bundles
 
@@ -177,7 +177,7 @@ Processor instructions are `Runnables` enriched with a priority. The abstract cl
 
 *This section is under construction.*
 
-### Data Types
+### Facts
 
 In relationaler Umgebung wären es Fakten.
 
@@ -232,7 +232,7 @@ Connectors can have the following properties:
 * A `String messageKey` with the default `""`, that is used for the internationalization.
 * An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
 * A `boolean scanForStatistics` with the default `true`, that indicates the framework, if the statistics contained by the return type of the marked method should be registered.
-	* This is useful for connections to *higher level* data types, to be able to use their dimensions, without the registration of unwanted or even wrong statistics.
+	* This is useful for connections to *higher level* Facts, to be able to use their dimensions, without the registration of unwanted or even wrong statistics.
 
 How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
 
