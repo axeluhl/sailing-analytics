@@ -655,7 +655,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
 
-        mvn -P !with-not-android-relevant,with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+		mvn -P -with-not-android-relevant -P with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
