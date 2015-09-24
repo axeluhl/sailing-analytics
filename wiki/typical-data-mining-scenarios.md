@@ -70,11 +70,40 @@ Note that the process described above is a very specific process to calculate ag
 
 ### Implement the Fact and the Data Retrieval
 
-The concrete interfaces and classes that are needed to implement the Fact depend on what you want to analyze in the new data mining bundle. A good starting point is to think about the domain elements that contain the data you want to analyze, how to get the instances of these domain elements and whats the 
+The concrete interfaces and classes that are needed to implement the Fact depend on what you want to analyze in the new data mining bundle. A good starting point is to think about the domain elements that contain the data you want to analyze, how to get the instances of these domain elements.
 
-### Implement your own Aggregators
+* For example if you want to analyze the traveled distance and the speed of a competitor, the `TrackedLegOfCompetitor` would be the domain element of your choice.
+* This class is located in the sailing domain, so the entrypoint to get instances would be the `RacingEventService`, which will be the Data Source.
+* There are multiple ways to get `TrackedLegOfCompetitors` from the `RacingEventService`.
+	* For example `LeaderboardGroup` &#8594; `Leaderboard` &#8594; `RaceColumn` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
+	* Or `Regatta` &#8594; `Series` &#8594; `RaceColumn` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
 
-It may be necessary, that your data mining bundle needs domain specific [aggregator](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific statistics (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
+But before the data retrieval is implemented, it's worth to have a more detailed look on the process that performs the retrieval.
+
+<img style="float: right" src="/wiki/images/datamining/DataRetrievalInDetail.svg" />
+
+The data retrieval process can be separated in multiple levels. Each level is performed by its own Retriever that produces multiple intermediate elements from the the given element (Data Source or intermediate element) until the last retriever produces the Facts. After every Retriever is a Filter that has a Filter Criterion, which is used to check, if the given meets a condition.
+
+* The standard criterion that is used, checks if the dimensional value of the given element (provided via a Dimension) matches a specific value.
+* For example if you want to analyze races of a specific regatta, but a retriever would provide races of many regattas the Filter can be used to exclude the unwanted races.
+* Filter Criteria can also be defined in a more general way. See the [Data Mining Architecture](/wiki/data-mining-architecture#Filter-Criteria) for detailed information.
+
+Splitting the data retrieval into multiple levels provides several benefits for the whole data mining process:
+
+* The possibility to filter the elements after each retriever level improves the performance, because less elements have to be retrieved by the following Retrievers.
+* It's possible to reuse Retrievers for the data retrieval process of other Facts. This reduces future implementation effort.
+
+To split the data retrieval in multiple levels, it is necessary to implement the corresponding intermediate elements. These elements are very similar to the Fact (there aren't any differences from an objective point of view) so it's possible to reuse these intermediate elements to implement new Facts. But in the context of defining a concrete new Fact, their types will be referred to as Intermediate Types to distinguish them from the Fact.
+
+How to implement a new Fact with supporting Intermediate Types will be described in the following section.
+
+#### Implement the Fact and the Intermediate Types
+
+#### Implement the Retrievers and put them together
+
+### Implement domain specific Aggregators
+
+It may be necessary, that your data mining bundle needs domain specific [aggregator](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
 
 * Implement your own aggregator according to the advice in [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
 * Provide a `AggregationProcessorDefinition` for the new aggregator in the corresponding method of the `DataMiningBundleService` of your data mining bundle.
