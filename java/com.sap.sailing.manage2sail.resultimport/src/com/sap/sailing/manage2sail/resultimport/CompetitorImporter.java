@@ -57,12 +57,19 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
     @Override
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
+        final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
+        final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>();
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-            if (resultDocDescr.getEventName().equals(eventName)) {
+            if (resultDocDescr.getEventName().equals(eventName) &&
+                    (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
                 final Parser parser = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 final RegattaResults regattaResults = parser.parse();
                 for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                    if (o instanceof Event) {
+                    if (o instanceof Team) {
+                        final Team team = (Team) o;
+                        teamsWithoutRaceAssignments.put(team.getTeamID(),
+                                createCompetitorDescriptor(team, parser, /* event */ null, /* division */ null, /* raceID */ null));
+                    } else if (o instanceof Event) {
                         Event event = (Event) o;
                         for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
                             if (eventO instanceof Division) {
@@ -80,32 +87,9 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                                             team = parser.getTeam(seriesResult.getTeamID());
                                         }
                                         if (team != null) {
-                                            final Boat boat = parser.getBoat(team.getBoatID());
-                                            final String sailNumber = boat.getSailNumber();
-                                            final Race race = parser.getRace(raceID);
-                                            final Nationality[] teamNationality = new Nationality[] {
-                                                // use that of team; if not defined for team, use first nationality of a team member that has one defined
-                                                team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
-                                            };
-                                            List<com.sap.sailing.domain.base.Person> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
-                                                    Person xrrPerson = parser.getPerson(crew.getPersonID());
-                                                    String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
-                                                    final Nationality nationality;
-                                                    if (xrrPerson.getNOC() == null) {
-                                                        nationality = null;
-                                                    } else {
-                                                        nationality = new NationalityImpl(xrrPerson.getNOC().name());
-                                                        if (teamNationality[0] == null) {
-                                                            teamNationality[0] = nationality;
-                                                        }
-                                                    }
-                                                    com.sap.sailing.domain.base.Person person = new PersonImpl(name, nationality, /* date of birth */ null, /* description */ xrrPerson.getGender().name());
-                                                    return person;
-                                            }).collect(Collectors.toList());
-                                            final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
-                                                    event.getTitle(), division.getTitle() + (division.getGender() == null ? "" : division.getGender().name()),
-                                                    race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber, team.getTeamName(),
-                                                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
+                                            final CompetitorDescriptor competitorDescriptor = createCompetitorDescriptor(
+                                                    team, parser, event, division, raceID);
+                                            resultsByTeamID.put(team.getTeamID(), competitorDescriptor);
                                             result.add(competitorDescriptor);
                                         }
                                     }
@@ -116,6 +100,43 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                 }
             }
         }
+        for (final Map.Entry<String, CompetitorDescriptor> tid : teamsWithoutRaceAssignments.entrySet()) {
+            if (!resultsByTeamID.containsKey(tid.getKey())) {
+                result.add(tid.getValue());
+            }
+        }
         return result;
+    }
+
+    private CompetitorDescriptor createCompetitorDescriptor(Team team, final Parser parser, Event event,
+            Division division, String raceID) {
+        final Boat boat = parser.getBoat(team.getBoatID());
+        final String sailNumber = boat.getSailNumber();
+        final Race race = parser.getRace(raceID);
+        final Nationality[] teamNationality = new Nationality[] {
+            // use that of team; if not defined for team, use first nationality of a team member that has one defined
+            team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
+        };
+        List<com.sap.sailing.domain.base.Person> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
+                Person xrrPerson = parser.getPerson(crew.getPersonID());
+                String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
+                final Nationality nationality;
+                if (xrrPerson.getNOC() == null) {
+                    nationality = null;
+                } else {
+                    nationality = new NationalityImpl(xrrPerson.getNOC().name());
+                    if (teamNationality[0] == null) {
+                        teamNationality[0] = nationality;
+                    }
+                }
+                com.sap.sailing.domain.base.Person person = new PersonImpl(name, nationality, /* date of birth */ null, /* description */ xrrPerson.getGender().name());
+                return person;
+        }).collect(Collectors.toList());
+        final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
+                            event==null?null:event.getTitle(),
+                            division==null?null:(division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
+                            race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber, team.getTeamName(),
+                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
+        return competitorDescriptor;
     }
 }

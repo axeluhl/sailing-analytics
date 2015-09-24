@@ -43,12 +43,12 @@ public abstract class AbstractManage2SailResultDocumentProvider {
                 // Open boat classes (ORC) ->  IFClassID="" Title="Welcome Race ORC-Club"
                 // -> therefore we need to take the regatta title as boat class where the IsafID is not available
                 String boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getName();
-                if (regattaResult.getIsFinal() != null && regattaResult.getPublishedAt() != null) {
+                if (acceptRegatta(regattaResult)) {
                     final URL resultUrl = getDocumentUrlForRegatta(regattaResult);
                     if (resultUrl != null) {
                         URLConnection regattaResultConn = resultUrl.openConnection();
                         result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
-                                resultUrl.toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
+                                resultUrl.toString(), regattaResult.getPublishedAt()==null?null:new MillisecondsTimePoint(regattaResult.getPublishedAt()),
                                 eventResult.getName(), regattaResult.getName(), boatClass, regattaResult
                                         .getCompetitorGenderType()));
                     }
@@ -57,5 +57,7 @@ public abstract class AbstractManage2SailResultDocumentProvider {
         }
     }
 
+    abstract protected boolean acceptRegatta(RegattaResultDescriptor regattaResult);
+    
     abstract protected URL getDocumentUrlForRegatta(RegattaResultDescriptor regattaResult);
 }

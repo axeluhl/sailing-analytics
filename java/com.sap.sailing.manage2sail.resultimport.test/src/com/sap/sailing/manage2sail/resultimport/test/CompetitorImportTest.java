@@ -31,9 +31,33 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("YES - Young Europeans Sailing 2013").contains("29er"));
         final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", null); // get competitors for all regattas in event
         assertNotNull(competitorDescriptors);
-        assertEquals(418, Util.size(competitorDescriptors));
+        assertEquals(1270, Util.size(competitorDescriptors));
         final Iterable<CompetitorDescriptor> competitorDescriptors29er = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", "29er"); // get competitors only for 29er regatta
         assertNotNull(competitorDescriptors29er);
         assertEquals(134, Util.size(competitorDescriptors29er));
+    }
+
+    @Test
+    public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
+        ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
+        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json")));
+        final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
+        assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("IDJM 2015 - 420er"));
+        assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("IDJM 2015 - 420er").contains("420"));
+        final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("IDJM 2015 - 420er", "420"); // get competitors for 420 regatta
+        assertNotNull(competitorDescriptors);
+        assertEquals(100, Util.size(competitorDescriptors));
+    }
+
+    @Test
+    public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
+        ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
+        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json")));
+        final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
+        assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("IDJM 2015 - 420er"));
+        assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("IDJM 2015 - 420er").contains("420"));
+        final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("IDJM 2015 - 420er", null); // get competitors for all regattas in event
+        assertNotNull(competitorDescriptors);
+        assertEquals(100, Util.size(competitorDescriptors));
     }
 }

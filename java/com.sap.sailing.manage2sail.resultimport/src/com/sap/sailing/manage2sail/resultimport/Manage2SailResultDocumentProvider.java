@@ -31,4 +31,10 @@ public class Manage2SailResultDocumentProvider extends AbstractManage2SailResult
         }
         return resultUrl;
     }
+
+    @Override
+    protected boolean acceptRegatta(RegattaResultDescriptor regattaResult) {
+        return regattaResult.getIsFinal() != null && regattaResult.getPublishedAt() != null;
+    }
+
 }
