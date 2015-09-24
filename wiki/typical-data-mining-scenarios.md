@@ -36,10 +36,10 @@ Before you start to implement the components, you should get an overview about t
 The data mining process consists of different steps that will be described below. Elements that are **bold** are the components you'll have to implement. The project `com.sap.sailing.dataming` is a fully implemented data mining bundle, where you can see the concrete implementation of the different components.
 
 1. At first a **DataSourceProvider** is necessary that is used to get a *Data Source* of a specific type.
-	* This *Data Source* is the starting point for the data you want to analyze.
-	* A concrete *Data Source* is for example the `RacingEventService`.
+	* This Data Source is the starting point for the data you want to analyze.
+	* A concrete Data Source is for example the `RacingEventService`.
 	* A concrete DataSourceProvider would be the `RacingEventServiceProvider`.
-2. The *Data Source* is given to a **Retriever** that retrieves multiple **Facts** (of the same type) from it.
+2. The Data Source is given to a **Retriever** that retrieves multiple **Facts** (of the same type) from it.
 	* A Fact can be roughly described as an enriched and abstracted domain element (for example a `TrackedRace`).
 	* Enriched means that the Fact provides contextual information and Key Figures in a way that they can be easily used by in the data mining process.
 		* Contextual information could be the name of the race, the regatta of the race or the course area on which the race took place.
@@ -55,14 +55,22 @@ The data mining process consists of different steps that will be described below
 	* The output of a Grouper is a tuple of the group key and the Fact.
 4. The [Key, Fact]-Tuple is given to an Extractor that extracts the Key Figure from the Fact.
 	* An **Extration Function** is used to get the concrete value from the Fact.
-	* The output of an extractor is a tuple of the group key and the extracted value.
+	* The output of an Extractor is a tuple of the group key and the extracted value.
 5. The [Key, Value]-Tuple is given to an **Aggregator** that calculates an aggregate for each group key from the given values with this group key.
 	* Examples for aggregates would be the sum, average or maximum of the given values.
-	* An example would be the analysis of the sum of jibes performed in multiple regattas. Therefore the dimension for the regatta name, the extraction function for the number of jibes performed in a race and an aggregator that calculates the sum would be used.
+	* An example would be the analysis of the sum of jibes performed in multiple regattas. Therefore the dimension for the regatta name, the extraction function for the number of jibes performed in a race and an Aggregator that calculates the sum would be used.
 	* The result would be a map that maps each group key to the sum of jibes.
-	* In this case the type of the extracted value and the type of the aggregated value would be the same, but this doesn't have to be the case.
+	* In this example the type of the extracted value and the type of the aggregated value would be the same, but this doesn't have to be the case.
+
+The main task to integrate the data mining bundle is to define the Fact (with its dimensions and extraction functions) that should be analyzed and to implement the data retrieval to get the facts from the Data Source. The second task would be to implement domain specific Aggregators that are able to process the type of the Key Figure. This may not necessary, because there are some domain independent Aggregators (for example for numeric values) that are available to every domain specific data mining bundle. So it isn't necessary to implement an Aggregator in the bundle, if the type of the Key Figure is a `Number`. See the package `com.sap.sse.datamining.impl.components.aggregators` for the available domain independent aggregators.
+
+The following sections describe how to implement the different components.
+
+Note that the process described above is a very specific process to calculate aggregations from a collection of Facts (in the code referred as Statistic Query) and that the data mining framework is capable to execute many other processes. For general and more detailed information about the framework and its architecture see [Data Mining Architecture](data-mining-architecture).
 
 ### Implement the Fact and the Data Retrieval
+
+The concrete interfaces and classes that are needed to implement the Fact depend on what you want to analyze in the new data mining bundle. A good starting point is to think about the domain elements that contain the data you want to analyze, how to get the instances of these domain elements and whats the 
 
 ### Implement your own Aggregators
 
