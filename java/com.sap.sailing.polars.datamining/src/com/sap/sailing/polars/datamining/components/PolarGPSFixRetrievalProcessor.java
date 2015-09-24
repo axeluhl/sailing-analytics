@@ -27,6 +27,12 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
+/**
+ * Essential retriever in the polar datamining pipeline that also handles some standard filtering.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasCompetitorPolarContext, HasGPSFixPolarContext> {
 
     private final PolarDataMiningSettings settings;

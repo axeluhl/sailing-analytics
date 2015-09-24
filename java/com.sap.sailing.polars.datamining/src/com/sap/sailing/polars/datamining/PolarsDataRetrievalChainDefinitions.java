@@ -3,6 +3,7 @@ package com.sap.sailing.polars.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.datamining.components.BackendPolarsBoatClassRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarCompetitorRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarFleetRetrievalProcessor;
@@ -26,6 +27,17 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
 
+/**
+ * Builds the polar related retriever chains.
+ *
+ * </br></br>
+ * 
+ * At the time of writing there are two chains, one for actual generation of custom polars and one for simple access of
+ * backend saved polar in the {@link PolarDataService}
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarsDataRetrievalChainDefinitions {
     
     private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;

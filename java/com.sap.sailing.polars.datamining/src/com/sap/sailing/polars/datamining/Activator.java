@@ -24,6 +24,13 @@ import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
+/**
+ * Handles all necessary registration for a datamining bundle. See
+ * http://wiki.sapsailing.com/wiki/typical-data-mining-scenarios for more information.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class Activator extends AbstractDataMiningActivator {
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Polars_StringMessages";

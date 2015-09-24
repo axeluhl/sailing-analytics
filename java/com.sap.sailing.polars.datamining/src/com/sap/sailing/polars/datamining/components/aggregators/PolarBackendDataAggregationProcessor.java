@@ -24,6 +24,12 @@ import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefiniti
 import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Creates one {@link PolarBackendData} per element. Due to the nature of the backend data there will be only one element per groupkey (boatclass).
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarBackendDataAggregationProcessor extends AbstractParallelGroupedDataAggregationProcessor<HasBackendPolarBoatClassContext, PolarBackendData> {
 
     private static final String POLARS_MESSAGE_KEY = "Polars";
