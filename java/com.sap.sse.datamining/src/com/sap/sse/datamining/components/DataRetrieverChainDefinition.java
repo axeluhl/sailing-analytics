@@ -22,7 +22,8 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * </ol>
  * 
  * The Processors in the chain should extend {@link AbstractRetrievalProcessor}.
- * If not, the processor has to have a constructor with the exact parameter list {@link ExecutorService}, {@link Collection}, <code>int</code>.
+ * If not, the processor has to have a constructor with the exact parameter list
+ * ({@link ExecutorService}, {@link Collection}, <code>int</code>) or ({@link ExecutorService}, {@link Collection}, <code>SettingsType</code>, <code>int</code>).
  * Otherwise an exception will be thrown, when you call one of the methods above.<br/>
  * To create a data retriever chain defined by a <code>DataRetrieverChainDefinition</code>, call {@link #startBuilding(ExecutorService)}
  * which returns an instance of {@link DataRetrieverChainBuilder}.

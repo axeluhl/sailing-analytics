@@ -18,6 +18,10 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 
+    /**
+     * @throws IllegalArgumentException if any of the given function isn't a dimension
+     *                                  or the given iterable is empty.
+     */
     @SuppressWarnings("unchecked")
     public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,
@@ -30,7 +34,7 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     private void verifyThatDimensionsAreDimensions(Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
         if (parameterizedDimensions == null) {
-            throw new IllegalArgumentException("The given dimensions mustn't be null.");
+            throw new NullPointerException("The given dimensions mustn't be null.");
         }
         
         int size = 0;

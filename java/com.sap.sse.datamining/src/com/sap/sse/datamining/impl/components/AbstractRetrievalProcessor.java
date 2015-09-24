@@ -8,6 +8,14 @@ import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 
+/**
+ * Abstract base class for retrieval processors. These kind of processors retrieve multiple <code>result elements</code>
+ * from a single <code>input element</code>. Has an abstract method, that defines how the data is retrieved.
+ * 
+ * @author Lennart Hensler (D054527)
+ * 
+ * @see com.sap.sse.datamining.impl.components com.sap.sse.datamining.impl.components for general information about Processors.
+ */
 public abstract class AbstractRetrievalProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
 
     private final int retrievalLevel;

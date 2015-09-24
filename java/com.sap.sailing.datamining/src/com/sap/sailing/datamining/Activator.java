@@ -22,7 +22,6 @@ import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMe
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sse.datamining.DataMiningBundleService;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -31,7 +30,7 @@ import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
-public class Activator extends AbstractDataMiningActivator implements DataMiningBundleService {
+public class Activator extends AbstractDataMiningActivator {
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Sailing_StringMessages";
     private static final SailingClusterGroups clusterGroups = new SailingClusterGroups();
@@ -63,11 +62,6 @@ public class Activator extends AbstractDataMiningActivator implements DataMining
         this.context = null;
         INSTANCE = null;
         super.stop(context);
-    }
-    
-    @Override
-    protected DataMiningBundleService getDataMiningBundleService() {
-        return this;
     }
     
     @Override
