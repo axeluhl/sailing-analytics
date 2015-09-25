@@ -74,7 +74,7 @@ public class RaceFinishingFragment extends BaseFragment {
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        if (mFinishingSince != null) {
+        if (mFinishingSince != null && getRaceState().getFinishingTime() != null) {
             String timeDiff = TimeUtils.formatDurationSince(now.minus(getRaceState().getFinishingTime().asMillis()).asMillis());
             mFinishingSince.setText(getString(R.string.finishing_started_since, timeDiff));
         }
