@@ -59,11 +59,10 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
             int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
             competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
-
         startAnalysisDTO.competitor = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
-        
-        if (trackedRace.isGateStart()) {
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
             logger.log(Level.INFO, "Creating startanalysis for gate start");
             startAnalysisDTO.racingProcedureType = RacingProcedureType.GateStart;
             long timePointOfGolfDownTime = trackedRace.getGateStartGolfDownTime();
@@ -123,7 +122,8 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         tableentry.rankAtFirstMark = rank;
         tableentry.teamName = competitor.getName();
         tableentry.speedAtStartTime = trackedRace.getSpeed(competitor, 1).getKnots();
-        if (trackedRace.isGateStart()) {
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
             tableentry.distanceToLineAtStartTime = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(
                     competitor).getMeters();
         } else {

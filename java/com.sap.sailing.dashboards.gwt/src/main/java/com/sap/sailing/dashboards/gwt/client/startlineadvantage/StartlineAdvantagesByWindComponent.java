@@ -58,7 +58,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
         initWidget(uiBinder.createAndBindUi(this));
         this.ribDashboardService = ribDashboardService;
         this.asyncActionsExecutor = new AsyncActionsExecutor();
-        initSampleTimer();
+        //initSampleTimer();
     }
     
     private void loadData() {

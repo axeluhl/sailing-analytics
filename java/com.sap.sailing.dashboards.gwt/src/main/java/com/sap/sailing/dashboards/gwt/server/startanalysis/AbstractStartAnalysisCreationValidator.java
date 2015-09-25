@@ -45,7 +45,8 @@ public abstract class AbstractStartAnalysisCreationValidator {
     }
     
     protected boolean raceProgressedFarEnough(Competitor competitor, TrackedRace trackedRace){
-        if(trackedRace.isGateStart()){
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
             return gateStartGolfFlagIsDown(trackedRace);
         }else{
             return competitorPassedSecondWayPoint(competitor, trackedRace);
