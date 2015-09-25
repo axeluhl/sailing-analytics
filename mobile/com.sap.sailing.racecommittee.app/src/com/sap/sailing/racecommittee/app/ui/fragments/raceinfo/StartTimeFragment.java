@@ -417,8 +417,7 @@ public class StartTimeFragment extends BaseFragment
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
-                    if (races.getFleet().getName().equals(fleet.getA()) || LeaderboardNameConstants.DEFAULT_FLEET_NAME
-                        .equals(races.getFleet().getName())) {
+                    if (races.getFleet().getName().equals(fleet.getA())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
                             if (!getRace().equals(race)) {
                                 Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);

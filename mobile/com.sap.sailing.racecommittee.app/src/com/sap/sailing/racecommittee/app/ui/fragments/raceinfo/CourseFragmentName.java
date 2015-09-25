@@ -15,12 +15,12 @@ import android.widget.ListView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class CourseFragmentName extends CourseFragment {
 
