@@ -42,6 +42,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public synchronized void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
         this.raceLogStore = raceLogStore;
         this.regattaLikeParent = regattaLikeParent;
+        for (final Fleet fleet : getFleets()) {
+           reloadRaceLog(fleet);
+        }
     }
 
     @Override
