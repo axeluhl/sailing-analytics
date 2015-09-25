@@ -129,7 +129,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                         @Override
                         public void getRegisteredCompetitors(
                                 final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                            sailingService.getCompetitorRegistrations(leaderboardName,
+                            sailingService.getCompetitorRegistrationsOnRegattaLog(leaderboardName,
                                     new AsyncCallback<Collection<CompetitorDTO>>() {
                                         @Override
                                         public void onSuccess(Collection<CompetitorDTO> result) {
@@ -212,7 +212,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                                 @Override
                                 public void getRegisteredCompetitors(
                                         final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                                    sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName,
+                                    sailingService.getCompetitorRegistrationsOnRaceLog(leaderboardName, raceColumnName,
                                             fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
                                                 @Override
                                                 public void onSuccess(Collection<CompetitorDTO> result) {

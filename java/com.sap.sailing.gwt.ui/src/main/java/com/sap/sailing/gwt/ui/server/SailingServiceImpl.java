@@ -4907,14 +4907,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
+    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
                         getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName)
+    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRegattaLog(String leaderboardName)
             throws DoesNotHaveRegattaLogException {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
