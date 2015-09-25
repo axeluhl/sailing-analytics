@@ -1258,20 +1258,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(identifier.getIdentifier()));
             loadRaceLogEvents(result, query);
-            
-            // query for events with deprecated identifier format...
-            query.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(identifier.getDeprecatedIdentifier()));
-            
-            List<RaceLogEvent> eventsToMigrate = loadRaceLogEvents(result, query);
-            if (!eventsToMigrate.isEmpty()) {
-                // ... migrate them...
-                MongoRaceLogStoreVisitor storeVisitor = new MongoRaceLogStoreVisitor(identifier, new MongoObjectFactoryImpl(database, serviceFinderFactory));
-                for (RaceLogEvent event : eventsToMigrate) {
-                    event.accept(storeVisitor);
-                }
-                // ... and delete the old ones...
-                database.getCollection(CollectionNames.RACE_LOGS.name()).remove(query);
-            }
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new race log
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded race log data. Check MongoDB settings.");
