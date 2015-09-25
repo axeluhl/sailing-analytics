@@ -64,7 +64,6 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         logIdentifier = mock(RaceLogIdentifier.class);
         com.sap.sse.common.Util.Triple<String, String, String> triple = new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
         when(logIdentifier.getIdentifier()).thenReturn(triple);
-        when(logIdentifier.getDeprecatedIdentifier()).thenReturn("");
     }
     
     private RaceLog loadRaceLog() {        
