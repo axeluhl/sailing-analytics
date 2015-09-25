@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
 import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
@@ -1387,4 +1388,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String dataMiningRetrieval();
+    String inviteSelectedCompetitors();
 }

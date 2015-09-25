@@ -702,7 +702,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
+            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
 
     void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 

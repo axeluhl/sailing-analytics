@@ -5668,7 +5668,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {

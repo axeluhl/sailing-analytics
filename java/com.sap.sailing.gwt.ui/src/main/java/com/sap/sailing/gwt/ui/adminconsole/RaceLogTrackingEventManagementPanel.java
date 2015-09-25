@@ -107,7 +107,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                    /* editable */ true, new CompetitorRegistrationHandler() {
+                    /* editable */ true, leaderboardName, new CompetitorRegistrationHandler() {
                         
                         @Override
                         public void setRegisteredCompetitors(Set<CompetitorDTO> registeredCompetitors) {
@@ -208,7 +208,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS
                         .equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                            editable, new CompetitorRegistrationHandler() {
+                            editable, leaderboardName, new CompetitorRegistrationHandler() {
                                 @Override
                                 public void getRegisteredCompetitors(
                                         final Callback<Collection<CompetitorDTO>, Throwable> callback) {
