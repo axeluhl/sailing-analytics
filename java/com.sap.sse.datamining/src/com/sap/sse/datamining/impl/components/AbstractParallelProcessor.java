@@ -74,6 +74,10 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         unfinishedInstructionsCounter.getAndDecrement();
     }
     
+    protected Iterable<Processor<ResultType, ?>> getResultReceivers() {
+        return resultReceivers;
+    }
+    
     /**
      * Forwards the given <code>result</code> to the result receivers, if it's {@link #isResultValid(Object) valid}
      * and if the processor hasn't been {@link #abort() aborted}.

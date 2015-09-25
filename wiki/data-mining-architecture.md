@@ -1,337 +1,125 @@
-# Data Mining Architecture
-
-The data mining framework consists of four major parts. At first the general infrastructure, that handles the registration and deregistration of data mining bundles and provides information about the data mining components, that are currently available. The next part is about how to build and run queries. After that come the data processing components, that are used by queries and contain the main functionality of the framework. The last part are the functions, that are used by the data processing components and that can be changed during run-time.
+# Polars
 
 [[_TOC_]]
 
-## General Infrastructure
+## Introduction
 
-The central place to get information about the current state of the data mining and to perform actions is the OSGi-Service `DataMiningServer`. It provides information about the statistics, dimensions or data retriever chains, that are currently available. It also provides methods to create and run queries with a specific structure. For example a query, that returns all dimension values for a data type, or a standard statistic query (that is described in [Building and running Queries](#Building-and-running-Queries)). The server also has methods to get necessary elements to build your own queries (like an `ExecutorService` or the `ResourceBundleStringMessages`) or to convert DTOs to the data mining domain objects.
+Polar Diagrams (or Polar Plots or Polars in short) describe how fast a boat can go depending on the wind speed and its angle to the true wind. It helps sailors to find the best angle to sail to reach their target destination. In the SAP Sailing Analytics we gather a lot of race data, which can be used to create estimations of the boats polar diagram.
 
-### Registration and Deregistration of Data Mining Bundles
+This wiki page provides information on how to use the polar features in the Analytics, details on the architecture and some further ideas and problems connected to the storage and generation of polars in our system.
 
-The data mining framework listens constantly to the registrations and deregistrations of `DataMiningBundleServices` and adds/removes their provided data mining components. Such components are for example:
+## Two Different Approaches
 
-* An instance of `ResourceBundleStringMessages`, that contains the string messages used by the data mining bundle
-* An iterable of `DataSourceProviders`, that are used to get the data source for queries
-* An iterable of `DataRetrieverChainDefinitions`, that are used by the bundle (see [Building and running Queries](#Building-and-running-Queries))
-* An iterable of `Classes`, that provide the functions of the bundle (see [Data Mining Functions](#Data-Mining-Functions))
+It's important to understand that we have two different approaches for gathering polar diagrams in the Analytics. We give the user datamining tools to build custom polars and we also automatically gather polars for each boat class on the server to be used by other features through an API called the PolarDataService.
 
-To register/deregister a data mining bundle, you just have to register/deregister its `DataMiningBundleService` to the OSGi-Context. An easy way to achieve this, is to extend the `AbstractDataMiningActivator` with the activator of the data mining bundle. This handles the registration/deregistration in the start/stop-method and implements the `DataMiningBundleService`, which forces the concrete activator to implement the component providing methods.
+### Custom Polars (Datamining)
 
-### String Messages
+Custom Polars can be generated in the datamining UI. You can choose filters and groupings as you desire and fire a query at the server. The server than applies these settings and returns your custom polar diagram with some additional information like underlying data sizes. The focus in this approach lies on the configurability of the query to give the user a lot of power to answer the questions they ask concerning polars. Example: You want to compare the polars of the winner of a race with the polars of the sailor who finished last. You can do that with the datamining tools. A more detailed description on how to use the polar datamining features can be found [here](#polars_using-the-datamining-ui-for-polars).
 
-A data mining bundle needs string messages, that are created server-side (for example to internationalize the display name of a function). To create string messages for the bundle do the following steps:
+What the polar datamining feature is **not**: It is not very fast for big queries and shouldn't be used (at least as is) for automated queries that are used in real time features. It is not optimized for that purpose. For those kind of things we provide a designated Backend API called *PolarDataService*.
 
-* Create the new source folder `resources`
-* Add the package `<string messages package name>` to `resources`
-* Create empty properties files for each supported language with the name scheme `<string messages base name>_<locale acronym>`
-* Create a `ResourceBundleStringMessages` in the `DataMiningBundleService`
-	* The `ResourceBundleStringMessages` needs the resource base name, which should be `<string messages package name>/<string messages base name>`
-	* A reference to this `ResourceBundleStringMessages` should be returned by the method `getStringMessages()`
+### PolarDataService (Backend API)
 
-The provided `ResourceBundleStringMessages` will be added to the string messages of the framework, when the data mining bundle is registered. The framework string messages are an instance of `CompoundResourceBundleStringMessages`, that logs message keys that occur multiple times with the log level `INFO`.
+The PolarDataService is a backend API providing access to polar data that is gathered on the backend. The data structures and aggregation is designed for fast responses and real time usage. The PolarDataService is registered as an OSGi Service and can be used very independently (you only need a dependency to com.sap.sailing.domain). You can for example ask the PolarDataService for an estimated speed and beatangle for a given boatclass, windspeed and legtype (upwind or downwind) or for an estimated speed for a given boatclass, windspeed and beatangle (e.g. for reaching legs). To be light memorywise, the backend structures don't save a lot of additional data, so it does not provide any custom filtering.
 
-### Data Source Provider
+For more information on how to use the PolarDataService, please see [this section](#polars_using-the-polardataservice).
 
-A `DataSourceProvider` provides an instance of a data source, that is used by queries. A data source can be from any type, for example is the `RacingEventService` used as one. Your own `DataSourceProviders` should extend `AbstractDataSourceProvider`. Have a look at `RacingEventServiceProvider` for an example.<br />
-These `DataSourceProviders` are used by the framework to create new queries.
+## Using the Datamining UI for Polars
 
-### Client-Server Communication (Data Mining DTOs)
+_TODO_
 
-*This site is under construction.*
+## Using the PolarDataService
 
-## Building and running Queries
+_TODO_
 
-### Defining and building a Data Retriever Chain
+## Polar Datamining Architecture
 
-The interface `DataRetrieverChainDefinition<DataSourceType, DataType>` describes the order of retrieval processors ([Processors](#Processors) with the specific functionality to map an `InputType` to a `ResultType`) to get from the `DataSourceType` to the `DataType`. It provides methods to get some information about the retriever chain and to define the order of the processors. There's currently one implementation, which is the `SimpleDataRetrieverChainDefinition<DataSourceType, DataType>`. Every retriever chain has a `UUID` for identification, which is important for the client server communication. The `SimpleDataRetrieverChainDefinition` generates a new random `UUID` upon construction.
+For general information about the Datamining Architecture please see [this wikipage](/wiki/data-mining-architecture).
 
-The `DataRetrieverChainDefinition<DataSourceType, DataType>` provides three methods to define the order of the retriever chain:
+This section will focus on the polar specific datamining functionality.
 
-* The method `startWith` to define the first retrieval processor.
-	* The other methods would throw an exception, if this method hasn't been called exactly once.
-	* Calling this method more than once causes an exception.
-* The method `addAfter` to add a retrieval processor to the end a the list.
-	* The parameter `lastAddedRetrieverType` is necessary to ensure, that the `ResultType` and `InputType` of successive retrieval processors match.
-* The method `endWith` to complete the retriever chain with the last retrieval processor
-	* Completing a retriever chain makes it immutable.
-	* This causes all modifying methods to throw an exception, if `endWith` has been called.
-	* The parameter `lastAddedRetrieverType` is necessary to ensure, that the `ResultType` and `InputType` of successive retrieval processors match.
+At the time of writing there are two different retrieval chains for polar data. One is for displaying the PolarDataService Data which is automatically gathered in the backend. Most classes for that feature contain the word "Backend". It is quite simple and only allows filtering by boat class name.
 
-This results in the mandatory call order `startWith addAfter* endWith` to define a fresh retriever chain. This strict policy ensures, that the resulting retriever chain instances are type safe and work correctly. The retrieval processors added with this methods have to have a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>, int)` or an exception will be thrown. This constructor is used to create concrete instances of the retrieval processors via reflection, when a retriever chain is constructed. All the definition methods (and the constructors of `SimpleDataRetrieverChainDefinition`) have a `String` parameter for a string message key, that would return the name of the retrieval level/chain. This is necessary to display the retriever chain in a human readable way.
+Most of the classes are for custom polar datamining. In this section we will concentrate on this feature.
 
-This is an example for the correct definition of a fresh retriever chain:
+### File Locations / Project Structure
 
-	DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
-	legOfCompetitorRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
-	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class, HasLeaderboardContext.class, "Leaderboard");
-	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
-	legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
-	legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
+The project structure sticks to the best practices described [here](/wiki/typical-data-mining-scenarios). There are two bundles:
+com.sap.sailing.polars.datamining and com.sap.sailing.polars.datamining.shared; the latter containing classes that are serializable by the GWT engine.
 
-The `SimpleDataRetrieverChainDefinition` has a second constructor, where the parameter for the `Class` of the `DataSourceType` is replaced with an `DataRetrieverChainDefinition`. This allows the reuse of existing retriever chains and initializes the new one in the state as if the method `startWith` has been called exactly once. This is an example for the correct reuse of an existing retriever:
+An Activator registeres the polar datamining functionality with the main datamining server. The data package contains the retrieval data classes, the component package contains retrieval processors and the aggregators package contains the two aggregators.
 
-	DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(RacingEventService.class, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");
-	legOfCompetitorRetrieverChainDefinition.startWith(LeaderboardGroupRetrievalProcessor.class, LeaderboardGroupWithContext.class, "LeaderboardGroup");
-	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardGroupRetrievalProcessor.class, LeaderboardRetrievalProcessor.class, HasLeaderboardContext.class, "Leaderboard");
-	legOfCompetitorRetrieverChainDefinition.addAfter(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class, HasTrackedRaceContext.class, "Race");
-	legOfCompetitorRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, TrackedLegRetrievalProcessor.class, HasTrackedLegContext.class, "Leg");
-	legOfCompetitorRetrieverChainDefinition.endWith(TrackedLegRetrievalProcessor.class, TrackedLegOfCompetitorRetrievalProcessor.class, HasTrackedLegOfCompetitorContext.class, "LegOfCompetitor");
-	
-	DataRetrieverChainDefinition<RacingEventService, HasGPSFixContext> gpsFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(legOfCompetitorRetrieverChainDefinition, HasGPSFixContext.class, "GPSFixSailingDomainRetrieverChain");
-    gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, GPSFixRetrievalProcessor.class,HasGPSFixContext.class, "GpsFix");
+The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.gwt.ui.polarmining package.
 
-Concrete data retriever chain instances can be constructed with a `DataRetrieverChainBuilder`. To get the builder of a **completed** `DataRetrieverChainDefinition` call its `startBuilding` method, which can be done as often as necessary. The interface `DataRetrieverChainBuilder<DataSourceType>` provides methods to iterate the defined retriever chain and to modify the current retrieval processor.
+### Extending the Feature
 
-* The method `stepFurther` iterates over the retriever chain and sets the next retrieval processor as the one to modify.
-	* Is similar to the `next` method of `Iterator`.
-	* Initializes the builder, which is necessary to call the modifying methods.
-	* Throws an exception, if the builder can't step any further.
-* The method `canStepFurther` returns `true`, if `stepFurther` can be called at least once more.
-	* Is similar to the `hasNext` method of `Iterator`
+The feature can be extended by adding dimensions to the types in the polar.datamining bundle.
+This dimensions then serve as a new option in filtering and grouping.
 
-The builder has to be initialized, to call the modifying methods so that no exception is thrown. This means, that the `stepFurther` method has to be called at least once. This allows a better usage of the builder in loops as described in the construction examples.
+How that works is displayed [here](/wiki/typical-data-mining-scenarios).
 
-* The method `setFilter`, sets the [Filter Criterion](#Filter-Criteria) that is applied after the current retrieval processor.
-	* If this method is called more than once for the same retrieval processor, than the old filter is replaced by the new one. Use `CompoundFilterCriterion` to filter with multiple criteria.
-	* The `ElementType` of the given criterion has to match the `ResultType` of the current retrieval processor or an exception will be thrown. Call the builders `getCurrentRetrievedDataType` method to get the current `ResultType`.
-* The method `addResultReceiver` adds the given processor as a result receiver of the current retrieval processor, which means that all retrieved data elements will be forwarded to the result receiver.
-	* It's possible to add more than one result receiver to the same retrieval processor.
-	* Note that, successive retrieval processors will automatically be result receivers of the corresponding precursor.
-	* The `InputType` of the given processor has to match the `ResultType` of the current retrieval processor or an exception will be thrown. Call the builders `getCurrentRetrievedDataType` method to get the current `ResultType`.
+### Known Issues
 
-All iterating and modifying methods return the builder. This can be used to make multiple calls in a single statement. The method `build` constructs the configured retriever chain until the **current** retrieval processor and returns the **first** processor of the concrete retriever chain instance. This can be useful in some cases, but the standard use case is to configure the retrieval processors, that should be configured and iterate through the builder until `canStepFurther` returns `false` (this results in instances of the complete retriever chain). `build` can be called as often as necessary and it's legal to configure the chain, after `build` has been called. Note that the previously created retriever chain instance won't be affected from these changes.
+* Bug 3055 - Tooltip at Polarsheets Histogramm disappears
+* Bug 3056 - Polar Sheets Histogram shows average value for number of data points
 
-This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be configured in a single statement, which is useful for tests or fix configurations:
+## PolarDataService Architecture
 
-	DataRetrieverChainBuilder<Collection<Test_Regatta>> chainBuilder = dataRetrieverChainDefinition.startBuilding(ConcurrencyTestsUtil.getExecutor());
-	chainBuilder.stepFurther().stepFurther().setFilter(raceFilter).stepFurther().setFilter(legOfCompetitorFilter).addResultReceiver(legReceiver);
-	Processor<Collection<Test_Regatta>, ?> firstRetrieverInChain = chainBuilder.build();
+The PolarDataService is an OSGi Service. The interface lives in com.sap.sailing.domain. Information on how to use the service is provided in [this section](#polars_using-the-polardataservice).
 
-This is an example how a `DataRetrieverChainBuilder<DataSourceType>` can be configured with a loop, which is useful to create many different retriever chain instances of one definition:
+This section is addressed at developers who desire to understand the implementation of the service and how it gathers polar data automatically.
 
-	DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition().startBuilding(executor);
-    Map<Integer, FilterCriterion<?>> criteriaMappedByRetrieverLevel = getFilterCriteriaForLevel();
-    while (chainBuilder.canStepFurther()) {
-        chainBuilder.stepFurther();
-        
-        if (criteriaMappedByRetrieverLevel.containsKey(chainBuilder.getCurrentRetrieverLevel())) {
-            chainBuilder.setFilter(criteriaMappedByRetrieverLevel.get(chainBuilder.getCurrentRetrieverLevel()));
-        }
-    }
-    chainBuilder.addResultReceiver(groupingProcessor);
+### File Locations / Project Structure
 
-	Processor<DataSourceType, ?> firstRetrieverInChain = chainBuilder.build();
+Apart from the service interface which lives in com.sap.sailing.domain, everything else is in the com.sap.sailing.polars bundle. PolarDataServiceImpl implements the service and can be used as a good entry point when first trying to understand the code.
+This implementation also implements ReplicableWithObjectInputStream to support replication of the gathered data when a new replica is attached. If not for that the gathered data would differ on different servers.
 
-### Building a Processor Query
+The com.sap.sailing.polars bundle also provides an Activator that handles registration of the OSGi Service.
 
-*This section is under construction.*
+Everything else in the bundle is related to the pipeline that filter, groups and aggregates the data. Some more detail is given below and a look into the code will certainly help.
 
-### Running a Query directly
+### Gathering Pipeline
 
-*This section is under construction.*
+The implementation uses features of the datamining engine to build the gathering pipeline. The pipeline is fed with GPS fixes, when they come in. These are then filtered, grouped and in the end they are aggregated into the main data structure, which is detailed below.
 
-### Running a Query with the `DataMiningServer`
+The pipeline is constructed in com.sap.sailing.polars.mining.PolarDataMiner. Here the core structure for the automatic polar gatherer is constructed. If you are looking to extend/change the mechanism, the PolarDataMiner is a good place to start looking for the desired part of the feature.
 
-*This section is under construction.*
+The filtering excludes fixes where a boat was doing a maneuver or every boat that didn't finish in the top 10%, so that good sailors provide the data for higher quality polar data.
 
-## Data Processing Components
+### Main Data Structure
 
-### Processors
+The last step of the gathering pipeline is putting the result into the main data structure where it lives in memory until the server is killed. The main data structure actually consists of two different aggregations:
 
-Processors are the main component of the framework to process the data and work with the [Pipes and Filter Architecture](http://de.wikipedia.org/wiki/Pipes_und_Filter). The interface `Processor<InputType, ResultType>` describes the functionality of processors, which combines pipes and filters. It has methods to process given elements or to react to a thrown failure and also methods to control the work-flow (for example to finish or abort the work), but it doesn't have methods to get the result of the data processing. The results of processors are forwarded to something, that depends on the concrete implementation (this will be other processors in most cases). Here are the most important methods of `Processor`:
+####  SpeedRegressionPerAngleClusterProcessor
 
-* The method `canProcessElements` returns `true`, if the processor will accept new elements.
-* The method `processElement` processes the given element and forwards the result.
-* The method `onFailure` handles failures during the processing.
-	* The standard implementation is forwarding them to the last processor, that collects the failures, until the processing is finished. Than the failures will be handled.
-* The method `finish` tells the processor to finish.
-	* It won't accept new elements given with `processElement`.
-	* After the processor has finished all remaining work, will it tell all result receivers to finish.
-* The method `abort` aborts the processing immediately.
-	* The resulting data of the processor can be incomplete or undefined.
-	* It won't accept new elements given with `processElement`.
-	* All result receivers will be told to abort.
+The com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor contains data to answer requests which already supply a beat angle. It maintains a boatSpeed over windSpeed regression for every boatclass and 5degree beatangle combination.
 
-How this functionality is implemented, depends on the concrete implementation, but it should stick to this description, except for some special cases (like the last processor in a chain). New processors should extend `AbstractParallelProcessor`. This abstract implementation implements most of the functionality defined by `Processor`, with a parallel processing of the input elements. The parallelization is done in the method `processElement`:
+#### CubicRegressionPerCourseProcessor
+The com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor contains data to answer requests which do not contain a beat angle but a legtype (upwind/downwind). It maintains two regression buckets. One boatSpeed over windSpeed and one beatAngle over windSpeed regression per boat class.
 
-* An `AbstractProcessorInstruction` created if for the given input element.
-* The instruction is given to an `ExecutorService`, if it is valid.
-	* For example are `null` instructions invalid.
-	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
-* The instruction forwards its result to the result receivers, after it has been executed.
-* The execution of instructions is handled by the `ExecutorService` of the processor.
+#### Regressions
+The regression magic is performed by the IncrementalAnyOrderLeastSquaresImpl class, which was inspired by this blog post: <http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/>
 
-Abstract processors have the following abstract methods:
+It can do online any order regressions with least squares and has optimizations to be especially quick for cubic regressions, as they are used for the regressions in the polar backend.
 
-* The method `createInstruction` creates an `AbstractProcessorInstruction` for the given input element, in which the concrete functionality of the instruction is implemented.
-	* See [Processor Instructions](#Processor-Instructions) for detailed information about instructions.
-* The method `setAdditionalData` sets the additional result data for the processor.
-	* For example the amount of filtered or retrieved data elements.
+## Replication with Use Case
 
-An useful method for concrete processors is the protected method `createInvalidResult`, that returns an instruction, that won't be passed to the `ExecutorService`. This can be used to stop the processing of a specific input element (for example to filter the data).
+"Bug 2563 - Support replication of polar data service" states the need for interserver communication when it comes to the polars that reside in the backend. The standard event scenario is that we have one event server for each ongoing event and the archive server for the past events. We still want to be able to access polar data of the past when being on the live server. This is obvious when we think about the presentation of the simulator at a live event. It will not work very well in the beginning of the event when no races are loaded yet. Thus it would be great to have the archive data available. Multiple approaches have been discussed and I will list them here trying to sort them descending by feasability.
 
-There are useful implementations of the abstract processors, that are more specialized. These special processors implement the creation of instructions and the setting of the additional data for their special case.
+### System.properties
 
-#### Retrieval Processor
+We could just let the admin specify a System Property that is read by the polar bundle upon start. The system property should contain a URL to a remote server where polars are available. (E.g. the archive server). The bundle then requests the current polar aggregation from the remote server. If successful it will set this aggregation as the initial aggregation in it. If unsuccessful the server will start with empty containers.
 
-Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
+This would be quite simple to implement (as opposed to multiway replication) and still be sufficient for the typical event + archive scenario.
 
-#### Filtering Processor
+### Manual Import
 
-Filtering processors are used to filter the input elements. The class `ParallelFilteringProcessor<InputType>` is a concrete processor, that checks in its instructions, if a given input element matches a `FilterCriterion`. If yes, the given input element is returned as result and if not an invalid result (created with the method `createInvalidResult`) is returned. See [Filter Criteria](#Filter-Criteria) for detailed information about possible filters.
+The manual import approach is pretty similar to the System.properties approach, but as opposed to defining a system property, the admin could import the polars during the run time of the server similar to the Master Data Import feature. There are some problems with that approach, since merging of to non-empty aggregations in non-trivial and also a UI would have to be created.
 
-#### Grouping Processor
+### Replication
 
-Grouping processors are used classify the data elements. The class `ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>` is a concrete processor, that creates a compound `GroupKey` for the dimension values of a collection of [Dimension Functions](#Dimensions) for a data element. The calculation of this group key is done in the processor instruction and the type of the results is `GroupedDataEntry<DataType>`. The resulting group key is a nesting of the single dimension values. So if the dimension values for a data element would be
+We could use Axels replication framework. It would allow for a more flexible approach, but a lot of work would have to be done to allow replication in that direction and between multiple servers that are not in a master-replica-configuration.
 
-* Regatta Name: `Kieler Woche 2014`
-* Race Name: `505 Race 1`
-* Leg Type: `UPWIND`
+### Hard Coded Polars
 
-And the dimensions to group by would be the list `[Regatta Name, Race Name, Leg Type]`, then the resulting group key would be `Kieler Woche 2014 (505 Race 1 (UPWIND))`. The `Functions`, that are given to the grouping processor have to meet some conditions or an exception will be thrown upon construction:
-
-* The given iterable mustn't be `null`.
-* The given iterable mustn't be empty.
-* Every `Function` has to be a dimension.
-
-There's also the abstract class `AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>` (that is implemented by the dimensions value processor), that implements the functionality to build the nested key out of a collection of dimensions. It has the abstract method `createGroupKeyFor`, that has to implement the concrete key creation for the data element for a single dimension.
-
-#### Extraction Processor
-
-Extraction processors are used to get statistic value of a grouped data element. The class `ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>` is a concrete processor, that takes `GroupedDataEntry<DataType>` as input elements and has `GroupedDataEntry<FunctionReturnType>` as result elements. It needs a [Statistic Function](#Statistics) to extract the statistic value from the data elements, which is done in its instructions. If the statistic value is `null`, then an invalid result (created with the method `createInvalidResult`) is returned. If the value is something else, then the statistic value grouped by the key of the data element is returned.
-
-### Aggregators
-
-Aggregators are special processors, that are used to aggregate a collection of input elements (e.g. grouped statistic values) to a single result element (e.g. grouped statistic aggregate). The abstract class `AbstractParallelStoringAggregationProcessor<InputType, AggregatedType>` should be used to implement new aggregators. It creates instructions, that store the input element in a collection, that depends on the concrete implementation. The concrete aggregators doesn't have to use a concurrent collection, because the abstract aggregator handles the locking before storing an input element. The instructions always return an invalid result (created with the method `createInvalidResult`). This has the effect, that there won't be a result element forwarded to the result receivers, when the instruction has been executed. This is because the standard aggregator needs all input elements before it can calculate the aggregate. This is done in the implementation of the method `finish`. The calculated aggregate will then be forwarded to the result receivers. The abstract aggregator has two abstract methods:
-
-* The method `storeElement`, that is called in the instructions to store the given element in the specific collection.
-* The method `aggregateResult`, that is called in the `finish` method. It calculates the aggregate for the stored input elements and returns a single result element.
-
-**It's important to add a new entry to the enum `AggregatorType`, after a new type of aggregator has been implemented.** The aggregator won't be displayed in the generic data mining UI otherwise. This is legacy code from the previous architecture and will be removed in the future development.
-
-There are some concrete aggregators, that have `GroupedDataEntry<DataType>` as `InputType` and `Map<GroupKey, Double` as `ResultType`. Most of them have `Double` as `DataType`, but some of them are type independent. This has the effect, that currently the `ReturnType` of [Statistics](#Statistics) has to be `Double` or has to be autocasted or wrapped to `Double`. It is planned to use `ScalableValue` instead of `Double`, which will make the aggregation more flexible. These are the concrete aggregators for the statistic aggregation:
-
-* Sum (implemented by `ParallelGroupedDoubleDataSumAggregationProcessor`)
-* Average (implemented by `ParallelGroupedDoubleDataAverageAggregationProcessor`)
-* Median (implemented by `ParallelGroupedDoubleDataMedianAggregationProcessor`)
-* Maximum (implemented by `ParallelGroupedDoubleDataMaxAggregationProcessor`)
-* Minimum (implemented by `ParallelGroupedDoubleDataMinAggregationProcessor`)
-* Count (implemented by `ParallelGroupedDataCountAggregationProcessor`)
-	* This aggregator is type independent and can be used with any `GroupedDataEntry<?>`
-
-There's also the special aggregator `ParallelGroupedDataCollectingAsSetProcessor<DataType>`, that returns a `Map<GroupKey, Set<DataType>>` as result element. There's no entry in the enum `AggregatorType`, because this aggregator shouldn't be used by the end users. It is used to collect all dimension values of a collection of data elements.
-
-### Processor Instructions
-
-*This section is under construction.*
-
-Processor instructions are `Runnables` enriched with a priority. The abstract class `AbstractProcessorInstruction<ResultType>` should be used to create new instructions.
-
-### Filter Criteria
-
-*This section is under construction.*
-
-### Data Types
-
-*This section is under construction.*
-
-## Data Mining Functions
-
-Data Mining Functions are used by the [Data Processing Components](#Data-Processing-Components) to get the data from the data elements, that is necessary for the data processing. This can be for the filtration or grouping by dimension values (like the name of the regatta or the leg type) or for the extraction of the statistic values (like the traveled distance or the relative rank). Functions can be defined by annotating the methods of data types and domain types, that should be used to the data. There are currently the three annotations `Connector`, `Dimension` and `Statistic` with different properties and conditions as described below. This makes the system flexible and allows developers to add new or change existing dimensions and statistics very fast. This can also be done during run-time, if the corresponding OSGi-Bundles are hot deployed or refreshed (see [Registration and Deregistration of Data Mining Bundles](#Registration-and-Deregistration-of-Data-Mining-Bundles) for more information).
-
-### Connecter
-
-Methods marked with the annotation `Connector` indicate the framework, that the result type contains functions. The method has to match the following conditions, to be registered by the framework:
-
-* It has no parameters.
-* The return type isn't `void`.
-* It should be side effect free.
-	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
-
-Connecter can have the following properties:
-
-* A `String messageKey` with the default `""`, that is used for the internationalization.
-* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
-* A `boolean scanForStatistics` with the default `true`, that indicates the framework, if the statistics contained by the return type of the marked method should be registered.
-	* This is useful for connections to *higher level* data types, to be able to use their dimensions, without the registration of unwanted or even wrong statistics.
-
-How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
-
-### Dimensions
-
-Methods marked with the annotation `Dimension` will be registered as dimension by the framework. The method will be called via reflection, if the dimension value of data elements of this data type is requested (for example to filter or group the data). The method has to match the following conditions, to be registered by the framework:
-
-* It has no parameters, except if the parameter list is exactly `Locale, ResourceBundleStringMessages`.
-* The return type isn't `void`.
-* It should be side effect free.
-	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
-
-The return type of the marked method should be:
-
-* A primitive type or wrapper class or
-* Classes that implement `equals`, `hashCode`
-	* Or the grouping could become incorrect.
-* and `toString`.
-	* Or the result presentation will be unreadable.
-
-Dimensions have the following properties:
-
-* The mandatory `String messageKey`, that is used for the internationalization.
-* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
-
-How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
-
-### Statistics
-
-Methods marked with the annotation `Statistic` will be registered as computable statistics by the framework. The method will be called via reflection, if the statistic value of a data elements of this data type is requested (for example for the statistic extraction). The method has to match the following conditions, to be registered by the framework:
-
-* It has no parameters, except if the parameter list is exactly `Locale, ResourceBundleStringMessages`.
-* The return type isn't `void`.
-* It should be side effect free.
-	* This isn't checked by the framework, so methods with side effects will be registered, but this could have strange effects on the data mining.
-
-The return type of the method has to be processable by an aggregator (described in [Processors](#Processors)) of the data mining framework, for example `int` or `double`.
-
-Statistics have the following properties:
-
-* The mandatory `String messageKey`, that is used for the internationalization.
-* An `int ordinal` with the default `Integer.MAX_VALUE`, that is used for the sorting of functions (the standard sorting is ascending).
-* A `Unit resultUnit` with the default `Unit.None`, that is shown in the result presentation.
-	* `Unit` is an enum located in the bundle `com.sap.sse.datamining.shared`.
-	* Every member of `Unit` needs a message key in the string messages of the bundle `com.sap.sse.datamining` for internationalization purposes. For example has the unit `Meters` the entry `Meters=m` in the file `StringMessages_en.properties`.
-* An `int resultDecimals` with the default `0`, that sets the number of the visible result decimals.
-
-How the presence of multiple `messageKeys` and `ordinals` in compound functions work is described in [Compound Functions](#Compound-Functions).
-
-### Function Registration Process
-
-The function registration process is triggered, when a [data mining bundle is registered](#Registration-and-Deregistration-of-Data-Mining-Bundles). The classes returned by the method `getClassesWithMarkedMethods` of the `DataMiningBundleService` are given to a `FunctionRegistry`. The registry iterates over all public methods (including those declared by the class or interface and those inherited from superclasses and superinterfaces) for each of the given classes and does the following:
-
-* If the method is a valid [Connector](#Connecter), then the method gets converted to a `Function`, which is added to the list of *previous functions*. The return type of the function gets registered to the `FunctionRegistry`.
-* If the method is a valid [Dimension](#Dimensions), then the method gets converted to a `Function`, which is registered as dimension. If the list of *previous functions* isn't empty, than the list and the dimension will be saved as `ConcatenatingCompoundFunction`.
-* If the method is a valid [Statistic](#Statistics) and no connector in the list of *previous functions* has set the `scanForStatistics` to `false`, then the method gets converted to a `Function`, which is registered as statistic. If the list of *previous functions* isn't empty, than the list and the statistic will be saved as `ConcatenatingCompoundFunction`.
-
-What is a valid connector/dimension/statistic and what isn't is described in the corresponding sections of this wiki page. How the `ConcatenatingCompoundFunction` works in detail, is described in [Compound Functions](#Compound-Functions).
-
-Currently unsupported are
-
-* Annotating a method with multiple data mining annotations.
-	* The annotations `Dimension` and `Statistic` have a higher priority than `Connector`, so a method annotated with `Dimension` and `Connector` will be handled as `Dimensions`.
-* Cycles in the annotation graph.
-	* For example, if `A` has the connector `B foo()` and `B` has the connector `A bar()`.
-	* This would result in an infinite loop during the registration process, that should lead to a `StackOverflowError`.
-
-### Compound Functions
-
-Compound functions provide the `Function<ReturnType>` interface for a collection of functions. There is currently only the `ConcatenatingCompoundFunction`, that capsules a list of functions, that are called one after another (like the java statement `foo().bar().stat();`). It's necessary to handle some of the methods declared in the `Function` interface in a special way, what is described here.
-
-* The methods `getDeclaringType` and `getParameters` return the corresponding value of the **first** function in the list.
-* The methods `getReturnType`, `getResultUnit`, `getResultDecimals` and `isDimension` return the corresponding value of the **last** function in the list.
-* The `tryToInvoke` methods invoke the first function in the list with the given instance and all other functions with the return value of the previous function.
-	* It returns `null`, if one of the functions in the list returned `null`.
-* The method `getOrdinal` returns the smallest ordinal of the functions in the list.
-* The method `getSimpleName` returns the name of the function, if the name has been set. If not returns the method the concatenated simple names of the functions in the list separated by `->`.
-* The method `isLocalizable` returns `true`, if any of the functions in the list is localizable.
-* The method `getLocalizedName` returns the name of the function, if the name has been set, the simple name, if the compound function isn't localizable or the concatenated simple names of the functions in the list separated by a single space.
+Some suggested it would be okay to just read out the polars of the archive and hard-code them into the server as an initial polar state, that is then changed by new incoming data. That is a very static approach and defeats the dynamic nature of the whole polar approach but it is very simple to do.

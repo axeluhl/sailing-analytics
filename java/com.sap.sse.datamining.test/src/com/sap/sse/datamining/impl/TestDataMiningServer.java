@@ -27,22 +27,22 @@ public class TestDataMiningServer {
         
         Date beforeChange = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.setDataSourceProvider(dataSourceProvider);
+        server.registerDataSourceProvider(dataSourceProvider);
         assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(true));
         
         beforeChange = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.setDataSourceProvider(dataSourceProvider);
+        server.registerDataSourceProvider(dataSourceProvider);
         assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(true));
         
         beforeChange = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.removeDataSourceProvider(dataSourceProvider);
+        server.unregisterDataSourceProvider(dataSourceProvider);
         assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(true));
         
         beforeChange = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.removeDataSourceProvider(dataSourceProvider);
+        server.unregisterDataSourceProvider(dataSourceProvider);
         assertThat(server.getComponentsChangedTimepoint().after(beforeChange), is(false));
     }
 

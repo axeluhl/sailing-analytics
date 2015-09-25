@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.test.data.impl;
 
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.annotations.data.Unit;
 
 public interface DataTypeInterface {
     

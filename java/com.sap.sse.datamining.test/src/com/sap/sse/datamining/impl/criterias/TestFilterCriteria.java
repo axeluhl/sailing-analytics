@@ -15,7 +15,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.data.impl.DataTypeWithContext;
 import com.sap.sse.datamining.test.data.impl.DataTypeWithContextImpl;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
-import com.sap.sse.datamining.test.util.StringRegexFilterCriterion;
+import com.sap.sse.datamining.test.util.components.StringRegexFilterCriterion;
 
 public class TestFilterCriteria {
     

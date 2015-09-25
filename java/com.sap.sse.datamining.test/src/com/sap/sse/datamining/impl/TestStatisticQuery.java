@@ -19,23 +19,23 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.StatisticQueryDefinition;
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.QueryResultState;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.Number;
-import com.sap.sse.datamining.test.util.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestStatisticQuery {
@@ -49,7 +49,7 @@ public class TestStatisticQuery {
         
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;
@@ -82,7 +82,7 @@ public class TestStatisticQuery {
         definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));
         
         Method getValueMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getValue");
-        definition.setFilterSelection(0, functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
+        definition.setFilterSelection(retrieverChain.getDataRetrieverLevel(0), functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
         
         return definition;
     }

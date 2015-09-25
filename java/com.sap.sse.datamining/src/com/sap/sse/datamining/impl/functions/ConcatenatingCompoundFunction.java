@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
@@ -157,6 +157,25 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return functions;
     }
 
+    /**
+     * @return The list of functions as simple functions (like {@link MethodWrappingFunction}).
+     */
+    public List<MethodWrappingFunction<?>> getSimpleFunctions() {
+        List<MethodWrappingFunction<?>> simpleFunctions = new ArrayList<>();
+        for (Function<?> function : functions) {
+            if (function.getClass().equals(MethodWrappingFunction.class)) {
+                simpleFunctions.add((MethodWrappingFunction<?>) function);
+                continue;
+            }
+            if (function.getClass().equals(ConcatenatingCompoundFunction.class)) {
+                simpleFunctions.addAll(((ConcatenatingCompoundFunction<?>) function).getSimpleFunctions());
+                continue;
+            }
+            throw new IllegalArgumentException("Can't simplify functions of type " + function.getClass().getSimpleName());
+        }
+        return simpleFunctions;
+    }
+
     private Function<?> getFirstFunction() {
         return functions.get(0);
     }
@@ -174,7 +193,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((functions == null) ? 0 : functions.hashCode());
+        result = prime * result + ((functions == null) ? 0 : getSimpleFunctions().hashCode());
         return result;
     }
 
@@ -190,7 +209,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         if (functions == null) {
             if (other.functions != null)
                 return false;
-        } else if (!functions.equals(other.functions))
+        } else if (!getSimpleFunctions().equals(other.getSimpleFunctions()))
             return false;
         return true;
     }

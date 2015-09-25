@@ -44,7 +44,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onSuccess(T result) {
             try {
-                GWT.log("Execution success for action of type: " + getType());
+                GWT.log("Execution success for action of type " + getType() + ", category "+getCategory());
                 this.callback.onSuccess(result);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
@@ -54,7 +54,7 @@ public class AsyncActionsExecutor {
         @Override
         public void onFailure(Throwable caught) {
             try {
-                GWT.log("Execution failure for action of type: " + getType());
+                GWT.log("Execution failure for action of type " + getType() + ", category "+getCategory());
                 this.callback.onFailure(caught);
             } finally {
                 AsyncActionsExecutor.this.callCompleted(this);
@@ -62,7 +62,7 @@ public class AsyncActionsExecutor {
         }
     }
     
-    private static final int DEFAULT_MAX_PENDING_CALLS = 6;
+    private static final int DEFAULT_MAX_PENDING_CALLS = 10;
     private static final int DEFAULT_MAX_PENDING_CALLS_PER_TYPE = 4;
     
     /**
@@ -145,7 +145,7 @@ public class AsyncActionsExecutor {
                 }
                 numActionsOfType = 0;
             } else {
-                GWT.log("Dropping action of type: " + job.getType());
+                GWT.log("Dropping action of type " + job.getType() + ", category "+job.getCategory());
                 /* don't put the call into the execution queue, but save it as the last one of each type
                  * after each successful execution of a job checkForEmptyCallQueue will check if there
                  * are other jobs of that type that need execution and execute the last one thus
