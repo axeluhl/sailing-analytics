@@ -77,7 +77,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     protected int setMarkerLevel(View view, @IdRes int resId, int level) {
         int retValue = -1;
 
-        if (isAdded()) {
+        if (view != null && isAdded()) {
             ImageView image = (ImageView) view.findViewById(resId);
             if (image != null) {
                 Drawable drawable = image.getDrawable();

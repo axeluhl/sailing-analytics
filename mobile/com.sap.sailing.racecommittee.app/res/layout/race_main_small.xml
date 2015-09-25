@@ -24,7 +24,9 @@
         <FrameLayout
             android:id="@+id/race_panel_extra"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
+
+        </FrameLayout>
     </FrameLayout>
 
     <RelativeLayout
@@ -73,8 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                tools:src="@drawable/ic_dot"
-                tools:visibility="visible"/>
+                tools:src="@drawable/ic_dot"/>
         </LinearLayout>
 
         <View
@@ -101,4 +102,5 @@
         android:id="@+id/race_edit"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
 </RelativeLayout>

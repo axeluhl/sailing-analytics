@@ -2,6 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
 import java.util.ArrayList;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,8 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.panels.MorePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -21,6 +28,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
     private ArrayList<ImageView> mDots;
     private ArrayList<View> mPanels;
+    private RaceStateListener mStateListener;
 
     private int mActivePage = 0;
 
@@ -30,6 +38,8 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
         mDots = new ArrayList<>();
         mPanels = new ArrayList<>();
+
+        mStateListener = new RaceStateListener();
 
         View panel;
         panel = ViewHelper.get(layout, R.id.race_panel_time);
@@ -54,10 +64,10 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         if (dot != null) {
             mDots.add(dot);
         }
-//        dot = ViewHelper.get(layout, R.id.panel_3);
-//        if (dot != null) {
-//            mDots.add(dot);
-//        }
+        dot = ViewHelper.get(layout, R.id.panel_3);
+        if (dot != null) {
+            mDots.add(dot);
+        }
 
         ImageView btnPrev = ViewHelper.get(layout, R.id.nav_prev);
         if (btnPrev != null) {
@@ -77,12 +87,24 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        getRaceState().addChangedListener(mStateListener);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getRaceState().removeChangedListener(mStateListener);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (mDots != null && mDots.size() > 0) {
-            viewPanel(0);
-        }
+        racingProcedureChanged();
     }
 
     @Override
@@ -98,6 +120,27 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         }
     }
 
+    private void racingProcedureChanged() {
+        if (mDots != null && mDots.size() > 0) {
+            if (getRaceState() != null && getRaceState().getRacingProcedure() != null) {
+                RacingProcedure procedure = getRaceState().getRacingProcedure();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                if (procedure instanceof RRS26RacingProcedure || procedure instanceof GateStartRacingProcedure) {
+                    mDots.get(mDots.size() - 1).setVisibility(View.VISIBLE);
+                    transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));
+                } else {
+                    mDots.get(mDots.size() - 1).setVisibility(View.GONE);
+                    Fragment fragment = getFragmentManager().findFragmentById(R.id.race_panel_extra);
+                    if (fragment != null) {
+                        transaction.remove(fragment);
+                    }
+                }
+                transaction.commit();
+                viewPanel(0);
+            }
+        }
+    }
+
     private void viewPanel(int direction) {
         mActivePage += direction;
         if (mActivePage < 0) {
@@ -105,6 +148,10 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         }
         if (mActivePage == mDots.size()) {
             mActivePage = 0;
+        }
+
+        if (mDots.get(mActivePage).getVisibility() == View.GONE) {
+            viewPanel(direction);
         }
 
         for (ImageView mDot : mDots) {
@@ -122,5 +169,15 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         }
 
         mPanels.get(mActivePage).setVisibility(View.VISIBLE);
+    }
+
+    private class RaceStateListener extends BaseRaceStateChangedListener {
+
+        @Override
+        public void onRacingProcedureChanged(ReadonlyRaceState state) {
+            super.onRacingProcedureChanged(state);
+
+            racingProcedureChanged();
+        }
     }
 }

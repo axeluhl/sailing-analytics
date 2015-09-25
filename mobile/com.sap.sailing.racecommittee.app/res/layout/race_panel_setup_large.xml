@@ -69,21 +69,21 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/start_mode"
+            android:id="@+id/start_procedure_more"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="?sap_gray">
 
             <ImageView
-                android:id="@+id/start_mode_marker"
+                android:id="@+id/start_procedure_more_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="?marker"/>
 
             <LinearLayout
-                android:id="@+id/start_mode_header"
+                android:id="@+id/start_procedure_more_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -92,11 +92,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/start_mode"
+                    android:text="@string/start_procedure_more"
                     android:textAppearance="?textPanelHeader"/>
 
                 <ImageView
-                    android:id="@+id/start_mode_lock"
+                    android:id="@+id/start_procedure_more_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/lock_margin"
@@ -110,15 +110,14 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/start_mode_header">
+                android:layout_below="@id/start_procedure_more_header">
 
                 <ImageView
-                    android:id="@+id/start_mode_flag"
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="true"
-                    tools:src="@drawable/flag_papa_64dp"/>
+                    android:id="@+id/start_procedure_more_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="?keyboard_control_36dp"
+                    android:layout_centerInParent="true"/>
             </RelativeLayout>
         </RelativeLayout>
 

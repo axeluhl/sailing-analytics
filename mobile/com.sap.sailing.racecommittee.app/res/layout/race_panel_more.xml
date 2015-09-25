@@ -3,31 +3,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/side_button"
-    tools:ignore="UseCompoundDrawables">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:id="@+id/start_procedure"
+            android:id="@+id/start_mode"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?sap_gray"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
-                android:id="@+id/start_procedure_marker"
+                android:id="@+id/start_mode_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="?marker"/>
 
             <LinearLayout
-                android:id="@+id/start_procedure_header"
+                android:id="@+id/start_mode_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -36,11 +36,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/start_procedure"
+                    android:text="@string/start_mode"
                     android:textAppearance="?textPanelHeader"/>
 
                 <ImageView
-                    android:id="@+id/start_procedure_lock"
+                    android:id="@+id/start_mode_lock"
                     android:layout_width="@dimen/side_button_lockSize"
                     android:layout_height="@dimen/side_button_lockSize"
                     android:layout_gravity="center_vertical"
@@ -55,82 +55,15 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/start_procedure_header">
-
-                <TextView
-                    android:id="@+id/start_procedure_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:gravity="center_horizontal"
-                    android:paddingLeft="@dimen/default_padding_half"
-                    android:paddingRight="@dimen/default_padding_half"
-                    android:textAppearance="?textPanelCaption"
-                    tools:text="@string/start_procedure_line_start"/>
-            </RelativeLayout>
-
-            <ImageView
-                android:layout_width="@dimen/thin_line"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:src="?white"/>
-        </RelativeLayout>
-
-
-        <RelativeLayout
-            android:id="@+id/course"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?sap_gray">
-
-            <ImageView
-                android:id="@+id/course_marker"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/thin_line"
-                android:layout_alignParentBottom="true"
-                android:src="?marker"/>
-
-            <LinearLayout
-                android:id="@+id/course_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/course"
-                    android:textAppearance="?textPanelHeader"/>
+                android:layout_below="@id/start_mode_header">
 
                 <ImageView
-                    android:id="@+id/course_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
-            </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/course_header">
-
-                <TextView
-                    android:id="@+id/course_value"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:id="@+id/start_mode_flag"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerHorizontal="true"
                     android:layout_centerInParent="true"
-                    android:gravity="center_horizontal"
-                    android:textAppearance="?textPanelCaption"
-                    tools:text="012"/>
-                <!--tools:drawableTop="@drawable/course_updown_64dp_dark" -->
+                    tools:src="@drawable/flag_papa_64dp"/>
             </RelativeLayout>
 
             <ImageView
@@ -141,21 +74,23 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/wind"
+            android:id="@+id/gate_pathfinder"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?sap_gray"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
-                android:id="@+id/wind_marker"
+                android:id="@+id/gate_pathfinder_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
                 android:src="?marker"/>
 
             <LinearLayout
-                android:id="@+id/wind_header"
+                android:id="@+id/gate_pathfinder_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -164,11 +99,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/wind"
+                    android:text="@string/gate_start_pathfinder"
                     android:textAppearance="?textPanelHeader"/>
 
                 <ImageView
-                    android:id="@+id/wind_lock"
+                    android:id="@+id/gate_pathfinder_lock"
                     android:layout_width="@dimen/side_button_lockSize"
                     android:layout_height="@dimen/side_button_lockSize"
                     android:layout_gravity="center_vertical"
@@ -183,23 +118,86 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/wind_header">
+                android:layout_below="@id/gate_pathfinder_header">
 
                 <TextView
-                    android:id="@+id/wind_value"
+                    android:id="@+id/gate_pathfinder_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:text="@string/wind_no_data"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:textAppearance="?textPanelCaption"
+                    tools:text="SAD123"/>
             </RelativeLayout>
+
+            <ImageView
+                android:layout_width="@dimen/thin_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:src="?white"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/gate_timing"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?sap_gray"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/gate_timing_marker"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thin_line"
+                android:layout_alignParentBottom="true"
+                android:src="?marker"/>
+
+            <LinearLayout
+                android:id="@+id/gate_timing_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/side_padding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gate_start_timing"
+                    android:textAppearance="?textPanelHeader"/>
+
+                <ImageView
+                    android:id="@+id/gate_timing_lock"
+                    android:layout_width="@dimen/side_button_lockSize"
+                    android:layout_height="@dimen/side_button_lockSize"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/lock_margin"
+                    android:layout_marginRight="@dimen/lock_margin"
+                    android:src="?lock_outline"
+                    android:tint="?sap_light_gray"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/gate_timing_header">
+
+                <TextView
+                    android:id="@+id/gate_timing_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:textAppearance="?textPanelCaption"
+                    tools:text="4 + 3 = 7 Minuten"/>
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="@dimen/thin_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:src="?white"/>
         </RelativeLayout>
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/thin_line"
-        android:layout_alignParentBottom="true"
-        android:background="?black"/>
 </RelativeLayout>

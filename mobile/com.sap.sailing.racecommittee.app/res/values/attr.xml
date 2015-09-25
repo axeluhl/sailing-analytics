@@ -65,6 +65,7 @@
     <attr name="hearing" format="reference"/>
     <attr name="link_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
+    <attr name="keyboard_control_36dp" format="reference"/>
     <attr name="marker" format="reference"/>
     <attr name="marker_race" format="reference"/>
     <attr name="mic_48dp" format="reference"/>

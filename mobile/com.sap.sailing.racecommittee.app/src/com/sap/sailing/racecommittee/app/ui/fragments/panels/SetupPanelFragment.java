@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,7 +11,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -18,16 +20,15 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
-import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class SetupPanelFragment extends BasePanelFragment {
 
@@ -40,10 +41,9 @@ public class SetupPanelFragment extends BasePanelFragment {
     private View mStartProcedureLock;
     private TextView mStartProcedureValue;
 
-    // Start Mode Toggle
-    private View mStartMode;
-    private View mStartModeLock;
-    private ImageView mStartModeFlag;
+    // Start Procedure More Toggle
+    private View mStartProcedureMore;
+    private View mStartProcedureMoreLock;
 
     // Course Toggle
     private View mCourse;
@@ -79,12 +79,11 @@ public class SetupPanelFragment extends BasePanelFragment {
         mStartProcedureLock = ViewHelper.get(layout, R.id.start_procedure_lock);
         mStartProcedureValue = ViewHelper.get(layout, R.id.start_procedure_value);
 
-        mStartMode = ViewHelper.get(layout, R.id.start_mode);
-        if (mStartMode != null) {
-            mStartMode.setOnClickListener(new StartModeClick());
+        mStartProcedureMore = ViewHelper.get(layout, R.id.start_procedure_more);
+        if (mStartProcedureMore != null) {
+            mStartProcedureMore.setOnClickListener(new StartProcedureMoreClick());
         }
-        mStartModeLock = ViewHelper.get(layout, R.id.start_mode_lock);
-        mStartModeFlag = ViewHelper.get(layout, R.id.start_mode_flag);
+        mStartProcedureMoreLock = ViewHelper.get(layout, R.id.start_procedure_more_lock);
 
         mCourse = ViewHelper.get(layout, R.id.course);
         if (mCourse != null) {
@@ -141,18 +140,13 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         if (mStartProcedureValue != null && getRaceState().getTypedRacingProcedure() != null) {
             mStartProcedureValue.setText(getRaceState().getTypedRacingProcedure().getType().toString());
-        }
 
-        if (mStartModeFlag != null) {
-            try {
-                if (mStartMode != null) {
-                    mStartMode.setVisibility(View.VISIBLE);
-                }
-                RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
-                mStartModeFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), procedure.getStartModeFlag().name(), 48));
-            } catch (Exception ex) {
-                if (mStartMode != null) {
-                    mStartMode.setVisibility(View.GONE);
+            if (mStartProcedureMore != null) {
+                if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure || getRaceState()
+                    .getRacingProcedure() instanceof GateStartRacingProcedure) {
+                    mStartProcedureMore.setVisibility(View.VISIBLE);
+                } else {
+                    mStartProcedureMore.setVisibility(View.GONE);
                 }
             }
         }
@@ -168,69 +162,68 @@ public class SetupPanelFragment extends BasePanelFragment {
         switch (getRace().getStatus()) {
             case UNSCHEDULED:
                 changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 break;
 
             case PRESCHEDULED:
                 changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 break;
 
             case SCHEDULED:
                 changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 break;
 
             case STARTPHASE:
                 changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 break;
 
             case RUNNING:
                 changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 uncheckMarker(mStartProcedure);
-                uncheckMarker(mStartMode);
+                uncheckMarker(mStartProcedureMore);
                 break;
 
             case FINISHING:
                 changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartModeLock, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.VISIBLE);
                 changeVisibility(mWindLock, View.GONE);
                 uncheckMarker(mStartProcedure);
-                uncheckMarker(mStartMode);
+                uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourseLock);
                 break;
 
             case FINISHED:
                 changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartModeLock, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, View.GONE);
                 changeVisibility(mCourseLock, View.GONE);
                 changeVisibility(mWindLock, View.GONE);
                 uncheckMarker(mStartProcedure);
-                uncheckMarker(mStartMode);
+                uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourse);
                 uncheckMarker(mWind);
                 break;
 
             default:
                 changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartModeLock, View.VISIBLE);
                 changeVisibility(mCourseLock, View.VISIBLE);
                 changeVisibility(mWindLock, View.VISIBLE);
                 uncheckMarker(mStartProcedure);
-                uncheckMarker(mStartMode);
+                uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourse);
                 uncheckMarker(mWind);
                 break;
@@ -244,9 +237,8 @@ public class SetupPanelFragment extends BasePanelFragment {
                 setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, 0);
             }
 
-            if (!view.equals(mStartMode)) {
-                resetFragment(mStartModeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartModeFragment.class);
-                setMarkerLevel(mStartMode, R.id.start_mode_marker, 0);
+            if (!view.equals(mStartProcedureMore)) {
+                setMarkerLevel(mStartProcedureMore, R.id.start_procedure_more_marker, 0);
             }
 
             if (!view.equals(mCourse)) {
@@ -327,6 +319,7 @@ public class SetupPanelFragment extends BasePanelFragment {
         private final View container = mStartProcedure;
         private final int markerId = R.id.start_procedure_marker;
 
+        @Override
         public void onClick(View v) {
             if (mStartProcedureLock != null) {
                 if (mStartProcedureLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
@@ -361,15 +354,17 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
     }
 
-    private class StartModeClick implements View.OnClickListener, DialogInterface.OnClickListener {
+    private class StartProcedureMoreClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
-        private final String TAG = StartModeClick.class.getName();
-        private final View container = mStartMode;
-        private final int markerId = R.id.start_mode_marker;
+        private final String TAG = StartProcedureMoreClick.class.getName();
+        private final View container = mStartProcedureMore;
+        private final int markerId = R.id.start_procedure_more_marker;
+        private FrameLayout extraLayout;
 
+        @Override
         public void onClick(View v) {
-            if (mStartModeLock != null) {
-                if (mStartModeLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+            if (mStartProcedureMoreLock != null) {
+                if (mStartProcedureMoreLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
                     showChangeDialog(this);
                 } else {
                     toggleFragment();
@@ -383,19 +378,38 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MODE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
             switch (toggleMarker(container, markerId)) {
                 case 0:
-                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    if (extraLayout != null) {
+                        extraLayout.setVisibility(View.GONE);
+                        transaction.remove(getFragmentManager().findFragmentById(R.id.race_panel_extra));
+                    }
                     break;
 
                 case 1:
-                    replaceFragment(StartModeFragment.newInstance(1));
+                    if (getView() != null && getView().getRootView() != null) {
+                        extraLayout = (FrameLayout) getView().getRootView().findViewById(R.id.race_panel_extra);
+                        int multiplier = 1;
+                        if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
+                            multiplier = 2;
+                        }
+                        int height = container.getHeight();
+                        int width = container.getWidth() * multiplier;
+                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+                        params.setMargins(container.getLeft() + container.getWidth(), container.getTop(), 0, 0);
+                        extraLayout.setLayoutParams(params);
+                        extraLayout.setVisibility(View.VISIBLE);
+                        transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));
+                    }
                     break;
 
                 default:
                     ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
             }
+            transaction.commit();
             disableToggle(container, markerId);
         }
     }
@@ -494,8 +508,8 @@ public class SetupPanelFragment extends BasePanelFragment {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                     if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE.equals(data)) {
                         uncheckMarker(mStartProcedure);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_MODE.equals(data)) {
-                        uncheckMarker(mStartMode);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE.equals(data)) {
+                        uncheckMarker(mStartProcedureMore);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
                         uncheckMarker(mCourse);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_WIND.equals(data)) {

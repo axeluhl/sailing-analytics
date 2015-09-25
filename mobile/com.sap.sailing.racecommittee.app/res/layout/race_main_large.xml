@@ -36,4 +36,9 @@
             android:layout_height="0dp"
             android:layout_weight="3"/>
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/race_panel_extra"
+        android:layout_width="@dimen/side_button"
+        android:layout_height="@dimen/side_button"/>
 </RelativeLayout>
