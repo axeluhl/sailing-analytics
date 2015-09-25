@@ -7,8 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.data.Unit;
-
 /**
  * Methods marked with this annotation will be used as computable key figures for the data mining framework. The method will be called,
  * if the key figure of a data element is requested.<br />
@@ -45,11 +43,6 @@ public @interface Statistic {
      */
     public int ordinal() default Integer.MAX_VALUE;
     
-    /**
-     * The {@link Unit} of the methods return value. The default value is {@link Unit#None}.
-     */
-    public Unit resultUnit() default Unit.None;
-        
     /**
      * The number of decimals of the methods return value. The default value is <code>0</code>.
      */
