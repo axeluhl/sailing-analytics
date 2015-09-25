@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.SparseBooleanArray;
@@ -78,7 +79,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     @Override
-    protected DialogListenerHost getHost() {
+    protected DialogListenerHost getListenerHost() {
         return new DialogListenerHost() {
             @Override
             public DialogResultListener getListener() {
@@ -105,14 +106,15 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
 
-        ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
-        layoutParams.height = 49 * races.size();
-        int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
-        if (layoutParams.height > screenHeight) {
-            layoutParams.height = screenHeight;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            // TODO: @Samuel -> please check, why we did this, because I can't remember
+            ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
+            layoutParams.height = 49 * races.size();
+            int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
+            if (layoutParams.height > screenHeight) {
+                layoutParams.height = screenHeight;
+            }
         }
-        view.setLayoutParams(layoutParams);
-
         return view;
     }
     

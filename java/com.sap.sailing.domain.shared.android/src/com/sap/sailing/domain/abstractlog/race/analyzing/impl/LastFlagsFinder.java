@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Analysis returns the most recent {@link RaceLogFlagEvent}s.
@@ -42,7 +43,7 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
         List<RaceLogFlagEvent> result = new ArrayList<RaceLogFlagEvent>();
         TimePoint logicalTime = flagEvent.getLogicalTimePoint();
 
-        while (flagEvent.getLogicalTimePoint().equals(logicalTime)) {
+        while (Util.compareToWithNull(flagEvent.getLogicalTimePoint(), logicalTime, /* nullIsLess */ false) == 0) {
             result.add(flagEvent);
             flagEvent = getNextFlagEvent(iterator);
             if (flagEvent == null) {
@@ -84,7 +85,7 @@ public class LastFlagsFinder extends RaceLogAnalyzer<List<RaceLogFlagEvent>> {
         Collections.sort(sortedEvents, new Comparator<RaceLogFlagEvent>() {
             @Override
             public int compare(RaceLogFlagEvent left, RaceLogFlagEvent right) {
-                int result = right.getLogicalTimePoint().compareTo(left.getLogicalTimePoint());
+                int result = Util.compareToWithNull(right.getLogicalTimePoint(), left.getLogicalTimePoint(), /* nullIsLess */ false);
                 if (result == 0) {
                     result = Boolean.valueOf(right.isDisplayed()).compareTo(left.isDisplayed());
                     if (result == 0) {

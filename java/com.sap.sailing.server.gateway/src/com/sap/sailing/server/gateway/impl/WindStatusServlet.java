@@ -48,15 +48,15 @@ import com.sap.sse.common.TimePoint;
 public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
     private static final long serialVersionUID = -6791613843435003810L;
     
-    private static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+    protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
 
-    private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
-    private final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=5;
+    protected final int NUMBER_OF_MESSAGES_TO_SHOW=100;
+    protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=10;
 
-    private static final DecimalFormat decimalFormatter2Digits = new DecimalFormat("#.##");
-    private static final DecimalFormat decimalFormatter1Digit = new DecimalFormat("#.#");
-    private static final DecimalFormat latLngDecimalFormatter = new DecimalFormat("#.######");
-    private static final DateFormat dateTimeFormatter = DateFormat.getTimeInstance(DateFormat.LONG);
+    protected static final DecimalFormat decimalFormatter2Digits = new DecimalFormat("#.##");
+    protected static final DecimalFormat decimalFormatter1Digit = new DecimalFormat("#.#");
+    protected static final DecimalFormat latLngDecimalFormatter = new DecimalFormat("#.######");
+    protected static final DateFormat dateTimeFormatter = DateFormat.getTimeInstance(DateFormat.LONG);
             
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
@@ -75,7 +75,19 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         isIgtimiListenerRegistered = false;
     }
     
-    private void initializeWindReceiver(boolean reinitialize) {
+    protected int getIgtimiMessagesRawCount() {
+        return igtimiRawMessageCount;
+    }
+    
+    protected Map<String, Deque<IgtimiMessageInfo>> getLastIgtimiMessages() {
+        return lastIgtimiMessages;
+    }
+    
+    protected List<ExpeditionMessageInfo> getLastExpeditionMessages() {
+        return lastExpeditionMessages;
+    }
+    
+    protected void initializeWindReceiver(boolean reinitialize) {
         synchronized (lock) {
             if (!isExpeditionListenerRegistered || reinitialize) {
                 isExpeditionListenerRegistered = registerExpeditionListener();
@@ -225,7 +237,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         return result;
     }
     
-    private class ExpeditionMessageInfo {
+    protected class ExpeditionMessageInfo {
         Integer boatID;
         ExpeditionMessage message;
         Date messageReceivedAt;
@@ -242,11 +254,15 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         }
     }
     
-    private class IgtimiMessageInfo {
+    protected class IgtimiMessageInfo {
         private Wind wind;
         
         public IgtimiMessageInfo(Wind wind) {
             this.wind = wind;
+        }
+        
+        public Wind getWind() {
+            return wind;
         }
         
         public String toString() {

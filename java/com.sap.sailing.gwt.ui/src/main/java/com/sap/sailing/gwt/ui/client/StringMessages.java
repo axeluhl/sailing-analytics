@@ -12,6 +12,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String manage2Sail();
+    String raceCommitteeApp();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -382,7 +383,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
-    String sailingServers();
+    String remoteServerInstances();
+    String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
     String errorRemovingSailingServers(String message);
@@ -408,6 +410,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
     String scoringSchemeWinnerGetsEightAndInterpolation();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -559,6 +563,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String polarSheetWindSteppingMaxDistanceTooltip();
     String polarSheetSplitByWindGauges();
     String polarSheetSplitByWindGaugesTooltip();
+    String applyMinimumWindConfidence();
+    String applyMinimumWindConfidenceTooltip();
+    String windRangeDistribution();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
@@ -1152,7 +1159,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterCarryValueFor(String competitorName);
     String advanced();
     String basedOn();
-    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
@@ -1258,12 +1264,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     
     String dashboardNewStartAnalysisAvailable();
     
-    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantagesByWind();
     String dashboardStartlineAdvantageByGeometry();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    
+    String dashboardAdvantageInSeconds();
+    String dashboardSecondsAbreviation();
+    String dashboardDistanceToRCBoat();
+    String dashboardPinEnd();
+    String dashboardRCBoat();
+    
     String fixedMarkPassing();
     String suppressedMarkPassing();
     String windUp();
@@ -1362,6 +1375,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String plainText();
     String columnChart();
     String choosePresentation();
+    String cantDisplayDataOfType(String resultType);
+    String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String analyze();
+    String dataMiningSettings();
+    String multiResultsPresenter();
+    String plainResultsPresenter();
+    String resultsChart();
+    String tabbedResultsPresenter();
+    String polarResultsPresenter();
+    String dataMiningRetrieval();
 }

@@ -7,6 +7,7 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -39,8 +40,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public double getDistanceToStartLineAtStart() {
-        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0).getMeters();
+    public Distance getDistanceToStartLineAtStart() {
+        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0);
     }
     
     @Override

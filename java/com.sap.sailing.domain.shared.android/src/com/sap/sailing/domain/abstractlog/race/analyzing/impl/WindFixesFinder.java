@@ -6,24 +6,22 @@ import java.util.List;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.common.Wind;
 
-public class WindFixesFinder extends RaceLogAnalyzer<List<Wind>> {
+public class WindFixesFinder extends RaceLogAnalyzer<List<RaceLogWindFixEvent>> {
 
     public WindFixesFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
     @Override
-    protected List<Wind> performAnalysis() {
-        final List<Wind> windFixes = new ArrayList<Wind>();
+    protected List<RaceLogWindFixEvent> performAnalysis() {
+        final List<RaceLogWindFixEvent> windFixes = new ArrayList<>();
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogWindFixEvent) {
                 RaceLogWindFixEvent windFixEvent = (RaceLogWindFixEvent) event;
-                windFixes.add(windFixEvent.getWindFix());
+                windFixes.add(windFixEvent);
             }
         }
         return windFixes;
     }
-
 }

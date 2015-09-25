@@ -22,13 +22,14 @@ import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
 
-    protected DesktopPlacesNavigator(PlaceController placeController) {
-        super(placeController);
+    protected DesktopPlacesNavigator(PlaceController placeController, boolean isStandaloneServer) {
+        super(placeController, isStandaloneServer);
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {

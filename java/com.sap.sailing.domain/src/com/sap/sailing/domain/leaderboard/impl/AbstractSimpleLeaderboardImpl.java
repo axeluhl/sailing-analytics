@@ -532,7 +532,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
-            if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
+            if (getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint)) {
                 final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
@@ -651,7 +651,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
-        return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
+        return getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint) && 
                (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
@@ -1372,7 +1372,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (trackedRace != null) {
             Date timePointOfLastPositionFixAtOrBeforeQueryTimePoint = getTimePointOfLastFixAtOrBefore(competitor, trackedRace, timePoint);
             if (track != null) {
-                entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenFixes();
+                entryDTO.averageSamplingInterval = track.getAverageIntervalBetweenRawFixes();
             }
             if (timePointOfLastPositionFixAtOrBeforeQueryTimePoint != null) {
                 long timeDifferenceInMs = timePoint.asMillis() - timePointOfLastPositionFixAtOrBeforeQueryTimePoint.getTime();

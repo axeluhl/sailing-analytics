@@ -177,8 +177,9 @@ public interface RaceState extends ReadonlyRaceState {
 
     /**
      * Enters a new wind fix for this race.
+     * @param isMagnetic TODO
      */
-    void setWindFix(TimePoint now, Wind wind);
+    void setWindFix(TimePoint now, Wind wind, boolean isMagnetic);
     
     /**
      * Marks this race state with a new {@link RaceLogAdditionalScoringInformationEvent} or revokes

@@ -2,11 +2,10 @@ package com.sap.sse.datamining.shared.impl.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
 public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefinitionDTO {
@@ -15,9 +14,10 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     private String localeInfoName;
     private FunctionDTO statisticToCalculate;
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
-    private List<FunctionDTO> dimensionsToGroupBy;
+    private ArrayList<FunctionDTO> dimensionsToGroupBy;
     private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
-    private Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> filterSelection;
+    private HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings;
+    private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
     
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -30,11 +30,16 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
         this.dataRetrieverChainDefinition = dataRetrieverChainDefinition;
+        this.retrieverSettings = new HashMap<>();
         this.filterSelection = new HashMap<>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }
     
-    public void setFilterSelectionFor(Integer retrieverLevel, Map<FunctionDTO, Collection<? extends Serializable>> levelFilterSelection) {
+    public void setRetrieverSettings(DataRetrieverLevelDTO retrieverLevel, SerializableSettings settings) {
+        retrieverSettings.put(retrieverLevel, settings);
+    }
+    
+    public void setFilterSelectionFor(DataRetrieverLevelDTO retrieverLevel, HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection) {
         filterSelection.put(retrieverLevel, levelFilterSelection);
     }
     
@@ -51,14 +56,19 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     public DataRetrieverChainDefinitionDTO getDataRetrieverChainDefinition() {
         return dataRetrieverChainDefinition;
     }
+    
+    @Override
+    public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
+        return retrieverSettings;
+    }
 
     @Override
-    public Map<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> getFilterSelection() {
+    public HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> getFilterSelection() {
         return filterSelection;
     }
 
     @Override
-    public List<FunctionDTO> getDimensionsToGroupBy() {
+    public ArrayList<FunctionDTO> getDimensionsToGroupBy() {
         return dimensionsToGroupBy;
     }
 

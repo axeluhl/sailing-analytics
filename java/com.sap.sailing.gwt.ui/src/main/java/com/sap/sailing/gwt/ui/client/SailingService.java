@@ -21,8 +21,6 @@ import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -76,6 +74,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
@@ -95,6 +94,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -322,6 +322,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
+    ServerInfoDTO getServerInfo();
+
+    ServerConfigurationDTO getServerConfiguration();
+
+    void updateServerConfiguration(ServerConfigurationDTO serverConfiguration);
+    
     List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences();
 
     void removeSailingServers(Set<String> toRemove) throws Exception;
@@ -361,21 +367,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
-
-    PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, String name) throws Exception;
     
-    void createCourseArea(UUID eventId, String courseAreaName);
+    void createCourseAreas(UUID eventId, String[] courseAreaNames);
     
-    List<String> getBoatClassNamesWithPolarSheetsAvailable();
-    
-    void removeCourseArea(UUID eventId, UUID courseAreaId);
+    void removeCourseAreas(UUID eventId, UUID[] courseAreaIds);
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
-
-    PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName);
-
-    
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
@@ -392,8 +389,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<RegattaOverviewEntryDTO> getRaceStateEntriesForLeaderboard(String leaderboardName,
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, List<String> visibleRegattas)
             throws Exception;
-
-    String getBuildVersion();
 
     void stopReplicatingFromMaster();
 

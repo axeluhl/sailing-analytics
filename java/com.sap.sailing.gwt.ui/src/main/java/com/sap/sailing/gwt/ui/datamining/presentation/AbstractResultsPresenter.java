@@ -1,35 +1,39 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sse.datamining.shared.QueryResult;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenter<ResultType> implements ResultsPresenterWithControls<ResultType> {
+public abstract class AbstractResultsPresenter<SettingsType extends Settings> implements ResultsPresenterWithControls<SettingsType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     private ResultsPresenterState state;
     
     private final DockLayoutPanel mainPanel;
     private final HorizontalPanel controlsPanel;
-    private final SimpleLayoutPanel presentationPanel;
+    protected final ValueListBox<String> dataSelectionListBox;
+    protected final DeckLayoutPanel presentationPanel;
     
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private QueryResult<ResultType> currentResult;
+    private QueryResultDTO<?> currentResult;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -49,9 +53,24 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
                 // Call a servlet to download the previously pushed result as json file
             }
         });
-        addControl(exportButton);
+//        addControl(exportButton);
         
-        presentationPanel = new SimpleLayoutPanel();
+        dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
+            @Override
+            protected String convertObjectToString(String nonNullObject) {
+                // TODO I18N
+                return nonNullObject;
+            }
+        });
+        dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                onDataSelectionValueChange();
+            }
+        });
+        addControl(dataSelectionListBox);
+
+        presentationPanel = new DeckLayoutPanel();
         mainPanel.add(presentationPanel);
         
         errorLabel = new HTML();
@@ -63,13 +82,15 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
         showError(getStringMessages().runAQuery());
     }
     
+    abstract protected void onDataSelectionValueChange();
+
     @Override
     public void addControl(Widget controlWidget) {
         controlsPanel.add(controlWidget);
     }
     
     @Override
-    public void showResult(QueryResult<ResultType> result) {
+    public void showResult(QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
                 mainPanel.setWidgetHidden(controlsPanel, false);
@@ -78,22 +99,18 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
             }
             
             this.currentResult = result;
-            internalShowResult();
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    presentationPanel.onResize();
-                }
-            });
+            
+            internalShowResults(getCurrentResult());
+            
         } else {
             this.currentResult = null;
             showError(getStringMessages().noDataFound() + ".");
         }
     }
-    
+
+    abstract protected void internalShowResults(QueryResultDTO<?> result);
+
     protected abstract Widget getPresentationWidget();
-    
-    protected abstract void internalShowResult();
 
     @Override
     public void showError(String error) {
@@ -132,13 +149,23 @@ public abstract class AbstractResultsPresenter<ResultType> implements ResultsPre
     }
     
     @Override
-    public QueryResult<ResultType> getCurrentResult() {
+    public QueryResultDTO<?> getCurrentResult() {
         return currentResult;
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget getEntryWidget() {
         return mainPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
     }
 
 }

@@ -30,6 +30,7 @@ public class MainPreferenceFragment extends LoggableFragment implements OnClickL
 
         for (int i = 0; i < layout.getChildCount(); i++) {
             Button button = (Button) layout.getChildAt(i);
+            button.setTextColor(getResources().getColor(R.color.white));
             if (button != null) {
                 button.setOnClickListener(this);
             }

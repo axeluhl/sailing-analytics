@@ -15,18 +15,20 @@ import org.junit.Test;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
+import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
 import com.sap.sse.datamining.test.data.Test_HasContextWithDeadConnectorEnd;
 import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
 import com.sap.sse.datamining.test.data.Test_HasRaceContext;
 import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
-import com.sap.sse.datamining.test.util.OpenFunctionManager;
 import com.sap.sse.datamining.test.util.TestsUtil;
+import com.sap.sse.datamining.test.util.components.management.OpenFunctionManager;
 
 
 public class TestFunctionManagerAsFunctionRegistry {
@@ -55,9 +57,10 @@ public class TestFunctionManagerAsFunctionRegistry {
     @Test
     public void testRegistration() throws NoSuchMethodException, SecurityException {
         OpenFunctionManager functionManager = new OpenFunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new DataRetrieverChainDefinitionManager();
-        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
-        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
+        DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
+        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
+        ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager, dataSourceProviderRegistry, dataRetrieverChainDefinitionRegistry, aggregationProcessorDefinitionRegistry);
 
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);

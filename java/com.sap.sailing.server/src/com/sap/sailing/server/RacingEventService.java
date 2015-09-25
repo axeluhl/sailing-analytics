@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -399,7 +400,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRemoteSailingServerReference(String name);
 
     
-    CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
+    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -472,9 +473,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
-    CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
+    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames);
 
-    CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId);
+    CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds);
 
     /**
      * Returns a mobile device's configuration.
@@ -584,6 +585,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
 
+    /**
+     * Gets the configuration of the local sailing server instances.
+     */
+    SailingServerConfiguration getSailingServerConfiguration();
+    
+    void updateServerConfiguration(SailingServerConfiguration serverConfiguration);
+    
     /**
      * References to remote servers may be dead or alive. This is internally determined by regularly polling those
      * servers for their events list. If the events list cannot be successfully retrieved, the server is considered "dead."

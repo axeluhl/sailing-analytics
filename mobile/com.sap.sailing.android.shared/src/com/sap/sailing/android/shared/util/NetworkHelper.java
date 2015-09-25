@@ -36,7 +36,6 @@ public class NetworkHelper {
 
     public void executeHttpJsonRequestAsnchronously(HttpRequest request, NetworkHelperSuccessListener successListener,
             NetworkHelperFailureListener failureListener) {
-
         NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
     }
@@ -62,13 +61,10 @@ public class NetworkHelper {
             try {
                 stream = request.execute();
                 String responseStr = readStream(stream);
-
                 response = null;
-
                 if (responseStr.length() > 0) {
                     response = new JSONObject(responseStr);
                 }
-
                 isSuccess = true;
             } catch (IOException e) {
                 error = new NetworkHelperError(e.getMessage());
@@ -76,7 +72,6 @@ public class NetworkHelper {
                 error = new NetworkHelperError(e.getMessage());
                 ExLog.e(mContext, TAG, "Failed to parse JSON: " + e.getMessage());
             }
-
             return null;
         }
 

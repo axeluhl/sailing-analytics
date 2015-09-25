@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.finishing.FinishListPhotoAdapter;
@@ -60,7 +60,7 @@ public class PhotoListFragment extends BaseFragment {
 
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        ImageView button = ViewHolder.get(layout, R.id.photo_button);
+        ImageView button = ViewHelper.get(layout, R.id.photo_button);
         if (button != null) {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -80,7 +80,7 @@ public class PhotoListFragment extends BaseFragment {
             });
         }
 
-        mPhotoList = ViewHolder.get(layout, R.id.photo_list);
+        mPhotoList = ViewHelper.get(layout, R.id.photo_list);
         if (mPhotoList != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -88,7 +88,7 @@ public class PhotoListFragment extends BaseFragment {
             mPhotoList.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         }
 
-        mSubmit = ViewHolder.get(layout, R.id.submit_button);
+        mSubmit = ViewHelper.get(layout, R.id.submit_button);
         if (mSubmit != null) {
             mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override

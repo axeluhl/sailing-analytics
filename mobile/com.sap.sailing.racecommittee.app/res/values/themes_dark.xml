@@ -12,7 +12,6 @@
         <item name="colorPrimary">@color/dark_colorPrimary</item>
         <item name="colorPrimaryDark">@color/dark_colorPrimaryDark</item>
         <item name="colorAccent">@color/dark_colorAccent</item>
-
         <item name="drawerArrowStyle">@style/AppTheme.Dark.Widget.DrawerArrowStyle</item>
         <item name="editText">@style/AppTheme.Dark.EditText</item>
 

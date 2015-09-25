@@ -7,7 +7,6 @@ import com.sap.sse.datamining.data.ClusterBoundary;
 
 public class ClusterWithSingleBoundary<ElementType> extends AbstractCluster<ElementType> {
 
-    private static final long serialVersionUID = -3188802475809553490L;
     private static final char INFINITE = '\u221e';
 
     /**
@@ -19,8 +18,8 @@ public class ClusterWithSingleBoundary<ElementType> extends AbstractCluster<Elem
      * @param messageKey the key used for internationalization
      * @param boundary the boundary used to define the range
      */
-    public ClusterWithSingleBoundary(String messageKey, ClusterBoundary<ElementType> boundary) {
-        super(messageKey, Arrays.asList(boundary));
+    public ClusterWithSingleBoundary(ClusterBoundary<ElementType> boundary) {
+        super(Arrays.asList(boundary));
     }
     
     @Override

@@ -20,15 +20,18 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMaxAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMinAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMedianAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMinAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
-import com.sap.sse.datamining.impl.functions.FunctionManager;
+import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
+import com.sap.sse.datamining.impl.components.management.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
@@ -50,10 +53,11 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private ModifiableDataMiningServer createDataMiningServer() {
         ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
-        FunctionManager functionManager = new FunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new DataRetrieverChainDefinitionManager();
-        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
-        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
+        FunctionRegistry functionRegistry = new FunctionManager();
+        DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
+        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
+        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionRegistry, dataSourceProviderRegistry, dataRetrieverChainDefinitionRegistry, aggregationProcessorDefinitionRegistry);
         dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningFrameworkActivator.class.getClassLoader()));
         for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : getDefaultAggregationProcessors()) {
             dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);
@@ -64,11 +68,11 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     private Iterable<AggregationProcessorDefinition<?, ?>> getDefaultAggregationProcessors() {
         Collection<AggregationProcessorDefinition<?, ?>> defaultAggregationProcessors = new HashSet<>();
         defaultAggregationProcessors.add(ParallelGroupedDataCountAggregationProcessor.getDefinition());
-        defaultAggregationProcessors.add(ParallelGroupedDoubleDataAverageAggregationProcessor.getDefinition());
-        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMaxAggregationProcessor.getDefinition());
-        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMedianAggregationProcessor.getDefinition());
-        defaultAggregationProcessors.add(ParallelGroupedDoubleDataMinAggregationProcessor.getDefinition());
-        defaultAggregationProcessors.add(ParallelGroupedDoubleDataSumAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberDataAverageAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberDataMaxAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberDataMedianAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberDataMinAggregationProcessor.getDefinition());
+        defaultAggregationProcessors.add(ParallelGroupedNumberDataSumAggregationProcessor.getDefinition());
         return defaultAggregationProcessors;
     }
 
@@ -102,7 +106,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
-            dataMiningServer.setDataSourceProvider(dataSourceProvider);
+            dataMiningServer.registerDataSourceProvider(dataSourceProvider);
         }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
@@ -117,7 +121,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
-            dataMiningServer.removeDataSourceProvider(dataSourceProvider);
+            dataMiningServer.unregisterDataSourceProvider(dataSourceProvider);
         }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);

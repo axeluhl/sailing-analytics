@@ -81,8 +81,8 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
                     @Override
                     public void onSuccess(Pair<TimePoint, TimePoint> result) {
-                        currentStart = result.getA();
-                        currentEnd = result.getB();
+                        currentStart = result == null ? null : result.getA();
+                        currentEnd = result == null ? null : result.getB();
                         updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
                         updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
                     }

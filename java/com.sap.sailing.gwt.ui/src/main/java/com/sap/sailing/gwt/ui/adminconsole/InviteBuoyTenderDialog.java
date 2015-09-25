@@ -26,7 +26,7 @@ public class InviteBuoyTenderDialog extends DataEntryDialog<Triple<EventDTO, Str
     private ErrorReporter errorReporter;
 
     public InviteBuoyTenderDialog(final StringMessages stringMessages, SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter, DialogCallback<Triple<EventDTO, String, String>> callback) {
-        super(stringMessages.selectEventForInvitation(), null, stringMessages.inviteCompetitors(), stringMessages
+        super(stringMessages.selectEventForInvitation(), null, stringMessages.inviteBuoyTenders(), stringMessages
                 .cancel(), new Validator<Triple<EventDTO, String, String>>() {
             @Override
             public String getErrorMessage(Triple<EventDTO, String, String> valueToValidate) {

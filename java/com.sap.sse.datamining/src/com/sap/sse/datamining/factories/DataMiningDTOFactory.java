@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningDTOFactory {
@@ -66,9 +71,33 @@ public class DataMiningDTOFactory {
     }
 
     private AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition, String displayName) {
-        return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getExtractedType().getSimpleName(),
+        return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getAggregationNameMessageKey(),
+                                                     aggregatorDefinition.getExtractedType().getSimpleName(),
                                                      aggregatorDefinition.getAggregatedType().getSimpleName(),
                                                      displayName);
+    }
+
+    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition,
+                                                                                 ResourceBundleStringMessages stringMessages, Locale locale) {
+        ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
+        for (DataRetrieverLevel<?, ?> retrieverLevel : dataRetrieverChainDefinition.getDataRetrieverLevels()) {
+            retrieverLevels.add(createDataRetrieverLevelDTO(retrieverLevel, stringMessages, locale));
+        }
+        return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(),
+                dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages), dataRetrieverChainDefinition
+                        .getDataSourceType().getSimpleName(), retrieverLevels);
+   }
+
+    public DataRetrieverLevelDTO createDataRetrieverLevelDTO(DataRetrieverLevel<?, ?> retrieverLevel,
+                                                             ResourceBundleStringMessages stringMessages, Locale locale) {
+        String typeName = retrieverLevel.getRetrievedDataType().getSimpleName();
+        String displayName = retrieverLevel.getRetrievedDataTypeMessageKey() != null
+                && !retrieverLevel.getRetrievedDataTypeMessageKey().isEmpty() ? stringMessages
+                .get(locale, retrieverLevel.getRetrievedDataTypeMessageKey()) : typeName;
+        LocalizedTypeDTO localizedRetrievedDataType = new LocalizedTypeDTO(typeName, displayName);
+        return new DataRetrieverLevelDTO(retrieverLevel.getLevel(),
+                                         retrieverLevel.getRetrieverType().getName(),
+                                         localizedRetrievedDataType, retrieverLevel.getDefaultSettings());
     }
 
 }
