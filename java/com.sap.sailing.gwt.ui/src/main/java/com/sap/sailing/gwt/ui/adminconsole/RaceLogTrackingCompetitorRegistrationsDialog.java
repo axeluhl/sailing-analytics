@@ -143,7 +143,7 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
 
-        allCompetitorsTable.refreshCompetitorList(null, true, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 center();

@@ -10,9 +10,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -410,14 +408,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<CompetitorDTO> getCompetitors();
     
-    /**
-     * 
-     * @param leaderboardName
-     * @param lookInRaceLogs If set to {@code true}, the {@link RaceLog}s are checked for the competitor registrations.
-     * If set to {@code false}, the {@link RaceDefinition}s are checked instead.
-     * @return
-     */
-    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 

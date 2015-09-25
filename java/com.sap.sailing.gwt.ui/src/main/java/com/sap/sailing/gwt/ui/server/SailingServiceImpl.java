@@ -4499,21 +4499,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs) {
-        if (lookInRaceLogs) {
-            Set<Competitor> result = new HashSet<Competitor>();
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    result.addAll(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
-                }
-            }
-            return convertToCompetitorDTOs(result);
-        } else {
+    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
-        }
     }
 
     @Override
