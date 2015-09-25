@@ -2,8 +2,6 @@ package com.sap.sse.datamining.impl.components.aggregators;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -15,7 +13,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
                       extends AbstractParallelProcessor<InputType, AggregatedType> {
 
     private final String aggregationNameMessageKey;
-    private final Lock lock;
+    private final Object monitor;
 
     public AbstractParallelAggregationProcessor(Class<InputType> inputType,
                                                 Class<AggregatedType> resultType,
@@ -24,7 +22,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
                                                 String aggregationNameMessageKey) {
         super(inputType, resultType, executor, resultReceivers);
         this.aggregationNameMessageKey = aggregationNameMessageKey;
-        lock = new ReentrantLock();
+        monitor = new Object();
     }
 
     @Override
@@ -32,11 +30,8 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
         return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
             @Override
             public AggregatedType computeResult() {
-                lock.lock();
-                try {
+                synchronized (monitor) {
                     handleElement(element);
-                } finally {
-                    lock.unlock();
                 }
                 return AbstractParallelAggregationProcessor.super.createInvalidResult();
             }
