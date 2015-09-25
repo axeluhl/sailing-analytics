@@ -22,6 +22,14 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.components.FilterCriterion;
 
+/**
+ * Contains several filter criteria for incoming fixes concerning their validity for the polar aggregation.
+ * 
+ * It is used in the backend polar mining pipeline.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarFixFilterCriteria implements FilterCriterion<GPSFixMovingWithPolarContext> {
 
     private static final Logger logger = Logger.getLogger(PolarFixFilterCriteria.class.getName());

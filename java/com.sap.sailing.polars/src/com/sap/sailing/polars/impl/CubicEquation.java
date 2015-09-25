@@ -1,5 +1,12 @@
 package com.sap.sailing.polars.impl;
 
+/**
+ * Represents cubic equations in the form of a*x^3 + b*x^2 + c*x + d = 0 and can solve roots for x with {@link #solve()}.
+ * !Note that complex roots are not returned.!
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class CubicEquation {
 
     private double a;
@@ -7,6 +14,9 @@ public class CubicEquation {
     private double c;
     private double d;
 
+    /**
+     * Create a cubic equation in the form of a*x^3 + b*x^2 + c*x + d = 0.
+     */
     public CubicEquation(double a, double b, double c, double d) {
         this.a = a;
         this.b = b;
@@ -16,6 +26,7 @@ public class CubicEquation {
 
     /**
      * Following: http://www.1728.org/cubic2.htm !The complex roots are not returned!
+     * Returned array can be of length one or three. Depending on how many real roots there are.
      */
     public double[] solve() {
 

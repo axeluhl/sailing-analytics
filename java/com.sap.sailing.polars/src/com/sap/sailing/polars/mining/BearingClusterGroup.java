@@ -15,8 +15,27 @@ import com.sap.sse.datamining.impl.data.ComparatorClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
 
+/**
+ * Allows grouping angles into angle ranges.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class BearingClusterGroup extends FixClusterGroup<Bearing> {
 
+    /**
+     * Creates an angle range grouping.
+     * 
+     * E.g. call {@link #BearingClusterGroup(0, 10, 5)} if you wanr to group angle data that ranges from 0 to 10° into
+     * two containers. 0->5 and 5->10
+     * 
+     * @param startAngle
+     *            smallest angle
+     * @param endAngle
+     *            biggest angle
+     * @param clusterSize
+     *            how big should each range be.
+     */
     public BearingClusterGroup(int startAngle, int endAngle, int clusterSize) {
         super(createClusters(startAngle, endAngle, clusterSize));
     }

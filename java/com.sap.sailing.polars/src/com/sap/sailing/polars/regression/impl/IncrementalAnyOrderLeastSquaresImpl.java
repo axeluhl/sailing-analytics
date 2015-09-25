@@ -26,6 +26,8 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * > http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/
  * </a>
  * 
+ * It can be used in parallel, because it uses locking for adding and reading data.
+ * 
  * 
  * @author Frederik Petersen D054528
  *
@@ -225,6 +227,8 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         CUBIC, CUBIC_NO_INTERCEPT;
 
         /**
+         * Use to provide a fast alternative to actually computing the inverseMatrix from scratch.
+         * Right now this uses precalculated equations for cubic functions.
          * 
          * @param realMatrix
          *            matrix to inverse

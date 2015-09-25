@@ -15,6 +15,12 @@ import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefiniti
 import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Keeps one {@link PolarAggregation} per group key and incrementally updates that aggregation when elements are added.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataAggregationProcessor extends AbstractParallelGroupedDataAggregationProcessor<PolarStatistic, PolarAggregation> {
 
     private static final String POLARS_MESSAGE_KEY = "Polars";

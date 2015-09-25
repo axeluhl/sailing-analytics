@@ -18,15 +18,21 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
 import com.sap.sailing.polars.datamining.data.impl.GPSFixWithPolarContext;
+import com.sap.sailing.polars.datamining.data.impl.PolarStatisticImpl;
 import com.sap.sailing.polars.datamining.data.impl.SpeedClusterGroup;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
-import com.sap.sailing.polars.datamining.shared.PolarStatisticImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
+/**
+ * Essential retriever in the polar datamining pipeline that also handles some standard filtering.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasCompetitorPolarContext, HasGPSFixPolarContext> {
 
     private final PolarDataMiningSettings settings;
@@ -62,7 +68,7 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
                     if (wind != null && (settings.applyMinimumWindConfidence() ?  wind.getConfidence() >= settings.getMinimumWindConfidence() : true)) {
                         GPSFixWithPolarContext potentialResult = new GPSFixWithPolarContext(fix, trackedRace, windSpeedRangeGroup, competitor,
                                 settings, wind, element);
-                        if (!potentialResult.getWindSpeedRange().getSignifier().equals("null")) {
+                        if (!potentialResult.getWindSpeedRange().getSignifier().equals("null") && !track.hasDirectionChange(fix.getTimePoint(), 5)) {
                             result.add(potentialResult);
                         }
                     }

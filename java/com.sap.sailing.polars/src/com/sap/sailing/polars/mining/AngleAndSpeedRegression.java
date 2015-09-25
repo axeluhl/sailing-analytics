@@ -25,6 +25,17 @@ import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImp
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * This container has two regressions. One for boatSpeed over windSpeed and one for beatAngle over windSpeed
+ * estimations.
+ * 
+ * It can return speed and angle for a given windSpeed and should only be used for restricted sets of input data. There
+ * should be one instance per BoatClass+LegType combination. This seperation needs to be taken care of in a higher level
+ * of the application.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class AngleAndSpeedRegression implements Serializable {
 
     private static final long serialVersionUID = 6343595388753945979L;
@@ -43,6 +54,10 @@ public class AngleAndSpeedRegression implements Serializable {
         angleRegression.addData(windSpeedInKnots, angleToTheWind.getObject().getDegrees());
     }
 
+    /**
+     * Estimate the speed and angle for a given windSpeed by using the regressions contained in this class.
+     * Seperation by boatclass and legtype needs to be done on a higher level.
+     */
     public SpeedWithBearingWithConfidence<Void> estimateSpeedAndAngle(Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         double windSpeedInKnots = windSpeed.getKnots();
@@ -57,6 +72,9 @@ public class AngleAndSpeedRegression implements Serializable {
                 speedRegression.getNumberOfAddedPoints() / 100.0), null);
     }
 
+    /**
+     * Estimates wind speed candidates for the given input scenario based on the speed and angle regressions.
+     */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(Speed speedOverGround,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException {
         double[] coefficiants = speedRegression.getOrCreatePolynomialFunction().getCoefficients();

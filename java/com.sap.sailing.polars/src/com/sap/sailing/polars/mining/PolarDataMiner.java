@@ -55,6 +55,17 @@ import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestin
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
+/**
+ * Entry point for the aggregation of backend polar data and backend to that data.
+ * 
+ * Creates a polar data pipeline upon creation and puts incoming GPS fixes into that pipeline.
+ * Also holds references to the actual data containers in which the aggregation results lay.
+ * 
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataMiner {
 
     private static final int EXECUTOR_QUEUE_SIZE = 100;

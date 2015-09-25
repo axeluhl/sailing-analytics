@@ -31,8 +31,6 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
     private final int ONE_HOUR_IN_MILLISECONDS = 1000*60*60;
     private final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     private boolean didInitialLoading;
-    
-    
 
     public WindBotDataRetriever(SailingServiceAsync sailingService) {
         this.sailingService = sailingService;

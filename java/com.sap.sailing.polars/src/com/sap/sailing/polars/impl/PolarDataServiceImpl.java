@@ -9,8 +9,6 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -25,7 +23,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -39,10 +36,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataOperation;
-import com.sap.sailing.polars.aggregation.PolarFixAggregator;
-import com.sap.sailing.polars.aggregation.SimplePolarFixRaceInterval;
-import com.sap.sailing.polars.data.PolarFix;
-import com.sap.sailing.polars.generation.PolarSheetGenerator;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
@@ -54,14 +47,14 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
-import com.sap.sse.util.SmartFutureCache;
 
 /**
- * Uses two chained {@link SmartFutureCache}s. One to store {@link PolarFix}es extracted from {@link TrackedRace}s and
- * the other one for storing one polar sheet per boat class. This enables quick access to desired measures like optimal
- * beat angles.
+ * Uses a custom datamining pipeline to aggregate incoming fixes in two regression based polar containers.
+ * 
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
  * 
  * @author Frederik Petersen (D054528)
+ * @author Axel Uhl
  * 
  */
 public class PolarDataServiceImpl implements PolarDataService,
@@ -86,6 +79,9 @@ public class PolarDataServiceImpl implements PolarDataService,
 
     private DomainFactory domainFactory;
 
+    /**
+     * Constructs the polar data service with default generation settings.
+     */
     public PolarDataServiceImpl() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
@@ -140,23 +136,6 @@ public class PolarDataServiceImpl implements PolarDataService,
     }
 
     @Override
-    public PolarSheetsData generatePolarSheet(Set<TrackedRace> trackedRaces, PolarSheetGenerationSettings settings,
-            Executor executor) throws InterruptedException, ExecutionException {
-        Set<PolarFix> fixes;
-        PolarFixAggregator aggregator = new PolarFixAggregator(new SimplePolarFixRaceInterval(trackedRaces), settings,
-                executor);
-        aggregator.startPolarFixAggregation();
-        fixes = aggregator.getAggregationResultAsSingleList();
-        PolarSheetGenerator generator = new PolarSheetGenerator(fixes, settings);
-        return generator.generate();
-    }
-
-    @Override
-    public PolarSheetsData getPolarSheetForBoatClass(BoatClass boatClass) {
-        return polarDataMiner.createFullSheetForBoatClass(boatClass);
-    }
-
-    @Override
     public Set<BoatClass> getAllBoatClassesWithPolarSheetsAvailable() {
         return polarDataMiner.getAvailableBoatClasses();
     }
@@ -165,12 +144,6 @@ public class PolarDataServiceImpl implements PolarDataService,
     public void competitorPositionChanged(final GPSFixMoving fix, final Competitor competitor,
             final TrackedRace createdTrackedRace) {
         polarDataMiner.addFix(fix, competitor, createdTrackedRace);
-    }
-
-    @Override
-    public int[] getDataCountsForWindSpeed(BoatClass boatClass, Speed windSpeed, int startAngleInclusive,
-            int endAngleExclusive) {
-        return polarDataMiner.getDataCountsForWindSpeed(boatClass, windSpeed, startAngleInclusive, endAngleExclusive);
     }
 
     @Override

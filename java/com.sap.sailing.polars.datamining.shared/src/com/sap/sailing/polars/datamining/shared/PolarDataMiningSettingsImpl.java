@@ -2,12 +2,17 @@ package com.sap.sailing.polars.datamining.shared;
 
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
 
+/**
+ * Standard implementation of {@link PolarDataMiningSettings}.
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataMiningSettingsImpl extends PolarDataMiningSettings {
 
     public static PolarDataMiningSettingsImpl createStandardPolarSettings() {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.5);
-        return new PolarDataMiningSettingsImpl(50, 0.01, true, 20, 20, true, true, windStepping);
+        return new PolarDataMiningSettingsImpl(1000, 0.01, true, 100, 20, true, true, windStepping);
     }
 
     private static final long serialVersionUID = 2731616509404813790L;

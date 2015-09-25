@@ -23,6 +23,13 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Groups incoming fixes by boatclass and legtype into {@link AngleAndSpeedRegression} instances and
+ * provides access methods to regression data.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class CubicRegressionPerCourseProcessor implements
         Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
 
@@ -66,6 +73,9 @@ public class CubicRegressionPerCourseProcessor implements
         }
     }
 
+    /**
+     * Returns speed and twa for a given scenario, if data is available in the regression.
+     */
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -78,6 +88,9 @@ public class CubicRegressionPerCourseProcessor implements
         return estimatedSpeedAndAngle;
     }
 
+    /**
+     * Returns windspeed and windangle candidates for a given scenario, if enough data is available.
+     */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -118,6 +131,14 @@ public class CubicRegressionPerCourseProcessor implements
         return compoundKey;
     }
 
+    /**
+     * Allows direct access to speed regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -130,6 +151,14 @@ public class CubicRegressionPerCourseProcessor implements
         return polynomialFunction;
     }
 
+    /**
+     * Allows direct access to angle regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);

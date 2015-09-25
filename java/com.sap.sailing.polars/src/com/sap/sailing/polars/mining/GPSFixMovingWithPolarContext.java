@@ -27,6 +27,13 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 
+/**
+ * Encapsulates a {@link GPSFixMoving} with some polar context. Some of the important and computeintensive data is
+ * calculated once and then cached for further usage in this class.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, AngleClusterPolarClusterKey {
 
     private final GPSFixMoving fix;

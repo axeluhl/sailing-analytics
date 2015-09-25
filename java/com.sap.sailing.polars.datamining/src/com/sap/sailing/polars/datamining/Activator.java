@@ -7,7 +7,9 @@ import java.util.Set;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.RacingEventServiceProvider;
+import com.sap.sailing.polars.datamining.components.aggregators.PolarBackendDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarDataAggregationProcessor;
+import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
@@ -22,6 +24,13 @@ import com.sap.sse.datamining.impl.AbstractDataMiningActivator;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
+/**
+ * Handles all necessary registration for a datamining bundle. See
+ * http://wiki.sapsailing.com/wiki/typical-data-mining-scenarios for more information.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class Activator extends AbstractDataMiningActivator {
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/Polars_StringMessages";
@@ -70,6 +79,7 @@ public class Activator extends AbstractDataMiningActivator {
         internalClasses.add(HasCompetitorPolarContext.class);
         internalClasses.add(HasLegPolarContext.class);
         internalClasses.add(HasGPSFixPolarContext.class);
+        internalClasses.add(HasBackendPolarBoatClassContext.class);
         return internalClasses;
     }
 
@@ -91,6 +101,7 @@ public class Activator extends AbstractDataMiningActivator {
     public Iterable<AggregationProcessorDefinition<?, ?>> getAggregationProcessorDefinitions() {
         HashSet<AggregationProcessorDefinition<?, ?>> aggregators = new HashSet<>();
         aggregators.add(PolarDataAggregationProcessor.getDefinition());
+        aggregators.add(PolarBackendDataAggregationProcessor.getDefinition());
         return aggregators;
     }
     

@@ -3,6 +3,8 @@ package com.sap.sailing.polars.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.polars.datamining.components.BackendPolarsBoatClassRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarCompetitorRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarFleetRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarGPSFixRetrievalProcessor;
@@ -10,6 +12,7 @@ import com.sap.sailing.polars.datamining.components.PolarLeaderboardGroupRetriev
 import com.sap.sailing.polars.datamining.components.PolarLeaderboardRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarLegRetrievalProcessor;
 import com.sap.sailing.polars.datamining.components.PolarRaceColumnRetrievalProcessor;
+import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
 import com.sap.sailing.polars.datamining.data.HasFleetPolarContext;
 import com.sap.sailing.polars.datamining.data.HasGPSFixPolarContext;
@@ -22,7 +25,19 @@ import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
 
+/**
+ * Builds the polar related retriever chains.
+ *
+ * </br></br>
+ * 
+ * At the time of writing there are two chains, one for actual generation of custom polars and one for simple access of
+ * backend saved polar in the {@link PolarDataService}
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarsDataRetrievalChainDefinitions {
     
     private final Collection<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions;
@@ -46,6 +61,12 @@ public class PolarsDataRetrievalChainDefinitions {
         definition1.endWith(PolarCompetitorRetrievalProcessor.class, PolarGPSFixRetrievalProcessor.class,
                 HasGPSFixPolarContext.class, PolarDataMiningSettings.class, PolarDataMiningSettingsImpl.createStandardPolarSettings(), "GPSFix");
         dataRetrieverChainDefinitions.add(definition1);
+        
+        DataRetrieverChainDefinition<RacingEventService, HasBackendPolarBoatClassContext> definition2 = new SingleDataRetrieverChainDefinition<>(
+                RacingEventService.class, HasBackendPolarBoatClassContext.class, "PolarChain2");
+        definition2.startWith(BackendPolarsBoatClassRetrievalProcessor.class, HasBackendPolarBoatClassContext.class, "BoatClass");
+     
+        dataRetrieverChainDefinitions.add(definition2);
     }
 
     public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {

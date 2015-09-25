@@ -1,5 +1,8 @@
 package com.sap.sailing.polars.datamining.shared;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 public class PolarAggregationImpl implements PolarAggregation {
@@ -7,7 +10,11 @@ public class PolarAggregationImpl implements PolarAggregation {
     private static final long serialVersionUID = 9177124509619315748L;
     private double[] sumSpeedsPerAngle = new double[360];
     private int[] countPerAngle = new int[360];
-    private int[][] histogramData;
+    /**
+     * FIXME Right now the histogram data is only valid, if the results are grouped by windrange.
+     * Otherwise the column-indices of different ranges are mixed in one histogram. 
+     */
+    private Map<Integer, Map<Double, Integer>> histogramData;
     private int count = 0;
     private PolarDataMiningSettings settings;
     
@@ -17,9 +24,9 @@ public class PolarAggregationImpl implements PolarAggregation {
     
     public PolarAggregationImpl(PolarDataMiningSettings polarDataMiningSettings) {
         this.settings = polarDataMiningSettings;
-        histogramData = new int[360][];
+        histogramData = new HashMap<>();
         for (int i = 0; i < 360; i++) {
-            histogramData[i] = new int[settings.getNumberOfHistogramColumns()];
+            histogramData.put(i, new HashMap<Double, Integer>());
         }
     }
 
@@ -32,8 +39,14 @@ public class PolarAggregationImpl implements PolarAggregation {
         }
         sumSpeedsPerAngle[angleDeg] += dataEntry.getBoatSpeed().getKnots();
         countPerAngle[angleDeg]++;
-        // TODO add 1 to correct histogram column, for that we need to know min and max
-        //histogramData[angleDeg][]
+        Double histogramXValue = settings.getWindSpeedStepping().getHistogramXValue(settings.getNumberOfHistogramColumns(),
+                dataEntry.getWindSpeed().getKnots());
+        Map<Double, Integer> histDataForAngle = histogramData.get(angleDeg);
+        if (!histDataForAngle.containsKey(histogramXValue)) {
+            histDataForAngle.put(histogramXValue, 0);
+        }
+        Integer currentCount = histDataForAngle.get(histogramXValue) + 1;
+        histDataForAngle.put(histogramXValue, currentCount);
         count++;
     }
     
@@ -62,7 +75,11 @@ public class PolarAggregationImpl implements PolarAggregation {
     public PolarDataMiningSettings getSettings() {
         return settings;
     }
-    
+
+    @Override
+    public Map<Integer, Map<Double, Integer>> getCountHistogramPerAngle() {
+        return histogramData;
+    }
     
 
 }

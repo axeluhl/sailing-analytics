@@ -29,6 +29,14 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Holds one speed regression per BoatClass, WindSpeed, Beat Angle Range combination and provides means for adding and
+ * accessing data. Data is added incrementally in and not all historic fixes need to be maintained. This allows for a
+ * very space efficient structure.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class SpeedRegressionPerAngleClusterProcessor implements
         Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
 
@@ -92,6 +100,8 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      * There are angle clusters (size defined in the data mining pipeline construction), which each have their own
      * regression for boatspeed over windspeed. We don't know the thresholds or centers of the angle clusters here, so
      * we roughly interpolate by taking 10 values from angle-5 deg to angle+5 deg and average the speeds.
+     * 
+     * At the time of writing the size of each angle range is 5° so this method provides a pretty smooth interpolation.
      */
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
@@ -153,6 +163,13 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
+
+    /**
+     * Allows direct access to angle regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #estimateBoatSpeed(BoatClass, Speed, Bearing)}.
+     */
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle));

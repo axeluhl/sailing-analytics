@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.polarsheets.WindSpeedSteppingConfiguratorPanel;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettingsImpl;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -16,6 +15,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * Provides a widget for configuring {@link PolarDataMiningSettings}, including validation.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class PolarDataMiningSettingsDialogComponent implements SettingsDialogComponent<PolarDataMiningSettings> {
 
     private PolarDataMiningSettings settings;

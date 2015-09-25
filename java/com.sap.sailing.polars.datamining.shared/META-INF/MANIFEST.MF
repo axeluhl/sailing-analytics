@@ -11,5 +11,6 @@ Require-Bundle: com.sap.sse.datamining.shared,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sse;bundle-version="1.0.0",
- com.sap.sse.common;bundle-version="1.0.0"
+ com.sap.sse.common;bundle-version="1.0.0",
+ com.sap.sse.datamining.annotations
 Export-Package: com.sap.sailing.polars.datamining.shared
