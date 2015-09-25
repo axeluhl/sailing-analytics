@@ -297,7 +297,6 @@ public class ImportMasterDataOperation extends
                         addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     }
                 }
-                raceColumn.reloadRaceLog(fleet);
             }
         }
     }
