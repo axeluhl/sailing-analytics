@@ -56,7 +56,17 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
                 openAddCompetitorDialog();
             }
         });
+        
+        Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
+        editCompetitorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openEditCompetitorDialog();
+            }
+        });
+        
         buttonPanel.add(addCompetitorButton);
+        buttonPanel.add(editCompetitorButton);
 
         super.addButtons(buttonPanel);
     }
@@ -138,6 +148,39 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
                     public void cancel() {
                     }
                 }).show();
+    }
+    
+    private void openEditCompetitorDialog() {
+        //get currently selected competitor
+        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1){
+            // show some warning
+        } else {
+            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet().iterator().next();
+            new CompetitorEditDialog(stringMessages, competitorToEdit,
+                    new DataEntryDialog.DialogCallback<CompetitorDTO>() {
+                @Override
+                public void ok(CompetitorDTO competitor) {
+                    sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(CompetitorDTO updatedCompetitor) {
+                            int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList().indexOf(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            registeredCompetitorsTable.getDataProvider().refresh();
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
     }
 
     protected void refreshCompetitors() {
