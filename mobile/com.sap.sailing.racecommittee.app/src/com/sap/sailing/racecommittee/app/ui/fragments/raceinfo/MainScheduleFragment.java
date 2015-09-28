@@ -175,7 +175,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
 
-                    String timing = null;
+                    String timing;
                     long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
                     long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
                     if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
