@@ -10,9 +10,6 @@
 			<div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
 				<sse:carousel.WidgetCarousel ui:field="widgetCarousel" />
 			</div>
-			<div class="{local_res.css.stage_progress}">
-				<div class="{local_res.css.stage_progress_bar}"></div>
-			</div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
