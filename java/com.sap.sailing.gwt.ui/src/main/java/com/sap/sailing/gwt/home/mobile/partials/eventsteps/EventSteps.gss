@@ -10,32 +10,38 @@
 }
 .eventsteps_phases_phase {
   font-size: 1rem;
-  width: 50%;
+  width: 100%;
   display: inline-block;
   padding: 0 0.666666666666666em;
   vertical-align: top;
 }
+.eventsteps_phases_phase:last-child {
+  margin-bottom: 0.333333333333333em
+}
 .eventsteps_phases_phaseinactive {
   color: #999;
 }
-.eventsteps_phases_phase:nth-child(2n-1) {
-  padding-right: 0.333333333333333em;
-}
-.eventsteps_phases_phase:nth-child(2n) {
-  padding-left: 0.333333333333333em;
-}
+/* .eventsteps_phases_phase:nth-child(2n-1) { */
+/*   padding-right: 0.333333333333333em; */
+/* } */
+/* .eventsteps_phases_phase:nth-child(2n) { */
+/*   padding-left: 0.333333333333333em; */
+/* } */
 .eventsteps_phases_phase_name {
   font-size: 0.866666666666667em;
   font-weight: 600;
   text-transform: uppercase;
-  text-align: center;
-  padding: .666666666666667em 0;
+/*   text-align: center; */
+/*   padding: .666666666666667em 0; */
+  display: inline;
+  vertical-align: middle;
 }
 .eventsteps_phases_phase_progressbar {
   height: 1.266666666666667em;
   width: 100%;
   border: 1px solid #dedede;
   padding: 1px;
+  margin-bottom: 0.333333333333333em;
 }
 .eventsteps_phases_phase_progressbar_fleet {
   font-size: inherit;
@@ -45,17 +51,18 @@
 }
 .eventsteps_phases_phase_progress {
   text-align: center;
-  margin: 0.666666666666667em 0;
+  margin-top: 0.666666666666667em;
+  margin-bottom: 0.333333333333333em;
 }
 img.eventsteps_phases_phase_progress_icon {
-  display: inline-block;
+  display: inline;
   vertical-align: middle;
   height: 1.133333333333333em;
   width: 1.133333333333333em;
-  margin-right: 0.666666666666667em;
+  margin: 0 0.333333333333333em;
 }
 .eventsteps_phases_phase_progress_text {
   font-size: 0.866666666666667em;
-  display: inline-block;
+  display: inline;
   vertical-align: middle;
 }
