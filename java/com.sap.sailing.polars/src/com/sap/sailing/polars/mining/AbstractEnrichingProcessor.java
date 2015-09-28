@@ -9,7 +9,13 @@ import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 
-public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends AbstractParallelProcessor<InputType, ResultType> {
+/**
+ * This simple abstract processor can be used to enrich data.
+ * 
+ * @author D054528 (Frederik Petersen)
+ */
+public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends
+        AbstractParallelProcessor<InputType, ResultType> {
 
     public AbstractEnrichingProcessor(Class<InputType> inputType, Class<ResultType> resultType,
             ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
@@ -27,6 +33,9 @@ public abstract class AbstractEnrichingProcessor<InputType, ResultType> extends 
         };
     }
 
+    /**
+     * Takes an input element, enriches it with context data and returns that result.
+     */
     protected abstract ResultType enrich(InputType element);
 
     @Override

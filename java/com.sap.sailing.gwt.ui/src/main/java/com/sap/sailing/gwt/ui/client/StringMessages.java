@@ -563,6 +563,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String polarSheetWindSteppingMaxDistanceTooltip();
     String polarSheetSplitByWindGauges();
     String polarSheetSplitByWindGaugesTooltip();
+    String applyMinimumWindConfidence();
+    String applyMinimumWindConfidenceTooltip();
+    String windRangeDistribution();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
@@ -1156,7 +1159,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterCarryValueFor(String competitorName);
     String advanced();
     String basedOn();
-    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
@@ -1386,4 +1388,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);
     String raceOffice();
+    String analyze();
+    String dataMiningSettings();
+    String multiResultsPresenter();
+    String plainResultsPresenter();
+    String resultsChart();
+    String tabbedResultsPresenter();
+    String polarResultsPresenter();
+    String dataMiningRetrieval();
 }

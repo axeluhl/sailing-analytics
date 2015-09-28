@@ -9,6 +9,18 @@ import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 
+/**
+ * These Processors are used to extract a value (defined by a {@link Function}) from grouped elements. 
+ * 
+ * @author Lennart Hensler (D054527)
+ *
+ * @param <DataType> The type of the grouped data. The <code>InputType</code> of the Processor will be
+ *                   <code>GroupedDataEntry<DataType></code>.
+ * @param <FunctionReturnType> The return type of the function, that is used to extract the value. The
+ *                             <code>ResultType</code> of the Processor will be <code>GroupedDataEntry<FunctionReturnType>></code>.
+ * 
+ * @see com.sap.sse.datamining.impl.components com.sap.sse.datamining.impl.components for general information about Processors.
+ */
 public class ParallelGroupedElementsValueExtractionProcessor<DataType, FunctionReturnType>
              extends AbstractParallelProcessor<GroupedDataEntry<DataType>, GroupedDataEntry<FunctionReturnType>> {
 

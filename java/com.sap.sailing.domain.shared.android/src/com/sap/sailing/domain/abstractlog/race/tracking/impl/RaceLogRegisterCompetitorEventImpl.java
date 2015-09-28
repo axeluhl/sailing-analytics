@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.tracking.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -35,7 +36,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
 
     @Override
     public List<Competitor> getInvolvedBoats() {
-        return raceLogEventData.getInvolvedBoats();
+        return Collections.singletonList(getCompetitor());
     }
 
     @Override

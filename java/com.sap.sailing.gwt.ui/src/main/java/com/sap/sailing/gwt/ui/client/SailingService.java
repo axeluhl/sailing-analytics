@@ -20,8 +20,6 @@ import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -368,21 +366,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
-
-    PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, String name) throws Exception;
     
     void createCourseAreas(UUID eventId, String[] courseAreaNames);
-    
-    List<String> getBoatClassNamesWithPolarSheetsAvailable();
     
     void removeCourseAreas(UUID eventId, UUID[] courseAreaIds);
 
     List<Util.Pair<String, String>> getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName);
-
-    PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName);
-
-    
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 

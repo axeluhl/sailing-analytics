@@ -18,6 +18,10 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 
+    /**
+     * @throws IllegalArgumentException if any of the given function isn't a dimension
+     *                                  or the given iterable is empty.
+     */
     @SuppressWarnings("unchecked")
     public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,

@@ -6,10 +6,11 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.sap.sse.datamining.shared,
- com.sap.sse.datamining.shared.annotations,
  com.sap.sse.datamining.shared.data,
  com.sap.sse.datamining.shared.dto,
  com.sap.sse.datamining.shared.impl,
  com.sap.sse.datamining.shared.impl.dto,
  com.sap.sse.datamining.shared.util
 Bundle-ActivationPolicy: lazy
+Require-Bundle: com.sap.sse.datamining.annotations;bundle-version="1.0.0",
+ com.sap.sse.common;bundle-version="1.0.0"

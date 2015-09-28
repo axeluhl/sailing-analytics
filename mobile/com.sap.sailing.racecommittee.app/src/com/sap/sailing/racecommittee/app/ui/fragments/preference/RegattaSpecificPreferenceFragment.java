@@ -14,11 +14,11 @@ import android.preference.PreferenceScreen;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
 

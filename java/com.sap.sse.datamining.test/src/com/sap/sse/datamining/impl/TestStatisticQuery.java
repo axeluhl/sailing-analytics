@@ -25,17 +25,16 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
+import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.data.QueryResultState;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.Number;
-import com.sap.sse.datamining.test.util.components.SingleDataRetrieverChainDefinition;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestStatisticQuery {
@@ -49,7 +48,7 @@ public class TestStatisticQuery {
         
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;
@@ -82,7 +81,7 @@ public class TestStatisticQuery {
         definition.addDimensionToGroupBy(functionFactory.createMethodWrappingFunction(getLengthMethod));
         
         Method getValueMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getValue");
-        definition.setFilterSelection(0, functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
+        definition.setFilterSelection(retrieverChain.getDataRetrieverLevel(0), functionFactory.createMethodWrappingFunction(getValueMethod), Arrays.asList(10, 100, 1000));
         
         return definition;
     }
@@ -141,7 +140,7 @@ public class TestStatisticQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<java.lang.Number> result = new QueryResultImpl<>(QueryResultState.NORMAL, java.lang.Number.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
+        QueryResultImpl<java.lang.Number> result = new QueryResultImpl<>(QueryResultState.NORMAL, java.lang.Number.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", 0, 0));
         return result;
     }
 
@@ -150,7 +149,6 @@ public class TestStatisticQuery {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
         assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
-        assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 
