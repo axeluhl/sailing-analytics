@@ -12,6 +12,7 @@
 	<packaging>aar</packaging>
 
 	<dependencies>
+
         <dependency>
             <groupId>com.android.support</groupId>
             <artifactId>appcompat-v7</artifactId>
@@ -101,37 +102,10 @@
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<finalName>${project.artifactId}</finalName>
-		
 		<plugins>
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>4.3.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<resourceDirectory>res</resourceDirectory>
-					<sourceDirectories>src</sourceDirectories>
-					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
-					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
-					<failOnDuplicatePackages>false</failOnDuplicatePackages>
-					<classesJarExcludes>
-						<classesJarExclude>*.jar</classesJarExclude>
-						<classesJarExclude>generated-sources/**</classesJarExclude>
-						<classesJarExclude>maven-archiver/**</classesJarExclude>
-						<classesJarExclude>sourcebundle-l10n-gen/**</classesJarExclude>
-						<classesJarExclude>p2*</classesJarExclude>
-						<classesJarExclude>MANIFEST.MF</classesJarExclude>
-						<classesJarExclude>*.ap_</classesJarExclude>
-						<classesJarExclude>local-artifacts.properties</classesJarExclude>
-						<classesJarExclude>android/**</classesJarExclude>
-						<classesJarExclude>com/google/**</classesJarExclude>
-						<classesJarExclude>**/R.class</classesJarExclude>
-						<classesJarExclude>**/R$*.class</classesJarExclude>
-					</classesJarExcludes>
-					<sdk>
-						<platform>22</platform>
-					</sdk>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

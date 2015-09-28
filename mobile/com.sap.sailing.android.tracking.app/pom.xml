@@ -63,58 +63,11 @@
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>4.3.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<resourceDirectory>res</resourceDirectory>
-					<sourceDirectories>
-						<sourceDirectory>${project.basedir}/src</sourceDirectory>
-					</sourceDirectories>
-					<assetsDirectory>assets</assetsDirectory>
-					<failOnNonStandardStructure>false</failOnNonStandardStructure>
-					<failOnConflictingLayouts>false</failOnConflictingLayouts>
-					<failOnDuplicatePackages>false</failOnDuplicatePackages>
-					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
-					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
-					<undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    <extractDuplicates>true</extractDuplicates>
-                    <sdk>
-                        <platform>22</platform>
-                    </sdk>
-					<release>true</release>
-                    <proguard>
-                     <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
-                        <skip>true</skip>
-                        <configs>
-                            <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
-							<config>${project.basedir}/proguard-project.txt</config>
-							<config>${project.basedir}/../proguard-mobile.txt</config>
-                        </configs>
-                    </proguard>
-                    <zipalign>
-                        <skip>false</skip>
-                    </zipalign>
-					<excludeJarResources>
-						<!-- Prevents *-sources.jar to be distributed with the APK -->
-						<excludeJarResource>^.*-sources.jar$</excludeJarResource>
-					</excludeJarResources>
-					<dex>
-						<jvmArguments>
-							<jvmArgument>-Xms1024m</jvmArgument>
-							<jvmArgument>-Xmx2048m</jvmArgument>
-						</jvmArguments>
-					</dex>
-				</configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>apk</goal>
                         </goals>
-                        <configuration>
-                            <excludeJarResources>
-                                <excludeJarResource>^android.*.jar$</excludeJarResource>
-                            </excludeJarResources>
-                        </configuration>
                     </execution>
                 </executions>
 			</plugin>

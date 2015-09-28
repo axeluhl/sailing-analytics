@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>com.sap.sailing</groupId>
-        <artifactId>mobile</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sap.sailing</groupId>
-    <artifactId>com.sap.sailing.racecommittee.app</artifactId>
-    <packaging>apk</packaging>
+	<parent>
+		<groupId>com.sap.sailing</groupId>
+		<artifactId>mobile</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
-    <properties>
-        <!-- If you change this name, change in RCApp too! -->
-        <additional-deployment-version-file>com.sap.sailing.racecommittee.app.version</additional-deployment-version-file>
-        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
-        <app-version>${rc-app-version}</app-version>
-    </properties>
-	
-	
+	<groupId>com.sap.sailing</groupId>
+	<artifactId>com.sap.sailing.racecommittee.app</artifactId>
+	<packaging>apk</packaging>
+
+	<properties>
+		<!-- If you change this name, change in RCApp too! -->
+		<additional-deployment-version-file>com.sap.sailing.racecommittee.app.version</additional-deployment-version-file>
+		<!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+		<app-version>${rc-app-version}</app-version>
+	</properties>
+
+
 	<repositories>
 		<repository>
 			<id>jcenter</id>
@@ -28,28 +28,22 @@
 		</repository>
 	</repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>android</groupId>
+			<artifactId>android</artifactId>
 			<version>5.1.1_r2</version>
 			<scope>provided</scope>
-        </dependency>
+		</dependency>
 
-<!--
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>support-annotations</artifactId>
-            <version>21.0.3</version>
-            <type>aar</type>
-        </dependency>
--->
+		<!-- <dependency> <groupId>com.android.support</groupId> <artifactId>support-annotations</artifactId> 
+			<version>21.0.3</version> <type>aar</type> </dependency> -->
 
-        <dependency>
-            <groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
-            <artifactId>advrecyclerview</artifactId>
-            <version>0.6.2</version>
-            <type>aar</type>
+		<dependency>
+			<groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
+			<artifactId>advrecyclerview</artifactId>
+			<version>0.6.2</version>
+			<type>aar</type>
 			<exclusions>
 				<exclusion>
 					<groupId>com.android.support</groupId>
@@ -60,118 +54,66 @@
 					<artifactId>appcompat-v7</artifactId>
 				</exclusion>
 			</exclusions>
-        </dependency>
-		
-		<dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>appcompat-v7</artifactId>
-            <version>22.1.1</version>
-            <type>aar</type>
-        </dependency>
-		
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>recyclerview-v7</artifactId>
-            <version>22.1.1</version>
-            <type>aar</type>
-        </dependency>
+		</dependency>
 
-        <!-- Already transitively added? -->
-        <!--<dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services-location</artifactId>
-            <version>7.3.0</version>
-            <type>aar</type>
-        </dependency>-->
-		
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sap.sailing.android.shared</artifactId>
-            <version>${project.version}</version>
-            <type>aar</type>
+		<dependency>
+			<groupId>com.android.support</groupId>
+			<artifactId>appcompat-v7</artifactId>
+			<version>22.1.1</version>
+			<type>aar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.android.support</groupId>
+			<artifactId>recyclerview-v7</artifactId>
+			<version>22.1.1</version>
+			<type>aar</type>
+		</dependency>
+
+		<!-- Already transitively added? -->
+		<!--<dependency> <groupId>com.google.android.gms</groupId> <artifactId>play-services-location</artifactId> 
+			<version>7.3.0</version> <type>aar</type> </dependency> -->
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>com.sap.sailing.android.shared</artifactId>
+			<version>${project.version}</version>
+			<type>aar</type>
 			<exclusions>
 				<exclusion>
 					<groupId>com.android.support</groupId>
 					<artifactId>appcompat-v7</artifactId>
 				</exclusion>
 			</exclusions>
-        </dependency>
-    </dependencies>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <sourceDirectory>src</sourceDirectory>
-        <plugins>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>4.3.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<resourceDirectory>res</resourceDirectory>
-					<sourceDirectories>
-						<sourceDirectory>${project.basedir}/src</sourceDirectory>
-					</sourceDirectories>
-					<assetsDirectory>assets</assetsDirectory>
-					<failOnNonStandardStructure>false</failOnNonStandardStructure>
-					<failOnConflictingLayouts>false</failOnConflictingLayouts>
-					<failOnDuplicatePackages>false</failOnDuplicatePackages>
-					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
-					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
-					<undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    <extractDuplicates>true</extractDuplicates>
-                    <sdk>
-                        <platform>22</platform>
-                    </sdk>
-					<release>true</release>
-                    <proguard>
-                     <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
-                        <skip>true</skip>
-                        <configs>
-                            <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
-							<config>${project.basedir}/proguard-project.txt</config>
-							<config>${project.basedir}/../proguard-mobile.txt</config>
-                        </configs>
-                    </proguard>
-                    <zipalign>
-                        <skip>false</skip>
-                    </zipalign>
-					<excludeJarResources>
-						<!-- Prevents *-sources.jar to be distributed with the APK -->
-						<excludeJarResource>^.*-sources.jar$</excludeJarResource>
-					</excludeJarResources>
-					<dex>
-						<jvmArguments>
-							<jvmArgument>-Xms1024m</jvmArgument>
-							<jvmArgument>-Xmx2048m</jvmArgument>
-						</jvmArguments>
-					</dex>
-				</configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apk</goal>
-                        </goals>
-                        <configuration>
-                            <excludeJarResources>
-                                <excludeJarResource>^android.*.jar$</excludeJarResource>
-                            </excludeJarResources>
-                        </configuration>
-                    </execution>
-                </executions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>apk</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>
