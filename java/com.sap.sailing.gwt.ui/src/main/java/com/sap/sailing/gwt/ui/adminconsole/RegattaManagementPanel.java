@@ -156,9 +156,18 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             @Override
             public void ok(RegattaDTO newRegatta) {
                 createNewRegatta(newRegatta);
+                openCreateDefaultRegattaLeaderboardDialog(newRegatta);
             }
         });
         dialog.ensureDebugId("RegattaCreateDialog");
+        dialog.show();
+    }
+    
+    private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta){
+        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta);
+        dialog.ensureDebugId("CreateDefaultRegattaLeaderboardDialog");
+        dialog.setText(stringMessages.createDefaultRegattaLeaderboard());
+        dialog.setTitle(stringMessages.createDefaultRegattaLeaderboard());
         dialog.show();
     }
     
