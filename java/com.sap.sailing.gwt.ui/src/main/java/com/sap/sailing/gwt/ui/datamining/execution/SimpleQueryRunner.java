@@ -2,19 +2,19 @@ package com.sap.sailing.gwt.ui.datamining.execution;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.QueryRunner;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettings;
 import com.sap.sailing.gwt.ui.datamining.settings.QueryRunnerSettingsDialogComponent;
 import com.sap.sse.datamining.shared.DataMiningSession;
-import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -24,22 +24,21 @@ public class SimpleQueryRunner implements QueryRunner {
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
-    
-    private final Button runButton;
+    private final ManagedDataMiningQueriesCounter counter;
 
     private QueryRunnerSettings settings;
     private final QueryDefinitionProvider queryDefinitionProvider;
-    private final ResultsPresenter<Number> resultsPresenter;
-    
-    private int sentQueriesNumber;
+    private final ResultsPresenter<?> resultsPresenter;
+    private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
-            ResultsPresenter<Number> resultsPresenter) {
+            ResultsPresenter<?> resultsPresenter) {
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        counter = new SimpleManagedDataMiningQueriesCounter();
         
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
@@ -56,30 +55,23 @@ public class SimpleQueryRunner implements QueryRunner {
         if (this.settings.isRunAutomatically()) {
             queryDefinitionProvider.addQueryDefinitionChangedListener(this);
         }
-        
-        sentQueriesNumber = 0;
     }
 
     @Override
-    public void run(QueryDefinitionDTO queryDefinition) {
+    public void run(StatisticQueryDefinitionDTO queryDefinition) {
         Iterable<String> errorMessages = queryDefinitionProvider.validateQueryDefinition(queryDefinition);
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
-            sentQueriesNumber++;
+            counter.increase();
             resultsPresenter.showBusyIndicator();
-            dataMiningService.runQuery(session, queryDefinition, new AsyncCallback<QueryResult<Number>>() {
+            dataMiningService.runQuery(session, queryDefinition, new ManagedDataMiningQueryCallback<Object>(counter) {
                 @Override
-                public void onFailure(Throwable caught) {
+                protected void handleFailure(Throwable caught) {
                     errorReporter.reportError("Error running the query: " + caught.getMessage());
                     resultsPresenter.showError(stringMessages.errorRunningDataMiningQuery() + ".");
                 }
-            
                 @Override
-                public void onSuccess(QueryResult<Number> result) {
-                    sentQueriesNumber--;
-                    //Don't show the empty result, if more Queries have been sent
-                    if (!result.isEmpty() || sentQueriesNumber == 0) {
-                        resultsPresenter.showResult(result);
-                    }
+                protected void handleSuccess(QueryResultDTO<Object> result) {
+                    resultsPresenter.showResult(result);
                 }
             });
         } else {
@@ -100,7 +92,7 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
-    public void queryDefinitionChanged(QueryDefinitionDTO newQueryDefinition) {
+    public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         run(newQueryDefinition);
     }
 
@@ -131,8 +123,7 @@ public class SimpleQueryRunner implements QueryRunner {
 
     @Override
     public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
-        QueryRunnerSettings dataMiningSettings = new QueryRunnerSettings(settings);
-        return new QueryRunnerSettingsDialogComponent(dataMiningSettings, stringMessages);
+        return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override

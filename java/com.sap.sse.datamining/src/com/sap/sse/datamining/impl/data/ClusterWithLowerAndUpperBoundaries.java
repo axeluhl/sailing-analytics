@@ -13,13 +13,11 @@ public class ClusterWithLowerAndUpperBoundaries<ElementType> extends AbstractClu
      * all elements, that are contained by the given <code>lowerBound</code> <b>and</b> the given
      * <code>upperBound</code>.
      * 
-     * @param messageKey the key used for internationalization
      * @param lowerBound the lower bound of this <code>Cluster</code>
      * @param upperBound the upper bound of this <code>Cluster</code>
      */
-    public ClusterWithLowerAndUpperBoundaries(String messageKey, ClusterBoundary<ElementType> lowerBound,
-            ClusterBoundary<ElementType> upperBound) {
-        super(messageKey, Arrays.asList(lowerBound, upperBound));
+    public ClusterWithLowerAndUpperBoundaries(ClusterBoundary<ElementType> lowerBound, ClusterBoundary<ElementType> upperBound) {
+        super(Arrays.asList(lowerBound, upperBound));
     }
     
     @Override

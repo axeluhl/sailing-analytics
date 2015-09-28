@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
-
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;

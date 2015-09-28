@@ -389,6 +389,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public Speed projectTo(Position position, Bearing bearing) {
             return null;
         }
+        @Override
+        public double getStatuteMilesPerHour() {
+            return 0;
+        }
     }
 
     @Override

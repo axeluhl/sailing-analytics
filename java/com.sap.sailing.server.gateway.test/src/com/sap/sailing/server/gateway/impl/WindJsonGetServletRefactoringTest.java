@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
@@ -19,9 +20,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
 import org.mockito.ArgumentMatcher;
 
 import com.sap.sailing.domain.base.RaceDefinition;

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -36,6 +38,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -80,7 +83,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */
-                7000, /*useMarkPassingCalculator*/ false) {
+                7000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class)) {
             private static final long serialVersionUID = 9114777576548711763L;
 
             @Override

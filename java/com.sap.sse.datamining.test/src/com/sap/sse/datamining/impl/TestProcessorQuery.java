@@ -1,18 +1,16 @@
 package com.sap.sse.datamining.impl;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.UUID;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -22,33 +20,19 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.sap.sse.datamining.AdditionalQueryData;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
-import com.sap.sse.datamining.components.FilterCriterion;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
-import com.sap.sse.datamining.factories.ProcessorFactory;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
-import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
-import com.sap.sse.datamining.impl.criterias.AbstractFilterCriterion;
-import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.datamining.shared.data.QueryResultState;
-import com.sap.sse.datamining.shared.data.Unit;
-import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
-import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.datamining.test.util.components.BlockingProcessor;
 import com.sap.sse.datamining.test.util.components.NullProcessor;
@@ -59,121 +43,11 @@ public class TestProcessorQuery {
     
     private static final Logger LOGGER = Logger.getLogger(TestProcessorQuery.class.getSimpleName());
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
-    private static final ProcessorFactory processorFactory = new ProcessorFactory(ConcurrencyTestsUtil.getExecutor());
 
     private boolean receivedElementOrFinished;
     private boolean receivedAbort;
     
     private QueryResult<?> resultAfterAbortion;
-    
-    @Test
-    public void testStandardWorkflow() throws InterruptedException, ExecutionException {
-        Collection<Number> dataSource = createDataSource();
-        Query<Double> queryWithStandardWorkflow = createQueryWithStandardWorkflow(dataSource);
-        assertThat(queryWithStandardWorkflow.getState(), is(QueryState.NOT_STARTED));
-        QueryResult<Double> expectedResult = buildExpectedResult(dataSource);
-        verifyResult(queryWithStandardWorkflow.run(), expectedResult);
-    }
-    
-    private Collection<Number> createDataSource() {
-        Collection<Number> dataSource = new ArrayList<>();
-        
-        //Should be removed after filtering the data
-        dataSource.add(new Number(1));
-        dataSource.add(new Number(7));
-
-        //Results in <2> = 5
-        dataSource.add(new Number(10));
-        dataSource.add(new Number(10));
-        dataSource.add(new Number(10));
-        dataSource.add(new Number(10));
-        dataSource.add(new Number(10));
-
-        //Results in <3> = 3
-        dataSource.add(new Number(100));
-        dataSource.add(new Number(100));
-        dataSource.add(new Number(100));
-
-        //Results in <4> = 10
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        dataSource.add(new Number(1000));
-        
-        return dataSource;
-    }
-
-    /**
-     * Creates a query, that takes a Collection of Numbers, filters all numbers < 10, groups them by
-     * their length, extracts the cross sum and aggregates these as sum.
-     */
-    private Query<Double> createQueryWithStandardWorkflow(Collection<Number> dataSource) {
-        final ExecutorService executor = ConcurrencyTestsUtil.getExecutor();
-        ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
-            @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
-                Processor<GroupedDataEntry<Double>, Map<GroupKey, Double>> sumAggregator = processorFactory.createAggregationProcessor(this, AggregatorType.Sum, Double.class);
-                
-                Method getCrossSumMethod = FunctionTestsUtil.getMethodFromClass(Number.class, "getCrossSum");
-                Function<Double> getCrossSumFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getCrossSumMethod);
-                Processor<GroupedDataEntry<Number>, GroupedDataEntry<Double>> crossSumExtractor = processorFactory.createExtractionProcessor(sumAggregator, getCrossSumFunction, ParameterProvider.NULL);
-
-                List<ParameterizedFunction<?>> dimensions = new ArrayList<>();
-                Function<Integer> getLengthFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(FunctionTestsUtil.getMethodFromClass(Number.class, "getLength"));
-                dimensions.add(new SimpleParameterizedFunction<>(getLengthFunction, ParameterProvider.NULL));
-                Processor<Number, GroupedDataEntry<Number>> lengthGrouper = processorFactory.createGroupingProcessor(Number.class, crossSumExtractor, dimensions);
-                Collection<Processor<Number, ?>> filtrationResultReceivers = new ArrayList<>();
-                filtrationResultReceivers.add(lengthGrouper);
-                
-                FilterCriterion<Number> filterCriterion = new AbstractFilterCriterion<Number>(Number.class) {
-                    @Override
-                    public boolean matches(Number element) {
-                        return element.getValue() >= 10;
-                    }
-                };
-                Processor<Number, Number> filtrationProcessor =  new ParallelFilteringProcessor<>(Number.class, executor, filtrationResultReceivers, filterCriterion);
-                Collection<Processor<Number, ?>> retrievalResultReceivers = new ArrayList<>();
-                retrievalResultReceivers.add(filtrationProcessor);
-                
-                @SuppressWarnings("unchecked")
-                Processor<Iterable<Number>, Number> retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Number>, Number>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Number.class,
-                                                                                                                                         ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 0) {
-                    @Override
-                    protected Iterable<Number> retrieveData(Iterable<Number> element) {
-                        return element;
-                    }
-                };
-                
-                return retrievalProcessor;
-            }
-        };
-        return query;
-    }
-
-    private QueryResult<Double> buildExpectedResult(Collection<Number> dataSource) {
-        Map<GroupKey, Double> results = new HashMap<>();
-        results.put(new GenericGroupKey<Integer>(2), 5.0);
-        results.put(new GenericGroupKey<Integer>(3), 3.0);
-        results.put(new GenericGroupKey<Integer>(4), 10.0);
-        
-        QueryResultImpl<Double> result = new QueryResultImpl<>(QueryResultState.NORMAL, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
-        return result;
-    }
-
-    private void verifyResult(QueryResult<Double> result, QueryResult<Double> expectedResult) {
-        assertThat("The result State isn't correct.", result.getState(), is(expectedResult.getState()));
-        assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
-        assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
-        assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
-        assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
-        assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
-    }
 
     @Test(timeout=2000)
     public void testQueryTimeouting() {
@@ -183,12 +57,12 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
                         ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
                             @Override
@@ -221,12 +95,12 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
                         ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
                             @Override
@@ -287,12 +161,12 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                createDataSource(), stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
                                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
@@ -325,18 +199,52 @@ public class TestProcessorQuery {
         assertThat(query.run(500, TimeUnit.MILLISECONDS).getResults(), is(expectedResult));
     }
     
+    private Collection<Number> createDataSource() {
+        Collection<Number> dataSource = new ArrayList<>();
+        
+        //Should be removed after filtering the data
+        dataSource.add(new Number(1));
+        dataSource.add(new Number(7));
+
+        //Results in <2> = 5
+        dataSource.add(new Number(10));
+        dataSource.add(new Number(10));
+        dataSource.add(new Number(10));
+        dataSource.add(new Number(10));
+        dataSource.add(new Number(10));
+
+        //Results in <3> = 3
+        dataSource.add(new Number(100));
+        dataSource.add(new Number(100));
+        dataSource.add(new Number(100));
+
+        //Results in <4> = 10
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        dataSource.add(new Number(1000));
+        
+        return dataSource;
+    }
+    
     @Test
     public void testQueryWithError() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
-                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                          ConcurrencyTestsUtil.getExecutor(),
-                                                                                          resultReceivers) {
+                                                                                    (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
@@ -367,16 +275,16 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryWithFailure() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
-                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                          ConcurrencyTestsUtil.getExecutor(),
-                                                                                          resultReceivers) {
+                                                                                    (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
@@ -394,6 +302,29 @@ public class TestProcessorQuery {
         };
         query.run();
         assertThat(query.getState(), is(QueryState.FAILURE));
+    }
+    
+    @Test
+    public void testQueryAdditionalData() {
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
+        Query<?> query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
+            @Override
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
+                return null;
+            }
+        };
+        assertThat(query.getAdditionalData(), is(additionalData));
+        assertThat(query.getAdditionalData(AdditionalStatisticQueryData.class), is(additionalData));
+        assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), nullValue());
+        
+        additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
+        query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
+            @Override
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
+                return null;
+            }
+        };
+        assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), is(additionalData));
     }
 
 }

@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -41,9 +41,9 @@ public class TestFunctionDTOConstruction {
         Function<?> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
         
         FunctionDTO expectedDimensionDTO = createExpectedDimensionDTO();
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension), is(expectedDimensionDTO));
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.ENGLISH), is(expectedDimensionDTO));
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.GERMAN), is(expectedDimensionDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension), is(expectedDimensionDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.ENGLISH), is(expectedDimensionDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.GERMAN), is(expectedDimensionDTO));
     }
 
     public FunctionDTO createExpectedDimensionDTO() {
@@ -64,8 +64,8 @@ public class TestFunctionDTOConstruction {
         Function<?> sideEffectFreeValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(sideEffectFreeValueMethod);
         
         FunctionDTO expectedDTO = createExpectedNullarySideEffectFreeValueDTO();
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.ENGLISH), is(expectedDTO));
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.GERMAN), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.ENGLISH), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.GERMAN), is(expectedDTO));
     }
 
     private FunctionDTO createExpectedNullarySideEffectFreeValueDTO() {
@@ -86,8 +86,8 @@ public class TestFunctionDTOConstruction {
         Function<?> externalLibraryFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(externalLibraryMethod);
         
         FunctionDTO expectedDTO = createExpectedExternalLibraryFunctionDTO();
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(externalLibraryFunction, stringMessages, Locale.ENGLISH), is(expectedDTO));
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(externalLibraryFunction, stringMessages, Locale.GERMAN), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(externalLibraryFunction, stringMessages, Locale.ENGLISH), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(externalLibraryFunction, stringMessages, Locale.GERMAN), is(expectedDTO));
     }
 
     private FunctionDTO createExpectedExternalLibraryFunctionDTO() {
@@ -108,8 +108,8 @@ public class TestFunctionDTOConstruction {
         Function<?> increment = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(incrementMethod);
         
         FunctionDTO expectedDTO = createFunctionDTOWithParameters();
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, stringMessages, Locale.ENGLISH), is(expectedDTO));
-        assertThat(FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(increment, stringMessages, Locale.GERMAN), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(increment, stringMessages, Locale.ENGLISH), is(expectedDTO));
+        assertThat(FunctionTestsUtil.getDTOFactory().createFunctionDTO(increment, stringMessages, Locale.GERMAN), is(expectedDTO));
     }
 
     private FunctionDTO createFunctionDTOWithParameters() {
@@ -130,9 +130,9 @@ public class TestFunctionDTOConstruction {
     public void testThatLocalizedFunctionDTOAndUnlocalizedAreEqual() {
         Function<?> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
         
-        FunctionDTO unlocalizedDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension);
-        FunctionDTO englishDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension, TestsUtil.getTestStringMessages(), Locale.ENGLISH);
-        FunctionDTO germanDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(dimension, TestsUtil.getTestStringMessages(), Locale.GERMAN);
+        FunctionDTO unlocalizedDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension);
+        FunctionDTO englishDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, TestsUtil.getTestStringMessages(), Locale.ENGLISH);
+        FunctionDTO germanDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, TestsUtil.getTestStringMessages(), Locale.GERMAN);
         
         assertThat(unlocalizedDimensionDTO, is(englishDimensionDTO));
         assertThat(englishDimensionDTO, is(germanDimensionDTO));

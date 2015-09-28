@@ -22,11 +22,9 @@
 }
 
 .highcharts-container {
-	position: absulute;
-	top: 0pt;
-	bottom: 0pt;
-	left: 0pt;
-	right: 0pt;
+	position: absolute !important;
+	width: 100% !important;
+	height: 100% !important;
 }
 
 .bottomnotification {
@@ -38,11 +36,10 @@
 	width: 100%;
 	bottom: 0pt;
 	text-align: center;
-	font-weight: bold;
 	font-size: 15pt;
 	line-height: 30pt;
 	color: black;
-	font-family: "Arial";
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	z-index: 2;
 }
 
@@ -134,5 +131,5 @@
 	font-weight: bold;
 	font-size: 13px;
 	color: grey;
-	font-family: "Arial";
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 }

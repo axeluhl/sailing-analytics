@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
+import com.sap.sse.datamining.test.domain.Test_Regatta;
 
 public class TestRegattaRetrievalProcessor extends AbstractRetrievalProcessor<Collection<Test_Regatta>, Test_Regatta> {
 
@@ -18,5 +18,10 @@ public class TestRegattaRetrievalProcessor extends AbstractRetrievalProcessor<Co
     protected Iterable<Test_Regatta> retrieveData(Collection<Test_Regatta> regattas) {
         return regattas;
     }
+    
+//    @Override
+//    public Iterable<Processor<Test_Regatta, ?>> getResultReceivers() {
+//        return super.getResultReceivers();
+//    }
 
 }

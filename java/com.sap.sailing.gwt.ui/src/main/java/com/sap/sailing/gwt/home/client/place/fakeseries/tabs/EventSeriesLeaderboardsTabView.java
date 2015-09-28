@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.client.place.event.oldmultileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.client.place.event.utils.EventParamUtils;
 import com.sap.sailing.gwt.home.client.place.fakeseries.EventSeriesAnalyticsDataManager;
@@ -28,13 +29,18 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
         LeaderboardUpdateListener {
 
+    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesLeaderboardsTabView> {
+    }
+
+    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+
     private SeriesView.Presenter currentPresenter;
 
-    @UiField
+    @UiField(provided = true)
     protected OldMultiLeaderboard leaderboard;
 
     public EventSeriesLeaderboardsTabView() {
-
+        leaderboard = new OldMultiLeaderboard(new OldMultiLeaderboardDelegateFullscreenViewer());
     }
 
     @Override
@@ -54,52 +60,34 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
     @Override
     public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
-
         contentArea.setWidget(new Placeholder());
-
         String leaderboardName = myPlace.getCtx().getSeriesDTO().getLeaderboardId();
-
-        if (leaderboardName != null && !leaderboardName.isEmpty()) {
-          
-            EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx()
-                    .getAnalyticsManager();
-
-
-            boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
-                    LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-
-            final LeaderboardSettings leaderboardSettings = EventParamUtils
-                    .createLeaderboardSettingsFromURLParameters(Window.Location
-                    .getParameterMap());
-
-            final RaceIdentifier preselectedRace = EventParamUtils
-                    .getPreselectedRace(Window.Location.getParameterMap());
+        
+        if (leaderboardName != null && !leaderboardName.isEmpty()) {          
+            EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
+            boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
+            final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
+            final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
 
             MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
                     preselectedRace,
- "leaderboardGroupName",
+                    "leaderboardGroupName",
                     leaderboardName,
                     true, // TODO @FM this information came from place, now hard coded. check with frank
                     autoExpandLastRaceColumn);
 
             initWidget(ourUiBinder.createAndBindUi(this));
 
-            leaderboard.setMultiLeaderboard(leaderboardPanel,
-                    currentPresenter.getAutoRefreshTimer());
-
+            leaderboard.setMultiLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             leaderboardPanel.addLeaderboardUpdateListener(this);
-
             if (currentPresenter.getCtx().getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 // TODO: this.leaderboard.hideRefresh();
             } else {
                 // TODO: start autorefresh?
             }
-
-
             regattaAnalyticsManager.hideCompetitorChart();
             leaderboardPanel.setVisible(true);
-
             contentArea.setWidget(this);
         } else {
             contentArea.setWidget(new Label("No leaderboard specified, cannot proceed to leaderboardpage"));
@@ -109,36 +97,24 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
                     currentPresenter.getHomeNavigation().goToPlace();
                 }
             }.schedule(3000);
-
         }
-
     }
 
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard.updatedMultiLeaderboard(leaderboard, true); // TODO hard coded
+        this.leaderboard.updatedMultiLeaderboard(leaderboard, true);
     }
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-
     }
 
     @Override
     public void stop() {
-
     }
-
-    interface MyBinder extends UiBinder<HTMLPanel, EventSeriesLeaderboardsTabView> {
-    }
-
-    private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
 
     @Override
     public EventSeriesLeaderboardsPlace placeToFire() {
         return new EventSeriesLeaderboardsPlace(currentPresenter.getCtx());
     }
-
-
-
 }

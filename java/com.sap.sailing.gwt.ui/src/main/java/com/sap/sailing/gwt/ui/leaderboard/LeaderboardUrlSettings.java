@@ -25,6 +25,8 @@ public class LeaderboardUrlSettings extends AbstractSettings {
     public static final String PARAM_SHOW_OVERALL_LEADERBOARD = "showOverallLeaderboard";
     public static final String PARAM_SHOW_SERIES_LEADERBOARDS = "showSeriesLeaderboards";
     public static final String PARAM_SHOW_ADDED_SCORES = "showAddedScores";
+    public static final String PARAM_SHOW_TIME_ON_TIME_FACTOR = "showTimeOnTimeFactor";
+    public static final String PARAM_SHOW_TIME_ON_DISTANCE_ALLOWANCE = "showTimeOnDistanceAllowance";
     public static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
     
     /**
@@ -167,7 +169,7 @@ public class LeaderboardUrlSettings extends AbstractSettings {
                 additionalOverallParams.append(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_FULL_NAME);
             }
         }
-
+        
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboardName
                 + (settings.isShowRaceDetails() ? "&"+LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS+"=true" : "")

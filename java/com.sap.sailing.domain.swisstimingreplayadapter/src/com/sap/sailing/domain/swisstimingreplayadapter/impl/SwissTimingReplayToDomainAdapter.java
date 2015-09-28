@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -53,6 +54,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
@@ -135,6 +137,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
     private RaceStatus lastRaceStatus;
     
     private final boolean useInternalMarkPassingAlgorithm;
+    
+    private final RaceLogResolver raceLogResolver;
 
     /**
      * @param regatta
@@ -143,7 +147,8 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
      * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm) {
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver) {
+        this.raceLogResolver = raceLogResolver;
         this.regatta = regatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceID = new HashMap<>();
@@ -294,9 +299,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             Course course = race.getCourse();
             try {
                 // TODO: Does SwissTiming also deliver the passing side for course marks?
-                List<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>>();
+                List<Pair<ControlPoint, PassingInstruction>> courseToUpdate = new ArrayList<>();
                 for (ControlPoint cp : currentCourseDefinition) {
-                    courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(cp, null));
+                    courseToUpdate.add(new Pair<ControlPoint, PassingInstruction>(cp, PassingInstruction.None));
                 }
                 course.update(courseToUpdate, domainFactory.getBaseDomainFactory());
             } catch (PatchFailedException e) {
@@ -316,7 +321,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm);
+                        /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver);
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {

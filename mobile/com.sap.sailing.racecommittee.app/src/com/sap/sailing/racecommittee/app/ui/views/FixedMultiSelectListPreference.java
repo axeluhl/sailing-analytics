@@ -55,7 +55,6 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
         obtainReflectionInformation();
     }
 
-    @SuppressWarnings("unchecked")
     private void obtainReflectionInformation() {
         fixNeeded = false;
         if (android.os.Build.VERSION.SDK_INT < VERSION_CODE_JELLY_BEAN) {
@@ -64,7 +63,10 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
             try {
                 mValuesField = MultiSelectListPreference.class.getDeclaredField("mValues");
                 mValuesField.setAccessible(true);
-                mValuesReference = (Set<String>) mValuesField.get(this);
+
+                @SuppressWarnings("unchecked")
+                Set<String> valueReference = (Set<String>) mValuesField.get(this);
+                mValuesReference = valueReference;
 
                 persistStringSetMethod = Preference.class.getDeclaredMethod("persistStringSet", java.util.Set.class);
                 persistStringSetMethod.setAccessible(true);

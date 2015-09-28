@@ -2,21 +2,47 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.1.1'
     }
 }
 
 allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
     }
+
     version = "1.0.0-SNAPSHOT"
+
     tasks.withType(JavaCompile) { 
-	sourceCompatibility = "1.7"
-	targetCompatibility = "1.7" 
+	    sourceCompatibility = "1.7"
+	    targetCompatibility = "1.7"
     }
+}
+
+// dependency versions for all sub modules
+ext {
+    // regular
+    buildTools = "22.0.1"
+    compileSdk = 22
+    minSdk = 14
+    targetSdk = 22
+
+    support = "22.1.1"
+    play_services = "7.3.0"
+
+    // testing - jvm
+    junit = "4.12"
+    mockito = "1.9.5"
+
+    // testing - ui
+    test = "0.2"
+    espresso = "2.1"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.6'
 }

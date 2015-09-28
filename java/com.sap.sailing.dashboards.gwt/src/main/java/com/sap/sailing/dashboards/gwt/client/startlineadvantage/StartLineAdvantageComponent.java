@@ -22,16 +22,14 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
     private StartLineAdvantageComponentState startLineAdvantageComponentState;
     private StartLineAdvantageComponentStateShowsAdvantageByWind startLineAdvantageComponentStateShowsAdvantageByWind;
     private StartLineAdvantageComponentStateShowsAdvantageByGeometry startLineAdvantageComponentStateShowsAdvantageByGeometry;
-    private StringMessages stringConstants;
+    private static StringMessages stringConstants = StringMessages.INSTANCE;
     
     public StartLineAdvantageComponent(RibDashboardDataRetriever ribDashboardDataRetriever) {
-        super();
-        stringConstants = StringMessages.INSTANCE;
+        super(stringConstants.dashboardStartlineAdvantageByGeometry(), "m");
         initAndSetStartLineAdvantageStates();
         StartLineAdvantageComponentRessources.INSTANCE.css().ensureInjected();
-        this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
-        this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css()
-                .startLineAdvantageComponent_header());
+        this.header.setInnerText(stringConstants.dashboardStartlineAdvantageByGeometry());
+        this.header.addClassName(StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_header());
         liveAveragePanel.getElement().addClassName(
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_liveAveragePanel());
         livePanel.getElement().addClassName(
@@ -41,14 +39,14 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
         averagePanel.getElement().addClassName(
                 StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_averagePanel());
         this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
-        this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(60));
+        this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
         ribDashboardDataRetriever.addDataObserver(this);
     }
 
     private void initAndSetStartLineAdvantageStates() {
         startLineAdvantageComponentStateShowsAdvantageByWind = new StartLineAdvantageComponentStateShowsAdvantageByWind();
         startLineAdvantageComponentStateShowsAdvantageByGeometry = new StartLineAdvantageComponentStateShowsAdvantageByGeometry();
-        startLineAdvantageComponentState = startLineAdvantageComponentStateShowsAdvantageByWind;
+        startLineAdvantageComponentState = startLineAdvantageComponentStateShowsAdvantageByGeometry;
     }
 
     @Override
@@ -102,21 +100,21 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             String liveValue = NumberFormat.getFormat("#0.0").format(
                     liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             String averageValue = NumberFormat.getFormat("#0.0").format(
-                    liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    liveRaceInfoDTO.startLineAdvantageDTO.average);
             startLineAdvantageComponent.liveNumber.setInnerText(liveValue);
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
             lastAverageValue = averageValue;
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastLiveValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+            setLiveValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage));
+            setAverageValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average));
         }
 
         @Override
         public void changeStartLineAdvatageComponentsStateToOtherState(
                 StartLineAdvantageComponent startLineAdvantageComponent) {
-            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantageByWind());
+            startLineAdvantageComponent.header.setInnerText(stringConstants.dashboardStartlineAdvantagesByWind());
             startLineAdvantageComponent.startLineAdvantageComponentState = startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry;
             startLineAdvantageComponent.liveNumber
                     .setInnerText(startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByGeometry
@@ -135,15 +133,15 @@ public class StartLineAdvantageComponent extends LiveAverageComponent implements
             String liveValue = NumberFormat.getFormat("#0.0").format(
                     liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
             String averageValue = NumberFormat.getFormat("#0.0").format(
-                    liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+                    liveRaceInfoDTO.startLineAdvantageDTO.average);
             startLineAdvantageComponent.liveNumber.setInnerText(liveValue);
             startLineAdvantageComponent.averageNumber.setInnerText(averageValue);
             lastLiveValue = liveValue;
             lastAverageValue = averageValue;
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastLiveValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage);
-            startLineAdvantageComponent.startLineAdvantageComponentStateShowsAdvantageByWind.lastAverageValue = NumberFormat
-                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startlineAdvantageAverage);
+            setLiveValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.startLineAdvantage));
+            setAverageValue(NumberFormat
+                    .getFormat("#0.0").format(liveRaceInfoDTO.startLineAdvantageDTO.average));
         }
 
         @Override

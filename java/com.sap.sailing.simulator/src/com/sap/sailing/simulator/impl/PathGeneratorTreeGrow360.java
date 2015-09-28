@@ -44,10 +44,12 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
     ArrayList<List<PathCandidate>> gridPositions = null;
     ArrayList<List<PathCandidate>> isocPositions = null;
     String gridFile = null;
+    Distance endLineWidth = null;
+    int endMatchCriterion;
 
     public PathGeneratorTreeGrow360(SimulationParameters params) {
         PolarDiagram polarDiagramClone = new PolarDiagramBase((PolarDiagramBase)params.getBoatPolarDiagram());
-        this.parameters = new SimulationParametersImpl(params.getCourse(), params.getStartLine(), polarDiagramClone, params.getWindField(),
+        this.parameters = new SimulationParametersImpl(params.getCourse(), params.getStartLine(), params.getEndLine(), polarDiagramClone, params.getWindField(),
                 params.getSimuStep(), params.getMode(), params.showOmniscient(), params.showOpportunist(), params.getLegType());
     }
 
@@ -598,6 +600,33 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
         Position startPos = this.parameters.getCourse().get(0);
         Position endPos = this.parameters.getCourse().get(1);
+        Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
+
+        List<Position> endLine = this.parameters.getEndLine();
+        if (endLine != null) {
+            Bearing bearEndLine = endLine.get(0).getBearingGreatCircle(endLine.get(1));
+            double diffEndLineVrt = bearVrt.getDifferenceTo(bearEndLine).getDegrees();
+            Position endPositionLeft;
+            Position endPositionRight;
+            if ((diffEndLineVrt > 0) && (diffEndLineVrt < 180)) {
+                endPositionLeft = endLine.get(0);
+                endPositionRight = endLine.get(1);
+            } else {
+                endPositionLeft = endLine.get(1);
+                endPositionRight = endLine.get(0);
+            }
+            if (initPathStr.length() > 1) {
+                if (initPathStr.charAt(1) == 'L') {
+                    endPos = endPositionLeft;
+                } else {
+                    endPos = endPositionRight;
+                }
+                endLineWidth = null;
+            } else {
+                endLineWidth = endPositionLeft.getDistance(endPositionRight);
+            }
+            bearVrt = startPos.getBearingGreatCircle(endPos);
+        }
         
         TimePoint startTime = wf.getStartTime();// new MillisecondsTimePoint(0);
         List<TimedPositionWithSpeed> path = new ArrayList<TimedPositionWithSpeed>();
@@ -611,7 +640,6 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         Wind wndStart = wf.getWind(new TimedPositionWithSpeedImpl(startTime, startPos, null));
         logger.finest("wndStart speed:" + wndStart.getKnots() + " angle:" + wndStart.getBearing().getDegrees());
         polarDiagram.setWind(wndStart);
-        Bearing bearVrt = startPos.getBearingGreatCircle(endPos);
         // Bearing bearHrz = bearVrt.add(new DegreeBearingImpl(90.0));
         Position middlePos = startPos.translateGreatCircle(bearVrt, distStartEnd.scale(0.5));
 
@@ -741,6 +769,12 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
         if (debugMsgOn) {
             System.out.println("Horizontal Bin Size: " + hrzBinSize);
         }
+        
+        if (endLineWidth != null) {
+            endMatchCriterion = ((int)Math.round(endLineWidth.getMeters() / hrzBinSize)) / 2;
+        } else {
+            endMatchCriterion = 0;
+        }
 
         boolean reachedEnd = false;
         int addSteps = 0;
@@ -790,7 +824,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
                         // logger.fine("\ntPath: " + curPath.path + "\n      Time: " +
                         // (Math.round((curPath.pos.getTimePoint().asMillis()-startTime.asMillis())/1000.0/60.0*10.0)/10.0)+", Height: "+curPath.vrt+" of "+(Math.round(startPos.getDistance(endPos).getMeters()*100.0)/100.0)+", Dist: "+curPath.hrz+"m ~ "+(Math.round(curPath.pos.getPosition().getDistance(endPos).getMeters()*100.0)/100.0)+"m");
                         int curBin = (int) Math.round(Math.floor((curPath.hrz + hrzBinSize / 2.0) / hrzBinSize));
-                        if ((Math.abs(curBin) <= 4)) {
+                        if ((Math.abs(curBin) <= endMatchCriterion)) {
                             reachedEnd = true;
                             trgPaths.add(curPath); // add path to list of target-paths
                         }
@@ -804,7 +838,7 @@ public class PathGeneratorTreeGrow360 extends PathGeneratorBase {
 
             // check for time-out
             if (this.isTimedOut()) {
-                //reachedEnd = true;
+                reachedEnd = true; 
             }
             
         } // main while-loop

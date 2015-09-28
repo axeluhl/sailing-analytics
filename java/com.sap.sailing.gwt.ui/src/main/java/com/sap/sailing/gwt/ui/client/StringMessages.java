@@ -4,12 +4,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
+import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
+    String manage2Sail();
+    String raceCommitteeApp();
     String tracTracEvents();
     String swissTimingEvents();
     String trackedBefore();
@@ -42,7 +45,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
-    String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
@@ -93,7 +95,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String gapToLeaderInSeconds();
     String velocityMadeGoodInKnots();
     String windwardDistanceToGoInMeters();
-    String windwardDistanceToLeaderInMeters();
+    String windwardDistanceToCompetitorFarthestAheadInMeters();
     String name();
     String leaveEmptyForDefault();
     String trackNewEvent();
@@ -103,6 +105,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String eventName();
     String event();
     String startTime();
+    String startOfTracking();
+    String endOfTracking();
     String regatta();
     String regattas();
     String startTracking();
@@ -170,6 +174,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String distance();
     String in();
     String secondsUnit();
+    String secondsPerNauticalMileUnit();
     String metersUnit();
     @Override
     String close();
@@ -378,7 +383,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pleaseEnterNonEmptyUrl();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
-    String sailingServers();
+    String remoteServerInstances();
+    String localServer();
     String errorRefreshingSailingServers(String message);
     String successfullyUpdatedSailingServers();
     String errorRemovingSailingServers(String message);
@@ -404,6 +410,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
     String scoringSchemeWinnerGetsEightAndInterpolation();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -485,6 +493,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
     String upcoming();
+    String next();
     String inProgress();
     String passedTo(String name);
     String gapChangeSinceLegStartInSeconds();
@@ -494,6 +503,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
+    String knotsValue(double value);
+    String knotsRange(double lowerValue, double upperValue);
     String averageJibeLossInMetersTooltip();
     String averageManeuverLossInMetersTooltip();
     String averageTackLossInMetersTooltip();
@@ -508,7 +519,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String penaltyCircleTooltip();
     String raceAverageSpeedInKnotsTooltip();
     String currentSpeedOverGroundInKnotsTooltip();
-    String windwardDistanceToLeaderInMetersTooltip();
+    String windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
     String raceDistanceTraveledTooltip();
     String rankTooltip();
     String rankGainTooltip();
@@ -552,6 +563,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String polarSheetWindSteppingMaxDistanceTooltip();
     String polarSheetSplitByWindGauges();
     String polarSheetSplitByWindGaugesTooltip();
+    String applyMinimumWindConfidence();
+    String applyMinimumWindConfidenceTooltip();
+    String windRangeDistribution();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
@@ -755,6 +769,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dropReplicaConnection();
     String timePanelName();
     String competitorFilterExplanation();
+    String protestTime();
     String protestTimeFinishesAt();
     String protestTimeFinishedAt();
     String flags();
@@ -959,6 +974,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String setStartTime();
     String currentPass();
     String setStartTimeDescription();
+    String setTrackingTimesDescription();
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
@@ -1023,6 +1039,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String pingPosition(String whose);
     String pleaseEnterAValidValueFor(String what, String validTemplate);
     String copyCourseAndCompetitors();
+    String setTrackingTimes();
     String nowSelectRaceColumnAndFleetToCopyTo();
     String selectRowInTableToCopyCourse();
     String deviceId();
@@ -1043,6 +1060,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String ratio();
     String importWind();
     String importWindTooltip();
+    String importDeviceConfigurations();
+    String importDeviceConfigurationsTooltip();
     String authorName();
     String authorPriority();
     String removeDenotation();
@@ -1077,6 +1096,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String photos();
     String videos();
     String image();
+    String images();
     String video();
     String flagImageURL();
     String imageURLs();
@@ -1086,6 +1106,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String advancePassId();
     String pleaseSelectAScoringResult();
     String eventOfficialWebsiteURL();
+    String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
     String showPingMarkMappings();
@@ -1138,7 +1159,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterCarryValueFor(String competitorName);
     String advanced();
     String basedOn();
-    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
@@ -1158,7 +1178,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     @Override
     String errorCommunicatingWithServer();
     String userManagement();
-    String structureImportUrls();
+    String regattaStructureImport();
     String filteredBy();
     String filterBy();
     String editSeries();
@@ -1244,12 +1264,19 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     
     String dashboardNewStartAnalysisAvailable();
     
-    String dashboardStartlineAdvantageByWind();
+    String dashboardStartlineAdvantagesByWind();
     String dashboardStartlineAdvantageByGeometry();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
     String dashboardSpeedInKts();
+    
+    String dashboardAdvantageInSeconds();
+    String dashboardSecondsAbreviation();
+    String dashboardDistanceToRCBoat();
+    String dashboardPinEnd();
+    String dashboardRCBoat();
+    
     String fixedMarkPassing();
     String suppressedMarkPassing();
     String windUp();
@@ -1260,13 +1287,15 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String startLineToFirstMarkTriangle(String distanceInMeters);
     String dataMiningComponentsHaveBeenUpdated();
     String dataMiningComponentsNeedReloadDialogMessage();
-    
+
     String noDataForEvent();
     String countriesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String racesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String competitorsCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String trackedRacesCount(@PluralCount(DefaultRule_1_0n.class) int count);
     String eventsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String courseAreaName(String courseAreaName);
+    String currentOfTotalLegs(int currentLeg, int totalLegs);
     String clone();
     String changed();
     String matcher();
@@ -1274,4 +1303,89 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String urlProviders();
     String pleaseSelectAURLProvider();
     String sampleURL(String sampleURL);
+    String sapSportsOn();
+    String followSapSports();
+    String liveNow();
+    String analyseRace();
+    String nextRaceStartingIn();
+    String startingIn(String name);
+    String raceIsPlanned();
+    String raceIsCanceled();
+    String raceIsPostponed();
+    String startingInMinutes(@PluralCount(DefaultRule_0_1_n.class) int minutes);
+    String latestNews();
+    String showCompetitorTimeOnTimeFactorColumn();
+    String showCompetitorTimeOnDistanceAllowanceColumn();
+    String rankingMetric();
+    String oneDesignRankingMetric();
+    String orcPerformanceCurveRankingMetric();
+    String timeOnTimeAndDistanceRankingMetric();
+    String oneDesignRankingMetricDescription();
+    String orcPerformanceCurveRankingMetricDescription();
+    String timeOnTimeAndDistanceRankingMetricDescription();
+    String timeOnTimeFactor();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMile();
+    String calculatedTimeTraveled();
+    String calculatedTimeTraveledTooltip();
+    String timeOnTimeFactorTooltip();
+    String timeOnDistanceAllowanceInSecondsPerNauticalMileTooltip();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSeconds();
+    String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
+    String sailorInfo();
+    String sailorInfoLongText();
+    String resultsQuickfinder();
+    String statistics();
+    String impressions();
+    String notAvailableOnMobileMessage();
+    String gotoDesktop();
+    String goBack();
+    String resultsUpdate();
+    String competitorWonRace(String competitorName);
+    String showAllX(String text);
+    String collapseX(String text);
+    String numberOfGPSFixes();
+    String fastestSailor();
+    String numberWindFixes();
+    String sailedMiles();
+    String millionValue(double value);
+    String billionValue(double value);
+    String noResults();
+    String noNews();
+    String pointsValue(double value);
+    String openLeaderboard();
+    String now();
+    String minutesAgo(String minutes);
+    String hoursAgo(String hours);
+    String winner();
+    String durationPlain();
+    String finishedRaces();
+    String selectCompetitor();
+    String allBoatClasses();
+    String points();
+    String numberOfRacesShort();
+    String courseGeometry();
+    String degreesToWind(String diff);
+    String miniLeeaderboardLegendText();
+    String currentOfTotal(int current, int total);
+    String noFinishedRaces();
+    String racesOverview();
+    String empty();
+    String runAQuery();
+    String latestRegattaStandings();
+    String plainText();
+    String columnChart();
+    String choosePresentation();
+    String cantDisplayDataOfType(String resultType);
+    String shownDecimals();
+    String openFullscreenView();
+    String closeFullscreenView();
+    String analyze();
+    String dataMiningSettings();
+    String multiResultsPresenter();
+    String plainResultsPresenter();
+    String resultsChart();
+    String tabbedResultsPresenter();
+    String polarResultsPresenter();
+    String dataMiningRetrieval();
+    String denoteAllRacesForRaceLogTrackingShorctut();
 }

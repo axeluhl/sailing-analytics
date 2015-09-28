@@ -18,6 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
@@ -34,9 +35,11 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     private static final TimeZone DEFAULT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
     private final DomainFactory domainFactory;
+    private final RaceLogResolver raceLogResolver;
 
-    public SwissTimingReplayServiceImpl(DomainFactory domainFactory) {
+    public SwissTimingReplayServiceImpl(DomainFactory domainFactory, RaceLogResolver raceLogResolver) {
         this.domainFactory = domainFactory;
+        this.raceLogResolver = raceLogResolver;
     }
 
     @Override
@@ -143,8 +146,10 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     }
 
     @Override
-    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm) {
-        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm);
+    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
+            boolean useInternalMarkPassingAlgorithm) {
+        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory,
+                trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver);
         loadRaceData(link, listener);
     }
 }

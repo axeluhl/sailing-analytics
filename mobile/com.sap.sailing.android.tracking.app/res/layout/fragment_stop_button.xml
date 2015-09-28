@@ -33,7 +33,7 @@
             android:paddingBottom="0dp"
             android:layout_marginBottom="0dp"
             android:text="@string/initial_timer_text_zerozero"
-            android:gravity="bottom"
+            android:gravity="center"
             android:textSize="100sp"/>
 
     </RelativeLayout>

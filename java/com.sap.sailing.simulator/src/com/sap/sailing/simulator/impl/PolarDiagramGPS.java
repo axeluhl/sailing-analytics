@@ -57,16 +57,17 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 beatPort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
-                        Tack.PORT, true).getObject();
+                        Tack.PORT).getObject();
                 beatStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i), LegType.UPWIND,
-                        Tack.STARBOARD, true).getObject();
+                        Tack.STARBOARD).getObject();
             } catch (NotEnoughDataHasBeenAddedException e) {
                 beatPort = null;
                 beatStar = null;
             }
             if (beatStar != null) {
-                Bearing avgBeatAngle = new DegreeBearingImpl((beatStar.getBearing().getDegrees() + (360 - beatPort
-                        .getBearing().getDegrees()) % 360) / 2.0);
+                double beatStarAngle = Math.abs((beatStar.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                double beatPortAngle = Math.abs((beatPort.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                Bearing avgBeatAngle = new DegreeBearingImpl((beatStarAngle + beatPortAngle) / 2.0);
                 beatAngles.add(avgBeatAngle);
                 Speed avgBeatSpeed = new KnotSpeedImpl((beatStar.getKnots() + beatPort.getKnots()) / 2.0);
                 beatSpeed.add(avgBeatSpeed);
@@ -85,16 +86,17 @@ public class PolarDiagramGPS extends PolarDiagramBase {
         for (int i = 0; i < windSpeeds.size(); i++) {
             try {
                 jibePort = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i),
-                        LegType.DOWNWIND, Tack.PORT, true).getObject();
+                        LegType.DOWNWIND, Tack.PORT).getObject();
                 jibeStar = this.polarData.getAverageSpeedWithBearing(this.boatClass, windSpeeds.get(i),
-                        LegType.DOWNWIND, Tack.STARBOARD, true).getObject();
+                        LegType.DOWNWIND, Tack.STARBOARD).getObject();
             } catch (NotEnoughDataHasBeenAddedException e) {
                 jibePort = null;
                 jibeStar = null;
             }
             if (jibeStar != null) {
-                Bearing avgJibeAngle = new DegreeBearingImpl((jibeStar.getBearing().getDegrees() + (360 - jibePort
-                        .getBearing().getDegrees()) % 360) / 2.0);
+                double jibeStarAngle = Math.abs((jibeStar.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                double jibePortAngle = Math.abs((jibePort.getBearing().getDegrees() + 180.0) % 360.0 - 180.0);
+                Bearing avgJibeAngle = new DegreeBearingImpl((jibeStarAngle + jibePortAngle) / 2.0);
                 jibeAngles.add(avgJibeAngle);
                 Speed avgJibeSpeed = new KnotSpeedImpl((jibeStar.getKnots() + jibePort.getKnots()) / 2.0);
                 jibeSpeed.add(avgJibeSpeed);

@@ -1,5 +1,7 @@
 package com.sap.sailing.polars.regression;
 
+import java.io.Serializable;
+
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
@@ -10,11 +12,12 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
  * @author Frederik Petersen (D054528)
  *
  */
-public interface IncrementalLeastSquares {
+public interface IncrementalLeastSquares extends Serializable {
 
     /**
-     * Adds data to the least squares regression. This only updates the internal matrix and vector and will not trigger the 
-     * actual least square solving. See {@link #getOrCreatePolynomialFunction()}.
+     * Adds data to the least squares regression. This only updates the internal matrix and vector and will not trigger
+     * the actual least square solving. See {@link #getOrCreatePolynomialFunction()}.
+     * 
      * @param x
      * @param y
      */
@@ -22,11 +25,12 @@ public interface IncrementalLeastSquares {
 
     /**
      * The polynomial function is cached and will be returned immediately if no data has been added since the last call.
-     * Otherwise the calculation is performed and the polynomial function is returned. It has a complexity of O(order) where
-     * order is the requested order of the polynomial.
+     * Otherwise the calculation is performed and the polynomial function is returned. It has a complexity of O(order)
+     * where order is the requested order of the polynomial.
      * 
      * @return polynomial function estimating the data. Can be constant when only one data point has been added.
-     * @throws NotEnoughDataHasBeenAddedException Will be returned if no data has been added to the regression.
+     * @throws NotEnoughDataHasBeenAddedException
+     *             Will be returned if no data has been added to the regression.
      */
     public abstract PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException;
 

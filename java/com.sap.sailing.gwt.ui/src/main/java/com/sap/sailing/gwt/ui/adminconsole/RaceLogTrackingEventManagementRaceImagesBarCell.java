@@ -19,6 +19,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
     public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
+    public final static String ACTION_SET_TRACKING_TIMES = "ACTION_SET_TRACKING_TIMES";
 
     
     private final StringMessages stringMessages;
@@ -46,6 +47,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
+        result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
         return result;
     }
 }

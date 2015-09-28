@@ -7,25 +7,30 @@ import static org.junit.Assert.assertThat;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.ModifiableDataMiningServer;
+import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.SimpleDataRetrieverChainDefinition;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Regatta;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContextImpl;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContextImpl;
-import com.sap.sse.datamining.test.functions.test_classes.SimpleClassWithMarkedMethods;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
+import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContextImpl;
+import com.sap.sse.datamining.test.data.Test_HasRaceContext;
+import com.sap.sse.datamining.test.data.Test_HasRaceContextImpl;
+import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
+import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.domain.Test_Named;
+import com.sap.sse.datamining.test.domain.Test_Regatta;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
 import com.sap.sse.datamining.test.util.TestsUtil;
@@ -39,48 +44,74 @@ public class TestFunctionManagerAsFunctionProvider {
     private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessagesWithProductiveMessages();
     
     private ExpectedFunctionRegistryUtil functionRegistryUtil;
-    private FunctionManager functionManager;
+    private ModifiableDataMiningServer server;
     
     @Before
-    public void initializeFunctionRegistry() throws NoSuchMethodException, SecurityException {
+    public void initializeDataMiningServer() throws NoSuchMethodException, SecurityException {
         functionRegistryUtil = new ExpectedFunctionRegistryUtil();
-        functionManager = new FunctionManager();
+        server = TestsUtil.createNewServer();
+        server.addStringMessages(TestsUtil.getTestStringMessages());
         
         Collection<Class<?>> internalClassesToScan = new HashSet<>();
-        internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
         internalClassesToScan.add(Test_HasRaceContext.class);
-        functionManager.registerAllClasses(internalClassesToScan);
+        internalClassesToScan.add(Test_HasLegOfCompetitorContext.class);
+        server.registerAllClasses(internalClassesToScan);
         
         Collection<Class<?>> externalClassesToScan = new HashSet<>();
         externalClassesToScan.add(Test_ExternalLibraryClass.class);
-        functionManager.registerAllWithExternalFunctionPolicy(externalClassesToScan);
+        server.registerAllWithExternalFunctionPolicy(externalClassesToScan);
     }
     
     @Test
     public void testGetAllStatistics() {
         Collection<Function<?>> expectedFunctions = functionRegistryUtil.getAllExpectedStatistics();
-        assertThat(functionManager.getAllStatistics(), is(expectedFunctions));
+        assertThat(server.getAllStatistics(), is(expectedFunctions));
     }
 
     @Test
     public void testGetDimensionsForType() {
-        
         Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        assertThat(functionManager.getDimensionsFor(Test_HasRaceContext.class), is(expectedDimensions));
-        assertThat(functionManager.getDimensionsFor(Test_HasRaceContextImpl.class), is(expectedDimensions));
+        assertThat(server.getDimensionsFor(Test_HasRaceContext.class), is(expectedDimensions));
+        assertThat(server.getDimensionsFor(Test_HasRaceContextImpl.class), is(expectedDimensions));
 
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(functionManager.getDimensionsFor(Test_HasLegOfCompetitorContext.class), is(expectedDimensions));
-        assertThat(functionManager.getDimensionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedDimensions));
+        expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class);
+        assertThat(server.getDimensionsFor(Test_HasLegOfCompetitorContext.class), is(expectedDimensions));
+        assertThat(server.getDimensionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedDimensions));
     }
     
     @Test
     public void testGetDimensionsForDataRetrieverChainDefinition() {
         DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> dataRetrieverChainDefinition = createDataRetrieverChainDefinition();
 
-        Collection<Function<?>> expectedDimensions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        expectedDimensions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(functionManager.getDimensionsFor(dataRetrieverChainDefinition), is(expectedDimensions));
+        List<? extends DataRetrieverLevel<?, ?>> dataRetrieverLevels = dataRetrieverChainDefinition.getDataRetrieverLevels();
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = new HashMap<>();
+        for (DataRetrieverLevel<?, ?> dataRetrieverLevel : dataRetrieverLevels) {
+            expectedDimensions.put(dataRetrieverLevel, server.getDimensionsFor(dataRetrieverLevel.getRetrievedDataType()));
+        }
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensionsMappedByLevel = server.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+        assertThat(dimensionsMappedByLevel, is(expectedDimensions));
+    }
+    
+    @Test
+    public void testGetReducedDimensionsForDataRetrieverChainDefinition() {
+        DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> retrieverChain = createDataRetrieverChainDefinition();
+
+        Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> expectedDimensions = server.getDimensionsMappedByLevelFor(retrieverChain);
+        for (DataRetrieverLevel<?, ?> retrieverLevel : expectedDimensions.keySet()) {
+            if (retrieverLevel.getRetrievedDataType().equals(Test_HasLegOfCompetitorContext.class)) {
+                Collection<Function<?>> reducedLegDimensions = new HashSet<>();
+                for (Function<?> dimension : expectedDimensions.get(retrieverLevel)) {
+                    if (!(dimension instanceof ConcatenatingCompoundFunction) ||
+                        !((ConcatenatingCompoundFunction<?>) dimension).getSimpleFunctions().get(0).getReturnType().equals(Test_HasRaceContext.class)) {
+                        reducedLegDimensions.add(dimension);
+                    }
+                }
+                expectedDimensions.put(retrieverLevel, reducedLegDimensions);
+                break;
+            }
+        }
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain);
+        assertThat(reducedDimensionsMappedByLevel, is(expectedDimensions));
     }
     
     @SuppressWarnings("unchecked")
@@ -107,17 +138,15 @@ public class TestFunctionManagerAsFunctionProvider {
     @Test
     public void testGetStatisticsForType() {
         Collection<Function<?>> expectedStatistics = functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class);
-        assertThat(functionManager.getStatisticsFor(Test_HasLegOfCompetitorContext.class), is(expectedStatistics));
-        assertThat(functionManager.getStatisticsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedStatistics));
+        assertThat(server.getStatisticsFor(Test_HasLegOfCompetitorContext.class), is(expectedStatistics));
+        assertThat(server.getStatisticsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedStatistics));
     }
     
     @Test
     public void testGetAllFunctionsForType() {
-        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedDimensionsFor(Test_HasRaceContext.class);
-        expectedFunctions.addAll(functionRegistryUtil.getExpectedDimensionsFor(Test_HasLegOfCompetitorContext.class));
-        expectedFunctions.addAll(functionRegistryUtil.getExpectedStatisticsFor(Test_HasLegOfCompetitorContext.class));
-        assertThat(functionManager.getFunctionsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
-        assertThat(functionManager.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
+        Collection<Function<?>> expectedFunctions = functionRegistryUtil.getExpectedFunctionsFor(Test_HasLegOfCompetitorContext.class);
+        assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContext.class), is(expectedFunctions));
+        assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
     }
     
     @Test
@@ -128,10 +157,10 @@ public class TestFunctionManagerAsFunctionProvider {
         Function<?> getName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getNameMethod);
         Function<Object> getRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
         
-        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
+        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
         
         @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
-        Function<Object> providedFunction = (Function<Object>) functionManager.getFunctionForDTO(getRegattaNameDTO);
+        Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO);
         assertThat(providedFunction, is(getRegattaName));
     }
     
@@ -139,14 +168,14 @@ public class TestFunctionManagerAsFunctionProvider {
     public void testGetFunctionForUnregisteredDTO() {
         Method illegalDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "illegalDimension");
         Function<Object> illegalDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(illegalDimensionMethod);
-        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getFunctionDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
+        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
         
-        assertThat(functionManager.getFunctionForDTO(illegalDimensionDTO), is(nullValue()));
+        assertThat(server.getFunctionForDTO(illegalDimensionDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
-        assertThat(functionManager.getFunctionForDTO(null), is(nullValue()));
+        assertThat(server.getFunctionForDTO(null), is(nullValue()));
     }
 
 }

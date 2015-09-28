@@ -1,6 +1,8 @@
 package com.sap.sse.gwt.client.dialog;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
@@ -24,12 +26,15 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -88,8 +93,11 @@ public abstract class DataEntryDialog<T> {
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, boolean animationEnabled, final DialogCallback<T> callback) {
         dateEntryDialog = new DialogBox();
+
         dateEntryDialog.setText(title);
-        dateEntryDialog.setAnimationEnabled(animationEnabled);
+        // dateEntryDialog.setAnimationEnabled(animationEnabled);
+        dateEntryDialog.setGlassEnabled(true);
+
         this.validator = validator;
         okButton = new Button(okButtonName);
         okButton.getElement().getStyle().setMargin(3, Unit.PX);
@@ -137,7 +145,7 @@ public abstract class DataEntryDialog<T> {
         if (validator != null) {
             errorMessage = validator.getErrorMessage(getResult());
         }
-        if (errorMessage == null) {
+        if (errorMessage == null || errorMessage.isEmpty()) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);
         } else {
@@ -160,6 +168,24 @@ public abstract class DataEntryDialog<T> {
         return createTextBoxInternal(initialValue, 30);
     }
 
+    public SuggestBox createSuggestBox(Iterable<String> suggestValues) {
+        List<String> suggestValuesAsCollection = new ArrayList<>();
+        Util.addAll(suggestValues, suggestValuesAsCollection);
+        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+        oracle.addAll(suggestValuesAsCollection);
+        oracle.setDefaultSuggestionsFromText(suggestValuesAsCollection);
+        final SuggestBox result = new SuggestBox(oracle);
+        result.getValueBox().addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        DialogUtils.linkEnterToButton(getOkButton(), result.getValueBox());
+        DialogUtils.linkEscapeToButton(getCancelButton(), result.getValueBox());
+        return result;
+    }
+    
     /**
      * Creates a text box with a key-up listener attached which ensures the value is updated after each
      * key-up event and the entire dialog is {@link #validate() validated} in this case.
@@ -266,7 +292,7 @@ public abstract class DataEntryDialog<T> {
         return longBox;
     }
 
-    public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+    public DoubleBox createDoubleBox(Double initialValue, int visibleLength) {
         return createDoubleBoxInternal(initialValue, visibleLength);
     }
 

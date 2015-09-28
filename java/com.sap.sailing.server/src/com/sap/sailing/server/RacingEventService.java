@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
@@ -57,6 +60,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -72,6 +76,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.media.ImageDescriptor;
+import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
@@ -106,7 +112,7 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>> {
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -308,7 +314,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
-            boolean useStartTimeInference);
+            boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
     
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
 
@@ -366,8 +372,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL logoImageURL, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs);
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -394,7 +400,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeRemoteSailingServerReference(String name);
 
     
-    CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId);
+    CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds);
 
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
@@ -446,13 +452,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
+     * @param rankingMetricConstructor TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
             TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference);
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -461,13 +468,14 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, Iterable<URL> imageURLs, Iterable<URL> videoURLs, Iterable<URL> sponsorImageURLs, URL logoImageURL, URL officialWebsiteURL);
+            boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, Iterable<ImageDescriptor> images,
+            Iterable<VideoDescriptor> videos);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);
 
-    CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName);
+    CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames);
 
-    CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId);
+    CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds);
 
     /**
      * Returns a mobile device's configuration.
@@ -578,6 +586,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Result<LeaderboardSearchResultBase> searchRemotely(String remoteServerReferenceName, KeywordQuery query);
 
     /**
+     * Gets the configuration of the local sailing server instances.
+     */
+    SailingServerConfiguration getSailingServerConfiguration();
+    
+    void updateServerConfiguration(SailingServerConfiguration serverConfiguration);
+    
+    /**
      * References to remote servers may be dead or alive. This is internally determined by regularly polling those
      * servers for their events list. If the events list cannot be successfully retrieved, the server is considered "dead."
      * This method returns the "live" server references.
@@ -604,4 +619,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     ClassLoader getCombinedMasterDataClassLoader();
 
+    Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
 }

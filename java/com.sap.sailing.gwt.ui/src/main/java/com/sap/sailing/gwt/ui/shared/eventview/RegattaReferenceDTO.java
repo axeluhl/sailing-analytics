@@ -1,17 +1,17 @@
 package com.sap.sailing.gwt.ui.shared.eventview;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
-public class RegattaReferenceDTO implements IsSerializable {
+public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO> {
     private String id;
     private String displayName;
     
     public RegattaReferenceDTO() {
     }
     
-    public RegattaReferenceDTO(String id, String name) {
+    public RegattaReferenceDTO(String leaderboardId, String name) {
         super();
-        this.id = id;
+        this.id = leaderboardId;
         this.displayName = name;
     }
     public String getDisplayName() {
@@ -27,5 +27,14 @@ public class RegattaReferenceDTO implements IsSerializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public int compareTo(RegattaReferenceDTO o) {
+        int compareByDisplayName = displayName.compareTo(o.displayName);
+        if(compareByDisplayName != 0) {
+            return compareByDisplayName;
+        }
+        return id.compareTo(o.id);
     }
 }

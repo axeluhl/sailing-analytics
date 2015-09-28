@@ -1,18 +1,23 @@
 package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -24,6 +29,8 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.handlers.CompetitorsDataHandler;
 import com.sap.sailing.racecommittee.app.data.handlers.CourseBaseHandler;
@@ -44,9 +51,13 @@ import com.sap.sailing.racecommittee.app.data.parsers.DeviceConfigurationParser;
 import com.sap.sailing.racecommittee.app.data.parsers.EventsDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.ManagedRacesDataParser;
 import com.sap.sailing.racecommittee.app.data.parsers.MarksDataParser;
+import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.ControlPointDeserializer;
 import com.sap.sailing.server.gateway.deserialization.coursedata.impl.CourseBaseDeserializer;
@@ -66,6 +77,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.RegattaConfigurationJ
 import com.sap.sailing.server.gateway.deserialization.impl.TeamJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racegroup.impl.RaceGroupDeserializer;
+import com.sap.sse.common.Util;
 
 /**
  * Enables accessing of data.
@@ -101,14 +113,17 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<EventBase>>(callback, new LoaderCreator<Collection<EventBase>>() {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
-                DataParser<Collection<EventBase>> parser = new EventsDataParser(new EventBaseJsonDeserializer(
-                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer()));
+                ExLog.i(context, TAG, String.format("Creating Events-OnlineDataLoader %d", id));
+                EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
+                        new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
+                DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
-                ExLog.i(context, TAG, "getEventsLoader created new loader...");
+                // ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
-                return new OnlineDataLoader<Collection<EventBase>>(context, 
-                        new URL(preferences.getServerBaseURL() + "/sailingserver/events"), parser, handler);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", null);
+                return new OnlineDataLoader<Collection<EventBase>>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }
@@ -124,28 +139,49 @@ public class OnlineDataManager extends DataManager {
                             EventBase event = dataStore.getEvent(parentEventId);
                             return dataStore.getCourseAreas(event);
                         } else {
-                            throw new DataLoadingException(String.format(
-                                    "Unable to load course areas for unknown event %s.", parentEventId));
+//                            throw new DataLoadingException(String.format(
+//                                    "Unable to load course areas for unknown event %s.", parentEventId));
+                            //TODO: Quickfix for #2889
+                            return null;
                         }
                     }
                 });
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(final Serializable courseAreaId,
-            LoadClient<Collection<ManagedRace>> callback) {
+    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
+            final EventBase parentEvent, LoadClient<Collection<CourseArea>> callback) {
+        // TODO Auto-generated method stub
+        return new ImmediateDataLoaderCallbacks<Collection<CourseArea>>(context, callback,
+                new Callable<Collection<CourseArea>>() {
+                    @Override
+                    public Collection<CourseArea> call() throws Exception {
+
+                        return dataStore.getCourseAreas(parentEvent);
+
+                    }
+                });
+    }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(
+            final Serializable courseAreaId, LoadClient<Collection<ManagedRace>> callback) {
         return new DataLoaderCallbacks<Collection<ManagedRace>>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                ConfigurationLoader<RegattaConfiguration> globalConfiguration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
-                
+                ExLog.i(context, TAG, String.format("Creating races-OnlineDataLoader %d", id));
+                ConfigurationLoader<RegattaConfiguration> globalConfiguration = PreferencesRegattaConfigurationLoader
+                        .loadFromPreferences(preferences);
+
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences.getAuthor(),
-                        globalConfiguration, RaceGroupDeserializer.create(domainFactory, RegattaConfigurationJsonDeserializer.create()));
+                        globalConfiguration, RaceGroupDeserializer.create(domainFactory,
+                                RegattaConfigurationJsonDeserializer.create()));
                 DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
-                return new OnlineDataLoader<Collection<ManagedRace>>(context, new URL(preferences.getServerBaseURL()
-                    + "/sailingserver/rc/racegroups?"+
-                    RaceLogServletConstants.PARAM_COURSE_AREA_FILTER + "=" + courseAreaId.toString()+"&"+
-                    RaceLogServletConstants.PARAMS_CLIENT_UUID + "=" + MessageSendingService.uuid), parser, handler);
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/racegroups", params);
+                return new OnlineDataLoader<Collection<ManagedRace>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -156,20 +192,23 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<Collection<Mark>>(callback, new LoaderCreator<Collection<Mark>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Mark>>> create(int id, Bundle args) throws Exception {
+                ExLog.i(context, TAG, String.format("Creating marks-OnlineDataLoader %d", id));
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
                 DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
+                // no parameter encoding required here; the UrlHelper.generateUrl call uses Url.Builder which handles encoding
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
-
-                return new OnlineDataLoader<Collection<Mark>>(context, new URL(preferences.getServerBaseURL() + 
-                        "/sailingserver/rc/marks?"+RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName +
-                        "&"+RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=" + raceColumnName + 
-                        "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/marks", params);
+                return new OnlineDataLoader<Collection<Mark>>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -180,6 +219,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<CourseBase>(callback, new LoaderCreator<CourseBase>() {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
+                ExLog.i(context, TAG, String.format("Creating Course-OnlineDataLoader %d", id));
                 JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(
                         new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory),
                                 new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
@@ -188,14 +228,17 @@ public class OnlineDataManager extends DataManager {
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
-                return new OnlineDataLoader<CourseBase>(context, new URL(preferences.getServerBaseURL()
-                    + "/sailingserver/rc/currentcourse?" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "="
-                    + raceGroupName + "&" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName
-                    + "&"+RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=" + fleetName), parser, handler);
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/currentcourse", params);
+
+                return new OnlineDataLoader<CourseBase>(context, url, parser, handler);
             }
         }, getContext());
     }
@@ -207,47 +250,80 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(),
-                        new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), 
-                        new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(
+                        domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(
+                                new NationalityJsonDeserializer(domainFactory))), new BoatJsonDeserializer(
+                                new BoatClassJsonDeserializer(domainFactory)));
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this,
                         managedRace);
 
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
-                String raceGroupName = URLEncoder.encode(identifier.getRaceGroup().getName(), MessageSendingService.charsetName);
-                String raceColumnName = URLEncoder.encode(identifier.getRaceName(), MessageSendingService.charsetName);
-                String fleetName = URLEncoder.encode(identifier.getFleet().getName(), MessageSendingService.charsetName);
+                String raceGroupName = identifier.getRaceGroup().getName();
+                String raceColumnName = identifier.getRaceName();
+                String fleetName = identifier.getFleet().getName();
 
-                return new OnlineDataLoader<Collection<Competitor>>(context, new URL(
-                        preferences.getServerBaseURL() + "/sailingserver/rc/competitors?"
-                                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + raceGroupName + "&"
-                                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
-                                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName), parser, handler);
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME, raceGroupName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, raceColumnName));
+                params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME, fleetName));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/competitors", params);
+                return new OnlineDataLoader<Collection<Competitor>>(context, url, parser, handler);
             }
         }, getContext());
     }
 
     @Override
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(final DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback) {
+    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(
+            final DeviceConfigurationIdentifier identifier, LoadClient<DeviceConfiguration> callback) {
         return new DataLoaderCallbacks<DeviceConfiguration>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
-                
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
-                DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
-                
-                String encodedIdentifier = URLEncoder.encode(identifier.getClientIdentifier(), MessageSendingService.charsetName);
-                encodedIdentifier = encodedIdentifier.replace("+", "%20");
-                
-                return new OnlineDataLoader<DeviceConfiguration>(
-                        context, 
-                        new URL(preferences.getServerBaseURL() + "/sailingserver/rc/configuration?client="+ encodedIdentifier), 
-                        parser, handler);
+                DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(
+                        DeviceConfigurationJsonDeserializer.create());
+                String encodedIdentifier = identifier.getClientIdentifier();
+                List<Util.Pair<String, Object>> params = new ArrayList<>();
+                params.add(new Util.Pair<String, Object>("client", encodedIdentifier));
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/rc/configuration", params);
+                return new OnlineDataLoader<DeviceConfiguration>(context,
+                    url, parser, handler);
             }
         }, getContext());
     }
+
+    @Override
+    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
+            PositionListFragment positionListFragment) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
+        String url = "";
+        // get simple race log identifier
+        Util.Triple<String, String, String> triple = FleetIdentifierImpl.unescape(race.getId());
+        SimpleRaceLogIdentifier identifier = new SimpleRaceLogIdentifierImpl(triple.getA(), triple.getB(), triple.getC());
+        List<Util.Pair<String, Object>> params = new ArrayList<>();
+        params.add(new Util.Pair<String, Object>("regattaLikeName", identifier.getRegattaLikeParentName()));
+        params.add(new Util.Pair<String, Object>("raceColumnName", identifier.getRaceColumnName()));
+        params.add(new Util.Pair<String, Object>("fleetName", identifier.getFleetName()));
+        params.add(new Util.Pair<String, Object>("eventId", eventId));
+        params.add(new Util.Pair<String, Object>("viewShowWindChart", showWindCharts));
+        params.add(new Util.Pair<String, Object>("viewShowStreamlets", showStreamlets));
+        params.add(new Util.Pair<String, Object>("viewShowSimulation", showSimulation));
+        params.add(new Util.Pair<String, Object>("viewShowMapControls", showMapControls));
+
+        try {
+            url = UrlHelper.generateUrl(AppPreferences.on(context).getServerBaseURL(), AppConstants.GWT_MAP_AND_WIND_CHART_HTML, params).toString();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "An error occured while generating the map url: " + e.getMessage());
+        }
+        return url;
+    }
+
+
 }

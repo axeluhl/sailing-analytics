@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.functions.Function;
@@ -18,6 +18,10 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 
+    /**
+     * @throws IllegalArgumentException if any of the given function isn't a dimension
+     *                                  or the given iterable is empty.
+     */
     @SuppressWarnings("unchecked")
     public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,

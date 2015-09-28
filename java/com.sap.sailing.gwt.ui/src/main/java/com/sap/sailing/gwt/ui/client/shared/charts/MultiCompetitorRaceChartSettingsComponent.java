@@ -25,7 +25,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         this.initialDetailType = settings.getDetailType();
         
         availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
+        availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED_INCLUDING_GATE_START);
         availableDetailsTypes.add(DetailType.VELOCITY_MADE_GOOD_IN_KNOTS);

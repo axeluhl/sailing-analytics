@@ -17,12 +17,12 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -154,6 +154,39 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
             }
         });
 
+        TextColumn<CompetitorDTO> timeOnTimeFactorColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getTimeOnTimeFactor()==null?"":(""+competitor.getTimeOnTimeFactor());
+            }
+        };
+        timeOnTimeFactorColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(timeOnTimeFactorColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return o1.getTimeOnTimeFactor()==null?o2.getTimeOnTimeFactor()==null?0:-1:o2.getTimeOnTimeFactor()==null?1:
+                    o1.getTimeOnTimeFactor().compareTo(o2.getTimeOnTimeFactor());
+            }
+        });
+        TextColumn<CompetitorDTO> timeOnDistanceAllowancePerNauticalMileColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getTimeOnDistanceAllowancePerNauticalMile()==null?"":(""+competitor.getTimeOnDistanceAllowancePerNauticalMile());
+            }
+        };
+        timeOnTimeFactorColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(timeOnDistanceAllowancePerNauticalMileColumn, new Comparator<CompetitorDTO>() {
+            @Override
+                    public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                        return o1.getTimeOnDistanceAllowancePerNauticalMile() == null ? o2
+                                .getTimeOnDistanceAllowancePerNauticalMile() == null ? 0 : -1 : o2
+                                .getTimeOnDistanceAllowancePerNauticalMile() == null ? 1 : o1
+                                .getTimeOnDistanceAllowancePerNauticalMile().compareTo(
+                                        o2.getTimeOnDistanceAllowancePerNauticalMile());
+                    }
+        });
+
+        
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(stringMessages.filterCompetitors()),
                 new ArrayList<CompetitorDTO>(), table, dataProvider) {
             @Override
@@ -170,6 +203,8 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
+        table.addColumn(timeOnTimeFactorColumn, stringMessages.timeOnTimeFactor());
+        table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile());
         table.addColumn(displayColorColumn, stringMessages.color());
         table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());

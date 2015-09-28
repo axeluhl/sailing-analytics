@@ -1,6 +1,32 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:HTMLPanel>
-        <g:FlowPanel ui:field="content" />
-    </g:HTMLPanel>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+		xmlns:p="urn:import:com.sap.sailing.gwt.home.client.place.event.partials">
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:style>
+  		.legend_and_filter {
+			text-align: right;
+		}
+  		.legend_and_filter > div, .legend_and_filter > a {
+			display: inline-block;
+			vertical-align: middle;
+			margin-left: 1.5em;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.grid}" ui:field="newContentContainerUi">
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}">
+				<p:raceListLive.RacesListLive ui:field="racesListLiveUi" addStyleNames="{res.mainCss.spacermargintopmedium}" />
+				<div class="{res.mainCss.spacermargintopmedium} {style.legend_and_filter}" ui:field="legendAndFilterUi" style="display:none;">
+					<p:multiRegattaList.MultiRegattaListStepsLegend ui:field="regattaProgressLegendUi" />
+			        <p:listNavigation.DropdownFilter ui:field="boatCategoryFilterUi" />
+			        <a class="{res.mainCss.button} {res.mainCss.buttonstrong} {res.mainCss.buttonarrowrightwhite}" 
+			        		target="_blank" ui:field="regattaOverviewLinkUi">
+			        	<ui:text from="{i18n.racesOverview}" />
+			        </a>
+		        </div>
+				<p:multiRegattaList.MultiRegattaList ui:field="regattaListUi" />
+			</div>
+		</div>
+		<g:SimplePanel ui:field="content" />
+	</g:HTMLPanel>
 </ui:UiBinder>

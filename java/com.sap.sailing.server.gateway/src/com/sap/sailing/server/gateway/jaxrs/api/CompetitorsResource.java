@@ -25,8 +25,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
@@ -47,17 +49,17 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     public static JSONObject getCompetitorJSON(Competitor competitor) {
         // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
         JSONObject json = new JSONObject();
-        json.put("id", competitor.getId().toString());
-        json.put("name", competitor.getName());
-        json.put("sailID", competitor.getBoat().getSailID());
-        json.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
-        json.put("countryCode", competitor.getTeam().getNationality().getCountryCode().getTwoLetterISOCode());
-        json.put("boatClassName", competitor.getBoat().getBoatClass().getName());
-        json.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
+        json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
+        json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
+        json.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat().getSailID());
+        final Nationality nationality = competitor.getTeam().getNationality();
+        json.put(CompetitorJsonConstants.FIELD_NATIONALITY, nationality==null?null:nationality.getThreeLetterIOCAcronym());
+        json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
+        json.put(CompetitorJsonConstants.FIELD_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
+        json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
         if(competitor.getFlagImage() != null) {
-            json.put("flagImage", competitor.getFlagImage().toString());
+            json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
         }
-        
         return json;
     }
 
@@ -158,7 +160,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         }
 
         getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage());
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 
         JSONObject result = new JSONObject();

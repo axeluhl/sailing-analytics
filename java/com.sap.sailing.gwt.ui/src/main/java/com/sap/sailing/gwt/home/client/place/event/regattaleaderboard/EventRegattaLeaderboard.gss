@@ -66,9 +66,9 @@
   padding-bottom: 1em;
   border-bottom: 1px solid #ddd;
 }
+
 .regattaleaderboard_meta_scoring,
 .regattaleaderboard_meta_update {
-  margin-top: 1em;
 }
 .regattaleaderboard_meta_scoring_comment,
 .regattaleaderboard_meta_update_comment,
@@ -85,35 +85,50 @@
   text-align: right;
 }
 .regattaleaderboard_meta_reload,
-.regattaleaderboard_meta_settings_button {
+.regattaleaderboard_meta_settings_button,
+.regattaleaderboard_meta_fullscreen_button {
   display: inline-block;
   width: 2.666666666666667em;
   height: 2.666666666666667em;
   margin: 0 0 0 0.666666666666667em;
   background-repeat: no-repeat;
   background-position: center center;
+  background-size: 50%;
 }
 .regattaleaderboard_meta_reload {
-  background-color: #8ab54e;
-  background-image: url("images/home/reload.png");
+  background-color: #9f9f9f;
+  background-image: url("images/home/reload.svg");
 }
+.regattaleaderboard_meta_reload_live {
+  background-color: red;
+}
+.regattaleaderboard_meta_reload_playing {
+  background-color: #f0ab00;
+}
+
+.regattaleaderboard_meta_liverace {
+  color: red;
+  font-weight: 600;
+}
+
 .regattaleaderboard_meta_reload:hover {
-  background-color: #7ca445;
+  background-color: #909090;
 }
+
+.regattaleaderboard_meta_reload_live:hover {
+  background-color: #ffa4a4;
+}
+
 .regattaleaderboard_meta_settings {
   display: inline-block;
   text-align: right;
 }
 .regattaleaderboard_meta_settings_button {
-  width: 2.666666666666667em;
-  height: 2.666666666666667em;
-  margin: 0 0 0 0.666666666666667em;
-  background-color: #f0ab00;
-  background-image: url("images/home/settings.png");
-  background-size: 50%;
+  background-color: #9f9f9f;
+  background-image: url("images/home/settings.svg");
 }
 .regattaleaderboard_table {
-  margin-top: 0.666666666666667em;
+  	margin-bottom: 20px;
 }
 .regattaleaderboard_header {
   background: #f2f2f2;
@@ -209,12 +224,13 @@
   table-layout: fixed;
 }
 .marginFix {
-  margin:2rem auto;
-  width: 100%;
+  margin-top:0.5rem;
 }
-@media (min-width: 84em) {
-  .marginFix {
-    margin:2rem 5rem;
-    width: auto;
-  }
+.letItScroll {
+  overflow-x: auto;
+  margin: 10px 0px;
+}
+.regattaleaderboard_meta_fullscreen_button {
+  background-color: #9f9f9f;
+  background-image: url("images/home/fullscreen.svg");
 }

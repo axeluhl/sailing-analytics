@@ -47,11 +47,14 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security.common,
  com.sap.sse.filestorage,
  org.apache.shiro.core;bundle-version="1.2.2",
- com.sap.sse.gwt.theme
+ com.sap.sse.gwt.theme,
+ com.sap.sailing.news,
+ com.sap.sailing.polars.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.polars.datamining,
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.jms;version="1.1.0",
- javax.servlet;version="3.1.0",
+Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.apache.http.client;version="4.2.5",

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +22,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -41,20 +42,22 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.masterdataimport.WindTrackMasterData;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
@@ -121,6 +124,9 @@ public class ImportMasterDataOperation extends
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
             importRaceLogTrackingGPSFixes(toState);
+            if (masterData.getDeviceConfigurations() != null) {
+                importDeviceConfigurations(toState);
+            }
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -128,6 +134,31 @@ public class ImportMasterDataOperation extends
             throw new RuntimeException("Error during execution of ImportMasterDataOperation", e);
         } finally {
             LockUtil.unlockAfterWrite(dataImportLock);
+        }
+    }
+
+    private void importDeviceConfigurations(RacingEventService toState) {
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> existingConfigs = toState.getAllDeviceConfigurations();
+        Set<DeviceConfigurationMatcher> existingKeys = existingConfigs.keySet();
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> newConfigs = masterData.getDeviceConfigurations();
+        for(Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : newConfigs.entrySet()) {
+            DeviceConfigurationMatcher key = entry.getKey();
+            DeviceConfiguration value = entry.getValue();
+            if (existingKeys.contains(key)) {
+                if (override) {
+                    logger.info(String.format(
+                            "Device configuration [%s] already exists. Overwrite because override flag is set.",
+                            key.getMatcherIdentifier()));
+                    toState.removeDeviceConfiguration(key);
+                    toState.createOrUpdateDeviceConfiguration(key, value);
+                } else {
+                    logger.info(String
+                            .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
+                                    key.getMatcherIdentifier()));
+                }
+            } else {
+                toState.createOrUpdateDeviceConfiguration(key, value);
+            }
         }
     }
 
@@ -218,8 +249,8 @@ public class ImportMasterDataOperation extends
             }
             if (leaderboard != null) {
                 toState.addLeaderboard(leaderboard);
-                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory());
-                storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory());
+                storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
+                storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -244,30 +275,46 @@ public class ImportMasterDataOperation extends
     }
 
     /**
-     * Ensures that the race log events are stored to the receiving instance's database. The race logs have been received
-     * in serialized form on the {@link RaceColumn} objects, but the database doesn't yet know about them. This method uses
-     * a <code>MongoRaceLogStoreVisitor</code> to store all race log events to the database.
+     * Ensures that the race log events are stored to the receiving instance's database. The race logs have been
+     * received in serialized form on the {@link RaceColumn} objects, but the database doesn't yet know about them. This
+     * method uses a <code>MongoRaceLogStoreVisitor</code> to store all race log events to the database.
      */
-    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
+    private void storeRaceLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory,
+            DomainObjectFactory domainObjectFactory, boolean override) {
+        RaceLogStore mongoRaceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory,
+                domainObjectFactory);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog log = raceColumn.getRaceLog(fleet);
                 if (log != null) {
                     RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
-                    RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStoreVisitor(
-                            identifier, mongoObjectFactory);
-                    log.lockForRead();
-                    try {
-                        for (RaceLogEvent event : log.getRawFixes()) {
-                            event.accept(storeVisitor);
-                        }
-                    } finally {
-                        log.unlockAfterRead();
+                    RaceLog currentPersistedLog = mongoRaceLogStore.getRaceLog(identifier, true);
+                    if (currentPersistedLog.isEmpty()) {
+                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                    } else if (override) {
+                        // Clear existing race log
+                        mongoRaceLogStore.removeRaceLog(identifier);
+                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     }
                 }
             }
         }
+    }
 
+    private void addAllmportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
+            RaceLog log, RaceLogIdentifier identifier) {
+        RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
+                .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
+        log.lockForRead();
+        try {
+            for (RaceLogEvent event : log.getRawFixes()) {
+                event.accept(storeVisitor);
+            }
+        } finally {
+            log.unlockAfterRead();
+        }
+        // Make sure listener is added to race log
+        mongoRaceLogStore.addImportedRaceLog(log, identifier);
     }
 
     /**
@@ -275,22 +322,37 @@ public class ImportMasterDataOperation extends
      * potentially {@link HasRegattaLike has} an attached RegattaLog, which then must be stored in the database.
      * @see #storeRaceLogEvents(Leaderboard, MongoObjectFactory)
      */
-    private void storeRegattaLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory) {
+    private void storeRegattaLogEvents(Leaderboard leaderboard, MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
+            boolean override) {
+        RegattaLogStore regattaLogStore = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
         if (leaderboard instanceof HasRegattaLike) {
             IsRegattaLike regattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
             RegattaLog log = regattaLike.getRegattaLog();
             RegattaLikeIdentifier identifier = regattaLike.getRegattaLikeIdentifier();
             RegattaLogEventVisitor storeVisitor = MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStoreVisitor(
                     identifier, mongoObjectFactory);
-            log.lockForRead();
-            try {
-                for (RegattaLogEvent event : log.getRawFixes()) {
-                    event.accept(storeVisitor);
-                }
-            } finally {
-                log.unlockAfterRead();
+            RegattaLog currentPersistedLog = regattaLogStore.getRegattaLog(identifier, true);
+            if (currentPersistedLog.isEmpty()) {
+                addAllImportedRegattaEvents(regattaLogStore, log, identifier, storeVisitor);
+            } else if (override) {
+                //Clear existing regatta log
+                regattaLogStore.removeRegattaLog(identifier);
+                addAllImportedRegattaEvents(regattaLogStore, log, identifier, storeVisitor);
             }
         }
+    }
+
+    private void addAllImportedRegattaEvents(RegattaLogStore regattaLogStore, RegattaLog log,
+            RegattaLikeIdentifier identifier, RegattaLogEventVisitor storeVisitor) {
+        log.lockForRead();
+        try {
+            for (RegattaLogEvent event : log.getRawFixes()) {
+                event.accept(storeVisitor);
+            }
+        } finally {
+            log.unlockAfterRead();
+        }
+        regattaLogStore.addImportedRegattaLog(log, identifier);
     }
 
     private void relinkTrackedRacesIfPossible(RacingEventService toState, Leaderboard newLeaderboard) {
@@ -306,31 +368,6 @@ public class ImportMasterDataOperation extends
                 }
             }
         }
-    }
-
-    /**
-     * Hack adding a dummy tracked race, so that the competitors will be added to the leaderboards
-     * 
-     * @param leaderboard
-     * @return the race column and fleet the dummy was attached to
-     */
-    public com.sap.sse.common.Util.Pair<RaceColumn, Fleet> addDummyTrackedRace(Leaderboard leaderboard,
-            Regatta regatta) {
-        RaceColumn raceColumn = null;
-        Fleet fleet = null;
-        Iterable<RaceColumn> raceColumns = leaderboard.getRaceColumns();
-        Iterator<RaceColumn> raceColumnIterator = raceColumns.iterator();
-        if (raceColumnIterator.hasNext()) {
-            raceColumn = raceColumnIterator.next();
-            Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-            Iterator<? extends Fleet> fleetIterator = fleets.iterator();
-            if (fleetIterator.hasNext()) {
-                fleet = fleetIterator.next();
-                DummyTrackedRace dummy = new DummyTrackedRace(UUID.randomUUID(), leaderboard.getAllCompetitors(), regatta, null, EmptyWindStore.INSTANCE);
-                raceColumn.setTrackedRace(fleet, dummy);
-            }
-        }
-        return new com.sap.sse.common.Util.Pair<RaceColumn, Fleet>(raceColumn, fleet);
     }
 
     private void createWindTracks(RacingEventService toState) {
@@ -406,8 +443,13 @@ public class ImportMasterDataOperation extends
                             TrackedRegatta trackedRegatta = toState.getTrackedRegatta(existingRegatta);
                             List<TrackedRace> toRemove = new ArrayList<TrackedRace>();
                             if (trackedRegatta != null) {
-                                for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
-                                    toRemove.add(race);
+                                trackedRegatta.lockTrackedRacesForRead();
+                                try {
+                                    for (TrackedRace race : trackedRegatta.getTrackedRaces()) {
+                                        toRemove.add(race);
+                                    }
+                                } finally {
+                                    trackedRegatta.unlockTrackedRacesAfterRead();
                                 }
                                 for (TrackedRace raceToRemove : toRemove) {
                                     trackedRegatta.removeTrackedRace(raceToRemove);

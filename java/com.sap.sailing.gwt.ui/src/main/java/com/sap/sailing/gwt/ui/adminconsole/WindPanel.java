@@ -116,7 +116,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         this.setWidget(mainPanel);
 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, 
-                raceSelectionProvider, stringMessages, /*multiselection*/true);
+                raceSelectionProvider, stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
         mainPanel.add(trackedRacesListComposite);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 
@@ -254,6 +254,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
         final CheckBox correctByDeclination = new CheckBox(stringMessages.declinationCheckbox());
+        correctByDeclination.setValue(true); // by default this is desirable because the Igtimi connector reads uncorrected magnetic values
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
         final HTML resultReport = new HTML();
         importButton.addClickHandler(new ClickHandler() {

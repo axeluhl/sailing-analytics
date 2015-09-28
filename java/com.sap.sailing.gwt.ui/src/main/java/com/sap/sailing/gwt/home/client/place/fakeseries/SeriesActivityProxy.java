@@ -4,22 +4,24 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.client.app.HomePlacesNavigator;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SeriesActivityProxy extends AbstractActivityProxy {
 
-    private final AbstractSeriesPlace place;
+    private AbstractSeriesPlace place;
     private SeriesContext ctx;
     private SeriesClientFactory clientFactory;
-    private final HomePlacesNavigator homePlacesNavigator;
+    private final DesktopPlacesNavigator homePlacesNavigator;
 
     public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory,
-            HomePlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.ctx = place.getCtx();
         this.clientFactory = clientFactory;
@@ -32,24 +34,22 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
             afterLoad();
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            
             clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
                 @Override
                 public void onSuccess(final EventSeriesViewDTO event) {
                     ctx.updateContext(event);
                     afterLoad();
                 }
-
                 @Override
                 public void onFailure(Throwable caught) {
-                 // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the series with service getEventSeriesViewById()");
+                    // TODO @FM: extract text?
+                    ErrorPlace errorPlace = new ErrorPlace(
+                            "Error while loading the series with service getEventSeriesViewById()");
                     // TODO @FM: reload sinnvoll hier?
                     errorPlace.setComingFrom(place);
                     clientFactory.getPlaceController().goTo(errorPlace);
                 }
             });
-
         }
     }
 
@@ -57,19 +57,34 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                final AbstractSeriesPlace placeToStart;
-                if(place instanceof SeriesDefaultPlace) {
-                    placeToStart = getRealPlace();
-                } else {
-                    placeToStart = place;
+                if (place instanceof SeriesDefaultPlace) {
+                    place = getRealPlace();
                 }
-                
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) placeToStart, clientFactory, homePlacesNavigator));
+                place = verifyAndAdjustPlace();
+                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, clientFactory,
+                        homePlacesNavigator));
             }
         });
     }
-    
+
     private AbstractSeriesPlace getRealPlace() {
-        return new EventSeriesOverallLeaderboardPlace(ctx);
+        if (ctx.getSeriesDTO().isHasAnalytics()) {
+            return new EventSeriesOverallLeaderboardPlace(ctx);
+        } else {
+            return new SeriesEventsPlace(ctx);
+        }
+    }
+    
+    /**
+     * Checks if the place is valid for the given event.
+     * If not, the place is automatically being adjusted.
+     */
+    private AbstractSeriesPlace verifyAndAdjustPlace() {
+        if(place instanceof SeriesMiniOverallLeaderboardPlace) {
+            return new EventSeriesOverallLeaderboardPlace(place.getCtx());
+        }
+        
+        // no adjustment necessary
+        return place;
     }
 }

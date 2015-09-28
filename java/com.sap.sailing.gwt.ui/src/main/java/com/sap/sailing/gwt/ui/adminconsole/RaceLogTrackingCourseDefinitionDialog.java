@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Set;
+
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -47,7 +49,29 @@ public class RaceLogTrackingCourseDefinitionDialog extends RaceLogTrackingDialog
             });
             marksBtnsPanel.add(addMark);
             
-            
+            Button removeMark = new Button(stringMessages.remove(stringMessages.mark()));
+            removeMark.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
+                    
+                    for (MarkDTO markToRemove : marksToRemove) {
+                        sailingService.revokeMarkDefinitionEventInRaceLog(leaderboardName, raceColumnName, fleetName, markToRemove, new AsyncCallback<Void>() {
+                            
+                            @Override
+                            public void onSuccess(Void result) {
+                                refresh();
+                            }
+                            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                            }
+                        });
+                    }
+                }
+            });               
+            marksBtnsPanel.add(removeMark);
+                        
             Button cancel = new Button(stringMessages.cancel());
             cancel.addClickHandler(new ClickHandler() {
                 @Override

@@ -15,8 +15,8 @@
 	margin-top: 0;
 	line-height: 30pt;
 	vertical-align: middle;
-	font-size: 15pt;
-	font-family: "Arial";
+	font-size: 14pt;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	width: 100%;
 	text-align: center;
 	font-weight: bold;
@@ -91,7 +91,7 @@
 	line-height: 25pt;
 	vertical-align: middle;
 	font-size: 11pt;
-	font-family: "Arial";
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	text-align: center;
 }
 
@@ -113,7 +113,7 @@
 	color: white;
 	line-height: 25pt;
 	font-size: 11pt;
-	font-family: "Arial";
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	z-index: 1;
 }
 

@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.common.Util;
 
 /**
  * A compact representation of a {@link RaceMapDataDTO} that represents competitors by their ID only instead of a
@@ -25,21 +27,30 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     private CoursePositionsDTO coursePositions;
     private List<SidelineDTO> courseSidelines;
     private List<CompactQuickRankDTO> quickRanks;
-    private int simulationResultVersion;
+    private LinkedHashMap<String, Integer> competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber;
+    private long simulationResultVersion;
     
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
-           List<SidelineDTO> courseSidelines, List<QuickRankDTO> quickRanks, int simulationResultVersion) {
+           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion) {
         this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
             this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
         }
-        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : quickRanks.size());
+        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : Util.size(quickRanks.getQuickRanks()));
+        this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber = new LinkedHashMap<>();
+        Map<String, Integer> competitorIdAsStringToOneBasedLegNumber = new HashMap<>();
         if (quickRanks != null) {
-            for (QuickRankDTO quickRank : quickRanks) {
+            for (QuickRankDTO quickRank : quickRanks.getQuickRanks()) {
                 this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank,
                         quickRank.legNumberOneBased));
+                competitorIdAsStringToOneBasedLegNumber.put(quickRank.competitor.getIdAsString(), quickRank.legNumberOneBased);
+            }
+            for (CompetitorDTO competitorInOrderOfWindwardDistanceTraveled : quickRanks.getCompetitorsInOrderOfWindwardDistanceTraveledFarthestFirst()) {
+                this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.put(
+                        competitorInOrderOfWindwardDistanceTraveled.getIdAsString(),
+                        competitorIdAsStringToOneBasedLegNumber.get(competitorInOrderOfWindwardDistanceTraveled.getIdAsString()));
             }
         }
         this.courseSidelines = courseSidelines;
@@ -68,6 +79,13 @@ public class CompactRaceMapDataDTO implements IsSerializable {
             if (competitor != null) {
                 // maybe null in case the competitor was added, e.g., by unsuppressing, while this call was underway
                 result.boatPositions.put(competitor, e.getValue());
+            }
+        }
+        result.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber = new LinkedHashMap<>();
+        for (Entry<String, Integer> i : competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.entrySet()) {
+            CompetitorDTO c = competitorsByIdAsString.get(i.getKey());
+            if (c != null) {
+                result.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.put(c, i.getValue());
             }
         }
         result.simulationResultVersion = simulationResultVersion;

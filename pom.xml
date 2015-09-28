@@ -24,6 +24,13 @@
 				<module>mobile</module>
 			</modules>
 		</profile>
+		<profile>
+			<!-- activate with parameter '-P with-ios'-->
+			<id>with-ios</id>
+			<modules>
+				<module>ios</module>
+			</modules>
+		</profile>
 	</profiles>
 
 	<properties>
@@ -57,7 +64,5 @@
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
 		</repository>
-
 	</repositories>
-
 </project>

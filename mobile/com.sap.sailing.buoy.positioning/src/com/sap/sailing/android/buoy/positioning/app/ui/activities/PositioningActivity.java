@@ -23,25 +23,18 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     private MarkInfo markInfo;
     private MarkPingInfo markPing;
     private LeaderboardInfo leaderBoard;
+    private String markerID;
+    private String checkinDigest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
         Intent intent = getIntent();
-        String markerID = intent.getExtras().getString(getString(R.string.mark_id));
-        String checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
-        List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
-        setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
-        for (MarkInfo mark : marks) {
-            if (mark.getId().equals(markerID)) {
-                setMarkInfo(mark);
-                break;
-            }
-        }
-        if (markInfo != null) {
-            setPingFromDatabase(markerID);
-        }
+        markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
+
+        loadDataFromDatabase();
 
         OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -63,11 +56,25 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     }
 
+    public void loadDataFromDatabase() {
+        List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
+        setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
+        for (MarkInfo mark : marks) {
+            if (mark.getId().equals(markerID)) {
+                setMarkInfo(mark);
+                break;
+            }
+        }
+        if (markInfo != null) {
+            setPingFromDatabase(markerID);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.about_menu, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -77,6 +84,9 @@ public class PositioningActivity extends BaseActivity implements pingListener {
             AboutDialog aboutDialog = new AboutDialog(this);
             aboutDialog.show();
             return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -84,7 +94,8 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     protected int getOptionsMenuResId() {
-        return R.menu.about_menu;
+        // Set to 0 to avoid redundant menu inflation
+        return 0;
     }
 
     public void setPingFromDatabase(String markerID) {

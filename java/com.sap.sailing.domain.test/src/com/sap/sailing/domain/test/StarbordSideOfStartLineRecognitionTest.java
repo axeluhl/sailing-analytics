@@ -12,6 +12,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -32,7 +34,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StarbordSideOfStartLineRecognitionTest {
-    private MillisecondsTimePoint now;
+    private TimePoint now;
 
     @Before
     public void setUp() {
@@ -86,7 +88,8 @@ public class StarbordSideOfStartLineRecognitionTest {
         private static final long serialVersionUID = -8007932232555073829L;
 
         public MockedTrackedRaceImpl() {
-            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false);
+            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false, OneDesignRankingMetric::new,
+                    mock(RaceLogResolver.class));
         }
         
         @Override

@@ -33,6 +33,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
+import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -45,6 +46,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     @Override
     protected void doOnModuleLoad() {
+        Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
         createUI();
@@ -90,7 +92,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
             }
-        }, getStringMessages().leaderboardConfiguration(), Permission.MANAGE_LEADERBOARDS);
+        }, getStringMessages().leaderboards(), Permission.MANAGE_LEADERBOARDS);
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
@@ -110,7 +112,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         /* RACES */
         
-        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().races(), "RacesPanel");
+        final TabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
         TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this,
                 this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
@@ -145,6 +147,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().mediaPanel(), Permission.MANAGE_MEDIA);
 
+        /* RACE COMMITTEE APP */
+
+        final TabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
+        final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
+                getStringMessages(), this);
+        panel.addToTabPanel(raceCommitteeTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
+                getStringMessages().deviceConfiguration(), Permission.MANAGE_DEVICE_CONFIGURATION);
+        
         /* CONNECTORS */
         
         final TabLayoutPanel connectorsTabPanel = panel.addVerticalTab(getStringMessages().connectors(), "TrackingProviderPanel");
@@ -189,7 +199,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(sailingService, this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
-                getStringMessages().structureImportUrls(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
+                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
 
         /* ADVANCED */
         
@@ -207,14 +217,13 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), Permission.MANAGE_MASTERDATA_IMPORT);
 
-        RemoteSailingServerInstancesManagementPanel sailingServerInstancesManagementPanel = new RemoteSailingServerInstancesManagementPanel(sailingService, this, getStringMessages());
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteSailingServerInstancesManagementPanel>(sailingServerInstancesManagementPanel),
-                getStringMessages().sailingServers(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
+        RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(sailingService, this, getStringMessages());
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
+                getStringMessages().remoteServerInstances(), Permission.MANAGE_SAILING_SERVER_INSTANCES);
 
-        final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
-                getStringMessages(), this);
-        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
-                getStringMessages().deviceConfiguration(), Permission.MANAGE_DEVICE_CONFIGURATION);
+        LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(sailingService, this, getStringMessages());
+        panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
+                getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
                 SailingPermissionsForRoleProvider.INSTANCE);

@@ -4,7 +4,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRanksDTO;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
@@ -50,7 +50,7 @@ public class QuickRanksLiveCache {
     
     private final WeakReference<? extends TrackedRace> stopRef = new WeakReference<TrackedRace>(dummyTrackedRace);
     
-    private final SmartFutureCache<RegattaAndRaceIdentifier, List<QuickRankDTO>, CalculateOrPurge> cache;
+    private final SmartFutureCache<RegattaAndRaceIdentifier, QuickRanksDTO, CalculateOrPurge> cache;
     
     private final SailingServiceImpl service;
     
@@ -72,24 +72,24 @@ public class QuickRanksLiveCache {
     
     public QuickRanksLiveCache(final SailingServiceImpl service) {
         this.service = service;
-        cache = new SmartFutureCache<RegattaAndRaceIdentifier, List<QuickRankDTO>, CalculateOrPurge>(
-                new AbstractCacheUpdater<RegattaAndRaceIdentifier, List<QuickRankDTO>, CalculateOrPurge>() {
+        cache = new SmartFutureCache<RegattaAndRaceIdentifier, QuickRanksDTO, CalculateOrPurge>(
+                new AbstractCacheUpdater<RegattaAndRaceIdentifier, QuickRanksDTO, CalculateOrPurge>() {
                     @Override
-                    public List<QuickRankDTO> computeCacheUpdate(RegattaAndRaceIdentifier key,
+                    public QuickRanksDTO computeCacheUpdate(RegattaAndRaceIdentifier key,
                             CalculateOrPurge updateInterval) throws Exception {
                         logger.fine("Computing cache update for live QuickRanks of race "+key);
-                        final List<QuickRankDTO> result;
+                        final QuickRanksDTO quickRanks;
                         if (updateInterval == CalculateOrPurge.PURGE) {
-                            result = null;
+                            quickRanks = null;
                         } else {
-                            result = service.computeQuickRanks(key, /* time point; null means live */ null);
+                            quickRanks = service.computeQuickRanks(key, /* time point; null means live */ null);
                         }
-                        return result;
+                        return quickRanks;
                     }
                 }, getClass().getName());
         fromRefToRaceIdentifier = new HashMap<>();
         referencesToGarbageCollectedRaces = new ReferenceQueue<>();
-        new Thread("QuickRanksLiveCache garbage collector") {
+        Thread t = new Thread("QuickRanksLiveCache garbage collector") {
             @Override
             public void run() {
                 Reference<?> ref;
@@ -107,7 +107,9 @@ public class QuickRanksLiveCache {
                 } while (ref != stopRef);
                 logger.info("Received stop in QuickRanksLiveCache garbage collector; terminating");
             }
-        }.start();
+        };
+        t.setDaemon(true);
+        t.start();
     }
 
     private void remove(RegattaAndRaceIdentifier raceIdentifier) {
@@ -118,8 +120,8 @@ public class QuickRanksLiveCache {
         dummyTrackedRace = null; // release the dummy tracked race, causing the stopRef to be enqueued
     }
 
-    public List<QuickRankDTO> get(RegattaAndRaceIdentifier raceIdentifier) {
-        List<QuickRankDTO> result = cache.get(raceIdentifier, false);
+    public QuickRanksDTO get(RegattaAndRaceIdentifier raceIdentifier) {
+        QuickRanksDTO result = cache.get(raceIdentifier, false);
         if (result == null) {
             TrackedRace trackedRace = service.getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {

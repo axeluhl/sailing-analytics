@@ -54,11 +54,11 @@ public interface Leaderboard extends LeaderboardBase {
      */
     public interface Entry {
         int getTrackedRank();
-        Double getNetPoints() throws NoWindException;
-        Double getNetPointsUncorrected() throws NoWindException;
-        Double getTotalPoints() throws NoWindException;
+        Double getNetPoints();
+        Double getNetPointsUncorrected();
+        Double getTotalPoints();
         MaxPointsReason getMaxPointsReason();
-        boolean isDiscarded() throws NoWindException;
+        boolean isDiscarded();
         /**
          * Tells if the net points have been corrected by a {@link ScoreCorrection}
          */
@@ -354,7 +354,7 @@ public interface Leaderboard extends LeaderboardBase {
      * that column shall be considered for discarding and counts for determining the number of races so far. Also, if a
      * tracked race is connected to the column and has started already, the column is to be considered for discarding
      * unless the column has several unordered fleets and not all fleets have started their race yet (see
-     * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
+     * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, Competitor, TimePoint)}).
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
     

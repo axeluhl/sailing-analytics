@@ -31,7 +31,7 @@ public interface DomainFactory extends SharedDomainFactory {
      * the <code>RacingEventService.getBaseDomainFactory()</code> instead which should be the single instance used
      * by all other services linked to the <code>RacingEventService</code>.
      */
-    static DomainFactory INSTANCE = new DomainFactoryImpl();
+    static DomainFactory INSTANCE = new DomainFactoryImpl((srlid)->null);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
     

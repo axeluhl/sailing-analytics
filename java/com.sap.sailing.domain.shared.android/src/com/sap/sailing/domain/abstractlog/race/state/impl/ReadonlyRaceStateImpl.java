@@ -1,9 +1,16 @@
 package com.sap.sailing.domain.abstractlog.race.state.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -11,10 +18,12 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinde
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -45,19 +54,41 @@ import com.sap.sse.common.Util;
  */
 public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedListener {
 
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */null,
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState> emptyMap());
+    }
+
     /**
      * Creates a {@link ReadonlyRaceState}.
+     * 
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      */
-    public static ReadonlyRaceState create(RaceLog raceLog,
-            ConfigurationLoader<RegattaConfiguration> configurationLoader) {
-        return new ReadonlyRaceStateImpl(raceLog, new ReadonlyRacingProcedureFactory(configurationLoader));
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier,
+            ConfigurationLoader<RegattaConfiguration> configurationLoader,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, forRaceLogIdentifier, new ReadonlyRacingProcedureFactory(
+                        configurationLoader), dependentRaceStates);
     }
 
     /**
      * Creates a {@link ReadonlyRaceState} with an empty configuration ( {@link EmptyRegattaConfiguration} ).
+     * 
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      */
-    public static ReadonlyRaceState create(RaceLog raceLog) {
-        return new ReadonlyRaceStateImpl(raceLog, new ReadonlyRacingProcedureFactory(new EmptyRegattaConfiguration()));
+    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        return new ReadonlyRaceStateImpl(raceLogResolver, raceLog, forRaceLogIdentifier, new ReadonlyRacingProcedureFactory(
+                        new EmptyRegattaConfiguration()), dependentRaceStates);
     }
 
     /**
@@ -97,16 +128,16 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * a default is taken from {@link #fallbackInitialProcedureType}.
      */
     private RacingProcedureType cachedRacingProcedureType;
-    
+
     /**
      * The result of {@link #determineInitialProcedureType()}; may be {@link RacingProcedureType#UNKNOWN} in case no
      * specification is found in the underlying race log.
      */
     private RacingProcedureType cachedRacingProcedureTypeNoFallback;
-    
+
     private RaceLogRaceStatus cachedRaceStatus;
     private int cachedPassId;
-    private TimePoint cachedStartTime;
+    private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
     private TimePoint cachedFinishedTime;
     private TimePoint cachedProtestTime;
@@ -114,25 +145,42 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private CompetitorResults cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
     private Wind cachedWindFix;
+    private RaceLogResolver raceLogResolver;
 
-    private ReadonlyRaceStateImpl(RaceLog raceLog, RacingProcedureFactory procedureFactory) {
-        this(raceLog, new RaceStatusAnalyzer.StandardClock(), procedureFactory, /* update */ true);
+    // For dependentStartTime
+    private ReadonlyRaceState raceStateToObserve;
+    private RaceStateChangedListener raceStateToObserveListener;
+
+    private ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier, RacingProcedureFactory procedureFactory,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        this(raceLogResolver, raceLog, forRaceLogIdentifier, new RaceStatusAnalyzer.StandardClock(),
+                procedureFactory, dependentRaceStates, /* update */true);
     }
 
     /**
+     * @param forRaceLogIdentifier
+     *            If known, callers can specify the simple race log identifier for the race log to be wrapped by this
+     *            new race state. This can help avoid endless recursions because this race state can be passed along
+     *            together with the identifier so that when again along a dependent call chain a race state is required
+     *            for that race log identifier, this one can be used.
      * @param update
      *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
      *            changes.
      */
-    protected ReadonlyRaceStateImpl(RaceLog raceLog, Clock analyzersClock, RacingProcedureFactory procedureFactory, boolean update) {
+    protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier, Clock analyzersClock,
+            RacingProcedureFactory procedureFactory,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
         this.raceLog = raceLog;
+        this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
         this.changedListeners = new RaceStateChangedListeners();
 
         this.racingProcedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         this.statusAnalyzerClock = analyzersClock;
         // status analyzer will get initialized when racing procedure is ready
-        this.startTimeAnalyzer = new StartTimeFinder(raceLog);
+        this.startTimeAnalyzer = new StartTimeFinder(raceLogResolver, raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
         this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
@@ -141,8 +189,16 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
 
+        this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
+            @Override
+            public void onStartTimeChanged(ReadonlyRaceState state) {
+                update();
+            }
+        };
+
         this.cachedRacingProcedureTypeNoFallback = determineInitialProcedureType();
-        if (this.cachedRacingProcedureTypeNoFallback == null || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+        if (this.cachedRacingProcedureTypeNoFallback == null
+                || this.cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
             this.cachedRacingProcedureType = fallbackInitialProcedureType;
         } else {
             cachedRacingProcedureType = cachedRacingProcedureTypeNoFallback;
@@ -155,6 +211,32 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         // We known that recreateRacingProcedure calls update() when done, therefore this RaceState
         // will be fully initialized after this line
         recreateRacingProcedure();
+        final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStatesAndMe;
+        if (forRaceLogIdentifier != null) {
+            dependentRaceStatesAndMe = new HashMap<>(dependentRaceStates);
+            dependentRaceStatesAndMe.put(forRaceLogIdentifier, this);
+        } else {
+            dependentRaceStatesAndMe = dependentRaceStates;
+        }
+        registerListenerOnDependentRaceIfDependentStartTime(dependentRaceStatesAndMe);
+    }
+
+    protected void registerListenerOnDependentRaceIfDependentStartTime(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
+        // dependent startTime setup listeners
+        this.raceLog.lockForRead();
+        try {
+            for (RaceLogEvent event : this.raceLog.getFixesDescending()) {
+                if (event instanceof RaceLogStartTimeEvent) {
+                    break;
+                } else if (event instanceof RaceLogDependentStartTimeEvent) {
+                    setupListenersOnDependentRace(event, dependentRaceStates);
+                    break;
+                }
+            }
+        } finally {
+            this.raceLog.unlockAfterRead();
+        }
     }
 
     protected RacingProcedureType determineInitialProcedureType() {
@@ -178,11 +260,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     public ReadonlyRacingProcedure getRacingProcedure() {
         return racingProcedure;
     }
-    
+
     @Override
     public ReadonlyRacingProcedure getRacingProcedureNoFallback() {
         final ReadonlyRacingProcedure result;
-        if (cachedRacingProcedureTypeNoFallback == null || cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
+        if (cachedRacingProcedureTypeNoFallback == null
+                || cachedRacingProcedureTypeNoFallback == RacingProcedureType.UNKNOWN) {
             result = null;
         } else {
             result = getRacingProcedure();
@@ -223,7 +306,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public TimePoint getStartTime() {
-        return cachedStartTime;
+        return cachedStartTimeFinderResult.getStartTime();
+    }
+    
+    @Override
+    public StartTimeFinderResult getStartTimeFinderResult() {
+        return cachedStartTimeFinderResult;
     }
 
     @Override
@@ -278,7 +366,36 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public void eventAdded(RaceLogEvent event) {
+        if (event instanceof RaceLogDependentStartTimeEvent) {
+            setupListenersOnDependentRace(event, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+        } else if (event instanceof RaceLogStartTimeEvent) {
+            if (raceStateToObserve != null) {
+                raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+                raceStateToObserve = null;
+            }
+        }
         update();
+    }
+
+    private void setupListenersOnDependentRace(RaceLogEvent event, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        if (raceStateToObserve != null) {
+            // Remove previous listeners
+            raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+            raceStateToObserve = null;
+        }
+        RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
+        final SimpleRaceLogIdentifier dependentOnRaceIdentifier = dependentStartTimeEvent.getDependentOnRaceIdentifier();
+        if (dependentRaceStates.containsKey(dependentOnRaceIdentifier)) {
+            raceStateToObserve = dependentRaceStates.get(dependentOnRaceIdentifier);
+            raceStateToObserve.addChangedListener(raceStateToObserveListener);
+        } else {
+            RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentOnRaceIdentifier);
+            if (resolvedRaceLog != null) {
+                raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog,
+                        dependentOnRaceIdentifier, dependentRaceStates);
+                raceStateToObserve.addChangedListener(raceStateToObserveListener);
+            }
+        }
     }
 
     @Override
@@ -291,7 +408,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         return false;
     }
 
-    private void update() {
+    protected void update() {
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;
@@ -313,9 +430,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
         }
 
-        TimePoint startTime = startTimeAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedStartTime, startTime)) {
-            cachedStartTime = startTime;
+        StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedStartTimeFinderResult, startTimeFinderResult)) {
+            cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
 
@@ -369,11 +486,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             removeChangedListener(racingProcedure);
             racingProcedure.detach();
         }
-        racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog);
+        racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog, raceLogResolver);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
 
-        statusAnalyzer = new RaceStatusAnalyzer(raceLog, statusAnalyzerClock, racingProcedure);
+        statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update();
     }

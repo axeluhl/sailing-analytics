@@ -1,10 +1,13 @@
 package com.sap.sailing.android.tracking.app.services;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
 import android.location.Location;
 import android.os.BatteryManager;
@@ -12,6 +15,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -23,16 +27,17 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -42,14 +47,12 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private NotificationManager notificationManager;
     private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
-    private ScheduledExecutorService scheduler;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
     private static final String TAG = TrackingService.class.getName();
 
-    public static final String WEB_SERVICE_PATH = "/sailingserver/api/v1/gps_fixes";
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
@@ -114,7 +117,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         locationUpdateRequested = true;
 
         ExLog.i(this, TAG, "Started Tracking");
-        // showNotification();
+        showNotification();
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
@@ -126,10 +129,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         }
         googleApiClient.disconnect();
         locationUpdateRequested = false;
-
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
@@ -190,16 +189,16 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             JSONArray jsonArray = new JSONArray();
             JSONObject fixJson = new JSONObject();
 
-            fixJson.put("course", location.getBearing());
-            fixJson.put("timestamp", location.getTime());
-            fixJson.put("speed", location.getSpeed());
-            fixJson.put("longitude", location.getLongitude());
-            fixJson.put("latitude", location.getLatitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
 
             jsonArray.put(fixJson);
 
-            json.put("fixes", jsonArray);
-            json.put("deviceUuid", prefs.getDeviceIdentifier());
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, jsonArray);
+            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
 
             String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
 
@@ -209,12 +208,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
-
-        // DatabaseHelper.getInstance().insertGPSFix(this, location.getLatitude(),
-        // location.getLongitude(), location.getSpeed(),
-        // location.getBearing(), location.getProvider(),
-        // location.getTime(), eventRowId);
-        // ensureTransmittingServiceIsRunning();
     }
 
     /**
@@ -262,17 +255,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         return batteryPct;
     }
 
-    /**
-     * start transmitting service when a new fix arrives, because it ends itself, if there's no data to send.
-     */
-    // private void ensureTransmittingServiceIsRunning() {
-    // if (BuildConfig.DEBUG) {
-    // ExLog.i(this, TAG,
-    // "ensureTransmittingServiceIsRunning, starting TransmittingService");
-    // }
-    //
-    // ServiceHelper.getInstance().startTransmittingService(this);
-    // }
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -284,20 +266,22 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         notificationManager.cancel(NOTIFICATION_ID);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
+    
+    // Useful code for Bug 3048. Will stay commented for now.
 
-    // private void showNotification() {
-    // Intent intent = new Intent(this, RegattaActivity.class);
-    // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-    // | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    // PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-    // CharSequence text = getText(R.string.tracker_started);
-    // Notification notification = new NotificationCompat.Builder(this)
-    // .setContentTitle(getText(R.string.app_name))
-    // .setContentText(text).setContentIntent(pi)
-    // .setSmallIcon(R.drawable.icon).build();
-    // notification.flags |= Notification.FLAG_NO_CLEAR;
-    // startForeground(NOTIFICATION_ID, notification);
-    // }
+     private void showNotification() {
+     Intent intent = new Intent(this, TrackingActivity.class);
+     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+     PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+     Notification notification = new NotificationCompat.Builder(this)
+     .setContentTitle(getText(R.string.app_name))
+     .setContentText(getString(R.string.tracking_notification_text, event.name)).setContentIntent(pi)
+         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+         .setSmallIcon(R.drawable.ic_launcher)
+         .setOngoing(true).build();
+         notificationManager.notify(NOTIFICATION_ID, notification);
+     }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
         gpsQualityListener = listener;

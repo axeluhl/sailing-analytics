@@ -40,7 +40,7 @@ public class AbstractGPSFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected RaceLog raceLog;
     protected GPSFixStore store;
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
@@ -79,7 +79,7 @@ public class AbstractGPSFixStoreTest {
                 mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
-    protected void testLength(Track<?> track, long expected) {
+    protected void testNumberOfRawFixes(Track<?> track, long expected) {
         track.lockForRead();
         assertEquals(expected, size(track.getRawFixes()));
         track.unlockAfterRead();

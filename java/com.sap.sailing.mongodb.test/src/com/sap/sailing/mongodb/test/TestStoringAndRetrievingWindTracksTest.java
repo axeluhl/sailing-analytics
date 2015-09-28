@@ -3,6 +3,7 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -16,6 +17,7 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -87,7 +89,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /* trackedRegattaRegistry */ null, /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE);
+                }, /* trackedRegattaRegistry */ null, mock(RaceLogResolver.class),
+                /*courseDesignUpdateURI*/ null, /*tracTracUsername*/ null, /*tracTracPassword*/ null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaces().iterator().next().getId());
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
@@ -95,7 +98,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     @Override
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
-                }, /*useMarkPassingCalculator*/ false);
+                }, /*useMarkPassingCalculator*/ false, mock(RaceLogResolver.class));
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());

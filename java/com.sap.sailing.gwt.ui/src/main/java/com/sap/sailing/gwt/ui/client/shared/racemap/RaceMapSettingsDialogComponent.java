@@ -98,7 +98,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
-                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
+                cb.setValue(Util.contains(initialSettings.getZoomSettings().getTypesToConsiderOnZoom(), zoomType), false);
                 checkboxAndZoomType.add(new Util.Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
@@ -184,7 +184,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         buoyZoneRadiusLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
         buoyZoneSettingsPanel.add(buoyZoneRadiusLabel);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        buoyZoneRadiusBox = dialog.createDoubleBox((int) (initialSettings.getBuoyZoneRadiusInMeters()), 4);
+        buoyZoneRadiusBox = dialog.createDoubleBox(Double.valueOf((int) (initialSettings.getBuoyZoneRadiusInMeters())), 4);
         buoyZoneRadiusBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
         buoyZoneSettingsPanel.add(buoyZoneRadiusBox);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusBox, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -195,6 +195,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.ADVANTAGELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEMIDDLELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
+        vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
         return vp;
     }

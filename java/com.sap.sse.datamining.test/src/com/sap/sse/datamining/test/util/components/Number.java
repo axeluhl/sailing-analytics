@@ -1,14 +1,17 @@
 package com.sap.sse.datamining.test.util.components;
 
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import java.io.Serializable;
+
+import com.sap.sse.datamining.annotations.Dimension;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!
  * The tests will fail, because they are reflected via constant strings.
  */
 
-public class Number {
+public class Number implements Serializable {
     
+    private static final long serialVersionUID = 1L;
     private int value;
 
     public Number(int value) {

@@ -150,9 +150,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
 
-        HorizontalPanel leaderboardConfigControlsPanel = new HorizontalPanel();
+        HorizontalPanel leaderboardControlsPanel = new HorizontalPanel();
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
-        leaderboardConfigControlsPanel.setSpacing(5);
+        leaderboardControlsPanel.setSpacing(5);
+        addLeaderboardControls(leaderboardControlsPanel);
+        leaderboardsPanel.add(leaderboardControlsPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
@@ -166,9 +168,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 return strings;
             }
         };
-        leaderboardConfigControlsPanel.add(filterLeaderboardPanel);
-        addLeaderboardConfigControls(leaderboardConfigControlsPanel);
-        leaderboardsPanel.add(leaderboardConfigControlsPanel);
+        filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
+
+        leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes);
         @SuppressWarnings("unchecked")
@@ -183,10 +185,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         });
         leaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
-        HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
-        leaderboardButtonPanel.setSpacing(5);
-        leaderboardsPanel.add(leaderboardButtonPanel);
-        addLeaderboardCreateControls(leaderboardButtonPanel);
         mainPanel.add(new Grid(1, 1));
 
         // caption panels for the selected leaderboard and tracked races
@@ -214,7 +212,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                raceSelectionProvider, stringMessages, /* multiselection */false);
+                raceSelectionProvider, stringMessages, /* multiselection */false, isActionButtonsEnabled());
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
@@ -255,9 +253,12 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         
         addSelectedLeaderboardRacesControls(selectedLeaderboardRaceButtonPanel);
     }
+
+    protected boolean isActionButtonsEnabled() {
+        return /* actionButtonsEnabled */ false;
+    }
     
-    protected abstract void addLeaderboardConfigControls(Panel configPanel);
-    protected abstract void addLeaderboardCreateControls(Panel createPanel);
+    protected abstract void addLeaderboardControls(Panel controlsPanel);
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
     protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableRes);
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);

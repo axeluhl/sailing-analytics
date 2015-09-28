@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.ImageSize;
+import com.sap.sse.common.media.ImageSize;
 
 public class ImageSizeImpl implements ImageSize {
     private static final long serialVersionUID = 1170701774852068780L;

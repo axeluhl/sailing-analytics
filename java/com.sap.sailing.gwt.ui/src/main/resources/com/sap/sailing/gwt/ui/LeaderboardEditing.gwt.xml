@@ -9,6 +9,7 @@
 	<inherits name='com.google.gwt.debug.Debug'/>
 	
 	<!-- Other module inherits                                      -->
+	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
@@ -17,7 +18,7 @@
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	
   	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
 
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />

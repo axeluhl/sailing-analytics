@@ -50,6 +50,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
+    protected boolean regattaHasCompetitors = false;
     
     public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -67,6 +68,13 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         importPanel.add(importContent);
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
+    }
+    
+    /**
+     * When doing race log tracking, the Remove and Stop Tracking buttons are required.
+     */
+    protected boolean isActionButtonsEnabled() {
+        return /* actionButtonsEnabled */ true;
     }
     
     @Override
@@ -281,6 +289,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_TRACKING_TIMES.equals(value)) {
+                    setTrackingTimes(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());;
                 }
             }
         });
@@ -297,10 +307,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
 
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {}
-
-    @Override
-    protected void addLeaderboardCreateControls(Panel createPanel) {}
+    protected void addLeaderboardControls(Panel controlsPanel) {}
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
@@ -350,6 +357,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     @Override
     protected void leaderboardSelectionChanged() {
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
+        regattaHasCompetitors = false;
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
@@ -362,6 +370,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             if (!selectedLeaderboard.type.isMetaLeaderboard()) {
                 trackedRacesCaptionPanel.setVisible(true);
             }
+            
+            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
@@ -369,6 +379,19 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         raceColumnTableSelectionModel.clear();
     }
 
+    
+    private class RegattaLogCallBack implements AsyncCallback<Boolean>{
+        @Override
+        public void onFailure(Throwable caught) {
+            regattaHasCompetitors = false;
+        }
+
+        @Override
+        public void onSuccess(Boolean result) {
+            regattaHasCompetitors = true;
+        }
+    }
+    
     private void denoteForRaceLogTracking(final StrippedLeaderboardDTO leaderboard) {
         sailingService.denoteForRaceLogTracking(leaderboard.name, new AsyncCallback<Void>() {
             @Override
@@ -418,9 +441,12 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";
-        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
-            if (!doCompetitorResgistrationsExist(race)) {
-                namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
+        
+        if (!regattaHasCompetitors) {
+            for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : races) {
+                if (!doCompetitorResgistrationsExist(race)) {
+                    namesOfRacesMissingRegistrations += race.getA().getName() + "/" + race.getB().getName() + " ";
+                }
             }
         }
         if (! namesOfRacesMissingRegistrations.isEmpty()) {
@@ -450,7 +476,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
             });
         }
     }
-    
+
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {
         new SetStartTimeDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumnDTO.getName(), 
                 fleetDTO.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetStartTimeAndProcedureDTO>() {
@@ -478,6 +504,32 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         }).show();
     }
     
+    private void setTrackingTimes(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        new SetTrackingTimesDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumn.getName(),
+                fleet.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetTrackingTimesDTO>() {
+
+                    @Override
+                    public void ok(RaceLogSetTrackingTimesDTO editedObject) {
+                        sailingService.setTrackingTimes(editedObject, new AsyncCallback<Void>(){
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                            }
+                            
+                        });
+                        
+                    }
+
+                    @Override
+                    public void cancel() {}
+                }).show();
+    }
+
     private String getLocaleInfo() {
         return LocaleInfo.getCurrentLocale().getLocaleName();
     }

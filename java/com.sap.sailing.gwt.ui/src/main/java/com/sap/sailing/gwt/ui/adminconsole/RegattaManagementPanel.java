@@ -174,7 +174,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
                 newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference,
+                newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());

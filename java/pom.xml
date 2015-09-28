@@ -23,6 +23,7 @@
     <module>com.sap.sse.gwt</module>
     <module>com.sap.sse.gwt.adminconsole</module>
     <module>com.sap.sse.datamining</module>
+    <module>com.sap.sse.datamining.annotations</module>
     <module>com.sap.sse.datamining.shared</module>
     <module>com.sap.sse.security</module>
     <module>com.sap.sse.security.common</module>
@@ -50,6 +51,7 @@
     <module>com.sap.sailing.domain.swisstimingadapter</module>
     <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
     <module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+    <module>com.sap.sailing.news</module>
     <module>com.sap.sailing.declination</module>
     <module>com.sap.sailing.udpconnector</module>
     <module>com.sap.sailing.expeditionconnector</module>
@@ -79,8 +81,6 @@
     <module>com.sap.sailing.freg.resultimport</module>
     <module>org.openqa.selenium.osgi</module>
     <module>com.sap.sailing.monitoring</module>
-    <module>com.sap.sailing.nmeaconnector</module>
-    <module>net.sf.marineapi</module>
     <module>com.sap.sailing.simulator</module>
     <module>com.sap.sailing.server.trackfiles</module>
     <module>com.sap.sailing.feature.runtime</module>
@@ -102,7 +102,6 @@
     <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
     <module>com.sap.sailing.xmlexport.test</module>
     <module>com.sap.sailing.xrr.resultimport.test</module>
-    <module>net.sf.marineapi.test</module>
     <module>com.sap.sailing.domain.shared.android.test</module>
     <module>com.sap.sailing.geocoding.test</module>
     <module>com.sap.sailing.domain.swisstimingadapter.test</module>
@@ -129,13 +128,14 @@
     <module>com.sap.sailing.manage2sail</module>
     <module>com.sap.sailing.manage2sail.resultimport</module>
     <module>com.sap.sailing.manage2sail.resultimport.test</module>
-    <module>com.sap.sailing.nmeaconnector.test</module>
     <module>com.sap.sailing.simulator.test</module>
     <module>com.sap.sailing.server.trackfiles.test</module>
     <module>com.sap.sailing.selenium.test</module>
     <module>com.sap.sailing.autoload</module>
     <module>com.sap.sailing.feature.p2build</module>
     <module>com.sap.sailing.polars</module>
+	<module>com.sap.sailing.polars.datamining</module>
+	<module>com.sap.sailing.polars.datamining.shared</module>
     <module>com.sap.sailing.polars.test</module>
     <!--
     com.sap.sailing.targetplatform.base
@@ -146,6 +146,7 @@
   <properties>
     <tycho-version>0.21.0</tycho-version>
     <gwt.version>2.7.0</gwt.version>
+    <gwt.minVersion>2.7.0</gwt.minVersion>
     <gwt.workers>2</gwt.workers>
     <p2-target>race-analysis-p2-remote</p2-target><!--can be overidden through p2-target.local profile -->
     <!-- QUESTION: Which properties or settings are system dependent and differ across different machines/environments? QUESTION: 
@@ -169,6 +170,7 @@
     <!-- "Forward declaration" for better readability. The actual value should be defined in the local settings.xml, because 
       of the differences between the CI-Build and the local setup. -->
     <parameters.proxy>
+      -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080
     </parameters.proxy>
     <reportsdirectory>${project.build.directory}/surefire-reports</reportsdirectory>
     <skipTests>false</skipTests>
@@ -326,8 +328,7 @@
         <artifactId>tycho-compiler-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <useJDK>BREE</useJDK>
         </configuration>
       </plugin>
 

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
@@ -15,6 +16,8 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -40,9 +43,14 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -59,7 +67,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace extends Serializable {
+public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -67,6 +75,16 @@ public interface TrackedRace extends Serializable {
     RaceDefinition getRace();
 
     RegattaAndRaceIdentifier getRaceIdentifier();
+    
+    /**
+     * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
+     * this will usually happen by projecting the competitors to the wind direction for upwind and downwind legs or to
+     * the leg's rhumb line for reaching legs, then comparing positions. For handicap races using a time-on-time,
+     * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
+     * process needs to take into account the competitor-specific correction factors defined in the measurement
+     * certificate.
+     */
+    RankingMetric getRankingMetric();
 
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time
@@ -263,6 +281,31 @@ public interface TrackedRace extends Serializable {
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    
+    /**
+     * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
+     * for wind recording. If, based on a {@link RaceExecutionOrderProvider}, there is no previous race that takes the
+     * wind fix, an extended time range lead (see
+     * {@link TrackedRaceImpl#EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS}) is used to record wind even a long
+     * time before the race start.
+     * <p>
+     * 
+     * A race does not record wind when both, {@link #getStartOfTracking()} and {@link #getStartOfRace()} are
+     * <code>null</code>. Wind is not recorded when it is after the later of {@link #getEndOfRace()} and
+     * {@link #getEndOfTracking()} and one of the two is not <code>null</code>.
+     * <p>
+     * 
+     * This default implementation returns true which may be useful for tests and mocked implementations; however, real
+     * implementations shall override this and provide a meaningful implementation according to the specification given
+     * above.
+     */
+    default boolean takesWindFix(Wind wind) {
+        return true;
+    }
+
+    default boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+        return true;
+    }
 
     /**
      * Same as {@link #getWind(Position, TimePoint, Set) getWind(p, at, Collections.emptyList())}
@@ -286,7 +329,8 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
-     * Callers can freely iterate because a copied collection is returned.
+     * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
+     * is never part of the result.
      */
     Set<WindSource> getWindSources();
 
@@ -503,7 +547,21 @@ public interface TrackedRace extends Serializable {
      */
     Distance getDistanceTraveledIncludingGateStart(Competitor competitor, TimePoint timePoint);
 
-    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) throws NoWindException;
+    /**
+     * See {@link TrackedLegOfCompetitor#getWindwardDistanceToCompetitorFarthestAhead(TimePoint, WindPositionMode, RankingInfo)}
+     */
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode);
+
+    /**
+     * Same as {@link #getWindwardDistanceToCompetitorFarthestAhead(Competitor, TimePoint, WindPositionMode)}, only with an
+     * additional cache to speed up wind and leg type and leg bearing calculations in case of multiple similar look-ups
+     * for the same time point.
+     * 
+     * @param rankingInfo
+     *            materialized ranking information that is expensive to calculate, avoiding redundant calculations
+     */
+    Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
@@ -574,13 +632,21 @@ public interface TrackedRace extends Serializable {
 
     WindStore getWindStore();
 
-    Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
+    Competitor getOverallLeader(TimePoint timePoint);
+    
+    Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose
      * {@link #getRank(Competitor)} is 0 will be sorted "worst".
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getCompetitorsFromBestToWorst(TimePoint)}, using a cache for wind, leg type and leg
+     * bearing values.
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache);
 
     /**
      * When provided with a {@link WindStore} during construction, the tracked race will
@@ -618,9 +684,9 @@ public interface TrackedRace extends Serializable {
     void detachRaceLog(Serializable identifier);
     
     /**
-     * Detaches all {@link RaceLog} instances from this race
+     * Detaches the link {@link RaceExecutionOrderProvider}
      */
-    void detachAllRaceLogs();
+    void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
@@ -639,6 +705,12 @@ public interface TrackedRace extends Serializable {
      * This also causes fixes from the {@link GPSFixStore} to be loaded (see {@link #attachRaceLog} for details).
      */
     void attachRegattaLog(RegattaLog regattaLog);
+    
+    /**
+     * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
+     * which races are scheduled around it in the execution order of a {@link Regatta}.
+     * */
+    void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider);
     
     /**
      * Returns the attached race log event track for this race if any.
@@ -774,14 +846,36 @@ public interface TrackedRace extends Serializable {
     boolean isUsingMarkPassingCalculator();
     
     /**
-     * @param timepoint Used for positions of marks and wind information
+     * Calculates the estimated time it takes a competitor to sail the race, from start to finish.
+     * 
+     * @param timepoint
+     *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
+     *            when the race starts and that a windward mark may be collected already before the race finishes.
+     * 
      * @return estimated time it takes to complete the race
-     * @throws NotEnoughDataHasBeenAddedException thrown if not enough polar data has been added or polar data service
-     * is not available
-     * @throws NoWindException 
+     * 
+     * @throws NotEnoughDataHasBeenAddedException
+     *             thrown if not enough polar data has been added or polar data service is not available
+     * @throws NoWindException
      */
     Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
+
+    default RaceLogResolver getRaceLogResolver() {
+        return null;
+    }
+
+    default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+        return null;
+    }
+
+    /**
+     * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
+     * definition events in all attached race and regatta logs.
+     */
+    default Iterable<Mark> getMarksFromRaceAndLogs() {
+        return getMarks();
+    }
 
 }

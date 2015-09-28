@@ -46,6 +46,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -79,7 +80,7 @@ public class CreateAndTrackWithRaceLogTest {
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
         /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), false,
-                new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */true);
+                new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */true, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);
         leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         adapter = RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(DomainFactory.INSTANCE);
@@ -168,7 +169,8 @@ public class CreateAndTrackWithRaceLogTest {
         assertFalse(raceLog.isEmpty());
 
         // add a mapping and one fix in, one out of mapping
-        Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null);
+        Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
         raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(0), t(10)));
         addFixes0(dev1);
@@ -202,7 +204,8 @@ public class CreateAndTrackWithRaceLogTest {
         adapter.denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, "race");
 
         // add a mapping and one fix in, one out of mapping
-        Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null);
+        Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), author, t(), UUID.randomUUID(), comp1, dev1,
                 t(0), t(10)));
