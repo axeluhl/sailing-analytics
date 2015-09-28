@@ -1,11 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,20 +22,39 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
+    @IntDef({LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MarkerLevel {}
+
+    /**
+     * Marker level is unknown, due to an error
+     */
+    protected final static int LEVEL_UNKNOWN = -1;
+
+    /**
+     * Marker is in normal state
+     */
+    protected final static int LEVEL_NORMAL = 0;
+
+    /**
+     * Marker is toggled
+     */
+    protected final static int LEVEL_TOGGLED = 1;
+
     /**
      * @param view  container view
      * @param resId resource if of the marker drawable
-     * @return new level (0 - normal / 1 - toggled)
+     * @return new level (LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED)
      */
     protected int toggleMarker(View view, @IdRes int resId) {
-        int retValue = -1;
+        int retValue = LEVEL_UNKNOWN;
 
         ImageView image = (ImageView) view.findViewById(resId);
         if (image != null) {
             Drawable drawable = image.getDrawable();
             if (drawable != null) {
                 int level = drawable.getLevel();
-                retValue = setMarkerLevel(view, resId, 1 - level);
+                retValue = setMarkerLevel(view, resId, LEVEL_TOGGLED - level);
             }
         }
 
@@ -41,10 +64,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     /**
      * @param view  container view
      * @param resId resource id of the marker drawable
-     * @return 0 - normal / 1 - toggled
+     * @return new level (LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED)
      */
     protected int getMarkerLevel(View view, @IdRes int resId) {
-        int retValue = -1;
+        int retValue = LEVEL_UNKNOWN;
 
         if (isAdded()) {
             ImageView image = (ImageView) view.findViewById(resId);
@@ -62,10 +85,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     /**
      * @param view  container view
      * @param resId resource id of the marker drawable
-     * @return is view marked as normal (level == 0)
+     * @return is view marked as normal (level == LEVEL_NORMAL)
      */
     protected boolean isNormal(View view, @IdRes int resId) {
-        return (getMarkerLevel(view, resId) == 0);
+        return (getMarkerLevel(view, resId) == LEVEL_NORMAL);
     }
 
     /**
@@ -75,7 +98,7 @@ public abstract class BasePanelFragment extends RaceFragment {
      * @return new level, which should be the input level, if everything is correct
      */
     protected int setMarkerLevel(View view, @IdRes int resId, int level) {
-        int retValue = -1;
+        int retValue = LEVEL_UNKNOWN;
 
         if (view != null && isAdded()) {
             ImageView image = (ImageView) view.findViewById(resId);
@@ -85,7 +108,7 @@ public abstract class BasePanelFragment extends RaceFragment {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
                     switch (retValue) {
-                        case 1: // clicked
+                        case LEVEL_TOGGLED:
                             view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
                             break;
 

@@ -39,7 +39,9 @@ public class AppConstants {
     public final static String INTENT_ACTION_EXTRA = "extra";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE = "procedure_more";
-    public final static String INTENT_ACTION_TOGGLE_MODE = "mode";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING = "more_timing";
     public final static String INTENT_ACTION_TOGGLE_COURSE = "course";
     public final static String INTENT_ACTION_TOGGLE_WIND = "wind";
     public final static String INTENT_ACTION_TOGGLE_TIME = "time";

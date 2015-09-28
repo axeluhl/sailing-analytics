@@ -25,12 +25,11 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends BaseFragment {
 
-    private final static String START_MODE = "startMode";
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
     private int mFlagSize;
 
-    public static StartModeFragment newInstance(int startMode) {
+    public static StartModeFragment newInstance(@START_MODE_VALUES int startMode) {
         StartModeFragment fragment = new StartModeFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -131,7 +130,7 @@ public class StartModeFragment extends BaseFragment {
             sameFlag = true;
         }
         mProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
-        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
             if (sameFlag) {

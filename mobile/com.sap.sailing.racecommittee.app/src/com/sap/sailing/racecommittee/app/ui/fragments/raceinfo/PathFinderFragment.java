@@ -19,7 +19,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PathFinderFragment extends BaseFragment {
 
-    private final static String START_MODE = "startMode";
     private final static String NAT = "nationality";
     private final static String NUM = "number";
 
@@ -29,18 +28,18 @@ public class PathFinderFragment extends BaseFragment {
     private View mButton;
 
     public static PathFinderFragment newInstance() {
-        return newInstance(0, null, null);
+        return newInstance(START_MODE_PRESETUP, null, null);
     }
 
-    public static PathFinderFragment newInstance(int startMode) {
+    public static PathFinderFragment newInstance(@START_MODE_VALUES int startMode) {
         return newInstance(startMode, null, null);
     }
 
     public static PathFinderFragment newInstance(String nat, String num) {
-        return newInstance(0, nat, num);
+        return newInstance(START_MODE_PRESETUP, nat, num);
     }
 
-    public static PathFinderFragment newInstance(int startMode, String nat, String num) {
+    public static PathFinderFragment newInstance(@START_MODE_VALUES int startMode, String nat, String num) {
         PathFinderFragment fragment = new PathFinderFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -109,7 +108,7 @@ public class PathFinderFragment extends BaseFragment {
             mHeader.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goBack();
                 }
             });
         }
@@ -118,19 +117,22 @@ public class PathFinderFragment extends BaseFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        if (getArguments() != null) {
-            if (getArguments().getInt(START_MODE, 0) != 0) {
-                if (getView() != null) {
-                    View header = ViewHelper.get(getView(), R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
-        }
 
         final GateStartRacingProcedure procedure = (GateStartRacingProcedure) getRaceState().getRacingProcedure();
         if (procedure != null) {
@@ -159,11 +161,7 @@ public class PathFinderFragment extends BaseFragment {
                     if (procedure != null) {
                         procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
                     }
-                    if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
-                        openMainScheduleFragment();
-                    } else {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    }
+                    goBack();
                 }
             });
 
@@ -186,6 +184,15 @@ public class PathFinderFragment extends BaseFragment {
     private void enableSetButton(View view, View button) {
         if (view != null && view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
             button.setEnabled((Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
+        }
+    }
+
+    private void goBack() {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
+            openMainScheduleFragment();
+        } else {
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

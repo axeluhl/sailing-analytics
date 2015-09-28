@@ -107,17 +107,17 @@ public class FinishedButtonFragment extends BasePanelFragment {
         if (view != null) {
             if (!view.equals(mRecord)) {
                 resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartProcedureFragment.class);
-                setMarkerLevel(mRecord, R.id.record_marker, 0);
+                setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mPhoto)) {
                 resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartModeFragment.class);
-                setMarkerLevel(mPhoto, R.id.photo_marker, 0);
+                setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mList)) {
                 resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), CourseFragment.class);
-                setMarkerLevel(mList, R.id.list_marker, 0);
+                setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
             }
         }
     }
@@ -129,11 +129,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
                 switch (toggleMarker(v, R.id.record_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
+                    case LEVEL_TOGGLED:
                         // TODO
                         break;
 
@@ -152,11 +152,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
                 switch (toggleMarker(v, R.id.photo_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
+                    case LEVEL_TOGGLED:
                         replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), R.id.finished_content);
                         break;
 
@@ -175,11 +175,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
+                    case LEVEL_TOGGLED:
                         replaceFragment(PositioningFragment.newInstance(getRecentArguments()), R.id.finished_content);
                         break;
 

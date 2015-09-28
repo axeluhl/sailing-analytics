@@ -1,11 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.List;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -19,8 +27,6 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.List;
 
 public class RaceFlagViewerFragment extends BaseFragment {
 
@@ -126,10 +132,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
                     for (FlagPole flagPole : currentState) {
                         size++;
                         flag = flagPole.getUpperFlag();
-                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
+                            currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                         if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                             flag = flagPole.getLowerFlag();
-                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, false, LOWER_FLAG));
+                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
+                                currentState.size() == size, false, LOWER_FLAG));
                         }
                     }
                 } else {
@@ -244,8 +252,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private class FlagsCache {
-        private TimePoint mChange;
         public FlagPole nextPole;
+        private TimePoint mChange;
 
         public FlagsCache(TimePoint change, FlagPole pole) {
             mChange = change;

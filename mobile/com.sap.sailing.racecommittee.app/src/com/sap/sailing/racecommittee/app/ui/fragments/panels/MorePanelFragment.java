@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -24,7 +25,9 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TimingFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class MorePanelFragment extends BasePanelFragment {
@@ -74,17 +77,24 @@ public class MorePanelFragment extends BasePanelFragment {
 
         mGatePathfinder = ViewHelper.get(layout, R.id.gate_pathfinder);
         if (mGatePathfinder != null) {
-
+            mGatePathfinder.setOnClickListener(new PathfinderClick());
         }
         mGatePathfinderLock = ViewHelper.get(layout, R.id.gate_pathfinder_lock);
         mGatePathfinderValue = ViewHelper.get(layout, R.id.gate_pathfinder_value);
 
         mGateTiming = ViewHelper.get(layout, R.id.gate_timing);
         if (mGateTiming != null) {
-
+            mGateTiming.setOnClickListener(new TimingClick());
         }
         mGateTimingLock = ViewHelper.get(layout, R.id.gate_timing_lock);
         mGateTimingValue = ViewHelper.get(layout, R.id.gate_timing_value);
+
+        View view = ViewHelper.get(layout, R.id.top_line);
+        if (view != null) {
+            if (AppUtils.with(getActivity()).isPhone()) {
+                view.setVisibility(View.GONE);
+            }
+        }
 
         return layout;
     }
@@ -123,7 +133,8 @@ public class MorePanelFragment extends BasePanelFragment {
             RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
             if (mStartMode != null && mStartModeFlag != null) {
                 mStartMode.setVisibility(View.VISIBLE);
-                mStartModeFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
+                mStartModeFlag.setImageDrawable(FlagsResources
+                    .getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
             }
         }
 
@@ -198,10 +209,17 @@ public class MorePanelFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-//        if (!view.equals(mStartMode)) {
-//            resetFragment(mStartModeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartModeFragment.class);
-//            setMarkerLevel(mStartMode, R.id.start_mode_marker, 0);
-//        }
+        if (!AppUtils.with(getActivity()).isTablet()) {
+            if (!view.equals(mStartMode)) {
+                setMarkerLevel(mStartMode, R.id.start_mode_marker, LEVEL_NORMAL);
+            }
+            if (!view.equals(mGatePathfinder)) {
+                setMarkerLevel(mGatePathfinder, R.id.gate_pathfinder_marker, LEVEL_NORMAL);
+            }
+            if (!view.equals(mGateTiming)) {
+                setMarkerLevel(mGateTiming, R.id.gate_timing_marker, LEVEL_NORMAL);
+            }
+        }
     }
 
     private class RaceStateChangedListener extends BaseRaceStateChangedListener {
@@ -284,14 +302,94 @@ public class MorePanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MODE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE);
             switch (toggleMarker(container, markerId)) {
-                case 0:
+                case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
-                case 1:
-                    replaceFragment(StartModeFragment.newInstance(1));
+                case LEVEL_TOGGLED:
+                    replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            }
+            disableToggle(container, markerId);
+        }
+    }
+
+    private class PathfinderClick implements View.OnClickListener, DialogInterface.OnClickListener {
+
+        private final String TAG = PathfinderClick.class.getName();
+        private final View container = mGatePathfinder;
+        private final int markerId = R.id.gate_pathfinder_marker;
+
+        @Override
+        public void onClick(View v) {
+            if (mGatePathfinderLock != null) {
+                if (mGatePathfinderLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
+                }
+            }
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER);
+            switch (toggleMarker(container, markerId)) {
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
+
+                case LEVEL_TOGGLED:
+                    replaceFragment(PathFinderFragment.newInstance(PathFinderFragment.START_MODE_PLANNED));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            }
+            disableToggle(container, markerId);
+        }
+    }
+
+    private class TimingClick implements View.OnClickListener, DialogInterface.OnClickListener {
+
+        private final String TAG = TimingClick.class.getName();
+        private final View container = mGateTiming;
+        private final int markerId = R.id.gate_timing_marker;
+
+        @Override
+        public void onClick(View v) {
+            if (mGateTimingLock != null) {
+                if (mGateTimingLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
+                }
+            }
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING);
+            switch (toggleMarker(container, markerId)) {
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
+
+                case LEVEL_TOGGLED:
+                    replaceFragment(TimingFragment.newInstance(TimingFragment.START_MODE_PLANNED));
                     break;
 
                 default:
@@ -313,8 +411,12 @@ public class MorePanelFragment extends BasePanelFragment {
             if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_MODE.equals(data)) {
+                    if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE.equals(data)) {
                         uncheckMarker(mStartMode);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER.equals(data)) {
+                        uncheckMarker(mGatePathfinder);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING.equals(data)) {
+                        uncheckMarker(mGateTiming);
                     } else {
                         uncheckMarker(new View(context));
                     }

@@ -90,8 +90,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
     public static class FinishTimeFragment extends BaseFragment implements View.OnClickListener {
 
-        public static final String START_MODE = "startMode";
-
         private SimpleDateFormat mDateFormat;
         private TimePicker mTimePicker;
         private TextView mCurrentTime;

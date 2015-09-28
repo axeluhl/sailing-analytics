@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -44,6 +46,7 @@ public class SetupPanelFragment extends BasePanelFragment {
     // Start Procedure More Toggle
     private View mStartProcedureMore;
     private View mStartProcedureMoreLock;
+    private FrameLayout mExtraLayout;
 
     // Course Toggle
     private View mCourse;
@@ -100,6 +103,13 @@ public class SetupPanelFragment extends BasePanelFragment {
         mWindValue = ViewHelper.get(layout, R.id.wind_value);
 
         return layout;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mExtraLayout = (FrameLayout) getActivity().findViewById(R.id.race_panel_extra);
     }
 
     @Override
@@ -234,21 +244,30 @@ public class SetupPanelFragment extends BasePanelFragment {
         if (view != null) {
             if (!view.equals(mStartProcedure)) {
                 resetFragment(mStartProcedureLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartProcedureFragment.class);
-                setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, 0);
+                setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mStartProcedureMore)) {
-                setMarkerLevel(mStartProcedureMore, R.id.start_procedure_more_marker, 0);
+                if (AppUtils.with(getActivity()).isTablet()) {
+                    Fragment fragment = getFragmentManager().findFragmentById(R.id.race_panel_extra);
+                    if (mExtraLayout != null && fragment != null) {
+                        mExtraLayout.setVisibility(View.GONE);
+                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                        transaction.remove(fragment);
+                        transaction.commit();
+                    }
+                }
+                setMarkerLevel(mStartProcedureMore, R.id.start_procedure_more_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mCourse)) {
                 resetFragment(mCourseLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), CourseFragment.class);
-                setMarkerLevel(mCourse, R.id.course_marker, 0);
+                setMarkerLevel(mCourse, R.id.course_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mWind)) {
                 resetFragment(mWindLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), WindFragment.class);
-                setMarkerLevel(mWind, R.id.wind_marker, 0);
+                setMarkerLevel(mWind, R.id.wind_marker, LEVEL_NORMAL);
             }
         }
     }
@@ -338,11 +357,11 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE);
             switch (toggleMarker(container, markerId)) {
-                case 0:
+                case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
-                case 1:
+                case LEVEL_TOGGLED:
                     replaceFragment(StartProcedureFragment.newInstance(1));
                     break;
 
@@ -359,7 +378,6 @@ public class SetupPanelFragment extends BasePanelFragment {
         private final String TAG = StartProcedureMoreClick.class.getName();
         private final View container = mStartProcedureMore;
         private final int markerId = R.id.start_procedure_more_marker;
-        private FrameLayout extraLayout;
 
         @Override
         public void onClick(View v) {
@@ -380,17 +398,14 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            switch (toggleMarker(container, markerId)) {
-                case 0:
-                    if (extraLayout != null) {
-                        extraLayout.setVisibility(View.GONE);
+            if (mExtraLayout != null) {
+                switch (toggleMarker(container, markerId)) {
+                    case LEVEL_NORMAL:
+                        mExtraLayout.setVisibility(View.GONE);
                         transaction.remove(getFragmentManager().findFragmentById(R.id.race_panel_extra));
-                    }
-                    break;
+                        break;
 
-                case 1:
-                    if (getView() != null && getView().getRootView() != null) {
-                        extraLayout = (FrameLayout) getView().getRootView().findViewById(R.id.race_panel_extra);
+                    case LEVEL_TOGGLED:
                         int multiplier = 1;
                         if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
                             multiplier = 2;
@@ -399,15 +414,15 @@ public class SetupPanelFragment extends BasePanelFragment {
                         int width = container.getWidth() * multiplier;
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
                         params.setMargins(container.getLeft() + container.getWidth(), container.getTop(), 0, 0);
-                        extraLayout.setLayoutParams(params);
-                        extraLayout.setVisibility(View.VISIBLE);
+                        mExtraLayout.setLayoutParams(params);
+                        mExtraLayout.setVisibility(View.VISIBLE);
                         transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));
-                    }
-                    break;
+                        break;
 
-                default:
-                    ExLog.i(getActivity(), TAG, "Unknown return value");
-                    break;
+                    default:
+                        ExLog.i(getActivity(), TAG, "Unknown return value");
+                        break;
+                }
             }
             transaction.commit();
             disableToggle(container, markerId);
@@ -439,11 +454,11 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (toggleMarker(container, markerId)) {
-                case 0:
+                case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
-                case 1:
+                case LEVEL_TOGGLED:
                     replaceFragment(CourseFragment.newInstance(1, getRace()));
                     break;
 
@@ -479,11 +494,11 @@ public class SetupPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_WIND);
             switch (toggleMarker(container, markerId)) {
-                case 0:
+                case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                     break;
 
-                case 1:
+                case LEVEL_TOGGLED:
                     replaceFragment(WindFragment.newInstance(1));
                     break;
 

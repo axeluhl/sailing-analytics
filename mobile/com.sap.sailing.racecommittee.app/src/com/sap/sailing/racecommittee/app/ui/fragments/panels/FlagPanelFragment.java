@@ -222,23 +222,23 @@ public class FlagPanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (view != null) {
             if (!view.equals(mAbandonFlags)) {
-                setMarkerLevel(mAbandonFlags, R.id.abandon_flags_marker, 0);
+                setMarkerLevel(mAbandonFlags, R.id.abandon_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mRecallFlags)) {
-                setMarkerLevel(mRecallFlags, R.id.recall_flags_marker, 0);
+                setMarkerLevel(mRecallFlags, R.id.recall_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mPostponeFlags)) {
-                setMarkerLevel(mPostponeFlags, R.id.postpone_flags_marker, 0);
+                setMarkerLevel(mPostponeFlags, R.id.postpone_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mCourseFlags)) {
-                setMarkerLevel(mCourseFlags, R.id.course_flags_marker, 0);
+                setMarkerLevel(mCourseFlags, R.id.course_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mMoreFlags)) {
-                setMarkerLevel(mMoreFlags, R.id.more_flags_marker, 0);
+                setMarkerLevel(mMoreFlags, R.id.more_flags_marker, LEVEL_NORMAL);
             }
         }
     }
@@ -307,11 +307,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_ABANDON);
             switch (toggleMarker(container, markerId)) {
-            case 0:
+            case LEVEL_NORMAL:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
-            case 1:
+            case LEVEL_TOGGLED:
                 replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER, getString(R.string.flags_abandon)));
                 break;
 
@@ -346,11 +346,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_RECALL);
             switch (toggleMarker(container, markerId)) {
-            case 0:
+            case LEVEL_NORMAL:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
-            case 1:
+            case LEVEL_TOGGLED:
                 replaceFragment(RecallFlagsFragment.newInstance(getString(R.string.flags_recall)));
                 break;
 
@@ -385,11 +385,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSTPONE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
+            case LEVEL_NORMAL:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
-            case 1:
+            case LEVEL_TOGGLED:
                 replaceFragment(AbortFlagsFragment.newInstance(Flags.AP, getString(R.string.flags_postpone)));
                 break;
 
@@ -424,11 +424,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
+            case LEVEL_NORMAL:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
-            case 1:
+            case LEVEL_TOGGLED:
                 replaceFragment(EmptyFragment.newInstance());
                 break;
 
@@ -464,11 +464,11 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MORE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
+            case LEVEL_NORMAL:
                 sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
 
-            case 1:
+            case LEVEL_TOGGLED:
                 replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(0));
                 break;
 

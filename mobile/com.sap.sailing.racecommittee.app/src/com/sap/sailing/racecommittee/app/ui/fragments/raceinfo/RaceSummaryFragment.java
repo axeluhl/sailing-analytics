@@ -1,19 +1,20 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class RaceSummaryFragment extends BaseFragment {
 
@@ -55,7 +56,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editStartTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                    replaceFragment(RaceTimeChangeFragment
+                        .newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }
@@ -65,7 +67,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishingTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                    replaceFragment(RaceTimeChangeFragment
+                        .newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }
@@ -75,7 +78,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishedTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                    replaceFragment(RaceTimeChangeFragment
+                        .newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                 }
             });
         }
@@ -139,20 +143,20 @@ public class RaceSummaryFragment extends BaseFragment {
         if (mFinishDuration != null) {
             mFinishDuration.setText(TimeUtils.calcDuration(finishingTime, finishedTime));
         }
-    
+
         if (mRegionWind != null) {
             mRegionWind.setVisibility(View.GONE);
             if (getRaceState().getWindFix() != null) {
                 mRegionWind.setVisibility(View.VISIBLE);
-    
+
                 Wind wind = getRaceState().getWindFix();
-    
+
                 TextView direction = ViewHelper.get(getView(), R.id.wind_direction);
                 if (direction != null) {
                     String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
                     direction.setText(wind_direction);
                 }
-    
+
                 TextView speed = ViewHelper.get(getView(), R.id.wind_speed);
                 if (speed != null) {
                     String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
@@ -160,7 +164,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 }
             }
         }
-    
+
         if (mRegionRecall != null) {
             mRegionRecall.setVisibility(View.GONE);
         }

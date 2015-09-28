@@ -69,6 +69,10 @@ public class AppUtils {
         return buildInfo;
     }
 
+    public boolean isPhone() {
+        return !isTablet();
+    }
+
     public boolean isTablet() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && (

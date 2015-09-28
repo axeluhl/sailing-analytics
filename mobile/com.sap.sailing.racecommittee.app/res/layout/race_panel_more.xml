@@ -198,10 +198,10 @@
                 android:layout_alignParentRight="true"
                 android:src="?white"/>
         </RelativeLayout>
-
     </LinearLayout>
 
     <View
+        android:id="@+id/top_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:background="?black"/>

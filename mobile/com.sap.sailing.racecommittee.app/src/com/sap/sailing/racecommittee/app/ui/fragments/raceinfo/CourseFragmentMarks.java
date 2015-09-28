@@ -81,7 +81,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mMarks = new ArrayList<>();
     }
 
-    public static CourseFragmentMarks newInstance(int startMode) {
+    public static CourseFragmentMarks newInstance(@START_MODE_VALUES int startMode) {
         CourseFragmentMarks fragment = new CourseFragmentMarks();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -488,13 +488,13 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
-        switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+            case START_MODE_PRESETUP:
+                openMainScheduleFragment();
                 break;
 
-            default:
-                openMainScheduleFragment();
+            case START_MODE_PLANNED:
+//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
         }
     }

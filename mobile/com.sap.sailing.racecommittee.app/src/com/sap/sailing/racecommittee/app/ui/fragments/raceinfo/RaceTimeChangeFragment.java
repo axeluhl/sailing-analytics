@@ -1,9 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +27,15 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceTimeChangeFragment extends BaseFragment implements View.OnClickListener {
 
+    @IntDef({START_TIME_MODE, FINISHING_TIME_MODE, FINISHED_TIME_MODE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TIME_CHANGE_MODE {}
+
+    private final static String TIME_MODE = "timeMode";
     public final static int START_TIME_MODE = 0;
     public final static int FINISHING_TIME_MODE = 1;
     public final static int FINISHED_TIME_MODE = 2;
-    private final static String START_MODE = "startMode";
+
     private static final int FUTURE_DAYS_DEFAULT = 3;
     private static final int PAST_DAYS_DEFAULT = -3;
 
@@ -38,10 +46,10 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
     private int mFutureDays = FUTURE_DAYS_DEFAULT;
     private int mPastDays = PAST_DAYS_DEFAULT;
 
-    public static RaceTimeChangeFragment newInstance(int mode) {
+    public static RaceTimeChangeFragment newInstance(@TIME_CHANGE_MODE int timeMode) {
         RaceTimeChangeFragment fragment = new RaceTimeChangeFragment();
         Bundle args = new Bundle();
-        args.putInt(START_MODE, mode);
+        args.putInt(TIME_MODE, timeMode);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,7 +74,12 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         final Calendar calendar = Calendar.getInstance();
         TextView headerText = (TextView) layout.findViewById(R.id.header_headline);
         if (headerText != null) {
-            switch (getArguments().getInt(START_MODE, 0)) {
+            switch (getArguments().getInt(TIME_MODE, START_TIME_MODE)) {
+                case  START_TIME_MODE:
+                    calendar.setTime(getRaceState().getStartTime().asDate());
+                    headerText.setText(getString(R.string.race_summary_start));
+                    break;
+
                 case FINISHING_TIME_MODE:
                     calendar.setTime(getRaceState().getFinishingTime().asDate());
                     headerText.setText(getString(R.string.race_summary_finish_begin));
@@ -76,11 +89,6 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
                     calendar.setTime(getRaceState().getFinishedTime().asDate());
                     headerText.setText(getString(R.string.race_summary_finish_end));
                     break;
-
-                default: // START_TIME_MODE
-                    calendar.setTime(getRaceState().getStartTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_start));
-                    break;
             }
         }
 
@@ -89,7 +97,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             Calendar start = (Calendar) calendar.clone();
             Calendar finishing = (Calendar) calendar.clone();
             Calendar finished = (Calendar) calendar.clone();
-            switch (getArguments().getInt(START_MODE, 0)) {
+            switch (getArguments().getInt(TIME_MODE, START_TIME_MODE)) {
                 case START_TIME_MODE:
                     finishing.setTime(getRaceState().getFinishingTime().asDate());
                     mFutureDays = TimeUtils.daysBetween(finishing, calendar);
@@ -187,7 +195,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         TimePoint time = getPickerTime();
 
         Result result;
-        switch (getArguments().getInt(START_MODE)) {
+        switch (getArguments().getInt(TIME_MODE)) {
             case FINISHING_TIME_MODE:
                 result = getRace().setFinishingTime(time);
                 if (result.hasError()) {

@@ -21,15 +21,13 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartProcedureFragment extends BaseFragment{
 
-    private final static String START_MODE = "startMode";
-
     private final ArrayList<StartProcedureItem> startProcedure = new ArrayList<>();
 
     public StartProcedureFragment() {
 
     }
 
-    public static StartProcedureFragment newInstance(int startMode) {
+    public static StartProcedureFragment newInstance(@START_MODE_VALUES int startMode) {
         StartProcedureFragment fragment = new StartProcedureFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -60,8 +58,8 @@ public class StartProcedureFragment extends BaseFragment{
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(START_MODE, 0)) {
-                case 1:
+            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                case START_MODE_PLANNED:
                     if (getView() != null) {
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
@@ -123,7 +121,7 @@ public class StartProcedureFragment extends BaseFragment{
         } else {
             getRaceState().setRacingProcedure(MillisecondsTimePoint.now(), procedureType);
         }
-        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
             if (sameProcedure) {

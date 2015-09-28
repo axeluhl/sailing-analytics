@@ -19,7 +19,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class TimingFragment extends BaseFragment {
 
     public final static int ONE_MINUTE_MILLISECONDS = 60000;
-    private final static String START_MODE = "startMode";
 
     private final static int MIN_VALUE = 0;
     private final static int MAX_VALUE = 60;
@@ -30,10 +29,10 @@ public class TimingFragment extends BaseFragment {
     private GateStartRacingProcedure mProcedure;
 
     public static TimingFragment newInstance() {
-        return newInstance(0);
+        return newInstance(START_MODE_PRESETUP);
     }
 
-    public static TimingFragment newInstance(int startMode) {
+    public static TimingFragment newInstance(@START_MODE_VALUES int startMode) {
         TimingFragment fragment = new TimingFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -51,7 +50,7 @@ public class TimingFragment extends BaseFragment {
 
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goBack();
                 }
             });
         }
@@ -70,17 +69,6 @@ public class TimingFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getArguments() != null) {
-            if (getArguments().getInt(START_MODE, 0) != 0) {
-                if (getView() != null) {
-                    View header = getView().findViewById(R.id.header);
-                    if (header != null) {
-                        header.setVisibility(View.GONE);
-                    }
-                }
-            }
-        }
-
         mTotalTime = (TextView) getActivity().findViewById(R.id.total_time_text);
         mTimeLaunch = (NumberPicker) getActivity().findViewById(R.id.time_launch);
         mTimeGolf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
@@ -95,6 +83,20 @@ public class TimingFragment extends BaseFragment {
         setTimeLaunchWidget();
         setTimeGolfWidget();
         setButton();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     private void setTimeLaunchWidget() {
@@ -159,13 +161,18 @@ public class TimingFragment extends BaseFragment {
 
                     GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                     procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
-                    if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
-                        openMainScheduleFragment();
-                    } else {
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                    }
+                    goBack();
                 }
             });
+        }
+    }
+
+    private void goBack() {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
+            openMainScheduleFragment();
+        } else {
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

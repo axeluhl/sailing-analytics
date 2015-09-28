@@ -56,11 +56,8 @@ import com.sap.sse.common.util.NaturalComparator;
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
-    public static final int MODE_SETUP = 0;
-    public static final int MODE_1 = 1;
     public static final int MODE_TIME_PANEL = 2;
 
-    private static final String START_MODE = "startMode";
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = -3;
     private static final int MAX_DIFF_MIN = 60;
@@ -114,7 +111,7 @@ public class StartTimeFragment extends BaseFragment
     }
 
     public static StartTimeFragment newInstance(Bundle extraArgs) {
-        StartTimeFragment fragment = newInstance(MODE_SETUP);
+        StartTimeFragment fragment = newInstance(START_MODE_PRESETUP);
         Bundle args = fragment.getArguments();
         if (extraArgs != null) {
             args.putAll(extraArgs);
@@ -209,8 +206,8 @@ public class StartTimeFragment extends BaseFragment
         Calendar time = Calendar.getInstance();
         if (getView() != null) {
             if (getArguments() != null) {
-                switch (getArguments().getInt(START_MODE, MODE_SETUP)) {
-                    case MODE_1:
+                switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                    case START_MODE_PLANNED:
                         View header = ViewHelper.get(getView(), R.id.header_text);
                         if (header != null) {
                             header.setOnClickListener(this);
@@ -462,7 +459,7 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setIs24HourView(true);
             int hours = time.get(Calendar.HOUR_OF_DAY);
             int minutes = time.get(Calendar.MINUTE);
-            if (getArguments() != null && getArguments().getInt(START_MODE, MODE_SETUP) != MODE_TIME_PANEL && mRaceId == null
+            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) != MODE_TIME_PANEL && mRaceId == null
                 && mStartTimeOffset == null) {
                 // In 10 minutes from now, but always a 5-minute-mark.
                 time.add(Calendar.MINUTE, 10);
@@ -723,7 +720,7 @@ public class StartTimeFragment extends BaseFragment
         getRaceState().setRacingProcedure(now, procedureType);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (getArguments() != null && startTime != null) {
-            if (getArguments().getInt(START_MODE, MODE_SETUP) != MODE_SETUP) {
+            if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) != START_MODE_PRESETUP) {
                 if (startTimeDiff == null && identifier == null) {
                     // absolute start time
                     getRaceState().forceNewStartTime(now, startTime);

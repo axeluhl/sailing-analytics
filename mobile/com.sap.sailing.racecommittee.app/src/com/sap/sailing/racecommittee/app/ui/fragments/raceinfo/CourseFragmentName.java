@@ -26,7 +26,7 @@ public class CourseFragmentName extends CourseFragment {
 
     private ListView mListView;
 
-    public static CourseFragmentName newInstance(int startMode) {
+    public static CourseFragmentName newInstance(@START_MODE_VALUES int startMode) {
         CourseFragmentName fragment = new CourseFragmentName();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -95,7 +95,7 @@ public class CourseFragmentName extends CourseFragment {
         CourseBase courseLayout = new CourseDataImpl(course);
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
 
-        if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 0) {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();
         } else {
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
