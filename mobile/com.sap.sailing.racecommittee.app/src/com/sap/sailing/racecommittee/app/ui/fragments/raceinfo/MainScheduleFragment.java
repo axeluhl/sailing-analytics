@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -58,7 +57,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private Duration mStartTimeDiff;
     private RacingProcedureType mRacingProcedureType;
 
-    private SimpleDateFormat mDateFormat;
     private Calendar mCalendar;
 
     private RaceStateChangedListener mStateListener;
@@ -92,7 +90,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             startButton.setOnClickListener(this);
         }
 
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mFlagSize = getResources().getInteger(R.integer.flag_size);
 
         return layout;
@@ -207,7 +204,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 activity.setStartTime(timePoint);
             }
             mStartTime = timePoint;
-            mStartTimeString = mDateFormat.format(timePoint.asDate());
+            mStartTimeString = TimeUtils.formatTime(timePoint);
         }
 
         mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
@@ -285,7 +282,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             Wind wind = getRaceState().getWindFix();
-            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+            String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()), wind.getFrom().getDegrees(), wind
                 .getKnots());
             mItemStartWind.setValue(sensorData);
         }
