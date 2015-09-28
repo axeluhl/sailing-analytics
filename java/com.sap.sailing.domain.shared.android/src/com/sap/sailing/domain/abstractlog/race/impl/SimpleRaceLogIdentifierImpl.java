@@ -42,15 +42,6 @@ public class SimpleRaceLogIdentifierImpl implements SimpleRaceLogIdentifier {
     }
 
     @Override
-    public String getDeprecatedIdentifier() {
-        return String.format("%s.%s.%s", 
-                regattaLikeParentName,
-                raceColumnName,
-                fleetName);
-    }
-
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

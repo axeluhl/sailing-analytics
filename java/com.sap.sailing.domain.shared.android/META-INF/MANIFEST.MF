@@ -6,9 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain.common,
- com.sap.sse.datamining.shared,
  com.sap.sse.common,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
  com.sap.sailing.domain.abstractlog.race,

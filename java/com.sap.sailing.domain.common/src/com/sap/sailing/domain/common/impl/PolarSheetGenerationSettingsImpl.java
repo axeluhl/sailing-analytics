@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sse.common.settings.AbstractSettings;
 
-public class PolarSheetGenerationSettingsImpl extends AbstractSettings implements PolarSheetGenerationSettings {
+public class PolarSheetGenerationSettingsImpl extends PolarSheetGenerationSettings {
     
     public static PolarSheetGenerationSettings createStandardPolarSettings() {
         double[] levels = { 4., 6., 8., 10., 12., 14., 16., 20., 25., 30. };
         WindSpeedSteppingWithMaxDistance windStepping = new WindSpeedSteppingWithMaxDistance(levels, 2.5);
-        return new PolarSheetGenerationSettingsImpl(50, 0.1, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
+        return new PolarSheetGenerationSettingsImpl(50, 0.01, 20, 20, 0.1, true, true, 2, 0.05, true, windStepping,
                 false, 1);
     }
     

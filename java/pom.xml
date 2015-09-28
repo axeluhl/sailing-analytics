@@ -19,6 +19,7 @@
     <module>com.sap.sse.mail</module>
     <module>com.sap.sse.mongodb</module>
     <module>com.sap.sse.datamining</module>
+    <module>com.sap.sse.datamining.annotations</module>
     <module>com.sap.sse.datamining.shared</module>
     <module>com.sap.sse.security</module>
     <module>com.sap.sse.security.common</module>
@@ -77,6 +78,8 @@
     <module>com.sap.sailing.manage2sail.resultimport</module>
     <module>com.sap.sailing.autoload</module>
     <module>com.sap.sailing.polars</module>
+	<module>com.sap.sailing.polars.datamining</module>
+	<module>com.sap.sailing.polars.datamining.shared</module>
     <!--
     com.sap.sailing.targetplatform.base
     left out on purpose: only invoke maven manually to build target platform

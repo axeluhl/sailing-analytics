@@ -1,8 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +18,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
     private static final int SLEEP_TIME_DURING_FINISHING = 100;
 
-    private final Set<Processor<ResultType, ?>> resultReceivers;
+    private final Processor<ResultType, ?>[] resultReceivers;
     private final ExecutorService executor;
     private final AtomicInteger unfinishedInstructionsCounter;
     
@@ -30,7 +28,9 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     public AbstractParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
         super(inputType, resultType);
         this.executor = executor;
-        this.resultReceivers = new HashSet<Processor<ResultType, ?>>(resultReceivers);
+        @SuppressWarnings("unchecked")
+        final Processor<ResultType, ?>[] resultReceiversAsArray = (Processor<ResultType, ?>[]) new Processor<?, ?>[resultReceivers.size()];
+        this.resultReceivers = resultReceivers.toArray(resultReceiversAsArray);
         unfinishedInstructionsCounter = new AtomicInteger();
     }
     
@@ -72,6 +72,10 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     
     public void afterInstructionFinished() {
         unfinishedInstructionsCounter.getAndDecrement();
+    }
+    
+    protected Processor<ResultType, ?>[] getResultReceivers() {
+        return resultReceivers;
     }
     
     /**

@@ -13,10 +13,16 @@ import org.osgi.framework.ServiceRegistration;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sse.replication.Replicable;
 
+/**
+ * Handles OSGi (de-)registration of the polar data service. 
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class Activator implements BundleActivator {
-    
+
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
-    
+
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     @Override

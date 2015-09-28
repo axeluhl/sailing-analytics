@@ -43,7 +43,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         this.raceLogStore = raceLogStore;
         this.regattaLikeParent = regattaLikeParent;
         for (final Fleet fleet : getFleets()) {
-            reloadRaceLog(fleet);
+           reloadRaceLog(fleet);
         }
     }
 

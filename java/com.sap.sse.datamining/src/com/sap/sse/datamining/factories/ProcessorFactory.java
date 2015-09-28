@@ -2,10 +2,10 @@ package com.sap.sse.datamining.factories;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -42,8 +42,8 @@ public class ProcessorFactory {
      * Creates a collecting processor with the given ProcessorQuery as result receiver, that stores all received grouped
      * data in a Set.
      */
-    public Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<Set<Object>, ?> query) {
-        Collection<Processor<Map<GroupKey, Set<Object>>, ?>> resultReceivers = new ArrayList<>();
+    public Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<HashSet<Object>, ?> query) {
+        Collection<Processor<Map<GroupKey, HashSet<Object>>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(query.getResultReceiver());
         return new ParallelGroupedDataCollectingAsSetProcessor<>(executor, resultReceivers);
     }
