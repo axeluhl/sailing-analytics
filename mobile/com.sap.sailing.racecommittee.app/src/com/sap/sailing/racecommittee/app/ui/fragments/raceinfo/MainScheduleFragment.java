@@ -248,7 +248,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private void startRace() {
         RRS26RacingProcedure rrs26Procedure = null;
-        GateStartRacingProcedure gateStartProcedure = null;
 
         Flags flag = null;
         if (RacingProcedureType.RRS26.equals(getRaceState().getRacingProcedure().getType())) {
