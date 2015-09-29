@@ -77,7 +77,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * more races.
      */
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         boolean result;
         Iterable<? extends Fleet> fleets = raceColumn.getFleets();
         if (Util.size(fleets) <= 1 || allFleetsOrdered(fleets)) {

@@ -70,7 +70,7 @@ public abstract class AbstractProcessorInstruction<ResultType> implements Proces
     
     @Override
     public int compareTo(ProcessorInstruction<?> instruction) {
-        return Integer.compare(getPriority(), instruction.getPriority());
+        return Integer.compare(priority, instruction.getPriority());
     }
 
 }

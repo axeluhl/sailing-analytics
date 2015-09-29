@@ -411,6 +411,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
     String scoringSchemeWinnerGetsEightAndInterpolation();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
+    String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -562,6 +564,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String polarSheetWindSteppingMaxDistanceTooltip();
     String polarSheetSplitByWindGauges();
     String polarSheetSplitByWindGaugesTooltip();
+    String applyMinimumWindConfidence();
+    String applyMinimumWindConfidenceTooltip();
+    String windRangeDistribution();
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
@@ -1155,7 +1160,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String enterCarryValueFor(String competitorName);
     String advanced();
     String basedOn();
-    String retrieveWith();
     String mappingDetails();
     String deviceMappingQrCodeExplanation();
     String qrCode();
@@ -1376,4 +1380,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String analyze();
+    String dataMiningSettings();
+    String multiResultsPresenter();
+    String plainResultsPresenter();
+    String resultsChart();
+    String tabbedResultsPresenter();
+    String polarResultsPresenter();
+    String dataMiningRetrieval();
+    String denoteAllRacesForRaceLogTrackingShorctut();
 }

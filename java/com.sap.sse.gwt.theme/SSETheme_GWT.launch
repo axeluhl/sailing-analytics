@@ -22,5 +22,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-nosuperDevMode -war &quot;${project_loc:com.sap.sse.gwt.theme}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9997 -startupUrl /theme/SSETheme.html com.sap.sse.gwt.theme.SSETheme"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sse.gwt.theme"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XstartOnFirstThread -Xmx2048m -Dgwt-usearchives=false -Dgwt.persistentunitcache=false"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx2048m -Dgwt-usearchives=false -Dgwt.persistentunitcache=false"/>
 </launchConfiguration>

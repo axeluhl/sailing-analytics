@@ -16,8 +16,6 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -356,9 +354,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, String sailorsInfoWebsiteURL,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
-    void createCourseArea(UUID eventId, String courseAreaName, AsyncCallback<Void> callback);
+    void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
 
-    void removeCourseArea(UUID eventId, UUID courseAreaId, AsyncCallback<Void> callback);
+    void removeCourseAreas(UUID eventId, UUID[] idsOfCourseAreasToRemove, AsyncCallback<Void> callback);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
 
@@ -453,10 +451,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
-    void generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, String name, AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
-
-
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
 
@@ -549,13 +543,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination, AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
-
-    void getBoatClassNamesWithPolarSheetsAvailable(AsyncCallback<List<String>> asyncCallback);
     
     void getEventById(UUID id, boolean withStatisticalData, AsyncCallback<EventDTO> callback);
-    
-    void showCachedPolarSheetForBoatClass(String boatClassName,
-            AsyncCallback<PolarSheetGenerationResponse> asyncCallback);
     
     void getLeaderboardsByEvent(EventDTO event, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
@@ -710,4 +699,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePoint, TimePoint>> callback);
+
+    void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            MarkDTO markDTO, AsyncCallback<Void> callback);
 }

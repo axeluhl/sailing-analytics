@@ -34,7 +34,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -49,6 +48,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -482,9 +482,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
         Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent, updatedEvent);
-        List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
-        List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
-        List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
+        final List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
+        final List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
+        final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
@@ -502,51 +502,53 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void onSuccess(EventDTO result) {
                 fillEvents();
-                if (!oldEvent.getName().equals(updatedEvent.getName())) {
-                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            fillEvents();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
-                        }
-                    });
+                final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
+                int i=0;
+                for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
+                    namesOfCourseAreasToAdd[i++] = courseAreaToAdd.getName();
                 }
+                sailingService.createCourseAreas(oldEvent.id, namesOfCourseAreasToAdd, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
+                                + ": " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        final UUID[] idsOfCourseAreasToRemove = new UUID[courseAreasToRemove.size()];
+                        int j=0;
+                        for (CourseAreaDTO courseAreaToRemove : courseAreasToRemove) {
+                            idsOfCourseAreasToRemove[j++] = courseAreaToRemove.id;
+                        }
+                        sailingService.removeCourseAreas(oldEvent.id, idsOfCourseAreasToRemove, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
+                                        + ": " + t.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                fillEvents();
+                                if (!oldEvent.getName().equals(updatedEvent.getName())) {
+                                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable t) {
+                                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
             }
         });
-        for (CourseAreaDTO courseArea : courseAreasToAdd) {
-            sailingService.createCourseArea(oldEvent.id, courseArea.getName(), new AsyncCallback<Void>() {
-
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
-                            + ": " + t.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    fillEvents();
-                }
-
-            });
-        }
-        for (CourseAreaDTO courseArea : courseAreasToRemove) {
-            sailingService.removeCourseArea(oldEvent.id, courseArea.id, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
-                            + ": " + t.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    fillEvents();
-                }
-            });
-        }
     }
 
     private Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {

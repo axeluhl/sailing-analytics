@@ -42,3 +42,7 @@ ext {
     test = "0.2"
     espresso = "2.1"
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.6'
+}
