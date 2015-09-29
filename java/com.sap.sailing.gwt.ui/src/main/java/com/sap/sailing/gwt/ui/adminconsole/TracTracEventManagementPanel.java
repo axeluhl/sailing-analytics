@@ -282,7 +282,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setValue(Boolean.TRUE);
 
         final TextBox offsetToStartTimeOfSimulatedRace = new TextBox();
-        offsetToStartTimeOfSimulatedRace.setWidth("25px");
+        offsetToStartTimeOfSimulatedRace.setWidth("200px");
         offsetToStartTimeOfSimulatedRace.setEnabled(false);
         offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
         
@@ -415,7 +415,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public void onClick(ClickEvent event) {
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
-                        getMillisecondsDurationDurationOfString(offsetToStartTimeOfSimulatedRace.getValue()), ignoreTracTracMarkPassingsCheckbox.getValue());
+                        getMillisecondsDurationFromString(offsetToStartTimeOfSimulatedRace.getValue()), ignoreTracTracMarkPassingsCheckbox.getValue());
             }
         });
 
@@ -485,7 +485,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     
-    private Duration getMillisecondsDurationDurationOfString(String millisecondsAsString) {
+    private Duration getMillisecondsDurationFromString(String millisecondsAsString) {
         Duration result = null;
         if(millisecondsAsString != null) {
             long millisecondsAsLong = Long.parseLong(millisecondsAsString);
