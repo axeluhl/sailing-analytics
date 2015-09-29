@@ -626,15 +626,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
         RC_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/build.gradle | cut -d "=" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
-        extra="$extra -Drc-app-version=$RC_APP_VERSION"
 
         TRACKING_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/build.gradle | cut -d "=" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
-        extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
         BUOY_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/build.gradle | cut -d "=" -f 2`
         echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
-        extra="$extra -Dbuoy-app-version=$BUOY_APP_VERSION"
+		
+        APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
+		extra="$extra $APP_VERSION_PARAMS"
 
         NOW=$(date +"%s")
         BUILD_TOOLS=22.0.1
@@ -655,7 +655,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
 
-		mvn -P -with-not-android-relevant -P with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+		mvn -P -with-not-android-relevant -P with-mobile $APP_VERSION_PARAMS -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
