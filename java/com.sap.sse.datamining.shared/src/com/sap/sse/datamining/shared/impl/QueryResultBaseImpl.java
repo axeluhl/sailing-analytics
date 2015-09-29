@@ -3,7 +3,6 @@ package com.sap.sse.datamining.shared.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResultBase;
@@ -61,16 +60,6 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
     @Override
     public String getResultSignifier() {
         return additionalData.getResultSignifier();
-    }
-
-    @Override
-    public Unit getUnit() {
-        return additionalData.getUnit();
-    }
-
-    @Override
-    public String getUnitSignifier() {
-        return additionalData.getUnitSignifier();
     }
 
     @Override

@@ -186,8 +186,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
 
     private void updateChartLabels() {
         chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
-        chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue())
-                                      .setValueSuffix(getCurrentResult().getUnitSignifier()));
+        chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
     }
 
     private void updateChartSubtitle() {

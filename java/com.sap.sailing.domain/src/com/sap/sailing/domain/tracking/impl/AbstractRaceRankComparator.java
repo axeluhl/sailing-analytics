@@ -57,6 +57,14 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         this.lessIsBetter = lessIsBetter;
     }
 
+    protected TimePoint getTimePoint() {
+        return timePoint;
+    }
+
+    protected TrackedRace getTrackedRace() {
+        return trackedRace;
+    }
+
     @Override
     public int compare(Competitor o1, Competitor o2) {
         int result;
