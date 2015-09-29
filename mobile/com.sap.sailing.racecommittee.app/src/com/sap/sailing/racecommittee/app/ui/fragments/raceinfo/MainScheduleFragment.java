@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -57,8 +56,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     private TimePoint mStartTime;
     private Duration mStartTimeDiff;
     private RacingProcedureType mRacingProcedureType;
+    private TimePoint lastTick;
 
-    private SimpleDateFormat mDateFormat;
     private Calendar mCalendar;
 
     private RaceStateChangedListener mStateListener;
@@ -92,7 +91,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             startButton.setOnClickListener(this);
         }
 
-        mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mFlagSize = getResources().getInteger(R.integer.flag_size);
 
         return layout;
@@ -106,6 +104,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         initStartMode();
         initCourse();
         initWind();
+        lastTick = MillisecondsTimePoint.now().minus(2000);
     }
 
     @Override
@@ -176,7 +175,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
 
-                    String timing = null;
+                    String timing;
                     long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
                     long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
                     if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
@@ -207,7 +206,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 activity.setStartTime(timePoint);
             }
             mStartTime = timePoint;
-            mStartTimeString = mDateFormat.format(timePoint.asDate());
+            mStartTimeString = TimeUtils.formatTime(timePoint);
         }
 
         mStartTimeDiff = (Duration) getArguments().getSerializable(START_TIME_DIFF);
@@ -251,7 +250,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private void startRace() {
         RRS26RacingProcedure rrs26Procedure = null;
-        GateStartRacingProcedure gateStartProcedure = null;
 
         Flags flag = null;
         if (RacingProcedureType.RRS26.equals(getRaceState().getRacingProcedure().getType())) {
@@ -274,24 +272,27 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
-            if (mRaceId == null && mStartTimeDiff == null) {
-                String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
-                mItemStartTime.setValue(startTimeValue);
-            } else {
-                mItemStartTime.setValue(mStartTimeString);
+        if (!now.minus(1000).before(lastTick)) {
+            if (mItemStartTime != null && !TextUtils.isEmpty(mStartTimeString)) {
+                if (mRaceId == null && mStartTimeDiff == null) {
+                    String startTimeValue = getString(R.string.start_time_value, mStartTimeString, calcCountdown(now));
+                    mItemStartTime.setValue(startTimeValue);
+                } else {
+                    mItemStartTime.setValue(mStartTimeString);
+                }
             }
-        }
 
-        if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-            Wind wind = getRaceState().getWindFix();
-            String sensorData = getString(R.string.wind_sensor, mDateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
-                .getKnots());
-            mItemStartWind.setValue(sensorData);
-        }
+            if (getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
+                Wind wind = getRaceState().getWindFix();
+                String sensorData = getString(R.string.wind_sensor, TimeUtils.formatTime(wind.getTimePoint()), wind.getFrom().getDegrees(), wind
+                    .getKnots());
+                mItemStartWind.setValue(sensorData);
+            }
 
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+            lastTick = now;
         }
     }
 
