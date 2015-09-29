@@ -624,13 +624,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	        ANDROID="$ANDROID_HOME/tools/android.bat"
 	    fi
 
-        RC_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/build.gradle | cut -d "=" -f 2`
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
 
-        TRACKING_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/build.gradle | cut -d "=" -f 2`
+        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
 
-        BUOY_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/build.gradle | cut -d "=" -f 2`
+        BUOY_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
 		
         APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
