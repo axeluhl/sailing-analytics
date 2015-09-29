@@ -282,7 +282,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setValue(Boolean.TRUE);
 
         final TextBox offsetToStartTimeOfSimulatedRace = new TextBox();
-        offsetToStartTimeOfSimulatedRace.setWidth("200px");
+        offsetToStartTimeOfSimulatedRace.setWidth("80px");
         offsetToStartTimeOfSimulatedRace.setEnabled(false);
         offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
         
