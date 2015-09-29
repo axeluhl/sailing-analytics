@@ -286,7 +286,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         offsetToStartTimeOfSimulatedRace.setEnabled(false);
         offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
         
-        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithNowMinutesBeforeRaceStart());
+        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithNowMillisecondsBeforeRaceStart());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
