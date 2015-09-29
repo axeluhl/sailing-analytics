@@ -34,7 +34,7 @@ public class Simulator {
     private DynamicTrackedRace trackedRace;
     private final WindStore windStore;
     private boolean stopped;
-    private long advanceInMillis = -1;
+    private Duration advanceInMillis = null;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
     private Duration offsetToStart;
     
@@ -72,7 +72,7 @@ public class Simulator {
     /**
      * This is what everybody is waiting for :-). Notifies all waiters.
      */
-    public synchronized void setAdvanceInMillis(long advanceInMillis) {
+    public synchronized void setAdvanceInMillis(Duration advanceInMillis) {
         this.advanceInMillis = advanceInMillis;
         notifyAll();
     }
@@ -117,7 +117,7 @@ public class Simulator {
      * Waits until {@link #advanceInMillis} is set to something not equal to -1 which is its initial value. Unblocked by
      * {@link #setAdvanceInMillis(long)}.
      */
-    private synchronized long getAdvanceInMillis() {
+    private synchronized Duration getAdvance() {
         while (!isAdvanceInMillisSet()) {
             try {
                 wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
@@ -129,10 +129,12 @@ public class Simulator {
         return advanceInMillis;
     }
     
-    private long getOffsetToStartAsMillis() {
-        long result = 0;
-        if(offsetToStart != null) {
-            result = offsetToStart.asMillis();
+    private Duration getOffsetToStart() {
+        final Duration result;
+        if (offsetToStart != null) {
+            result = offsetToStart;
+        } else {
+            result = Duration.NULL;
         }
         return result;
     }
@@ -168,7 +170,7 @@ public class Simulator {
      * Like {@link #delay}, only that it doesn't wait until <code>timePoint</code> is reached in wall time.
      */
     public TimePoint advance(TimePoint timePoint) {
-        return new MillisecondsTimePoint(timePoint.asMillis()+getAdvanceInMillis());
+        return timePoint.plus(getAdvance());
     }
 
     /**
@@ -194,13 +196,13 @@ public class Simulator {
         if (isAdvanceInMillisSet()) {
             return advance(time);
         } else {
-            setAdvanceInMillis(System.currentTimeMillis() - time.asMillis() + getOffsetToStartAsMillis());
+            setAdvanceInMillis(MillisecondsTimePoint.now().until(time).plus(getOffsetToStart()));
             return advance(time);
         }
     }
 
     private boolean isAdvanceInMillisSet() {
-        return advanceInMillis != -1;
+        return advanceInMillis != null;
     }
 
     /**
