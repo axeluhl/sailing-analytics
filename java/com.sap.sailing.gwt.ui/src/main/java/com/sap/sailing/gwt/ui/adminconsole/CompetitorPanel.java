@@ -102,17 +102,22 @@ public class CompetitorPanel extends SimplePanel {
 
         //only if this competitor panel is connected to a leaderboard, we want to enable invitations
         if (leaderboardName != null) {
-            final Button inviteCompetitorsButton = new Button(stringMessages.inviteCompetitors());
+            final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
             inviteCompetitorsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     Set<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
-                    boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
 
-                    if (emailProvidedForAll) {
-                        openChooseEventDialogAndSendMails(competitors);
+                    if (competitors.size() == 0){
+                        Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
                     } else {
-                        Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                        boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
+
+                        if (emailProvidedForAll) {
+                            openChooseEventDialogAndSendMails(competitors);
+                        } else {
+                            Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                        }
                     }
                 }
 

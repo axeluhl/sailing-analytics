@@ -77,19 +77,19 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
             @Override
             public void onClick(ClickEvent event) {
                 Collection<CompetitorDTO> competitorsToInvite = null;
+                
                 if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() > 0){
                    competitorsToInvite = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
-                } else {
-                    Collection<CompetitorDTO> competitors = registeredCompetitorsTable.dataProvider.getList();
-                    competitorsToInvite = new ArrayList<CompetitorDTO>(competitors);
-                }
-                
-                boolean emailProvidedForAll = isEmailProvidedForAll(competitorsToInvite);
+                   boolean emailProvidedForAll = isEmailProvidedForAll(competitorsToInvite);
 
-                if (emailProvidedForAll) {
-                    openChooseEventDialogAndSendMails(competitorsToInvite);
+                   if (emailProvidedForAll) {
+                       openChooseEventDialogAndSendMails(competitorsToInvite);
+                   } else {
+                       Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                   }
+                   
                 } else {
-                    Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                    Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
                 }
             }
 

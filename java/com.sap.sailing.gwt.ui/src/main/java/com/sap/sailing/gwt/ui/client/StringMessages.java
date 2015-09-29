@@ -283,6 +283,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
     String competitorCharts();
     String selectAtLeastOneCompetitor();
+    String selectAtLeastOneCompetitorForInvitation();
     String directionChange();
     String speedChange();
     String degreesShort();
