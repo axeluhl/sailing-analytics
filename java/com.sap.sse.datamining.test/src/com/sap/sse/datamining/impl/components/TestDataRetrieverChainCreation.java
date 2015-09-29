@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -291,9 +290,9 @@ public class TestDataRetrieverChainCreation {
     }
     
     private Test_RetrievalProcessorWithSettings getLastRetriever(Processor<Collection<Test_Regatta>, ?> firstRetriever) {
-        TestRaceWithContextRetrievalProcessor raceRetriever = (TestRaceWithContextRetrievalProcessor) Util.get(((TestRegattaRetrievalProcessor) firstRetriever).getResultReceivers(), 0);
-        TestLegOfCompetitorWithContextRetrievalProcessor legRetriever = (TestLegOfCompetitorWithContextRetrievalProcessor) Util.get(raceRetriever.getResultReceivers(), 0);
-        Test_RetrievalProcessorWithSettings lastRetriever = (Test_RetrievalProcessorWithSettings) Util.get(legRetriever.getResultReceivers(), 0);
+        TestRaceWithContextRetrievalProcessor raceRetriever = (TestRaceWithContextRetrievalProcessor) ((TestRegattaRetrievalProcessor) firstRetriever).getResultReceivers()[0];
+        TestLegOfCompetitorWithContextRetrievalProcessor legRetriever = (TestLegOfCompetitorWithContextRetrievalProcessor) raceRetriever.getResultReceivers()[0];
+        Test_RetrievalProcessorWithSettings lastRetriever = (Test_RetrievalProcessorWithSettings) legRetriever.getResultReceivers()[0];
         return lastRetriever;
     }
 

@@ -5,7 +5,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Statistic;
-import com.sap.sse.datamining.annotations.data.Unit;
 
 public interface HasTrackedLegOfCompetitorContext {
     
@@ -17,7 +16,7 @@ public interface HasTrackedLegOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
-    @Statistic(messageKey="DistanceTraveled", resultUnit=Unit.None, resultDecimals=0, ordinal=0)
+    @Statistic(messageKey="DistanceTraveled", resultDecimals=0, ordinal=0)
     public Distance getDistanceTraveled();
     
     @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)

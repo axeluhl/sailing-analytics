@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -168,14 +167,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         @SuppressWarnings("unchecked")
         ReturnType typedResult = (ReturnType) result;
         return typedResult;
-    }
-
-    /**
-     * @return the {@link Unit result Unit} of the last function.
-     */
-    @Override
-    public Unit getResultUnit() {
-        return getLastFunction().getResultUnit();
     }
 
     /**

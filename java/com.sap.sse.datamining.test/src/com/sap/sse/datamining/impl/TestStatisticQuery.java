@@ -19,7 +19,6 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.StatisticQueryDefinition;
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
@@ -141,7 +140,7 @@ public class TestStatisticQuery {
         results.put(new GenericGroupKey<Integer>(3), 3.0);
         results.put(new GenericGroupKey<Integer>(4), 10.0);
         
-        QueryResultImpl<java.lang.Number> result = new QueryResultImpl<>(QueryResultState.NORMAL, java.lang.Number.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", Unit.None, "", 0, 0));
+        QueryResultImpl<java.lang.Number> result = new QueryResultImpl<>(QueryResultState.NORMAL, java.lang.Number.class, results, new AdditionalResultDataImpl(dataSource.size() - 2, "Cross Sum (Sum)", 0, 0));
         return result;
     }
 
@@ -150,7 +149,6 @@ public class TestStatisticQuery {
         assertThat("Result values aren't correct.", result.getResults(), is(expectedResult.getResults()));
         assertThat("Retrieved data amount isn't correct.", result.getRetrievedDataAmount(), is(expectedResult.getRetrievedDataAmount()));
         assertThat("Result signifier isn't correct.", result.getResultSignifier(), is(expectedResult.getResultSignifier()));
-        assertThat("Unit isn't correct.", result.getUnit(), is(expectedResult.getUnit()));
         assertThat("Value decimals aren't correct.", result.getValueDecimals(), is(expectedResult.getValueDecimals()));
     }
 

@@ -2,7 +2,6 @@ package com.sap.sse.datamining.components;
 
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -20,12 +19,12 @@ public interface AdditionalResultDataBuilder {
     public int getRetrievedDataAmount();
 
     /**
-     * Sets the used {@link Function} for the statistic extraction. Also sets the {@linkplain Unit result unit} and the amount of
-     * decimals to the values of the <code>Function</code> ({@link Function#getResultUnit()} and {@link Function#getResultDecimals()}).
+     * Sets the used {@link Function} for the statistic extraction. Also sets the amount of decimals to the values of
+     * the <code>Function</code> ({@link Function#getResultDecimals()}).
+     * 
      * @param extractionFunction
      */
     public void setExtractionFunction(Function<?> extractionFunction);
-    public void setResultUnit(Unit resultUnit);
     public void setResultDecimals(int resultDecimals);
 
     public void setAggregationNameMessageKey(String aggregationNameMessageKey);
