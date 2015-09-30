@@ -282,11 +282,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setValue(Boolean.TRUE);
 
         final TextBox offsetToStartTimeOfSimulatedRace = new TextBox();
-        offsetToStartTimeOfSimulatedRace.setWidth("80px");
+        offsetToStartTimeOfSimulatedRace.setWidth("40px");
         offsetToStartTimeOfSimulatedRace.setEnabled(false);
         offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
         
-        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithNowMillisecondsBeforeRaceStart());
+        final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateAsLiveRace());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
@@ -298,9 +298,15 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 offsetToStartTimeOfSimulatedRace.setFocus(simulateWithStartTimeNowCheckBox.getValue());
             }
         });
-        final FlowPanel simulateStartTimePanel = new FlowPanel();
-        simulateStartTimePanel.add(simulateWithStartTimeNowCheckBox);
-        simulateStartTimePanel.add(offsetToStartTimeOfSimulatedRace);
+
+        final FlowPanel simulateAsLiveRacePanel = new FlowPanel();
+        simulateAsLiveRacePanel.add(simulateWithStartTimeNowCheckBox);
+        
+        final Label offsetToStartLabel = new Label(stringMessages.simulateWithOffset());
+        
+        final HorizontalPanel simulateWithOffsetPanel = new HorizontalPanel();
+        simulateWithOffsetPanel.add(offsetToStartLabel);
+        simulateWithOffsetPanel.add(offsetToStartTimeOfSimulatedRace);
         
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
@@ -309,8 +315,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(1, 0, trackSettingsLabel);
         layoutTable.setWidget(1, 1, trackWindCheckBox);
         layoutTable.setWidget(2, 1, correctWindCheckBox);
-        layoutTable.setWidget(3, 1, simulateStartTimePanel);
-        layoutTable.setWidget(4, 1, ignoreTracTracMarkPassingsCheckbox);
+        layoutTable.setWidget(3, 1, simulateAsLiveRacePanel);
+        layoutTable.setWidget(4, 1, simulateWithOffsetPanel);
+        layoutTable.setWidget(5, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
