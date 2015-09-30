@@ -150,6 +150,7 @@
 }
 .fleet_races_raceuntracked {
   background-color: #999;
+  cursor: default;
 }
 .fleet_races_raceuntracked:hover {
   background-color: #8a8a8a;
