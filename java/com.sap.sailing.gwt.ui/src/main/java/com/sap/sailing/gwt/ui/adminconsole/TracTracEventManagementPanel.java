@@ -422,7 +422,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             @Override
             public void onClick(ClickEvent event) {
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
-                        getMillisecondsDurationFromString(offsetToStartTimeOfSimulatedRace.getValue()), ignoreTracTracMarkPassingsCheckbox.getValue());
+                        getMillisecondsDurationFromMinutesAsString(offsetToStartTimeOfSimulatedRace.getValue()), ignoreTracTracMarkPassingsCheckbox.getValue());
             }
         });
 
@@ -492,11 +492,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     
-    private Duration getMillisecondsDurationFromString(String millisecondsAsString) {
+    private Duration getMillisecondsDurationFromMinutesAsString(String minutesAsString) {
         Duration result = null;
-        if(millisecondsAsString != null) {
-            long millisecondsAsLong = Long.parseLong(millisecondsAsString);
-            result = new MillisecondsDurationImpl(millisecondsAsLong);
+        if (minutesAsString != null) {
+            Double minutesAsDouble = Double.parseDouble(minutesAsString);
+            if (minutesAsDouble != null) {
+                result = new MillisecondsDurationImpl(minutesAsDouble.longValue() * 60000/* One Minute in Milliseconds */);
+            }
         }
         return result;
     }
