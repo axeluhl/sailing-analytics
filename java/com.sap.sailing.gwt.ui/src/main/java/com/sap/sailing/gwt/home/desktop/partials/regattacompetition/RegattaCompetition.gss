@@ -109,6 +109,7 @@
   text-align: center;
   color: #fff;
   padding: 0.333333333333333em 0.333333333333333em;
+  vertical-align: top;
 }
 @media (min-width: 45em) {
   .fleet_races_race {
@@ -126,13 +127,13 @@
   text-decoration: none;
 }
 .fleet_races_race_name,
-.fleet_races_race_date {
+.fleet_races_race_info {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .fleet_races_race_name {
-  font-size: 1.466666666666667em;
+  font-size: 1.166666666666667em;
   font-weight: 700;
 }
 .fleet_races_race_name:after {
@@ -141,19 +142,19 @@
   width: 0.466666666666667em;
   height: 0.466666666666667em;
   background: url("images/home/skip-forward.png") no-repeat center center;
-  margin: 0 0 0.133333333333333em 0.133333333333333em;
+  margin: 0 0 0.033333333333333em 0.133333333333333em;
+  font-size: 1.466666666666667em;
 }
-.fleet_races_race_date {
+.fleet_races_race_info {
   width: 100%;
   font-size: 0.666666666666667em;
   font-weight: 600;
 }
 .fleet_races_raceuntracked {
-  background-color: #999;
+  color: #008fcc;
+  background-color: #fff;
+  border: 1px solid #008fcc;
   cursor: default;
-}
-.fleet_races_raceuntracked:hover {
-  background-color: #8a8a8a;
 }
 .fleet_races_racelive {
   background-color: #e94a1b;
@@ -163,15 +164,27 @@
 }
 .fleet_races_raceplanned {
   color: #999;
-  background-color: #fff;
   border: 1px solid #999;
   padding: 0.266666666666666em 0.266666666666666em;
 }
 .fleet_races_raceplanned:hover {
-  background-color: #e6e6e6;
+  background-color: #8a8a8a;
 }
 .fleet_races_raceuntracked .fleet_races_race_name:after {
   display: none;
+}
+.fleet_races_racelive.fleet_races_raceuntracked {
+  color: #e94a1b;
+  background-color: #fff;
+  border: 1px solid #e94a1b;
+}
+.fleet_races_raceplanned.fleet_races_raceuntracked {
+  background-color: #fff;
+  color: #999;
+  border: 1px solid #999;
+}
+.fleet_races_raceuntracked:hover {
+  background-color: #e6e6e6;
 }
 .regattalistitem .fleet {
   border: none;
@@ -179,4 +192,9 @@
 }
 .regattalistitem .fleet:last-of-type {
   border-radius: 0;
+}
+.fleet_races_race_date {
+}
+.fleet_races_race_state {
+  text-transform: uppercase;
 }

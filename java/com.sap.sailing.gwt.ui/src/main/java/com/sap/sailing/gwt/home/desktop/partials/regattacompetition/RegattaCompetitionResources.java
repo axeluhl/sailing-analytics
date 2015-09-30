@@ -26,9 +26,11 @@ public interface RegattaCompetitionResources extends ClientBundle {
         String fleet_races();
         String fleet_races_race();
         String fleet_races_race_name();
-        String fleet_races_race_date();
+        String fleet_races_race_info();
         String fleet_races_raceuntracked();
         String fleet_races_racelive();
         String fleet_races_raceplanned();
+        String fleet_races_race_date();
+        String fleet_races_race_state();
     }
 }
