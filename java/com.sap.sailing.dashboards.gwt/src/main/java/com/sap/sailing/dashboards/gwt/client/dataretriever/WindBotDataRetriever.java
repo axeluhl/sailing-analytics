@@ -8,43 +8,48 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
+import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatTakesWindFixesNowAction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 
-public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeListener, WindBotDataRetrieverProvider {
+public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverProvider {
 
     private AsyncActionsExecutor asyncActionsExecutor;
+    private final RibDashboardServiceAsync ribDashboardService;
     private final SailingServiceAsync sailingService;
-    private RegattaAndRaceIdentifier currentLiveRace;
     private List<NumberOfWindBotsChangeListener> numberOfWindBotsChangeListeners;
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
     private List<String> windBotIDsInLiveRace;
+    private String leaderboardName;
 
     private final Set<String> windSourceTypeNames;
     private final int WIND_CHART_RESOLUTION_IN_MILLISECONDS = 5000;
     private final int ONE_HOUR_IN_MILLISECONDS = 1000*60*60;
     private final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
+    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private boolean didInitialLoading;
     
     private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
     
-    public WindBotDataRetriever(SailingServiceAsync sailingService) {
+    public WindBotDataRetriever(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingService) {
+        this.ribDashboardService = ribDashboardService;
         this.sailingService = sailingService;
-        currentLiveRace = null;
         didInitialLoading = false;
         asyncActionsExecutor = new AsyncActionsExecutor();
         numberOfWindBotsChangeListeners = new ArrayList<NumberOfWindBotsChangeListener>();
         windBotDataRetrieverListeners = new ArrayList<WindBotDataRetrieverListener>(); 
         windBotIDsInLiveRace = new ArrayList<String>();
         windSourceTypeNames = new HashSet<>();
+        this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
     }
 
@@ -125,17 +130,17 @@ public class WindBotDataRetriever implements TimeListener, RaceSelectionChangeLi
 
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        if (currentLiveRace != null) {
-            loadWindBotData(oldTime, newTime, currentLiveRace);
-        }
-    }
+        GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, leaderboardName);
+        asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
+            @Override
+            public void onSuccess(RegattaAndRaceIdentifier result) {
+                loadWindBotData(oldTime, newTime, result);
+            }
 
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces == null) {
-            currentLiveRace = null;
-        } else if (selectedRaces.size() > 0) {
-            currentLiveRace = selectedRaces.get(0);
-        }
+            @Override
+            public void onFailure(Throwable caught) {
+                logger.log(Level.INFO, caught.getMessage().toString());
+            }
+        });
     }
 }
