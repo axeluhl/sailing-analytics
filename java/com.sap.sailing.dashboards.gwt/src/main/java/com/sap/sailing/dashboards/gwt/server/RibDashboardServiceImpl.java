@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -128,6 +130,22 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             lRInfo.responseMessage = ResponseMessage.NO_RACE_LIVE;
         }
         return lRInfo;
+    }
+    
+    @Override
+    public RegattaAndRaceIdentifier getIDFromRaceThatTakesWindFixesNow(String leaderboardName) {
+        RegattaAndRaceIdentifier result = null;
+        if(leaderboardName != null) {
+            List<TrackedRace> trackedRaces = getTrackedRacesFromLeaderboard(leaderboardName);
+            List<TrackedRace> filteredTrackedRaces = trackedRaces.stream().filter(trackedRace -> trackedRace.takesWindFixWithTimePoint(MillisecondsTimePoint.now())).collect(Collectors.toList());
+            if(filteredTrackedRaces != null) {
+                TrackedRace raceThatTakesWindNow = filteredTrackedRaces.get(0);
+                if(raceThatTakesWindNow != null) {
+                    result = raceThatTakesWindNow.getRaceIdentifier();
+                }
+            }
+        }
+        return result;
     }
 
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
