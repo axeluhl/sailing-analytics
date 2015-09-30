@@ -49,7 +49,7 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
 
     @Override
     protected void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new AddDeviceMappingToRaceLogDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+        new RaceLogAddDeviceMappingDialog(sailingService, errorReporter, stringMessages, leaderboardName,
                 raceColumnName, fleetName, new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
                     @Override
                     public void ok(final DeviceMappingDTO mapping) {

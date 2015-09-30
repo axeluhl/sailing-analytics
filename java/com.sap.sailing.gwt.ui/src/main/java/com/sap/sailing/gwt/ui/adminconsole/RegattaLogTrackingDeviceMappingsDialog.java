@@ -12,50 +12,73 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDeviceMappingsDialog {
-    protected String leaderboardName;
+    protected final String leaderboardName;
 
     public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName) {
 
         super(sailingService, stringMessages, errorReporter);
         this.leaderboardName = leaderboardName;
-        
+
         refresh();
     }
 
     @Override
     protected void refresh() {
-        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName,
-                new AsyncCallback<List<DeviceMappingDTO>>() {
-                    @Override
-                    public void onSuccess(List<DeviceMappingDTO> result) {
-                        mappings = result;
+        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
+            @Override
+            public void onSuccess(List<DeviceMappingDTO> result) {
+                mappings = result;
 
-                        updateChart();
-                        deviceMappingTable.refresh(mappings);
-                    }
+                updateChart();
+                deviceMappingTable.refresh(mappings);
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load mappings for marks: " + caught.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load mappings for marks: " + caught.getMessage());
+            }
+        });
     }
 
     @Override
     protected void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new AddDeviceMappingToRegattaLogDialog(sailingService, errorReporter, stringMessages, leaderboardName).show();
+        new RegattaLogAddDeviceMappingDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
+                    @Override
+                    public void ok(final DeviceMappingDTO mapping) {
+                        sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        refresh();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        showAddMappingDialog(mapping);
+                                        errorReporter.reportError("Could not add mapping: " + caught.getMessage());
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                        refresh();
+                    }
+                }, mapping).show();
     }
 
     @Override
     protected void importFixes() {
-        new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName, new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
+        new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
 
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
                         for (DeviceMappingDTO mapping : editedObject) {
-                            sailingService.addDeviceMappingToRegattaLog(leaderboardName,
-                                    mapping, new AsyncCallback<Void>() {
+                            sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                    new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
                                             refresh();
@@ -87,7 +110,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
                             new DataEntryDialog.DialogCallback<java.util.Date>() {
                                 @Override
                                 public void ok(java.util.Date editedObject) {
-                                    sailingService.closeOpenEndedDeviceMapping(leaderboardName, dto, editedObject, new AsyncCallback<Void>() {
+                                    sailingService.closeOpenEndedDeviceMapping(leaderboardName, dto, editedObject,
+                                            new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
                                                     refresh();
@@ -106,8 +130,8 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
                                 }
                             }).show();
                 } else if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    sailingService.revokeRaceAndRegattaLogEvents(leaderboardName,
-                            dto.originalRaceLogEventIds, new AsyncCallback<Void>() {
+                    sailingService.revokeRaceAndRegattaLogEvents(leaderboardName, dto.originalRaceLogEventIds,
+                            new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError("Could not remove mappings: " + caught.getMessage());
