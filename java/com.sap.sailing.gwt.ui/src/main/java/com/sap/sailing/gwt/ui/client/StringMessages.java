@@ -1396,5 +1396,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String dataMiningRetrieval();
-    String watch();
+    String actionWatch();
+    String actionAnalyze();
 }
