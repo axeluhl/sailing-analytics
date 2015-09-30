@@ -54,7 +54,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     }
 
     private void loadWindBotData(Date from, Date to, RegattaAndRaceIdentifier selectedRaceIdentifier) {
-        if(!didInitialLoading){
+        if (!didInitialLoading) {
             didInitialLoading = true;
             from = new Date(from.getTime()-ONE_HOUR_IN_MILLISECONDS);
         }
@@ -130,11 +130,13 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
+        final Date finalNewTime = newTime;
+        final Date finaloldTime = oldTime;
         GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, leaderboardName);
         asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
             public void onSuccess(RegattaAndRaceIdentifier result) {
-                loadWindBotData(oldTime, newTime, result);
+                loadWindBotData(finaloldTime, finalNewTime, result);
             }
 
             @Override
