@@ -1,36 +1,47 @@
 package com.sap.sse.datamining.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionProvider;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
-import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
+import com.sap.sse.datamining.components.management.FunctionProvider;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
+import com.sap.sse.datamining.components.management.MemoryMonitor;
+import com.sap.sse.datamining.components.management.MemoryMonitorAction;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.functions.FunctionProvider;
-import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
+import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
+import com.sap.sse.datamining.impl.components.management.RuntimeMemorInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -38,19 +49,24 @@ import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
+    private static final long MEMORY_CHECK_PERIOD = 5;
+    private static final TimeUnit MEMORY_CHECK_PERIOD_UNIT = TimeUnit.SECONDS;
+    
     private final CompoundResourceBundleStringMessages stringMessages;
     private final ExecutorService executorService;
     private Date componentsChangedTimepoint;
     
     private final QueryFactory queryFactory;
-    private final DataMiningQueryManager dataMiningQueryManager;
+    private final StrategyPerQueryTypeManager dataMiningQueryManager;
+    private final MemoryMonitor memoryMonitor;
     
     private final FunctionRegistry functionRegistry;
-    private final Map<Class<?>, DataSourceProvider<?>> dataSourceProviderMappedByDataSourceType;
+    private final DataSourceProviderRegistry dataSourceProviderRegistry;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
     private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
+                                DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
                                 AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -58,12 +74,44 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
+        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemorInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
+                                                      createMemoryMonitorActions(), MEMORY_CHECK_PERIOD, MEMORY_CHECK_PERIOD_UNIT);
         this.functionRegistry = functionRegistry;
-        dataSourceProviderMappedByDataSourceType = new HashMap<>();
+        this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
     }
     
+    private Iterable<MemoryMonitorAction> createMemoryMonitorActions() {
+        Collection<MemoryMonitorAction> actions = new ArrayList<>();
+        actions.add(new AbstractMemoryMonitorAction(0.10) {
+            @Override
+            public void performAction() {
+                memoryMonitor.logWarning("Yellow Alert free memory is below " + getThreshold() + "%!");
+                int numberOfRunningStatisticQueries = dataMiningQueryManager.getNumberOfRunningQueriesOfType(QueryType.STATISTIC);
+                if (numberOfRunningStatisticQueries > 0) {
+                    memoryMonitor.logWarning("Aborting random statistic query.");
+                    dataMiningQueryManager.abortRandomQueryOfType(QueryType.STATISTIC);
+                } else {
+                    memoryMonitor.logWarning("Can't abort random statistic query, because none are running.");
+                }
+            }
+        });
+        actions.add(new AbstractMemoryMonitorAction(0.05) {
+            @Override
+            public void performAction() {
+                memoryMonitor.logSevere("Red Alert free memory is below " + getThreshold() + "%!");
+                if (dataMiningQueryManager.getNumberOfRunningQueries() > 0) {
+                    memoryMonitor.logSevere("Aborting all queries.");
+                    dataMiningQueryManager.abortAllQueries();
+                } else {
+                    memoryMonitor.logSevere("Can't abort all queries, because none are running.");
+                }
+            }
+        });
+        return actions;
+    }
+
     @Override
     public Date getComponentsChangedTimepoint() {
         return componentsChangedTimepoint;
@@ -154,8 +202,14 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public Iterable<Function<?>> getDimensionsFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getDimensionsFor(dataRetrieverChainDefinition);
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return functionRegistry.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+    }
+    
+    @Override
+    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getReducedDimensionsMappedByLevelFor(
+            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
     }
 
     @Override
@@ -164,14 +218,16 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        dataSourceProviderMappedByDataSourceType.put(dataSourceProvider.getDataSourceType(), dataSourceProvider);
-        updateComponentsChangedTimepoint();
+    public void registerDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.register(dataSourceProvider);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
     }
     
     @Override
-    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
-        boolean componentsChanged = dataSourceProviderMappedByDataSourceType.remove(dataSourceProvider.getDataSourceType()) != null;
+    public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider) {
+        boolean componentsChanged = dataSourceProviderRegistry.unregister(dataSourceProvider);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
         }
@@ -286,13 +342,20 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         if (locale != null && retrieverChain != null && statisticToCalculate != null) {
             AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition = getAggregationProcessorDefinitionForDTO(queryDefinitionDTO.getAggregatorDefinition());
             queryDefinition = new ModifiableStatisticQueryDefinition<>(locale, retrieverChain, statisticToCalculate, aggregatorDefinition);
-             
-            for (Entry<Integer, Map<FunctionDTO, Collection<? extends Serializable>>> levelSpecificFilterSelection : queryDefinitionDTO.getFilterSelection().entrySet()) {
-                Integer retrieverLevel = levelSpecificFilterSelection.getKey();
-                for (Entry<FunctionDTO, Collection<? extends Serializable>> levelSpecificFilterSelectionEntry : levelSpecificFilterSelection.getValue().entrySet()) {
-                    Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
-                    if (dimensionToFilterBy != null) {
-                        queryDefinition.setFilterSelection(retrieverLevel, dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
+            
+            Map<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = queryDefinitionDTO.getRetrieverSettings();
+            Map<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinitionDTO.getFilterSelection();
+            for (DataRetrieverLevelDTO retrieverLevelDTO : queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevels()) {
+                if (retrieverSettings.containsKey(retrieverLevelDTO)) {
+                    queryDefinition.setRetrieverSettings(retrieverChain.getDataRetrieverLevel(retrieverLevelDTO.getLevel()), retrieverSettings.get(retrieverLevelDTO));
+                }
+                
+                if (filterSelection.containsKey(retrieverLevelDTO)) {
+                    for (Entry<FunctionDTO, HashSet<? extends Serializable>> levelSpecificFilterSelectionEntry : filterSelection.get(retrieverLevelDTO).entrySet()) {
+                        Function<?> dimensionToFilterBy = getFunctionForDTO(levelSpecificFilterSelectionEntry.getKey());
+                        if (dimensionToFilterBy != null) {
+                            queryDefinition.setFilterSelection(retrieverChain.getDataRetrieverLevel(retrieverLevelDTO.getLevel()), dimensionToFilterBy, levelSpecificFilterSelectionEntry.getValue());
+                        }
                     }
                 }
             }
@@ -315,23 +378,28 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType> Query<Set<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, int retrieverLevel,
-            Iterable<Function<?>> dimensions, Map<Integer, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
+    public <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
+            Iterable<Function<?>> dimensions, Map<DataRetrieverLevel<?, ?>, SerializableSettings> settings, Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, Locale locale) {
         DataSourceProvider<DataSourceType> dataSourceProvider = getDataSourceProviderFor(dataRetrieverChainDefinition.getDataSourceType());
-        return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, filterSelection, locale, getStringMessages(), getExecutorService());
+        return queryFactory.createDimensionValuesQuery(dataSourceProvider.getDataSource(), dataRetrieverChainDefinition, retrieverLevel, dimensions, settings, filterSelection, locale, getStringMessages(), getExecutorService());
     }
 
-    @SuppressWarnings("unchecked")
     private <DataSourceType> DataSourceProvider<DataSourceType> getDataSourceProviderFor(Class<DataSourceType> dataSourceType) {
-        if (!dataSourceProviderMappedByDataSourceType.containsKey(dataSourceType)) {
+        DataSourceProvider<DataSourceType> dataSourceProvider = dataSourceProviderRegistry.get(dataSourceType);
+        if (dataSourceProvider == null) {
             throw new NullPointerException("No DataSourceProvider found for '" + dataSourceType + "'");
         }
-        return (DataSourceProvider<DataSourceType>) dataSourceProviderMappedByDataSourceType.get(dataSourceType);
+        return dataSourceProvider;
     }
     
     @Override
     public <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query) {
         return dataMiningQueryManager.runNewAndAbortPrevious(session, query);
+    }
+    
+    @Override
+    public int getNumberOfRunningQueries() {
+        return dataMiningQueryManager.getNumberOfRunningQueries();
     }
     
     @Override

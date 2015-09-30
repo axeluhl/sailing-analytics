@@ -1,7 +1,5 @@
 package com.sap.sse.datamining.data;
 
-import java.io.Serializable;
-
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 
 /**
@@ -13,7 +11,7 @@ import com.sap.sse.datamining.impl.data.ComparisonStrategy;
  * 
  * @see Cluster
  */
-public interface ClusterBoundary<ElementType> extends Serializable {
+public interface ClusterBoundary<ElementType> {
 
     public boolean contains(ElementType value);
 

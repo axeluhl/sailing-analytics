@@ -27,7 +27,11 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
     private final Locale locale;
 
     private final DataMiningDTOFactory dtoFactory;
-    
+
+
+    /**
+     * @throws IllegalArgumentException if the given function isn't a dimension.
+     */
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,

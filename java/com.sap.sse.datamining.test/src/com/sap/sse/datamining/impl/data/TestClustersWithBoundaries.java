@@ -22,11 +22,20 @@ public class TestClustersWithBoundaries {
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private static final ClusterBoundary<Integer> lowerBound = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.GREATER_EQUALS_THAN, comparator);
     private static final ClusterBoundary<Integer> upperBound = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.LOWER_THAN, comparator);
+    
+    @Test
+    public void testLocalizedCluster() {
+        Cluster<Integer> cluster = new ClusterWithLowerAndUpperBoundaries<>(lowerBound, upperBound);
+        Cluster<Integer> localizedCluster = new LocalizedCluster<Integer>("TestCluster", cluster);
+        
+        assertThat(localizedCluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - 10["));
+        assertThat(localizedCluster.asLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - 10["));
+    }
 
 
     @Test
     public void testClusterWithBoundaries() {
-        Cluster<Integer> cluster = new ClusterWithLowerAndUpperBoundaries<>("TestCluster", lowerBound, upperBound);
+        Cluster<Integer> cluster = new ClusterWithLowerAndUpperBoundaries<>(lowerBound, upperBound);
 
         assertThat(cluster.isInRange(0), is(true));
         assertThat(cluster.isInRange(3), is(true));
@@ -35,31 +44,31 @@ public class TestClustersWithBoundaries {
         assertThat(cluster.isInRange(-1), is(false));
         assertThat(cluster.isInRange(10), is(false));
         
-        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - 10["));
-        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - 10["));
+        assertThat(cluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("[0 - 10["));
+        assertThat(cluster.asLocalizedString(Locale.GERMAN, stringMessages), is("[0 - 10["));
     }
     
     @Test
     public void testClusterWithSingleBoundary() {
-        Cluster<Integer> cluster = new ClusterWithSingleBoundary<>("TestCluster", lowerBound);
+        Cluster<Integer> cluster = new ClusterWithSingleBoundary<>(lowerBound);
 
         assertThat(cluster.isInRange(0), is(true));
         assertThat(cluster.isInRange(3), is(true));
         assertThat(cluster.isInRange(Integer.MAX_VALUE), is(true));
         assertThat(cluster.isInRange(-1), is(false));
 
-        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - " + INFINITE));
-        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - " + INFINITE));
+        assertThat(cluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("[0 - " + INFINITE));
+        assertThat(cluster.asLocalizedString(Locale.GERMAN, stringMessages), is("[0 - " + INFINITE));
         
-        cluster = new ClusterWithSingleBoundary<>("TestCluster", upperBound);
+        cluster = new ClusterWithSingleBoundary<>(upperBound);
 
         assertThat(cluster.isInRange(Integer.MIN_VALUE), is(true));
         assertThat(cluster.isInRange(9), is(true));
         assertThat(cluster.isInRange(10), is(false));
         assertThat(cluster.isInRange(11), is(false));
 
-        assertThat(cluster.getAsLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English -" + INFINITE + " - 10["));
-        assertThat(cluster.getAsLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch -" + INFINITE + " - 10["));
+        assertThat(cluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("-" + INFINITE + " - 10["));
+        assertThat(cluster.asLocalizedString(Locale.GERMAN, stringMessages), is("-" + INFINITE + " - 10["));
     }
 
 }

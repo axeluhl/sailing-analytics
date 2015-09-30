@@ -11,7 +11,6 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.data.Unit;
 
 public class ParallelGroupedDataCountAggregationProcessor
                 extends AbstractParallelGroupedDataAggregationProcessor<Object, Number> {
@@ -49,7 +48,6 @@ public class ParallelGroupedDataCountAggregationProcessor
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
         super.setAdditionalData(additionalDataBuilder);
-        additionalDataBuilder.setResultUnit(Unit.None);
         additionalDataBuilder.setResultDecimals(0);
     }
 

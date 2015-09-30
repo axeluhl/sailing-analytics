@@ -79,6 +79,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -152,9 +153,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
@@ -199,7 +197,6 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -3949,56 +3946,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 swissTimingJsonUrl));
     }
 
-    @Override
-    public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, String name) throws Exception {
-        String id = UUID.randomUUID().toString();
-        RacingEventService service = getService();
-        Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
-        for (RegattaAndRaceIdentifier race : selectedRaces) {
-            trackedRaces.add(service.getTrackedRace(race));
-        }
-        if (name == null || name.isEmpty()) {
-            name = getCommonBoatClass(trackedRaces);
-        }
-        PolarDataService polarDataService = service.getPolarDataService();
-        PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
-        return new PolarSheetGenerationResponseImpl(id, name, result);
-    }
-
-    @Override
-    public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
-        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
-        List<String> names = new ArrayList<String>();
-        for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getName());
-        }
-        return names;
-    }
-
-    @Override
-    public PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName) {
-        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        PolarSheetsData data = getService().getPolarDataService().getPolarSheetForBoatClass(boatClass);
-        String name = boatClassName + "_OVERALL";
-        String id = name;
-        return new PolarSheetGenerationResponseImpl(id, name, data);
-    }
-
-    private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
-        BoatClass boatClass = null;
-        for (TrackedRace race : trackedRaces) {
-            if (boatClass == null) {
-                boatClass = race.getRace().getBoatClass();
-            }
-            if (!boatClass.getName().toLowerCase().matches(race.getRace().getBoatClass().getName().toLowerCase())) {
-                return "Mixed";
-            }
-        }
-
-        return boatClass.getName();
-    }
-
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
     }
@@ -5046,6 +4993,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
         raceLog.add(event);
+    }
+    
+    @Override
+    public void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        
+        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */ true, RaceLogDefineMarkEvent.class).analyze();
+        
+        RaceLogEvent eventToRevoke = null;
+        for (RaceLogEvent event : raceLogDeviceMarkMappingEvents) {
+            RaceLogDefineMarkEvent defineMarkEvent = (RaceLogDefineMarkEvent) event;
+            if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())){
+                eventToRevoke = event;
+            }
+        }
+        
+        if (eventToRevoke != null){
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(getService().getServerAuthor(), raceLog.getCurrentPassId(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
+            raceLog.add(event);
+        } else {
+            logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RaceLog.");
+        }
     }
     
     @Override
