@@ -29,13 +29,12 @@ import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigatio
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.SelectionCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.partials.regattanavigation.RaceStateLegend;
+import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
@@ -58,7 +57,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private enum Navigation implements ListNavigationAction {
         SORT_LIST_FORMAT(I18N.listFormatLabel(), false),
-        COMPETITION_FORMAT(I18N.competitionFormatLabel(), true);
+        COMPETITION_FORMAT(I18N.competitionFormatLabel(), false);
         
         private final String displayName;
         private final boolean showAdditionalWidget;
@@ -109,7 +108,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
         listNavigationPanelUi = new ListNavigationPanel<Navigation>(new RegattaRacesTabViewNavigationSelectionCallback());
-        listNavigationPanelUi.setAdditionalWidget(new RaceStateLegend());
+        // listNavigationPanelUi.setAdditionalWidget(new RaceStateLegend());
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         raceListContainerUi = new RaceListContainer<>(I18N.finishedRaces(), I18N.noFinishedRaces(), new RaceListFinishedRaces(currentPresenter));
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
