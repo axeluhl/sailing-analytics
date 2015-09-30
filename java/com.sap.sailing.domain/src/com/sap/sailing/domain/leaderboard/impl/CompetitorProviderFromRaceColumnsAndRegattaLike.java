@@ -1,0 +1,149 @@
+package com.sap.sailing.domain.leaderboard.impl;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
+import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
+
+/**
+ * A caching provider of a competitor set, based on the tracked races and {@link RaceLog}s of the {@link RaceColumn}s of
+ * a {@link HasRaceColumnsAndRegattaLike} and the {@link RegattaLog} of the same object. After an answer has been provided,
+ * it is cached. The cache is invalidated when one of the following events occurs:
+ * <ul>
+ * <li>a competitor is registered with or unregistered from a race log of any of the race columns or the regatta log</li>
+ * <li>a race column is added or removed</li>
+ * <li>a tracked race is linked to or unlinked from any of the race columns</li>
+ * </ul>
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class CompetitorProviderFromRaceColumnsAndRegattaLike {
+    private static final Logger logger = Logger.getLogger(CompetitorProviderFromRaceColumnsAndRegattaLike.class.getName());
+    
+    private final HasRaceColumnsAndRegattaLike provider;
+
+    private final RegattaLogEventVisitor regattaLogCompetitorsCacheInvalidationListener;
+
+    private final RaceLogEventVisitor raceLogCompetitorsCacheInvalidationListener;
+    
+    private final RaceColumnListener raceColumnListener;
+
+    private transient Iterable<Competitor> allCompetitorsCache;
+
+    public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
+        super();
+        this.provider = provider;
+        regattaLogCompetitorsCacheInvalidationListener = new BaseRegattaLogEventVisitor() {
+            @Override
+            public void visit(RegattaLogRegisterCompetitorEvent event) {
+                invalidateAllCompetitorsCache();
+            }
+
+            @Override
+            public void visit(RegattaLogRevokeEvent event) {
+                try {
+                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                        
+                    }
+                } catch (ClassNotFoundException e) {
+                    logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
+                }
+            }
+        };
+        raceLogCompetitorsCacheInvalidationListener = new BaseRaceLogEventVisitor() {
+            @Override
+            public void visit(RaceLogRegisterCompetitorEvent event) {
+                invalidateAllCompetitorsCache();
+            }
+
+            @Override
+            public void visit(RaceLogRevokeEvent event) {
+                try {
+                    if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                        
+                    }
+                } catch (ClassNotFoundException e) {
+                    logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
+                }
+            }
+        };
+        raceColumnListener = new RaceColumnListenerWithDefaultAction() {
+            private static final long serialVersionUID = -8678230058730043052L;
+
+            @Override
+            public void defaultAction() {}
+
+            @Override
+            public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                invalidateAllCompetitorsCache();
+            }
+
+            @Override
+            public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                invalidateAllCompetitorsCache();
+            }
+
+            @Override
+            public void raceColumnAddedToContainer(RaceColumn raceColumn) {
+                invalidateAllCompetitorsCache();
+            }
+
+            @Override
+            public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
+                invalidateAllCompetitorsCache();
+            }
+        };
+    }
+    
+    public Iterable<Competitor> getAllCompetitors() {
+        if (allCompetitorsCache == null) {
+            final Set<Competitor> result = new HashSet<>();
+            for (RaceColumn rc : provider.getRaceColumns()) {
+                Util.addAll(rc.getAllCompetitors(), result);
+                for (final Fleet fleet : rc.getFleets()) {
+                    rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
+                }
+            }
+            provider.addRaceColumnListener(raceColumnListener);
+            // consider {@link RegattaLog}
+            Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(provider.getRegattaLike().getRegattaLog()).analyze();
+            result.addAll(viaLog);
+            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
+            allCompetitorsCache = result;
+        }
+        return allCompetitorsCache;
+    }
+
+    private void invalidateAllCompetitorsCache() {
+        allCompetitorsCache = null;
+        provider.getRegattaLike().getRegattaLog().removeListener(regattaLogCompetitorsCacheInvalidationListener);
+        for (final RaceColumn rc : provider.getRaceColumns()) {
+            for (final Fleet fleet : rc.getFleets()) {
+                rc.getRaceLog(fleet).removeListener(raceLogCompetitorsCacheInvalidationListener);
+            }
+        }
+        provider.removeRaceColumnListener(raceColumnListener);
+    }
+
+}

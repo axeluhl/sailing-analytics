@@ -44,7 +44,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard extends LeaderboardBase {
+public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."

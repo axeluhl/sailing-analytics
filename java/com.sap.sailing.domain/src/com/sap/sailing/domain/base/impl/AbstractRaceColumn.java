@@ -3,11 +3,14 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -206,4 +209,25 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
+
+    
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        Set<Competitor> result = new HashSet<>();
+        for (Fleet fleet : getFleets()) {
+            TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                Util.addAll(trackedRace.getRace().getCompetitors(), result);
+            } else {
+                // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+                // race exists, its competitors set takes precedence over what's in the race log. Usually,
+                // the tracked race will have the same competitors as those in the race log, or more because
+                // those from the regatta log are added to the tracked race as well.
+                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+                result.addAll(viaRaceLog);
+            }
+        }
+        return result;
+    }
+
 }

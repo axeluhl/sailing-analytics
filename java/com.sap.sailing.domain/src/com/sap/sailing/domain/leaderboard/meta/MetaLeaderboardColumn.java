@@ -203,4 +203,9 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
         return null;
     }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return leaderboard.getAllCompetitors();
+    }
 }
