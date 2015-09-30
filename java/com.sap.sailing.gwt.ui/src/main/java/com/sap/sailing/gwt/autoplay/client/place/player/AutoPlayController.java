@@ -291,6 +291,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clear();
                     Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats = new HashMap<>();
+                    for(CompetitorDTO competitor: result.getCompetitors()) {
+                        competitorsAndTheirBoats.put(competitor, result.getCompetitorAndTheirBoats().get(competitor));
+                    }
+
                     RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace, competitorsAndTheirBoats);
                     raceBoardPanel.setSize("100%", "100%");
                     if (showWindChart) {
