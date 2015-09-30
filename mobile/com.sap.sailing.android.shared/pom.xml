@@ -12,12 +12,10 @@
 	<packaging>aar</packaging>
 
 	<dependencies>
-
         <dependency>
             <groupId>com.android.support</groupId>
             <artifactId>appcompat-v7</artifactId>
-            <version>22.1.1</version>
-            <type>aar</type>
+			<type>aar</type>
         </dependency>
 		
         <dependency>
@@ -87,15 +85,12 @@
         <dependency>
             <groupId>com.google.android.gms</groupId>
             <artifactId>play-services-location</artifactId>
-            <version>7.3.0</version>
-            <type>aar</type>
+			<type>aar</type>
         </dependency>
 		
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
-			<version>5.1.1_r2</version>
-			<scope>provided</scope>
         </dependency>
 	</dependencies>
 

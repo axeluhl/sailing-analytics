@@ -24,22 +24,12 @@
         <dependency>
             <groupId>android</groupId>
             <artifactId>android</artifactId>
-			<version>5.1.1_r2</version>
-			<scope>provided</scope>
-        </dependency>
-		
-		<dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>appcompat-v7</artifactId>
-            <version>22.1.1</version>
-            <type>aar</type>
         </dependency>
 		
 		<dependency>
             <groupId>com.google.android.gms</groupId>
             <artifactId>play-services-gcm</artifactId>
-            <version>7.3.0</version>
-            <type>aar</type>
+			<type>aar</type>
         </dependency>
 		
         <dependency>
@@ -47,12 +37,6 @@
             <artifactId>com.sap.sailing.android.shared</artifactId>
             <version>${project.version}</version>
             <type>aar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.android.support</groupId>
-					<artifactId>appcompat-v7</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
     </dependencies>
 

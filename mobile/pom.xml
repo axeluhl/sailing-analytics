@@ -26,17 +26,48 @@
     <!-- redefine in child poms -->
     <additional-deployment-version-file></additional-deployment-version-file>
     <app-version></app-version>
+	<android.support.version>22.1.1</android.support.version>
+	<play.services.version>7.3.0</play.services.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <!-- needed on remote repository -->
       <dependency>
         <groupId>android</groupId>
         <artifactId>android</artifactId>
         <version>5.1.1_r2</version>
         <scope>provided</scope>
       </dependency>
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>appcompat-v7</artifactId>
+            <version>${android.support.version}</version>
+            <type>aar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>${android.support.version}</version>
+            <type>aar</type>
+        </dependency>
+		<dependency>
+			<groupId>com.android.support</groupId>
+			<artifactId>recyclerview-v7</artifactId>
+			<version>${android.support.version}</version>
+			<type>aar</type>
+		</dependency>
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services-location</artifactId>
+            <version>${play.services.version}</version>
+            <type>aar</type>
+        </dependency>
+		<dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services-gcm</artifactId>
+            <version>${play.services.version}</version>
+            <type>aar</type>
+        </dependency>
     </dependencies>
   </dependencyManagement>
 
