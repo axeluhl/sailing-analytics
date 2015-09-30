@@ -2,8 +2,6 @@ package com.sap.sse.datamining.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.datamining.shared.data.Unit;
-
 public interface AdditionalResultData extends Serializable {
 
     public int getRetrievedDataAmount();
@@ -11,9 +9,6 @@ public interface AdditionalResultData extends Serializable {
     public double getCalculationTimeInSeconds();
 
     public String getResultSignifier();
-
-    public Unit getUnit();
-    public String getUnitSignifier();
 
     public int getValueDecimals();
 

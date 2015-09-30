@@ -25,8 +25,7 @@ public class TestLegOfCompetitorWithContextRetrievalProcessor extends AbstractRe
         for (Test_Leg leg : raceWithContext.getRace().getLegs()) {
             legNumber++;
             for (Test_Competitor competitor : raceWithContext.getRace().getCompetitors()) {
-                legsWithContext.add(new Test_HasLegOfCompetitorContextImpl(raceWithContext.getRegatta(), raceWithContext.getRace(), raceWithContext.getBoatClass(),
-                                                               raceWithContext.getYear(), leg, legNumber, competitor));
+                legsWithContext.add(new Test_HasLegOfCompetitorContextImpl(raceWithContext, leg, legNumber, competitor));
             }
         }
         return legsWithContext;

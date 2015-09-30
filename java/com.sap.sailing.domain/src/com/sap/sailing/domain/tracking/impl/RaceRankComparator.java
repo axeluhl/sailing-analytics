@@ -39,21 +39,24 @@ import com.sap.sse.common.TimePoint;
  */
 public class RaceRankComparator extends AbstractRaceRankComparator<Distance> {
     private final Map<Competitor, Distance> windwardDistanceToGoInLegCache;
+    private final WindLegTypeAndLegBearingCache cache;
     
     public RaceRankComparator(TrackedRace trackedRace, TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         super(trackedRace, timePoint, /* lessIsBetter */ true);
+        this.cache = cache;
         this.windwardDistanceToGoInLegCache = new HashMap<Competitor, Distance>();
-        for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, timePoint);
-            if (trackedLegOfCompetitor != null) {
-                windwardDistanceToGoInLegCache.put(competitor, trackedLegOfCompetitor.getWindwardDistanceToGo(timePoint,
-                        WindPositionMode.LEG_MIDDLE, cache));
-            }
-        }
     }
 
     @Override
-    protected Distance getComparisonValueForSameLeg(Competitor o1) {
-        return windwardDistanceToGoInLegCache.get(o1);
+    protected Distance getComparisonValueForSameLeg(Competitor competitor) {
+        Distance result = windwardDistanceToGoInLegCache.get(competitor);
+        if (result == null) {
+            final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(competitor, getTimePoint());
+            if (trackedLegOfCompetitor != null) {
+                result = trackedLegOfCompetitor.getWindwardDistanceToGo(getTimePoint(), WindPositionMode.LEG_MIDDLE, cache);
+                windwardDistanceToGoInLegCache.put(competitor, result);
+            }
+        }
+        return result;
     }
 }

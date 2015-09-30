@@ -35,12 +35,15 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private Button btnSetDelayToLive;
     private Button btnExport;
     private ExportPopup exportPopup;
+    private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
+            final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
         super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+        this.actionButtonsEnabled = actionButtonsEnabled;
+        createUI();
     }
 
     private void showSetDelayToLiveDialog() {
@@ -104,78 +107,84 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
-        btnRemoveRace = new Button(stringMessages.remove());
-        btnRemoveRace.ensureDebugId("RemoveRaceButton");
-        btnRemoveRace.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeAndUntrackRaces(getSelectedRaces());
-            }
-        });
-        btnRemoveRace.setEnabled(false);
-        trackedRacesButtonPanel.add(btnRemoveRace);
-        
-        btnUntrack = new Button(stringMessages.stopTracking());
-        btnUntrack.ensureDebugId("StopTrackingButton");
-        btnUntrack.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                stopTrackingRaces(getSelectedRaces());
-            }
-        });
-        btnUntrack.setEnabled(false);
-        trackedRacesButtonPanel.add(btnUntrack);
-        
-        btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
-        btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
-        btnSetDelayToLive.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showSetDelayToLiveDialog();
-            }
-        });
-        trackedRacesButtonPanel.add(btnSetDelayToLive);
-
-        exportPopup = new ExportPopup(stringMessages);
-        btnExport = new Button(stringMessages.export());
-        btnExport.ensureDebugId("ExportButton");
-        btnExport.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                exportPopup.center(getSelectedRaces());
-            }
-        });
-        btnExport.setEnabled(false);
-        trackedRacesButtonPanel.add(btnExport);
-    }
-
-    @Override
-    protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
-        if (selectedRaces.isEmpty()) {
+        if(actionButtonsEnabled) {
+            btnRemoveRace = new Button(stringMessages.remove());
+            btnRemoveRace.ensureDebugId("RemoveRaceButton");
+            btnRemoveRace.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    removeAndUntrackRaces(getSelectedRaces());
+                }
+            });
             btnRemoveRace.setEnabled(false);
+            trackedRacesButtonPanel.add(btnRemoveRace);
+            
+            btnUntrack = new Button(stringMessages.stopTracking());
+            btnUntrack.ensureDebugId("StopTrackingButton");
+            btnUntrack.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent click) {
+                    stopTrackingRaces(getSelectedRaces());
+                }
+            });
             btnUntrack.setEnabled(false);
+            trackedRacesButtonPanel.add(btnUntrack);
+            
+            btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
+            btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
+            btnSetDelayToLive.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    showSetDelayToLiveDialog();
+                }
+            });
+            trackedRacesButtonPanel.add(btnSetDelayToLive);
+
+            exportPopup = new ExportPopup(stringMessages);
+            btnExport = new Button(stringMessages.export());
+            btnExport.ensureDebugId("ExportButton");
+            btnExport.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    exportPopup.center(getSelectedRaces());
+                }
+            });
             btnExport.setEnabled(false);
-        } else {
-            btnRemoveRace.setEnabled(true);
-            btnUntrack.setEnabled(true);
-            btnExport.setEnabled(true);
+            trackedRacesButtonPanel.add(btnExport);
         }
     }
 
     @Override
+    protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
+       if(actionButtonsEnabled) {
+            if (selectedRaces.isEmpty()) {
+                btnRemoveRace.setEnabled(false);
+                btnUntrack.setEnabled(false);
+                btnExport.setEnabled(false);
+            } else {
+                btnRemoveRace.setEnabled(true);
+                btnUntrack.setEnabled(true);
+                btnExport.setEnabled(true);
+            }
+       }
+    }
+
+    @Override
     protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
-        if (Util.isEmpty(regattas)) {
-            btnUntrack.setVisible(false);
-            btnRemoveRace.setVisible(false);
-            btnSetDelayToLive.setVisible(false);
-            btnExport.setVisible(false);
-        } else {
-            btnUntrack.setVisible(true);
-            btnUntrack.setEnabled(false);
-            btnRemoveRace.setVisible(true);
-            btnRemoveRace.setEnabled(false);
-            btnSetDelayToLive.setVisible(true);
-            btnExport.setVisible(true);
+        if(actionButtonsEnabled) {
+            if (Util.isEmpty(regattas)) {
+                btnUntrack.setVisible(false);
+                btnRemoveRace.setVisible(false);
+                btnSetDelayToLive.setVisible(false);
+                btnExport.setVisible(false);
+            } else {
+                btnUntrack.setVisible(true);
+                btnUntrack.setEnabled(false);
+                btnRemoveRace.setVisible(true);
+                btnRemoveRace.setEnabled(false);
+                btnSetDelayToLive.setVisible(true);
+                btnExport.setVisible(true);
+            }
         }
     }
 

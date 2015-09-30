@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 
 import java.util.Comparator;
 
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class RegattaSeriesFleetComparator implements Comparator<RaceGroupSeriesFleet> {
 

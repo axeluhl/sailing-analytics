@@ -36,7 +36,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -45,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -86,7 +86,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
         this.errorReporter = errorReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();

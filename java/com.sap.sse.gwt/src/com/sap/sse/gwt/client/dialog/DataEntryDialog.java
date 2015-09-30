@@ -145,7 +145,7 @@ public abstract class DataEntryDialog<T> {
         if (validator != null) {
             errorMessage = validator.getErrorMessage(getResult());
         }
-        if (errorMessage == null) {
+        if (errorMessage == null || errorMessage.isEmpty()) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);
         } else {

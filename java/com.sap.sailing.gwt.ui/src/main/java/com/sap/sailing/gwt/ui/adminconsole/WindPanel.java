@@ -116,7 +116,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         this.setWidget(mainPanel);
 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, 
-                raceSelectionProvider, stringMessages, /*multiselection*/true);
+                raceSelectionProvider, stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
         mainPanel.add(trackedRacesListComposite);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 

@@ -70,6 +70,13 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         importContent.add(deviceIdentifierTable);
     }
     
+    /**
+     * When doing race log tracking, the Remove and Stop Tracking buttons are required.
+     */
+    protected boolean isActionButtonsEnabled() {
+        return /* actionButtonsEnabled */ true;
+    }
+    
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
@@ -301,10 +308,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
 
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {}
-
-    @Override
-    protected void addLeaderboardCreateControls(Panel createPanel) {}
+    protected void addLeaderboardControls(Panel controlsPanel) {}
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {

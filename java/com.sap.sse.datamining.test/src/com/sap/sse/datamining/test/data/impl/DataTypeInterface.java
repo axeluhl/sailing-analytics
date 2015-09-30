@@ -1,11 +1,10 @@
 package com.sap.sse.datamining.test.data.impl;
 
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Statistic;
 
 public interface DataTypeInterface {
     
-    @Statistic(messageKey="speedInKnots", resultUnit=Unit.Knots, resultDecimals=2)
+    @Statistic(messageKey="speedInKnots", resultDecimals=2)
     public int getSpeedInKnots();
 
 }

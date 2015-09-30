@@ -2,8 +2,8 @@ package com.sap.sse.datamining.test.data.impl;
 
 import java.util.Locale;
 
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.Statistic;
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /*

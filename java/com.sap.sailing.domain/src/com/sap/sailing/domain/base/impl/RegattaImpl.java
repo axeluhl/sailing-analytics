@@ -272,8 +272,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * {@link RaceColumnListeners} may not be de-serialized (yet) when the regatta
-     * is de-serialized. Do avoid re-registering empty objects most probably leading
-     * to null pointer exception one need to initialize all listeners after
+     * is de-serialized. To avoid re-registering empty objects most probably leading
+     * to null pointer exception one needs to initialize all listeners after
      * all objects have been read.
      */
     public void initializeSeriesAfterDeserialize() {

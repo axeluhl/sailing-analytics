@@ -110,7 +110,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
-            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, timePoint)) {
+            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o1, timePoint)
+            &&  getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint)) {
                 int preemptiveColumnResult = 0;
                 final Double o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
                 if (o1Score != null) {

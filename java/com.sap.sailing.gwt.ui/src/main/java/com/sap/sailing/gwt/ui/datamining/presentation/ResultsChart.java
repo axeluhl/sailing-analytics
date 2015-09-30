@@ -34,10 +34,12 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ResultsChart extends AbstractResultsPresenter {
+public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Settings> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -143,7 +145,7 @@ public class ResultsChart extends AbstractResultsPresenter {
     }
 
     @Override
-    protected void internalShowResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
         updateKeyComparatorListBox();
         resetChartSeries();
@@ -184,8 +186,7 @@ public class ResultsChart extends AbstractResultsPresenter {
 
     private void updateChartLabels() {
         chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
-        chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue())
-                                      .setValueSuffix(getCurrentResult().getUnitSignifier()));
+        chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
     }
 
     private void updateChartSubtitle() {
@@ -280,6 +281,30 @@ public class ResultsChart extends AbstractResultsPresenter {
         }));
         
         return chart;
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return getStringMessages().resultsChart();
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "resultsChart";
     }
 
 }
