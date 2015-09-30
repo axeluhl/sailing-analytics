@@ -40,7 +40,7 @@ public class CreateDefaultRegattaLeaderboardDialog extends AbstractCancelableDia
 
     protected void ok() {
         RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
-        sailingService.createRegattaLeaderboard(regattaIdentifier, regatta.getName(), new int[]{},
+        sailingService.createRegattaLeaderboard(regattaIdentifier, /* displayName */ null, new int[]{},
                 new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable t) {
