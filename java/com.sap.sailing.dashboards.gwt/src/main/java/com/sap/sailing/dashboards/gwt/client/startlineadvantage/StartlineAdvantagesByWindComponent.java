@@ -58,7 +58,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
         initWidget(uiBinder.createAndBindUi(this));
         this.ribDashboardService = ribDashboardService;
         this.asyncActionsExecutor = new AsyncActionsExecutor();
-        initSampleTimer();
+        //initSampleTimer();
     }
     
     private void loadData() {
@@ -72,10 +72,12 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
 
             @Override
             public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
-                startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
-                advantageMaximumLiveAverage.setLiveValue(""+result.maximum);
-                advantageMaximumLiveAverage.setAverageValue(""+result.average);
-            }
+                        if (result != null) {
+                            startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
+                            advantageMaximumLiveAverage.setLiveValue("" + result.maximum);
+                            advantageMaximumLiveAverage.setAverageValue("" + result.average);
+                        }
+                    }
 
         });
     }

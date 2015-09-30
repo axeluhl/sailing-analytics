@@ -2,8 +2,6 @@ package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Animation;
 import org.moxieapps.gwt.highcharts.client.Animation.Easing;
@@ -67,7 +65,6 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     private Series series;
     
     private static final int POINT_ADDING_ANIMATION_DURATION_IN_MILLIS = 2000;
-    private static final Logger logger = Logger.getLogger(StartlineAdvantagesOnLineChart.class.getName());
     
     public StartlineAdvantagesOnLineChart() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -200,9 +197,6 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     }
     
     public void setStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages) {
-        for(StartLineAdvantageDTO startLineAdvantageDTO : startlineAdvantages) {
-            logger.log(Level.INFO, startLineAdvantageDTO.distanceToRCBoatInMeters +" "+startLineAdvantageDTO.startLineAdvantage);
-        }
         if (series.getPoints() != null && series.getPoints().length > 0) {
             updateStartlineAdvantages(startlineAdvantages, series);
         } else {
@@ -213,19 +207,8 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     }
     
     private void updateStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series) {
-//        Series newSeries = createSeries(chart);
-//        addStartlineAdvantages(startlineAdvantages, newSeries);
         removeAllSeriesPoints(chart.getSeries()[0]);
-        logger.log(Level.INFO, "SERIES: " + chart.getSeries().length);
         addStartlineAdvantages(startlineAdvantages, series);
-//        int counter = 0;
-//        for (Point point : series.getPoints()) {
-//                if(startlineAdvantages.size() -1 > counter){
-//                    StartLineAdvantageDTO currentNewStartlineAdvantage = startlineAdvantages.get(counter);
-//                    series.addPoint(currentNewStartlineAdvantage.distanceToRCBoatInMeters, currentNewStartlineAdvantage.startLineAdvantage);
-//                    counter++;
-//                }
-//        }
     }
     
     private void removeAllSeriesPoints(Series series) {
@@ -235,11 +218,10 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     }
     
     private void addStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages, Series series){
-        //TODO Build this with forEach Consumer as soon as the bundle uses GWT 2.8 with Java 8 Support.
+        //TODO Build this with forEach consumer as soon as the bundle uses GWT 2.8 with Java 8 Support.
         for (StartLineAdvantageDTO startlineAdvantage : startlineAdvantages) {
             Point point = new Point(startlineAdvantage.distanceToRCBoatInMeters, startlineAdvantage.startLineAdvantage);
             series.addPoint(point, false, false, false);
-            //new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS)
         }
         setConfidenceGradientColorToSeries(series, startlineAdvantages);
         chart.redraw();
@@ -287,10 +269,7 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
                     lastConfidence = startlineAdvantageDTO.confidence;
                     double gradientPosition = getGradientStopPositionFromStartlineLenghtAndDistanceToRCBoat(lineLenght,
                             startlineAdvantageDTO.distanceToRCBoatInMeters);
-                    logger.log(Level.INFO, "Confidence " + startlineAdvantageDTO.confidence + "gradientPosition"
-                            + gradientPosition);
-                    color.addColorStop(gradientPosition,
-                            getColorAsHexStringFromConfidence(startlineAdvantageDTO.confidence));
+                    color.addColorStop(gradientPosition, getColorAsHexStringFromConfidence(startlineAdvantageDTO.confidence));
                 }
             }
             return color;

@@ -179,7 +179,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @Override
     public void numberOfWindBotsChanged(List<String> windBotIDs,
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        logger.log(Level.INFO, "Number of Windbots changed");
         initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
     }
 }
