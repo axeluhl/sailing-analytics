@@ -467,12 +467,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             throws NotDenotedForRaceLogTrackingException, Exception;
     
     void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
-    
-    /**
-     * Get the competitors registered in this racelog. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrationsInRegattaLog(String) registered for the leaderboard}.
-     */
-    Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * Get the competitors registered in this leaderboard. Does not automatically include the competitors
@@ -630,4 +624,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO);
+
+    Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName, String raceColumnName,
+            String fleetName);
 }

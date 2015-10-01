@@ -4921,14 +4921,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         return raceColumn.getRaceLog(fleet);
     }
-    
-    @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        return convertToCompetitorDTOs(
-                new RegisteredCompetitorsAnalyzer<>(
-                        getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
-    }
-    
+
     private Competitor getCompetitor(CompetitorDTO dto) {
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
@@ -5888,5 +5881,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName,
+            String raceColumnName, String fleetName) {
+        List<AbstractLog<?,?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+
+        Collection<CompetitorDTO> competitorRegistrations = new ArrayList<CompetitorDTO>();
+
+        for (AbstractLog<?, ?> abstractLog : logHierarchy) {
+            competitorRegistrations.addAll(convertToCompetitorDTOs(
+                    new RegisteredCompetitorsAnalyzer<>(
+                            abstractLog).analyze()));
+        }
+
+        return competitorRegistrations;
     }
 }

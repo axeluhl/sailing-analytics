@@ -63,7 +63,7 @@ public class RaceLogAddDeviceMappingDialog extends AbstractLogAddDeviceMappingDi
 
     @Override
     protected void loadCompetitorsAndMarks() {
-        sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName,
+        sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, raceColumnName, fleetName,
                 itemSelectionPanel.getSetCompetitorsCallback());
 
         sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName,
