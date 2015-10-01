@@ -1389,4 +1389,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dataMiningRetrieval();
     String denoteAllRacesForRaceLogTrackingShorctut();
     String registerCompetitors();
+    String createDefaultRegattaLeaderboard();
 }
