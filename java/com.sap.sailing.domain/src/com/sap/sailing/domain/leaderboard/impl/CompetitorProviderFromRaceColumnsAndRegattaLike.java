@@ -54,6 +54,13 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
         super();
         this.provider = provider;
+        // A note regarding listener serializability: RaceLogListener and RegattaLogListener objects
+        // don't need to be serializable as the log listeners are a transient structure. The race column
+        // listeners, however, need to explicitly declare that they are transient.
+        // This enclosing object is intended not to be serialized and shall be re-constructed by
+        // its users after de-serialization. Therefore, the transient-ness of the log listeners works
+        // as intended, and the race column listener explicitly returns true from its isTransient()
+        // method.
         regattaLogCompetitorsCacheInvalidationListener = new BaseRegattaLogEventVisitor() {
             @Override
             public void visit(RegattaLogRegisterCompetitorEvent event) {
@@ -93,6 +100,14 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
 
             @Override
             public void defaultAction() {}
+
+            /**
+             * As the entire provider object is considered transient, its listeners are so, too.
+             */
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
 
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
