@@ -81,6 +81,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
@@ -634,9 +635,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
-    void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
-            Set<Util.Triple<String, String, String>> raceLogsTo, AsyncCallback<Void> callback);
-
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids, AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
@@ -722,4 +720,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO, AsyncCallback<Void> callback);
+
+    void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
+
+    void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 }

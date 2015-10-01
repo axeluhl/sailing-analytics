@@ -92,6 +92,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -497,13 +498,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, Position position);
     
-    /**
-     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
-     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
-     */
-    void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
-            Set<Util.Triple<String, String, String>> raceLogsTo);
-    
     void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
             throws TransformationException;
     
@@ -619,4 +613,18 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO);
+
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
+    void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples);
+
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
+    void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples);
 }

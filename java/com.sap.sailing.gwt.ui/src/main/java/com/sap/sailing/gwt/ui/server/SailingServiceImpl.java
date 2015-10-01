@@ -5146,14 +5146,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void copyCourseAndCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
+    public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-        getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
+        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
+    }
+    
+    @Override
+    public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
+        RaceLog fromRaceLog = getRaceLog(fromTriple);
+        Set<RaceLog> toRaceLogs = new HashSet<>();
+        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+            toRaceLogs.add(getRaceLog(toTriple));
+        }
+        getRaceLogTrackingAdapter().copyCompetitors(fromRaceLog, toRaceLogs, getService());
     }
     
     private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
