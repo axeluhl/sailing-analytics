@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -164,11 +165,27 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
     
     private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta){
-        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta);
-        dialog.ensureDebugId("CreateDefaultRegattaLeaderboardDialog");
-        dialog.setText(stringMessages.createDefaultRegattaLeaderboard());
-        dialog.setTitle(stringMessages.createDefaultRegattaLeaderboard());
-        dialog.show();
+        new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
+            @Override
+            public void ok(RegattaIdentifier regattaIdentifier) {
+                sailingService.createRegattaLeaderboard(regattaIdentifier, /* displayName */ null, new int[]{},
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to create default regatta leaderboard for " + newRegatta.getName()
+                                + ": " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(StrippedLeaderboardDTO result) {
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
