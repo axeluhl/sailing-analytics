@@ -262,11 +262,17 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         for (Competitor c : compLists[1]) {
             raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
         }
+        regattaLeaderboard.setSuppressed(compLists[0].get(compLists[0].size()-1), /* suppressed */ true);
         Set<Competitor> expected = new HashSet<>(compLists[0]);
         expected.addAll(compLists[1]);
+        Set<Competitor> expectedWithoutSuppressed = new HashSet<>(expected);
+        expectedWithoutSuppressed.remove(compLists[0].get(compLists[0].size()-1));
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(), actual);
         assertEquals(expected, actual);
+        Set<Competitor> actualWithoutSuppressed = new HashSet<>();
+        Util.addAll(regattaLeaderboard.getCompetitors(), actualWithoutSuppressed);
+        assertEquals(expectedWithoutSuppressed, actualWithoutSuppressed);
         Set<Competitor> actualForRaceYellow = new HashSet<>();
         Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(
                 regattaLeaderboard.getRaceColumnByName("R1"), regattaLeaderboard.getFleet("Yellow")), actualForRaceYellow);
