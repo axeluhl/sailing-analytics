@@ -1,8 +1,8 @@
 package com.sap.sse.datamining.impl.components.management;
 
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +15,6 @@ import com.sap.sse.datamining.test.util.components.management.Test_MemoryMonitor
 
 public class TestMemoryMonitorAction {
     
-    @SuppressWarnings("unchecked")
     @Test
     public void testSimpleActionOrdering() {
         MemoryMonitorAction low = new Test_MemoryMonitorAction(0.8);
@@ -27,7 +26,7 @@ public class TestMemoryMonitorAction {
 
         List<MemoryMonitorAction> expectedOrder1 = Arrays.asList(high1, high2, medium, low);
         List<MemoryMonitorAction> expectedOrder2 = Arrays.asList(high2, high1, medium, low);
-        assertThat(actions, anyOf(is(expectedOrder1), is(expectedOrder2)));
+        assertTrue(actions.equals(expectedOrder1) || actions.equals(expectedOrder2));
     }
     
     @Test
