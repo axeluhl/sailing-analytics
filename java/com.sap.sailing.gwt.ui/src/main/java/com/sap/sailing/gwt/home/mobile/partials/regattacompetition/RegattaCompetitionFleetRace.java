@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
@@ -19,8 +20,10 @@ public class RegattaCompetitionFleetRace extends UIObject {
     }
     
     @UiField RegattaCompetitionResources local_res;
+    @UiField StringMessages i18n;
     @UiField DivElement raceNameUi;
     @UiField DivElement raceDateUi;
+    @UiField DivElement raceStateUi;
     private final AnchorElement anchor;
 
     public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
@@ -35,16 +38,20 @@ public class RegattaCompetitionFleetRace extends UIObject {
     }
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
+        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
         if (viewState == RaceViewState.RUNNING) {
             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_racelive());
+            raceStateUi.setInnerText(isUntrackedRace ? i18n.live() : i18n.actionWatch());
         } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceplanned());
+            raceStateUi.setInnerText(i18n.raceIsPlanned());
+        } else {
+            // TODO: As long as there is no mobile race viewer, show all races as untracked
+            // raceStateUi.setInnerText(isUntrackedRace ? i18n.finished() : i18n.actionAnalyze());
+            raceStateUi.setInnerText(i18n.finished());
         }
-        // TODO: As long as there is no mobile race viewer, show all races as untracked (with different background-color)
-        anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
-        // if (trackingState != RaceTrackingState.TRACKED_VALID_DATA) {
-        // anchor.addClassName(local_res.css().regattacompetition_phase_fleet_raceuntracked());
-        // }
+        setStyleName(anchor, local_res.css().regattacompetition_phase_fleet_raceuntracked(), true);
+        // setStyleName(anchor, local_res.css().regattacompetition_phase_fleet_raceuntracked(), isUntrackedRace);
     }
 
 }
