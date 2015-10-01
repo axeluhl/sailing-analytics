@@ -45,6 +45,9 @@
 .regattacompetition_phase_fleet:last-child {
   padding-right: 0.666666666666667em;
 }
+.regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race {
+  height: 3.466666666666666666em;
+}
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_title {
   position: absolute;
   top: 50%;
@@ -75,9 +78,11 @@
   background: #008fcc;
   margin-bottom: 0.666666666666667em;
   text-align: center;
-  padding: 1.066666666666667em 0;
+  padding: .8em 0;
   border-radius: 0.333333333333333em;
-  color: #f6f9fc;
+  color: #fff;
+  /* color: #f6f9fc; alternative white*/
+  height: 5em;  
 }
 .regattacompetition_phase_fleet_racetracked {
   background: #008fcc;
@@ -86,7 +91,7 @@
   color: #008fcc;
   background-color: #fff;
   border: 0.133333333333333em solid #008fcc;
-  padding: .933333333333333em 0;
+  padding: .666666666666667em 0;
   cursor: default;
 }
 .regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_title:after {
