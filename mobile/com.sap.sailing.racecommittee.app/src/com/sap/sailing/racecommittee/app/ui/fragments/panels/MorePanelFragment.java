@@ -91,7 +91,7 @@ public class MorePanelFragment extends BasePanelFragment {
 
         View view = ViewHelper.get(layout, R.id.top_line);
         if (view != null) {
-            if (AppUtils.with(getActivity()).isPhone()) {
+            if (!AppUtils.with(getActivity()).is10inch()) {
                 view.setVisibility(View.GONE);
             }
         }
