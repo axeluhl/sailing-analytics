@@ -139,6 +139,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
         asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
             public void onSuccess(RegattaAndRaceIdentifier result) {
+                if(result != null)
                 loadWindBotData(finaloldTime, finalNewTime, result);
             }
 
