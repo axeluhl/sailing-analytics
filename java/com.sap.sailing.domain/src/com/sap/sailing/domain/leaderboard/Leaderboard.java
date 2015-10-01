@@ -93,6 +93,22 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Retrieves all competitors expected to race in the fleet and column specified.
+     * When a {@link TrackedRace} is {@link RaceColumn#getTrackedRace(Fleet) attached} to the race
+     * column for the <code>fleet</code> specified, its competitor set is returned. Otherwise,
+     * the competitors are collected from any other information, such as a regatta log and/or the
+     * race log for the combination of race column and fleet or, in case of a meta-leaderboard,
+     * from the leaderboard represented by the race column.
+     */
+    Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet);
+
+    /**
+     * Same as {@link #getAllCompetitors(RaceColumn, Fleet)} with competitors from {@link #getSuppressedCompetitors()}
+     * removed
+     */
+    Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet);
     
     /**
      * Convenience method which returns the difference between {@link #getAllCompetitors()} and {@link #getCompetitors()}.

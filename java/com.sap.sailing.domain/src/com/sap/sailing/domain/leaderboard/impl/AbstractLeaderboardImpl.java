@@ -84,6 +84,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
     
     @Override
+    public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        return competitorsProvider.getAllCompetitors(raceColumn, fleet);
+    }
+
+    @Override
     public Competitor getCompetitorByIdAsString(String idAsString) {
         for (Competitor competitor : getAllCompetitors()) {
             if (competitor.getId().toString().equals(idAsString)) {
@@ -162,4 +167,5 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         return raceColumn.getRaceLog(fleet);
     }
+
 }

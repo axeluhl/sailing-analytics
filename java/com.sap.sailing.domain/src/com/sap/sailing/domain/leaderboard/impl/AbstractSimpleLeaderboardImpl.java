@@ -1106,42 +1106,57 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             final Iterable<Competitor> allCompetitors = getAllCompetitors();
             final Set<Competitor> suppressed = new HashSet<>();
             Util.addAll(getSuppressedCompetitors(), suppressed);
-            result = new Iterable<Competitor>() {
-                @Override
-                public Iterator<Competitor> iterator() {
-                    return new Iterator<Competitor>() {
-                        private final Iterator<Competitor> allIter = allCompetitors.iterator();
-                        private Competitor next = advance();
-                        
-                        private Competitor advance() {
-                            next = null;
-                            while (allIter.hasNext() && next == null) {
-                                next = allIter.next();
-                                if (suppressed.contains(next)) {
-                                    next = null;
-                                }
-                            }
-                            return next;
-                        }
-                        
-                        @Override
-                        public boolean hasNext() {
-                            return next != null;
-                        }
-
-                        @Override
-                        public Competitor next() {
-                            if (next == null) {
-                                throw new NoSuchElementException();
-                            }
-                            final Competitor result = next;
-                            advance();
-                            return result;
-                        }
-                    };
-                }
-            };
+            result = getCompetitorIterableSkippingSuppressed(allCompetitors, suppressed);
         }
+        return result;
+    }
+    
+    @Override
+    public Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        return getCompetitorIterableSkippingSuppressed(getAllCompetitors(raceColumn, fleet), getSuppressedCompetitors());
+    }
+
+    /**
+     * return an iterable with a smart iterator that filters out the suppressed elements on demand
+     */
+    protected Iterable<Competitor> getCompetitorIterableSkippingSuppressed(final Iterable<Competitor> allCompetitors,
+            final Iterable<Competitor> suppressed) {
+        final Iterable<Competitor> result;
+        result = new Iterable<Competitor>() {
+            @Override
+            public Iterator<Competitor> iterator() {
+                return new Iterator<Competitor>() {
+                    private final Iterator<Competitor> allIter = allCompetitors.iterator();
+                    private Competitor next = advance();
+                    
+                    private Competitor advance() {
+                        next = null;
+                        while (allIter.hasNext() && next == null) {
+                            next = allIter.next();
+                            if (Util.contains(suppressed, next)) {
+                                next = null;
+                            }
+                        }
+                        return next;
+                    }
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return next != null;
+                    }
+
+                    @Override
+                    public Competitor next() {
+                        if (next == null) {
+                            throw new NoSuchElementException();
+                        }
+                        final Competitor result = next;
+                        advance();
+                        return result;
+                    }
+                };
+            }
+        };
         return result;
     }
 

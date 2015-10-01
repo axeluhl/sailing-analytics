@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -62,15 +61,11 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
             return;
         }
-        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         JSONArray result = new JSONArray();
-        if (trackedRace != null) {
-            CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-            		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
-
-            for (Competitor competitor : raceColumn.getRaceDefinition(fleet).getCompetitors()) {
-                result.add(serializer.serialize(competitor));
-            }
+        CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+        		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
+        for (Competitor competitor : leaderboard.getCompetitors(raceColumn, fleet)) {
+            result.add(serializer.serialize(competitor));
         }
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
