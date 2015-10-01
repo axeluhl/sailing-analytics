@@ -34,10 +34,13 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.domain.common.PassingInstruction;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -219,8 +222,29 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                         }
                     }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
-                    new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter,
-                            leaderboardName, raceColumnName, fleetName).show();
+                    new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, 
+                            fleetName, new DialogCallback<List<com.sap.sse.common.Util.Pair<ControlPointDTO,PassingInstruction>>>() {
+
+                        @Override
+                        public void cancel() {
+                        }
+
+                        @Override
+                        public void ok(List<Pair<ControlPointDTO, PassingInstruction>> waypointPairs) {
+                            sailingService.addCourseDefinitionToRaceLog(leaderboardName, raceColumnName, fleetName, waypointPairs,
+                                    new AsyncCallback<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Could note save course: " + caught.getMessage());
+                                }
+                            });
+                        }
+                    }).show();
+
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
