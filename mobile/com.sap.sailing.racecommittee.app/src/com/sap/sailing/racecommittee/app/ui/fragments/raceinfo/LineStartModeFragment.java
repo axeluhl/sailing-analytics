@@ -23,14 +23,14 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartModeItem;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartModeFragment extends BaseFragment {
+public class LineStartModeFragment extends BaseFragment {
 
     private ListView mListView;
     private RRS26RacingProcedure mProcedure;
     private int mFlagSize;
 
-    public static StartModeFragment newInstance(@START_MODE_VALUES int startMode) {
-        StartModeFragment fragment = new StartModeFragment();
+    public static LineStartModeFragment newInstance(@START_MODE_VALUES int startMode) {
+        LineStartModeFragment fragment = new LineStartModeFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
         fragment.setArguments(args);

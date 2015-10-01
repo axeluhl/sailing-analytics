@@ -17,7 +17,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PathFinderFragment extends BaseFragment {
+public class GateStartPathFinderFragment extends BaseFragment {
 
     private final static String NAT = "nationality";
     private final static String NUM = "number";
@@ -27,20 +27,20 @@ public class PathFinderFragment extends BaseFragment {
     private View mHeader;
     private View mButton;
 
-    public static PathFinderFragment newInstance() {
+    public static GateStartPathFinderFragment newInstance() {
         return newInstance(START_MODE_PRESETUP, null, null);
     }
 
-    public static PathFinderFragment newInstance(@START_MODE_VALUES int startMode) {
+    public static GateStartPathFinderFragment newInstance(@START_MODE_VALUES int startMode) {
         return newInstance(startMode, null, null);
     }
 
-    public static PathFinderFragment newInstance(String nat, String num) {
+    public static GateStartPathFinderFragment newInstance(String nat, String num) {
         return newInstance(START_MODE_PRESETUP, nat, num);
     }
 
-    public static PathFinderFragment newInstance(@START_MODE_VALUES int startMode, String nat, String num) {
-        PathFinderFragment fragment = new PathFinderFragment();
+    public static GateStartPathFinderFragment newInstance(@START_MODE_VALUES int startMode, String nat, String num) {
+        GateStartPathFinderFragment fragment = new GateStartPathFinderFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
         args.putString(NAT, nat);

@@ -25,9 +25,9 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRa
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PathFinderFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TimingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 
@@ -312,7 +312,7 @@ public class MorePanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
+                    replaceFragment(LineStartModeFragment.newInstance(LineStartModeFragment.START_MODE_PLANNED));
                     break;
 
                 default:
@@ -352,7 +352,7 @@ public class MorePanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(PathFinderFragment.newInstance(PathFinderFragment.START_MODE_PLANNED));
+                    replaceFragment(GateStartPathFinderFragment.newInstance(GateStartPathFinderFragment.START_MODE_PLANNED));
                     break;
 
                 default:
@@ -392,7 +392,7 @@ public class MorePanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(TimingFragment.newInstance(TimingFragment.START_MODE_PLANNED));
+                    replaceFragment(GateStartTimingFragment.newInstance(GateStartTimingFragment.START_MODE_PLANNED));
                     break;
 
                 default:

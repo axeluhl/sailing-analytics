@@ -16,7 +16,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class TimingFragment extends BaseFragment {
+public class GateStartTimingFragment extends BaseFragment {
 
     public final static int ONE_MINUTE_MILLISECONDS = 60000;
 
@@ -28,12 +28,12 @@ public class TimingFragment extends BaseFragment {
     private NumberPicker mTimeGolf;
     private GateStartRacingProcedure mProcedure;
 
-    public static TimingFragment newInstance() {
+    public static GateStartTimingFragment newInstance() {
         return newInstance(START_MODE_PRESETUP);
     }
 
-    public static TimingFragment newInstance(@START_MODE_VALUES int startMode) {
-        TimingFragment fragment = new TimingFragment();
+    public static GateStartTimingFragment newInstance(@START_MODE_VALUES int startMode) {
+        GateStartTimingFragment fragment = new GateStartTimingFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
         fragment.setArguments(args);

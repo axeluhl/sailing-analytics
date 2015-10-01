@@ -21,7 +21,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PositioningFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
@@ -111,7 +111,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartModeFragment.class);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), LineStartModeFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 

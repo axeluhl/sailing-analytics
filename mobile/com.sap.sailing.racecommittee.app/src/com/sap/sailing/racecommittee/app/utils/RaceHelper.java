@@ -12,7 +12,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TimingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
 
 public class RaceHelper {
     public static String getRaceName(@Nullable ManagedRace race) {
@@ -120,8 +120,8 @@ public class RaceHelper {
 
     public static String getGateTiming(Context context, GateStartRacingProcedure procedure) {
         String timing;
-        long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
-        long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
+        long launchTime = procedure.getGateLaunchStopTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
+        long golfTime = procedure.getGolfDownTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
         if (AppPreferences.on(context).getGateStartHasAdditionalGolfDownTime()) {
             timing = context.getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
         } else {
