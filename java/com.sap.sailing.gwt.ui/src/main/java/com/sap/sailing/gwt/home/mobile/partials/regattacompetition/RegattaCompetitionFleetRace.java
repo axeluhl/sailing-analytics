@@ -33,7 +33,7 @@ public class RegattaCompetitionFleetRace extends UIObject {
         setupRaceState(race.getTrackingState(), race.getViewState());
         this.raceNameUi.setInnerText(race.getRaceName());
         if (race.getStart() != null) {
-            this.raceDateUi.setInnerText(DateAndTimeFormatterUtil.defaultDateFormatter.render(race.getStart())); 
+            this.raceDateUi.setInnerText(DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter.render(race.getStart())); 
         }
     }
     
