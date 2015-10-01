@@ -64,8 +64,8 @@ public class WindFragment extends BaseFragment
     private final static long EVERY_POSITION_CHANGE = 1000;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
-    private final static float MAX_LOCATION_DRIFT_IN_METER = 25f; // 25 meter
-    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
+//    private final static float MAX_LOCATION_DRIFT_IN_METER = 25f; // 25 meter
+//    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -204,7 +204,7 @@ public class WindFragment extends BaseFragment
         if (mCurrentLocation != null) {
             double latitude = mCurrentLocation.getLatitude();
             double longitude = mCurrentLocation.getLongitude();
-            float accuracy = mCurrentLocation.getAccuracy();
+//            float accuracy = mCurrentLocation.getAccuracy();
             long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
             setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
             setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);

@@ -68,7 +68,6 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         above_area.add(event_layout);
         mAreaContainer = new ToggleContainer(view, area_fragment, area_header, area_text, above_area);
 
-        View position_layout = ViewHelper.get(view, R.id.positions);
         FrameLayout position_fragment = ViewHelper.get(view, R.id.position_fragment);
         RelativeLayout position_header = ViewHelper.get(view, R.id.position_header);
         TextView position_text = ViewHelper.get(view, R.id.selected_position);

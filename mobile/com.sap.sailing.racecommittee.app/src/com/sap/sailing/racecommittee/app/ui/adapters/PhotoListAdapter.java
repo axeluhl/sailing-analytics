@@ -85,13 +85,13 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
 
     private static class DeleteListener implements View.OnClickListener {
 
-        private final WeakReference<RecyclerView.Adapter> weakAdapter;
+        private final WeakReference<RecyclerView.Adapter<PhotoListAdapter.ViewHolder>> weakAdapter;
         private final WeakReference<Context> weakContext;
         private final WeakReference<List<Uri>> weakList;
 
         private final File file;
 
-        public DeleteListener(RecyclerView.Adapter adapter, Context context, List<Uri> uris, File file) {
+        public DeleteListener(RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter, Context context, List<Uri> uris, File file) {
             weakAdapter = new WeakReference<>(adapter);
             weakContext = new WeakReference<>(context);
             weakList = new WeakReference<>(uris);
@@ -109,7 +109,7 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
                 builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        RecyclerView.Adapter adapter = weakAdapter.get();
+                        RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter = weakAdapter.get();
                         List<Uri> uris = weakList.get();
                         if (adapter != null && uris != null) {
                             if (uris.remove(Uri.fromFile(file))) {
