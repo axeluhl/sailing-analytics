@@ -77,15 +77,19 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      */
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        if (competitorsProvider == null) {
-            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
-        }
-        return competitorsProvider.getAllCompetitors();
+        return getOrCreateCompetitorsProvider().getAllCompetitors();
     }
     
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
-        return competitorsProvider.getAllCompetitors(raceColumn, fleet);
+        return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
+    }
+
+    private CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        if (competitorsProvider == null) {
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        return competitorsProvider;
     }
 
     @Override
