@@ -33,11 +33,11 @@ public class AppUtils {
      * @param activity Activity to lock
      */
     public static void lockOrientation(Activity activity) {
-        if (with(activity).isTablet()) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        } else {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        }
+//        if (with(activity).isTablet()) {
+//            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+//        } else {
+//            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+//        }
     }
 
     public PackageInfo getPackageInfo() {
