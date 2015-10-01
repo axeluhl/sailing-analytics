@@ -76,6 +76,10 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
     }
     
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        QuickfinderPresenter.getForSeriesLeaderboards(quickfinder, seriesName, currentPresenter, eventsOfSeries);
+    }
+    
     protected void initRacesNavigation(Panel container) {
         MobileSection mobileSection = new MobileSection();
         SectionHeaderContent header = new SectionHeaderContent();
@@ -93,7 +97,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     @Override
     public final void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
-        QuickfinderPresenter.getForSeriesLeaderboards(layout.quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
+        setQuickFinderValues(layout.quickFinderUi, seriesName, eventsOfSeries);
     }
     
     @Override

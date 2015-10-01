@@ -6,6 +6,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaOverviewNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaRacesNavigationProvider;
+import com.sap.sailing.gwt.home.mobile.places.SeriesEventOverviewNavigationProvider;
+import com.sap.sailing.gwt.home.mobile.places.SeriesEventRacesNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
@@ -26,7 +28,8 @@ public interface EventViewBase extends IsWidget {
     void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
-            RegattaRacesNavigationProvider, RegattaOverviewNavigationProvider {
+            RegattaRacesNavigationProvider, SeriesEventRacesNavigationProvider, RegattaOverviewNavigationProvider,
+            SeriesEventOverviewNavigationProvider {
         
         EventContext getCtx();
 

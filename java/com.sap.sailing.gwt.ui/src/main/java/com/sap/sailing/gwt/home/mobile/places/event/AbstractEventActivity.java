@@ -168,9 +168,19 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return clientFactory.getNavigator().getEventNavigation(new RegattaOverviewPlace(ctx), null, false);
     }
     
+    @Override
+    public PlaceNavigation<?> getSeriesEventOverviewNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new EventDefaultPlace(eventId.toString()), null, false);
+    }
+    
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
         EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getSeriesEventRacesNavigation(UUID eventId) {
+        return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(eventId.toString(), null), null, false);
     }
 
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
