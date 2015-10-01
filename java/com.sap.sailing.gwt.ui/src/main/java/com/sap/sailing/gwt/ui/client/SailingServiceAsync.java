@@ -581,17 +581,17 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * Set the competitor registrations in the racelog. Unregisters formerly registered competitors
      * that are not listed in {@code competitors}.
      */
-    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitors, AsyncCallback<Void> callback);
 
     /**
      * Set the competitor registrations in the leaderboard. Unregisters formerly registered competitors
      * that are not listed in {@code competitors}.
      */
-    void setCompetitorRegistrations(String leaderboardName,Set<CompetitorDTO> competitors,
+    void setCompetitorRegistrationsInRegattaLog(String leaderboardName,Set<CompetitorDTO> competitors,
             AsyncCallback<Void> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    void getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
@@ -671,7 +671,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
+    void getCompetitorRegistrationsInRegattaLog(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
 

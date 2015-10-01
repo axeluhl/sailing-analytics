@@ -73,7 +73,7 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 mappedToSelectionChanged(markTable.getSelectionModel().getSelectedObject());
             }
         });
-        sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
+        sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
             @Override
             public void onSuccess(Collection<CompetitorDTO> result) {
                 competitorTable.refreshCompetitorList(result);

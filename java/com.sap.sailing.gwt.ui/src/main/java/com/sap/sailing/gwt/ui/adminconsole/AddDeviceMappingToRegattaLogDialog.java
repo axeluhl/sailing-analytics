@@ -87,7 +87,7 @@ public class AddDeviceMappingToRegattaLogDialog extends AbstractCancelableDialog
                 }, null);
 
         // load table content
-        sailingService.getCompetitorRegistrations(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         // fetching marks definitions from the race logs; note that currently there are no mark *definitions*
         // on regatta logs although there can be mark/device assignments on a regatta log which then gives the
         // mark a position that applies across all races in the regatta-like thing

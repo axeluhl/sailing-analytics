@@ -466,19 +466,19 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind, boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
     
-    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
     
     /**
      * Get the competitors registered in this racelog. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrations(String) registered for the leaderboard}.
+     * {@link #getCompetitorRegistrationsInRegattaLog(String) registered for the leaderboard}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
+    Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * Get the competitors registered in this leaderboard. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrations(String, String, String) registered for the racelog}.
+     * {@link #getCompetitorRegistrationsInRaceLog(String, String, String) registered for the racelog}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName) throws DoesNotHaveRegattaLogException;
+    Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
@@ -577,7 +577,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO);
 
-    void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors)
+    void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitors)
             throws DoesNotHaveRegattaLogException;
     
     /**

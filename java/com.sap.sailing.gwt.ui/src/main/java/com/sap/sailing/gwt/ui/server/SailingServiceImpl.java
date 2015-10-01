@@ -4920,14 +4920,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
                         getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName)
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName)
             throws DoesNotHaveRegattaLogException {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
@@ -4939,7 +4939,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -4951,7 +4951,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
+    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         Set<Competitor> competitors = new HashSet<Competitor>();

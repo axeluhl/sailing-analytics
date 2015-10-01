@@ -1,12 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -26,7 +24,6 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
-import com.sap.sailing.gwt.ui.adminconsole.RaceLogTrackingCompetitorRegistrationsDialog.CompetitorRegistrationHandler;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -106,43 +103,32 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 if (RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
-                    new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                    /* editable */ true, new CompetitorRegistrationHandler() {
-                        
-                        @Override
-                        public void setRegisteredCompetitors(Set<CompetitorDTO> registeredCompetitors) {
-                            sailingService.setCompetitorRegistrations(leaderboardName, registeredCompetitors,
-                                    new AsyncCallback<Void>() {
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            // pass
-                                        }
+                    new RegattaLogCompetitorRegistrationDialog(sailingService, stringMessages, errorReporter, /*editable*/ true, 
+                            leaderboardName, new DialogCallback<Set<CompetitorDTO>>() {
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            errorReporter.reportError("Could not save competitor registrations: "
-                                                    + caught.getMessage());
-                                        }
+                                @Override
+                                public void ok(Set<CompetitorDTO> registeredCompetitors) {
+                                    sailingService.setCompetitorRegistrationsInRegattaLog(leaderboardName, registeredCompetitors,
+                                            new AsyncCallback<Void>() {
+                                                @Override
+                                                public void onSuccess(Void result) {
+                                                    // pass
+                                                }
+
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    errorReporter.reportError("Could not save competitor registrations: "
+                                                            + caught.getMessage());
+                                                }
                                     });
-                        }
+                                }
 
-                        @Override
-                        public void getRegisteredCompetitors(
-                                final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                            sailingService.getCompetitorRegistrations(leaderboardName,
-                                    new AsyncCallback<Collection<CompetitorDTO>>() {
-                                        @Override
-                                        public void onSuccess(Collection<CompetitorDTO> result) {
-                                            callback.onSuccess(result);
-                                        }
+                                @Override
+                                public void cancel() {
+                                    
+                                }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            callback.onFailure(caught);
-                                        }
-                                    });
-                        }
-                    }).show();
+                            }).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new AddDeviceMappingToRegattaLogDialog(sailingService, errorReporter, stringMessages,
                             leaderboardName).show();
@@ -207,44 +193,31 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     removeDenotation(object.getA(), object.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS
                         .equals(value)) {
-                    new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                            editable, new CompetitorRegistrationHandler() {
-                                @Override
-                                public void getRegisteredCompetitors(
-                                        final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                                    sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName,
-                                            fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
-                                                @Override
-                                                public void onSuccess(Collection<CompetitorDTO> result) {
-                                                    callback.onSuccess(result);
-                                                }
+                    new RaceLogCompetitorRegistrationDialog(sailingService, stringMessages, errorReporter, editable, leaderboardName, 
+                            raceColumnName, fleetName, new DialogCallback<Set<CompetitorDTO>>() {
 
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    callback.onFailure(caught);
-                                                }
-                                            });
+                        @Override
+                        public void ok(final Set<CompetitorDTO> registeredCompetitors) {
+                            sailingService.setCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName,
+                                    fleetName, registeredCompetitors, new AsyncCallback<Void>() {
+                                @Override
+                                public void onSuccess(Void result) {
+                                    object.getA().getRaceLogTrackingInfo(object.getB()).competitorRegistrationsExists = !registeredCompetitors.isEmpty();
                                 }
 
                                 @Override
-                                public void setRegisteredCompetitors(final Set<CompetitorDTO> registeredCompetitors) {
-                                    sailingService.setCompetitorRegistrations(leaderboardName, raceColumnName,
-                                            fleetName, registeredCompetitors, new AsyncCallback<Void>() {
-                                                @Override
-                                                public void onSuccess(Void result) {
-                                                    object.getA().getRaceLogTrackingInfo(object.getB()).competitorRegistrationsExists = !registeredCompetitors
-                                                            .isEmpty();
-                                                }
-
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    errorReporter
-                                                            .reportError("Could not save competitor registrations: "
-                                                                    + caught.getMessage());
-                                                }
-                                            });
+                                public void onFailure(Throwable caught) {
+                                    errorReporter
+                                    .reportError("Could not save competitor registrations: "
+                                            + caught.getMessage());
                                 }
-                            }).show();
+                            });
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter,
                             leaderboardName, raceColumnName, fleetName).show();
