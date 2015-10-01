@@ -18,9 +18,10 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
 
     public RaceLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
-            final String raceColumnName, final String fleetName) {
+            final String raceColumnName, final String fleetName, DialogCallback<Void> callback) {
 
-        super(sailingService, stringMessages, errorReporter);
+        super(sailingService, stringMessages, errorReporter, callback);
+        
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
@@ -153,5 +154,10 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
 
             }
         };
+    }
+
+    @Override
+    protected Void getResult() {
+        return null;
     }
 }

@@ -133,7 +133,16 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
 
                             }).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName).show();
+                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter,
+                            leaderboardName, new DialogCallback<Void>() {
+                                @Override
+                                public void ok(Void editedObject) {
+                                }
+
+                                @Override
+                                public void cancel() {
+                                }
+                            }).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_INVITE_BUOY_TENDERS.equals(value)) {
                     openChooseEventDialogAndSendMails(leaderboardName);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_SHOW_REGATTA_LOG.equals(value)) {
@@ -245,7 +254,15 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     }).show();
 
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName).show();
+                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, new DialogCallback<Void>() {
+                        @Override
+                        public void ok(Void editedObject) {
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());

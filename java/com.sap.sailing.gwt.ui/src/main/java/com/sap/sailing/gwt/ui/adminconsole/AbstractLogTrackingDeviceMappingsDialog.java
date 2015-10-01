@@ -24,8 +24,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.gwt.ui.adminconsole.DeviceMappingTableWrapper.FilterChangedHandler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -34,27 +35,60 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class AbstractLogTrackingDeviceMappingsDialog extends AbstractSaveDialog {
+public abstract class AbstractLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void> {
     public static final double PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS = 0.1;
     public static final String FIELD_INDEX = "index";
     public static final int CHART_WIDTH = 500;
     public static final String SERIES_COLOR = "#fcb913";
     
-    List<DeviceMappingDTO> mappings = new ArrayList<DeviceMappingDTO>();
-    DeviceMappingTableWrapper deviceMappingTable;
+    protected ErrorReporter errorReporter;
+    protected SailingServiceAsync sailingService;
+    protected StringMessages stringMessages;
+    protected List<DeviceMappingDTO> mappings = new ArrayList<DeviceMappingDTO>();
+    protected DeviceMappingTableWrapper deviceMappingTable;
     
     private Point[] data;
     
     private Date latest;
     private Date earliest;
-    
     private Chart chart;
     
+    
+    
     public AbstractLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, false);
-        setupUi();
+            final ErrorReporter errorReporter, DialogCallback<Void> callback) {
+        super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
+        
+        this.stringMessages = stringMessages;
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+    }
+    
+    @Override
+    protected Widget getAdditionalWidget() {
+        FlowPanel mainPanel = new FlowPanel();
+        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        Button addMappingButton = new Button(stringMessages.add());
+        addMappingButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                addMapping();
+            }
+        });
+        buttonPanel.add(addMappingButton);
+        
+        Button importBtn = new Button(stringMessages.importFixes());
+        importBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                importFixes();
+            }
+        });
+        buttonPanel.add(importBtn);
+        mainPanel.add(buttonPanel);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
         
@@ -78,8 +112,8 @@ public abstract class AbstractLogTrackingDeviceMappingsDialog extends AbstractSa
         actionCol.setFieldUpdater(getActionColFieldUpdater());
         deviceMappingTable.getTable().addColumn(actionCol, stringMessages.actions());
         
-        HorizontalPanel panel = new HorizontalPanel();
-        mainPanel.add(panel);
+        HorizontalPanel deviceMappingPannel = new HorizontalPanel();
+        mainPanel.add(deviceMappingPannel);
         
         chart = new Chart()
         .setType(Series.Type.COLUMN_RANGE)
@@ -130,43 +164,14 @@ public abstract class AbstractLogTrackingDeviceMappingsDialog extends AbstractSa
             }
         }));
 
-        panel.add(chart);
-        panel.add(deviceMappingTable);
-
-        center();
+        deviceMappingPannel.add(chart);
+        deviceMappingPannel.add(deviceMappingTable);
+        
+        return mainPanel;
     }
 
     protected abstract FieldUpdater<DeviceMappingDTO, String> getActionColFieldUpdater();
-    
-    @Override
-    protected void addButtons(Panel buttonPanel) {
-        Button addCompetitorButton = new Button(stringMessages.add());
-        addCompetitorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addMapping();
-            }
-        });
-        buttonPanel.add(addCompetitorButton);
         
-        Button importBtn = new Button(stringMessages.importFixes());
-        importBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                importFixes();
-            }
-        });
-        buttonPanel.add(importBtn);
-
-        super.addButtons(buttonPanel);
-    }
-
-    @Override
-    protected void save() {
-        // TODO Auto-generated method stub
-        
-    }
-    
     void updateChart() {
         earliest = new Date(Long.MAX_VALUE);
         latest = new Date(Long.MIN_VALUE);

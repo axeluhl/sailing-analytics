@@ -15,9 +15,9 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
     protected final String leaderboardName;
 
     public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName) {
+            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName, DialogCallback<Void> callback) {
 
-        super(sailingService, stringMessages, errorReporter);
+        super(sailingService, stringMessages, errorReporter, callback);
         this.leaderboardName = leaderboardName;
 
         refresh();
@@ -147,5 +147,10 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
 
             }
         };
+    }
+
+    @Override
+    protected Void getResult() {
+        return null;
     }
 }
