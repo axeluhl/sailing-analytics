@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A caching provider of a competitor set, based on the tracked races and {@link RaceLog}s of the {@link RaceColumn}s of
@@ -49,11 +51,14 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     
     private final RaceColumnListener raceColumnListener;
 
-    private transient Iterable<Competitor> allCompetitorsCache;
+    private Iterable<Competitor> allCompetitorsCache;
+    
+    private final ConcurrentHashMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
 
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
         super();
         this.provider = provider;
+        this.allCompetitorsCacheByRace = new ConcurrentHashMap<>();
         // A note regarding listener serializability: RaceLogListener and RegattaLogListener objects
         // don't need to be serializable as the log listeners are a transient structure. The race column
         // listeners, however, need to explicitly declare that they are transient.
@@ -64,14 +69,14 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         regattaLogCompetitorsCacheInvalidationListener = new BaseRegattaLogEventVisitor() {
             @Override
             public void visit(RegattaLogRegisterCompetitorEvent event) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
 
             @Override
             public void visit(RegattaLogRevokeEvent event) {
                 try {
                     if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
-                        
+                        invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
                     logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
@@ -81,14 +86,14 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         raceLogCompetitorsCacheInvalidationListener = new BaseRaceLogEventVisitor() {
             @Override
             public void visit(RaceLogRegisterCompetitorEvent event) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
 
             @Override
             public void visit(RaceLogRevokeEvent event) {
                 try {
                     if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
-                        
+                        invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
                     logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
@@ -111,22 +116,22 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
 
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
 
             @Override
             public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
 
             @Override
             public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
 
             @Override
             public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-                invalidateAllCompetitorsCache();
+                invalidateAllCompetitorsCaches();
             }
         };
     }
@@ -149,16 +154,45 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         }
         return allCompetitorsCache;
     }
+    
+    /**
+     * Obtains competitors from the regatta log and adds those from the tracked race for the
+     * raceColumn/fleet combination or the race log, if no tracked race is attached for this
+     * combination. Does <em>not</em> eliminate suppressed competitors.
+     */
+    public Iterable<Competitor> getAllCompetitors(final RaceColumn raceColumn, final Fleet fleet) {
+        Pair<RaceColumn, Fleet> key = new Pair<>(raceColumn, fleet);
+        Iterable<Competitor> result = allCompetitorsCacheByRace.get(key);
+        if (result == null) {
+            final Set<Competitor> resultSet = new HashSet<>();
+            Util.addAll(raceColumn.getAllCompetitors(fleet), resultSet);
+            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race log's listeners set
+            raceColumn.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
+            // consider {@link RegattaLog}
+            Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(provider.getRegattaLike().getRegattaLog()).analyze();
+            resultSet.addAll(viaLog);
+            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's listeners set
+            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
+            result = resultSet;
+            allCompetitorsCacheByRace.put(key, result);
+        }
+        return result;
+    }
 
-    private void invalidateAllCompetitorsCache() {
+    private void invalidateAllCompetitorsCaches() {
         allCompetitorsCache = null;
+        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the regatta log's listeners set
         provider.getRegattaLike().getRegattaLog().removeListener(regattaLogCompetitorsCacheInvalidationListener);
         for (final RaceColumn rc : provider.getRaceColumns()) {
             for (final Fleet fleet : rc.getFleets()) {
+                // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race log's listeners set
                 rc.getRaceLog(fleet).removeListener(raceLogCompetitorsCacheInvalidationListener);
             }
         }
+        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race column listeners set
         provider.removeRaceColumnListener(raceColumnListener);
+        allCompetitorsCacheByRace.clear(); // this is a little coarse-grained; but given the typical access patterns it should be good enough.
+        // The change frequency of competitors lists on individual races is much lower than the access frequency to this structure.
     }
 
 }

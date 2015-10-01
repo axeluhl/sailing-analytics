@@ -142,8 +142,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
-            final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard "+getName();
-            logger.severe(msg);
+            if (logAlreadyExistingColumn) {
+                final String msg = "Trying to create race column with duplicate name " + name + " in leaderboard " + getName();
+                logger.severe(msg);
+            }
         } else {
             column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);

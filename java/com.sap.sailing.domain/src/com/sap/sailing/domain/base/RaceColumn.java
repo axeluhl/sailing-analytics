@@ -230,10 +230,16 @@ public interface RaceColumn extends Named {
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
     
     /**
-     * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this column}
-     * plus the competitors registered through any {@link RaceLog} {@link #getRaceLog(Fleet) attached to this column}. Note that
-     * this does not include competitors registered through any {@link RegattaLog} on the structure owning (directly or transitively)
-     * this column.
+     * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this
+     * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
+     * respective {@link RaceLog} {@link #getRaceLog(Fleet) attached to this column for that fleet}. Note that this does
+     * not include competitors registered through any {@link RegattaLog} on the structure owning (directly or
+     * transitively) this column.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.
+     */
+    Iterable<Competitor> getAllCompetitors(Fleet fleet);
 }

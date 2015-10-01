@@ -230,4 +230,20 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         return result;
     }
 
+    @Override
+    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
+        final Iterable<Competitor> result;
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            result = trackedRace.getRace().getCompetitors();
+        } else {
+            // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+            result = viaRaceLog;
+        }
+        return result;
+    }
 }
