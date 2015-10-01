@@ -104,7 +104,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (view != null) {
+        if (isAdded() && view != null) {
             if (!view.equals(mRecord)) {
                 resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartProcedureFragment.class);
                 setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);

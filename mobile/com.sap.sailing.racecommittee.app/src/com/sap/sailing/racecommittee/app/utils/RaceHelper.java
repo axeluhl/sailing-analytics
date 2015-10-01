@@ -1,12 +1,18 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TimingFragment;
 
 public class RaceHelper {
     public static String getRaceName(@Nullable ManagedRace race) {
@@ -110,5 +116,17 @@ public class RaceHelper {
         }
 
         return fleetName;
+    }
+
+    public static String getGateTiming(Context context, GateStartRacingProcedure procedure) {
+        String timing;
+        long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
+        long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
+        if (AppPreferences.on(context).getGateStartHasAdditionalGolfDownTime()) {
+            timing = context.getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
+        } else {
+            timing = context.getString(R.string.gate_time_schedule_short, launchTime);
+        }
+        return timing;
     }
 }

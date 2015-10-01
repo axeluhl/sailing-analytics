@@ -242,7 +242,7 @@ public class SetupPanelFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (view != null) {
+        if (isAdded() && view != null) {
             if (!view.equals(mStartProcedure)) {
                 resetFragment(mStartProcedureLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartProcedureFragment.class);
                 setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, LEVEL_NORMAL);
@@ -411,10 +411,11 @@ public class SetupPanelFragment extends BasePanelFragment {
                         if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
                             multiplier = 2;
                         }
-                        int height = container.getHeight();
+                        int height = container.getHeight() + getResources().getDimensionPixelSize(R.dimen.thin_line);
                         int width = container.getWidth() * multiplier;
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
-                        params.setMargins(container.getLeft() + container.getWidth(), container.getTop(), 0, 0);
+                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        params.addRule(RelativeLayout.RIGHT_OF, R.id.race_panel_setup);
                         mExtraLayout.setLayoutParams(params);
                         mExtraLayout.setVisibility(View.VISIBLE);
                         transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));

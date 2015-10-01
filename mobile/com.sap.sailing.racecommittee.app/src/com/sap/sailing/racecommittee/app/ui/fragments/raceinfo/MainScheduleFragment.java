@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -165,7 +164,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 mItems.add(new MainScheduleItem(getString(R.string.start_mode), flag.name(), drawable, runnableMode));
             } else if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
                 // GateStart
-                GateStartRacingProcedure procedure = (GateStartRacingProcedure) getRaceState().getRacingProcedure();
+                GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 if (procedure != null) {
                     Runnable runnablePathfinder = new Runnable() {
                         @Override
@@ -175,21 +174,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
 
-                    String timing;
-                    long launchTime = procedure.getGateLaunchStopTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
-                    long golfTime = procedure.getGolfDownTime() / TimingFragment.ONE_MINUTE_MILLISECONDS;
-                    if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
-                        timing = getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
-                    } else {
-                        timing = getString(R.string.gate_time_schedule_short, launchTime);
-                    }
                     Runnable runnableTiming = new Runnable() {
                         @Override
                         public void run() {
                             openFragment(TimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), timing, null, runnableTiming));
+                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), RaceHelper
+                        .getGateTiming(getActivity(), procedure), null, runnableTiming));
                 }
             }
         }

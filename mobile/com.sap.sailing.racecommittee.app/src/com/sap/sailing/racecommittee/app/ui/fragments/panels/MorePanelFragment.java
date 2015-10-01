@@ -29,6 +29,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PathFinderFragmen
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TimingFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 
 public class MorePanelFragment extends BasePanelFragment {
 
@@ -147,7 +148,7 @@ public class MorePanelFragment extends BasePanelFragment {
 
             if (mGateTiming != null && mGateTimingValue != null) {
                 mGateTiming.setVisibility(View.VISIBLE);
-                mGateTimingValue.setText("3 + 4 = 7 Min");
+                mGateTimingValue.setText(RaceHelper.getGateTiming(getActivity(), typedProcedure));
             }
         }
     }
@@ -209,15 +210,17 @@ public class MorePanelFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (!AppUtils.with(getActivity()).is10inch()) {
-            if (!view.equals(mStartMode)) {
-                setMarkerLevel(mStartMode, R.id.start_mode_marker, LEVEL_NORMAL);
-            }
-            if (!view.equals(mGatePathfinder)) {
-                setMarkerLevel(mGatePathfinder, R.id.gate_pathfinder_marker, LEVEL_NORMAL);
-            }
-            if (!view.equals(mGateTiming)) {
-                setMarkerLevel(mGateTiming, R.id.gate_timing_marker, LEVEL_NORMAL);
+        if (isAdded() && view != null) {
+            if (!AppUtils.with(getActivity()).is10inch()) {
+                if (!view.equals(mStartMode)) {
+                    setMarkerLevel(mStartMode, R.id.start_mode_marker, LEVEL_NORMAL);
+                }
+                if (!view.equals(mGatePathfinder)) {
+                    setMarkerLevel(mGatePathfinder, R.id.gate_pathfinder_marker, LEVEL_NORMAL);
+                }
+                if (!view.equals(mGateTiming)) {
+                    setMarkerLevel(mGateTiming, R.id.gate_timing_marker, LEVEL_NORMAL);
+                }
             }
         }
     }
