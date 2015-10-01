@@ -70,15 +70,52 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
                 compLists[l].add(createCompetitor("" + l + "/" + i));
             }
         }
+        competitorProviderRegattaLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(regattaLeaderboard);
     }
     
     @Test
-    public void testSimpleCompetitorListOnOneRace() {
+    public void testSimpleCompetitorListOnOneRaceInFlexibleLeaderboard() {
         TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[0]);
         flexibleLeaderboard.addRace(trackedRace, "R1", /* medalRace */ false);
         Set<Competitor> expected = new HashSet<>(compLists[0]);
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testTwoCompetitorListsOnTwoRacesInFlexibleLeaderboard() {
+        TrackedRace trackedRace1 = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[0]);
+        flexibleLeaderboard.addRace(trackedRace1, "R1", /* medalRace */ false);
+        TrackedRace trackedRace2 = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[1]);
+        flexibleLeaderboard.addRace(trackedRace2, "R2", /* medalRace */ false);
+        Set<Competitor> expected = new HashSet<>(compLists[0]);
+        expected.addAll(compLists[1]);
+        Set<Competitor> actual = new HashSet<>();
+        Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testSimpleCompetitorListOnOneRaceInRegattaLeaderboard() {
+        TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[0]);
+        regattaLeaderboard.getRaceColumnByName("R1").setTrackedRace(regattaLeaderboard.getRaceColumnByName("R1").getFleetByName("Yellow"), trackedRace);
+        Set<Competitor> expected = new HashSet<>(compLists[0]);
+        Set<Competitor> actual = new HashSet<>();
+        Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(), actual);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testTwoCompetitorListsOnTwoRacesInRegattaLeaderboard() {
+        TrackedRace trackedRace1 = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[0]);
+        regattaLeaderboard.getRaceColumnByName("R1").setTrackedRace(regattaLeaderboard.getRaceColumnByName("R1").getFleetByName("Yellow"), trackedRace1);
+        TrackedRace trackedRace2 = new MockedTrackedRaceWithStartTimeAndRanks(MillisecondsTimePoint.now(), compLists[1]);
+        regattaLeaderboard.getRaceColumnByName("R1").setTrackedRace(regattaLeaderboard.getRaceColumnByName("R1").getFleetByName("Blue"), trackedRace2);
+        Set<Competitor> expected = new HashSet<>(compLists[0]);
+        expected.addAll(compLists[1]);
+        Set<Competitor> actual = new HashSet<>();
+        Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(), actual);
         assertEquals(expected, actual);
     }
 }
