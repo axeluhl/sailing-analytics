@@ -9,18 +9,12 @@
 		.pageTitle {
 			font-size: 1.066666666666667em;
 			font-weight: 700;
-			margin-top: 0.666666666666667em;
-		}
-		div.legend {
-			margin-top: 0.666666666666667em;
-			margin-bottom: 0.666666666666667em;
+			margin: 0.666666666666667em 0;
 		}
 	</ui:style>	
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.columns}">
 			<div class="{res.mediaCss.small12} {style.pageTitle}"><ui:text from="{i18n.races}" /></div>
-			<mp:regattacompetition.TempMobileRaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}" />
-			<!-- <sp:regattanavigation.RaceStateLegend addStyleNames="{res.mediaCss.small12} {style.legend}"/> -->
 		</div>
 		<mp:regattacompetition.RegattaCompetition ui:field="regattaCompetitionUi" />
 	</g:HTMLPanel>	
