@@ -1333,6 +1333,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String eventQuickfinder();
     String regattaQuickfinder();
     String resultsQuickfinder();
     String racesQuickfinder();
