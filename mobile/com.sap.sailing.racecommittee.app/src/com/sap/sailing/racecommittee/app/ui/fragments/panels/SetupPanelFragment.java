@@ -28,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
@@ -362,7 +363,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(StartProcedureFragment.newInstance(1));
+                    replaceFragment(StartProcedureFragment.newInstance(BaseFragment.START_MODE_PLANNED));
                     break;
 
                 default:
@@ -459,7 +460,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(CourseFragment.newInstance(1, getRace()));
+                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace()));
                     break;
 
                 default:
@@ -499,7 +500,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(WindFragment.newInstance(1));
+                    replaceFragment(WindFragment.newInstance(BaseFragment.START_MODE_PLANNED));
                     break;
 
                 default:

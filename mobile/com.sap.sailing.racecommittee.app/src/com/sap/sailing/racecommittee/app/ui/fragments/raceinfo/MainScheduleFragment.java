@@ -120,7 +120,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                openFragment(CourseFragment.newInstance(0, getRace()));
+                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace()));
             }
         };
         MainScheduleItem courseItem = new MainScheduleItem(getString(R.string.course), null, null, runnable);
@@ -134,7 +134,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                openFragment(WindFragment.newInstance(0));
+                openFragment(WindFragment.newInstance(START_MODE_PRESETUP));
             }
         };
         mItemStartWind = new MainScheduleItem(getString(R.string.wind), null, null, runnable);
@@ -147,7 +147,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             Runnable runnableProcedure = new Runnable() {
                 @Override
                 public void run() {
-                    openFragment(StartProcedureFragment.newInstance(0));
+                    openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
                 }
             };
             mItems.add(new MainScheduleItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, runnableProcedure));
@@ -158,7 +158,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 Runnable runnableMode = new Runnable() {
                     @Override
                     public void run() {
-                        openFragment(StartModeFragment.newInstance(0));
+                        openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP));
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
@@ -170,7 +170,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     Runnable runnablePathfinder = new Runnable() {
                         @Override
                         public void run() {
-                            openFragment(PathFinderFragment.newInstance(0));
+                            openFragment(PathFinderFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
@@ -186,7 +186,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     Runnable runnableTiming = new Runnable() {
                         @Override
                         public void run() {
-                            openFragment(TimingFragment.newInstance(0));
+                            openFragment(TimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
                     mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), timing, null, runnableTiming));
