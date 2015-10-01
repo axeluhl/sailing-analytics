@@ -610,6 +610,17 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
+    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName);
+
+    List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException;
+
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
+
+    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint) throws TransformationException;
+
+    void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
+            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
+
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 
     RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);

@@ -20,31 +20,29 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
-import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappingDTO> {
-    private final BetterDateTimeBox from;
-    private final BetterDateTimeBox to;
-    private final ListBox deviceType;
-    private final TextBox deviceId;
-    private final DeviceMappingQRCodeWidget qrWidget;
-    private final StringMessages stringMessages;
-    private MappableToDevice selectedItem;
-    private final ItemToMapToDeviceSelectionPanel itemSelectionPanel;
+public abstract class AbstractLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
+    protected final BetterDateTimeBox from;
+    protected final BetterDateTimeBox to;
+    protected final ListBox deviceType;
+    protected final TextBox deviceId;
+    protected final DeviceMappingQRCodeWidget qrWidget;
+    protected final StringMessages stringMessages;
+    protected MappableToDevice selectedItem;
+    protected final ItemToMapToDeviceSelectionPanel itemSelectionPanel;
+    protected final SailingServiceAsync sailingService;
+    protected Grid entryGrid;
 
-    public AddDeviceMappingToRaceLogDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
-            final String fleetName, DialogCallback<DeviceMappingDTO> callback, final DeviceMappingDTO mapping) {
+    public AbstractLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, DialogCallback<DeviceMappingDTO> callback, final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<DeviceMappingDTO>() {
                     @Override
@@ -75,6 +73,7 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                 }, true, callback);
 
         this.stringMessages = stringMessages;
+        this.sailingService = sailingService;
 
         from = initTimeBox();
         from.setValue(null);
@@ -123,51 +122,25 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                     }
                 }, mapping != null ? mapping.mappedTo : null);
 
-        // load table content
-        sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName,
-                itemSelectionPanel.getSetCompetitorsCallback());
-
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName,
-                itemSelectionPanel.getSetMarksCallback());
-
         if (mapping != null) {
             deviceId.setValue(mapping.deviceIdentifier.deviceId);
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
 
-        qrWidget = new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
-            @SuppressWarnings("deprecation")
-            @Override
-            public String createURL(String baseUrlWithoutTrailingSlash, String mappedItemType, String mappedItemId)
-                    throws QRCodeURLCreationException {
-                if (from.getValue() == null && to.getValue() == null) {
-                    throw new QRCodeURLCreationException(stringMessages.atMostOneEndOfTheTimeRangeMayBeOpen());
-                }
-                
-                Long fromMillis = null;
-                if (from.getValue() != null){
-                    fromMillis = from.getValue().getTime();
-                }
-                
-                Long toMillis = null;
-                if (to.getValue() != null) {
-                    toMillis = to.getValue().getTime();
-                }
-                
-                return DeviceMappingConstants.getDeviceMappingForRaceLogUrl(baseUrlWithoutTrailingSlash,
-                        leaderboardName, raceColumnName, fleetName, mappedItemType, mappedItemId, fromMillis, toMillis,
-                        GwtUrlHelper.INSTANCE);
-            }
-        });
+        qrWidget = setupQRCodeWidget();
         qrWidget.generateQRCode();
     }
-
+    
+    protected abstract DeviceMappingQRCodeWidget setupQRCodeWidget();
+    
+    protected abstract void loadCompetitorsAndMarks();
+    
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel panel = new HorizontalPanel();
         VerticalPanel leftSidePanel = new VerticalPanel();
-        Grid entryGrid = new Grid(4, 2);
+        entryGrid = new Grid(4, 2);
         CaptionPanel entryPanel = new CaptionPanel(stringMessages.mappingDetails());
         CaptionPanel qrPanel = new CaptionPanel(stringMessages.qrCode());
 
@@ -219,8 +192,6 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
         return timeBox;
     }
     
-    
-
     @Override
     protected boolean validate() {
         if (super.validate()){
@@ -231,13 +202,4 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
             return false;
         }
     }
-
-    @Override
-    protected DeviceMappingDTO getResult() {
-        String deviceTypeS = deviceType.getSelectedIndex() < 0 ? null : deviceType.getValue(deviceType
-                .getSelectedIndex());
-        DeviceIdentifierDTO deviceIdentifier = new DeviceIdentifierDTO(deviceTypeS, deviceId.getValue());
-        return new DeviceMappingDTO(deviceIdentifier, from.getValue(), to.getValue(), selectedItem, null);
-    }
-
 }

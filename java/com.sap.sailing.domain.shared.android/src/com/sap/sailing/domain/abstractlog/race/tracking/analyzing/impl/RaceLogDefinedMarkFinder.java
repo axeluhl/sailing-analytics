@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.LogAnalyzer;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -13,15 +12,15 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.base.Mark;
 
-public class DefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
-    public DefinedMarkFinder(RaceLog raceLog) {
+public class RaceLogDefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
+    public RaceLogDefinedMarkFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
     public static class Factory implements AnalyzerFactory<Collection<Mark>> {
         @Override
-        public LogAnalyzer<Collection<Mark>> createAnalyzer(AbstractLog<?, ?> log) {
-            return new DefinedMarkFinder((RaceLog) log);
+        public RaceLogAnalyzer<Collection<Mark>> createAnalyzer(AbstractLog<?, ?> log) {
+            return new RaceLogDefinedMarkFinder((RaceLog) log);
         }
     }
 

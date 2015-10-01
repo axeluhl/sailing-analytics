@@ -11,49 +11,43 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDeviceMappingsDialog {
-    protected String leaderboardName;
-    protected String raceColumnName;
-    protected String fleetName;
+public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDeviceMappingsDialog {
+    protected final String leaderboardName;
 
-    public RaceLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName,
-            final String raceColumnName, final String fleetName) {
+    public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
+            final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName) {
 
         super(sailingService, stringMessages, errorReporter);
         this.leaderboardName = leaderboardName;
-        this.raceColumnName = raceColumnName;
-        this.fleetName = fleetName;
-        
+
         refresh();
     }
 
     @Override
     protected void refresh() {
-        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<List<DeviceMappingDTO>>() {
-                    @Override
-                    public void onSuccess(List<DeviceMappingDTO> result) {
-                        mappings = result;
+        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
+            @Override
+            public void onSuccess(List<DeviceMappingDTO> result) {
+                mappings = result;
 
-                        updateChart();
-                        deviceMappingTable.refresh(mappings);
-                    }
+                updateChart();
+                deviceMappingTable.refresh(mappings);
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load mappings for marks: " + caught.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load mappings for marks: " + caught.getMessage());
+            }
+        });
     }
 
     @Override
     protected void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new RaceLogAddDeviceMappingDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                raceColumnName, fleetName, new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
+        new RegattaLogAddDeviceMappingDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
                     @Override
                     public void ok(final DeviceMappingDTO mapping) {
-                        sailingService.addDeviceMappingToRaceLog(leaderboardName, raceColumnName, fleetName, mapping,
+                        sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
@@ -77,14 +71,14 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
 
     @Override
     protected void importFixes() {
-        new RaceLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                raceColumnName, fleetName, new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
+        new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
 
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
                         for (DeviceMappingDTO mapping : editedObject) {
-                            sailingService.addDeviceMappingToRaceLog(leaderboardName, raceColumnName, fleetName,
-                                    mapping, new AsyncCallback<Void>() {
+                            sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                    new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
                                             refresh();
@@ -116,8 +110,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
                             new DataEntryDialog.DialogCallback<java.util.Date>() {
                                 @Override
                                 public void ok(java.util.Date editedObject) {
-                                    sailingService.closeOpenEndedDeviceMapping(leaderboardName, raceColumnName,
-                                            fleetName, dto, editedObject, new AsyncCallback<Void>() {
+                                    sailingService.closeOpenEndedDeviceMapping(leaderboardName, dto, editedObject,
+                                            new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
                                                     refresh();
@@ -136,8 +130,8 @@ public class RaceLogTrackingDeviceMappingsDialog extends AbstractLogTrackingDevi
                                 }
                             }).show();
                 } else if (RaceLogTrackingDeviceMappingsImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    sailingService.revokeRaceAndRegattaLogEvents(leaderboardName, raceColumnName, fleetName,
-                            dto.originalRaceLogEventIds, new AsyncCallback<Void>() {
+                    sailingService.revokeRaceAndRegattaLogEvents(leaderboardName, dto.originalRaceLogEventIds,
+                            new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError("Could not remove mappings: " + caught.getMessage());
