@@ -138,7 +138,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         if(leaderboardName != null) {
             List<TrackedRace> trackedRaces = getTrackedRacesFromLeaderboard(leaderboardName);
             List<TrackedRace> filteredTrackedRaces = trackedRaces.stream().filter(trackedRace -> trackedRace.takesWindFixWithTimePoint(MillisecondsTimePoint.now())).collect(Collectors.toList());
-            if(filteredTrackedRaces != null) {
+            if(filteredTrackedRaces != null && filteredTrackedRaces.size() > 0) {
                 TrackedRace raceThatTakesWindNow = filteredTrackedRaces.get(0);
                 if(raceThatTakesWindNow != null) {
                     result = raceThatTakesWindNow.getRaceIdentifier();
