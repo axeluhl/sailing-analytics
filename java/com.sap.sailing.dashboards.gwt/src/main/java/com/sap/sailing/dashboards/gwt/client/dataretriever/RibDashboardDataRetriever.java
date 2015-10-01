@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,6 +40,7 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
     private final Object MUTEX;
 
     private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
+    private static final Logger logger = Logger.getLogger(RibDashboardDataRetriever.class.getName());
 
     public RibDashboardDataRetriever(RibDashboardServiceAsync ribDashboardService) {
         initNonFinalMemberVariablesWithNoArgumentConstructor();
@@ -74,6 +78,8 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
 
             @Override
             public void onFailure(Throwable caught) {
+                LogRecord logRecord = new LogRecord(Level.INFO, caught.toString());
+                logger.log(logRecord);
             }
         });
     }

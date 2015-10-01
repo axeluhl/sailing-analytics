@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.client.Window;
@@ -83,7 +84,9 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, caught.getMessage().toString());
+                        caught.printStackTrace();
+                        LogRecord logRecord = new LogRecord(Level.INFO, caught.toString());
+                        logger.log(logRecord);
                     }
                 });
     }
@@ -141,7 +144,9 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
             @Override
             public void onFailure(Throwable caught) {
-                logger.log(Level.INFO, caught.getMessage().toString());
+                caught.printStackTrace();
+                LogRecord logRecord = new LogRecord(Level.INFO, caught.toString());
+                logger.log(logRecord);
             }
         });
     }
