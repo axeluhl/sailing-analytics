@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/selector_header_height"
-    android:background="?sap_gray">
+    android:background="?sap_gray"
+    android:clickable="true">
 
     <LinearLayout
         android:id="@+id/header_text"
@@ -23,9 +24,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="@string/course"
-            android:textAppearance="?textHeader"
-            android:layout_gravity="center"/>
+            android:textAppearance="?textHeader"/>
     </LinearLayout>
 
     <View

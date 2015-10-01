@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -19,7 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class StartProcedureFragment extends BaseFragment{
+public class StartProcedureFragment extends BaseFragment {
 
     private final ArrayList<StartProcedureItem> startProcedure = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class StartProcedureFragment extends BaseFragment{
 
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goHome();
                 }
             });
         }
@@ -57,10 +58,10 @@ public class StartProcedureFragment extends BaseFragment{
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getArguments() != null) {
+        if (getView() != null && getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
-                    if (getView() != null) {
+                    if (AppUtils.with(getActivity()).is10inch()) {
                         View header = getView().findViewById(R.id.header);
                         header.setVisibility(View.GONE);
                     }

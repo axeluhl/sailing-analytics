@@ -50,7 +50,7 @@ public class TimingFragment extends BaseFragment {
 
                 @Override
                 public void onClick(View v) {
-                    goBack();
+                    goHome();
                 }
             });
         }
@@ -161,18 +161,9 @@ public class TimingFragment extends BaseFragment {
 
                     GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                     procedure.setGateLineOpeningTimes(MillisecondsTimePoint.now(), launch, golf);
-                    goBack();
+                    goHome();
                 }
             });
-        }
-    }
-
-    private void goBack() {
-        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
-            openMainScheduleFragment();
-        } else {
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }

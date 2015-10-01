@@ -3,7 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import android.os.Bundle;
 import android.view.View;
 
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -13,10 +13,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 public abstract class CourseFragment extends BaseFragment {
 
     public static RaceFragment newInstance(@START_MODE_VALUES int startMode, ManagedRace race) {
-        RaceFragment fragment;
-        RegattaConfiguration configuration = race.getState().getConfiguration();
-        CourseDesignerMode mode = configuration.getDefaultCourseDesignerMode();
+        CourseDesignerMode mode = race.getState().getConfiguration().getDefaultCourseDesignerMode();
 
+        RaceFragment fragment;
         switch (mode) {
             case BY_NAME:
                 fragment = CourseFragmentName.newInstance(startMode);
@@ -41,27 +40,25 @@ public abstract class CourseFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getView() != null) {
-            if (getArguments() != null) {
-                View header = getView().findViewById(R.id.header);
-                if (header != null) {
-                    switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                        case START_MODE_PRESETUP:
-                            View text = header.findViewById(R.id.header_text);
-                            if (text != null) {
-                                text.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        openMainScheduleFragment();
-                                    }
-                                });
-                            }
-                            break;
-
-                        case START_MODE_PLANNED:
+        if (getView() != null && getArguments() != null) {
+            View header = getView().findViewById(R.id.header);
+            if (header != null) {
+                View text = header.findViewById(R.id.header_text);
+                if (text != null) {
+                    text.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            goHome();
+                        }
+                    });
+                }
+                switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                    case START_MODE_PLANNED:
+                        if (AppUtils.with(getActivity()).is10inch()) {
                             header.setVisibility(View.GONE);
-                            break;
-                    }
+                        }
+                        break;
+
                 }
             }
         }

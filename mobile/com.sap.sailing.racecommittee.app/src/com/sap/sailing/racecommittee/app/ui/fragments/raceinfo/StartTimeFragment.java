@@ -24,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -59,7 +60,7 @@ public class StartTimeFragment extends BaseFragment
     public static final int MODE_TIME_PANEL = 2;
 
     private static final int FUTURE_DAYS = 25;
-    private static final int PAST_DAYS = -3;
+    private static final int PAST_DAYS = 3;
     private static final int MAX_DIFF_MIN = 60;
     private static final String ZERO_TIME = "-00:00:00";
     private static final int ABSOLUTE = 0;
@@ -204,64 +205,71 @@ public class StartTimeFragment extends BaseFragment
             }
         };
         Calendar time = Calendar.getInstance();
-        if (getView() != null) {
-            if (getArguments() != null) {
-                switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                    case START_MODE_PLANNED:
-                        View header = ViewHelper.get(getView(), R.id.header_text);
-                        if (header != null) {
-                            header.setOnClickListener(this);
-                        }
-                        View back = ViewHelper.get(getView(), R.id.header_back);
-                        if (back != null) {
-                            back.setVisibility(View.VISIBLE);
-                        }
-                        break;
+        if (getView() != null && getArguments() != null) {
+            View header = ViewHelper.get(getView(), R.id.header);
+            View back = ViewHelper.get(getView(), R.id.header_back);
+            View text = ViewHelper.get(getView(), R.id.header_text);
+            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                case START_MODE_PLANNED:
+                    if (back != null) {
+                        back.setVisibility(View.VISIBLE);
+                    }
+                    if (text != null) {
+                        text.setOnClickListener(this);
+                    }
+                    break;
 
-                    case MODE_TIME_PANEL:
-                        if (getRace() != null && getRaceState() != null) {
-                            mStartTime = getRaceState().getStartTime();
-                            if (mStartTime != null) {
-                                time.setTime(mStartTime.asDate());
-                            }
-                        }
-                        View frame = ViewHelper.get(getView(), R.id.header);
-                        if (frame != null) {
-                            frame.setVisibility(View.GONE);
-                        }
-
-                        StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
-                        if (result != null && result.isDependentStartTime()) {
-                            mStartTimeOffset = result.getStartTimeDiff();
-                            mRaceId = Util.get(result.getRacesDependingOn(), 0);
-                        }
-                        break;
-
-                    default: // MODE_SETUP
-                        mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                case MODE_TIME_PANEL:
+                    if (getRace() != null && getRaceState() != null) {
+                        mStartTime = getRaceState().getStartTime();
                         if (mStartTime != null) {
                             time.setTime(mStartTime.asDate());
                         }
-                        mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
-                        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
-
-                        View syncButtons = ViewHelper.get(getView(), R.id.buttonBar);
-                        if (syncButtons != null) {
-                            syncButtons.setVisibility(View.GONE);
+                    }
+                    if (AppUtils.with(getActivity()).is10inch()) {
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
                         }
-                        break;
-                }
-            }
+                    } else {
+                        if (back != null) {
+                            back.setVisibility(View.VISIBLE);
+                        }
+                        if (text != null) {
+                            text.setOnClickListener(this);
+                        }
+                    }
 
-            if (mRaceId == null && mStartTimeOffset == null) {
-                showTab(ABSOLUTE);
-            } else {
-                showTab(RELATIVE);
-            }
+                    StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
+                    if (result != null && result.isDependentStartTime()) {
+                        mStartTimeOffset = result.getStartTimeDiff();
+                        mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                    }
+                    break;
 
-            initViewsAbsolute(time);
-            initViewsRelative();
+                default: // MODE_SETUP
+                    mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                    if (mStartTime != null) {
+                        time.setTime(mStartTime.asDate());
+                    }
+                    mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
+                    mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
+
+                    View syncButtons = ViewHelper.get(getView(), R.id.buttonBar);
+                    if (syncButtons != null) {
+                        syncButtons.setVisibility(View.GONE);
+                    }
+                    break;
+            }
         }
+
+        if (mRaceId == null && mStartTimeOffset == null) {
+            showTab(ABSOLUTE);
+        } else {
+            showTab(RELATIVE);
+        }
+
+        initViewsAbsolute(time);
+        initViewsRelative();
     }
 
     private void initViewsRelative() {
@@ -448,8 +456,8 @@ public class StartTimeFragment extends BaseFragment
             ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mDatePicker.setOnValueChangedListener(this);
-            TimeUtils.initDatePicker(getActivity(), mDatePicker, time, PAST_DAYS, FUTURE_DAYS);
-            mDatePicker.setValue(Math.abs(PAST_DAYS));
+            TimeUtils.initDatePicker(getActivity(), mDatePicker, time, -PAST_DAYS, FUTURE_DAYS);
+            mDatePicker.setValue(PAST_DAYS);
         }
         mTimePicker = ViewHelper.get(getView(), R.id.start_time_picker);
         if (mTimePicker != null) {
@@ -649,7 +657,12 @@ public class StartTimeFragment extends BaseFragment
                 break;
 
             case R.id.header_text:
-                changeFragment();
+                if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
+                    changeFragment();
+                } else {
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                }
                 break;
 
             default:
@@ -678,7 +691,7 @@ public class StartTimeFragment extends BaseFragment
         Calendar newTime = (Calendar) today.clone();
         newTime.setTime(mStartTime.asDate());
 
-        int days = TimeUtils.daysBetween(today, newTime) + Math.abs(PAST_DAYS);
+        int days = TimeUtils.daysBetween(today, newTime) + PAST_DAYS;
 
         if (mDatePicker != null) {
             mDatePicker.setValue(days);
@@ -692,7 +705,7 @@ public class StartTimeFragment extends BaseFragment
     private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
         if (mDatePicker != null) {
-            calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
+            calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() - PAST_DAYS);
         }
         if (mTimePicker != null) {
             calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());

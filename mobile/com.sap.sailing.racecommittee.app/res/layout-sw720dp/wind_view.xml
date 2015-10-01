@@ -13,7 +13,8 @@
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?sap_gray"
+        android:clickable="true">
 
         <TextView
             android:id="@+id/wind_sensor"

@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
@@ -50,5 +51,14 @@ public class BaseFragment extends RaceFragment {
         }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(viewId, fragment).commit();
+    }
+
+    protected void goHome() {
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
+            openMainScheduleFragment();
+        } else {
+            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        }
     }
 }

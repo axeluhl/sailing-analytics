@@ -30,6 +30,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -59,7 +60,6 @@ public class WindFragment extends BaseFragment
     OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
-    private final static String START_MODE = "startMode";
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 1000;
     private final static int MIN_KTS = 3;
@@ -94,7 +94,7 @@ public class WindFragment extends BaseFragment
 
     private RacePositionsPoller positionPoller;
 
-    public static WindFragment newInstance(int startMode) {
+    public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -212,7 +212,8 @@ public class WindFragment extends BaseFragment
             setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
                 .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
 
-            mSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
+//            mSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
+            mSetData.setEnabled(true);
 
             // highlight accuracy problem if location is invalid
             if (mAccuracy != null) {
@@ -268,7 +269,7 @@ public class WindFragment extends BaseFragment
             mHeaderText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goHome();
                 }
             });
         }
@@ -337,8 +338,10 @@ public class WindFragment extends BaseFragment
     @SuppressLint("SetJavaScriptEnabled")
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
-            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 1) {
-                mHeaderLayout.setVisibility(View.GONE);
+            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
+                if (AppUtils.with(getActivity()).is10inch()) {
+                    mHeaderLayout.setVisibility(View.GONE);
+                }
             } else {
                 mHeaderLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
             }

@@ -108,7 +108,7 @@ public class PathFinderFragment extends BaseFragment {
             mHeader.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    goBack();
+                    goHome();
                 }
             });
         }
@@ -161,7 +161,7 @@ public class PathFinderFragment extends BaseFragment {
                     if (procedure != null) {
                         procedure.setPathfinder(MillisecondsTimePoint.now(), String.format("%s%s", nation, number));
                     }
-                    goBack();
+                    goHome();
                 }
             });
 
@@ -184,15 +184,6 @@ public class PathFinderFragment extends BaseFragment {
     private void enableSetButton(View view, View button) {
         if (view != null && view.getTag(R.id.pathfinder_nat) != null && view.getTag(R.id.pathfinder_num) != null) {
             button.setEnabled((Boolean) view.getTag(R.id.pathfinder_nat) && (Boolean) view.getTag(R.id.pathfinder_num));
-        }
-    }
-
-    private void goBack() {
-        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
-            openMainScheduleFragment();
-        } else {
-            sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
 }
