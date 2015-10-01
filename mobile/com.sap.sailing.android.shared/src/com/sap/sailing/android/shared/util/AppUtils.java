@@ -74,10 +74,19 @@ public class AppUtils {
     }
 
     public boolean isTablet() {
+        return is7inch() || is10inch();
+    }
+
+    public boolean is7inch() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && (
-            ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE) || (
-                (screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE)));
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
+            ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE));
+    }
+
+    public boolean is10inch() {
+        int screenLayout = mContext.getResources().getConfiguration().screenLayout;
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
+            ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE));
     }
 
     public boolean isPhoneLand() {

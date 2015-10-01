@@ -153,7 +153,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             switch (getArguments().getInt(START_MODE, 0)) {
                 case 0: // Race-State: Running -> Start Finishing
-                    if (AppUtils.with(getActivity()).isTablet()) {
+                    if (AppUtils.with(getActivity()).is10inch()) {
                         if (header != null) {
                             header.setOnClickListener(null);
                         }

@@ -150,7 +150,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
-            if (AppUtils.with(this).isTablet()) {
+            if (AppUtils.with(this).is10inch()) {
                 setOverflowIcon();
                 toolbar.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.biggerActionBarSize));
             }

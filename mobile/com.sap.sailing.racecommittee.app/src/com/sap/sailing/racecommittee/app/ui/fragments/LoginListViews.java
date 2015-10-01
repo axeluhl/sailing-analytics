@@ -199,7 +199,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         public void close() {
             if (mFrame != null && mFrame.getLayoutParams() != null) {
-                if (!AppUtils.with(getActivity()).isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (!AppUtils.with(getActivity()).is10inch() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     if (mLayouts != null) {
                         for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);

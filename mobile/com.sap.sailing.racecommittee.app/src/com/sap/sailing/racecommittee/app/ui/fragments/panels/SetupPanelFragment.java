@@ -248,7 +248,7 @@ public class SetupPanelFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mStartProcedureMore)) {
-                if (AppUtils.with(getActivity()).isTablet()) {
+                if (AppUtils.with(getActivity()).is10inch()) {
                     Fragment fragment = getFragmentManager().findFragmentById(R.id.race_panel_extra);
                     if (mExtraLayout != null && fragment != null) {
                         mExtraLayout.setVisibility(View.GONE);

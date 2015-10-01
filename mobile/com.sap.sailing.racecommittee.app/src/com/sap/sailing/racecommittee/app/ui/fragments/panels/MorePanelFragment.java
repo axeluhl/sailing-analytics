@@ -209,7 +209,7 @@ public class MorePanelFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (!AppUtils.with(getActivity()).isTablet()) {
+        if (!AppUtils.with(getActivity()).is10inch()) {
             if (!view.equals(mStartMode)) {
                 setMarkerLevel(mStartMode, R.id.start_mode_marker, LEVEL_NORMAL);
             }
