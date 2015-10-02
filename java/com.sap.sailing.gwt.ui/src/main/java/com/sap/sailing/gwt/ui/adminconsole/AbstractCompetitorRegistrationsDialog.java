@@ -38,7 +38,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     public AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             DialogCallback<Set<CompetitorDTO>> callback) {
-        super(stringMessages.registerCompetitors(), /*messsage*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
+        super(stringMessages.registerCompetitors(), /*messsage*/ null, stringMessages.save(), stringMessages.cancel(), /*validator*/ null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter  = errorReporter;
