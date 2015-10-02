@@ -46,7 +46,7 @@ public class RaceLogImportFixesAndAddMappingsDialog extends AbstractLogImportFix
 
     @Override
     void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
-        sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
+        sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, new AsyncCallback<Collection<CompetitorDTO>>() {
             @Override
             public void onSuccess(Collection<CompetitorDTO> result) {
                 competitorTable.refreshCompetitorList(result);
