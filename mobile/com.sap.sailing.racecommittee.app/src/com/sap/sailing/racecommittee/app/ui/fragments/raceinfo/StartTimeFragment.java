@@ -226,7 +226,7 @@ public class StartTimeFragment extends BaseFragment
                             time.setTime(mStartTime.asDate());
                         }
                     }
-                    if (AppUtils.with(getActivity()).is10inch()) {
+                    if (AppUtils.with(getActivity()).isLand()) {
                         if (header != null) {
                             header.setVisibility(View.GONE);
                         }

@@ -26,8 +26,8 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 
@@ -91,10 +91,8 @@ public class MorePanelFragment extends BasePanelFragment {
         mGateTimingValue = ViewHelper.get(layout, R.id.gate_timing_value);
 
         View view = ViewHelper.get(layout, R.id.top_line);
-        if (view != null) {
-            if (!AppUtils.with(getActivity()).is10inch()) {
-                view.setVisibility(View.GONE);
-            }
+        if (view != null && AppUtils.with(getActivity()).isPort()) {
+            view.setVisibility(View.GONE);
         }
 
         return layout;
@@ -114,8 +112,6 @@ public class MorePanelFragment extends BasePanelFragment {
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
-
-//        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
     }
 
     @Override

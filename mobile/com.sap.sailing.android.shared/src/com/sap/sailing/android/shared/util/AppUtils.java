@@ -78,17 +78,21 @@ public class AppUtils {
 
     public boolean is7inch() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
-            ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE));
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+            == Configuration.SCREENLAYOUT_SIZE_LARGE));
     }
 
     public boolean is10inch() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
-            ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE));
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+            == Configuration.SCREENLAYOUT_SIZE_XLARGE));
     }
 
-    public boolean isPhoneLand() {
-        return !isTablet() && mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    public boolean isPort() {
+        return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+    }
+
+    public boolean isLand() {
+        return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 }

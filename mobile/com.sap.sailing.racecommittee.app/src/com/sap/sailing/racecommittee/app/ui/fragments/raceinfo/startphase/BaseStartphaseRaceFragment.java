@@ -91,6 +91,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         super.onResume();
 
         getRaceState().addChangedListener(mStateListener);
+        initMoreButtons();
     }
 
     @Override
@@ -98,13 +99,6 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         super.onPause();
 
         getRaceState().removeChangedListener(mStateListener);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        racingProcedureChanged();
     }
 
     @Override
@@ -120,7 +114,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         }
     }
 
-    private void racingProcedureChanged() {
+    private void initMoreButtons() {
         if (mDots != null && mDots.size() > 0) {
             if (getRaceState() != null && getRaceState().getRacingProcedure() != null) {
                 RacingProcedure procedure = getRaceState().getRacingProcedure();
@@ -142,6 +136,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     }
 
     private void viewPanel(int direction) {
+        // find next active page (with overflow)
         mActivePage += direction;
         if (mActivePage < 0) {
             mActivePage = mDots.size() - 1;
@@ -150,24 +145,29 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             mActivePage = 0;
         }
 
+        // ignore invisible dots
         if (mDots.get(mActivePage).getVisibility() == View.GONE) {
             viewPanel(direction);
         }
 
+        // tint all dots gray
         for (ImageView mDot : mDots) {
             int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
             Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
             mDot.setImageDrawable(drawable);
         }
 
+        // tint current dot black
         int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(mActivePage).setImageDrawable(drawable);
 
+        // hide all panels
         for (View view : mPanels) {
             view.setVisibility(View.GONE);
         }
 
+        // show current panel
         mPanels.get(mActivePage).setVisibility(View.VISIBLE);
     }
 
@@ -177,7 +177,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         public void onRacingProcedureChanged(ReadonlyRaceState state) {
             super.onRacingProcedureChanged(state);
 
-            racingProcedureChanged();
+            initMoreButtons();
         }
     }
 }

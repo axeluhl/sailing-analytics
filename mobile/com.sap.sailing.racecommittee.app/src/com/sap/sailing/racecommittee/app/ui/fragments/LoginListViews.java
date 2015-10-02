@@ -178,7 +178,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                 // open the frame
                 if (mFrame.getLayoutParams().height == 0) {
                     mFrame.getLocationOnScreen(pos);
-                    if (AppUtils.with(getActivity()).isPhoneLand()) {
+                    if (AppUtils.with(getActivity()).isPhone() && AppUtils.with(getActivity()).isLand()) {
                         if (mLayouts != null) {
                             for (View view : mLayouts) {
                                 setVisibility(view, View.GONE);
@@ -198,7 +198,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         public void close() {
             if (mFrame != null && mFrame.getLayoutParams() != null) {
-                if (!AppUtils.with(getActivity()).is10inch() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (!AppUtils.with(getActivity()).is10inch()
+                    && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     if (mLayouts != null) {
                         for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);

@@ -54,7 +54,7 @@ public abstract class CourseFragment extends BaseFragment {
                 }
                 switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                     case START_MODE_PLANNED:
-                        if (AppUtils.with(getActivity()).is10inch()) {
+                        if (AppUtils.with(getActivity()).isLand()) {
                             header.setVisibility(View.GONE);
                         }
                         break;

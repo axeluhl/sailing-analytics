@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="side_button">168dp</dimen>
+    <dimen name="side_button_lockSize">18dp</dimen>
+
+    <dimen name="panel_button_caption_size">18sp</dimen>
+    <dimen name="panel_button_header_size">20sp</dimen>
+
+</resources>

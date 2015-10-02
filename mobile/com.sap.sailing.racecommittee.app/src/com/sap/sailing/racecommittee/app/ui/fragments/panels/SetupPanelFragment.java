@@ -249,7 +249,7 @@ public class SetupPanelFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mStartProcedureMore)) {
-                if (AppUtils.with(getActivity()).is10inch()) {
+                if (AppUtils.with(getActivity()).isLand()) {
                     Fragment fragment = getFragmentManager().findFragmentById(R.id.race_panel_extra);
                     if (mExtraLayout != null && fragment != null) {
                         mExtraLayout.setVisibility(View.GONE);
@@ -411,8 +411,8 @@ public class SetupPanelFragment extends BasePanelFragment {
                         if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
                             multiplier = 2;
                         }
-                        int height = container.getHeight() + getResources().getDimensionPixelSize(R.dimen.thin_line);
-                        int width = container.getWidth() * multiplier;
+                        int height = container.getMeasuredHeight() + getResources().getDimensionPixelSize(R.dimen.thin_line);
+                        int width = container.getMeasuredWidth() * multiplier;
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
                         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                         params.addRule(RelativeLayout.RIGHT_OF, R.id.race_panel_setup);

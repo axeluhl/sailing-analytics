@@ -153,7 +153,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
 
             switch (getArguments().getInt(START_MODE, 0)) {
                 case 0: // Race-State: Running -> Start Finishing
-                    if (AppUtils.with(getActivity()).is10inch()) {
+                    if (AppUtils.with(getActivity()).isLand()) {
                         if (header != null) {
                             header.setOnClickListener(null);
                         }
@@ -167,8 +167,8 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 case 1: // Race-State: Finishing -> End Finishing
                     ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                     if (flag != null) {
-                        flag.setImageDrawable(
-                            FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
+                        flag.setImageDrawable(FlagsResources
+                            .getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
                     }
 
                     TextView headline = ViewHelper.get(getView(), R.id.header_headline);

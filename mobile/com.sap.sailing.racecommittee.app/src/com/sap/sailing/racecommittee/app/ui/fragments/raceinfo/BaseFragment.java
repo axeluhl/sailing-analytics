@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;

@@ -73,7 +73,7 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-//    private View mWindOn;
+    //    private View mWindOn;
 //    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
@@ -190,7 +190,7 @@ public class WindFragment extends BaseFragment
 
     /**
      * refresh location data labels and highlight missing or inaccuracy gps data
-     * disable mSetData button if gps data is missing or inaccurate
+     * disable setData button if gps data is missing or inaccurate
      */
     private void refreshUI() {
         int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
@@ -329,7 +329,7 @@ public class WindFragment extends BaseFragment
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
-            mWindInputDirection.setText(String.valueOf((int)enteredWindBearingFrom));
+            mWindInputDirection.setText(String.valueOf((int) enteredWindBearingFrom));
             mWindInputSpeed.setText(String.valueOf(enteredWindSpeed));
         }
     }
@@ -339,7 +339,7 @@ public class WindFragment extends BaseFragment
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
-                if (AppUtils.with(getActivity()).is10inch()) {
+                if (AppUtils.with(getActivity()).isLand()) {
                     mHeaderLayout.setVisibility(View.GONE);
                 }
             } else {

@@ -30,6 +30,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.MainScheduleItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.MainScheduleAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -327,7 +328,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         public void onStatusChanged(ReadonlyRaceState state) {
             super.onStatusChanged(state);
 
-            openFragment(RaceInfoRaceFragment.newInstance());
+            openFragment(RaceInfoFragmentChooser.on(state.getRacingProcedure().getType()).choose(getActivity(), getRace()));
         }
     }
 }
