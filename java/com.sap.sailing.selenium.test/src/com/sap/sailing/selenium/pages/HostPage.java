@@ -20,7 +20,7 @@ public class HostPage extends PageObject {
     protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
     
     public static final String getGWTCodeServer() {
-        String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
+        String codeServer = "127.0.0.1:50802";//System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
         if (codeServer == null) {
             return NO_CODE_SERVER_PARAMTER_VALUE;
         }

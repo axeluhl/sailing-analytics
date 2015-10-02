@@ -165,7 +165,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
     
     private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta){
-        new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
+        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
             @Override
             public void ok(RegattaIdentifier regattaIdentifier) {
                 sailingService.createRegattaLeaderboard(regattaIdentifier, /* displayName */ null, new int[]{},
@@ -185,7 +185,10 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             @Override
             public void cancel() {
             }
-        }).show();
+        });
+        
+        dialog.ensureDebugId("CreateDefaultRegattaDialog");
+        dialog.show();
     }
     
     private void createNewRegatta(final RegattaDTO newRegatta) {
