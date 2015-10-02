@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="race_list_header" type="layout">@layout/race_list_header_small</item>
+    <item name="race_list_list" type="layout">@layout/race_list_list_top</item>
+
+</resources>
