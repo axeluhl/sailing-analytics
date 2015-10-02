@@ -108,7 +108,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         this.cellTable.addColumn(column, header, comperator, ascending);
     }
     
-    public void initTableFilter(final Filter<T> tableFilter) {
+    public void initTableFilter(final Filter<? super T> tableFilter) {
         this.cellTable.setRowStyles(new RowStyles<T>() {
             @Override
             public String getStyleNames(T row, int rowIndex) {

@@ -14,7 +14,6 @@
     <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
             <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
-		<!-- <dp:regattanavigation.TextBoxFilter addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="competitorFilterUi"/> -->
         </div>
         <dp:regattanavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
         <div class="{res.mediaCss.grid}">

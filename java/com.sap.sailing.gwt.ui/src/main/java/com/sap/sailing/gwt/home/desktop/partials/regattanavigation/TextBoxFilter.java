@@ -25,19 +25,19 @@ public class TextBoxFilter extends Composite {
     @UiField TextBox textBoxUi;
     @UiField Button clearButtonUi;
     
-    private final List<TextBoxFilterChangeHandler> changeHandlers = new ArrayList<>();
+    private final List<TextBoxFilterChangeHandler> valueChangeHandlers = new ArrayList<>();
 
     public TextBoxFilter() {
         initWidget(uiBinder.createAndBindUi(this));
         clearButtonUi.setVisible(false);
     }
     
-    public HandlerRegistration addChangeHandler(final TextBoxFilterChangeHandler changeHandler) {
-        changeHandlers.add(changeHandler);
+    public HandlerRegistration addValueChangeHandler(final TextBoxFilterChangeHandler changeHandler) {
+        valueChangeHandlers.add(changeHandler);
         return new HandlerRegistration() {
             @Override
             public void removeHandler() {
-                changeHandlers.remove(changeHandler);
+                valueChangeHandlers.remove(changeHandler);
             }
         };
     }
@@ -56,7 +56,7 @@ public class TextBoxFilter extends Composite {
     private void update() {
         clearButtonUi.setVisible(textBoxUi.getValue() != null && !textBoxUi.getValue().isEmpty());
         String searchString = textBoxUi.getValue().trim();
-        for (TextBoxFilterChangeHandler handler : changeHandlers) {
+        for (TextBoxFilterChangeHandler handler : valueChangeHandlers) {
             handler.onFilterChanged(searchString);
         }
     }

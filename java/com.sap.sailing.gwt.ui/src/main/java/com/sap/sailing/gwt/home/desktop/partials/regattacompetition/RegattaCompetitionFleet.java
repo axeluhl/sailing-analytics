@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +14,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sse.common.Util.Triple;
@@ -35,7 +33,7 @@ public class RegattaCompetitionFleet extends Widget {
     @UiField DivElement competitorCountUi;
     @UiField DivElement racesContainerUi;
     
-    private Map<RegattaCompetitionFleetRace, Collection<SimpleCompetitorDTO>> raceToCompetitorsMap = new HashMap<>();
+    private Map<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> raceToCompetitorsMap = new HashMap<>();
 
     public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
         setElement(uiBinder.createAndBindUi(this));
@@ -53,7 +51,7 @@ public class RegattaCompetitionFleet extends Widget {
     
     public void addRace(SimpleRaceMetadataDTO race, String raceViewerURL) {
         RegattaCompetitionFleetRace competitionRace = new RegattaCompetitionFleetRace(race, raceViewerURL);
-        raceToCompetitorsMap.put(competitionRace, race.getCompetitors());
+        raceToCompetitorsMap.put(competitionRace, race);
         racesContainerUi.appendChild(competitionRace.getElement());
     }
     
@@ -62,10 +60,10 @@ public class RegattaCompetitionFleet extends Widget {
         return "rgba(" + rgbValues.getA() + "," + rgbValues.getB() + "," + rgbValues.getC() + ", 0.1)";
     }
     
-    public boolean setCompetitorFilter(Filter<Collection<SimpleCompetitorDTO>> competitorFilter) {
+    public boolean setRacesFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
         boolean fleetVisible = false;
-        for (Entry<RegattaCompetitionFleetRace, Collection<SimpleCompetitorDTO>> entry : raceToCompetitorsMap.entrySet()) {
-            boolean raceVisible = competitorFilter.matches(entry.getValue());
+        for (Entry<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> entry : raceToCompetitorsMap.entrySet()) {
+            boolean raceVisible = racesFilter.matches(entry.getValue());
             entry.getKey().setVisible(raceVisible);
             fleetVisible |= raceVisible;
         }

@@ -8,14 +8,13 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
@@ -53,12 +52,10 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesD
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.AbstractTextFilter;
-import com.sap.sse.common.filter.Filter;
-import com.sap.sse.common.filter.TextOperator;
-import com.sap.sse.common.filter.TextOperator.Operators;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -129,7 +126,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         finishedRacesList.initTableFilter(competitorFilterHandler.raceFilter);
         raceListContainerUi = new RaceListContainer<>(I18N.finishedRaces(), I18N.noFinishedRaces(), finishedRacesList);
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
-        competitorFilterUi.addChangeHandler(competitorFilterHandler);
+        competitorFilterUi.addValueChangeHandler(competitorFilterHandler);
         raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
@@ -180,17 +177,10 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         public void onSelectAction(Navigation action) {
             RegattaRacesTabView.this.currentlySelectedTab = action;
             RegattaRacesTabView.this.refreshManager.forceReschule();
-            showWidget(listFormatContainerUi, action == Navigation.SORT_LIST_FORMAT);
-            showWidget(compFormatContainerUi, action == Navigation.COMPETITION_FORMAT);
+            UIObject.setVisible(listFormatContainerUi, action == Navigation.SORT_LIST_FORMAT);
+            compFormatContainerUi.setVisible(action == Navigation.COMPETITION_FORMAT);
         }
         
-        private void showWidget(Widget widget, boolean show) {
-            showWidget(widget.getElement(), show);
-        }
-        
-        private void showWidget(Element widget, boolean show) {
-            widget.getStyle().setDisplay(show ? Display.BLOCK : Display.NONE);
-        }
     }
     
     private class RegattaRacesTabViewActionProvider<A extends Action<?>> extends AbstractActionProvider<A> {
@@ -207,36 +197,20 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private class RaceFilter extends AbstractTextFilter<RaceListRaceDTO> {
+    private class RaceFilter extends AbstractTextFilter<SimpleRaceMetadataDTO> {
         
         private List<String> keywords = new ArrayList<>();
-        private Filter<Collection<SimpleCompetitorDTO>> competitorFilter = new Filter<Collection<SimpleCompetitorDTO>>() {
             
-            private AbstractListFilter<SimpleCompetitorDTO> listFilter = new AbstractListFilter<SimpleCompetitorDTO>() {
-                @Override
-                public Iterable<String> getStrings(SimpleCompetitorDTO t) {
-                    return Arrays.asList(t.getName(), t.getSailID());
-                }
-            };
-             
+        private AbstractListFilter<SimpleCompetitorDTO> listFilter = new AbstractListFilter<SimpleCompetitorDTO>() {
             @Override
-            public boolean matches(Collection<SimpleCompetitorDTO> object) {
-                return keywords.isEmpty() || !Util.isEmpty(listFilter.applyFilter(keywords, object));
-            }
-
-            @Override
-            public String getName() {
-                return "competitorFilter";
+            public Iterable<String> getStrings(SimpleCompetitorDTO t) {
+                return Arrays.asList(t.getName(), t.getSailID());
             }
         };
         
-        private RaceFilter() {
-            setOperator(new TextOperator(Operators.Contains));
-        }
-
         @Override
-        public boolean matches(RaceListRaceDTO object) {
-            return competitorFilter.matches(object.getCompetitors());
+        public boolean matches(SimpleRaceMetadataDTO object) {
+            return keywords.isEmpty() || !Util.isEmpty(listFilter.applyFilter(keywords, object.getCompetitors()));
         }
 
         @Override
@@ -272,7 +246,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private void update() {
             for (int i = 0; i < compFormatContainerUi.getWidgetCount(); i++) {
                 RegattaCompetitionSeries series = (RegattaCompetitionSeries) compFormatContainerUi.getWidget(i);
-                series.setCompetitorFilter(raceFilter.competitorFilter);
+                series.setRacesFilter(raceFilter);
             }
         }
         
