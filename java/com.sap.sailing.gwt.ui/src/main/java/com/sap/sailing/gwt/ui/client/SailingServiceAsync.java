@@ -81,6 +81,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
@@ -526,7 +527,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs,
+    void getCompetitorsOfLeaderboard(String leaderboardName,
             AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
@@ -591,7 +592,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setCompetitorRegistrations(String leaderboardName,Set<CompetitorDTO> competitors,
             AsyncCallback<Void> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    void getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
@@ -634,9 +635,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
-    void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
-            Set<Util.Triple<String, String, String>> raceLogsTo, AsyncCallback<Void> callback);
-
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids, AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
@@ -671,7 +669,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
+    void getCompetitorRegistrationsOnRegattaLog(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
 
@@ -702,7 +700,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
+            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
 
     void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 
@@ -722,4 +720,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO, AsyncCallback<Void> callback);
+
+    void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
+
+    void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 }

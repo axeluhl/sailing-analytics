@@ -22,7 +22,8 @@ import com.sap.sse.datamining.impl.data.FixClusterGroup;
  *
  */
 public class BearingClusterGroup extends FixClusterGroup<Bearing> {
-
+    private static final long serialVersionUID = -3810975212669767738L;
+    
     /**
      * Creates an angle range grouping.
      * 
