@@ -1399,4 +1399,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dataMiningRetrieval();
     String actionWatch();
     String actionAnalyze();
+    String denoteAllRacesForRaceLogTrackingShorctut();
 }

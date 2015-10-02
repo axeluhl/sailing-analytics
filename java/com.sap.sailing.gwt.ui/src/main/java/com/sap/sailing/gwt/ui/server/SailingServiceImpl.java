@@ -79,6 +79,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -4936,6 +4937,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
         raceLog.add(event);
+    }
+    
+    @Override
+    public void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        
+        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */ true, RaceLogDefineMarkEvent.class).analyze();
+        
+        RaceLogEvent eventToRevoke = null;
+        for (RaceLogEvent event : raceLogDeviceMarkMappingEvents) {
+            RaceLogDefineMarkEvent defineMarkEvent = (RaceLogDefineMarkEvent) event;
+            if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())){
+                eventToRevoke = event;
+            }
+        }
+        
+        if (eventToRevoke != null){
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(getService().getServerAuthor(), raceLog.getCurrentPassId(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
+            raceLog.add(event);
+        } else {
+            logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RaceLog.");
+        }
     }
     
     @Override

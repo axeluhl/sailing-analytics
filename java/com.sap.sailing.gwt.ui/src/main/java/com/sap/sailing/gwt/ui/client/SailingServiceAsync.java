@@ -714,4 +714,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePoint, TimePoint>> callback);
+
+    void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            MarkDTO markDTO, AsyncCallback<Void> callback);
 }

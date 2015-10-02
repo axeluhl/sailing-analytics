@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
@@ -28,61 +27,46 @@ public class CompetitorsJsonExportServlet extends AbstractJsonHttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         String leaderboardName = request.getParameter(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME);
         if (leaderboardName == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_LEADERBOARD_NAME));
             return;
         }
-
         String raceColumnName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
         if (raceColumnName == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME));
             return;
         }
-        
         String fleetName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME);
         if (fleetName == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_RACE_FLEET_NAME));
             return;
         }
-        
         RacingEventService service = getService();
-
         Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such leaderboard found.");
             return;
         }
-
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such race column found.");
             return;
         }
-        
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         if (fleet == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
             return;
         }
-
-        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-       
         JSONArray result = new JSONArray();
-        
-        if (trackedRace != null) {
-            CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
-            		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
-
-            for (Competitor competitor : raceColumn.getRaceDefinition(fleet).getCompetitors()) {
-                result.add(serializer.serialize(competitor));
-            }
+        CompetitorJsonSerializer serializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
+        		new PersonJsonSerializer(new NationalityJsonSerializer())), new BoatJsonSerializer(new BoatClassJsonSerializer()));
+        for (Competitor competitor : leaderboard.getCompetitors(raceColumn, fleet)) {
+            result.add(serializer.serialize(competitor));
         }
-        
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
     }
