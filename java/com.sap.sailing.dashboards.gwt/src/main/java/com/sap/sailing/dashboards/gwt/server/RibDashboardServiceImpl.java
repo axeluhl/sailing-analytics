@@ -40,7 +40,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -182,16 +181,9 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             for (RaceColumn column : lb.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
-                    if (race != null) {
+                    if (race != null && race.isLive(MillisecondsTimePoint.now())) {
+                        result = race;
                         notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(race);
-                        TimePoint startOfRace = race.getStartOfRace();
-                        // not relying on isLive() because the time window is too short
-                        // to retrieve wind information we need to extend the time window
-                        if (startOfRace != null && race.getEndOfRace() == null && 
-                                MillisecondsTimePoint.now().after(startOfRace.minus(Duration.ONE_MINUTE.times(20)))) {
-                            result = race;
-                            // no break here as we want to have the last race that is deemed to be live
-                        }
                     }
                 }
             }
