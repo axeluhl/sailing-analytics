@@ -34,7 +34,7 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
 
     private void verifyThatDimensionsAreDimensions(Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
         if (parameterizedDimensions == null) {
-            throw new NullPointerException("The given dimensions mustn't be null.");
+            throw new IllegalArgumentException("The given dimensions mustn't be null.");
         }
         
         int size = 0;

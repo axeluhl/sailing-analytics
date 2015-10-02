@@ -8,14 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -145,8 +142,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
-            final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard "+getName();
-            logger.severe(msg);
+            if (logAlreadyExistingColumn) {
+                final String msg = "Trying to create race column with duplicate name " + name + " in leaderboard " + getName();
+                logger.severe(msg);
+            }
         } else {
             column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);
@@ -319,18 +318,6 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor);
     }
 
-    @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
-        for (Competitor c : super.getAllCompetitors()) {
-            result.add(c);
-        }
-        //consider {@link RegattaLog}
-        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
-        result.addAll(viaLog);
-        return result;
-    }
-    
     private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
         private static final long serialVersionUID = 652833386555762661L;
 

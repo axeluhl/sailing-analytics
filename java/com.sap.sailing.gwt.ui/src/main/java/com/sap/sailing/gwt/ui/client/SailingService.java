@@ -607,4 +607,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto);
 
     Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
+
+    void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            MarkDTO markDTO);
 }

@@ -205,33 +205,36 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             SharedDomainFactory baseDomainFactory, RacingEventService service) {
         CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
         final Set<Mark> marks = new HashSet<>();
-        course.getWaypoints().forEach(wp->Util.addAll(wp.getMarks(), marks));
+        if (course != null) {
+            course.getWaypoints().forEach(wp->Util.addAll(wp.getMarks(), marks));
+        }
         final Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
         final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /* only unrevoked */ true, RaceLogDeviceMarkMappingEvent.class).analyze();
         for (RaceLog toRaceLog : toRaceLogs) {
-            if (course == null || !new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
-                continue;
+            if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
+                if (course != null) {
+                    CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
+                    TimePoint now = MillisecondsTimePoint.now();
+                    int i = 0;
+                    revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
+                    for (Waypoint oldWaypoint : course.getWaypoints()) {
+                        newCourse.addWaypoint(i++, oldWaypoint);
+                    }
+                    for (Mark mark : marks) {
+                        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
+                                service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
+                        toRaceLog.add(event);
+                    }
+                    for (RaceLogEvent raceLogDeviceMarkMappingEvent : raceLogDeviceMarkMappingEvents) {
+                        toRaceLog.add(raceLogDeviceMarkMappingEvent);
+                    }
+                    int passId = toRaceLog.getCurrentPassId();
+                    RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
+                            service.getServerAuthor(), passId, newCourse);
+                    toRaceLog.add(newCourseEvent);
+                }
+                registerCompetitors(service, toRaceLog, competitors);
             }
-            CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
-            TimePoint now = MillisecondsTimePoint.now();
-            int i = 0;
-            revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
-            for (Waypoint oldWaypoint : course.getWaypoints()) {
-                newCourse.addWaypoint(i++, oldWaypoint);
-            }
-            for (Mark mark : marks) {
-                RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
-                        service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
-                toRaceLog.add(event);
-            }
-            for (RaceLogEvent raceLogDeviceMarkMappingEvent : raceLogDeviceMarkMappingEvents) {
-                toRaceLog.add(raceLogDeviceMarkMappingEvent);
-            }
-            int passId = toRaceLog.getCurrentPassId();
-            RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
-                    service.getServerAuthor(), passId, newCourse);
-            toRaceLog.add(newCourseEvent);
-            registerCompetitors(service, toRaceLog, competitors);
         }
     }
 

@@ -103,6 +103,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }
             }
         });
+        
         waypoints.getTable().addColumn(waypointsActionColumn);
         
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {

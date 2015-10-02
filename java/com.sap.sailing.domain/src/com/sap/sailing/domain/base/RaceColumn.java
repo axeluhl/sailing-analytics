@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
@@ -227,4 +228,18 @@ public interface RaceColumn extends Named {
     boolean hasSplitFleets();
     
     RaceExecutionOrderProvider getRaceExecutionOrderProvider();
+    
+    /**
+     * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this
+     * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
+     * respective {@link RaceLog} {@link #getRaceLog(Fleet) attached to this column for that fleet}. Note that this does
+     * not include competitors registered through any {@link RegattaLog} on the structure owning (directly or
+     * transitively) this column.
+     */
+    Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.
+     */
+    Iterable<Competitor> getAllCompetitors(Fleet fleet);
 }

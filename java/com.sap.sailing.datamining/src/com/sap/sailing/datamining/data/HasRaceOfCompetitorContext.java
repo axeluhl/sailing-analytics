@@ -5,7 +5,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Statistic;
-import com.sap.sse.datamining.annotations.data.Unit;
 
 public interface HasRaceOfCompetitorContext {
     
@@ -15,7 +14,7 @@ public interface HasRaceOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
-    @Statistic(messageKey="DistanceAtStart", resultUnit=Unit.None, resultDecimals=2, ordinal=0)
+    @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     public Distance getDistanceToStartLineAtStart();
 
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
