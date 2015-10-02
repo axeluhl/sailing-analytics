@@ -26,7 +26,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
     @Override
     protected void setRegisteredCompetitors() {
-        sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, raceColumnName, fleetName,
+        sailingService.getCompetitorRegistrationsOnRaceLog(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {

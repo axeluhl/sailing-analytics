@@ -56,6 +56,14 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 openAddCompetitorDialog();
             }
         });
+        
+        Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
+        editCompetitorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openEditCompetitorDialog();
+            }
+        });
 
         HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
@@ -91,6 +99,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         refreshCompetitors();
         
         mainPanel.add(addCompetitorButton);
+        mainPanel.add(editCompetitorButton);
         mainPanel.add(competitorRegistrationPanel);
 
         return mainPanel;
@@ -138,12 +147,43 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                     }
                 }).show();
     }
+    
+    private void openEditCompetitorDialog() {
+        //get currently selected competitor
+        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1){
+            // show some warning
+        } else {
+            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet().iterator().next();
+            new CompetitorEditDialog(stringMessages, competitorToEdit,
+                    new DataEntryDialog.DialogCallback<CompetitorDTO>() {
+                @Override
+                public void ok(CompetitorDTO competitor) {
+                    sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(CompetitorDTO updatedCompetitor) {
+                            int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList().indexOf(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            registeredCompetitorsTable.getDataProvider().refresh();
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
+    }
 
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
-
-        
-        allCompetitorsTable.refreshCompetitorList(null, true, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 setRegisteredCompetitors();

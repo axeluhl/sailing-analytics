@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -143,6 +144,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         Set<Competitor> result = new HashSet<Competitor>();
         for (Leaderboard leaderboard : getLeaderboards()) {
             Util.addAll(leaderboard.getCompetitors(), result);
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        final Iterable<Competitor> result;
+        if (fleet == metaFleet && Util.contains(getRaceColumns(), raceColumn)) {
+            result = ((MetaLeaderboardColumn) raceColumn).getAllCompetitors();
+        } else {
+            result = Collections.emptySet();
         }
         return result;
     }
