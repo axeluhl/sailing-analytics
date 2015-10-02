@@ -278,20 +278,23 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     @Override
     public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString,
             String leaderboardName) {
-        List<StartAnalysisDTO> startAnalysisDTOs = new ArrayList<StartAnalysisDTO>();
-        try {
-            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
-            List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
-            for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
-                StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController.checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
-                if (startAnalysisDTO != null) {
-                    startAnalysisDTOs.add(startAnalysisDTO);
+        List<StartAnalysisDTO> result = null;
+        if (competitorIdAsString != null && leaderboardName != null) {
+            result = new ArrayList<StartAnalysisDTO>();
+            try {
+                Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+                List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
+                for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
+                    StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController.checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
+                    if (startAnalysisDTO != null) {
+                        result.add(startAnalysisDTO);
+                    }
                 }
+            } catch (NullPointerException e) {
+                logger.log(Level.INFO, "", e);
             }
-        } catch (NullPointerException e) {
-            logger.log(Level.INFO, "", e);
         }
-        return startAnalysisDTOs;
+        return result;
     }
 
     @Override
