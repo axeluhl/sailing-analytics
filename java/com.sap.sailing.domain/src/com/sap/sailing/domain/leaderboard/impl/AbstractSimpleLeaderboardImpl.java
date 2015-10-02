@@ -517,13 +517,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public Double getTotalPoints(Competitor competitor, TimePoint timePoint) {
         return getTotalPoints(competitor, getRaceColumns(), timePoint);
     }
 
     @Override
     public Double getTotalPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
-            TimePoint timePoint) throws NoWindException {
+            TimePoint timePoint) {
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
         double result = getCarriedPoints(competitor);
@@ -721,11 +721,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 public Map<Competitor, Double> call() {
                     Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
                     for (Competitor competitor : getCompetitors()) {
-                        try {
-                            totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, finalRaceColumnsToConsider, timePoint));
-                        } catch (NoWindException e) {
-                            throw new NoWindError(e);
-                        }
+                        totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, finalRaceColumnsToConsider, timePoint));
                     }
                     synchronized (result) {
                         return totalPointsSumPerCompetitorInColumn;
