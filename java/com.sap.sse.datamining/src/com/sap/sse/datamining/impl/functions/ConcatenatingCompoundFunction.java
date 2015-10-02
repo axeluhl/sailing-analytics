@@ -5,11 +5,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
+/**
+ * Provides the {@link Function} interface for a list of functions in a way that the functions are concatenated
+ * (like <code>foo().bar().value();</code>).
+ * 
+ * @author Lennart Hensler (D054527)
+ *
+ * @param <ReturnType> the return type of the compound function
+ */
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
     private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
@@ -63,27 +70,43 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         }
     }
 
+    /**
+     * @return the declaring type of the first function.
+     */
     @Override
     public Class<?> getDeclaringType() {
         return getFirstFunction().getDeclaringType();
     }
 
+
+    /**
+     * @return the parameters of the first function.
+     */
     @Override
     public Iterable<Class<?>> getParameters() {
         return getFirstFunction().getParameters();
     }
     
+    /**
+     * @return the return type of the last function.
+     */
     @SuppressWarnings("unchecked") // The cast has to work. The types were checked in the constructor.
     @Override
     public Class<ReturnType> getReturnType() {
         return (Class<ReturnType>) getLastFunction().getReturnType();
     }
     
+    /**
+     * @return the concatenated simple names of the functions separated by {@value #SIMPLE_NAME_CHAIN_CONNECTOR}.
+     */
     @Override
     public String getSimpleName() {
         return simpleName;
     }
 
+    /**
+     * The concatenated localized names of the functions separated by {@value #LOCALIZED_NAME_CHAIN_CONNECTOR}.
+     */
     @Override
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         if (!isLocalizable()) {
@@ -92,7 +115,6 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         
         return buildLocalizedNameChain(locale, stringMessages);
     }
-    
     @Override
     public boolean isLocalizable() {
         for (Function<?> function : functions) {
@@ -118,12 +140,19 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return builder.toString();
     }
 
+    /**
+     * Invokes the functions concatenated (like <code>foo().bar().value();</code>).<br>
+     * Returns <code>null</code>, if any of the functions returned <code>null</code>.
+     */
     @Override
     public ReturnType tryToInvoke(Object instance) {
         return tryToInvoke(instance, ParameterProvider.NULL);
     }
-    
-    @SuppressWarnings("unchecked")
+
+    /**
+     * Invokes the functions concatenated (like <code>foo(parameters).bar().value();</code>).<br>
+     * Returns <code>null</code>, if any of the functions returned <code>null</code>.
+     */
     @Override
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
         Iterator<Function<?>> functionsIterator = functions.iterator();
@@ -135,19 +164,22 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
                 return null;
             }
         }
-        return (ReturnType) result;
+        @SuppressWarnings("unchecked")
+        ReturnType typedResult = (ReturnType) result;
+        return typedResult;
     }
 
-    @Override
-    public Unit getResultUnit() {
-        return getLastFunction().getResultUnit();
-    }
-
+    /**
+     * @return the result decimals of the last function.
+     */
     @Override
     public int getResultDecimals() {
         return getLastFunction().getResultDecimals();
     }
     
+    /**
+     * @return the smallest ordinal of the functions.
+     */
     @Override
     public int getOrdinal() {
         return ordinal;

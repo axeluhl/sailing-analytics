@@ -58,7 +58,10 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
         final long totalMemory = infoProvider.totalMemory();
         final double freeMemoryInPercent = (double) freeMemory / totalMemory;
         final int numberOfRunningQueries = queryManager.getNumberOfRunningQueries();
-        logStatus(freeMemory, totalMemory, freeMemoryInPercent, numberOfRunningQueries);
+        
+        if (numberOfRunningQueries > 0) {
+            logStatus(freeMemory, totalMemory, freeMemoryInPercent, numberOfRunningQueries);
+        }
         
         boolean actionHasBeenPerformed = false;
         final Iterator<MemoryMonitorAction> actionsIterator = actions.iterator();

@@ -1,6 +1,5 @@
 package com.sap.sse.datamining.shared.impl;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 
 /**
@@ -31,16 +30,6 @@ public class NullAdditionalResultData implements AdditionalResultData {
 
     @Override
     public String getResultSignifier() {
-        return "";
-    }
-
-    @Override
-    public Unit getUnit() {
-        return Unit.None;
-    }
-    
-    @Override
-    public String getUnitSignifier() {
         return "";
     }
 

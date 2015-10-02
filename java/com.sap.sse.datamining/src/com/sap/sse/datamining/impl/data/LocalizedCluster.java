@@ -1,11 +1,13 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class LocalizedCluster<ElementType> implements Cluster<ElementType> {
+public class LocalizedCluster<ElementType extends Serializable> implements Cluster<ElementType> {
+    private static final long serialVersionUID = 6621306336227572117L;
     
     private final String messageKey;
     private final Cluster<ElementType> cluster;

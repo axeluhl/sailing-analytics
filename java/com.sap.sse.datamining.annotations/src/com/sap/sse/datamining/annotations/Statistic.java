@@ -7,11 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Locale;
 
-import com.sap.sse.datamining.annotations.data.Unit;
-
 /**
- * Methods marked with this annotation will be used as computable statistic for the data mining framework. The method will be called,
- * if the statistic value of a data element is extracted.<br />
+ * Methods marked with this annotation will be used as computable key figures for the data mining framework. The method will be called,
+ * if the key figure of a data element is requested.<br />
  * The marked method has to match the following conditions or the data mining could fail:
  * <ul>
  *      <li>Has no parameters (except if the parameter list is exactly {@link Locale}, {@link ResourceBundleStringMessages})</li>
@@ -30,7 +28,7 @@ public @interface Statistic {
 
     /**
      * The message key used for internationalization.<br />
-     * If there are more than one ordinal in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
+     * If there is more than one message key in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
      * then the messages will be concatenated (separated by a space).
      */
     public String messageKey();
@@ -45,11 +43,6 @@ public @interface Statistic {
      */
     public int ordinal() default Integer.MAX_VALUE;
     
-    /**
-     * The {@link Unit} of the methods return value. The default value is {@link Unit#None}.
-     */
-    public Unit resultUnit() default Unit.None;
-        
     /**
      * The number of decimals of the methods return value. The default value is <code>0</code>.
      */

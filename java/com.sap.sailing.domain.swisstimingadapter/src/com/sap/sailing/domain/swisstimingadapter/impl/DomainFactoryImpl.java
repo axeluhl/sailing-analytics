@@ -249,12 +249,12 @@ public class DomainFactoryImpl implements DomainFactory {
     private Iterable<Competitor> createCompetitorList(StartList startList, String raceId, BoatClass boatClass) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-        	Competitor domainCompetitor;
-        	if(swissTimingCompetitor.getID() != null) {
+            Competitor domainCompetitor;
+            if (swissTimingCompetitor.getID() != null) {
                 domainCompetitor = createCompetitorWithID(swissTimingCompetitor, boatClass);
-        	} else {
+            } else {
                 domainCompetitor = createCompetitorWithoutID(swissTimingCompetitor, raceId, boatClass);
-        	}
+            }
             result.add(domainCompetitor);
         }
         return result;

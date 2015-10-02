@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Methods marked with this annotation indicate, that the result type contains marked methods.<br />
+ * Methods marked with this annotation indicate, that the return type of the annotated method contains marked methods.<br />
  * The marked method has to match the following conditions or the data mining could fail:
  * <ul>
  *      <li>Has no parameters</li>
@@ -24,7 +24,7 @@ public @interface Connector {
     
     /**
      * The message key used for internationalization.<br />
-     * If there are more than one ordinal in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
+     * If there is more than one message key in a function (e.g. if the function is an instance of ConcatenatingCompoundFunction),
      * then the messages will be concatenated (separated by a space).
      */
     public String messageKey() default "";

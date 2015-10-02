@@ -26,15 +26,41 @@ For more information on how to use the PolarDataService, please see [this sectio
 
 ## Using the Datamining UI for Polars
 
-_TODO_
+There are two different data retriever chains that can be used for viewing polars. One of them ("Polars") supports the actual datamining approach with custom filtering and grouping and the queries that run on the server can be very time-intensive. The other one ("Backend Polars") can only be used to look at the data that is aggregated on the backend automatically. The latter option doesn't allow filtering or grouping apart from the boat class. The feature is mostly intended for developers that use or want to use the PolarDataService and want to have a preview for how the data looks, that they get when they use the service.
+
+### Polars
+
+When generating custom polars you can use the settings button in the UI to configure some settings. Most of them have tooltips that explain them in some more detail. After changing the settings, all filters and grouping has to be reconfigured. This is due to the fact that some of the settings actually affect the possible values of the filters. One example for it is the wind range that you can define in the settings.
+
+It makes a lot of sense to the wind range as a grouping dimension. It is allowed not to do it, but in most cases it will generate a useless diagram, since data from a lot of different wind speeds is averaged and thus mixed with each other.
+
+It is important to use the Polars Aggregator (and not Count which is a standard Datamining Aggregator which just counts the elements).
+
+When you run the query be aware, that it can take some time depending on your filtering options and the amount (and size) of races loaded. This is mostly due to wind computation in the backend. Maybe this can be optimized in the future.
+
+#### Presentation
+
+The data is presented in three charts. On the left you find the main polar chart that presents the polar diagrams as grouped. On the upper right there is a histogram that shows the underlying dataCount per Angle. Upon showing and hiding chart series in the polar chart, the connected histograms also show and hide.
+
+The third chart is empty when first shown. It can show how the data for one single point in the polar chart is distributed over the underlying wind range. Just click a point in the polar chart to show that data. When clicking another point, the old data will be hidden and only the data for the new point is shown.
+
+### Backend Polars
+
+Displaying backend polars in the datamining UI is quite simple: Choose the "Backend Polars" Retriever chain, filter by boat class name, choose the "Polars" aggregator and run the query. The query should not take long since the PolarDataService is optimzed for quick response times.
+
+#### Presentation
+
+Like the custom polars, the backend polars are presented in 3 charts. The main chart is also a polar chart which is quite similar to the on used for custom polars. The other two charts are different. They are not related to underlying data but rather show the regression functions boatspeed over windspeed and beatangle over windspeed for upwind and downwind.
 
 ## Using the PolarDataService
 
-_TODO_
+The PolarDataService is the interface to look at, when you want to use access the backend aggregated polar data. Its methods are eqipped with JavaDoc explanations and you can look at the usages of the methods to see typical ways to use the interface.
+
+The PolarDataService is an OSGi service. Above all it is retrieved by the RacingEventService. The RacingEventService supplies some needed objects like DomainFactories and also feeds the PolarDataService with fresh fixes. You can benefit from that because, if you have a chance to obtain the RacingEventService or maybe already have a reference to it, you can simply call service.getPolarDataService() and voila: You can start using the PolarDataService. If not you can look into handling the OSGi service listening yourself to obtain the PolarDataService.
 
 ## Polar Datamining Architecture
 
-For general information about the Datamining Architecture please see [this wikipage](wiki/wiki/data-mining-architecture).
+For general information about the Datamining Architecture please see [this wikipage](/wiki/data-mining-architecture).
 
 This section will focus on the polar specific datamining functionality.
 
@@ -44,7 +70,7 @@ Most of the classes are for custom polar datamining. In this section we will con
 
 ### File Locations / Project Structure
 
-The project structure sticks to the best practices described [here](wiki/typical-development-scenarios). There are two bundles:
+The project structure sticks to the best practices described [here](/wiki/typical-data-mining-scenarios). There are two bundles:
 com.sap.sailing.polars.datamining and com.sap.sailing.polars.datamining.shared; the latter containing classes that are serializable by the GWT engine.
 
 An Activator registeres the polar datamining functionality with the main datamining server. The data package contains the retrieval data classes, the component package contains retrieval processors and the aggregators package contains the two aggregators.
@@ -56,12 +82,11 @@ The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.
 The feature can be extended by adding dimensions to the types in the polar.datamining bundle.
 This dimensions then serve as a new option in filtering and grouping.
 
-How that works is displayed [here](wiki/typical-development-scenarios).
+How that works is displayed [here](/wiki/typical-data-mining-scenarios).
 
 ### Known Issues
 
-* Bug 3055 - Tooltip at Polarsheets Histogramm disappears
-* Bug 3056 - Polar Sheets Histogram shows average value for number of data points
+none right now
 
 ## PolarDataService Architecture
 
@@ -123,3 +148,17 @@ We could use Axels replication framework. It would allow for a more flexible app
 ### Hard Coded Polars
 
 Some suggested it would be okay to just read out the polars of the archive and hard-code them into the server as an initial polar state, that is then changed by new incoming data. That is a very static approach and defeats the dynamic nature of the whole polar approach but it is very simple to do.
+
+## Other Approaches
+
+Some short notes on other approaches for gathering polar data.
+
+### Manual Polars
+
+We tried creating a tool that allows an expert to gather data for manually creating polars. The development of this tool was triggered by Marcus from STG.
+
+For a given set of races the main algorithm finds situations where two boats on different hulls pass each other closely (locationwise). It then presents these results to the user and the user can have a closer look and decide if this data should be added to the aggregation.
+
+The problem with this approach is that it is a lot of work to get together a set of data that is not tiny. It is also unclear what to do with the data afterwards.
+
+The tool hasn't really been used in production and thus the code has not been merged into the master branch. It resides on the branch marcus-polars.
