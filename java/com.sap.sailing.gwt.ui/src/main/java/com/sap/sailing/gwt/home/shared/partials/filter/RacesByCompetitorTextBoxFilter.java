@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sse.common.Util;
@@ -13,6 +14,10 @@ import com.sap.sse.common.filter.Filter;
 public class RacesByCompetitorTextBoxFilter extends AbstractTextBoxFilter<SimpleRaceMetadataDTO> {
     
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
+    
+    public RacesByCompetitorTextBoxFilter() {
+        super(StringMessages.INSTANCE.competitorsFilter());
+    }
     
     @Override
     protected Filter<SimpleRaceMetadataDTO> getFilter(String searchValue) {

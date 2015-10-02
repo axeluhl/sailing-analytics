@@ -7,12 +7,25 @@
 	<ui:style>
 		.container {
 			text-align: right;
+		    font-weight: 600;
 		}
 		.textinput {
-			border-radius: 4px;
+			display: inline-block;
+		    padding: .333333333333333em 2.333333333333333em .333333333333333em .666666666666667em;
+		    line-height: 1.333333333333333em;
+		    color: #666;
+		    background-color: #f2f2f2;
+		    border: .066666666666667em solid #dedede
 		}
 		.clearbutton {
-			line-height: 1.1em;
+		    position: absolute;
+		    top: .066666666666667em;
+		    bottom: .066666666666667em;
+		    right: 1.066666666666667em;
+			border-radius: 0;
+			display: inline-block;
+		    padding: .333333333333333em .666666666666667em;
+		    line-height: 1.333333333333333em;
 		}
 	</ui:style>
 	<g:FlowPanel addStyleNames="{style.container}" ui:field="filterContainerUi">

@@ -21,8 +21,9 @@ public abstract class AbstractTextBoxFilter<T> extends AbstractFilterWidget<T> {
     @UiField TextBox textBoxUi;
     @UiField Button clearButtonUi;
     
-    public AbstractTextBoxFilter() {
+    protected AbstractTextBoxFilter(String placeholderText) {
         initWidget(uiBinder.createAndBindUi(this));
+        textBoxUi.getElement().setAttribute("placeholder", placeholderText);
         clearButtonUi.setEnabled(false);
     }
     
