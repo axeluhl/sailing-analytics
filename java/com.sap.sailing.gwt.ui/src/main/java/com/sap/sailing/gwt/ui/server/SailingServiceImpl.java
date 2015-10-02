@@ -5883,9 +5883,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName,
-            String raceColumnName, String fleetName) {
-        List<AbstractLog<?,?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+    public Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName) {
+        List<AbstractLog<?,?>> logHierarchy = getLogHierarchy(leaderboardName);
 
         Collection<CompetitorDTO> competitorRegistrations = new ArrayList<CompetitorDTO>();
 

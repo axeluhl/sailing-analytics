@@ -610,8 +610,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO);
 
-    Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName, String raceColumnName,
-            String fleetName);
+    Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName);
 
     /**
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
