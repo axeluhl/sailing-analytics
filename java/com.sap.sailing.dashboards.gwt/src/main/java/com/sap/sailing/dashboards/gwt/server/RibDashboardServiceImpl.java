@@ -91,7 +91,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
     
     protected RacingEventService getRacingEventService() {
-        return racingEventServiceTracker.getService(); // grab the service
+        return racingEventServiceTracker.getService();
     }
     
     private PolarDataService getPolarService() {
