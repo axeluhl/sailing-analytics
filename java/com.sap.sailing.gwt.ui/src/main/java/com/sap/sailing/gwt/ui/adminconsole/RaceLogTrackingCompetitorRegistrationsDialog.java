@@ -9,6 +9,8 @@ import java.util.Set;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -21,15 +23,19 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDialog {
     protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
     protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     protected final boolean filterByLeaderBoardInitially = false;
     protected final CompetitorRegistrationHandler competitorRegistrationsHandler;
+    private String leaderboardName;
 
     static interface CompetitorRegistrationHandler {
         void getRegisteredCompetitors(Callback<Collection<CompetitorDTO>, Throwable> callback);
@@ -38,11 +44,12 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
     }
 
     public RaceLogTrackingCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
+            final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable, String leaderboardName,
             CompetitorRegistrationHandler competitorRegistrationHandler) {
         super(sailingService, stringMessages, errorReporter, editable);
         this.competitorRegistrationsHandler = competitorRegistrationHandler;
-
+        this.leaderboardName = leaderboardName;
+        
         setupUi();
         refreshCompetitors();
     }
@@ -56,9 +63,79 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
                 openAddCompetitorDialog();
             }
         });
+        
+        Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
+        editCompetitorButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openEditCompetitorDialog();
+            }
+        });
+        
+        final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
+        inviteCompetitorsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Collection<CompetitorDTO> competitorsToInvite = null;
+                
+                if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() > 0){
+                   competitorsToInvite = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
+                   boolean emailProvidedForAll = isEmailProvidedForAll(competitorsToInvite);
+
+                   if (emailProvidedForAll) {
+                       openChooseEventDialogAndSendMails(competitorsToInvite);
+                   } else {
+                       Window.alert(stringMessages.notAllCompetitorsProvideEmail());
+                   }
+                   
+                } else {
+                    Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
+                }
+            }
+
+            private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
+                for (CompetitorDTO competitor : allCompetitors) {
+                    if (!competitor.hasEmail()) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        });
+        
         buttonPanel.add(addCompetitorButton);
+        buttonPanel.add(editCompetitorButton);
+        buttonPanel.add(inviteCompetitorsButton);
 
         super.addButtons(buttonPanel);
+    }
+    
+    private void openChooseEventDialogAndSendMails(final Collection<CompetitorDTO> competitors) {
+        new SelectEventAndHostnameDialog(sailingService, stringMessages, errorReporter, leaderboardName, new DialogCallback<Pair<EventDTO, String>>() {
+
+            @Override
+            public void ok(Pair<EventDTO, String> result) {
+                sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
+                        competitors, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Window.alert(stringMessages.sendingMailsSuccessful());
+                            }
+                        });
+            }
+
+            @Override
+            public void cancel() {
+                
+            }
+        }).show();
     }
 
     private void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
@@ -139,11 +216,44 @@ public class RaceLogTrackingCompetitorRegistrationsDialog extends AbstractSaveDi
                     }
                 }).show();
     }
+    
+    private void openEditCompetitorDialog() {
+        //get currently selected competitor
+        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1){
+            // show some warning
+        } else {
+            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet().iterator().next();
+            new CompetitorEditDialog(stringMessages, competitorToEdit,
+                    new DataEntryDialog.DialogCallback<CompetitorDTO>() {
+                @Override
+                public void ok(CompetitorDTO competitor) {
+                    sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(CompetitorDTO updatedCompetitor) {
+                            int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList().indexOf(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
+                            registeredCompetitorsTable.getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            registeredCompetitorsTable.getDataProvider().refresh();
+                        }
+                    });
+                }
+
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
+    }
 
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
 
-        allCompetitorsTable.refreshCompetitorList(null, true, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 center();

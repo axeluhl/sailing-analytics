@@ -224,20 +224,16 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     }
     
     public void refreshCompetitorList(String leaderboardName) {
-        refreshCompetitorList(leaderboardName, false, null);
-    }
-    
-    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs) {
-        refreshCompetitorList(leaderboardName, lookInRaceLogs, null);
+        refreshCompetitorList(leaderboardName, null);
     }
     
     /**
      * @param leaderboardName If null, all existing competitors are loaded
      */
-    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs, final Callback<Iterable<CompetitorDTO>,
+    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
         if(leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, lookInRaceLogs, new AsyncCallback<Iterable<CompetitorDTO>>() {
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());

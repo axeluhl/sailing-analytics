@@ -120,9 +120,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public Fleet getFleetOfCompetitor(Competitor competitor) {
-        for (Map.Entry<Fleet, TrackedRace> e : trackedRaces.entrySet()) {
-            if (Util.contains(e.getValue().getRace().getCompetitors(), competitor)) {
-                return e.getKey();
+        for (final Fleet fleet : getFleets()) {
+            if (Util.contains(getAllCompetitors(fleet), competitor)) {
+                return fleet;
             }
         }
         return null;
