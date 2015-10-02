@@ -283,6 +283,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
     String competitorCharts();
     String selectAtLeastOneCompetitor();
+    String selectAtLeastOneCompetitorForInvitation();
     String directionChange();
     String speedChange();
     String degreesShort();
@@ -1387,6 +1388,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String dataMiningRetrieval();
+    String inviteSelectedCompetitors();
     String denoteAllRacesForRaceLogTrackingShorctut();
     String copyCourse();
     String copyCompetitors();

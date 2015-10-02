@@ -106,7 +106,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                    /* editable */ true, new CompetitorRegistrationHandler() {
+                    /* editable */ true, leaderboardName, new CompetitorRegistrationHandler() {
                         
                         @Override
                         public void setRegisteredCompetitors(Set<CompetitorDTO> registeredCompetitors) {
@@ -128,7 +128,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                         @Override
                         public void getRegisteredCompetitors(
                                 final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                            sailingService.getCompetitorRegistrations(leaderboardName,
+                            sailingService.getCompetitorRegistrationsOnRegattaLog(leaderboardName,
                                     new AsyncCallback<Collection<CompetitorDTO>>() {
                                         @Override
                                         public void onSuccess(Collection<CompetitorDTO> result) {
@@ -207,11 +207,11 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS
                         .equals(value)) {
                     new RaceLogTrackingCompetitorRegistrationsDialog(sailingService, stringMessages, errorReporter,
-                            editable, new CompetitorRegistrationHandler() {
+                            editable, leaderboardName, new CompetitorRegistrationHandler() {
                                 @Override
                                 public void getRegisteredCompetitors(
                                         final Callback<Collection<CompetitorDTO>, Throwable> callback) {
-                                    sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName,
+                                    sailingService.getCompetitorRegistrationsOnRaceLog(leaderboardName, raceColumnName,
                                             fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
                                                 @Override
                                                 public void onSuccess(Collection<CompetitorDTO> result) {

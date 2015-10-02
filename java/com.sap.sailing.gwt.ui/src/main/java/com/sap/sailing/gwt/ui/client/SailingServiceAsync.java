@@ -527,7 +527,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitors(AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
-    void getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs,
+    void getCompetitorsOfLeaderboard(String leaderboardName,
             AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
@@ -592,7 +592,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setCompetitorRegistrations(String leaderboardName,Set<CompetitorDTO> competitors,
             AsyncCallback<Void> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    void getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO,
@@ -669,7 +669,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived, AsyncCallback<RaceDTO> callback);
 
-    void getCompetitorRegistrations(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
+    void getCompetitorRegistrationsOnRegattaLog(String leaderboardName, AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void createXYDiagramForBoatClass(String itemText, AsyncCallback<PolarSheetsXYDiagramData> asyncCallback);
 
@@ -700,7 +700,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
+            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo, AsyncCallback<Void> callback);
 
     void getMarksInRaceLogsAndTrackedRaces(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 

@@ -4500,21 +4500,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs) {
-        if (lookInRaceLogs) {
-            Set<Competitor> result = new HashSet<Competitor>();
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    result.addAll(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
-                }
-            }
-            return convertToCompetitorDTOs(result);
-        } else {
+    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
-        }
     }
 
     @Override
@@ -4920,14 +4908,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
+    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
                         getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
     }
     
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName)
+    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRegattaLog(String leaderboardName)
             throws DoesNotHaveRegattaLogException {
         return convertToCompetitorDTOs(
                 new RegisteredCompetitorsAnalyzer<>(
@@ -5714,7 +5702,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {
