@@ -124,7 +124,7 @@ public class AddDeviceMappingToRaceLogDialog extends DataEntryDialog<DeviceMappi
                 }, mapping != null ? mapping.mappedTo : null);
 
         // load table content
-        sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName,
+        sailingService.getCompetitorRegistrationsOnRaceLog(leaderboardName, raceColumnName, fleetName,
                 itemSelectionPanel.getSetCompetitorsCallback());
 
         sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName,

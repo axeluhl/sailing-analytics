@@ -10,9 +10,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
@@ -92,6 +90,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -410,14 +409,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<CompetitorDTO> getCompetitors();
     
-    /**
-     * 
-     * @param leaderboardName
-     * @param lookInRaceLogs If set to {@code true}, the {@link RaceLog}s are checked for the competitor registrations.
-     * If set to {@code false}, the {@link RaceDefinition}s are checked instead.
-     * @return
-     */
-    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs);
+    Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName);
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
@@ -470,15 +462,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     /**
      * Get the competitors registered in this racelog. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrations(String) registered for the leaderboard}.
+     * {@link #getCompetitorRegistrationsOnRaceLog(String) registered for the leaderboard}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName);
+    Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * Get the competitors registered in this leaderboard. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrations(String, String, String) registered for the racelog}.
+     * {@link #getCompetitorRegistrationsOnRegattaLog(String, String, String) registered for the racelog}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName) throws DoesNotHaveRegattaLogException;
+    Collection<CompetitorDTO> getCompetitorRegistrationsOnRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
@@ -496,13 +488,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, Position position);
-    
-    /**
-     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
-     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
-     */
-    void copyCourseAndCompetitorsToOtherRaceLogs(Util.Triple<String, String, String> raceLogFrom,
-            Set<Util.Triple<String, String, String>> raceLogsTo);
     
     void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
             throws TransformationException;
@@ -601,7 +586,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
             String fleetName) throws TransformationException;
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Set<CompetitorDTO> competitors, String localeInfo) throws MailException;
+            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
     Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName);
 
@@ -619,4 +604,18 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO);
+
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
+    void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples);
+
+    /**
+     * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
+     * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     */
+    void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples);
 }
