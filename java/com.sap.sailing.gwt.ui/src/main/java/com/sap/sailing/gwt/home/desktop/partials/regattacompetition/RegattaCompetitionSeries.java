@@ -53,11 +53,11 @@ public class RegattaCompetitionSeries extends Composite {
         containerUi.add(competitionFleet);
     }
     
-    public void setRacesFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
+    public void applyFilter(Filter<SimpleRaceMetadataDTO> filter) {
         boolean seriesVisible = false;
         for (int i = 0; i < containerUi.getWidgetCount(); i++) {
             RegattaCompetitionFleet fleet = (RegattaCompetitionFleet) containerUi.getWidget(i);
-            seriesVisible |= fleet.setRacesFilter(racesFilter);
+            seriesVisible |= fleet.applyFilter(filter);
         }
         setVisible(seriesVisible);
     }

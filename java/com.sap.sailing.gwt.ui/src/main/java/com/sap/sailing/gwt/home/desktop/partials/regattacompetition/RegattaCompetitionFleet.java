@@ -60,7 +60,7 @@ public class RegattaCompetitionFleet extends Widget {
         return "rgba(" + rgbValues.getA() + "," + rgbValues.getB() + "," + rgbValues.getC() + ", 0.1)";
     }
     
-    public boolean setRacesFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
+    public boolean applyFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
         boolean fleetVisible = false;
         for (Entry<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> entry : raceToCompetitorsMap.entrySet()) {
             boolean raceVisible = racesFilter.matches(entry.getValue());
