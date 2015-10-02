@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -30,12 +31,14 @@ import com.sap.sailing.gwt.home.client.place.event.partials.multiRegattaList.Mul
 import com.sap.sailing.gwt.home.client.place.event.partials.raceListLive.RacesListLive;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshManager;
 import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaListViewAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
@@ -57,10 +60,12 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     @UiField(provided = true) EventOverviewStage stage;
     @UiField(provided = true) RacesListLive racesListLive;
     @UiField DivElement newContentContainerUi;
+    @UiField DivElement legendAndFilterUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField MultiRegattaListStepsLegend regattaProgressLegendUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
     @UiField AnchorElement regattaOverviewLinkUi;
+    @UiField StatisticsBox statisticsBoxUi;
     private Presenter currentPresenter;
 
     @Override
@@ -84,7 +89,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         racesListLive = new RacesListLive(currentPresenter, true);
         MultiregattaOverviewRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaOverviewRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
-        regattaListUi = new MultiRegattaList(currentPresenter);
+        regattaListUi = new MultiRegattaList(currentPresenter, false);
 
         initWidget(ourUiBinder.createAndBindUi(this));
         regattaOverviewLinkUi.setHref(currentPresenter.getRegattaOverviewLink());
@@ -95,6 +100,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         
         if (ExperimentalFeatures.SHOW_NEW_REGATTA_LIST) {
             refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
+            refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId(), true));
             content.removeFromParent();
         } else {
             boatCategoryFilterUi.removeFromParent();
@@ -158,6 +164,7 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
             DropdownFilterList<String>, RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
         @Override
         public void setData(SortedSetResult<RegattaWithProgressDTO> data) {
+            legendAndFilterUi.getStyle().setDisplay(data.isEmpty() ? Display.NONE : Display.BLOCK);
             regattaListUi.setData(data);
             boatCategoryFilterUi.updateFilterValues();
         }

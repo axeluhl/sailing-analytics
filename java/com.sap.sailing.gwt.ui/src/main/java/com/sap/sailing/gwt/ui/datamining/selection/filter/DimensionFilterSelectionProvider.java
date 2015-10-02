@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,24 +20,31 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.DataMiningResources;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.ManagedDataMiningQueriesCounter;
 import com.sap.sailing.gwt.ui.datamining.execution.ManagedDataMiningQueryCallback;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleManagedDataMiningQueriesCounter;
+import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 class DimensionFilterSelectionProvider {
+
+    private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -74,11 +83,12 @@ class DimensionFilterSelectionProvider {
                 return function.getDisplayName();
             }
         });
+        dimensionListBox.setWidth("100%");
         dimensionChangedHandler = new DimensionChangedHandler();
         dimensionListBox.addValueChangeHandler(dimensionChangedHandler);
         controlsPanel.add(dimensionListBox);
-        
-        toggleFilterButton = new ToggleButton("S");
+
+        toggleFilterButton = new ToggleButton(new Image(resources.searchIcon()));
         toggleFilterButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -100,7 +110,7 @@ class DimensionFilterSelectionProvider {
             }
         });
         selectionTable.setVisible(false);
-        mainPanel.add(selectionTable);
+        mainPanel.add(selectionTable.getWidget());
     }
     
     private class DimensionChangedHandler implements ValueChangeHandler<FunctionDTO> {
@@ -149,23 +159,22 @@ class DimensionFilterSelectionProvider {
     private void fetchAndDisplayAvailableData(final boolean isUpdate, final boolean notifyListenersWhenSelectionChanged,
             final Iterator<DimensionFilterSelectionProvider> retrieverLevelSelectionProviderIterator) {
         final FunctionDTO dimension = getSelectedDimension();
-        Collection<FunctionDTO> dimensionDTOs = new ArrayList<>();
+        HashSet<FunctionDTO> dimensionDTOs = new HashSet<>();
         dimensionDTOs.add(dimension);
-        @SuppressWarnings("unchecked")
-        Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO = 
-                (Map<Integer, Map<FunctionDTO, Collection<?>>>)(Map<?, ?>) retrieverLevelSelectionProvider.getCompleteFilterSelection();
-        int retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
+        HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsDTO = retrieverLevelSelectionProvider.getRetrieverSettings();
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO = retrieverLevelSelectionProvider.getCompleteFilterSelection();
+        DataRetrieverLevelDTO retrieverLevel = retrieverLevelSelectionProvider.getRetrieverLevel();
         if (filterSelectionDTO.containsKey(retrieverLevel)) {
             filterSelectionDTO.get(retrieverLevel).remove(dimension);
         }
         busyIndicator.setVisible(true);
         counter.increase();
         dataMiningService.getDimensionValuesFor(session, retrieverLevelSelectionProvider.getDataRetrieverChain(),
-                retrieverLevelSelectionProvider.getRetrieverLevel(), dimensionDTOs, filterSelectionDTO,
-                LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<Set<Object>>(counter) {
+                retrieverLevel, dimensionDTOs, retrieverSettingsDTO, filterSelectionDTO,
+                LocaleInfo.getCurrentLocale().getLocaleName(), new ManagedDataMiningQueryCallback<HashSet<Object>>(counter) {
                     @Override
-                    protected void handleSuccess(QueryResult<Set<Object>> result) {
-                        Map<GroupKey, Set<Object>> results = result.getResults();
+                    protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
+                        Map<GroupKey, HashSet<Object>> results = result.getResults();
                         List<Object> content = new ArrayList<Object>();
                         
                         if (!results.isEmpty()) {
@@ -174,7 +183,8 @@ class DimensionFilterSelectionProvider {
                             Collections.sort(content, new Comparator<Object>() {
                                 @Override
                                 public int compare(Object o1, Object o2) {
-                                    return o1.toString().compareTo(o2.toString());
+                                    Comparator<String> naturalComparator = new NaturalComparator();
+                                    return naturalComparator.compare(o1.toString(), o2.toString());
                                 }
                             });
                         }
@@ -220,7 +230,7 @@ class DimensionFilterSelectionProvider {
         return dimensionListBox.getValue();
     }
 
-    public Collection<? extends Serializable> getSelection() {
+    public HashSet<? extends Serializable> getSelection() {
         return selectionTable.getSelection();
     }
     
@@ -236,14 +246,6 @@ class DimensionFilterSelectionProvider {
     
     public Widget getEntryWidget() {
         return mainPanel;
-    }
-
-    public void resizeToHeight(int heightInPX) {
-        int widthInPX = controlsPanel.getOffsetWidth();
-        mainPanel.setSize(widthInPX + "px", heightInPX + "px");
-        
-        int remainingHeightInPX = Math.max(0, heightInPX - controlsPanel.getOffsetHeight());
-        selectionTable.resizeTo(widthInPX, remainingHeightInPX);
     }
     
 }

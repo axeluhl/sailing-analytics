@@ -32,7 +32,7 @@ import com.rabbitmq.client.AMQP.Queue.DeleteOk;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sse.BuildVersion;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
@@ -631,7 +631,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
-                BuildVersion.getBuildVersion());
+                ServerInfo.getBuildVersion());
         final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
         registrationRequestConnection.connect();
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
@@ -747,7 +747,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             removeAsListenerFromReplicables();
             synchronized (this) {
                 if (masterChannel != null) {
-                    masterChannel.close();
+                    masterChannel.getConnection().close();
                     masterChannel = null;
                 }
             }

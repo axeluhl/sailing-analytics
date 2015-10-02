@@ -4,8 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Statistic;
 
 /**
  * A speed, convertible in various units of measure. Can be negative.
@@ -56,9 +55,14 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public String toString() {
             return "0kn";
         }
+
+        @Override
+        public double getStatuteMilesPerHour() {
+            return 0;
+        }
     };
     
-    @Statistic(messageKey="", resultDecimals=2, resultUnit=Unit.Knots)
+    @Statistic(messageKey="", resultDecimals=2)
     double getKnots();
 
     double getMetersPerSecond();
@@ -66,6 +70,8 @@ public interface Speed extends Comparable<Speed>, Serializable {
     double getKilometersPerHour();
     
     double getBeaufort();
+    
+    double getStatuteMilesPerHour();
 
     /**
      * Traveling at this speed starting at time <code>from</code> until time </code>to</code>, how far have we traveled?

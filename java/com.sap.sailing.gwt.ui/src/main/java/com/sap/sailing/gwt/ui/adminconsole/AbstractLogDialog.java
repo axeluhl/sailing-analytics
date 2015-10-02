@@ -13,11 +13,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.AbstractLogDTO;
 import com.sap.sailing.gwt.ui.shared.AbstractLogEventDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends AbstractLogEventDTO> extends DataEntryDialog<R> {

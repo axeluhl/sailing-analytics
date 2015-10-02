@@ -8,6 +8,7 @@ export EC2_HOME=/opt/amazon/ec2-api-tools-1.6.8.0
 export EC2_URL=https://ec2.eu-west-1.amazonaws.com
 export JAVA_HOME=/opt/jdk1.8.0_45
 export JAVA_1_7_HOME=/opt/jdk1.7.0_75
+export ANDROID_HOME=/opt/android-sdk-linux
 
 export PATH=$PATH:$JAVA_HOME/bin:/opt/amazon/ec2-api-tools-1.6.8.0/bin:/opt/amazon/bin
 

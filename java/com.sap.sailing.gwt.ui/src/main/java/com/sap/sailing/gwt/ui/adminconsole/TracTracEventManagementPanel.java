@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -35,7 +36,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -85,7 +86,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
         this.errorReporter = errorReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
@@ -474,12 +475,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public void onSuccess(List<TracTracConfigurationDTO> result) {
                         TracTracEventManagementPanel.this.previousConfigurations.clear();
                         TracTracEventManagementPanel.this.connectionsHistoryListBox.clear();
-                        
+                        Collections.sort(result, new Comparator<TracTracConfigurationDTO>() {
+                            @Override
+                            public int compare(TracTracConfigurationDTO c1, TracTracConfigurationDTO c2) {
+                                return c1.name.compareTo(c2.name);
+                            }
+                        });
                         for (TracTracConfigurationDTO config : result) {
                             TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config);
                             TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
                         }
-                        
                         
                         if (!result.isEmpty()) {
                             updatePanelFromSelectedStoredConfiguration();

@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
@@ -80,5 +81,10 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     @Override
     public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
         return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    }
+    
+    @Override
+    public PlaceNavigation<?> getSeriesNavigation() {
+        return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(getCtx()), null, false);
     }
 }

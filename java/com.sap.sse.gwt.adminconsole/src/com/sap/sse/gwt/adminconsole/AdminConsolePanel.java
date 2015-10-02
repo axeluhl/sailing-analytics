@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
-import com.sap.sse.gwt.client.BuildVersionRetriever;
+import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.Permission;
@@ -149,7 +149,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
     }
     
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
-            BuildVersionRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
         super(Unit.EM);
         this.permissionsForRoleProvider = permissionsForRoleProvider;

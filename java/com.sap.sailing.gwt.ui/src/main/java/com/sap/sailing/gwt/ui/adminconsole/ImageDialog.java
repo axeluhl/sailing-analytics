@@ -58,11 +58,11 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         }
     }
 
-    public ImageDialog(ImageParameterValidator validator, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
+    public ImageDialog(Date creationDate, ImageParameterValidator validator, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
-        this.creationDate = new Date();
+        this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
         
         image = new Image();

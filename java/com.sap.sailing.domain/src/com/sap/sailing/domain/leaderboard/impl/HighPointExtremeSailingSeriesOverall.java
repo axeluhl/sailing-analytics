@@ -36,8 +36,8 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
     private static final int MIN_RACES_REQUIRED_TO_BE_SCORED = 5;
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
+            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double result;
         if (rank == 0) {
             result = null;

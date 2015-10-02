@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
@@ -18,10 +17,11 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
@@ -84,7 +84,7 @@ public class TestDimensionsValuesQuery {
     public void testDimensionsValuesQuery() throws InterruptedException, ExecutionException {
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
         server.addStringMessages(stringMessages);
-        server.setDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
+        server.registerDataSourceProvider(new AbstractDataSourceProvider<Collection>(Collection.class) {
             @Override
             public Collection<?> getDataSource() {
                 return dataSource;
@@ -96,26 +96,26 @@ public class TestDimensionsValuesQuery {
         raceDimensions.add(dimensionRaceName);
         raceDimensions.add(dimensionBoatClassName);
         raceDimensions.add(dimensionYear);
-        Map<Integer, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
-        Query<Set<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 1 /*race*/, raceDimensions, filterSelection, locale);
+        Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = new HashMap<>();
+        Query<HashSet<Object>> dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*race*/ 1), raceDimensions, new HashMap<>(), filterSelection, locale);
         
-        Map<GroupKey, Set<Object>> expectedRaceResultData = buildExpectedRaceResultData();
-        QueryResult<Set<Object>> result = dimensionsValueQuery.run();
-        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedRaceResultData);
+        Map<GroupKey, HashSet<Object>> expectedRaceResultData = buildExpectedRaceResultData();
+        QueryResult<HashSet<Object>> result = dimensionsValueQuery.run();
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), expectedRaceResultData);
         
         Collection<Function<?>> legDimensions = new ArrayList<>();
         legDimensions.add(dimensionLegNumber);
         legDimensions.add(dimensionCompetitorName);
         legDimensions.add(dimensionCompetitorSailID);
-        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, 2 /*leg*/, legDimensions, filterSelection, locale);
+        dimensionsValueQuery = server.createDimensionValuesQuery(dataRetrieverChainDefinition, dataRetrieverChainDefinition.getDataRetrieverLevel(/*leg*/ 2), legDimensions, new HashMap<>(), filterSelection, locale);
 
-        Map<GroupKey, Set<Object>> expectedLegResultData = buildExpectedLegResultData();
+        Map<GroupKey, HashSet<Object>> expectedLegResultData = buildExpectedLegResultData();
         result = dimensionsValueQuery.run();
-        ConcurrencyTestsUtil.verifyResultData(result.getResults(), (Map<GroupKey, Set<Object>>) expectedLegResultData);
+        ConcurrencyTestsUtil.verifyResultData(result.getResults(), expectedLegResultData);
     }
     
-    private Map<GroupKey, Set<Object>> buildExpectedRaceResultData() {
-        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+    private Map<GroupKey, HashSet<Object>> buildExpectedRaceResultData() {
+        Map<GroupKey, HashSet<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasRaceContext dimensions
         GroupKey dimensionRegattaNameGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionRegattaName, stringMessages, locale));
@@ -139,8 +139,8 @@ public class TestDimensionsValuesQuery {
         return expectedResultData;
     }
     
-    private Map<GroupKey, Set<Object>> buildExpectedLegResultData() {
-        Map<GroupKey, Set<Object>> expectedResultData = new HashMap<>();
+    private Map<GroupKey, HashSet<Object>> buildExpectedLegResultData() {
+        Map<GroupKey, HashSet<Object>> expectedResultData = new HashMap<>();
 
         //Add empty sets for Test_HasLegContext dimensions
         GroupKey dimensionLegNumberGroupKey = new GenericGroupKey<FunctionDTO>(FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimensionLegNumber, stringMessages, locale));

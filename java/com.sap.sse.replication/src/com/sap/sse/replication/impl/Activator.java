@@ -168,9 +168,12 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
+        // stop replicating from a master server
         if (serverReplicationMasterService.getReplicatingFromMaster() != null) {
             serverReplicationMasterService.stopToReplicateFromMaster();
         }
+        // stop sending stuff to the exchange for other replicas (if this is a master)
+        serverReplicationMasterService.stopAllReplica();
     }
     
     public static BundleContext getDefaultContext() {

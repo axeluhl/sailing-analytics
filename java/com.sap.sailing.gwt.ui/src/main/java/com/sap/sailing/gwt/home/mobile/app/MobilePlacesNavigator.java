@@ -18,13 +18,14 @@ import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
-    protected MobilePlacesNavigator(PlaceController placeController) {
-        super(placeController);
+    protected MobilePlacesNavigator(PlaceController placeController, boolean isStandaloneServer) {
+        super(placeController, isStandaloneServer);
     }
 
     public PlaceNavigation<StartPlace> getHomeNavigation() {
@@ -65,8 +66,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     // NOT MOBILE PLACES
 
-    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
-        return createLocalPlaceNavigation(new SolutionsPlace(navigationTab));
+    public PlaceNavigation<SolutionsPlace> getSolutionsNavigation() {
+        return createLocalPlaceNavigation(new SolutionsPlace(SolutionsNavigationTabs.SailingAnalytics));
     }
 
     public PlaceNavigation<WhatsNewPlace> getWhatsNewNavigation(WhatsNewNavigationTabs navigationTab) {

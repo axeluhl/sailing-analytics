@@ -11,14 +11,16 @@ import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
-    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
-    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.STAGE, MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
+    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.STAGE, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
     
     private UUID eventId;
     
@@ -36,9 +38,9 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         TimePoint now = MillisecondsTimePoint.now();
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState state = HomeServiceUtil.calculateEventState(event);
-        long ttl = 1000 * 60 * 5;
+        long ttl = Duration.ONE_MINUTE.times(5).asMillis();
         if(state == EventState.RUNNING) {
-            ttl = 1000 * 60 * 2;
+            ttl = Duration.ONE_MINUTE.times(2).asMillis();
         }
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
             ttl = Math.min(ttl, now.until(event.getStartDate()).asMillis());
@@ -46,7 +48,7 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
         
         // TODO get correct message
         EventOverviewStageDTO stage = new EventOverviewStageDTO(null, getStageContent(context, event, state, now));
-        return new ResultWithTTL<>(ttl, stage);
+        return new ResultWithTTL<>(new MillisecondsDurationImpl(ttl), stage);
     }
 
     @GwtIncompatible

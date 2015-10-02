@@ -6,12 +6,12 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.test.domain.Test_Race;
 
 public class TestRaceAggregationProcessorDummy extends
-        AbstractParallelGroupedDataStoringAggregationProcessor<Test_Race, Test_Race> {
+        AbstractParallelGroupedDataAggregationProcessor<Test_Race, Test_Race> {
 
     public TestRaceAggregationProcessorDummy(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Test_Race>, ?>> resultReceivers) {
@@ -19,11 +19,11 @@ public class TestRaceAggregationProcessorDummy extends
     }
 
     @Override
-    protected void storeElement(GroupedDataEntry<Test_Race> element) {
+    protected void handleElement(GroupedDataEntry<Test_Race> element) {
     }
 
     @Override
-    protected Map<GroupKey, Test_Race> aggregateResult() {
+    protected Map<GroupKey, Test_Race> getResult() {
         return null;
     }
 

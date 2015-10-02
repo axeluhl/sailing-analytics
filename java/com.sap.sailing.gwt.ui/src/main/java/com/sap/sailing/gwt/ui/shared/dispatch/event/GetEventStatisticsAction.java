@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -168,7 +169,7 @@ public class GetEventStatisticsAction implements Action<ResultWithTTL<EventStati
         if (totalDistanceTraveled == Distance.NULL) {
             totalDistanceTraveled = null;
         }
-        return new ResultWithTTL<EventStatisticsDTO>(1000 * 60 * 5, new EventStatisticsDTO(regattas, competitors,
-                races, trackedRaces, numberOfGPSFixes, numberOfWindFixes, maxSpeed, totalDistanceTraveled));
+        return new ResultWithTTL<EventStatisticsDTO>(Duration.ONE_MINUTE.times(5), new EventStatisticsDTO(regattas,
+                competitors, races, trackedRaces, numberOfGPSFixes, numberOfWindFixes, maxSpeed, totalDistanceTraveled));
     }
 }

@@ -231,12 +231,20 @@
 	</servlet-mapping>
 			
 	<servlet>
-		<servlet-name>WindStatusServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusServlet</servlet-class>
+		<servlet-name>WindStatusHtmlServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusHtmlServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>WindStatusServlet</servlet-name>
+		<servlet-name>WindStatusHtmlServlet</servlet-name>
 		<url-pattern>/windStatus</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>WindStatusJsonServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusJsonServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>WindStatusJsonServlet</servlet-name>
+		<url-pattern>/windStatusJson</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>

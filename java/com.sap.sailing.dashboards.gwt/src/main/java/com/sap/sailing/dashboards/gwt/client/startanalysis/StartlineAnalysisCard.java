@@ -97,7 +97,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
             }else{
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByWind();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWind();
             }
             startanalysis_card_line_advantage
                     .setInnerHTML(startLineAdvantageType
@@ -141,7 +141,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
             zoomTypes.add(ZoomTypes.BUOYS);
         } else {
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
-            zoomTypes.add(ZoomTypes.BOATS);
+            zoomTypes.add(ZoomTypes.BUOYS);
         }
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,

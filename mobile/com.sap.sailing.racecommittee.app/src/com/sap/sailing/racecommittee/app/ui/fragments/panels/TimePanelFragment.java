@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -69,17 +69,17 @@ public class TimePanelFragment extends BasePanelFragment {
         dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
         mStateListener = new RaceStateChangedListener();
 
-        mRaceHeader = ViewHolder.get(layout, R.id.race_content_header);
+        mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
         if (mRaceHeader != null) {
             mRaceHeader.setOnClickListener(new RaceHeaderClick());
         }
 
-        mTimeLock = ViewHolder.get(layout, R.id.time_start_lock);
-        mCurrentTime = ViewHolder.get(layout, R.id.current_time);
-        mTimeFinish = ViewHolder.get(layout, R.id.time_finish);
-        mHeaderTime = ViewHolder.get(layout, R.id.timer_text);
-        mTimeStart = ViewHolder.get(layout, R.id.time_start);
-        mLinkIcon = ViewHolder.get(layout, R.id.linked_race);
+        mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
+        mCurrentTime = ViewHelper.get(layout, R.id.current_time);
+        mTimeFinish = ViewHelper.get(layout, R.id.time_finish);
+        mHeaderTime = ViewHelper.get(layout, R.id.timer_text);
+        mTimeStart = ViewHelper.get(layout, R.id.time_start);
+        mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
 
         if (getArguments().getBoolean(TOGGLED, false)) {
             toggleMarker(layout, R.id.time_marker);

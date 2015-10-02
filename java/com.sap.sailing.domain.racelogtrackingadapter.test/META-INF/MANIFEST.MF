@@ -18,4 +18,5 @@ Import-Package: com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.persistence.racelog.tracking.impl,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.server.impl,
+ com.sap.sse.concurrent,
  javax.servlet.http;version="2.5.0"

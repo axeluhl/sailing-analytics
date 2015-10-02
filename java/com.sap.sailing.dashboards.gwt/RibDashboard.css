@@ -22,11 +22,9 @@
 }
 
 .highcharts-container {
-	position: absolute;
-	top: 0pt;
-	bottom: 0pt;
-	left: 0pt;
-	right: 0pt;
+	position: absolute !important;
+	width: 100% !important;
+	height: 100% !important;
 }
 
 .bottomnotification {

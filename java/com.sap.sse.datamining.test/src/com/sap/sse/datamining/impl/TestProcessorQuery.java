@@ -25,11 +25,11 @@ import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
@@ -57,12 +57,12 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
                         ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
                             @Override
@@ -95,12 +95,12 @@ public class TestProcessorQuery {
         Collection<Number> dataSource = new ArrayList<>();
         dataSource.add(new Number(10));
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                dataSource, stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                dataSource, stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Double, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(new AbortResultReceiver(this.getResultReceiver()));
+                resultReceivers.add(new AbortResultReceiver(resultReceiver));
                 return new BlockingProcessor<Iterable<Number>, Double>((Class<Iterable<Number>>)(Class<?>) Iterable.class, Double.class,
                         ConcurrencyTestsUtil.getExecutor(), resultReceivers, 1000) {
                             @Override
@@ -161,12 +161,12 @@ public class TestProcessorQuery {
     public void testQueryWithTimeoutAndNonBlockingProcess() throws TimeoutException {
         final String keyValue = "Sum";
         ProcessorQuery<Double, Iterable<Number>> query = new ProcessorQuery<Double, Iterable<Number>>(
-                createDataSource(), stringMessages, Locale.ENGLISH, AdditionalQueryData.NULL_INSTANCE) {
+                createDataSource(), stringMessages, Locale.ENGLISH, Double.class, AdditionalQueryData.NULL_INSTANCE) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Iterable<Number>, ?> createFirstProcessor() {
+            protected Processor<Iterable<Number>, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Iterable<Number>, Map<GroupKey, Double>>((Class<Iterable<Number>>)(Class<?>) Iterable.class,
                                                                                                     (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
                                                                                                     ConcurrencyTestsUtil.getExecutor(),
@@ -235,16 +235,16 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryWithError() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
-                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                          ConcurrencyTestsUtil.getExecutor(),
-                                                                                          resultReceivers) {
+                                                                                    (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
@@ -275,16 +275,16 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryWithFailure() {
-        Query<Double> query = new ProcessorQuery<Double, Double>(0.0) {
+        Query<Double> query = new ProcessorQuery<Double, Double>(0.0, Double.class) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers = new ArrayList<>();
-                resultReceivers.add(this.getResultReceiver());
+                resultReceivers.add(resultReceiver);
                 return new AbstractParallelProcessor<Double, Map<GroupKey, Double>>(Double.class,
-                                                                                          (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
-                                                                                          ConcurrencyTestsUtil.getExecutor(),
-                                                                                          resultReceivers) {
+                                                                                    (Class<Map<GroupKey, Double>>)(Class<?>) Map.class,
+                                                                                    ConcurrencyTestsUtil.getExecutor(),
+                                                                                    resultReceivers) {
                     @Override
                     protected ProcessorInstruction<Map<GroupKey, Double>> createInstruction(Double element) {
                         return new AbstractProcessorInstruction<Map<GroupKey,Double>>(this) {
@@ -307,9 +307,9 @@ public class TestProcessorQuery {
     @Test
     public void testQueryAdditionalData() {
         AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
-        Query<?> query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+        Query<?> query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 return null;
             }
         };
@@ -318,9 +318,9 @@ public class TestProcessorQuery {
         assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), nullValue());
         
         additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
-        query = new ProcessorQuery<Double, Double>(0.0, additionalData) {
+        query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
-            protected Processor<Double, ?> createFirstProcessor() {
+            protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
                 return null;
             }
         };

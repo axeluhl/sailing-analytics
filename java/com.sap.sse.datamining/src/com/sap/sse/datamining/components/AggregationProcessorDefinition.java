@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public interface AggregationProcessorDefinition<ExtractedType, AggregatedType> {
@@ -15,7 +15,7 @@ public interface AggregationProcessorDefinition<ExtractedType, AggregatedType> {
     
     public String getAggregationNameMessageKey();
     
-    public Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor();
+    public Class<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor();
     public Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, AggregatedType>> construct(ExecutorService executor, Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers);
     
 }

@@ -39,6 +39,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -125,7 +126,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         extra += RaceHelper.getSeriesName(race.getSeries());
         extra += RaceHelper.getFleetName(race.getFleet());
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        BroadcastManager.getInstance(context).addIntent(intent);
     }
 
     private void dataChanged(ReadonlyRaceState changedState) {

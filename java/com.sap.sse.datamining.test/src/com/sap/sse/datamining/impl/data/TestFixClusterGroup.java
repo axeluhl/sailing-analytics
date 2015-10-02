@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,13 +14,9 @@ import org.junit.Test;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.datamining.test.util.TestsUtil;
-import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class TestFixClusterGroup {
 
-    private static final ResourceBundleStringMessages stringMessages = TestsUtil.getTestStringMessages();
-    
     private static final Comparator<Integer> comparator = new ComparableComparator<Integer>();
     private Cluster<Integer> clusterLowerThanZero;
     private Cluster<Integer> clusterFromZeroToTen;
@@ -44,9 +39,6 @@ public class TestFixClusterGroup {
         
         assertThat(groupWithClosedBoundaries.getClusterFor(-1), nullValue());
         assertThat(groupWithClosedBoundaries.getClusterFor(31), nullValue());
-        
-        assertThat(groupWithClosedBoundaries.getLocalizedName(Locale.ENGLISH, stringMessages), is("Cluster group with closed boundaries"));
-        assertThat(groupWithClosedBoundaries.getLocalizedName(Locale.GERMAN, stringMessages), is("Cluster-Gruppe mit geschlossenen Grenzen"));
     }
 
     private ClusterGroup<Integer> createGroupWithClosedBoundaries() {
@@ -54,7 +46,7 @@ public class TestFixClusterGroup {
         clusters.add(clusterFromZeroToTen);
         clusters.add(clusterFromElevenToTwenty);
         clusters.add(clusterFromTwentyOneToThirty);
-        return new FixClusterGroup<>("ClosedBoundariesClusterGroup", clusters);
+        return new FixClusterGroup<>(clusters);
     }
     
     @Test
@@ -63,9 +55,6 @@ public class TestFixClusterGroup {
 
         assertThat(groupWithOpenBoundaries.getClusterFor(-1), is(clusterLowerThanZero));
         assertThat(groupWithOpenBoundaries.getClusterFor(31), is(clusterGreaterThanThirty));
-
-        assertThat(groupWithOpenBoundaries.getLocalizedName(Locale.ENGLISH, stringMessages), is("Cluster group with open boundaries"));
-        assertThat(groupWithOpenBoundaries.getLocalizedName(Locale.GERMAN, stringMessages), is("Cluster-Gruppe mit offenen Grenzen"));
     }
     
     private ClusterGroup<Integer> createGroupWithOpenBoundaries() {
@@ -75,28 +64,28 @@ public class TestFixClusterGroup {
         clusters.add(clusterFromElevenToTwenty);
         clusters.add(clusterFromTwentyOneToThirty);
         clusters.add(clusterGreaterThanThirty);
-        return new FixClusterGroup<>("OpenBoundariesClusterGroup", clusters);
+        return new FixClusterGroup<>(clusters);
     }
 
     @Before
     public void initializeClusters() {
         ClusterBoundary<Integer> lowerThanZero = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.LOWER_THAN, comparator);
-        clusterLowerThanZero = new ClusterWithSingleBoundary<>("Test", lowerThanZero);
+        clusterLowerThanZero = new ClusterWithSingleBoundary<>(lowerThanZero);
         
         ClusterBoundary<Integer> greaterEqualsThanZero = new ComparatorClusterBoundary<Integer>(0, ComparisonStrategy.GREATER_EQUALS_THAN, new ComparableComparator<Integer>());
         ClusterBoundary<Integer> lowerEqualsThanTen = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
-        clusterFromZeroToTen = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterEqualsThanZero, lowerEqualsThanTen);
+        clusterFromZeroToTen = new ClusterWithLowerAndUpperBoundaries<>(greaterEqualsThanZero, lowerEqualsThanTen);
 
         ClusterBoundary<Integer> greaterThanTen = new ComparatorClusterBoundary<Integer>(10, ComparisonStrategy.GREATER_THAN, new ComparableComparator<Integer>());
         ClusterBoundary<Integer> lowerEqualsThanTwenty = new ComparatorClusterBoundary<Integer>(20, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
-        clusterFromElevenToTwenty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTen, lowerEqualsThanTwenty);
+        clusterFromElevenToTwenty = new ClusterWithLowerAndUpperBoundaries<>(greaterThanTen, lowerEqualsThanTwenty);
 
         ClusterBoundary<Integer> greaterThanTwenty = new ComparatorClusterBoundary<Integer>(20, ComparisonStrategy.GREATER_THAN, new ComparableComparator<Integer>());
         ClusterBoundary<Integer> lowerEqualsThanThirty = new ComparatorClusterBoundary<Integer>(30, ComparisonStrategy.LOWER_EQUALS_THAN, new ComparableComparator<Integer>());
-        clusterFromTwentyOneToThirty = new ClusterWithLowerAndUpperBoundaries<>("Test", greaterThanTwenty, lowerEqualsThanThirty);
+        clusterFromTwentyOneToThirty = new ClusterWithLowerAndUpperBoundaries<>(greaterThanTwenty, lowerEqualsThanThirty);
 
         ClusterBoundary<Integer> greaterThanThirty = new ComparatorClusterBoundary<Integer>(30, ComparisonStrategy.GREATER_THAN, comparator);
-        clusterGreaterThanThirty = new ClusterWithSingleBoundary<>("Test", greaterThanThirty);
+        clusterGreaterThanThirty = new ClusterWithSingleBoundary<>(greaterThanThirty);
     }
 
 }

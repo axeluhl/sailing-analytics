@@ -95,36 +95,40 @@ public class ReplicationServlet extends AbstractHttpServlet {
         case INITIAL_LOAD:
             String[] replicableIdsAsStrings = req.getParameter(REPLICABLES_IDS_AS_STRINGS_COMMA_SEPARATED).split(",");
             Channel channel = getReplicationService().createMasterChannel();
-            RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
-                    /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
-                    /* syncAfterTimeout */ false);
-            PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
-            br.println(ros.getQueueName());
-            br.flush();
-            final CountingOutputStream countingOutputStream = new CountingOutputStream(
-                    ros, /* log every megabyte */1024l * 1024l, Level.INFO,
-                    "HTTP output for initial load for " + req.getRemoteHost());
-            final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
-            for (String replicableIdAsString : replicableIdsAsStrings) {
-                Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
-                if (replicable == null) {
-                    final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
-                    logger.severe(msg);
-                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
-                    break; // causing an error on the replica which is expecting the replica's initial load
+            try {
+                RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
+                        /* queueName */ "initialLoad-for-"+req.getRemoteHost()+"@"+new Date()+"-"+UUID.randomUUID(),
+                        /* syncAfterTimeout */ false);
+                PrintWriter br = new PrintWriter(new OutputStreamWriter(resp.getOutputStream()));
+                br.println(ros.getQueueName());
+                br.flush();
+                final CountingOutputStream countingOutputStream = new CountingOutputStream(
+                        ros, /* log every megabyte */1024l * 1024l, Level.INFO,
+                        "HTTP output for initial load for " + req.getRemoteHost());
+                final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
+                for (String replicableIdAsString : replicableIdsAsStrings) {
+                    Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
+                    if (replicable == null) {
+                        final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
+                        logger.severe(msg);
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+                        break; // causing an error on the replica which is expecting the replica's initial load
+                    }
+                    try {
+                        replicable.serializeForInitialReplication(compressingOutputStream);
+                    } catch (Exception e) {
+                        logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
+                        logger.log(Level.SEVERE, "doGet", e);
+                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        e.printStackTrace(resp.getWriter());
+                    }
                 }
-                try {
-                    replicable.serializeForInitialReplication(compressingOutputStream);
-                } catch (Exception e) {
-                    logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
-                    logger.log(Level.SEVERE, "doGet", e);
-                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    e.printStackTrace(resp.getWriter());
-                }
+                compressingOutputStream.finish();
+                countingOutputStream.close();
+                break;
+            } finally {
+                channel.getConnection().close();
             }
-            compressingOutputStream.finish();
-            countingOutputStream.close();
-            break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));

@@ -1,16 +1,16 @@
 package com.sap.sse.datamining;
 
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.Statistic;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
- * A Service that provides all necessary elements of a datamining bundle. A datamining bundle
+ * A Service that provides all necessary elements of a data mining bundle. A data mining bundle
  * has to register such a service to the context. Such registrations are automatically tracked
- * by the domain independent datamining bundle, which calls the methods an integrates the bundle
- * in the datamining framework.
+ * by the domain independent data mining bundle, which calls the methods an integrates the bundle
+ * in the data mining framework.
  * 
  * @author Lennart Hensler (D054527)
  *

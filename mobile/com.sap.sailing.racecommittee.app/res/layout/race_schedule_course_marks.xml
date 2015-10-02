@@ -5,9 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <include
+        android:id="@+id/header"
+        layout="@layout/race_schedule_course_header"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/header">
 
         <LinearLayout
             android:id="@+id/header_bar"

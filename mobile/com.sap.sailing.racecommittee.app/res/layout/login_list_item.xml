@@ -3,22 +3,34 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/listView_row_height"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/listView_row_height"
     android:background="?sap_gray_black_30">
 
+    <ImageView
+        android:id="@+id/checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingRight="@dimen/default_padding_half"
+        android:src="?check_18dp"
+        android:visibility="invisible"
+        tools:visibility="visible"/>
+
     <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
-        android:gravity="center_vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginRight="@dimen/default_margin_half"
+        android:layout_toLeftOf="@id/checked"
+        android:layout_centerVertical="true">
 
         <TextView
             android:id="@+id/list_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
             android:textColor="?white"
             android:textSize="@dimen/textSize_26"
             tools:text="ListItem"/>
@@ -36,22 +48,11 @@
             tools:visibility="visible"/>
     </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/checked"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:paddingRight="@dimen/default_padding"
-        android:src="?check_18dp"
-        android:visibility="invisible"
-        tools:visibility="visible"/>
-
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/default_margin_half"
+        android:layout_marginRight="@dimen/default_margin_half"
         android:background="?sap_gray"/>
 </RelativeLayout>

@@ -18,19 +18,19 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final DataMiningDTOFactory dtoFactory;
     
-    private final Map<Class<?>, Map<String, AggregationProcessorDefinition<?, ?>>> definitionsMappedByExtractedType;
+    private final Map<Class<?>, Map<String, AggregationProcessorDefinition<?, ?>>> definitionsMappedByExtractedTypeAndMessageKey;
     
     public AggregationProcessorDefinitionManager() {
         dtoFactory = new DataMiningDTOFactory();
-        definitionsMappedByExtractedType = new HashMap<>();
+        definitionsMappedByExtractedTypeAndMessageKey = new HashMap<>();
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public <ExtractedType> AggregationProcessorDefinition<ExtractedType, ?> get(Class<ExtractedType> extractedType,
             String aggregationNameMessageKey) {
-        if (definitionsMappedByExtractedType.containsKey(extractedType)) {
-            return (AggregationProcessorDefinition<ExtractedType, ?>) definitionsMappedByExtractedType.get(extractedType).get(aggregationNameMessageKey);
+        if (definitionsMappedByExtractedTypeAndMessageKey.containsKey(extractedType)) {
+            return (AggregationProcessorDefinition<ExtractedType, ?>) definitionsMappedByExtractedTypeAndMessageKey.get(extractedType).get(aggregationNameMessageKey);
         }
         return null;
     }
@@ -52,8 +52,8 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
     @SuppressWarnings("unchecked")
     private <ExtractedType> Collection<AggregationProcessorDefinition< ? super ExtractedType, ?>> getByUnspecificTypeAsSpecificType(Class<?> extractedType) {
         Collection<AggregationProcessorDefinition<? super ExtractedType, ?>> definitions = new HashSet<>();
-        if (definitionsMappedByExtractedType.containsKey(extractedType)) {
-            for (AggregationProcessorDefinition<?, ?> definition : definitionsMappedByExtractedType.get(extractedType).values()) {
+        if (definitionsMappedByExtractedTypeAndMessageKey.containsKey(extractedType)) {
+            for (AggregationProcessorDefinition<?, ?> definition : definitionsMappedByExtractedTypeAndMessageKey.get(extractedType).values()) {
                 definitions.add((AggregationProcessorDefinition<? super ExtractedType, ?>) definition);
             }
         }
@@ -92,7 +92,7 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
 
     private Collection<AggregationProcessorDefinition<?, ?>> getAllDefinitions() {
         Collection<AggregationProcessorDefinition<?, ?>> allDefinitions = new HashSet<>();
-        for (Map<String, AggregationProcessorDefinition<?, ?>> map : definitionsMappedByExtractedType.values()) {
+        for (Map<String, AggregationProcessorDefinition<?, ?>> map : definitionsMappedByExtractedTypeAndMessageKey.values()) {
             allDefinitions.addAll(map.values());
         }
         return allDefinitions;
@@ -104,9 +104,9 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
 
     private <ExtractedType, ResultType> void logThatMoreThanOneDefinitionMatchedDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO,
                                                                                     Collection<AggregationProcessorDefinition<ExtractedType, ResultType>> definitionsMatchingDTO) {
-        logger.log(Level.FINER, "More than on registered aggregator definition matched the DTO '" + aggregatorDefinitionDTO + "'");
+        logger.log(Level.INFO, "More than on registered aggregator definition matched the DTO '" + aggregatorDefinitionDTO + "'");
         for (AggregationProcessorDefinition<ExtractedType, ResultType> definition : definitionsMatchingDTO) {
-            logger.log(Level.FINEST, "The definition '" + definition + "' matched the DTO '" + aggregatorDefinitionDTO + "'");
+            logger.log(Level.FINER, "The definition '" + definition + "' matched the DTO '" + aggregatorDefinitionDTO + "'");
         }
     }
 
@@ -117,24 +117,50 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
     @Override
     public boolean register(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
         if (get(aggregationProcessorDefinition.getExtractedType(), aggregationProcessorDefinition.getAggregationNameMessageKey()) != null) {
+            logger.info("Can't register the aggregation processor definition " + aggregationProcessorDefinition +
+                        ", because there's allready a definition registered for the extracted type " +
+                        aggregationProcessorDefinition.getExtractedType().getName() + " and the message key " + 
+                        aggregationProcessorDefinition.getAggregationNameMessageKey());
             return false;
         }
         
         Class<?> extractedType = aggregationProcessorDefinition.getExtractedType();
-        if (!definitionsMappedByExtractedType.containsKey(extractedType)) {
-            definitionsMappedByExtractedType.put(extractedType, new HashMap<String, AggregationProcessorDefinition<?,?>>());
+        if (!definitionsMappedByExtractedTypeAndMessageKey.containsKey(extractedType)) {
+            definitionsMappedByExtractedTypeAndMessageKey.put(extractedType, new HashMap<String, AggregationProcessorDefinition<?,?>>());
         }
-        definitionsMappedByExtractedType.get(extractedType).put(aggregationProcessorDefinition.getAggregationNameMessageKey(), aggregationProcessorDefinition);
+        AggregationProcessorDefinition<?, ?> previousDefinition = definitionsMappedByExtractedTypeAndMessageKey.get(extractedType).put(aggregationProcessorDefinition.getAggregationNameMessageKey(), aggregationProcessorDefinition);
+        if (previousDefinition == null) {
+            logger.info("Registering the aggregation processor definition " + aggregationProcessorDefinition +
+                        " for the extracted type " + aggregationProcessorDefinition.getExtractedType().getName() +
+                        " and the message key " + aggregationProcessorDefinition.getAggregationNameMessageKey());
+        } else {
+            logger.info("Registering the aggregation processor definition " + aggregationProcessorDefinition +
+                        " for the extracted type " + aggregationProcessorDefinition.getExtractedType().getName() +
+                        " and the message key " + aggregationProcessorDefinition.getAggregationNameMessageKey() +
+                        " replacing " + previousDefinition);
+        }
         return true;
     }
 
     @Override
     public boolean unregister(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition) {
+        boolean changed = false;
         Class<?> extractedType = aggregationProcessorDefinition.getExtractedType();
-        if (!definitionsMappedByExtractedType.containsKey(extractedType)) {
-            return false;
+        if (definitionsMappedByExtractedTypeAndMessageKey.containsKey(extractedType) &&
+            definitionsMappedByExtractedTypeAndMessageKey.get(extractedType).remove(aggregationProcessorDefinition.getAggregationNameMessageKey()) != null) {
+            changed = true;
         }
-        return definitionsMappedByExtractedType.get(extractedType).remove(aggregationProcessorDefinition.getAggregationNameMessageKey()) != null;
+        if (changed) {
+            logger.info("Unregistering the aggregation processor definition " + aggregationProcessorDefinition +
+                        " for the extracted type " + aggregationProcessorDefinition.getExtractedType().getName() +
+                        " and the message key " + aggregationProcessorDefinition.getAggregationNameMessageKey());
+        } else {
+            logger.info("Can't unregister the aggregation processor definition " + aggregationProcessorDefinition +
+                        ", because there's no definition registered for the extracted type " +
+                        aggregationProcessorDefinition.getExtractedType().getName() + " and the message key " + 
+                        aggregationProcessorDefinition.getAggregationNameMessageKey());
+        }
+        return changed;
     }
 
 }

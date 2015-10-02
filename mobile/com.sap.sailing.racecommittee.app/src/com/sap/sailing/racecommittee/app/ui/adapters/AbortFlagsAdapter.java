@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -89,7 +89,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
         final AbortFlag item = getItem(position);
 
-        final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
+        final ImageView flagImage = ViewHelper.get(convertView, R.id.flag);
         if (flagImage != null) {
             Drawable flagDrawable = null;
             flagImage.setVisibility(View.INVISIBLE);
@@ -105,7 +105,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final TextView first_line = ViewHolder.get(convertView, R.id.first_line);
+        final TextView first_line = ViewHelper.get(convertView, R.id.first_line);
         if (first_line != null) {
             first_line.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(item.first_line)) {
@@ -114,7 +114,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final TextView second_line = ViewHolder.get(convertView, R.id.second_line);
+        final TextView second_line = ViewHelper.get(convertView, R.id.second_line);
         if (second_line != null) {
             second_line.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(item.second_line)) {
@@ -123,7 +123,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final Button confirm = ViewHolder.get(convertView, R.id.confirm);
+        final Button confirm = ViewHelper.get(convertView, R.id.confirm);
         if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
             if (item.touched) {
@@ -138,7 +138,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             });
         }
 
-        final RelativeLayout layout = ViewHolder.get(convertView, R.id.line);
+        final RelativeLayout layout = ViewHelper.get(convertView, R.id.line);
         if (layout != null) {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override

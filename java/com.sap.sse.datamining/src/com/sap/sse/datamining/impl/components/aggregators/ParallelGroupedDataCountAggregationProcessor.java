@@ -11,45 +11,43 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.data.Unit;
 
 public class ParallelGroupedDataCountAggregationProcessor
-                extends AbstractParallelGroupedDataStoringAggregationProcessor<Object, Double> {
+                extends AbstractParallelGroupedDataAggregationProcessor<Object, Number> {
     
-    private static final AggregationProcessorDefinition<Object, Double> DEFINITION =
-            new SimpleAggregationProcessorDefinition<>(Object.class, Double.class, "Count", ParallelGroupedDataCountAggregationProcessor.class);
+    private static final AggregationProcessorDefinition<Object, Number> DEFINITION =
+            new SimpleAggregationProcessorDefinition<>(Object.class, Number.class, "Count", ParallelGroupedDataCountAggregationProcessor.class);
     
-    public static AggregationProcessorDefinition<Object, Double> getDefinition() {
+    public static AggregationProcessorDefinition<Object, Number> getDefinition() {
         return DEFINITION;
     }
 
-    private Map<GroupKey, Double> countMap;
+    private Map<GroupKey, Number> countMap;
     
     public ParallelGroupedDataCountAggregationProcessor(ExecutorService executor,
-            Collection<Processor<Map<GroupKey, Double>, ?>> resultReceivers) {
+            Collection<Processor<Map<GroupKey, Number>, ?>> resultReceivers) {
         super(executor, resultReceivers, "Count");
         countMap = new HashMap<>();
     }
-
+    
     @Override
-    protected void storeElement(GroupedDataEntry<Object> element) {
+    protected void handleElement(GroupedDataEntry<Object> element) {
         GroupKey key = element.getKey();
         if (!countMap.containsKey(key)) {
             countMap.put(key, 0.0);
         }
-        Double currentAmount = countMap.get(key);
+        Double currentAmount = countMap.get(key).doubleValue();
         countMap.put(key, currentAmount + 1.0);
     }
-
+    
     @Override
-    protected Map<GroupKey, Double> aggregateResult() {
+    protected Map<GroupKey, Number> getResult() {
         return countMap;
     }
     
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
         super.setAdditionalData(additionalDataBuilder);
-        additionalDataBuilder.setResultUnit(Unit.None);
         additionalDataBuilder.setResultDecimals(0);
     }
 

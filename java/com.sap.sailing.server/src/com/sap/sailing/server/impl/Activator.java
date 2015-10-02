@@ -62,7 +62,6 @@ public class Activator implements BundleActivator {
         clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
         logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
-        
     }
     
     public void start(BundleContext context) throws Exception {

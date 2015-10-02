@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
@@ -53,6 +52,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -65,9 +65,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final boolean showRaceDetails;
 
     private Button leaderboardRemoveButton;
-
     private Button addRaceColumnsButton;
-
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
 
@@ -79,7 +77,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
 
@@ -93,8 +91,26 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {
-        filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
+    protected void addLeaderboardControls(Panel controlsPanel) {
+        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
+        controlsPanel.add(createFlexibleLeaderboardBtn);
+        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createFlexibleLeaderboard();
+            }
+        });
+
+        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
+        controlsPanel.add(createRegattaLeaderboardBtn);
+        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createRegattaLeaderboard();
+            }
+        });
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
@@ -107,7 +123,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 }
             }
         });
-        configPanel.add(leaderboardRemoveButton);
+        controlsPanel.add(leaderboardRemoveButton);
     }
     
     @Override
@@ -330,28 +346,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
-    }
-
-    protected void addLeaderboardCreateControls(Panel createPanel) {
-        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
-        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-        createPanel.add(createFlexibleLeaderboardBtn);
-        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createFlexibleLeaderboard();
-            }
-        });
-
-        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
-        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
-        createPanel.add(createRegattaLeaderboardBtn);
-        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createRegattaLeaderboard();
-            }
-        });
     }
     
     @Override

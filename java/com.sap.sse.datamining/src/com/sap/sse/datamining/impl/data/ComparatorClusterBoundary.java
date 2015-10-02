@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 public class ComparatorClusterBoundary<ElementType extends Serializable> extends AbstractClusterBoundary<ElementType> {
-
     private static final long serialVersionUID = -8177984229875233720L;
+    
     private final Comparator<? super ElementType> comparator;
 
     public ComparatorClusterBoundary(ElementType boundaryValue, ComparisonStrategy strategy,

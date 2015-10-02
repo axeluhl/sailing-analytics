@@ -70,6 +70,13 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         importContent.add(deviceIdentifierTable);
     }
     
+    /**
+     * When doing race log tracking, the Remove and Stop Tracking buttons are required.
+     */
+    protected boolean isActionButtonsEnabled() {
+        return /* actionButtonsEnabled */ true;
+    }
+    
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
@@ -283,6 +290,8 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
                     setStartTime(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());
                 } else if (LeaderboardRaceConfigImagesBarCell.ACTION_SHOW_RACELOG.equals(value)) {
                     showRaceLog(object.getA(), object.getB());
+                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_SET_TRACKING_TIMES.equals(value)) {
+                    setTrackingTimes(getSelectedRaceColumnWithFleet().getA(), getSelectedRaceColumnWithFleet().getB());;
                 }
             }
         });
@@ -299,10 +308,7 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
     }
 
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {}
-
-    @Override
-    protected void addLeaderboardCreateControls(Panel createPanel) {}
+    protected void addLeaderboardControls(Panel controlsPanel) {}
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
@@ -499,6 +505,32 @@ public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConf
         }).show();
     }
     
+    private void setTrackingTimes(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        new SetTrackingTimesDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumn.getName(),
+                fleet.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetTrackingTimesDTO>() {
+
+                    @Override
+                    public void ok(RaceLogSetTrackingTimesDTO editedObject) {
+                        sailingService.setTrackingTimes(editedObject, new AsyncCallback<Void>(){
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                            }
+                            
+                        });
+                        
+                    }
+
+                    @Override
+                    public void cancel() {}
+                }).show();
+    }
+
     private String getLocaleInfo() {
         return LocaleInfo.getCurrentLocale().getLocaleName();
     }
