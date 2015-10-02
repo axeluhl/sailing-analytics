@@ -14,6 +14,7 @@
     <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">
             <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
+		<!-- <dp:regattanavigation.TextBoxFilter addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="competitorFilterUi"/> -->
         </div>
         <dp:regattanavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
         <div class="{res.mediaCss.grid}">
@@ -22,7 +23,7 @@
                 <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
             <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
-            	<g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label>
+				<!-- <g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label> -->
             </g:FlowPanel>
         </div>
         <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />

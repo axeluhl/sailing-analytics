@@ -474,6 +474,7 @@ public class RaceContext {
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
+        dto.setCompetitors(getCompetitors());
     }
 
     private void fillRaceMetadata(RaceMetadataDTO<?> dto) {

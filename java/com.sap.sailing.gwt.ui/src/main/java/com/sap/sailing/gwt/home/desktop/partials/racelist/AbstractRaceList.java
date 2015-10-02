@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
@@ -35,7 +36,7 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     protected final SortableRaceListColumn<T, ?> windDirectionColumn = RaceListColumnFactory.getWindDirectionColumn();
     protected final SortableRaceListColumn<T, ?> raceViewerButtonColumn;
     protected final RaceListColumnSet columnSet;
-    private final SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
+    protected final SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
     private boolean tableColumnsInitialized = false;
     
     protected AbstractRaceList(EventView.Presenter presenter, RaceListColumnSet columnSet) {
@@ -105,6 +106,15 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
             comperator.setAscending(ascending);
         }
         this.cellTable.addColumn(column, header, comperator, ascending);
+    }
+    
+    public void initTableFilter(final Filter<T> tableFilter) {
+        this.cellTable.setRowStyles(new RowStyles<T>() {
+            @Override
+            public String getStyleNames(T row, int rowIndex) {
+                return tableFilter.matches(row) ? null : CSS.racesListHideColumn();
+            }
+        });
     }
     
 }

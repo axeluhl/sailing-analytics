@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.race;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
@@ -63,6 +66,8 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     private RaceViewState state;
     private RaceTrackingState trackingState;
     
+    private HashSet<SimpleCompetitorDTO> competitors = new HashSet<>();
+    
     protected SimpleRaceMetadataDTO() {
     }
     
@@ -106,6 +111,14 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
 
     public void setTrackingState(RaceTrackingState trackingState) {
         this.trackingState = trackingState;
+    }
+    
+    public void setCompetitors(Collection<SimpleCompetitorDTO> competitors) {
+        this.competitors.addAll(competitors);
+    }
+    
+    public Collection<SimpleCompetitorDTO> getCompetitors() {
+        return competitors;
     }
     
     @Override

@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
 import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,8 +14,10 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Pr
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sse.common.filter.Filter;
 
 public class RegattaCompetitionSeries extends Composite {
 
@@ -50,6 +54,15 @@ public class RegattaCompetitionSeries extends Composite {
             competitionFleet.addRace(race, raceViewerUrl);
         }
         containerUi.add(competitionFleet);
+    }
+    
+    public void setCompetitorFilter(Filter<Collection<SimpleCompetitorDTO>> competitorFilter) {
+        boolean seriesVisible = false;
+        for (int i = 0; i < containerUi.getWidgetCount(); i++) {
+            RegattaCompetitionFleet fleet = (RegattaCompetitionFleet) containerUi.getWidget(i);
+            seriesVisible |= fleet.setCompetitorFilter(competitorFilter);
+        }
+        setVisible(seriesVisible);
     }
 
 }
