@@ -25,11 +25,22 @@ import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sse.common.Util;
 
+/**
+ * The Bundle URL connection implementation is really stupid; it doesn't recognize a content type for files exposed by
+ * a "bundleresource://" URL. We need to disguise the JSON documents as ".txt" documents for the purpose of this test
+ * to allow for the bundle resource class loader to find them.<p>
+ * 
+ * Ironically, in an Eclipse-based test environment everything seems fine. The problem occurs when a compiled bundle
+ * as a JAR file is loaded by an OSGi execution environment, such as during the Maven / Surefire tests.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTest() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON)));
+        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource(EVENT_RESULTS_JSON+".txt")));
         final CompetitorImporter competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry);
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().containsKey("YES - Young Europeans Sailing 2013"));
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("YES - Young Europeans Sailing 2013").contains("29er"));
@@ -44,7 +55,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYet() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json")));
+        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
             @Override
             protected CompetitorDocumentProvider getDocumentProvider() {
@@ -66,7 +77,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
     @Test
     public void simpleCompetitorImportTestNoResultsYetAndDivisionEmpty() throws FileNotFoundException, IOException, JAXBException {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
-        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json")));
+        when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
             @Override
             protected CompetitorDocumentProvider getDocumentProvider() {
