@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -42,11 +43,13 @@ public class LineStartModeFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getArguments() != null) {
-            switch (getArguments().getInt(START_MODE, 0)) {
-                case 1:
-                    if (getView() != null) {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
+            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                case START_MODE_PLANNED:
+                    if (AppUtils.with(getActivity()).is10inch()) {
+                        if (getView() != null) {
+                            View header = getView().findViewById(R.id.header);
+                            header.setVisibility(View.GONE);
+                        }
                     }
                     break;
 
@@ -70,7 +73,7 @@ public class LineStartModeFragment extends BaseFragment {
 
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goHome();
                 }
             });
         }
@@ -94,8 +97,8 @@ public class LineStartModeFragment extends BaseFragment {
             startModes.add(startMode);
         }
         Collections.sort(startModes, new StartModeComparator());
-        for(StartModeItem startModeItem: startModes){
-            if(startModeItem.getFlag().equals(mProcedure.getStartModeFlag())){
+        for (StartModeItem startModeItem : startModes) {
+            if (startModeItem.getFlag().equals(mProcedure.getStartModeFlag())) {
                 selected = position;
             }
             position++;
