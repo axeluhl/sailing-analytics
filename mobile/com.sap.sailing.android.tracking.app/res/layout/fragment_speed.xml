@@ -42,6 +42,7 @@
             android:layout_toEndOf="@+id/speed_text_view"
             android:layout_alignBaseline="@id/speed_text_view"
             android:text="@string/knots"
+            android:singleLine="true"
             android:textColor="@color/white"
             android:textSize="124sp"
             android:textStyle="bold"/>
