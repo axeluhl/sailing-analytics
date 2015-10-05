@@ -78,6 +78,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         checkinDigest = getIntent().getExtras().getString(
                 getString(R.string.tracking_activity_checkin_digest_parameter));
+        lastSpeedIndicatorText = getString(R.string.initial_hyphen);
 
         setContentView(R.layout.fragment_hud_container);
 

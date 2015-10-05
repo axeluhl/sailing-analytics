@@ -34,11 +34,11 @@ public class SpeedFragment extends BaseFragment {
             String formattedSpeed = df.format(speedInKnots);
 
             TextView speedText = (TextView) getActivity().findViewById(R.id.speed_text_view);
-            speedText.setText(formattedSpeed);
+            speedText.setText(getString(R.string.knots, formattedSpeed));
             TrackingActivity activity = (TrackingActivity) getActivity();
 
             if (activity != null) {
-                activity.lastSpeedIndicatorText = speedText.getText().toString();
+                activity.lastSpeedIndicatorText = formattedSpeed;
             }
         }
     }
@@ -51,9 +51,9 @@ public class SpeedFragment extends BaseFragment {
 
         TrackingActivity activity = (TrackingActivity) getActivity();
         if (activity != null) {
-            speedText.setText(activity.lastSpeedIndicatorText);
+            speedText.setText(getString(R.string.knots,activity.lastSpeedIndicatorText));
         } else {
-            speedText.setText("0");
+            speedText.setText(getString(R.string.knots,"0"));
         }
 
     }
