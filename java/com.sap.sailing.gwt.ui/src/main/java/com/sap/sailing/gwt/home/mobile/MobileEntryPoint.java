@@ -13,12 +13,13 @@ import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
 
 public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
 
     @Override
     public void doOnModuleLoad() {
-
+        CommonControlsCSS.ensureInjected();
         SharedResources sRes = GWT.create(SharedResources.class);
         sRes.mediaCss().ensureInjected();
         sRes.mainCss().ensureInjected();
