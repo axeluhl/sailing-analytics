@@ -33,7 +33,7 @@ public class RegattaCompetitionFleet extends Widget {
     @UiField DivElement competitorCountUi;
     @UiField DivElement racesContainerUi;
     
-    private Map<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> raceToCompetitorsMap = new HashMap<>();
+    private Map<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> raceWidgetToDtoMap = new HashMap<>();
 
     public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
         setElement(uiBinder.createAndBindUi(this));
@@ -51,7 +51,7 @@ public class RegattaCompetitionFleet extends Widget {
     
     public void addRace(SimpleRaceMetadataDTO race, String raceViewerURL) {
         RegattaCompetitionFleetRace competitionRace = new RegattaCompetitionFleetRace(race, raceViewerURL);
-        raceToCompetitorsMap.put(competitionRace, race);
+        raceWidgetToDtoMap.put(competitionRace, race);
         racesContainerUi.appendChild(competitionRace.getElement());
     }
     
@@ -62,7 +62,7 @@ public class RegattaCompetitionFleet extends Widget {
     
     public boolean applyFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
         boolean fleetVisible = false;
-        for (Entry<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> entry : raceToCompetitorsMap.entrySet()) {
+        for (Entry<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> entry : raceWidgetToDtoMap.entrySet()) {
             boolean raceVisible = racesFilter.matches(entry.getValue());
             entry.getKey().setVisible(raceVisible);
             fleetVisible |= raceVisible;

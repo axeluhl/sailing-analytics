@@ -250,7 +250,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
 
     private class CompetitionFormatRaces implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
-    FilterValueChangeHandler<SimpleRaceMetadataDTO> {
+            FilterValueChangeHandler<SimpleRaceMetadataDTO> {
         
         @Override
         public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
@@ -258,19 +258,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
                 RegattaCompetitionSeries seriesWidget = new RegattaCompetitionSeries(currentPresenter, series);
                 compFormatContainerUi.add(seriesWidget);
-                applyFilter(seriesWidget);
+                seriesWidget.applyFilter(competitorFilterUi.getFilter());
             }
         }
         
         @Override
         public void onFilterValueChanged(Filter<SimpleRaceMetadataDTO> filter) {
             for (int i = 0; i < compFormatContainerUi.getWidgetCount(); i++) {
-                applyFilter((RegattaCompetitionSeries) compFormatContainerUi.getWidget(i));
+                ((RegattaCompetitionSeries) compFormatContainerUi.getWidget(i)).applyFilter(filter);
             }
-        }
-        
-        private void applyFilter(RegattaCompetitionSeries series) {
-            series.applyFilter(competitorFilterUi.getFilter());
         }
         
     }
