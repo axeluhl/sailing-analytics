@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDT
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sse.common.filter.Filter;
 
 public class RegattaCompetitionSeries extends Composite {
 
@@ -54,6 +55,22 @@ public class RegattaCompetitionSeries extends Composite {
             competitionFleet.addRace(race, raceViewerUrl);
         }
         fleetContainerUi.add(competitionFleet);
+    }
+
+    public void applyFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
+        boolean seriesVisible = false;
+        int visibleFleetCount = 0;
+        for (int i = 0; i < fleetContainerUi.getWidgetCount(); i++) {
+            RegattaCompetitionFleet fleet = (RegattaCompetitionFleet) fleetContainerUi.getWidget(i);
+            visibleFleetCount = visibleFleetCount + (fleet.applyFilter(racesFilter) ? 1 : 0);
+            seriesVisible |= fleet.applyFilter(racesFilter);
+        }
+        seriesVisible = visibleFleetCount > 0;
+        for (int i = 0; i < fleetContainerUi.getWidgetCount(); i++) {
+            RegattaCompetitionFleet fleet = (RegattaCompetitionFleet) fleetContainerUi.getWidget(i);
+            fleet.updateFleetWidth(visibleFleetCount);
+        }
+        setVisible(seriesVisible);
     }
 
 }
