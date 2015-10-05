@@ -2,8 +2,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,7 +71,33 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             }
         };
+        
+        FlowPanel courseManagementPanel = new FlowPanel();
+        courseManagementPanel.add(courseManagementWidget);
+
+        HorizontalPanel buttonsPanel = new HorizontalPanel();
+
+        Button refreshBtn = new Button(stringMessages.refresh());
+        refreshBtn.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    courseManagementWidget.refresh();
+                }
+        });
+        
+        buttonsPanel.add(refreshBtn);
+        
+        Button saveBtn = new Button(stringMessages.save());
+        saveBtn.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    courseManagementWidget.save();
+                }
+            });
+        
+        buttonsPanel.add(saveBtn);
         this.selectedRaceContentPanel.add(courseManagementWidget);
+        this.selectedRaceContentPanel.add(buttonsPanel);
     }
 
     @Override

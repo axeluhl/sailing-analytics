@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -24,11 +23,11 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
+public abstract class AbstractLogImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
     TrackFileImportWidget importWidget;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    private final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
-    private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
+    protected final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
+    protected final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
     private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
@@ -38,9 +37,8 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
     private MarkDTO markToSelect;
     private boolean inInstableTransitionState = false;
 
-    public ImportFixesAndAddMappingsDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, String leaderboardName, String raceColumnName, String fleetName,
-            DialogCallback<Collection<DeviceMappingDTO>> callback) {
+    public AbstractLogImportFixesAndAddMappingsDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, DialogCallback<Collection<DeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(), new DataEntryDialog.Validator<Collection<DeviceMappingDTO>>() {
             @Override
@@ -73,29 +71,10 @@ public class ImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<
                 mappedToSelectionChanged(markTable.getSelectionModel().getSelectedObject());
             }
         });
-        sailingService.getCompetitorRegistrations(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
-            @Override
-            public void onSuccess(Collection<CompetitorDTO> result) {
-                competitorTable.refreshCompetitorList(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load competitors: " + caught.getMessage());
-            }
-        });
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Iterable<MarkDTO>>() {
-            @Override
-            public void onSuccess(Iterable<MarkDTO> result) {
-                markTable.refresh(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load marks: " + caught.getMessage());
-            }
-        });
     }
+
+    abstract void getMarks(SailingServiceAsync sailingService, final ErrorReporter errorReporter);
+    abstract void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter);
     
     private static <T> void selectOrClear(SingleSelectionModel<T> selectionModel, T object) {
         if (object == null) {
