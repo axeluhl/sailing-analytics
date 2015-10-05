@@ -12,7 +12,7 @@
 		}
 		.textinput {
 			display: inline-block;
-		    padding: .333333333333333em 2.333333333333333em .333333333333333em .666666666666667em;
+		    padding: .333333333333333em 3.066666666666667em .333333333333333em .666666666666667em;
 		    line-height: 1.333333333333333em;
 		    color: #666;
 		    background-color: #f2f2f2;
@@ -31,6 +31,6 @@
 	</ui:style>
 	<g:FlowPanel addStyleNames="{style.container}" ui:field="filterContainerUi">
 		<g:TextBox addStyleNames="{style.textinput}" ui:field="textBoxUi"/>
-		<g:Button addStyleNames="{style.clearbutton}" ui:field="clearButtonUi">x</g:Button>	
+		<g:Button addStyleNames="{style.clearbutton}" ui:field="clearButtonUi">&#10060;</g:Button>	
 	</g:FlowPanel>
 </ui:UiBinder> 
