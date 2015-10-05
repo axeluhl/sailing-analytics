@@ -1021,7 +1021,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaceLogTracker();
     String addRaceLogTrackers();
     String denoteForRaceLogTracking();
-    String raceLogTracking();
     String startRaceLogTracking();
     String filterByLeaderboard();
     String removeLeaderboardFilter();
@@ -1395,4 +1394,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String doYouWantToCreateADefaultRegattaLeaderboard();
     String copyCourse();
     String copyCompetitors();
+    String smartphoneTracking();
 }

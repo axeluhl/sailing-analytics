@@ -44,14 +44,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class RaceLogTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
+public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
     private Button startTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
     protected boolean regattaHasCompetitors = false;
     
-    public RaceLogTrackingEventManagementPanel(SailingServiceAsync sailingService,
+    public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
