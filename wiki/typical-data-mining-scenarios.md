@@ -62,7 +62,7 @@ The data mining process consists of different steps that will be described below
 	* The result would be a map that maps each group key to the sum of jibes.
 	* In this example the type of the extracted value and the type of the aggregated value would be the same, but this doesn't have to be the case.
 
-The main task to integrate the data mining bundle is to define the Fact (with its dimensions and extraction functions) that should be analyzed and to implement the data retrieval to get the facts from the Data Source. The second task would be to implement domain specific Aggregators that are able to process the type of the Key Figure. This may not necessary, because there are some domain independent Aggregators (for example for numeric values) that are available to every domain specific data mining bundle. So it isn't necessary to implement an Aggregator in the bundle, if the type of the Key Figure is a `Number`. See the package `com.sap.sse.datamining.impl.components.aggregators` for the available domain independent aggregators.
+The main task to integrate the data mining bundle is to define the Fact (with its dimensions and extraction functions) that should be analyzed and to implement the data retrieval to get the facts from the Data Source. A second task could be to implement domain specific Aggregators that are able to process the type of the Key Figure. This may not necessary, because there are some domain independent Aggregators (for example for numeric values) that are available to every domain specific data mining bundle. So it isn't necessary to implement an Aggregator in the bundle, if the type of the Key Figure is a `Number`. See the package `com.sap.sse.datamining.impl.components.aggregators` for the available domain independent aggregators.
 
 The following sections describe how to implement the different components.
 
@@ -70,7 +70,7 @@ Note that the process described above is a very specific process to calculate ag
 
 ### Implement the Fact and the Data Retrieval
 
-The concrete interfaces and classes that are needed to implement the Fact depend on what you want to analyze in the new data mining bundle. A good starting point is to think about the domain elements that contain the data you want to analyze, how to get the instances of these domain elements.
+The concrete interfaces and classes that are needed to implement the Fact depend on what you want to analyze in the new data mining bundle. A good starting point is to think about the domain elements that contain the data you want to analyze and how to get the instances of these domain elements.
 
 * For example if you want to analyze the traveled distance and the speed of a competitor, the `TrackedLegOfCompetitor` would be the domain element of your choice.
 * This class is located in the sailing domain, so the entrypoint to get instances would be the `RacingEventService`, which will be the Data Source.
