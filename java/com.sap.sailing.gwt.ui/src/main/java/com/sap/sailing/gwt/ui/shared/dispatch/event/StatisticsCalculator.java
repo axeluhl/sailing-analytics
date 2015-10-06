@@ -42,7 +42,7 @@ public class StatisticsCalculator implements LeaderboardCallback {
     @Override
     public void doForLeaderboard(LeaderboardContext context) {
         competitors += HomeServiceUtil.calculateCompetitorsCount(context.getLeaderboard());
-        races += HomeServiceUtil.calculateRaceColumnCount(context.getLeaderboard());
+        races += HomeServiceUtil.calculateRaceCount(context.getLeaderboard());
         trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(context.getLeaderboard());
         regattas++;
         String disableStats = System.getenv("DISABLE_STATS");

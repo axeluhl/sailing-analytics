@@ -179,11 +179,13 @@ public final class HomeServiceUtil {
     }
     
     public static int calculateRaceCount(Leaderboard sl) {
-        int count=0;
+        int nonCarryForwardRacesCount = 0;
         for (RaceColumn column : sl.getRaceColumns()) {
-            count += Util.size(column.getFleets());
+            if (!column.isCarryForward()) {
+                nonCarryForwardRacesCount += Util.size(column.getFleets());
+            }
         }
-        return count;
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateRaceColumnCount(Leaderboard sl) {

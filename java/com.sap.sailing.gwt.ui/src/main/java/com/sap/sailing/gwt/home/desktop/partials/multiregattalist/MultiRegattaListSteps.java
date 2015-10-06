@@ -45,11 +45,11 @@ public class MultiRegattaListSteps extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         double sumParts = 0;
         for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
-            double parts = Math.pow(seriesProgress.getTotalRaceCount(), 0.4);
+            double parts = Math.pow(seriesProgress.getMaxRacesPerFleet(), 0.4);
             sumParts += parts;
         }
         for(RegattaProgressSeriesDTO seriesProgress : regattaProgress.getSeries()) {
-            double parts = Math.pow(seriesProgress.getTotalRaceCount(), 0.4);
+            double parts = Math.pow(seriesProgress.getMaxRacesPerFleet(), 0.4);
             double percentage = 100.0 * parts / sumParts;
             MultiRegattaListStepsBody stepsBody = new MultiRegattaListStepsBody(seriesProgress);
             allMultiregattaSteps.add(stepsBody);

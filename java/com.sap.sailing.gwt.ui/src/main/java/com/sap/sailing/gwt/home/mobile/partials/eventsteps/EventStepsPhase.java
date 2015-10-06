@@ -44,7 +44,7 @@ public class EventStepsPhase extends Composite {
         if (seriesProgress.getProgressRaceCount() == 0) {
             addStyleName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());
         }
-        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
+        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getMaxRacesPerFleet());
     }
     
     private void addFleetProgresses(Map<FleetMetadataDTO, RegattaProgressFleetDTO> fleetStates, int totalRaceCount) {
