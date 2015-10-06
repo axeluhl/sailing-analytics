@@ -6,11 +6,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -24,14 +26,19 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     }
     
     @UiField RacesByCompetitorTextBoxFilter competitorFilterUi;
-    @UiField(provided = true) RegattaCompetition regattaCompetitionUi;
+    @UiField RegattaCompetition regattaCompetitionUi;
 
-    public RacesViewImpl(RacesView.Presenter presenter) {
+    public RacesViewImpl(final RacesView.Presenter presenter) {
         super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
-        regattaCompetitionUi = new RegattaCompetition(presenter);
         setViewContent(uiBinder.createAndBindUi(this));
-        competitorFilterUi.addFilterValueChangeHandler(regattaCompetitionUi);
-        refreshManager.add(regattaCompetitionUi, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
+        RegattaCompetitionPresenter competitionPresenter = new RegattaCompetitionPresenter(regattaCompetitionUi) {
+            @Override
+            protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+                return null; // TODO No mobile "RaceViewer implemented yet;
+            }
+        };
+        competitorFilterUi.addFilterValueChangeHandler(competitionPresenter);
+        refreshManager.add(competitionPresenter, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
     }
     
     @Override
