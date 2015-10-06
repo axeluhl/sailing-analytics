@@ -623,6 +623,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    if [ \! -x "$ANDROID" ]; then
 	        ANDROID="$ANDROID_HOME/tools/android.bat"
 	    fi
+		
+		mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
@@ -635,7 +637,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 		
         APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
 		extra="$extra $APP_VERSION_PARAMS"
-
+		mobile_extra="$mobile_extra $APP_VERSION_PARAMS"
+		
         NOW=$(date +"%s")
         BUILD_TOOLS=22.0.1
         TARGET_API=22
@@ -655,7 +658,9 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
 
-		mvn -P -with-not-android-relevant -P with-mobile $APP_VERSION_PARAMS -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+		echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+		echo "Maven version used: `mvn --version`"
+		mvn $mobile_extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
