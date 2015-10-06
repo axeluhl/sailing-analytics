@@ -1,0 +1,42 @@
+package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
+
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionFleetView;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
+import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.RGBColor;
+
+public abstract class AbstractRegattaCompetitionFleet extends Widget implements RegattaCompetitionFleetView {
+    
+    protected AbstractRegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
+        setElement(getMainUiElement());
+        getElement().getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
+        getFleetNameUiElement().setInnerText(fleet.getFleet().getFleetName());
+        getFleetCornerUiElement().getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
+        if (LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getFleet().getFleetName())) {
+            onDefaultFleetName();
+        }
+    }
+
+    private String getBackgroundColor(FleetMetadataDTO fleet) {
+        Triple<Integer, Integer, Integer> rgbValues = new RGBColor(fleet.getFleetColor()).getAsRGB();
+        return "rgba(" + rgbValues.getA() + "," + rgbValues.getB() + "," + rgbValues.getC() + ", 0.1)";
+    }
+    
+    @Override
+    public void doFilter(boolean filter) {
+        setVisible(!filter);
+    }
+    
+    protected abstract void onDefaultFleetName();
+    
+    protected abstract Element getMainUiElement();
+    
+    protected abstract Element getFleetNameUiElement();
+
+    protected abstract Element getFleetCornerUiElement();
+
+}
