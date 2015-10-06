@@ -33,7 +33,7 @@
 			<!-- deactivate with parameter '-P !with-mobile' -->
 			<id>with-mobile</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
 				<plugins>

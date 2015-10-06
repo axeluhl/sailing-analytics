@@ -15,10 +15,10 @@
 
 	<profiles>
 		<profile>
-			<!-- activate with parameter '-P with-mobile'-->
+			<!-- deactivate with parameter '-P !with-mobile'-->
 			<id>with-mobile</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
 				<module>mobile</module>
