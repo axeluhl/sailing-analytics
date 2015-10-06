@@ -625,6 +625,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    fi
 		
 		mobile_extra="-P -with-not-android-relevant -P with-mobile"
+		
+		if [ $testing -eq 0 ]; then
+			echo "INFO: Skipping tests"
+			mobile_extra="$mobile_extra -Dmaven.test.skip=true -DskipTests=true"
+		else
+			mobile_extra="$mobile_extra -DskipTests=false"
+		fi
 
         RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
