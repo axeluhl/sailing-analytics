@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
@@ -31,15 +32,15 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
@@ -48,8 +49,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
-import com.sap.sse.common.filter.Filter;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -133,11 +132,16 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
         
         if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
-            CompetitionFormatRaces competitionFormatWidget = new CompetitionFormatRaces();
             listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
             listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
-            competitorFilterUi.addFilterValueChangeHandler(competitionFormatWidget);
-            addRacesAction(competitionFormatWidget, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
+            RegattaCompetitionPresenter competitionPresenter = new RegattaCompetitionPresenter(new CompetitionFormatRaces()) {
+                @Override
+                protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+                    return currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier);
+                }
+            };
+            competitorFilterUi.addFilterValueChangeHandler(competitionPresenter);
+            addRacesAction(competitionPresenter, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
         } else {
             listNavigationPanelUi.removeFromParent();
             compFormatContainerUi.removeFromParent();
@@ -249,24 +253,18 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         
     }
 
-    private class CompetitionFormatRaces implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
-            FilterValueChangeHandler<SimpleRaceMetadataDTO> {
-        
+    private class CompetitionFormatRaces implements RegattaCompetitionView {
+
         @Override
-        public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+        public void clearContent() {
             compFormatContainerUi.clear();
-            for (RaceCompetitionFormatSeriesDTO series : data.getValues()) {
-                RegattaCompetitionSeries seriesWidget = new RegattaCompetitionSeries(currentPresenter, series);
-                compFormatContainerUi.add(seriesWidget);
-                seriesWidget.applyFilter(competitorFilterUi.getFilter());
-            }
         }
-        
+
         @Override
-        public void onFilterValueChanged(Filter<SimpleRaceMetadataDTO> filter) {
-            for (int i = 0; i < compFormatContainerUi.getWidgetCount(); i++) {
-                ((RegattaCompetitionSeries) compFormatContainerUi.getWidget(i)).applyFilter(filter);
-            }
+        public RegattaCompetitionSeriesView addSeriesView(RaceCompetitionFormatSeriesDTO series) {
+            RegattaCompetitionSeries seriesView = new RegattaCompetitionSeries(series);
+            compFormatContainerUi.add(seriesView);
+            return seriesView;
         }
         
     }

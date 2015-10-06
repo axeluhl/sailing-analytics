@@ -1,24 +1,18 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
-import static com.sap.sailing.domain.common.LeaderboardNameConstants.DEFAULT_SERIES_NAME;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionSeries;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionFleetView;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sse.common.filter.Filter;
 
-public class RegattaCompetitionSeries extends Composite {
+public class RegattaCompetitionSeries extends AbstractRegattaCompetitionSeries {
 
-    private static final StringMessages I18N = StringMessages.INSTANCE;
     private static RegattaCompetitionSeriesUiBinder uiBinder = GWT.create(RegattaCompetitionSeriesUiBinder.class);
 
     interface RegattaCompetitionSeriesUiBinder extends UiBinder<HTMLPanel, RegattaCompetitionSeries> {
@@ -27,39 +21,35 @@ public class RegattaCompetitionSeries extends Composite {
     @UiField DivElement seriesNameUi;
     @UiField DivElement competitorCountUi;
     @UiField DivElement raceCountUi;
-    private final HTMLPanel containerUi;
+    @UiField HTMLPanel containerUi;
 
-    public RegattaCompetitionSeries(Presenter presenter, RaceCompetitionFormatSeriesDTO series) {
+    public RegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
+        super(series);
         RegattaCompetitionResources.INSTANCE.css().ensureInjected();
-        initWidget(containerUi = uiBinder.createAndBindUi(this));
-        this.seriesNameUi.setInnerText(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
-        this.competitorCountUi.setInnerText(I18N.competitorsCount(series.getCompetitorCount()));
-        if (series.getCompetitorCount() == 0) {
-            this.competitorCountUi.removeFromParent();
-        }
-        this.raceCountUi.setInnerText(I18N.racesCount(series.getRaceCount()));
-        for (RaceCompetitionFormatFleetDTO fleet : series.getFleets()) {
-            addFleet(presenter, fleet);
-        }
     }
     
-    public void addFleet(Presenter presenter, RaceCompetitionFormatFleetDTO fleet) {
-        RegattaCompetitionFleet competitionFleet = new RegattaCompetitionFleet(fleet);
-        for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
-            boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
-            String raceViewerUrl = tracked ? presenter.getRaceViewerURL(race.getLeaderboardName(), race.getRegattaAndRaceIdentifier()) : null; 
-            competitionFleet.addRace(race, raceViewerUrl);
-        }
-        containerUi.add(competitionFleet);
+    @Override
+    public RegattaCompetitionFleetView addFleetView(RaceCompetitionFormatFleetDTO fleet) {
+        RegattaCompetitionFleet fleetView = new RegattaCompetitionFleet(fleet);
+        containerUi.add(fleetView);
+        return fleetView;
     }
-    
-    public void applyFilter(Filter<SimpleRaceMetadataDTO> filter) {
-        boolean seriesVisible = false;
-        for (int i = 0; i < containerUi.getWidgetCount(); i++) {
-            RegattaCompetitionFleet fleet = (RegattaCompetitionFleet) containerUi.getWidget(i);
-            seriesVisible |= fleet.applyFilter(filter);
-        }
-        setVisible(seriesVisible);
+
+    @Override
+    protected Widget getMainUiWidget() {
+        return uiBinder.createAndBindUi(this);
+    }
+
+    @Override
+    protected void setSeriesName(String seriesName) {
+        seriesNameUi.setInnerText(seriesName);
+    }
+
+    @Override
+    protected void setRacesAndCompetitorInfo(String raceInfoText, String competitorInfoText) {
+        raceCountUi.setInnerText(raceInfoText);
+        if (competitorInfoText.isEmpty()) competitorCountUi.removeFromParent();
+        else competitorCountUi.setInnerText(competitorInfoText);
     }
 
 }

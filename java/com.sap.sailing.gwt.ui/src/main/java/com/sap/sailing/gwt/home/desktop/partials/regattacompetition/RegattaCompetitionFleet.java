@@ -10,24 +10,21 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionFleet;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
-import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.common.impl.RGBColor;
 
-public class RegattaCompetitionFleet extends Widget {
+public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
 
-    private static final StringMessages I18N = StringMessages.INSTANCE;
     private static RegattaCompetitionFleetUiBinder uiBinder = GWT.create(RegattaCompetitionFleetUiBinder.class);
 
     interface RegattaCompetitionFleetUiBinder extends UiBinder<Element, RegattaCompetitionFleet> {
     }
     
+    @UiField RegattaCompetitionResources local_res;
     @UiField DivElement fleetCornerUi;
     @UiField DivElement fleetNameUi;
     @UiField DivElement competitorCountUi;
@@ -36,28 +33,9 @@ public class RegattaCompetitionFleet extends Widget {
     private Map<RegattaCompetitionFleetRace, SimpleRaceMetadataDTO> raceWidgetToDtoMap = new HashMap<>();
 
     public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
-        setElement(uiBinder.createAndBindUi(this));
-        getElement().getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
-        this.competitorCountUi.setInnerText(I18N.competitorsCount(fleet.getCompetitorCount()));
+        super(fleet);
+        this.competitorCountUi.setInnerText(StringMessages.INSTANCE.competitorsCount(fleet.getCompetitorCount()));
         this.competitorCountUi.getStyle().setDisplay(fleet.getCompetitorCount() == 0 ? Display.NONE : Display.BLOCK);
-        if (fleet.getFleet() != null) {
-            fleetNameUi.setInnerText(fleet.getFleet().getFleetName());
-            fleetCornerUi.getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
-            if (LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getFleet().getFleetName())) {
-                addStyleName(RegattaCompetitionResources.INSTANCE.css().default_fleet());
-            }
-        }
-    }
-    
-    public void addRace(SimpleRaceMetadataDTO race, String raceViewerURL) {
-        RegattaCompetitionFleetRace competitionRace = new RegattaCompetitionFleetRace(race, raceViewerURL);
-        raceWidgetToDtoMap.put(competitionRace, race);
-        racesContainerUi.appendChild(competitionRace.getElement());
-    }
-    
-    private String getBackgroundColor(FleetMetadataDTO fleet) {
-        Triple<Integer, Integer, Integer> rgbValues = new RGBColor(fleet.getFleetColor()).getAsRGB();
-        return "rgba(" + rgbValues.getA() + "," + rgbValues.getB() + "," + rgbValues.getC() + ", 0.1)";
     }
     
     public boolean applyFilter(Filter<SimpleRaceMetadataDTO> racesFilter) {
@@ -69,6 +47,37 @@ public class RegattaCompetitionFleet extends Widget {
         }
         setVisible(fleetVisible);
         return fleetVisible;
+    }
+
+    @Override
+    public RegattaCompetitionRaceView addRaceView(SimpleRaceMetadataDTO race, String raceViewerUrl) {
+        RegattaCompetitionFleetRace raceView = new RegattaCompetitionFleetRace(race, raceViewerUrl);
+        racesContainerUi.appendChild(raceView.getElement());
+        return raceView;
+    }
+
+    @Override
+    public void setNumberOfFleetsInSeries(int fleetCount) {
+    }
+
+    @Override
+    protected void onDefaultFleetName() {
+        addStyleName(local_res.css().default_fleet());
+    }
+
+    @Override
+    protected Element getMainUiElement() {
+        return uiBinder.createAndBindUi(this);
+    }
+
+    @Override
+    protected Element getFleetNameUiElement() {
+        return fleetNameUi;
+    }
+
+    @Override
+    protected Element getFleetCornerUiElement() {
+        return fleetCornerUi;
     }
     
 }
