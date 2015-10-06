@@ -12,6 +12,4 @@ public interface SimpleRaceLogIdentifier extends Serializable {
     String getFleetName();
     
     Triple<String, String, String> getIdentifier();
-    
-    String getDeprecatedIdentifier();
 }

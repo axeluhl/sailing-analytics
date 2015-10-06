@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Statistic;
-import com.sap.sse.datamining.annotations.data.Unit;
 
 /**
  * A speed, convertible in various units of measure. Can be negative.
@@ -63,7 +62,7 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
     };
     
-    @Statistic(messageKey="", resultDecimals=2, resultUnit=Unit.Knots)
+    @Statistic(messageKey="", resultDecimals=2)
     double getKnots();
 
     double getMetersPerSecond();

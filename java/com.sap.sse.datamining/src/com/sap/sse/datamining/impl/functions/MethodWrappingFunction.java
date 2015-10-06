@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -44,21 +43,21 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     private void initializeAdditionalData() {
-        additionalData = new AdditionalMethodWrappingFunctionData("", Unit.None, 0, Integer.MAX_VALUE);
+        additionalData = new AdditionalMethodWrappingFunctionData("", 0, Integer.MAX_VALUE);
         
         if (method.getAnnotation(Dimension.class) != null) {
             Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), Unit.None, 0, dimensionData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), 0, dimensionData.ordinal());
         }
         
         if (method.getAnnotation(Statistic.class) != null) {
             Statistic statisticData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals(), statisticData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultDecimals(), statisticData.ordinal());
         }
         
         if (method.getAnnotation(Connector.class) != null) {
             Connector connectorData = method.getAnnotation(Connector.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), Unit.None, 0, connectorData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), 0, connectorData.ordinal());
         }
     }
 
@@ -100,11 +99,6 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
-    public Unit getResultUnit() {
-        return additionalData.getResultUnit();
-    }
-
-    @Override
     public int getResultDecimals() {
         return additionalData.getResultDecimals();
     }
@@ -124,27 +118,16 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
         if (!isLocalizable()) {
             return getSimpleName();
         }
-        
         String localizedName = "";
         if (!additionalData.getMessageKey().isEmpty()) {
             localizedName = stringMessages.get(locale, additionalData.getMessageKey());
         }
-        
-        if (hasUnit()) {
-            String unitSignifier = stringMessages.get(locale, getResultUnit().toString());
-            localizedName = stringMessages.get(locale, "SignifierInUnit", localizedName, unitSignifier);
-        }
-        
         return localizedName;
     }
 
     @Override
     public boolean isLocalizable() {
-        return additionalData != null && (!additionalData.getMessageKey().isEmpty() || hasUnit());
-    }
-    
-    private boolean hasUnit() {
-        return getResultUnit() != null && getResultUnit() != Unit.None;
+        return additionalData != null && (!additionalData.getMessageKey().isEmpty());
     }
     
     @Override

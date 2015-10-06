@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.datamining.annotations.data.Unit;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
@@ -49,7 +48,6 @@ public class ParallelGroupedDataCountAggregationProcessor
     @Override
     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) {
         super.setAdditionalData(additionalDataBuilder);
-        additionalDataBuilder.setResultUnit(Unit.None);
         additionalDataBuilder.setResultDecimals(0);
     }
 
