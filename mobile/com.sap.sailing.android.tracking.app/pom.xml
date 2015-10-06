@@ -1,74 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>com.sap.sailing</groupId>
-        <artifactId>mobile</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sap.sailing</groupId>
-    <artifactId>com.sap.sailing.android.tracking.app</artifactId>
-    <packaging>apk</packaging>
+	<parent>
+		<groupId>com.sap.sailing</groupId>
+		<artifactId>mobile</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
-    <properties>
-        <!-- If you change this name, change in app too! -->
-        <additional-deployment-version-file>com.sap.sailing.android.tracking.app.version</additional-deployment-version-file>
-        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
-        <app-version>${tracking-app-version}</app-version>
-    </properties>
+	<groupId>com.sap.sailing</groupId>
+	<artifactId>com.sap.sailing.android.tracking.app</artifactId>
+	<packaging>apk</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-        </dependency>
-		
+	<properties>
+		<!-- If you change this name, change in app too! -->
+		<additional-deployment-version-file>com.sap.sailing.android.tracking.app.version</additional-deployment-version-file>
+		<!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+		<app-version>${tracking-app-version}</app-version>
+	</properties>
+
+	<dependencies>
 		<dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services-gcm</artifactId>
-			<type>aar</type>
-        </dependency>
-		
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sap.sailing.android.shared</artifactId>
-            <version>${project.version}</version>
-            <type>aar</type>
-        </dependency>
-    </dependencies>
+			<groupId>android</groupId>
+			<artifactId>android</artifactId>
+		</dependency>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <sourceDirectory>src</sourceDirectory>
-        <plugins>
+		<dependency>
+			<groupId>com.google.android.gms</groupId>
+			<artifactId>play-services-gcm</artifactId>
+			<type>aar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>com.sap.sailing.android.shared</artifactId>
+			<version>${project.version}</version>
+			<type>aar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.10.16</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apk</goal>
-                        </goals>
-                    </execution>
-                </executions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>apk</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
-            <!-- plugins for generating version file and copying .apk -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+			<!-- plugins for generating version file and copying .apk -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/tests-jvm/src</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

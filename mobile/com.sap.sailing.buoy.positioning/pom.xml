@@ -1,43 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.sap.sailing</groupId>
-        <artifactId>mobile</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>com.sap.sailing</groupId>
+		<artifactId>mobile</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
 
-    <groupId>com.sap.sailing</groupId>
-    <artifactId>com.sap.sailing.android.buoy.positioning.app</artifactId>
-    <packaging>apk</packaging>
+	<groupId>com.sap.sailing</groupId>
+	<artifactId>com.sap.sailing.android.buoy.positioning.app</artifactId>
+	<packaging>apk</packaging>
 
-    <properties>
-        <!-- If you change this name, change in app too! -->
-        <additional-deployment-version-file>com.sap.sailing.android.buoy.positioning.app.version
-        </additional-deployment-version-file>
-        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
-        <app-version>${buoy.positioning-app-version}</app-version>
-    </properties>
+	<properties>
+		<!-- If you change this name, change in app too! -->
+		<additional-deployment-version-file>com.sap.sailing.android.buoy.positioning.app.version
+		</additional-deployment-version-file>
+		<!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+		<app-version>${buoy.positioning-app-version}</app-version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>android</groupId>
-            <artifactId>android</artifactId>
-        </dependency>
-		
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.sap.sailing.android.shared</artifactId>
-            <version>${project.version}</version>
-            <type>aar</type>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>android</groupId>
+			<artifactId>android</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>com.sap.sailing.android.shared</artifactId>
+			<version>${project.version}</version>
+			<type>aar</type>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.10.16</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <sourceDirectory>src</sourceDirectory>
-        <plugins>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
 			<plugin>
 				<groupId>com.simpligility.maven.plugins</groupId>
 				<artifactId>android-maven-plugin</artifactId>
@@ -55,23 +68,24 @@
 					<androidManifestFile>AndroidManifest.xml</androidManifestFile>
 					<destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
-                    <extractDuplicates>true</extractDuplicates>
-                    <sdk>
-                        <platform>22</platform>
-                    </sdk>
+					<extractDuplicates>true</extractDuplicates>
+					<sdk>
+						<platform>22</platform>
+					</sdk>
 					<release>true</release>
-                    <proguard>
-                     <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
-                        <skip>true</skip>
-                        <configs>
-                            <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+					<proguard>
+						<!-- Someone needs to look into this - quite hard to find a configuration 
+							that doesnt break everything -->
+						<skip>true</skip>
+						<configs>
+							<config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
 							<config>${project.basedir}/proguard-project.txt</config>
 							<config>${project.basedir}/../proguard-mobile.txt</config>
-                        </configs>
-                    </proguard>
-                    <zipalign>
-                        <skip>false</skip>
-                    </zipalign>
+						</configs>
+					</proguard>
+					<zipalign>
+						<skip>false</skip>
+					</zipalign>
 					<excludeJarResources>
 						<!-- Prevents *-sources.jar to be distributed with the APK -->
 						<excludeJarResource>^.*-sources.jar$</excludeJarResource>
@@ -83,33 +97,51 @@
 						</jvmArguments>
 					</dex>
 				</configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apk</goal>
-                        </goals>
-                        <configuration>
-                            <excludeJarResources>
-                                <excludeJarResource>^android.*.jar$</excludeJarResource>
-                            </excludeJarResources>
-                        </configuration>
-                    </execution>
-                </executions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>apk</goal>
+						</goals>
+						<configuration>
+							<excludeJarResources>
+								<excludeJarResource>^android.*.jar$</excludeJarResource>
+							</excludeJarResources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
-            <!-- plugins for generating version file and copying .apk -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+			<!-- plugins for generating version file and copying .apk -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/tests-jvm/src</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
