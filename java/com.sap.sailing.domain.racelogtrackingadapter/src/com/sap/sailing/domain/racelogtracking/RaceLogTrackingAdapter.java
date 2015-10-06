@@ -79,19 +79,11 @@ public interface RaceLogTrackingAdapter {
      * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
      */
     void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-    
+
     /**
      * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
      */
     void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-
-    /**
-     * Duplicate the course and competitor registrations in the newest {@link RaceLogCourseDesignChangedEvent} in
-     * {@code from} race log to the {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are duplicated and
-     * not reused. This also inserts the necessary {@link RaceLogDefineMarkEvent}s into the {@code to} race logs.
-     */
-    void copyCourseAndCompetitors(RaceLog from, Set<RaceLog> to, SharedDomainFactory baseDomainFactory,
-            RacingEventService service);
 
     /**
      * If not yet registered, register the competitors in {@code competitors}, and unregister all already registered
@@ -107,15 +99,31 @@ public interface RaceLogTrackingAdapter {
 
     /**
      * Invite competitors for tracking via the Tracking App by sending out emails.
-     * @throws MailException 
+     * 
+     * @throws MailException
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
 
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
-     * @throws MailException 
+     * 
+     * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
             String emails, Locale locale) throws MailException;
+
+    /**
+     * Duplicate the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
+     * {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also
+     * inserts the necessary {@link RaceLogDefineMarkEvent}s into the {@code to} race logs.
+     */
+    void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
+            RacingEventService service);
+
+    /**
+     * Duplicate the competitor registrations from the {@code from} race log to the {@code to} race logs.
+     */
+    void copyCompetitors(RaceLog from, Set<RaceLog> to, 
+            RacingEventService service);
 }

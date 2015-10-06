@@ -1,12 +1,14 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 
-public class ClusterWithSingleBoundary<ElementType> extends AbstractCluster<ElementType> {
-
+public class ClusterWithSingleBoundary<ElementType extends Serializable> extends AbstractCluster<ElementType> {
+    private static final long serialVersionUID = -3188802475809553490L;
+    
     private static final char INFINITE = '\u221e';
 
     /**
