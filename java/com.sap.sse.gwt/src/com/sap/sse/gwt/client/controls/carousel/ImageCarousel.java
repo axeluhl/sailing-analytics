@@ -8,6 +8,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
@@ -104,10 +105,12 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
         init();
     }
 
-    public void onClick() {
-        GWT.log("Current slide: " + currentSlideIndex);
-        if (fsViewer != null) {
-            fsViewer.show(currentImages.get(currentSlideIndex), currentImages);
+    public void onClick(EventTarget eventTarget) {
+        if(fsViewer != null && Element.is(eventTarget)) {
+            TYPE imageData = getImageData(eventTarget.<Element>cast());
+            if(imageData != null) {
+                fsViewer.show(imageData, currentImages);
+            }
         }
     }
 
@@ -126,16 +129,16 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 		.on(
 			'click',
 			'.slick-slide',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick()();
-			});
+			$entry(function(event) {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick(Lcom/google/gwt/dom/client/EventTarget;)(event.target);
+			}));
 
 	slider
 		.on(
 			'afterChange',
-			function(event, index) {
+			$entry(function(event, index) {
 			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::currentSlideIndex = index.currentSlide;
-			});
+			}));
 
 	$wnd
 		.$(
@@ -187,6 +190,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
         imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
         imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);
         imageHolder.appendChild(imageElement);
+        setImageData(imageElement, image);
 
         getElement().appendChild(imageHolder);
 
@@ -195,6 +199,17 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
             setShowDots(false);
         }
     }
+    
+    private native void setImageData(Element element, TYPE imageData) /*-{
+        element.imageData = imageData;
+    }-*/;
+    
+    private native TYPE getImageData(Element element) /*-{
+        if(typeof element.imageData == "undefined") {
+            return null;
+        }
+        return element.imageData;
+    }-*/;
 
     /**
      * Define spacing between images in carousel. In fact, it is setting the img margins in pixels.
