@@ -63,6 +63,12 @@
 			left: 0px;
 			right: 0px;
 		}
+		.photolist {
+			padding: 0 10px;
+		}
+		.photolist > * {
+			padding: 0 5px;
+		}
 	</ui:style>
 	<g:HTMLPanel>
 		<div ui:field="videoSectionUi" style="display: none;" class="{local_res.css.media}">
@@ -87,7 +93,7 @@
 			</div>
 		</div>
 		<div class="{local_res.css.photolist} {res.mediaCss.grid}">
-			<g:FlowPanel ui:field="photoListOuterBoxUi"  />
+			<g:FlowPanel addStyleNames="{style.photolist}" ui:field="photoListOuterBoxUi" />
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 
