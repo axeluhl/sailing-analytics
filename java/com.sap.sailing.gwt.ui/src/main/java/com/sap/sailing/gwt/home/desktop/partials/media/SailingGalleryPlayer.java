@@ -35,10 +35,6 @@ public class SailingGalleryPlayer extends ResizeComposite {
             subSliderUi.appendChild(createThumbImgElement(i));
         }
     }
-    
-    public void setFocusToSubSlider() {
-        subSliderUi.getFirstChildElement().focus();
-    }
 
     private ImageElement createThumbImgElement(SailingImageDTO i ) {
         ImageElement img = Document.get().createImageElement();
