@@ -28,7 +28,14 @@ public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";
     private static final RegExp isMobileRegExp = RegExp.compile(
-            "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile Safari", "i");
+            "Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile Safari", "i");
+    private static final RegExp tabletBlacklistRegExp = RegExp.compile(
+            "iPad|" // Apple ;-)
+            + "Nexus 7|Nexus 10|Nexus 9|" // Google Tablets
+            + "PlayBook|" // Blackberry
+            + "KFAPWI|" // Kindle Fire HD
+            + "GT-P|SM-T|SM-P" // Galaxy Tab (https://en.wikipedia.org/wiki/Samsung_Galaxy ; http://forum.xda-developers.com/wiki/Samsung/Model_naming_scheme)
+                    , "i");
     private final PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
     private final ApplicationPlaceUpdater placeUpdater = new ApplicationPlaceUpdater();
 
@@ -87,7 +94,21 @@ public class SwitchingEntryPoint implements EntryPoint {
     public static boolean isMobile() {
         boolean isMobile = isMobileRegExp.test(Navigator.getUserAgent());
         LOG.info("Navigator user agent matched mobile regex: " + isMobile);
-        return isMobile;
+        if(!isMobile) {
+            return false;
+        }
+        return !isTablet();
+    }
+    
+    /**
+     * Uses regular expression and user agent to detect tablet device.
+     * 
+     * @return
+     */
+    public static boolean isTablet() {
+        boolean isTablet = tabletBlacklistRegExp.test(Navigator.getUserAgent());
+        LOG.info("Navigator user agent matched tablet regex: " + isTablet);
+        return isTablet;
     }
 
     /**
@@ -167,7 +188,11 @@ public class SwitchingEntryPoint implements EntryPoint {
     }
 
     private void configureDesktopHeader() {
-        metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=2");
+        if(isTablet()) {
+            metaElement("viewport", "width=device-width=900,initial-scale=0.75,maximum-scale=2");
+        } else {
+            metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=2");
+        }
     }
 
     private void configureMobileHeader() {
