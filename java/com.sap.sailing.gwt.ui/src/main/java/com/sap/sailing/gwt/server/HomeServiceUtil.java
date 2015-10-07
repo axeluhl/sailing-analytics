@@ -168,7 +168,9 @@ public final class HomeServiceUtil {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                acceptedImages.add(candidateImageUrl);
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                    acceptedImages.add(candidateImageUrl);
+                }
             }
         }
         return acceptedImages;
