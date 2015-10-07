@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
@@ -21,9 +22,12 @@ import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
+
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
+    private static final String ENABLE_DEVELOPER_OPTIONS_PARAMETER = "developerOptions";
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     
@@ -34,6 +38,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         session = new UUIDDataMiningSession(UUID.randomUUID());
+        
+        boolean enableDeveloperOptions = GwtHttpRequestUtils.getBooleanParameter(ENABLE_DEVELOPER_OPTIONS_PARAMETER, false);
         
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService, RemoteServiceMappingConstants.dataMiningServiceRemotePath);
 
@@ -58,6 +64,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
         queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
         settingsControl.addSettingsComponent(queryRunner);
+        
+        if (enableDeveloperOptions) {
+            final QueryDefinitionViewer queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages(), queryDefinitionProviderWithControls);
+            queryDefinitionProviderWithControls.addControl(queryDefinitionViewer.getEntryWidget());
+        }
     }
 
     private LogoAndTitlePanel createLogoAndTitlePanel() {

@@ -1395,4 +1395,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String copyCourse();
     String copyCompetitors();
     String smartphoneTracking();
+    String viewQueryDefinition();
+    String queryDefinitionViewer();
 }
