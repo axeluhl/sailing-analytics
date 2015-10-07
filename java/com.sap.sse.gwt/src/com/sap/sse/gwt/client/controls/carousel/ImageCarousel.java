@@ -99,9 +99,13 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
      */
     public ImageCarousel() {
         setElement(ourUiBinder.createAndBindUi(this));
-
         uniqueId = "slider_" + Document.get().createUniqueId();
         getElement().addClassName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
     }
 
@@ -140,11 +144,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::currentSlideIndex = index.currentSlide;
 			}));
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-		.slick(
+	slider.slick(
 			{
 			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
 			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
@@ -300,9 +300,7 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
      */
     private void init() {
         final ImageCarousel<TYPE> reference = this;
-
         Scheduler.get().scheduleDeferred(new Command() {
-
             @Override
             public void execute() {
                 try {
