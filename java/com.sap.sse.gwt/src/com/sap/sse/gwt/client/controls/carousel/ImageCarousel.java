@@ -307,14 +307,6 @@ public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
             public void execute() {
                 try {
                     setupSlider(reference);
-
-                    for (int childIndex = 0; childIndex < getElement().getChildCount(); childIndex++) {
-                        Element child = Element.as(getElement().getChild(childIndex));
-                        if (child.getClassName() != null && child.getClassName().contains("slick-track")) {
-
-                        }
-                    }
-
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
