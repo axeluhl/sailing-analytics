@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -58,6 +59,8 @@ public class SailingGalleryPlayer extends ResizeComposite {
     @Override
     protected void onLoad() {
         _onLoad();
+        mainSliderUi.getChild(0).<Element>cast().setTabIndex(0);
+        mainSliderUi.getChild(0).<Element>cast().focus();
     }
 
     @Override
