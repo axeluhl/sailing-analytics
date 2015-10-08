@@ -1,5 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar" xmlns:b="urn:import:com.sap.sse.gwt.client.controls.busyindicator">
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
@@ -35,6 +35,10 @@
 		float: right;
 		margin-left: 0.5em;
 	}
+	.busy {
+		width: 32px;
+		margin: 2em auto 10em;
+	}
 	</ui:style>
 	<g:FlowPanel>
 		<g:HTMLPanel addStyleNames="{style.header}">
@@ -54,6 +58,8 @@
 			</div>
 		</g:HTMLPanel>
 		<g:SimplePanel ui:field="tabContentPanelUi"
-			addStyleNames="{style.content}" />
+			addStyleNames="{style.content}">
+			<b:SimpleBusyIndicator addStyleNames="{style.busy}" busy="true" />
+		</g:SimplePanel>
 	</g:FlowPanel>
 </ui:UiBinder>

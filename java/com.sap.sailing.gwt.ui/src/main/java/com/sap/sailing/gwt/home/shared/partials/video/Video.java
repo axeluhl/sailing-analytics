@@ -1,0 +1,38 @@
+package com.sap.sailing.gwt.home.shared.partials.video;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
+
+public class Video extends Composite {
+
+    private static LivestreamUiBinder uiBinder = GWT.create(LivestreamUiBinder.class);
+
+    interface LivestreamUiBinder extends UiBinder<Widget, Video> {
+    }
+    
+    private String source;
+    @UiField(provided = true) VideoWithLowerThird videoPlayer = new VideoWithLowerThird(false, false);
+
+    public Video() {
+        VideoResources.INSTANCE.css().ensureInjected();
+        initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    public void setData(EventOverviewVideoStageDTO data) {
+        source = data.getVideo().getSourceRef();
+        videoPlayer.setVideo(data.getVideo());
+    }
+    
+    public boolean shouldBeReplaced(String newSource) {
+        return (videoPlayer == null || source == null || (!source.equals(newSource) && canCurrentVideoBeReplaced()));
+    }
+    
+    private boolean canCurrentVideoBeReplaced() {
+        return !videoPlayer.isFullscreen() && videoPlayer.paused();
+    }
+}

@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -133,6 +133,15 @@ public final class HomeServiceUtil {
         return event.findImageWithTag(MediaTagConstants.TEASER);
     }
     
+    public static ImageDescriptor getFeaturedImage(EventBase event) {
+        return event.findImageWithTag(MediaTagConstants.FEATURED);
+    }
+    
+    public static String getFeaturedImageUrlAsString(EventBase event) {
+        ImageDescriptor image = getFeaturedImage(event);
+        return image == null ? null : image.getURL().toString();
+    }
+    
     public static String getStageImageURLAsString(final EventBase event) {
         ImageDescriptor image = getStageImage(event);
         return image == null ? null : image.getURL().toString();
@@ -159,7 +168,9 @@ public final class HomeServiceUtil {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                acceptedImages.add(candidateImageUrl);
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                    acceptedImages.add(candidateImageUrl);
+                }
             }
         }
         return acceptedImages;
@@ -170,15 +181,21 @@ public final class HomeServiceUtil {
     }
     
     public static int calculateRaceCount(Leaderboard sl) {
-        int count=0;
+        int nonCarryForwardRacesCount = 0;
         for (RaceColumn column : sl.getRaceColumns()) {
-            count += Util.size(column.getFleets());
+            if (!column.isCarryForward()) {
+                nonCarryForwardRacesCount += Util.size(column.getFleets());
+            }
         }
-        return count;
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateRaceColumnCount(Leaderboard sl) {
-        return Util.size(sl.getRaceColumns());
+        int nonCarryForwardRacesCount = 0;
+        for (RaceColumn rc : sl.getRaceColumns()) {
+            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
+        }
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateTrackedRaceCount(Leaderboard sl) {
@@ -411,12 +428,9 @@ public final class HomeServiceUtil {
         }
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(leaderboard instanceof RegattaLeaderboard) {
-                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                    continue;
-                }
+            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
             }
-            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
     }
