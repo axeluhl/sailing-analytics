@@ -33,8 +33,9 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     }
 
     @Override
-    public void start(MultiregattaMediaPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(MultiregattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         final MediaPage mediaPage = new MediaPage();
+        initWidget(mediaPage);
         
         currentPresenter.ensureMedia(new AsyncCallback<MediaDTO>() {
             @Override
@@ -45,16 +46,10 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
 
             @Override
             public void onSuccess(MediaDTO media) {
+                contentArea.setWidget(MultiregattaMediaTabView.this);
                 mediaPage.setMedia(media);
             }
         });
-
-        initWidget(mediaPage);
-        
-        // TODO do we need UiBinder here?
-//        initWidget(ourUiBinder.createAndBindUi(this));
-
-        contentArea.setWidget(this);
     }
 
     @Override

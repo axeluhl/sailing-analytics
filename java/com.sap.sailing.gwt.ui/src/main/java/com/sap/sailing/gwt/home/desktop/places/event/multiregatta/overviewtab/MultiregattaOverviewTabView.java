@@ -71,13 +71,12 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
         stageUi.setupRefresh(refreshManager);
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
         refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
         refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
-        contentArea.setWidget(this);
     }
 
     @Override

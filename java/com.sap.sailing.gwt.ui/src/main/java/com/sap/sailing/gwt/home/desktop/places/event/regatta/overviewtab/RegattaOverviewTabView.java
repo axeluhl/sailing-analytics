@@ -71,7 +71,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
             @Override
             public void setData(RegattaWithProgressDTO data) {
@@ -84,7 +84,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
                 .getId(), currentPresenter.getCtx().getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
         refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
-        contentArea.setWidget(this);
     }
 
     @Override
