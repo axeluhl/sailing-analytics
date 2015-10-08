@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 public class RaceCompetitionFormatSeriesDTO implements DTO {
 
     private String seriesName;
+    private int flightCount = 0;
     private int raceCount = 0;
     private int competitorCount = 0;
     private ArrayList<RaceCompetitionFormatFleetDTO> fleets = new ArrayList<>();
@@ -21,6 +22,7 @@ public class RaceCompetitionFormatSeriesDTO implements DTO {
     
     public void addFleet(RaceCompetitionFormatFleetDTO fleet) {
         fleets.add(fleet);
+        flightCount = Math.max(flightCount, fleet.getRaces().size());
         raceCount += fleet.getRaces().size();
     }
     
@@ -30,6 +32,10 @@ public class RaceCompetitionFormatSeriesDTO implements DTO {
 
     public String getSeriesName() {
         return seriesName;
+    }
+    
+    public int getFlightCount() {
+        return flightCount;
     }
 
     public int getRaceCount() {
