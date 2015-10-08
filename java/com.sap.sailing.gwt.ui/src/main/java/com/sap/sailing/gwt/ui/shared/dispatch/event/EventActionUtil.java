@@ -106,6 +106,9 @@ public final class EventActionUtil {
     public static void forLeaderboardsOfEvent(DispatchContext context, UUID eventId, LeaderboardCallback callback) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
+        if (event == null) {
+            throw new RuntimeException("Event not found");
+        }
         forLeaderboardsOfEvent(context, event, callback);
     }
 
