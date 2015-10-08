@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.DefaultActionProvider;
@@ -34,12 +35,19 @@ public class RefreshManager {
 
     private final DispatchSystem actionExecutor;
 
-    private Widget container;
+    private final Widget content;
 
-    public RefreshManager(Widget container, DispatchSystem actionExecutor) {
+    private AcceptsOneWidget container;
+
+    public RefreshManager(Widget content, DispatchSystem actionExecutor) {
+        this(content, null, actionExecutor);
+    }
+    
+    public RefreshManager(Widget content, AcceptsOneWidget container, DispatchSystem actionExecutor) {
+        this.content = content;
         this.container = container;
         this.actionExecutor = actionExecutor;
-        container.addAttachHandler(new Handler() {
+        content.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
                 if (event.isAttached()) {
@@ -49,6 +57,9 @@ public class RefreshManager {
                 }
             }
         });
+        if(container != null) {
+            reschedule();
+        }
     }
 
     private void update() {
@@ -72,6 +83,7 @@ public class RefreshManager {
                         refreshable.timeout = System.currentTimeMillis() + result.getTtlMillis();
                         try {
                             refreshable.widget.setData(result.getDto());
+                            initContentIfNecessary();
                         } catch(Throwable error) {
                             LOG.log(Level.SEVERE, "Error while refreshing content with action " + action.getClass().getName(), error);
                         }
@@ -94,7 +106,7 @@ public class RefreshManager {
             public void execute() {
                 scheduled = false;
 
-                if (refreshables.isEmpty() || !container.isAttached()) {
+                if (refreshables.isEmpty() || (!content.isAttached() && container == null)) {
                     return;
                 }
 
@@ -117,6 +129,13 @@ public class RefreshManager {
                 }
             }
         });
+    }
+    
+    private void initContentIfNecessary() {
+        if(container != null) {
+            container.setWidget(content);
+            container = null;
+        }
     }
     
     public void forceReschule() {

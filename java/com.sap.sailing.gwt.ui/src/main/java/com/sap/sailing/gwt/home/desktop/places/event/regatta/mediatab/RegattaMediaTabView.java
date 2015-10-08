@@ -33,8 +33,9 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     }
 
     @Override
-    public void start(RegattaMediaPlace myPlace, AcceptsOneWidget contentArea) {
+    public void start(RegattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         final MediaPage mediaPage = new MediaPage();
+        initWidget(mediaPage);
         
         currentPresenter.ensureMedia(new AsyncCallback<MediaDTO>() {
             @Override
@@ -45,16 +46,10 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
 
             @Override
             public void onSuccess(MediaDTO media) {
+                contentArea.setWidget(RegattaMediaTabView.this);
                 mediaPage.setMedia(media);
             }
         });
-
-        initWidget(mediaPage);
-        
-        // TODO do we need UiBinder here?
-//        initWidget(ourUiBinder.createAndBindUi(this));
-
-        contentArea.setWidget(this);
     }
 
     @Override
