@@ -1407,4 +1407,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String copyCourse();
     String copyCompetitors();
     String smartphoneTracking();
+    String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
 }
