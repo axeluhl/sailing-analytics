@@ -33,16 +33,19 @@ public class RegattaCompetitionSeries extends Composite {
         initWidget(seriesUi = uiBinder.createAndBindUi(this));
         seriesUi.setEdgeToEdgeContent(true);
         sectionHeaderUi.setSectionTitle(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
-        initSubtitle(series.getCompetitorCount(), series.getRaceCount());
+        initSubtitle(series.getCompetitorCount(), series.getFlightCount(), series.getRaceCount());
         sectionHeaderUi.initCollapsibility(fleetContainerUi.getElement(), true);
     }
     
-    private void initSubtitle(int competitorCount, int raceCount) {
-        if (competitorCount > 0 || raceCount > 0) {
+    private void initSubtitle(int competitorCount, int flightCount, int raceCount) {
+        boolean showFlights = flightCount > 0 && flightCount != raceCount;
+        if (competitorCount > 0 || showFlights || raceCount > 0) {
             String competitors = competitorCount > 0 ? I18N.competitorsCount(competitorCount) : "";
-            String separator = competitorCount > 0 && raceCount > 0 ? " | " : "";
+            String competitorsSeparator = competitorCount > 0 ? " | " : "";
+            String flights = showFlights ? I18N.flightsCount(flightCount) : "";
+            String flightsSeparator = showFlights ? " | " : "";
             String races = raceCount > 0 ? I18N.racesCount(raceCount) : "";
-            sectionHeaderUi.setSubtitle(competitors + separator + races);
+            sectionHeaderUi.setSubtitle(competitors + competitorsSeparator + flights + flightsSeparator + races);
         }
     }        
     
