@@ -15,9 +15,10 @@ public abstract class AbstractRegattaCompetitionSeries extends Composite impleme
     protected AbstractRegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
         initWidget(getMainUiWidget());
         setSeriesName(DEFAULT_SERIES_NAME.equals(series.getSeriesName()) ? I18N.races() : series.getSeriesName());
+        String flightInfoText = series.getFlightCount() != series.getRaceCount() ? I18N.flightsCount(series.getFlightCount()) : "";
         String raceInfoText = series.getRaceCount() > 0 ? I18N.racesCount(series.getRaceCount()) : "";
         String competitorInfoText = series.getCompetitorCount() > 0 ? I18N.competitorsCount(series.getCompetitorCount()) : "";
-        setRacesAndCompetitorInfo(raceInfoText, competitorInfoText);
+        setRacesFlightAndCompetitorInfo(flightInfoText, raceInfoText, competitorInfoText);
     }
     
     @Override
@@ -29,6 +30,6 @@ public abstract class AbstractRegattaCompetitionSeries extends Composite impleme
     
     protected abstract void setSeriesName(String seriesName);
     
-    protected abstract void setRacesAndCompetitorInfo(String raceInfoText, String competitorInfoText);
+    protected abstract void setRacesFlightAndCompetitorInfo(String flightInfoText, String raceInfoText, String competitorInfoText);
 
 }

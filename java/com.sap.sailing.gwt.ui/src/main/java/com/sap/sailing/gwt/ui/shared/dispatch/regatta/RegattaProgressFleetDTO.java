@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.dispatch.regatta;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 
 public class RegattaProgressFleetDTO implements DTO {
+    private int raceCount;
     private int finishedRaceCount;
     private int liveRaceCount;
     
@@ -10,9 +11,14 @@ public class RegattaProgressFleetDTO implements DTO {
     private RegattaProgressFleetDTO() {
     }
     
-    public RegattaProgressFleetDTO(int finishedRaceCount, int liveRaceCount) {
+    public RegattaProgressFleetDTO( int raceCount, int finishedRaceCount, int liveRaceCount) {
+        this.raceCount = raceCount;
         this.finishedRaceCount = finishedRaceCount;
         this.liveRaceCount = liveRaceCount;
+    }
+
+    public int getRaceCount() {
+        return raceCount;
     }
     
     public int getFinishedRaceCount() {

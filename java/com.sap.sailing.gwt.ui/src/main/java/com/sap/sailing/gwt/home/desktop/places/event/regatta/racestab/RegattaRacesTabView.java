@@ -119,7 +119,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
         raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
         UUID eventId = myPlace.getCtx().getEventDTO().getId();
         String regattaId = myPlace.getRegattaId();
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
@@ -146,7 +146,6 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             listNavigationPanelUi.removeFromParent();
             compFormatContainerUi.removeFromParent();
         }
-        contentArea.setWidget(RegattaRacesTabView.this);
     }
     
     private <D extends DTO, A extends Action<ResultWithTTL<D>>> void addRacesAction(

@@ -20,6 +20,7 @@ public class RegattaCompetitionSeries extends AbstractRegattaCompetitionSeries {
     
     @UiField DivElement seriesNameUi;
     @UiField DivElement competitorCountUi;
+    @UiField DivElement flightCountUi;
     @UiField DivElement raceCountUi;
     @UiField HTMLPanel containerUi;
 
@@ -46,10 +47,15 @@ public class RegattaCompetitionSeries extends AbstractRegattaCompetitionSeries {
     }
 
     @Override
-    protected void setRacesAndCompetitorInfo(String raceInfoText, String competitorInfoText) {
+    protected void setRacesFlightAndCompetitorInfo(String flightInfoText, String raceInfoText, String competitorInfoText) {
+        this.setInfoTextOrRemoveUiElement(competitorInfoText, competitorCountUi);
+        this.setInfoTextOrRemoveUiElement(flightInfoText, flightCountUi);
         raceCountUi.setInnerText(raceInfoText);
-        if (competitorInfoText.isEmpty()) competitorCountUi.removeFromParent();
-        else competitorCountUi.setInnerText(competitorInfoText);
+    }
+    
+    private void setInfoTextOrRemoveUiElement(String infoText, DivElement uiElement) {
+        if (infoText.isEmpty()) uiElement.removeFromParent();
+        else uiElement.setInnerText(infoText);
     }
 
 }

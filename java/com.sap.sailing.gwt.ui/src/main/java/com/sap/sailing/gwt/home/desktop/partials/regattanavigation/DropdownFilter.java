@@ -39,6 +39,7 @@ public class DropdownFilter<T> extends Composite {
         CSS.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.dropdownHandler = new ListFilterDropdownHandler();
+        setVisible(false);
     }
     
     public void updateFilterValues() {

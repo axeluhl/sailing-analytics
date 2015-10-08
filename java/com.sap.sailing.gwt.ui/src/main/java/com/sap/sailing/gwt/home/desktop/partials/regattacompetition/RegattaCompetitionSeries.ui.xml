@@ -9,6 +9,7 @@
 			<div class="{local_res.css.phase_head_title}" ui:field="seriesNameUi"></div>
 			<div class="{local_res.css.phase_head_info}">
 				<div class="{local_res.css.phase_head_info_item}" ui:field="competitorCountUi"></div>
+				<div class="{local_res.css.phase_head_info_item}" ui:field="flightCountUi"></div>
 				<div class="{local_res.css.phase_head_info_item}" ui:field="raceCountUi"></div>
 			</div>
 		</div>

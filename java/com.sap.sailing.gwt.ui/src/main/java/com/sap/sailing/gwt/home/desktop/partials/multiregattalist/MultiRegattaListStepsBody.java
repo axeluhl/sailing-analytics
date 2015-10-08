@@ -55,7 +55,7 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
             progressUi.setInnerText(I18N.currentOfTotal(
                     seriesProgress.getProgressRaceCount(), seriesProgress.getTotalRaceCount()));
         }
-        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
+        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getMaxRacesPerFleet());
         setFleetsTooltip(seriesProgress.getFleetNames());
     }
     

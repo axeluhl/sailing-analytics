@@ -8,7 +8,7 @@
 		<!-- The main stage -->
 		<div class="{local_res.css.stage}">
 			<div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
-				<sse:carousel.WidgetCarousel ui:field="widgetCarousel" />
+				<sse:carousel.WidgetCarousel ui:field="widgetCarousel" showDots="false" />
 			</div>
 		</div>
 	</g:HTMLPanel>

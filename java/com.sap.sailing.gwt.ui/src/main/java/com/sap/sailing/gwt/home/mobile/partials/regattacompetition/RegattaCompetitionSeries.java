@@ -47,9 +47,10 @@ public class RegattaCompetitionSeries extends AbstractRegattaCompetitionSeries {
     }
 
     @Override
-    protected void setRacesAndCompetitorInfo(String raceInfoText, String competitorInfoText) {
-        String separator = raceInfoText.isEmpty() || competitorInfoText.isEmpty() ? "" : " | ";
-        sectionHeaderUi.setSubtitle(competitorInfoText + separator + raceInfoText);
+    protected void setRacesFlightAndCompetitorInfo(String flightInfoText, String raceInfoText, String competitorInfoText) {
+        String competitorsSeparator = competitorInfoText.isEmpty() ? "" : " | ";
+        String flightSeparator = flightInfoText.isEmpty() ? "" : " | ";
+        sectionHeaderUi.setSubtitle(competitorInfoText + competitorsSeparator + flightInfoText + flightSeparator + raceInfoText);
     }
-
+    
 }

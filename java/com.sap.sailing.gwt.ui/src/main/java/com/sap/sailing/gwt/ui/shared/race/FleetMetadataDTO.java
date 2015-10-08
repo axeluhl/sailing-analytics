@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.race;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class FleetMetadataDTO implements IsSerializable, Comparable<FleetMetadataDTO> {
@@ -31,6 +32,10 @@ public class FleetMetadataDTO implements IsSerializable, Comparable<FleetMetadat
     
     public int getOrdering() {
         return ordering;
+    }
+    
+    public boolean isDefaultFleet() {
+        return LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName);
     }
 
     @Override

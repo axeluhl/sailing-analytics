@@ -210,7 +210,7 @@ public class LeaderboardContext {
             regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
-        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceColumnCount(leaderboard));
+        regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
         regattaDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
         if(leaderboard instanceof RegattaLeaderboard) {
             regattaDTO.setStartDate(getStartDateWithEventFallback());

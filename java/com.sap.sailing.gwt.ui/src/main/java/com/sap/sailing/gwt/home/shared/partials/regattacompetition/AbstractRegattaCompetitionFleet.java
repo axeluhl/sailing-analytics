@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionFleetView;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
@@ -13,11 +12,12 @@ public abstract class AbstractRegattaCompetitionFleet extends Widget implements 
     
     protected AbstractRegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
         setElement(getMainUiElement());
-        getElement().getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
         getFleetNameUiElement().setInnerText(fleet.getFleet().getFleetName());
         getFleetCornerUiElement().getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
-        if (LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getFleet().getFleetName())) {
+        if (fleet.getFleet().isDefaultFleet()) {
             onDefaultFleetName();
+        } else {
+            getElement().getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
         }
     }
 
