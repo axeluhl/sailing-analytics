@@ -443,15 +443,8 @@ public class RaceContext {
             if (Util.size(raceColumn.getFleets()) == 1) {
                 return new SimpleCompetitorDTO(competitors.get(0));
             }
-            if (trackedRace == null) {
-                return null;
-            }
             for (Competitor competitor : competitors) {
-                Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                if (fleetOfCompetitor == null) {
-                    continue;
-                }
-                if (Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName())) {
+                if (isCompetitorInFleet(competitor)) {
                     return new SimpleCompetitorDTO(competitor);
                 }
             }
@@ -635,11 +628,20 @@ public class RaceContext {
     
     public Collection<SimpleCompetitorDTO> getCompetitors() {
         Set<SimpleCompetitorDTO> compotitorDTOs = new HashSet<>();
-        if (raceDefinition != null) {
-            for (Competitor competitor : raceDefinition.getCompetitors()) {
+        boolean isFleetRacing = Util.size(raceColumn.getFleets()) > 1;
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            if (!isFleetRacing || isCompetitorInFleet(competitor)) {
                 compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
-            }
+            } 
         }
         return compotitorDTOs;
+    }
+    
+    private boolean isCompetitorInFleet(Competitor competitor) {
+        if (trackedRace == null) {
+            return false;
+        }
+        Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+        return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
     }
 }
