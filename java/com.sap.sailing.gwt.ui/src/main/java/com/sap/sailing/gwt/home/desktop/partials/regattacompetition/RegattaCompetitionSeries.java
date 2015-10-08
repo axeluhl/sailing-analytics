@@ -25,6 +25,7 @@ public class RegattaCompetitionSeries extends Composite {
     
     @UiField DivElement seriesNameUi;
     @UiField DivElement competitorCountUi;
+    @UiField DivElement flightCountUi;
     @UiField DivElement raceCountUi;
     private final HTMLPanel containerUi;
 
@@ -35,6 +36,10 @@ public class RegattaCompetitionSeries extends Composite {
         this.competitorCountUi.setInnerText(I18N.competitorsCount(series.getCompetitorCount()));
         if (series.getCompetitorCount() == 0) {
             this.competitorCountUi.removeFromParent();
+        }
+        this.flightCountUi.setInnerText(I18N.flightsCount(series.getFlightCount()));
+        if (series.getFlightCount() == series.getRaceCount()) {
+            this.flightCountUi.removeFromParent();
         }
         this.raceCountUi.setInnerText(I18N.racesCount(series.getRaceCount()));
         for (RaceCompetitionFormatFleetDTO fleet : series.getFleets()) {
