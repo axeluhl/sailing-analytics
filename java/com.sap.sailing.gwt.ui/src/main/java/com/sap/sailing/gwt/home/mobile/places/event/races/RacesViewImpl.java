@@ -31,12 +31,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     public RacesViewImpl(final RacesView.Presenter presenter) {
         super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
         setViewContent(uiBinder.createAndBindUi(this));
-        RegattaCompetitionPresenter competitionPresenter = new RegattaCompetitionPresenter(regattaCompetitionUi) {
-            @Override
-            protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-                return null; // TODO No mobile "RaceViewer implemented yet;
-            }
-        };
+        RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
         competitorFilterUi.addFilterValueChangeHandler(competitionPresenter);
         refreshManager.add(competitionPresenter, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
     }
@@ -49,6 +44,17 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     @Override
     protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesEventRaces(quickfinder, seriesName, currentPresenter, eventsOfSeries);
+    }
+    
+    private class MobileRegattaCompetitionPresenter extends RegattaCompetitionPresenter {
+        public MobileRegattaCompetitionPresenter() {
+            super(regattaCompetitionUi);
+        }
+
+        @Override
+        protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+            return null; // TODO No mobile "RaceViewer implemented yet;
+        }
     }
     
 }

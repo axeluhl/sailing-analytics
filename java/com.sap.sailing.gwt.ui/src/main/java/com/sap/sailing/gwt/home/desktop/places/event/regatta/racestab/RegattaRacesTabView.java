@@ -134,12 +134,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
             listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
             listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
-            RegattaCompetitionPresenter competitionPresenter = new RegattaCompetitionPresenter(new CompetitionFormatRaces()) {
-                @Override
-                protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-                    return currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier);
-                }
-            };
+            RegattaCompetitionPresenter competitionPresenter = new DesktopRegattaCompetitionPresenter();
             competitorFilterUi.addFilterValueChangeHandler(competitionPresenter);
             addRacesAction(competitionPresenter, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
         } else {
@@ -251,22 +246,27 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
     }
-
-    private class CompetitionFormatRaces implements RegattaCompetitionView {
-
-        @Override
-        public void clearContent() {
-            compFormatContainerUi.clear();
-        }
-
-        @Override
-        public RegattaCompetitionSeriesView addSeriesView(RaceCompetitionFormatSeriesDTO series) {
-            RegattaCompetitionSeries seriesView = new RegattaCompetitionSeries(series);
-            compFormatContainerUi.add(seriesView);
-            return seriesView;
-        }
-        
-    }
     
+    private class DesktopRegattaCompetitionPresenter extends RegattaCompetitionPresenter {
+        public DesktopRegattaCompetitionPresenter() {
+            super(new RegattaCompetitionView() {
+                @Override
+                public void clearContent() {
+                    compFormatContainerUi.clear();
+                }
+                @Override
+                public RegattaCompetitionSeriesView addSeriesView(RaceCompetitionFormatSeriesDTO series) {
+                    RegattaCompetitionSeries seriesView = new RegattaCompetitionSeries(series);
+                    compFormatContainerUi.add(seriesView);
+                    return seriesView;
+                }});
+        }
+
+        @Override
+        protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+            return currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier);
+        }
+    }
+
 }
 
