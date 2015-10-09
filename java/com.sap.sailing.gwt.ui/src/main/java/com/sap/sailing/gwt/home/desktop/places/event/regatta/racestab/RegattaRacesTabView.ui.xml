@@ -21,9 +21,7 @@
                 <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" />
                 <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
             </div>
-            <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi">
-				<!-- <g:Label addStyleNames="{style.temp}"><ui:text from="{i18n.noRacesYet}"/></g:Label> -->
-            </g:FlowPanel>
+            <dp:regattacompetition.RegattaCompetition addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
         </div>
         <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
     </g:HTMLPanel>

@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,7 +23,7 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListContainer;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListDataUtil;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn;
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
-import com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetitionSeries;
+import com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.ListNavigationAction;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigationPanel.SelectionCallback;
@@ -34,7 +33,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
-import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -46,7 +44,6 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAct
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
@@ -90,7 +87,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) ListNavigationPanel<Navigation> listNavigationPanelUi;
     @UiField DivElement listFormatContainerUi;
-    @UiField FlowPanel compFormatContainerUi;
+    @UiField RegattaCompetition compFormatContainerUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) RaceListContainer<RaceListRaceDTO> raceListContainerUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
@@ -249,17 +246,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     
     private class DesktopRegattaCompetitionPresenter extends RegattaCompetitionPresenter {
         public DesktopRegattaCompetitionPresenter() {
-            super(new RegattaCompetitionView() {
-                @Override
-                public void clearContent() {
-                    compFormatContainerUi.clear();
-                }
-                @Override
-                public RegattaCompetitionSeriesView addSeriesView(RaceCompetitionFormatSeriesDTO series) {
-                    RegattaCompetitionSeries seriesView = new RegattaCompetitionSeries(series);
-                    compFormatContainerUi.add(seriesView);
-                    return seriesView;
-                }});
+            super(compFormatContainerUi);
         }
 
         @Override

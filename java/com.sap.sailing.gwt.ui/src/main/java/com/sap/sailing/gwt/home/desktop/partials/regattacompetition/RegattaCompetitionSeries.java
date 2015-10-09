@@ -26,7 +26,6 @@ public class RegattaCompetitionSeries extends AbstractRegattaCompetitionSeries {
 
     public RegattaCompetitionSeries(RaceCompetitionFormatSeriesDTO series) {
         super(series);
-        RegattaCompetitionResources.INSTANCE.css().ensureInjected();
     }
     
     @Override
