@@ -76,7 +76,7 @@ The concrete interfaces and classes that are needed to implement the Fact depend
 * This class is located in the sailing domain, so the entrypoint to get instances would be the `RacingEventService`, which will be the Data Source.
 * There are multiple ways to get `TrackedLegOfCompetitors` from the `RacingEventService`.
 	* For example `LeaderboardGroup` &#8594; `Leaderboard` &#8594; `RaceColumn` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
-	* Or `Regatta` &#8594; `Series` &#8594; `RaceColumn` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
+	* Or `Regatta` &#8594; `Series` &#8594; `RaceColumnInSeries` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
 
 But before the data retrieval is implemented, it's worth to have a more detailed look on the process that performs the retrieval.
 
@@ -95,11 +95,91 @@ Splitting the data retrieval into multiple levels provides several benefits for 
 
 To split the data retrieval in multiple levels, it is necessary to implement the corresponding intermediate elements. These elements are very similar to the Fact (there aren't any differences from an objective point of view) so it's possible to reuse these intermediate elements to implement new Facts. But in the context of defining a concrete new Fact, their types will be referred to as Intermediate Types to distinguish them from the Fact.
 
-How to implement a new Fact with supporting Intermediate Types will be described in the following section.
+How to implement a new Fact with supporting Intermediate Types and the Retrievers will be described in the following sections.
 
 #### Implement the Fact and the Intermediate Types
 
-#### Implement the Retrievers and put them together
+As stated before can a Fact be roughly described as an enriched and abstracted domain element (for example a `TrackedLegOfCompetitor`).
+
+* Enriched means that the Fact provides contextual information and Key Figures in a way that they can be easily used by in the data mining process.
+	* Contextual information could be the name of the race, the regatta of the race or the course area on which the race took place.
+	* Key Figures could be the speed at start for a specific competitor or the number of jibes that have been performed during the race.
+* Abstracted means, that the Fact provides a user friendly view of the domain element(s) it represents and isn't just a domain element with a richer interface.
+	* For example need the previously described Key Figures not only information about the race, but also about a specific competitor. Therefore a Fact that provides such Key Figures abstracts a tuple of race and competitor.
+
+What the implementation of the Fact will be depends on the data you want to analyze and the domain elements that contain the data. For example if you want to analyze the traveled distance and the speed of a competitor, the `TrackedLegOfCompetitor` would be a good domain element on which the Fact could be based. The next step is to choose the path (steps from domain element to domain element) to get the desired domain element. There will be multiple paths in most cases. Paths to `TrackedLegOfCompetitor` could be:
+
+* `RacingEventService` &#8594; `LeaderboardGroup` &#8594; `Leaderboard` &#8594; `RaceColumn` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
+* `RacingEventService` &#8594; `Regatta` &#8594; `Series` &#8594; `RaceColumnInSeries` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
+
+If there are multiple paths you should choose the one that contains more *user friendly* domain elements. In this case that would be the second path, because `Regatta` is more familiar by sailors and viewers than `LeaderboardGroup`.
+
+The next step is to choose the Intermediate Types to implement. These should contain useful contextual information (that will be provided via Dimensions) and should be *user friendly*, because they (and their Dimensions) will be displayed. Orient yourself on the domain elements in the path to choose the Intermediate Types. Good Intermediate Types for the example path would be `Regatta`, `TrackedRace` and `TrackedLeg`, while `RacingEventService` and `RaceColumnInSeries` aren't a good choice. `Series` could also be used, but will be excluded to keep the example more simple.
+
+The next step is to implement the chosen Intermediate Types and the Fact. Below is a simplified class diagram of the implementation of the example.
+
+<img style="float: right" src="/wiki/images/datamining/ExampleFactStructure.svg" />
+
+Note that the Fact and Intermediate Types are separated in an Interface and a Class. This is done because the Dimensions and Extraction Functions are provided by annotating the methods of the Fact and Intermediate Types. Separating the place where the methods are annotated (Interface) and the concrete implementation (Class) keeps the class structure cleaner.
+
+* Implementing the Interfaces for the Fact and the Intermediate Types.
+	* Create the Interfaces in the data mining bundle you want to edit.
+	* The current naming convention for such Interfaces is `Has<Name>Context`. If the Fact/Intermediate Type is close to the domain element, could the name be equal to the name of the domain element. For example the name of the Fact that represents `TrackedLegOfCompetitor` would be `HasTrackedLegOfCompetitorContext`.
+	* Add the methods that provide the contextual information
+		* Such methods are called Dimensions and have to be marked with the [Annotation `@Dimension`](/wiki/data-mining-architecture#Dimensions).
+		* These methods should return values that
+			* are a primitive type or wrapper class
+			* or classes that implement `equals()`, `hashCode()` and `toString()`. Otherwhise the grouping could fail and the result presentation will be unreadable.
+		* Contextual information of the example could be the regatta name, the race name, the year of the race, the leg type/number, the competitor name/nationality and many more.
+		* There are two ways to provide the contextual information:
+			1. **Direct Dimension**
+				* This means, that the annotated method returns the value that is the contextual information.
+				* This is useful, if the method of the domain element needs parameters, because the data mining framework currently doesn't support parameters.
+				* The Interface methods are directly annotated with `@Dimenson`. Short information about this annotation are listed below.
+				* Direct Dimensions of the example are `getYear()` of `HasTrackedRaceContext` and, `getLegType()` and `getLegNumber()` of  `HasTrackedLegContext`.
+			2. **Indirect Dimension**
+				* This means, that the annotated returns a type that again contains annotated methods.
+				* This prevents code duplication, because types and methods that are already annotated can be reused.
+				* The Interface methods are annotated with `@Connector`. Short information about this annotation are listed below.
+				* Indirect Dimensions of the example are `getRegatta()` of `HasRegattaContext` and `getCompetitor` of `HasTrackedLegOfCompetitorContext`.
+					* `getRegatta()` returns a `Regatta` that implements `Named` that has the method `getName()`, which is annotated as Dimension.
+					* `getCompetitor` returns a `Competitor` that implements `Named` and contains multiple annotated methods. For example `getBoat()` that has the method `getSailID()`, which is annotated as Dimension. This results in multiple Dimensions (e.g. the competitor name and sail ID) starting with the method `getCompetitor()`.
+				* An inderict Dimension can be seen as a concatenation of method calls. For example `getCompetitor().getBoat().getSailID()`, where `getCompetitor()` and `getBoat()` are annotated with `@Connector` and `getSailID()` is annotated with `@Dimension`.
+		* Short information about `@Dimension` and `@Connector`. For detailed information see their Javadoc or [Data Mining Annotations](/wiki/data-mining-architecture#Connectors).
+			* **@Dimension**
+				* Has the mandatory member `messageKey` that is used for internationalization, which has to be added to the `stringMessages*.properties` of the data mining bundle.
+				* And an optional member `ordinal` that is used for the natural order of Dimensions.
+			* **@Connector**
+				* Has the optional members `messageKey` and `ordinal`, that work like the corresponding members of `@Dimension`. See [Compound Functions](/wiki/data-mining-architecture#Compound-Functions) for information about how these members are used in indirect Dimensions.
+			* Methods marked with data mining annotations mustn't have parameters except
+				* the first method of an indirect Dimension
+				* direct Dimensions
+			* can have a paremeter list that is exactly `(Locale, ResourceBundleStringMessages)`.
+	* Add the methods that provide the Key Figures (also referred to as Statistic) to the Fact Interface.
+		* This works like providing the Dimensions, except that the annotation **@Statistic** is used. Annotating a method like this results in an Extraction Function.
+			* `@Statistic` has the members `messageKey` and `ordinal`, that work like the members of `@Dimension`. It also has the optional member `resultDecimals` that is used for the result presentation.
+		* Extraction Functions should return values that can be processed by an Aggregator.
+			* The framework provides domain independent aggregators for numeric values (like `int` or `double` and their wrapper classes).
+			* See [Implement domain specific Aggregators](#Implement-domain-specific-Aggregators) for information about how to implement your own Aggregators.
+		* Like Dimension it's possible to define Extraction Functions direct and indirect (again with the `@Connector` annotation).
+		* A direct Extraction Function of the example is `getRankGainsOrLosses()`.
+		* An indirect Extraction Function could be `getDistanceTraveled()`, if the method `getMeters()` would be annotated with `@Statistic`.
+			* This isn't the case, if you have a look at the code of `HasTrackedLegOfCompetitorContext`, because `Distance` is used directly as Key Figure.
+	* After you implemented the Fact and Intermediate Types, should the Interfaces look like in the picture above (with the corresponding annotations). The only missing part is the connection between the Fact and Intermediate Types. This is represented by the associations between the Interfaces in the picture.
+		* The connection is done by annotating the getter for the corresponding Intermediate Type (e.g. `getRegattaContext()` or `getTrackedRaceContext()`) with `@Connector`.
+		* In this case it's important to set `scanForStatistic=false`, to prevent that the Extraction Functions of the overlying type are included to the Extraction Functions of the Fact.
+			* Calculating the distance traveld based on GPS-Fixes doesn't make sense, if the Extraction Function is based on `HasTrackedLegOfCompetitorContext`.
+			* The annotation should look like `@Connector(scanForStatistic=false)`
+		* Connecting the interfaces like this has the effect that the Dimensions of the overlying Intermediate Types can be used, when operating on the Fact
+		* This can be seen as if all Dimensions were declared, but with the benefits of a higher performance due to early filtering and reusability of the Intermediate Types.
+	* It's necessary to register the Types that contain the Dimensions and Extraction Functions to the data mining framework, so that the framework is able to use them for the data mining process.
+		* This is done by adding the Fact and Intermediate Types to the classes returned by `getClassesWithMarkedMethods()` of the `DataMiningBundleService` of the data mining bundle.
+	* The last step is to implement the Classes that implement the Interfaces of the Fact and Intermediate Types.
+		* The current naming convention for such classes is `<Name>WithContext`. For the Interface `HasTrackedLegOfCompetitorContext` is the corresponding class name `TrackedLegOfCompetitorWithContext`.
+
+The implementation of the data mining bundle isn't finished yet. The next topic is about how to implement the Data Retrieval for the new Fact. This is described in the next section.
+
+#### Implement the Retrievers and put them together in a DataRetrieverChainDefinition
 
 ### Implement domain specific Aggregators
 
