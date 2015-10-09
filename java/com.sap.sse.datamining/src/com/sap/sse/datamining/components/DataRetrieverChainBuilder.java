@@ -1,5 +1,9 @@
 package com.sap.sse.datamining.components;
 
+import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.criterias.CompoundFilterCriterion;
+
 
 /**
  * Used to construct a chain of retriever processors step by step. Allows to set the filter and result
@@ -10,6 +14,11 @@ package com.sap.sse.datamining.components;
  * @param <DataSourceType> The type of the data source and the <code>InputType</code> of the first Processor.
  */
 public interface DataRetrieverChainBuilder<DataSourceType> {
+    
+    /**
+     * @return <code>true</code>, if {@link #canStepFurther()} has been called.
+     */
+    public boolean hasBeenInitialized();
     
     /**
      * @return <code>true</code>, if there's a next data retriever in the chain.
@@ -30,18 +39,28 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public Class<?> getCurrentRetrievedDataType();
     
     /**
-     * @return The current retriever level or <code>-1</code> if {@link #stepFurther()} has not yet been called.
+     * @return The current retriever level or <code>null</code> if {@link #stepFurther()} has not yet been called.
      */
-    public int getCurrentRetrieverLevel();
+    public DataRetrieverLevel<?, ?> getCurrentRetrieverLevel();
 
     /**
-     * Sets the filter for the data retriever of the current level.
+     * Sets the filter for the data retriever of the current level (replacing any filter that has been set).
+     * Use {@link CompoundFilterCriterion} for complex criteria.
      * 
      * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
      * @throws IllegalArgumentException if the filters <code>ElementType</code> doesn't match the
      *         {@link #getCurrentRetrievedDataType() current retrieved data type}.
      */
     public DataRetrieverChainBuilder<DataSourceType> setFilter(FilterCriterion<?> filter);
+
+    /**
+     * Sets the settings for the data retriever of the current level (replacing any settings that have been set).
+     * 
+     * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
+     * @throws IllegalArgumentException if the <code>SettingsType</code> isn't applicable for the
+     *         {@link DataRetrieverLevel#getSettingsType() settings of the current retriever level}.
+     */
+    public <SettingsType extends SerializableSettings> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings);
     
     /**
      * Adds a result receiver to the data retriever of the current level.
@@ -53,7 +72,11 @@ public interface DataRetrieverChainBuilder<DataSourceType> {
     public DataRetrieverChainBuilder<DataSourceType> addResultReceiver(Processor<?, ?> resultReceiver);
 
     /**
-     * Builds the configured data retriever chain.
+     * Builds the configured data retriever chain until the
+     * <b>{@link #getCurrentRetrieverLevel() current retriever level}</b> and returns its first processor.
+     * <br><br>
+     * This method can be called multiple times and it's legal to modify the builder, after this method
+     * has been called. Previously created retriever chains won't be affected from this changes.
      * 
      * @throws IllegalStateException if {@link #stepFurther()} has not yet been called.
      * @return The first processor of the built data retriever chain.

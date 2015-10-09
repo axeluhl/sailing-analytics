@@ -1,11 +1,10 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.datamining.shared.dto.DistanceDTO;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasRaceOfCompetitorContext {
     
@@ -15,8 +14,8 @@ public interface HasRaceOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
-    @Statistic(messageKey="DistanceAtStart", resultUnit=Unit.None, resultDecimals=2, ordinal=0)
-    public DistanceDTO getDistanceToStartLineAtStart();
+    @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
+    public Distance getDistanceToStartLineAtStart();
 
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();

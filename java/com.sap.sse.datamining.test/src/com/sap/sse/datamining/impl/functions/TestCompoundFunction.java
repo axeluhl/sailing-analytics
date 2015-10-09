@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.datamining.test.data.impl.ContainerElement;
 import com.sap.sse.datamining.test.data.impl.ContainerElementImpl;
 import com.sap.sse.datamining.test.data.impl.MarkedContainer;
@@ -52,7 +51,6 @@ public class TestCompoundFunction {
                 compoundFunction.getDeclaringType().equals(MarkedContainer.class), is(true));
         assertThat(compoundFunction.getSimpleName(), is("getContainerElement -> getName"));
         assertThat(compoundFunction.getLocalizedName(Locale.ENGLISH, TestsUtil.getTestStringMessages()), is("Name"));
-        assertThat(compoundFunction.getResultUnit(), is(Unit.None));
         assertThat(compoundFunction.getResultDecimals(), is(0));
     }
     

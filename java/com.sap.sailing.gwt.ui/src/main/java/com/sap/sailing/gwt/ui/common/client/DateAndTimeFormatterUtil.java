@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 
@@ -15,6 +16,8 @@ public class DateAndTimeFormatterUtil {
     public static DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
 
+    public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
     public static DateTimeFormatRenderer longDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
     public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(

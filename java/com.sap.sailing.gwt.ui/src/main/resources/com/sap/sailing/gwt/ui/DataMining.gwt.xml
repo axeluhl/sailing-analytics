@@ -19,10 +19,12 @@
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
+	<inherits name="com.sap.sse.datamining.DataMiningAnnotations" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
+	<inherits name="com.sap.sailing.polars.datamining.DataMiningPolars" />
 
 	
 	<!-- Specify the paths for translatable code -->
@@ -33,6 +35,7 @@
 	<set-property name="gwt.logging.enabled" value="FALSE"/>
 
 	<source path="datamining" />
+	<source path="polarmining" />
 		
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>

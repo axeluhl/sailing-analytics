@@ -3,7 +3,6 @@ package com.sap.sse.datamining.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface Function<ReturnType> {
@@ -43,8 +42,6 @@ public interface Function<ReturnType> {
      *         {@link IllegalAccessException} or {@link IllegalArgumentException} was thrown.
      */
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider);
-    
-    public Unit getResultUnit();
     
     public int getResultDecimals();
     

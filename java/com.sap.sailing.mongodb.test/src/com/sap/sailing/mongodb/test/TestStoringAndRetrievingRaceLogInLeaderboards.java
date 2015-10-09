@@ -61,7 +61,7 @@ import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRul
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.impl.MongoUtils;
+import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -344,7 +344,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogFinishPositioningConfirmedEvent.class.getSimpleName());
         
         DBObject raceLogResult = new BasicDBObject();
-        raceLogResult.put(FieldNames.RACE_LOG_IDENTIFIER.name(), MongoUtils.escapeDollarAndDot(raceColumn.getRaceLogIdentifier(defaultFleet).getDeprecatedIdentifier()));       
+        raceLogResult.put(FieldNames.RACE_LOG_IDENTIFIER.name(), TripleSerializer.serialize(raceColumn.getRaceLogIdentifier(defaultFleet).getIdentifier()));       
         raceLogResult.put(FieldNames.RACE_LOG_EVENT.name(), result);
         
         MongoObjectFactoryImpl factoryImpl = (MongoObjectFactoryImpl) mongoObjectFactory;

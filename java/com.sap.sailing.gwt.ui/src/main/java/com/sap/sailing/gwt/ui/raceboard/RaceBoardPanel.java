@@ -226,7 +226,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
-        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
                 stringMessages, competitorSelection, errorReporter, timer);
         editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
         editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());

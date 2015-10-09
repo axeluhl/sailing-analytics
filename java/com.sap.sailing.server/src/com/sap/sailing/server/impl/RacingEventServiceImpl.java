@@ -172,7 +172,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
-import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -2779,38 +2779,46 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
-        CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
-        addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
-        replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-        return courseArea;
+    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
+        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
+        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds));
+        return courseAreas;
     }
 
     @Override
-    public CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName) {
-        final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
+    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames) {
+        final CourseArea[] result = new CourseArea[courseAreaNames.length];
+        for (int i=0; i<courseAreaIds.length; i++) {
+            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i]);
+            final Event event = eventsById.get(eventId);
+            if (event == null) {
+                throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
+            }
+            event.getVenue().addCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
+            result[i] = courseArea;
+        }
+        return result;
+    }
+
+    @Override
+    public CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds) {
         final Event event = eventsById.get(eventId);
         if (event == null) {
             throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
         }
-        event.getVenue().addCourseArea(courseArea);
-        mongoObjectFactory.storeEvent(event);
-        return courseArea;
-    }
-
-    @Override
-    public CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId) {
-        final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
-        if (courseArea == null) {
-            throw new IllegalArgumentException("No course area with ID " + courseAreaId + " found.");
+        final CourseArea[] courseAreasRemoved = new CourseArea[courseAreaIds.length];
+        int i=0;
+        for (final UUID courseAreaId : courseAreaIds) {
+            final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
+            if (courseArea == null) {
+                throw new IllegalArgumentException("No course area with ID " + courseAreaId + " found.");
+            }
+            courseAreasRemoved[i++] = courseArea;
+            event.getVenue().removeCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
         }
-        final Event event = eventsById.get(eventId);
-        if (event == null) {
-            throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
-        }
-        event.getVenue().removeCourseArea(courseArea);
-        mongoObjectFactory.storeEvent(event);
-        return courseArea;
+        return courseAreasRemoved;
     }
 
     @Override

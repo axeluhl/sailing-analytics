@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -532,7 +533,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
-            if (getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint)) {
+            if (getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint)) {
                 final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
                 if (totalPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
@@ -651,7 +652,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
-        return getScoringScheme().isValidInTotalScore(this, raceColumn, timePoint) && 
+        return getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint) && 
                (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
@@ -1096,31 +1097,69 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     
     @Override
     public Iterable<Competitor> getCompetitors() {
-        // TODO bug 1348: try to cache result; invalidation would have to listen for columns added and suppression changing;
-        // for meta-leaderbaords, transitive listening to those events would be necessary.
-        Set<Competitor> result = new HashSet<>();
-        for (Competitor competitor : getAllCompetitors()) {
-            if (!isSuppressed(competitor)) {
-                result.add(competitor);
-            }
+        final Iterable<Competitor> result;
+        // mostly the set of suppressed competitors is empty; in this case, avoid having to loop over the
+        // potentially large set of competitors
+        if (Util.isEmpty(getSuppressedCompetitors())) {
+            result = getAllCompetitors();
+        } else {
+            final Iterable<Competitor> allCompetitors = getAllCompetitors();
+            final Set<Competitor> suppressed = new HashSet<>();
+            Util.addAll(getSuppressedCompetitors(), suppressed);
+            result = getCompetitorIterableSkippingSuppressed(allCompetitors, suppressed);
         }
         return result;
     }
+    
+    @Override
+    public Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        return getCompetitorIterableSkippingSuppressed(getAllCompetitors(raceColumn, fleet), getSuppressedCompetitors());
+    }
 
     /**
-     * Defines the difference between {@link #getCompetitors} and {@link #getAllCompetitors}. If a competitor is suppressed,
-     * it won't participate in the scoring process, particularly because it isn't considered by {@link #getCompetitorsFromBestToWorst(TimePoint)}
-     * nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.
+     * return an iterable with a smart iterator that filters out the suppressed elements on demand
      */
-    private boolean isSuppressed(Competitor competitor) {
-        LockUtil.lockForRead(suppressedCompetitorsLock);
-        try {
-            return suppressedCompetitors.contains(competitor);
-        } finally {
-            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
-        }
+    protected Iterable<Competitor> getCompetitorIterableSkippingSuppressed(final Iterable<Competitor> allCompetitors,
+            final Iterable<Competitor> suppressed) {
+        final Iterable<Competitor> result;
+        result = new Iterable<Competitor>() {
+            @Override
+            public Iterator<Competitor> iterator() {
+                return new Iterator<Competitor>() {
+                    private final Iterator<Competitor> allIter = allCompetitors.iterator();
+                    private Competitor next = advance();
+                    
+                    private Competitor advance() {
+                        next = null;
+                        while (allIter.hasNext() && next == null) {
+                            next = allIter.next();
+                            if (Util.contains(suppressed, next)) {
+                                next = null;
+                            }
+                        }
+                        return next;
+                    }
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return next != null;
+                    }
+
+                    @Override
+                    public Competitor next() {
+                        if (next == null) {
+                            throw new NoSuchElementException();
+                        }
+                        final Competitor result = next;
+                        advance();
+                        return result;
+                    }
+                };
+            }
+        };
+        return result;
     }
-    
+
     @Override
     public Iterable<Competitor> getSuppressedCompetitors() {
         LockUtil.lockForRead(suppressedCompetitorsLock);

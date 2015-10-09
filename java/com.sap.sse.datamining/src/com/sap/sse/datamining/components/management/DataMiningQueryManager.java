@@ -9,6 +9,12 @@ public interface DataMiningQueryManager {
     
     public static final DataMiningQueryManager NULL = new NullDataMiningQueryManager(); 
     
-    public <ResultType> QueryResult<ResultType> runNewAndAbortPrevious(DataMiningSession session, Query<ResultType> query);
+    <ResultType> QueryResult<ResultType> runNewAndAbortPrevious(DataMiningSession session, Query<ResultType> query);
+    
+    void abortRandomQuery();
+    
+    void abortAllQueries();
+
+    int getNumberOfRunningQueries();
 
 }

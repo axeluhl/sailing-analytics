@@ -28,11 +28,11 @@ public class FunctionFactory {
      * @throws ClassCastException
      */
     @SuppressWarnings("unchecked")
-    public <ReturnType> Function<ReturnType> createCompoundFunction(List<Function<?>> functions) throws ClassCastException {
-        return new ConcatenatingCompoundFunction<ReturnType>(functions, (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
+    public <ReturnType> Function<ReturnType> createCompoundFunction(List<? extends Function<?>> functions) throws ClassCastException {
+        return new ConcatenatingCompoundFunction<ReturnType>(new ArrayList<>(functions), (Class<ReturnType>) functions.get(functions.size() - 1).getReturnType());
     }
 
-    public Function<?> createCompoundFunction(List<Function<?>> previousFunctions, Function<?> lastFunction) {
+    public Function<?> createCompoundFunction(List<? extends Function<?>> previousFunctions, Function<?> lastFunction) {
         List<Function<?>> functions = new ArrayList<>(previousFunctions);
         functions.add(lastFunction);
         return createCompoundFunction(functions);

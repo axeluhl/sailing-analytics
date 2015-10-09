@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
 
 /**
  * Comparator sorting by pass, then by {@link AbstractLogEventAuthor}, then by {@link RaceLogEvent#getCreatedAt()}
@@ -43,7 +44,7 @@ public class LogEventComparator implements Comparator<Timed>, Serializable {
         if (result != 0) return result;
         
         //compare logical timepoints
-        result = e1.getLogicalTimePoint().compareTo(e2.getLogicalTimePoint());
+        result = Util.compareToWithNull(e1.getLogicalTimePoint(), e2.getLogicalTimePoint(), /* nullIsLess */ false);
         if (result != 0) return result;
         
         //compare ids
