@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class EventListYearDTO implements IsSerializable {
     private int year;
+    private int eventCount;
     private int countryCount;
     private int sailorCount;
     private int trackedRacesCount;
@@ -29,6 +30,7 @@ public class EventListYearDTO implements IsSerializable {
     }
 
     protected void addEvent(EventListEventDTO event) {
+        eventCount += event.getEventSeries() == null ? 1 : event.getEventSeries().getEventsCount();
         for(int i = 0; i < events.size(); i++) {
             if(events.get(i).getStartDate().compareTo(event.getStartDate()) < 0) {
                 events.add(i, event);
@@ -36,6 +38,10 @@ public class EventListYearDTO implements IsSerializable {
             }
         }
         events.add(event);
+    }
+    
+    public int getEventCount() {
+        return eventCount;
     }
 
     public int getCountryCount() {

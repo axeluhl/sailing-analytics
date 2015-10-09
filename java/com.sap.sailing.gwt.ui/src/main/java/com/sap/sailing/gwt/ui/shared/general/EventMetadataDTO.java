@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.shared.general;
 
 import java.util.Date;
 
+import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
+
 public class EventMetadataDTO extends EventReferenceDTO {
 
     private EventState state;
@@ -41,8 +43,6 @@ public class EventMetadataDTO extends EventReferenceDTO {
         return state;
     }
     
-    
-
     public void setState(EventState state) {
         this.state = state;
     }
@@ -106,5 +106,9 @@ public class EventMetadataDTO extends EventReferenceDTO {
             return location + ", " + venue;
         }
         return venue;
+    }
+    
+    public EventListEventSeriesDTO getEventSeries() {
+        return null;
     }
 }

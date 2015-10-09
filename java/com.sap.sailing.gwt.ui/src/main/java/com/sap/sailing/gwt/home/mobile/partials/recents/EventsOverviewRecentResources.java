@@ -46,6 +46,7 @@ public interface EventsOverviewRecentResources extends ClientBundle {
         String eventsoverviewrecent_event_arrow();
         String eventsoverviewrecent_event_arrow_image();
         String togglecontainerhidden();
+        String seriesInfo();
     }
 
     @Source("com/sap/sailing/gwt/home/images/default_event_photo.jpg")
