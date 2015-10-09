@@ -71,6 +71,7 @@ public class RaceContext {
     private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 60 * 60 * 1000; // 1 hour
     private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     private final TimePoint now = MillisecondsTimePoint.now();
+    private final LeaderboardContext leaderboardContext;
     private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
@@ -87,11 +88,12 @@ public class RaceContext {
     private RaceViewState raceViewState;
     private List<Competitor> competitors;
 
-    public RaceContext(RacingEventService service, Event event, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, RaceLogResolver raceLogResolver) {
+    public RaceContext(RacingEventService service, Event event, LeaderboardContext leaderboardContext, 
+            RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.service = service;
         this.event = event;
-        this.leaderboard = leaderboard;
+        this.leaderboardContext = leaderboardContext;
+        this.leaderboard = leaderboardContext.getLeaderboard();
         this.raceColumn = raceColumn;
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
         this.fleet = fleet;
@@ -628,11 +630,13 @@ public class RaceContext {
     
     public Collection<SimpleCompetitorDTO> getCompetitors() {
         Set<SimpleCompetitorDTO> compotitorDTOs = new HashSet<>();
-        boolean isFleetRacing = Util.size(raceColumn.getFleets()) > 1;
-        for (Competitor competitor : leaderboard.getCompetitors()) {
-            if (!isFleetRacing || isCompetitorInFleet(competitor)) {
-                compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
-            } 
+        if (leaderboardContext.hasMultipleFleets()) {
+            boolean isFleetRacing = Util.size(raceColumn.getFleets()) > 1;
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                if (!isFleetRacing || isCompetitorInFleet(competitor)) {
+                    compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
+                } 
+            }
         }
         return compotitorDTOs;
     }
