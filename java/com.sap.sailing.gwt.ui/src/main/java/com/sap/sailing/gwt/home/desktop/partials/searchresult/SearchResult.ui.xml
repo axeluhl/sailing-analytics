@@ -1,0 +1,75 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.searchresult.SearchResultResources" />
+    <g:HTMLPanel>
+<div class="{local_res.css.searchresult}">
+  <div class="{local_res.css.searchresult_header}">
+    <div class="{res.mediaCss.grid}">
+      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+        <div class="{local_res.css.searchresult_form}">
+          <label for="searchfor" class="{local_res.css.searchresult_form_label} {local_res.css.searchresult_header_formlabel}">
+            <ui:text from='{i18n.searchResultHeaderLabel}'/>
+          </label>
+          <g:TextBox ui:field="searchText1" styleName="{local_res.css.searchresult_form_input} {local_res.css.searchresult_header_input}" />
+          <g:Button ui:field="searchButton1" text="{i18n.searchResultHeaderButton}" styleName="{res.mainCss.button} {local_res.css.searchresult_form_button}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="{local_res.css.searchresult_content}" ui:field="searchAmountUi">
+    <div class="{res.mediaCss.grid} {local_res.css.searchresult_content_amount}">
+      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+        <h5><span ui:field="searchResultCount" />&nbsp;<ui:text from='{i18n.searchResultsFound}'/> '<span ui:field="searchResultFor" />'.
+        </h5>
+      </div>
+      <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
+          <!-- sorting is not supported yet 
+        <div class="{local_res.css.searchresult_content_amount_relevance}">
+          <div class="{local_res.css.searchresult_content_amount_relevance_label}">Sort by:</div>
+          <div class="{local_res.css.dropdown}">
+            <div class="{local_res.css.dropdown_head}">
+              <div class="{local_res.css.dropdown_head_title}">Relevance<a class="{res.mainCss.button} {res.mainCss.buttonarrowdown} {local_res.css.dropdown_head_titlebutton}">&nbsp;</a></div>
+            </div>
+            <div class="{local_res.css.dropdown_content}"><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Neueste</strong></a><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Älteste</strong></a></div>
+          </div>
+        </div>
+           -->
+      </div>
+    </div>
+    <div class="{res.mediaCss.grid}">
+      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+	    <g:HTMLPanel ui:field="searchResultItemPanel">
+		</g:HTMLPanel>
+		<!-- paging seems to be old fashioned -> Ubilabs will provide a better approach
+        <div class="{res.mediaCss.grid} {local_res.css.paging}">
+          <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
+              <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linkprevious}">previous</a>
+              <a href="http://" class="{local_res.css.paging_link}">1</a>
+              <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkactive}">2</a>
+              <a href="http://" class="{local_res.css.paging_link}">3</a>
+              <a href="http://" class="{local_res.css.paging_link}">4</a>
+              <a href="http://" class="{local_res.css.paging_link}">5</a>
+              <a class="{local_res.css.paging_link}">...</a>
+              <a href="http://" class="{local_res.css.paging_link}">XXX</a>
+              <a class="{res.mainCss.button} {local_res.css.paging_link} {local_res.css.paging_linknext}">next</a>
+          </div>
+          <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
+            <div class="{local_res.css.paging_perpage}"><span class="{local_res.css.paging_link_label}">Per page:</span>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage} {local_res.css.paging_linkactive}">10</a>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">20</a>
+                <a href="http://" class="{local_res.css.paging_link} {local_res.css.paging_linkperpage}">30</a>
+            </div>
+          </div>
+        </div>
+        -->
+      </div>
+    </div>
+  </div>
+  <div class="{local_res.css.searchresult_footer}" >
+  </div>
+</div>
+    </g:HTMLPanel>
+</ui:UiBinder>

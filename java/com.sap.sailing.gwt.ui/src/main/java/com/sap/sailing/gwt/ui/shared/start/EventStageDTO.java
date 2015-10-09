@@ -1,30 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.start;
 
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 
-public class EventStageDTO extends EventMetadataDTO {
+public class EventStageDTO extends EventLinkAndMetadataDTO {
 
     private StageEventType stageType;
-    private String baseURL;
-    private boolean isOnRemoteServer;
     private String stageImageURL;
 
-    public String getBaseURL() {
-        return baseURL;
-    }
-
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
-    }
-
-    public boolean isOnRemoteServer() {
-        return isOnRemoteServer;
-    }
-
-    public void setOnRemoteServer(boolean isOnRemoteServer) {
-        this.isOnRemoteServer = isOnRemoteServer;
-    }
-
+    @Override
     public StageEventType getStageType() {
         return stageType;
     }

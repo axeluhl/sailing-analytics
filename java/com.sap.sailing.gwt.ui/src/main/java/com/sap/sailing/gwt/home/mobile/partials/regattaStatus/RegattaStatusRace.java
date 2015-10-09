@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaStatusRace extends Composite {

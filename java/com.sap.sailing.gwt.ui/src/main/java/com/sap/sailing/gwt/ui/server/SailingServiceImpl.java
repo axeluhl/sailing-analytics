@@ -79,16 +79,16 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
@@ -3634,7 +3634,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return raceGroups;
     }
-
     
     /**
      * The name of the regatta to be shown on the regatta overview webpage is retrieved from the name of the {@link Leaderboard}. Since regattas are
@@ -4134,13 +4133,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
             CourseArea courseArea, Leaderboard leaderboard, String boatClassName, String regattaName, String seriesName, RaceColumn raceColumn,
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
-
-        for (Fleet fleet : raceColumn.getFleets()) {
-            RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
-                    leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
-                    showOnlyRacesOfSameDay, dayToCheck);
-            if (entry != null) {
-                addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+        if (!raceColumn.isCarryForward()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
+                        leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
+                        showOnlyRacesOfSameDay, dayToCheck);
+                if (entry != null) {
+                    addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+                }
             }
         }
     }
@@ -5752,7 +5752,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
                 emails, getLocale(localeInfoName));
     }
-    
+
     @Override
     public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
         Event event = getService().getEvent(id);
@@ -5766,7 +5766,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
-
+    
     @Override
     public List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException {
         List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);

@@ -75,6 +75,21 @@ img.sectionheader_item_arrow {
   margin-left: 1em;
   height: 0.8em;
 }
+img.sectionheader_item_arrow.accordion {
+  -webkit-transform: rotate(180deg);
+     -moz-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+          transform: rotate(180deg);
+  webkit-transition: -webkit-transform 0.4s;
+    -moz-transition: -moz-transform 0.4s;
+         transition: transform 0.4s;
+}
+img.sectionheader_item_arrow.accordion.collapsed {
+  -webkit-transform: rotate(0deg);
+     -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
+}
 .sectionheader_item_adjust_title {
   margin-left: 4em;
   margin-right: 2.5em;

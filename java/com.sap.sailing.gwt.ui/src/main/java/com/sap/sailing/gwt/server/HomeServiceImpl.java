@@ -1,13 +1,9 @@
 package com.sap.sailing.gwt.server;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -20,11 +16,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
@@ -78,13 +72,14 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         
         int count = 0;
         for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
+            StageEventType stageType = pair.getA();
+            EventHolder holder = pair.getB();
+
             count++;
-            if(count > MAX_STAGE_EVENTS) {
+            if(count > MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
                 break;
             }
             
-            StageEventType stageType = pair.getA();
-            EventHolder holder = pair.getB();
             result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, getService(), false));
             
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
@@ -262,21 +257,8 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
     
     @Override
     public EventListViewDTO getEventListView() throws MalformedURLException {
-        // TODO fill stats of years
-        final EventListViewDTO result = new EventListViewDTO();
-        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), new EventVisitor() {
-            @Override
-            public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {
-                EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, getService());
-                result.addEvent(eventDTO, getYear(eventDTO.getStartDate()));
-            }
-        });
-        return result;
-    }
-
-    private int getYear(Date date) {
-        Calendar cal = GregorianCalendar.getInstance();
-        cal.setTime(date);
-        return cal.get(Calendar.YEAR);
+        EventListDataCalculator eventListDataCalculator = new EventListDataCalculator(getService());
+        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), eventListDataCalculator);
+        return eventListDataCalculator.getResult();
     }
 }

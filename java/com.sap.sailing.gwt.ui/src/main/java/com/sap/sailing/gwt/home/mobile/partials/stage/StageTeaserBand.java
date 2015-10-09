@@ -9,11 +9,11 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 
 public abstract class StageTeaserBand extends Composite {
 
@@ -29,10 +29,10 @@ public abstract class StageTeaserBand extends Composite {
     @UiField Anchor actionLink;
 
     private final MobilePlacesNavigator placeNavigator;
-    private final EventStageDTO event;
+    private final EventLinkAndMetadataDTO event;
     private final PlaceNavigation<EventDefaultPlace> eventNavigation;
     
-    public StageTeaserBand(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public StageTeaserBand(EventLinkAndMetadataDTO event, MobilePlacesNavigator placeNavigator) {
         this.event = event;
         this.placeNavigator = placeNavigator;
         
@@ -51,7 +51,7 @@ public abstract class StageTeaserBand extends Composite {
         return placeNavigator;
     }
 
-    public EventStageDTO getEvent() {
+    public EventLinkAndMetadataDTO getEvent() {
         return event;
     }
 
