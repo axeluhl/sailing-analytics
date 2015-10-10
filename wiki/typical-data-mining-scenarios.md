@@ -179,7 +179,7 @@ Note that the Fact and Intermediate Types are separated in an Interface and a Cl
 
 The implementation of the data mining bundle isn't finished yet. The next task is to implement the Data Retrieval for the new Fact, which is described in the next section.
 
-#### Implement the Retrievers and put them together in a DataRetrieverChainDefinition
+#### Implement the Retrievers and put them together
 
 At this point you should have implemented a new Fact and several Intermediate Types in form of an Interface and an implementing Class. In the example these types are:
 <table>
@@ -190,10 +190,92 @@ At this point you should have implemented a new Fact and several Intermediate Ty
   <tr><td>`HasTrackedLegOfCompetitorContext`</td><td>`TrackedLegOfCompetitorWithContext`</td></tr>
 </table>
 
-For the implementation of the Data Retrieval it's helpful to keep the path to the Fact in mind. For the example is the path:<br>
+For the implementation of the Data Retrieval it's helpful to keep the path to the Fact in mind. The path of the example is:<br>
 `RacingEventService` &#8594; `Regatta` &#8594; `Series` &#8594; `RaceColumnInSeries` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
 
-The Data Retrieval is divided in several steps (see the [Data Retrieval Diagram](#Implement-the-Fact-and-the-Data-Retrieval)), if Intermediate Types are used. Each step is done by a so called Retriever that takes a single input element and produces multiple output elements. The types of the input and output elements is defined by generic type attributes of the Retriever implementation.
+The Data Retrieval is divided in several steps (see the [Data Retrieval Diagram](#Implement-the-Fact-and-the-Data-Retrieval)), if Intermediate Types are used. Each step is done by a so called Retriever that takes a single input element and produces multiple output elements. The types of the input and output elements is defined by generic type attributes of the Retriever implementation. You have to implement one Retriever per Intermediate Type and Fact. To be more exact, you need one Retrievers that retrieves the first Intermediate Type from the Data Source (in this case the `Racing Event Service`), one Retriever for each transition from an Intermediate Type to the next Intermediate Type and finally one to retrieve the Fact from the last Intermediate Type. The necessary Retrievers for the example are:
+<table>
+  <tr><th>Retriever</th><th>InputType</th><th></th><th>OutputType</th></tr>
+  <tr><td>`RegattaRetrievalProcessor`</td><td>`RacingEventService`</td><td>&#8594;</td><td>`HasRegattaContext`</td></tr>
+  <tr><td>`TrackedRaceRetrievalProcessor`</td><td>`HasRegattaContext`</td><td>&#8594;</td><td>`HasTrackedRaceContext`</td></tr>
+  <tr><td>`TrackedLegRetrievalProcessor`</td><td>`HasTrackedRaceContext`</td><td>&#8594;</td><td>`HasTrackedLegContext`</td></tr>
+  <tr><td>`TrackedLegOfCompetitorRetrievalProcessor`</td><td>`HasTrackedLegContext`</td><td>&#8594;</td><td>`HasTrackedLegOfCompetitorContext`</td></tr>
+</table>
+
+The following points should be considered during the Retriever implementation:
+
+* Retrievers should extend `AbstractRetrievalProcessor`.
+	* This abstract class encapsulates the management that has to be done during the Data Retrieval.
+	* It has the abstract method `Iterable<OutputType> retrieveData(InputType element)` in which the concrete algorithm to retrieve the output elements from the input element has to be implemented.
+	* Every Retriever must have a constructor with one of the following parameter lists:
+		* `(ExecutorService, Collection<Processor<OutputType, ?>>, int)`
+		* `(ExecutorService, Collection<Processor<OutputType, ?>>, <? extends SerializableSettings>, int)`
+		* Otherwhise the framework will throw an `IllegalArgumentException` when an instance of the Retriever is constructed.
+	* For general information about Processors see [Data Mining Architecture](/wiki/data-mining-architecture#Processors).
+
+The next step is put the Retrievers together in a `DataRetrieverChainDefinition`. Such a definition is used by the framework to create the Data Retrieval part of the [Data Mining Process](#Implementing-the-Data-Mining-Components). It tells the framework which components are used to retrieve the data and in which order. The following points have to be considered to create a new `DataRetrieverChainDefinition`:
+
+* There are two different ways to create a new `DataRetrieverChainDefinition`:
+	* The first creates a completely new one. This is the way to go, if you're creating the first chain for a new data mining bundle or if you added a new Fact that is independent from the other Facts in the data mining bundle (the new Fact doesn't share any Intermediate Types with other Facts). This is described in this section.
+	* The other way reuses existing `DataRetrieverChainDefinitions`. This should be used, when you added a Fact that shares Intermediate Types with other Facts of the data mining bundle. This is described [here](#Create-a-new-DataRetrieverChainDefinition-with-existing-ones).
+* Concrete instances of a `DataRetrieverChainDefintion` are created with `SimpleDataRetrieverChainDefinition`. This class has two generic type attributes for the type of the Data Source and the type of the retrieved Facts.
+	* Its constructor has three parameters. Two for the classes of the generic type attributes and a message key, that is used for internationalization. The values of the message key in the `stringMessages*.properties` are shown in the Ui, so they should be user friendly.
+* The methods `startWith`, `addAfter` and `endWith` are used to define the order of the used Retrievers.
+	* Every method has a message key as parameter that has to meet the same conditions as the message key of the chain.
+* The call order of these methods has to match the pattern `startWith addAfter* endWith` or an exception will be thrown.
+	* Note that every Retriever needs a constructor that has a parameter list like the ones described above or an `IllegalArgumentException` will be thrown.
+* **Don't forget** to to register the new `DataRetrieverChainDefinition` to the data mining framework. This is done by adding the new one to the ones returned by `getDataRetrieverChainDefinitions()` of the `DataMiningBundleService` of the data mining bundle.
+* An example for a `DataRetrieverChainDefinition` creation can be found in `SailingDataRetrievalChainDefinitions` in the package `com.sap.sailing.datamining`.
+* For detailed information about `DataRetrieverChainDefinition` see its Javadoc or [Data Mining Architecture](/wiki/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain).
+
+The last step is to implement a `DataSourceProvider`. In most cases you'll be able to reuse existing `DataSourceProviders` (for example the `RacingEventServiceProvider` located in `com.sap.sailing.datamining`), but if you have to implement a new one this is how it's done:
+
+* Create an new class that extends `AbstractDataSourceProvider` and implement its abstract methods.
+* Add the new `DataSourceProvider` to the ones returned by `getDataSourceProviders()` of the `DataMiningBundleService` of the data mining bundle.
+
+##### Create a new DataRetrieverChainDefinition with existing ones
+
+It's possible to a whole or a part of an existing `DataRetrieverChainDefinition` to create a new one. This is useful, if you want to add a new Fact that shares Intermediate Types with other Facts of the data mining bundle. For example, if the following Fact and Intermediate Types exist and you want to create a `DataRetrieverChainDefinition` for the new ones:
+<table>
+	<tr><th></th><th>Existing</th><th>New</th></tr>
+	<tr><td>**DataSource**</td><td>`RacingEventService`</td><td>`RacingEventService`</td></tr>
+	<tr><td>**Intermediate Types**</td>
+		<td>`HasRegattaContext`<br>
+			`HasTrackedRaceContext`<br>
+			`HasTrackedLegContext`<br>
+		</td>
+		<td>`HasRegattaContext`<br>
+			`HasTrackedRaceContext`<br>
+		</td>
+	</tr>
+	<tr><td>**Fact**</td><td>`HasTrackedLegOfCompetitorContext`</td><td>`HasMarkPassingContext`</td></tr>
+</table>
+
+* The first step is to split the existing `DataRetrieverChainDefinition` after the last Intermediate Type it has in common with the new chain. In this case it's the Retriever that retrieves `HasTrackedRaceContext`.
+* To split a `DataRetrieverChainDefinition`, create a new one after the split point with the usage of the existing one. Then move the `addAfter` and `endWith` calls to the new retriever chain.
+	* To create a new `DataRetrieverChainDefinition` use the constructor of `SimpleDataRetrieverChainDefinition` that takes a `DataRetrieverChainDefinition` as parameter.
+	* This constructor creates a `DataRetrieverChainDefinition` with the components of the given one **and initializes the new chain**. This means that it's not allowed to call `startWith` with `DataRetrieverChainDefinitions` created like this. 
+* The following is an example in pseudocode. See `SailingDataRetrievalChainDefinitions` in the package `com.sap.sailing.datamining` for the real code:<br>
+	**Before:**<br>
+	<pre>
+RetrieverChain trackedLegOfCompetitorRetrieverChain = new RetrieverChain(RacingEventService.class, HasTrackedLegOfCompetitorContext.class);
+trackedLegRetrieverChain.startWith(RegattaRetrievalProcessor.class);
+trackedLegRetrieverChain.addAfter(TrackedRaceRetrievalProcessor.class);
+trackedLegRetrieverChain.addAfter(TrackedLegRetrievalProcessor.class);
+trackedLegRetrieverChain.endWith(TrackedLegOfCompetitorRetrievalProcessor.class);
+	</pre>
+	**After:**
+	<pre>
+RetrieverChain trackedRaceRetrieverChain = new RetrieverChain(RacingEventService.class, HasTrackedRaceContext.class);
+trackedLegRetrieverChain.startWith(RegattaRetrievalProcessor.class);
+trackedLegRetrieverChain.endWith(TrackedRaceRetrievalProcessor.class);<br>
+RetrieverChain trackedLegOfCompetitorRetrieverChain = new RetrieverChain(trackedRaceRetrieverChain, HasTrackedLegOfCompetitorContext.class);
+// Don't call startWith after the creation with an existing chain or an exception will be thrown
+trackedLegRetrieverChain.addAfter(TrackedLegRetrievalProcessor.class);
+trackedLegRetrieverChain.endWith(TrackedLegOfCompetitorRetrievalProcessor.class);
+	</pre>
+* The first part of the split `DataRetrieverChainDefinition` can now be used to create the one for the new Fact. This works accordingly to the creation of `trackedLegOfCompetitorRetrieverChain`.
+* Ensure, that all necessary retriever chains are returned by the method `getDataRetrieverChainDefinitions()` of the `DataMiningBundleService`. This would be `trackedLegOfCompetitorRetrieverChain` and the new one for the example.
 
 ### Implement domain specific Aggregators
 

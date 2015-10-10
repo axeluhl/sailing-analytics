@@ -107,7 +107,7 @@ There are useful implementations of the abstract processors, that are more speci
 
 #### Retrieval Processor
 
-Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
+Retrieval processors are used to get many result elements (as `OutputType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, OutputType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
 
 #### Filtering Processor
 
