@@ -177,9 +177,23 @@ Note that the Fact and Intermediate Types are separated in an Interface and a Cl
 	* The last step is to implement the Classes that implement the Interfaces of the Fact and Intermediate Types.
 		* The current naming convention for such classes is `<Name>WithContext`. For the Interface `HasTrackedLegOfCompetitorContext` is the corresponding class name `TrackedLegOfCompetitorWithContext`.
 
-The implementation of the data mining bundle isn't finished yet. The next topic is about how to implement the Data Retrieval for the new Fact. This is described in the next section.
+The implementation of the data mining bundle isn't finished yet. The next task is to implement the Data Retrieval for the new Fact, which is described in the next section.
 
 #### Implement the Retrievers and put them together in a DataRetrieverChainDefinition
+
+At this point you should have implemented a new Fact and several Intermediate Types in form of an Interface and an implementing Class. In the example these types are:
+<table>
+  <tr><th>Interface</th><th>Class</th></tr>
+  <tr><td>`HasRegattaContext`</td><td>`RegattaWithContext`</td>
+  <tr><td>`HasTrackedRaceContext`</td><td>`TrackedRaceWithContext`</td>
+  <tr><td>`HasTrackedLegContext`</td><td>`TrackedLegWithContext`</td>
+  <tr><td>`HasTrackedLegOfCompetitorContext`</td><td>`TrackedLegOfCompetitorWithContext`</td></tr>
+</table>
+
+For the implementation of the Data Retrieval it's helpful to keep the path to the Fact in mind. For the example is the path:<br>
+`RacingEventService` &#8594; `Regatta` &#8594; `Series` &#8594; `RaceColumnInSeries` &#8594; `TrackedRace` &#8594; `TrackedLeg` &#8594; `TrackedLegOfCompetitor`
+
+The Data Retrieval is divided in several steps (see the [Data Retrieval Diagram](#Implement-the-Fact-and-the-Data-Retrieval)), if Intermediate Types are used. Each step is done by a so called Retriever that takes a single input element and produces multiple output elements. The types of the input and output elements is defined by generic type attributes of the Retriever implementation.
 
 ### Implement domain specific Aggregators
 
