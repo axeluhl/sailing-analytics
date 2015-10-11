@@ -184,9 +184,9 @@ The implementation of the data mining bundle isn't finished yet. The next task i
 At this point you should have implemented a new Fact and several Intermediate Types in form of an Interface and an implementing Class. In the example these types are:
 <table>
   <tr><th>Interface</th><th>Class</th></tr>
-  <tr><td>`HasRegattaContext`</td><td>`RegattaWithContext`</td>
-  <tr><td>`HasTrackedRaceContext`</td><td>`TrackedRaceWithContext`</td>
-  <tr><td>`HasTrackedLegContext`</td><td>`TrackedLegWithContext`</td>
+  <tr><td>`HasRegattaContext`</td><td>`RegattaWithContext`</td></tr>
+  <tr><td>`HasTrackedRaceContext`</td><td>`TrackedRaceWithContext`</td></tr>
+  <tr><td>`HasTrackedLegContext`</td><td>`TrackedLegWithContext`</td></tr>
   <tr><td>`HasTrackedLegOfCompetitorContext`</td><td>`TrackedLegOfCompetitorWithContext`</td></tr>
 </table>
 
