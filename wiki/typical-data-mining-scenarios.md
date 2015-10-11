@@ -219,7 +219,7 @@ The next step is put the Retrievers together in a `DataRetrieverChainDefinition`
 	* The first creates a completely new one. This is the way to go, if you're creating the first chain for a new data mining bundle or if you added a new Fact that is independent from the other Facts in the data mining bundle (the new Fact doesn't share any Intermediate Types with other Facts). This is described in this section.
 	* The other way reuses existing `DataRetrieverChainDefinitions`. This should be used, when you added a Fact that shares Intermediate Types with other Facts of the data mining bundle. This is described [here](#Create-a-new-DataRetrieverChainDefinition-with-existing-ones).
 * Concrete instances of a `DataRetrieverChainDefintion` are created with `SimpleDataRetrieverChainDefinition`. This class has two generic type attributes for the type of the Data Source and the type of the retrieved Facts.
-	* Its constructor has three parameters. Two for the classes of the generic type attributes and a message key, that is used for internationalization. The values of the message key in the `stringMessages*.properties` are shown in the Ui, so they should be user friendly.
+	* Its constructor has three parameters. Two for the classes of the generic type attributes and a message key that is used for internationalization. The values of the message key in the `stringMessages*.properties` are shown in the Ui, so they should be user friendly.
 * The methods `startWith`, `addAfter` and `endWith` are used to define the order of the used Retrievers.
 	* Every method has a message key as parameter that has to meet the same conditions as the message key of the chain.
 * The call order of these methods has to match the pattern `startWith addAfter* endWith` or an exception will be thrown.
@@ -279,14 +279,32 @@ trackedLegRetrieverChain.endWith(TrackedLegOfCompetitorRetrievalProcessor.class)
 
 ### Implement domain specific Aggregators
 
-It may be necessary, that your data mining bundle needs domain specific [Aggregators](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
+It may be necessary, that your data mining bundle needs domain specific [Aggregators](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent Aggregators (for example the Aggregators for numerical values located in `com.sap.sse.datamining.impl.components.aggregators`). Examples for domain specific aggregators can be found in the package `com.sap.sailing.datamining.impl.components.aggregators`.
 
-* Implement your own aggregator according to the advice in [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
-* Provide a `AggregationProcessorDefinition` for the new aggregator in the corresponding method of the `DataMiningBundleService` of your data mining bundle.
-	* The current convention is, that every concrete aggregator provides its definition with a static method.
-	* Note that the aggregator needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown upon the construction of the `AggregationProcessorDefinition`.
+There are several base classes for Aggregators that should be used for different purposes:
 
-For example see the `Activator` of the `com.sap.sailing.datamining` bundle and its aggregators in the package `com.sap.sailing.datamining.impl.components.aggregators`.
+* Every base class has two generic type attributes. The `ExtractedType` for the type of the extracted values (return type of the Extraction Function) and the `AggregatedType` for the resulting aggregation.
+	* The `InputType` of an Aggregator is `GroupedDataEntry<ExtractedType>`.
+	* The `ResultType` of an Aggregator is `Map<GroupKey, AggregatedType>`.
+* The base classes handles the concurrency, so that the concrete Aggregators can be implemented as if its methods are called sequential.
+* If the aggregation can be calculated incrementally with each new input element use `AbstractParallelGroupedDataAggregationProcessor`. For example to calculate the sum.
+	* The abstract method `void handleElement(InputType element)` has to perform the incremental calculation.
+	* The abstract method `ResultType getResult()` has to return the aggregation.
+* If the data has to be stored before the aggregation can be calculated, use `AbstractParallelGroupedDataStoringAggregationProcessor`. For example to calculate the median.
+	* The abstract method `void storeElement(InputType element)` has to store the element in an internal collection. This collection has to be a member of the concrete Aggregator.
+	* The abstract method `ResultType getResult()` has to calculate and return the aggregation.
+* If the aggregation is of the kind, that a single value is picked from the collection of input elements use `AbstractParallelSingleGroupedValueAggregationProcessor`. For example to calculate the minimum or maximum.
+	* This base class is special, because it has only the generic type attribute `ValueType`. This means that the `ExtractedType` is equal to the `AggregatedType`.
+	* The abstract method `ValueType compareValuesAndReturnNewResult(ValueType currentResult, ValueType newValue)` has to compare the current result with the new value and return the new result.
+* For detailed information about Aggregators see [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
+
+The next step is to define a `AggregationProcessorDefinition` for the new Aggregator.
+
+* This definition is used by the framework to create concrete Aggregator instances for the [Data Mining Process](#Implementing-the-Data-Mining-Components).
+* Such definitions are defined with `SimpleAggregationProcessorDefinition`. Its constructor takes several classes and a message key that is used for internationalization. The values of the message key in the `stringMessages*.properties` are shown in the Ui, so they should be user friendly.
+* The current convention is, that every concrete Aggregator provides its definition with a static method.
+* Note that the Aggregator needs a constructor with the signature `(ExecutorService, Collection<Processor<ResultType, ?>>)` or an exception will be thrown upon the construction of the `AggregationProcessorDefinition`.
+* Register the new `AggregationProcessorDefinition` to the framework by adding it to the definitions returned by the method `getAggregationProcessorDefinitions()` of the `DataMiningBundleService` of the data mining bundle.
 
 ## Include a Type forcefully in the GWT Serialization Policy
 
