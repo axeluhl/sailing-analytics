@@ -279,7 +279,7 @@ trackedLegRetrieverChain.endWith(TrackedLegOfCompetitorRetrievalProcessor.class)
 
 ### Implement domain specific Aggregators
 
-It may be necessary, that your data mining bundle needs domain specific [aggregator](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
+It may be necessary, that your data mining bundle needs domain specific [Aggregators](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent aggregators (located in `com.sap.sse.datamining.impl.components.aggregators`). To do this perform the following steps:
 
 * Implement your own aggregator according to the advice in [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
 * Provide a `AggregationProcessorDefinition` for the new aggregator in the corresponding method of the `DataMiningBundleService` of your data mining bundle.
@@ -290,15 +290,15 @@ For example see the `Activator` of the `com.sap.sailing.datamining` bundle and i
 
 ## Include a Type forcefully in the GWT Serialization Policy
 
-It can happen, that a necessary type isn't included in the GWT Serialization Policy, because of the generality of the framework. To enforce the include of a type, the GWT-Service has to use the type in one of its methods. To do this, follow these steps:
+It's possible that a necessary type isn't included in the GWT Serialization Policy, because of the generality of the framework. To include a type forcefully, the GWT-Service has to use this type in one of its methods. To achieve this, follow these steps:
 
 * Create a dummy class in a shared bundle, if such a dummy class doesn't exist already in the scope of the type.
 	* For example like `SSEDataMiningSerializationDummy`.
 	* The class has to implement the interface `SerializationDummy` and should only have a private standard constructor, to prevent an accidental instantiation.
-	* Implementing this interface adds the dummy automatically to the serialization policy, without changing the `DataMiningService`.
+	* Implementing this interface adds the dummy automatically to the serialization policy, without the need to change the `DataMiningService`.
 * Add a private non-final instance variable of the type to the dummy.
 
-The type will be included in the GWT Serialization Policy, because the `DataMiningService` has a method, that uses the interface `SerializationDummy`, that uses the type.
+The type will be included in the GWT Serialization Policy, because the `DataMiningService` has a method, that uses the interface `SerializationDummy`.
 
 If you can't implement `SerializationDummy` for any reasons do the following:
 
