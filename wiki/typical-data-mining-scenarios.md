@@ -184,10 +184,10 @@ The implementation of the data mining bundle isn't finished yet. The next task i
 At this point you should have implemented a new Fact and several Intermediate Types in form of an Interface and an implementing Class. In the example these types are:
 <table>
   <tr><th>Interface</th><th>Class</th></tr>
-  <tr><td>`HasRegattaContext`</td><td>`RegattaWithContext`</td></tr>
-  <tr><td>`HasTrackedRaceContext`</td><td>`TrackedRaceWithContext`</td></tr>
-  <tr><td>`HasTrackedLegContext`</td><td>`TrackedLegWithContext`</td></tr>
-  <tr><td>`HasTrackedLegOfCompetitorContext`</td><td>`TrackedLegOfCompetitorWithContext`</td></tr>
+  <tr><td><code>HasRegattaContext</code></td><td><code>RegattaWithContext</code></td></tr>
+  <tr><td><code>HasTrackedRaceContext</code></td><td><code>TrackedRaceWithContext</code></td></tr>
+  <tr><td><code>HasTrackedLegContext</code></td><td><code>TrackedLegWithContext</code></td></tr>
+  <tr><td><code>HasTrackedLegOfCompetitorContext</code></td><td><code>TrackedLegOfCompetitorWithContext</code></td></tr>
 </table>
 
 For the implementation of the Data Retrieval it's helpful to keep the path to the Fact in mind. The path of the example is:<br>
@@ -196,10 +196,10 @@ For the implementation of the Data Retrieval it's helpful to keep the path to th
 The Data Retrieval is divided in several steps (see the [Data Retrieval Diagram](#Implement-the-Fact-and-the-Data-Retrieval)), if Intermediate Types are used. Each step is done by a so called Retriever that takes a single input element and produces multiple output elements. The types of the input and output elements is defined by generic type attributes of the Retriever implementation. You have to implement one Retriever per Intermediate Type and Fact. To be more exact, you need one Retrievers that retrieves the first Intermediate Type from the Data Source (in this case the `Racing Event Service`), one Retriever for each transition from an Intermediate Type to the next Intermediate Type and finally one to retrieve the Fact from the last Intermediate Type. The necessary Retrievers for the example are:
 <table>
   <tr><th>Retriever</th><th>InputType</th><th></th><th>OutputType</th></tr>
-  <tr><td>`RegattaRetrievalProcessor`</td><td>`RacingEventService`</td><td>&#8594;</td><td>`HasRegattaContext`</td></tr>
-  <tr><td>`TrackedRaceRetrievalProcessor`</td><td>`HasRegattaContext`</td><td>&#8594;</td><td>`HasTrackedRaceContext`</td></tr>
-  <tr><td>`TrackedLegRetrievalProcessor`</td><td>`HasTrackedRaceContext`</td><td>&#8594;</td><td>`HasTrackedLegContext`</td></tr>
-  <tr><td>`TrackedLegOfCompetitorRetrievalProcessor`</td><td>`HasTrackedLegContext`</td><td>&#8594;</td><td>`HasTrackedLegOfCompetitorContext`</td></tr>
+  <tr><td><code>RegattaRetrievalProcessor</code></td><td><code>RacingEventService</code></td><td>&#8594;</td><td><code>HasRegattaContext</code></td></tr>
+  <tr><td><code>TrackedRaceRetrievalProcessor</code></td><td><code>HasRegattaContext</code></td><td>&#8594;</td><td><code>HasTrackedRaceContext</code></td></tr>
+  <tr><td><code>TrackedLegRetrievalProcessor</code></td><td><code>HasTrackedRaceContext</code></td><td>&#8594;</td><td><code>HasTrackedLegContext</code></td></tr>
+  <tr><td><code>TrackedLegOfCompetitorRetrievalProcessor</code></td><td><code>HasTrackedLegContext</code></td><td>&#8594;</td><td><code>HasTrackedLegOfCompetitorContext</code></td></tr>
 </table>
 
 The following points should be considered during the Retriever implementation:
@@ -238,17 +238,17 @@ The last step is to implement a `DataSourceProvider`. In most cases you'll be ab
 It's possible to a whole or a part of an existing `DataRetrieverChainDefinition` to create a new one. This is useful, if you want to add a new Fact that shares Intermediate Types with other Facts of the data mining bundle. For example, if the following Fact and Intermediate Types exist and you want to create a `DataRetrieverChainDefinition` for the new ones:
 <table>
 	<tr><th></th><th>Existing</th><th>New</th></tr>
-	<tr><td>**DataSource**</td><td>`RacingEventService`</td><td>`RacingEventService`</td></tr>
-	<tr><td>**Intermediate Types**</td>
-		<td>`HasRegattaContext`<br>
-			`HasTrackedRaceContext`<br>
-			`HasTrackedLegContext`<br>
+	<tr><td><b>DataSource</b></td><td><code>RacingEventService</code></td><td><code>RacingEventService</code></td></tr>
+	<tr><td><b>Intermediate Types</b></td>
+		<td><code>HasRegattaContext</code><br>
+			<code>HasTrackedRaceContext</code><br>
+			<code>HasTrackedLegContext</code><br>
 		</td>
-		<td>`HasRegattaContext`<br>
-			`HasTrackedRaceContext`<br>
+		<td><code>HasRegattaContext</code><br>
+			<code>HasTrackedRaceContext</code><br>
 		</td>
 	</tr>
-	<tr><td>**Fact**</td><td>`HasTrackedLegOfCompetitorContext`</td><td>`HasMarkPassingContext`</td></tr>
+	<tr><td><b>Fact</b></td><td><code>HasTrackedLegOfCompetitorContext</code></td><td><code>HasMarkPassingContext</code></td></tr>
 </table>
 
 * The first step is to split the existing `DataRetrieverChainDefinition` after the last Intermediate Type it has in common with the new chain. In this case it's the Retriever that retrieves `HasTrackedRaceContext`.
