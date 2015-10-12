@@ -48,8 +48,8 @@ public class TestFunctionDTOConstruction {
 
     public FunctionDTO createExpectedDimensionDTO() {
         String functionName = dimensionMethod.getName();
-        String sourceTypeName = dimensionMethod.getDeclaringClass().getSimpleName();
-        String returnTypeName = dimensionMethod.getReturnType().getSimpleName();
+        String sourceTypeName = dimensionMethod.getDeclaringClass().getName();
+        String returnTypeName = dimensionMethod.getReturnType().getName();
         List<String> parameterTypeNames = new ArrayList<>();
 
         String displayName = functionName;
@@ -70,8 +70,8 @@ public class TestFunctionDTOConstruction {
 
     private FunctionDTO createExpectedNullarySideEffectFreeValueDTO() {
         String functionName = sideEffectFreeValueMethod.getName();
-        String sourceTypeName = sideEffectFreeValueMethod.getDeclaringClass().getSimpleName();
-        String returnTypeName = sideEffectFreeValueMethod.getReturnType().getSimpleName();
+        String sourceTypeName = sideEffectFreeValueMethod.getDeclaringClass().getName();
+        String returnTypeName = sideEffectFreeValueMethod.getReturnType().getName();
         List<String> parameterTypeNames = new ArrayList<>();
 
         String displayName = functionName;
@@ -92,8 +92,8 @@ public class TestFunctionDTOConstruction {
 
     private FunctionDTO createExpectedExternalLibraryFunctionDTO() {
         String functionName = externalLibraryMethod.getName();
-        String sourceTypeName = externalLibraryMethod.getDeclaringClass().getSimpleName();
-        String returnTypeName = externalLibraryMethod.getReturnType().getSimpleName();
+        String sourceTypeName = externalLibraryMethod.getDeclaringClass().getName();
+        String returnTypeName = externalLibraryMethod.getReturnType().getName();
         List<String> parameterTypeNames = new ArrayList<>();
 
         String displayName = functionName;
@@ -114,10 +114,10 @@ public class TestFunctionDTOConstruction {
 
     private FunctionDTO createFunctionDTOWithParameters() {
         String functionName = incrementMethod.getName();
-        String sourceTypeName = incrementMethod.getDeclaringClass().getSimpleName();
-        String returnTypeName = incrementMethod.getReturnType().getSimpleName();
+        String sourceTypeName = incrementMethod.getDeclaringClass().getName();
+        String returnTypeName = incrementMethod.getReturnType().getName();
         List<String> parameterTypeNames = new ArrayList<>();
-        parameterTypeNames.add(int.class.getSimpleName());
+        parameterTypeNames.add(int.class.getName());
 
         String displayName = functionName;
         boolean isDimension = false;
