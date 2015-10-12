@@ -5,5 +5,7 @@ import com.sap.sse.common.filter.Filter;
 public interface FilterValueChangeHandler<T> {
     
     void onFilterValueChanged(Filter<T> filter);
+    
+    boolean hasFilterableValues();
 
 }

@@ -122,4 +122,14 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         this.cellTable.redraw();
     }
     
+    @Override
+    public boolean hasFilterableValues() {
+        for (T entry : cellTable.getDataProvider().getList()) {
+            if (!entry.getCompetitors().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
 }

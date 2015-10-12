@@ -64,6 +64,20 @@ public abstract class RegattaCompetitionPresenter implements
         }
     }
     
+    @Override
+    public boolean hasFilterableValues() {
+        for (Map<RegattaCompetitionFleetView, Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO>> series : structure.values()) {
+            for (Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO> fleet : series.values()) {
+                for (SimpleRaceMetadataDTO raceMetadata : fleet.values()) {
+                    if (!raceMetadata.getCompetitors().isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
     private void applyFilter(RegattaCompetitionSeriesView seriesView, Filter<SimpleRaceMetadataDTO> filter) {
         int unfilteredFleetCount = 0;
         Map<RegattaCompetitionFleetView, Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO>> fleetMap = structure.get(seriesView);
