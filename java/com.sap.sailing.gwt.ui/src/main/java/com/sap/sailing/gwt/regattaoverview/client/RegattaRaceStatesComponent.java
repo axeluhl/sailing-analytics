@@ -113,7 +113,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> boatClass;
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
     private SimplePanel tableHolder = new SimplePanel();
-    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 60 /* hour */;
+    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 1 /* hour */;
     private final long HIDE_COL_TIME_THRESHOLD = _1_HOUR;
     private TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn;
     private TextColumn<RegattaOverviewEntryDTO> endOfProtestTime;
@@ -631,8 +631,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 } else if (lastUpdateInSeconds < _1_HOUR) {
                     sb.append(lastUpdateInSeconds / 60).append("m");
                 } else {
-                    long hours = lastUpdateInSeconds / 3600;
-                    long minutes = (lastUpdateInSeconds - (hours * 3600)) / 60;
+                    long hours = lastUpdateInSeconds / _1_HOUR;
+                    long minutes = (lastUpdateInSeconds - (hours * _1_HOUR)) / 60;
                     if (hours > HIDE_COL_TIME_THRESHOLD) {
                         return "";
                     }
