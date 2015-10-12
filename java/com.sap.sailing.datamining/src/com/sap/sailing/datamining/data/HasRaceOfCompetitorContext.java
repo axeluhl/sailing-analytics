@@ -20,8 +20,8 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();
     
-    @Connector(messageKey="SpeedAtStart", ordinal=2)
-    public Speed getSpeedAtStart();
+    @Connector(messageKey="SpeedWhenStarting", ordinal=2)
+    public Speed getSpeedWhenStarting();
     
     @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
     public Speed getSpeedTenSecondsBeforeStart();

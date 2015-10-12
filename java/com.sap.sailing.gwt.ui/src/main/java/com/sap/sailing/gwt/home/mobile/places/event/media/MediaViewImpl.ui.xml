@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:style>
+		.pageTitle {
+			font-size: 1.066666666666667em;
+			font-weight: 700;
+			margin: 0.666666666666667em 0;
+		}
+		.infoLabel {
+			padding: 1em;
+			font-weight: bold;
+			font-style: italic;
+		}
+	</ui:style>	
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.columns}">
+			<div class="{res.mediaCss.small12} {style.pageTitle}"><ui:text from="{i18n.impressions}" /></div>
+		</div>
+		<g:Label addStyleNames="{style.infoLabel}" ui:field="noContentInfoUi">
+			<ui:text from="{i18n.mediaNoContent}" />
+		</g:Label>
+		<mp:videogallery.VideoGallery visible="false" ui:field="videoGalleryUi" />
+		<mp:imagegallery.ImageGallery visible="false" ui:field="imageGalleryUi" />
+	</g:HTMLPanel>	
+</ui:UiBinder> 

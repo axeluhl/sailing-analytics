@@ -1333,7 +1333,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String eventQuickfinder();
+    String regattaQuickfinder();
     String resultsQuickfinder();
+    String racesQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1369,6 +1372,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
     String racesOverview();
+    String listFormatLabel();
+    String competitionFormatLabel();
     String empty();
     String runAQuery();
     String latestRegattaStandings();
@@ -1379,6 +1384,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String progress();
+    String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);
+    String raceOffice();
     String analyze();
     String dataMiningSettings();
     String multiResultsPresenter();
@@ -1387,6 +1397,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String dataMiningRetrieval();
+    String actionWatch();
+    String actionAnalyze();
     String inviteSelectedCompetitors();
     String denoteAllRacesForRaceLogTrackingShorctut();
     String registerCompetitors();
@@ -1395,4 +1407,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String copyCourse();
     String copyCompetitors();
     String smartphoneTracking();
+    String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String viewQueryDefinition();
+    String queryDefinitionViewer();
 }
