@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -29,6 +27,8 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -48,6 +48,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected StringListInlineEditorComposite tagsListEditor;
     protected Image image;
     protected SimplePanel imageHolder;
+    private final BusyIndicator busyIndicator;
 
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
@@ -103,15 +104,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         getDialogBox().getWidget().setWidth("730px");
 
         imageHolder = new SimplePanel();
+        busyIndicator = new SimpleBusyIndicator();
 
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
+                ImageDialog.this.imageHolder.setWidget(busyIndicator);
+                busyIndicator.setBusy(true);
                 String imageUrlAsString = event.getValue();
                 ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString, new AsyncCallback<Util.Pair<Integer,Integer>>() {
                     @Override
                     public void onSuccess(Pair<Integer, Integer> imageSize) {
+                        busyIndicator.setBusy(false);
                         if(imageSize != null) {
                             widthInPxBox.setValue(imageSize.getA());
                             heightInPxBox.setValue(imageSize.getB());
@@ -121,6 +126,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                     
                     @Override
                     public void onFailure(Throwable caught) {
+                        busyIndicator.setBusy(false);
                     }
                 });
                 
