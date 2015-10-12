@@ -155,7 +155,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/updateIndicator"
-        android:src="@drawable/updatelabel"
+        android:src="@drawable/updated"
         android:visibility="gone"
         tools:visibility="visible"/>
 
