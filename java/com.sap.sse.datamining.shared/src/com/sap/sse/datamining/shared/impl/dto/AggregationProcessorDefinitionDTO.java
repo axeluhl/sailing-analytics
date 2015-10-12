@@ -35,6 +35,11 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
     public String getDisplayName() {
         return displayName;
     }
+    
+    @Override
+    public String toString() {
+        return getExtractedTypeName() + " -> " + getAggregatedTypeName() + "[messageKey: " + messageKey + "]";
+    }
 
     @Override
     public int compareTo(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO) {

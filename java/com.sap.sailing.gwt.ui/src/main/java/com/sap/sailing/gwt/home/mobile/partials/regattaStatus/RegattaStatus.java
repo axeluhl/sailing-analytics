@@ -8,12 +8,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
-import com.sap.sailing.gwt.home.mobile.places.event.EventView.Presenter;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RegattasAndLiveRacesDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
@@ -30,6 +31,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     @UiField MobileSection collapsableContainerUi;
     @UiField(provided = true) ToggleButton toggleButtonUi;
     private final Presenter presenter;
+//    private CollapseAnimation animation;
     
     public RegattaStatus(Presenter presenter) {
         this.presenter = presenter;
@@ -37,12 +39,15 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
         toggleButtonUi = new ToggleButton(new ToggleButtonCommand() {
             @Override
             protected void execute(boolean expanded) {
-                collapsableContainerUi.setStyleName(TOGGLEHIDDEN_STYLE, !expanded);
+                Widget.setVisible(collapsableContainerUi.getElement(), expanded);
+//                if (animation != null) animation.animate(expanded);
             }
         });
         initWidget(uiBinder.createAndBindUi(this));
+        Widget.setVisible(collapsableContainerUi.getElement(), false);
+//        this.animation = new CollapseAnimation(collapsableContainerUi.getElement().getFirstChildElement(), false);
     }
-
+    
     @Override
     public void setData(RegattasAndLiveRacesDTO data) {
         regattaContainerUi.clearContent();
@@ -60,7 +65,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
     
     private RegattaStatusRegatta addRegatta(MobileSection container, RegattaMetadataDTO regatta) {
-        PlaceNavigation<?> placeNavigation = presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
+        PlaceNavigation<?> placeNavigation = ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE ? 
+                presenter.getRegattaOverviewNavigation(regatta.getId()) : presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
         RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
         container.addContent(regattaWidget);
         return regattaWidget;

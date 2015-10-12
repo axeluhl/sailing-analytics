@@ -107,7 +107,7 @@ There are useful implementations of the abstract processors, that are more speci
 
 #### Retrieval Processor
 
-Retrieval processors are used to get many result elements (as `ResultType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, ResultType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
+Retrieval processors are used to get many result elements (as `OutputType`) from one input element (as `InputType`). The abstract class `AbstractRetrievalProcessor<InputType, OutputType>` should be used to implement concrete retrieval processors. It has the abstract method `retrieveData`, that has to implement the concrete algorithm to get the result elements from the input element. This method is used by the created instructions, which forwards each retrieved data element to the result receivers. The instruction itself returns an invalid result (created with the method `createInvalidResult`).
 
 #### Filtering Processor
 
@@ -139,11 +139,9 @@ Aggregators are special processors, that are used to aggregate a collection of i
 
 * The `AbstractParallelAggregationProcessor<InputType, AggregatedType>` is the most abstract aggregator and is the base class for any other (abstract or not) aggregator. There are no restrictions for the generic parameters. `InputType` and `AggregatedType` can be anything.
 	* This processor creates instructions, that perform the following steps:
-		1. Acquires a lock
-		2. Handle the input element (this has to be implemented from the concrete aggregators)
-		3. Release the lock
-		4. Return an invalid result
-	* This means, that the concrete implementations don't have to care about concurrency, because of the locking done by the most abstract aggregator.
+		1. Handle the input element (this has to be implemented from the concrete aggregators) in a **synchronized** block
+		2. Return an invalid result
+	* This means, that the concrete implementations don't have to care about concurrency, because of the synchronization done by the most abstract aggregator.
 	* The result of the aggregation is computed and forwarded, when no more input is expected (more specific in the `finish` method).
 * The only class, that extends the previous aggregator is the `AbstractParallel`**`GroupedData`**`AggregationProcessor<ExtractedType, AggregatedType>`, that does noting but adding a restriction to the generic parameters. The resulting `InputType` of this processor is `GroupedDataEntry<ExtractedType>` and the resulting `ResultType` is `Map<GroupKey, AggregatedType>`. This means, that this kind of processor expects grouped values and calculates an aggregation for all elements with the same group key. This class has two abstract subclasses (and several concrete aggregators):
 	* The `AbstractParallelGroupedData`**`Storing`**`AggregationProcessor<InputType, AggregatedType>` refines the names of the abstract methods to fit the specific purpose, that every input element is stored by the aggregator and that any calculation is done after every element is known. This is used by aggregators, that can't calculate the aggregation incrementally with each input element. For example to calculate the median.
