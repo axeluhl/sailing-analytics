@@ -37,8 +37,8 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     public RacesViewImpl(final RacesView.Presenter presenter) {
         super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
         setViewContent(uiBinder.createAndBindUi(this));
-        final RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
-        final RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
+        RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
+        RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
         refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
     }
     
