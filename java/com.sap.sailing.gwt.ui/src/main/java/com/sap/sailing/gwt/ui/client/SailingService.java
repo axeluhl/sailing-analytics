@@ -375,7 +375,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
-    /** for backward compatibility with the regatta overview */
+        /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
 
     /** the replacement service for getRegattaStructureForEvent() */
@@ -586,7 +586,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
-    
+            
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
     Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName);

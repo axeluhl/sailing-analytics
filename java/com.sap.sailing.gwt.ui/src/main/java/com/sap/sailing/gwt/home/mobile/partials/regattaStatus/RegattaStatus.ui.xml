@@ -14,8 +14,7 @@
 				<mp:section.MobileSection addStyleNames="{local_res.css.regattastatus_content}" ui:field="regattaContainerUi"/>
 			</mp:content>
 			<mp:content>
-				<mp:section.MobileSection addStyleNames="{local_res.css.regattastatus_content} {local_res.css.togglecontainerhidden}" 
-						ui:field="collapsableContainerUi" />
+				<mp:section.MobileSection addStyleNames="{local_res.css.regattastatus_content}" ui:field="collapsableContainerUi"/>
 			</mp:content>
 		</mp:section.MobileSection>
 		<mp:toggleButton.ToggleButton ui:field="toggleButtonUi" label="{i18n.regattas}"/>

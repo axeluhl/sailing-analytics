@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.home.mobile.partials.stage;
 
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 
 public class PopularEventStageTeaser extends StageTeaser {
 
     private final PopularEventStageTeaserBand teaserBand;
 
-    public PopularEventStageTeaser(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public PopularEventStageTeaser(EventLinkAndMetadataDTO event, MobilePlacesNavigator placeNavigator) {
         super(event);
 
         title.setInnerText(event.getDisplayName());
