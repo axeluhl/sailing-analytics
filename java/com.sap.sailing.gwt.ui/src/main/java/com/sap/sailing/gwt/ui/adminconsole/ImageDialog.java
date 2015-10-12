@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
@@ -32,6 +34,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
+    private final SailingServiceAsync sailingService;
+    
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload imageURLAndUploadComposite;
     protected final Date creationDate;
@@ -90,9 +94,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         }
     }
 
-    public ImageDialog(Date creationDate, ImageParameterValidator validator, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
+    public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
+        this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
@@ -103,11 +108,27 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                image = loadImageFromURL(event.getValue());
-                imageHolder.setWidget(image);
-                image.getElement().getStyle().setBorderWidth(1, Unit.PX);
-                image.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
-                image.getElement().getStyle().setBorderColor("#cccccc");
+                String imageUrlAsString = event.getValue();
+                ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString, new AsyncCallback<Util.Pair<Integer,Integer>>() {
+                    @Override
+                    public void onSuccess(Pair<Integer, Integer> imageSize) {
+                        if(imageSize != null) {
+                            widthInPxBox.setValue(imageSize.getA());
+                            heightInPxBox.setValue(imageSize.getB());
+                        }
+                        validate();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                });
+                
+//                image = loadImageFromURL(event.getValue());
+//                imageHolder.setWidget(image);
+//                image.getElement().getStyle().setBorderWidth(1, Unit.PX);
+//                image.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
+//                image.getElement().getStyle().setBorderColor("#cccccc");
                 validate();
             }
         });
