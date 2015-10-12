@@ -618,6 +618,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                if (entryDTO.raceInfo.lastUpdateTime == null) {
+                    return "-";
+                }
                 final long lastUpdateInSeconds = timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime);
                 if (lastUpdateInSeconds > HIDE_COL_TIME_THRESHOLD) {
                     return timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
