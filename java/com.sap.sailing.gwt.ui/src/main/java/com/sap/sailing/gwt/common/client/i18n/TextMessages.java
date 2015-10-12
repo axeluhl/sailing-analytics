@@ -45,7 +45,7 @@ public interface TextMessages extends Messages {
     String sapSailing();
     String search();
     String startSimulator();
-    
+    String countdownStartingInDays();
     String countdownDays();
     String countdownHours();
     String countdownMinutes();

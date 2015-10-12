@@ -375,7 +375,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Util.Pair<String, LeaderboardType> checkLeaderboardName(String leaderboardName);
 
-    /** for backward compatibility with the regatta overview */
+        /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId);
 
     /** the replacement service for getRegattaStructureForEvent() */
@@ -458,19 +458,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind, boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
     
-    void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
-    
-    /**
-     * Get the competitors registered in this racelog. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrationsOnRaceLog(String) registered for the leaderboard}.
-     */
-    Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors);
 
     /**
      * Get the competitors registered in this leaderboard. Does not automatically include the competitors
-     * {@link #getCompetitorRegistrationsOnRegattaLog(String, String, String) registered for the racelog}.
+     * {@link #getCompetitorRegistrationsInRaceLog(String, String, String) registered for the racelog}.
      */
-    Collection<CompetitorDTO> getCompetitorRegistrationsOnRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
+    Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
     void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO);
     
@@ -562,7 +556,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO);
 
-    void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitors)
+    void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitors)
             throws DoesNotHaveRegattaLogException;
     
     /**
@@ -592,8 +586,19 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
             String emails, String localeInfoName) throws MailException;
-    
+            
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
+
+    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName);
+
+    List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException;
+
+    void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
+
+    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint) throws TransformationException;
+
+    void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
+            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 
@@ -604,6 +609,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             MarkDTO markDTO);
+
+    Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName);
 
     /**
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
@@ -618,4 +625,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples);
+
+    /**
+     * Get the competitors registered in this racelog. Does not automatically include the competitors
+     * {@link #getCompetitorRegistrationsOnRaceLog(String) registered for the leaderboard}.
+     */
+    Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName);
 }

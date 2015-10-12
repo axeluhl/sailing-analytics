@@ -14,17 +14,20 @@ public class ImageCreateDialog extends ImageDialog {
         super(new Date(), new ImageParameterValidator(stringMessages), stringMessages, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
-        titleTextBox.setVisibleLength(50);
+        titleTextBox.setVisibleLength(40);
         subtitleTextBox = createTextBox(null);
-        subtitleTextBox.setVisibleLength(50);
+        subtitleTextBox.setVisibleLength(40);
         copyrightTextBox = createTextBox(null);
-        copyrightTextBox.setVisibleLength(50);
+        copyrightTextBox.setVisibleLength(40);
         widthInPxBox = createIntegerBox(null, 10);
+        widthInPxBox.setEnabled(false);
         heightInPxBox = createIntegerBox(null, 10);
+        heightInPxBox.setEnabled(false);
         List<String> tags = new ArrayList<>();
         if(initialTag != null && !initialTag.isEmpty()) {
             tags.add(initialTag);
         }
         tagsListEditor.setValue(tags);
+        image = null;
     }
 }
