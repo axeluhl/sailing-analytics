@@ -61,7 +61,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
         if (getArguments() != null) {
             if (mNat != null) {
                 mNat.setText(getArguments().getString(NAT));
-                mNat.setFilters(new InputFilter[] { new InputFilter.AllCaps(), new InputFilter.LengthFilter(3) });
+                mNat.setFilters(new InputFilter[] { new InputFilter.AllCaps() });
                 mNat.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -83,7 +83,7 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
             if (mNum != null) {
                 mNum.setText(getArguments().getString(NUM));
-                mNum.setFilters(new InputFilter[] { new InputFilter.LengthFilter(4) });
+                mNum.setFilters(new InputFilter[] { new InputFilter.LengthFilter(6) });
                 mNum.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
