@@ -63,10 +63,10 @@ public class SwitchingEntryPoint implements EntryPoint {
             }
         } else {
             if (isMobile()) {
-                LOG.info("Identified mobile browser by user agent");
+                LOG.info("Identified mobile (smartphone) browser by user agent");
                 startMobile();
             } else {
-                LOG.info("Using desktop browser");
+                LOG.info("Using desktop version");
                 startDesktop();
             }
         }
