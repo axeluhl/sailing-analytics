@@ -189,7 +189,7 @@ public class SwitchingEntryPoint implements EntryPoint {
 
     private void configureDesktopHeader() {
         if(isTablet()) {
-            metaElement("viewport", "width=device-width=900,initial-scale=0.75,maximum-scale=2");
+            metaElement("viewport", "width=device-width,initial-scale=0.75,maximum-scale=2");
         } else {
             metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=2");
         }
