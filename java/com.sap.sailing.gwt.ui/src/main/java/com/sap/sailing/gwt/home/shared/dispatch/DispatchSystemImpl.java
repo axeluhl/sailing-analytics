@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.ServerDispatchException;
 public class DispatchSystemImpl implements DispatchSystem {
     
     private final SimpleDispatch simpleDispatch = new SimpleDispatch(null);
-    private final DispatchAsync dispatch = new AutomaticBatchingDispatch(simpleDispatch);
+    private final DispatchAsync dispatch = new CachingDispatch(new AutomaticBatchingDispatch(simpleDispatch));
 
     @Override
     public <R extends Result, A extends Action<R>> void execute(final A action, final AsyncCallback<R> callback) {

@@ -1,9 +1,10 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
+import com.sap.sailing.gwt.home.shared.dispatch.HasClientCacheTotalTimeToLive;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
-public class ResultWithTTL<T extends DTO> implements Result {
+public class ResultWithTTL<T extends DTO> implements Result, HasClientCacheTotalTimeToLive {
     
     /** Time to live*/
     private Duration ttl;
@@ -32,5 +33,10 @@ public class ResultWithTTL<T extends DTO> implements Result {
     
     public long getTtlMillis() {
         return ttl.asMillis();
+    }
+
+    @Override
+    public int cacheTotalTimeToLiveMillis() {
+        return (int) getTtlMillis();
     }
 }

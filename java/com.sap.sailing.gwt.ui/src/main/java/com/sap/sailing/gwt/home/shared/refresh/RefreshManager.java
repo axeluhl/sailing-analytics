@@ -26,6 +26,7 @@ public class RefreshManager {
     private static final long PAUSE_ON_ERROR = Duration.ONE_SECOND.times(30).asMillis();
     private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
 
+    private boolean scheduled;
     private final Timer timer = new Timer() {
         @Override
         public void run() {
@@ -63,6 +64,7 @@ public class RefreshManager {
     }
 
     private void update() {
+
         for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
@@ -93,8 +95,6 @@ public class RefreshManager {
             }
         }
     }
-
-    boolean scheduled;
 
     private void reschedule() {
         if (scheduled) {
