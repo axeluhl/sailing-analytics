@@ -18,7 +18,7 @@ import com.sap.sse.common.Duration;
 public final class CachingDispatch implements DispatchAsync {
 
     private static final Logger LOG = Logger.getLogger(CachingDispatch.class.getName());
-    private final int DEFAULT_TIME_TO_LIVE_MILLIS = (int) Duration.ONE_SECOND.asMillis() * 30;
+    private final int DEFAULT_TIME_TO_LIVE_MILLIS = (int) Duration.ONE_MINUTE.times(3).asMillis();
     private final CacheCleanupTask invalidationTask = new CacheCleanupTask();
     private final HashMap<String, ResultHolder> resultsCache = new HashMap<>();
     private final DispatchAsync dispatch;

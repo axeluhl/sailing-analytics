@@ -19,7 +19,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
@@ -255,10 +254,10 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return getMediaForEvent(seriesId);
     }
     
-    @Override
-    public EventListViewDTO getEventListView() throws MalformedURLException {
-        EventListDataCalculator eventListDataCalculator = new EventListDataCalculator(getService());
-        HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), eventListDataCalculator);
-        return eventListDataCalculator.getResult();
-    }
+    // @Override
+    // public EventListViewDTO getEventListView() throws MalformedURLException {
+    // EventListDataCalculator eventListDataCalculator = new EventListDataCalculator(getService());
+    // HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), eventListDataCalculator);
+    // return eventListDataCalculator.getResult();
+    // }
 }

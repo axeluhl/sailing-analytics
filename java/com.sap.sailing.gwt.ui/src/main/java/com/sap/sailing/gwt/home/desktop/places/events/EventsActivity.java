@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventListViewAction;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 
@@ -24,7 +25,7 @@ public class EventsActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(new Placeholder());
         
-        clientFactory.getHomeService().getEventListView(new AsyncCallback<EventListViewDTO>() {
+        clientFactory.getDispatch().execute(new GetEventListViewAction(), new AsyncCallback<EventListViewDTO>() {
             @Override
             public void onSuccess(EventListViewDTO eventListView) {
                 final EventsView eventsView = clientFactory.createEventsView();
