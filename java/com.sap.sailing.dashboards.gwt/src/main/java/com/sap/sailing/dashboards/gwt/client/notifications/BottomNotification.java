@@ -42,8 +42,8 @@ public class BottomNotification extends FocusPanel {
 
     public void show(BottomNotificationType bottomNotificationType) {
         if (shown == false) {
-            this.removeStyleName(resources.notificationsStyle().bottomnotificationhidden());
-            this.addStyleName(resources.notificationsStyle().bottomnotificationshow());
+            this.removeStyleName(resources.notificationsStyle().bottomnotification_hidden());
+            this.addStyleName(resources.notificationsStyle().bottomnotification_shown());
             this.getElement().setInnerHTML(bottomNotificationType.getMessage());
             this.getElement().getStyle().setBackgroundColor(bottomNotificationType.getBackgroundColorAsHex());
             this.getElement().getStyle().setColor(bottomNotificationType.getTextColorAsHex());
@@ -61,8 +61,8 @@ public class BottomNotification extends FocusPanel {
         if (timer != null) {
             timer.cancel();
         }
-        this.removeStyleName(resources.notificationsStyle().bottomnotificationshow());
-        this.addStyleName(resources.notificationsStyle().bottomnotificationhidden());
+        this.removeStyleName(resources.notificationsStyle().bottomnotification_shown());
+        this.addStyleName(resources.notificationsStyle().bottomnotification_hidden());
         this.getElement().setInnerHTML("");
         shown = false;
     }

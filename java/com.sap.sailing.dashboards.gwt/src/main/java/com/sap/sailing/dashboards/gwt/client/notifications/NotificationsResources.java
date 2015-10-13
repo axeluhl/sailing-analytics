@@ -14,7 +14,12 @@ public interface NotificationsResources extends ClientBundle {
     
     public interface NotificationsStyle extends CssResource {
         public String bottomnotification();
-        public String bottomnotificationshow();
-        public String bottomnotificationhidden();
+        public String bottomnotification_shown();
+        public String bottomnotification_hidden();
+        public String wrongorientationnotification();
+        public String wrongorientationnotification_shown();
+        public String wrongorientationnotification_hidden();
+        public String wrongorientationnotification_logo();
+        public String wrongorientationnotification_text();
     }
 }
