@@ -3,6 +3,7 @@ package com.sap.sailing.dashboards.gwt.client.notifications;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
@@ -21,38 +22,38 @@ public class BottomNotification extends FocusPanel {
     private Timer timer;
     private List<BottomNotificationClickListener> bottomNotificationClickListeners;
 
+    private static NotificationsResources resources = GWT.create(NotificationsResources.class);
+    
     public BottomNotification() {
-
-        this.addStyleName("bottomnotification");
+        resources.notificationsStyle().ensureInjected();
+        this.addStyleName(resources.notificationsStyle().bottomnotification());
         this.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (shown == true) {
                     shown = false;
-                    BottomNotification.this.getElement().getStyle().setOpacity(1.0);
                     nofitifyBottomNotificationClickListenersAboutClick();
                     hide();
                 }
             }
         });
-        this.addStyleName("bottomnotification");
         bottomNotificationClickListeners = new ArrayList<BottomNotificationClickListener>();
     }
 
     public void show(BottomNotificationType bottomNotificationType) {
-        shown = true;
-        this.removeStyleName("bottomnotificationhidden");
-        this.addStyleName("bottomnotificationshow");
-        this.getElement().setInnerHTML(bottomNotificationType.getMessage());
-        this.getElement().getStyle().setBackgroundColor(bottomNotificationType.getBackgroundColorAsHex());
-        this.getElement().getStyle().setColor(bottomNotificationType.getTextColorAsHex());
-        if (bottomNotificationType.isShouldDisappearAfter20Seconds()) {
+        if (shown == false) {
+            this.removeStyleName(resources.notificationsStyle().bottomnotificationhidden());
+            this.addStyleName(resources.notificationsStyle().bottomnotificationshow());
+            this.getElement().setInnerHTML(bottomNotificationType.getMessage());
+            this.getElement().getStyle().setBackgroundColor(bottomNotificationType.getBackgroundColorAsHex());
+            this.getElement().getStyle().setColor(bottomNotificationType.getTextColorAsHex());
             Timer timer = new Timer() {
                 public void run() {
                     hide();
                 }
             };
-            timer.schedule(20000);
+            timer.schedule(bottomNotificationType.timeToDisappearInMilliseconds());
+            shown = true;
         }
     }
 
@@ -60,10 +61,10 @@ public class BottomNotification extends FocusPanel {
         if (timer != null) {
             timer.cancel();
         }
-        shown = false;
-        this.removeStyleName("bottomnotificationshow");
-        this.addStyleName("bottomnotificationhidden");
+        this.removeStyleName(resources.notificationsStyle().bottomnotificationshow());
+        this.addStyleName(resources.notificationsStyle().bottomnotificationhidden());
         this.getElement().setInnerHTML("");
+        shown = false;
     }
 
     public void addBottomNotificationClickListener(BottomNotificationClickListener bottomNotificationClickListener) {
@@ -75,8 +76,8 @@ public class BottomNotification extends FocusPanel {
     }
 
     private void nofitifyBottomNotificationClickListenersAboutClick() {
-        for (BottomNotificationClickListener bncl : bottomNotificationClickListeners) {
-            bncl.bottomNotificationClicked();
+        for (BottomNotificationClickListener bottomNotificationClickListener : bottomNotificationClickListeners) {
+            bottomNotificationClickListener.bottomNotificationClicked();
         }
     }
 }
