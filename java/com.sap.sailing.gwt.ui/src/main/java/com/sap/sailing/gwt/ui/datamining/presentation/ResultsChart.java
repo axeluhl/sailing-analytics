@@ -48,7 +48,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         }
         @Override
         public String toString() {
-            return getStringMessages().group();
+            return getStringMessages().groupName();
         };
     };
     private final Comparator<GroupKey> ascendingByValueKeyComparator = new Comparator<GroupKey>() {
@@ -73,6 +73,46 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
             return getStringMessages().valueDescending();
         };
     };
+    private final Comparator<GroupKey> ascendingByGroupAverageComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            GroupKey mainKey1 = key1.getMainKey();
+            GroupKey mainKey2 = key2.getMainKey();
+            return Double.compare(averagePerMainKey.get(mainKey1), averagePerMainKey.get(mainKey2));
+        }
+        public String toString() {
+            return getStringMessages().groupAverageAscending();
+        };
+    };
+    private final Comparator<GroupKey> descendingByGroupAverageComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            return -1 * ascendingByGroupAverageComparator.compare(key1, key2);
+        }
+        public String toString() {
+            return getStringMessages().groupAverageDescending();
+        };
+    };
+    private final Comparator<GroupKey> ascendingByGroupMedianComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            GroupKey mainKey1 = key1.getMainKey();
+            GroupKey mainKey2 = key2.getMainKey();
+            return Double.compare(medianPerMainKey.get(mainKey1), medianPerMainKey.get(mainKey2));
+        }
+        public String toString() {
+            return getStringMessages().groupMedianAscending();
+        };
+    };
+    private final Comparator<GroupKey> descendingByGroupMedianComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            return -1 * ascendingByGroupMedianComparator.compare(key1, key2);
+        }
+        public String toString() {
+            return getStringMessages().groupMedianDescending();
+        };
+    };
     
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
@@ -80,10 +120,13 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
 
     private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
-    private Map<GroupKey, Series> seriesMappedByGroupKey;
+    private final Map<GroupKey, Series> seriesMappedByGroupKey;
     private final GroupKey simpleResultSeriesKey;
-    private Map<GroupKey, Integer> mainKeyToXValueMap;
+    private final Map<GroupKey, Integer> mainKeyToXValueMap;
     private Map<GroupKey, Number> currentResultValues;
+
+    private final Map<GroupKey, Double> averagePerMainKey;
+    private final Map<GroupKey, Double> medianPerMainKey;
 
     public ResultsChart(StringMessages stringMessages) {
         super(stringMessages);
@@ -137,6 +180,9 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         
         seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
         simpleResultSeriesKey = new GenericGroupKey<String>(stringMessages.results());
+        mainKeyToXValueMap = new HashMap<>();
+        averagePerMainKey = new HashMap<>();
+        medianPerMainKey = new HashMap<>();
     }
     
     @Override
@@ -159,10 +205,17 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         Comparator<GroupKey> valueToBeSelected = standardKeyComparator;
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
-        if (getCurrentResult() != null && isCurrentResultSimple()) {
+        if (getCurrentResult() != null) {
             valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
-            acceptableValues.add(ascendingByValueKeyComparator);
-            acceptableValues.add(descendingByValueKeyComparator);
+            if (isCurrentResultSimple()) {
+                acceptableValues.add(ascendingByValueKeyComparator);
+                acceptableValues.add(descendingByValueKeyComparator);
+            } else {
+                acceptableValues.add(ascendingByGroupAverageComparator);
+                acceptableValues.add(descendingByGroupAverageComparator);
+                acceptableValues.add(ascendingByGroupMedianComparator);
+                acceptableValues.add(descendingByGroupMedianComparator);
+            }
             visible = true;
         }
         keyComparatorListBox.setValue(valueToBeSelected);
@@ -170,18 +223,9 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         sortByPanel.setVisible(visible);
     }
 
-    private boolean isCurrentResultSimple() {
-        for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-            if (groupKey.hasSubKey()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private void resetChartSeries() {
         chart.removeAllSeries(false);
-        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
+        seriesMappedByGroupKey.clear();
     }
 
     private void updateChartLabels() {
@@ -198,21 +242,66 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         buildMainKeyMapAndSetXAxisCategories();
         createAndAddSeriesToChart();
         
+        Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
         for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
             GroupKey mainKey = resultEntry.getKey().getMainKey();
-            Point point = new Point(mainKeyToXValueMap.get(mainKey), resultEntry.getValue());
+            Number value = resultEntry.getValue();
+            
+            if (!isCurrentResultSimple()) {
+                if (!valuesPerMainKey.containsKey(mainKey)) {
+                    valuesPerMainKey.put(mainKey, new ArrayList<Number>());
+                }
+                valuesPerMainKey.get(mainKey).add(value);
+            }
+            
+            Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
         }
         
+        averagePerMainKey.clear();
+        medianPerMainKey.clear();
+        if (!isCurrentResultSimple()) {
+            for (GroupKey mainKey : valuesPerMainKey.keySet()) {
+                List<Number> values = valuesPerMainKey.get(mainKey);
+                averagePerMainKey.put(mainKey, getAverageFromValues(values));
+                medianPerMainKey.put(mainKey, getMedianFromValues(values));
+            }
+        }
+        
         chart.redraw();
+    }
+
+    private Double getAverageFromValues(Collection<Number> values) {
+        double sum = 0;
+        for (Number value : values) {
+            sum += value.doubleValue();
+        }
+        return sum / values.size();
+    }
+
+    private Double getMedianFromValues(List<Number> values) {
+        Collections.sort(values, new Comparator<Number>() {
+            @Override
+            public int compare(Number n1, Number n2) {
+                return Double.compare(n1.doubleValue(), n2.doubleValue());
+            }
+        });
+        if (values.size() % 2 == 0) {
+            int index1 = (values.size() / 2) - 1;
+            int index2 = index1 + 1;
+            return (values.get(index1).doubleValue() + values.get(index2).doubleValue()) / 2;
+        } else {
+            int index = ((values.size() + 1) / 2) - 1;
+            return values.get(index).doubleValue();
+        }
     }
 
     private void buildMainKeyMapAndSetXAxisCategories() {
         List<GroupKey> sortedMainKeys = getSortedMainKeys();
         String[] categories = new String[sortedMainKeys.size()];
-        mainKeyToXValueMap = new HashMap<>();
+        mainKeyToXValueMap.clear();
         for (int i = 0; i < sortedMainKeys.size(); i++) {
             GroupKey mainKey = sortedMainKeys.get(i);
             categories[i] = mainKey.asString();
