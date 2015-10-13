@@ -53,7 +53,7 @@ public class RegattaCompetitionSeries extends Composite {
         RegattaCompetitionFleet competitionFleet = new RegattaCompetitionFleet(fleet, fleetCount);
         for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
             boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
-            String raceViewerUrl = tracked ? null : null; // TODO No mobile "RaceViewer implemented yet 
+            String raceViewerUrl = tracked ? presenter.getRaceViewerURL(race.getLeaderboardName(), race.getRegattaAndRaceIdentifier()) : null; 
             competitionFleet.addRace(race, raceViewerUrl);
         }
         fleetContainerUi.add(competitionFleet);

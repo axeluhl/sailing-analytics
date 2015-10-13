@@ -12,7 +12,6 @@ public interface EventView extends EventViewBase {
     void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images);
 
     public interface Presenter extends EventViewBase.Presenter, NewsItemLinkProvider {
-        String getRaceViewerURL(String regattaName, String trackedRaceName);
         PlaceNavigation<?> getMediaPageNavigation();
     }
 }

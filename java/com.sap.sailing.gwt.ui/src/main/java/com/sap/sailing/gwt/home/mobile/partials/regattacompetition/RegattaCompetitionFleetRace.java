@@ -38,9 +38,7 @@ public class RegattaCompetitionFleetRace extends UIObject {
     }
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        // TODO: As long as there is no mobile race viewer, show all races as untracked
-        boolean isUntrackedRace = true;
-        // boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
+        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
         if (viewState == RaceViewState.RUNNING) {
             anchor.addClassName(local_res.css().regattacompetition_phase_fleet_racelive());
             raceStateUi.setInnerText(isUntrackedRace ? i18n.live() : i18n.actionWatch());
@@ -50,7 +48,7 @@ public class RegattaCompetitionFleetRace extends UIObject {
         } else {
             raceStateUi.setInnerText(isUntrackedRace ? i18n.finished() : i18n.actionAnalyze());
         }
-        setStyleName(anchor, local_res.css().regattacompetition_phase_fleet_raceuntracked(), true);
+        setStyleName(anchor, local_res.css().regattacompetition_phase_fleet_raceuntracked(), isUntrackedRace);
     }
 
 }
