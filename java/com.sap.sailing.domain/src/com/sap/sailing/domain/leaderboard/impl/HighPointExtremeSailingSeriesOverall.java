@@ -107,8 +107,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * @throws NoWindException 
      */
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard,
-            Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
         assert leaderboard instanceof MetaLeaderboard;
         // compare by last regatta if this leaderboard is a meta leaderboard
         final int result;

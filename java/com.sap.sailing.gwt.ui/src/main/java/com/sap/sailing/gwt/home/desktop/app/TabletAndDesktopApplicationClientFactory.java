@@ -3,23 +3,23 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.client.place.error.TabletAndDesktopErrorView;
-import com.sap.sailing.gwt.home.client.place.events.EventsView;
-import com.sap.sailing.gwt.home.client.place.events.TabletAndDesktopEventsView;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultView;
-import com.sap.sailing.gwt.home.client.place.searchresult.TabletAndDesktopSearchResultView;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsView;
-import com.sap.sailing.gwt.home.client.place.solutions.TabletAndDesktopSolutionsView;
-import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringView;
-import com.sap.sailing.gwt.home.client.place.sponsoring.TabletAndDesktopSponsoringView;
-import com.sap.sailing.gwt.home.client.place.start.StartView;
-import com.sap.sailing.gwt.home.client.place.start.TabletAndDesktopStartView;
-import com.sap.sailing.gwt.home.client.place.whatsnew.TabletAndDesktopWhatsNewView;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
+import com.sap.sailing.gwt.home.desktop.places.events.EventsView;
+import com.sap.sailing.gwt.home.desktop.places.events.TabletAndDesktopEventsView;
+import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultView;
+import com.sap.sailing.gwt.home.desktop.places.searchresult.TabletAndDesktopSearchResultView;
+import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsView;
+import com.sap.sailing.gwt.home.desktop.places.solutions.TabletAndDesktopSolutionsView;
+import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringView;
+import com.sap.sailing.gwt.home.desktop.places.sponsoring.TabletAndDesktopSponsoringView;
+import com.sap.sailing.gwt.home.desktop.places.start.StartView;
+import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {

@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -8,8 +9,9 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public abstract class AbstractCluster<ElementType> implements Cluster<ElementType> {
-
+public abstract class AbstractCluster<ElementType extends Serializable> implements Cluster<ElementType> {
+    private static final long serialVersionUID = 1606840566021644768L;
+    
     private Collection<ClusterBoundary<ElementType>> boundaries;
 
     public AbstractCluster(Collection<ClusterBoundary<ElementType>> boundaries) {

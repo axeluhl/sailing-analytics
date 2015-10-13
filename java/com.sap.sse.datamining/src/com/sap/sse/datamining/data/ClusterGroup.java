@@ -1,5 +1,7 @@
 package com.sap.sse.datamining.data;
 
+import java.io.Serializable;
+
 
 /**
  * Represents a collection of {@link Cluster Clusters} and provides a method to get the
@@ -11,7 +13,7 @@ package com.sap.sse.datamining.data;
  * 
  * @see Cluster
  */
-public interface ClusterGroup<ElementType> {
+public interface ClusterGroup<ElementType extends Serializable> extends Serializable {
 
     /**
      * @param value the element to get the {@link Cluster} for

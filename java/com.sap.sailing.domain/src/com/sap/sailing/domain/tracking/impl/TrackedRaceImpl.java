@@ -54,7 +54,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEv
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.BoatClass;
@@ -1570,10 +1570,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * two is not <code>null</code>.
      */
     @Override
-    public boolean takesWindFix(Wind wind) {
+    public boolean takesWindFixWithTimePoint(TimePoint timePoint) {
         final Set<TrackedRace> visited = new HashSet<>();
         visited.add(this);
-        return takesWindFixRecursively(wind, visited);
+        return takesWindFixWithTimePointRecursively(timePoint, visited);
     }
     
     /**
@@ -1582,7 +1582,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            {@link RaceExecutionOrderProvider}
      */
     @Override
-    public boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+    public boolean takesWindFixWithTimePointRecursively(TimePoint windFixTimePoint, Set<TrackedRace> visited) {
         final boolean result;
         final TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
         final TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getEndOfRace(), getEndOfTracking());
@@ -1590,21 +1590,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // first check if the fix meets the criteria set by the latestEndTimePoint: either the latestEndTimePoint is null, meaning an
             // open interval which will continue to accept late wind fixes, or the fix time point is before the latestEndTimePoint plus a grace
             // interval:
-            if (latestEndTimePoint == null || wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(latestEndTimePoint)) {
+            if (latestEndTimePoint == null || windFixTimePoint.minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(latestEndTimePoint)) {
                 // then check, if fix is accepted anyway because it's after earliestStartTimePoint.minus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS)
                 // and before latestEndTimePoint.plus(IS_LIVE_GRACE_PERIOD_IN_MILLIS) or latestEndTimePoint is null. In this case, no expensive
                 // recursive check whether previous races take the fix are required.
-                if (wind.getTimePoint().plus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(earliestStartTimePoint)) {
+                if (windFixTimePoint.plus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(earliestStartTimePoint)) {
                     result = true;
                 } else {
                     // if the fix is older than even the extended lead interval would accept, don't accept the fix:
-                    if (wind.getTimePoint().plus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).before(earliestStartTimePoint)) {
+                    if (windFixTimePoint.plus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).before(earliestStartTimePoint)) {
                         result = false;
                     } else {
                         // the fix is in the critical interval between EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS and
                         // TIME_BEFORE_START_TO_TRACK_WIND_MILLIS before the earliestStartTimePoint; the fix shall only be accepted
                         // if no previous race exists that accepts it
-                        result = noPreviousRaceTakesWind(wind, visited);
+                        result = noPreviousRaceTakesWindFixWithTimePoint(windFixTimePoint, visited);
                     }
                 }
             } else {
@@ -1616,11 +1616,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
     
-    private boolean noPreviousRaceTakesWind(Wind wind, Set<TrackedRace> visited) {
+    private boolean noPreviousRaceTakesWindFixWithTimePoint(TimePoint timePoint, Set<TrackedRace> visited) {
         final boolean result;
         Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
         if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr ->
-                        visited.add(tr) && tr.takesWindFixRecursively(wind, visited)).findAny().isPresent()) {
+                        visited.add(tr) && tr.takesWindFixWithTimePointRecursively(timePoint, visited)).findAny().isPresent()) {
             result = true;
         } else {
             result = false;
@@ -3874,7 +3874,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                  new MapWithValueCollectionReducer<>(), allLogs).analyze();
          final Set<Mark> result = new HashSet<>();
          result.addAll(markMappings.keySet());
-         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new DefinedMarkFinder.Factory();
+         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new RaceLogDefinedMarkFinder.Factory();
          Set<Mark> marksDefinedInRaceLog = new MultiLogAnalyzer<>(analyzerFactory, new SetReducer<Mark>(), raceLogs).analyze();
          result.addAll(marksDefinedInRaceLog);
          return result;

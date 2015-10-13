@@ -1,24 +1,18 @@
 package com.sap.sailing.gwt.ui.shared.eventlist;
 
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 
-public class EventListEventDTO extends EventMetadataDTO {
-    private String baseURL;
-    private boolean isOnRemoteServer;
+public class EventListEventDTO extends EventLinkAndMetadataDTO {
+    
+    private EventListEventSeriesDTO eventSeries;
 
-    public String getBaseURL() {
-        return baseURL;
+    @Override
+    public EventListEventSeriesDTO getEventSeries() {
+        return eventSeries;
     }
 
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
+    public void setEventSeries(EventListEventSeriesDTO eventSeries) {
+        this.eventSeries = eventSeries;
     }
-
-    public boolean isOnRemoteServer() {
-        return isOnRemoteServer;
-    }
-
-    public void setOnRemoteServer(boolean isOnRemoteServer) {
-        this.isOnRemoteServer = isOnRemoteServer;
-    }
+    
 }

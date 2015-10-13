@@ -2,8 +2,6 @@ package com.sap.sailing.dashboards.gwt.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -45,7 +43,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     }
 
     private static RootUiBinder uiBinder = GWT.create(RootUiBinder.class);
-    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     @UiField
     RibDashboardPanelStyle style;
@@ -179,7 +176,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @Override
     public void numberOfWindBotsChanged(List<String> windBotIDs,
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        logger.log(Level.INFO, "Number of Windbots changed");
         initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
     }
 }

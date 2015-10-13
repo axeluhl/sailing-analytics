@@ -28,18 +28,14 @@ public class GetStagedEventsAction implements Action<ListResult<EventStageDTO>> 
     @GwtIncompatible
     public ListResult<EventStageDTO> execute(final DispatchContext context) throws MalformedURLException {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
-        
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), stageCandidateCalculator);
-        
         ListResult<EventStageDTO> result = new ListResult<>();
-        
         int count = 0;
         for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
             count++;
             if(count > HomeServiceImpl.MAX_STAGE_EVENTS) {
                 break;
             }
-            
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
             result.addValue(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, context.getRacingEventService(), useTeaserImage));

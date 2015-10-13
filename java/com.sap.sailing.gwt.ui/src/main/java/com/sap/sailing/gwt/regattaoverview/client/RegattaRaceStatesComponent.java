@@ -225,7 +225,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
-        isAppending = collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
+        isAppending |= collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
                 repeatedInfoLabel, isAppending, new Command() {
                     @Override
                     public void execute() {
@@ -235,21 +235,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         // private boolean collectRepeatedInfos(String label, String info,
         // boolean canRemove, FlowPanel panel, boolean append,
         // final Command linkAction) {
-        isAppending = collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
+        isAppending |= collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending = collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
+        isAppending |= collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
                 isAppending, new Command() {
                     @Override
                     public void execute() {
                         raceCourseClicked(entryForRepeatedInfos);
                     }
                 });
-        isAppending = collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
+        isAppending |= collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
+        isAppending |= collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
+        isAppending |= collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();
