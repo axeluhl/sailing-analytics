@@ -34,6 +34,8 @@ public class SwitchingEntryPoint implements EntryPoint {
             + "Nexus 7|Nexus 10|Nexus 9|" // Google Tablets
             + "PlayBook|" // Blackberry
             + "KFAPWI|" // Kindle Fire HD
+            + "FZ-B|" // Panasonic ToughPad
+            + "SGP|" // Sony Xperia Tablets
             + "GT-P|SM-T|SM-P" // Galaxy Tab (https://en.wikipedia.org/wiki/Samsung_Galaxy ; http://forum.xda-developers.com/wiki/Samsung/Model_naming_scheme)
                     , "i");
     private final PlaceHistoryMapper hisMap = GWT.create(ApplicationHistoryMapper.class);
