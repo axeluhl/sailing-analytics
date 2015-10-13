@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.client.Window;
@@ -78,8 +77,7 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
 
             @Override
             public void onFailure(Throwable caught) {
-                LogRecord logRecord = new LogRecord(Level.INFO, caught.toString());
-                logger.log(logRecord);
+                logger.log(Level.INFO, caught.getMessage());
             }
         });
     }
