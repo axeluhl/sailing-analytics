@@ -206,7 +206,6 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
         if (getCurrentResult() != null) {
-            valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
             if (isCurrentResultSimple()) {
                 acceptableValues.add(ascendingByValueKeyComparator);
                 acceptableValues.add(descendingByValueKeyComparator);

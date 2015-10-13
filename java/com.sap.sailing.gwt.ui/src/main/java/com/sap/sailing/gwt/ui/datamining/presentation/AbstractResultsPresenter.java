@@ -104,7 +104,6 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
             updateIsCurrentResultSimple();
             
             internalShowResults(getCurrentResult());
-            
         } else {
             this.currentResult = null;
             updateIsCurrentResultSimple();
@@ -151,16 +150,17 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
     }
     
     private void updateIsCurrentResultSimple() {
+        boolean isSimple = false;
         if (currentResult != null) {
+            isSimple = true;
             for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
                 if (groupKey.hasSubKey()) {
-                    isCurrentResultSimple = false;
+                    isSimple = false;
+                    break;
                 }
             }
-            isCurrentResultSimple = true;
-        } else {
-            isCurrentResultSimple = false;
         }
+        isCurrentResultSimple = isSimple;
     }
 
     protected boolean isCurrentResultSimple() {
