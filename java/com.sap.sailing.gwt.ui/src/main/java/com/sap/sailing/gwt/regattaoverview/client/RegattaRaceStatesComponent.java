@@ -260,6 +260,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+        } else {
+            sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
         table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
         tableHolder.setWidget(table);
@@ -641,6 +643,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return sb.toString();
             }
         };
+        lastUpdateColumn.setDefaultSortAscending(false);
         lastUpdateColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
