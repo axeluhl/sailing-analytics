@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ListResult<T extends DTO> implements CollectionResult<T> {
@@ -9,7 +10,7 @@ public class ListResult<T extends DTO> implements CollectionResult<T> {
     public ListResult() {
     }
 
-    public ListResult(List<T> values) {
+    public ListResult(Collection<T> values) {
         super();
         this.values.addAll(values);
     }

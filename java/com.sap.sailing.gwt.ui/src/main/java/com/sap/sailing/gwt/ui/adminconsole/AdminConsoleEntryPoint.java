@@ -177,14 +177,14 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 getStringMessages().swissTimingEvents(), Permission.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
-        final RaceLogTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new RaceLogTrackingEventManagementPanel(
+        final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 sailingService, this, this, this, getStringMessages());
-        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<RaceLogTrackingEventManagementPanel>(raceLogTrackingEventManagementPanel) {
+        panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(raceLogTrackingEventManagementPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
             }
-        }, getStringMessages().raceLogTracking(), Permission.MANAGE_TRACKED_RACES);
+        }, getStringMessages().smartphoneTracking(), Permission.MANAGE_TRACKED_RACES);
         regattasDisplayers.add(raceLogTrackingEventManagementPanel);
         leaderboardsDisplayers.add(raceLogTrackingEventManagementPanel);
 

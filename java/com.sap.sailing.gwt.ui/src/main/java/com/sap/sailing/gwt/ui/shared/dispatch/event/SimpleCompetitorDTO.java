@@ -68,5 +68,30 @@ public class SimpleCompetitorDTO extends NamedDTO implements Serializable {
     public void setFlagImageURL(String flagImageURL) {
         this.flagImageURL = flagImageURL;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SimpleCompetitorDTO other = (SimpleCompetitorDTO) obj;
+        if (sailID == null) {
+            if (other.sailID != null)
+                return false;
+        } else if (!sailID.equals(other.sailID))
+            return false;
+        return true;
+    }
     
 }
