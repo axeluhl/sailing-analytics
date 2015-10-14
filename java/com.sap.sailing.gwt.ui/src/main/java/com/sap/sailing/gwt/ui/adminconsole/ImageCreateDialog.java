@@ -5,13 +5,14 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class ImageCreateDialog extends ImageDialog {
 
-    public ImageCreateDialog(String initialTag, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(new Date(), new ImageParameterValidator(stringMessages), stringMessages, callback);
+    public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
+        super(new Date(), new ImageParameterValidator(stringMessages), sailingService, stringMessages, callback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
         titleTextBox.setVisibleLength(40);
