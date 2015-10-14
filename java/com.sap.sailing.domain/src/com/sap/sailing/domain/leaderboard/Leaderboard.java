@@ -263,7 +263,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
      * across all races tracked by this leaderboard, respecting the {@link RaceColumn#isStartsWithZeroScore()} property.
      */
-    Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Double getTotalPoints(Competitor competitor, TimePoint timePoint);
     
     /**
      * Sums up the {@link #getTotalPoints(Competitor, RaceColumn, TimePoint) total points} of <code>competitor</code>

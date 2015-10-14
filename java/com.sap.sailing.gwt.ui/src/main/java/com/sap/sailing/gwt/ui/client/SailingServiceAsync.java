@@ -395,6 +395,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
             AsyncCallback<EventDTO> callback);
 
+    void resolveImageDimensions(String imageUrlAsString, AsyncCallback<Pair<Integer, Integer>> callback);
+
     void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
 
     void removeCourseAreas(UUID eventId, UUID[] idsOfCourseAreasToRemove, AsyncCallback<Void> callback);
