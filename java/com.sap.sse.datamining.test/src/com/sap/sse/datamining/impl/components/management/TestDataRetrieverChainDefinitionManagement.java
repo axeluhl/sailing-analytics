@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
 import com.sap.sse.datamining.impl.components.SingleDataRetrieverChainDefinition;
@@ -38,8 +37,6 @@ import com.sap.sse.datamining.test.util.components.TestRegattaRetrievalProcessor
 
 public class TestDataRetrieverChainDefinitionManagement {
     
-    private static final DataMiningDTOFactory dtoFactory = new DataMiningDTOFactory();
-
     private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_Regatta> regattaRetrieverChainDefinition;
     private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasRaceContext> raceRetrieverChainDefinition;
     private DataRetrieverChainDefinition<Collection<Test_Regatta>, Test_HasLegOfCompetitorContext> legRetrieverChainDefinition;
@@ -92,10 +89,10 @@ public class TestDataRetrieverChainDefinitionManagement {
     
     @Test
     public void testGetDataRetrieverChainDefinitionForDTO() {
-        DataRetrieverChainDefinitionDTO raceRetrieverChainDTO = dtoFactory.createDataRetrieverChainDefinitionDTO(raceRetrieverChainDefinition);
+        DataRetrieverChainDefinitionDTO raceRetrieverChainDTO = TestsUtil.getDTOFactory().createDataRetrieverChainDefinitionDTO(raceRetrieverChainDefinition);
         assertThat(server.getDataRetrieverChainDefinitionForDTO(raceRetrieverChainDTO), is(raceRetrieverChainDefinition));
 
-        DataRetrieverChainDefinitionDTO legRetrieverChainDTO = dtoFactory.createDataRetrieverChainDefinitionDTO(legRetrieverChainDefinition);
+        DataRetrieverChainDefinitionDTO legRetrieverChainDTO = TestsUtil.getDTOFactory().createDataRetrieverChainDefinitionDTO(legRetrieverChainDefinition);
         assertThat(server.getDataRetrieverChainDefinitionForDTO(legRetrieverChainDTO), is(legRetrieverChainDefinition));
         
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<DataRetrieverLevelDTO>();
@@ -115,6 +112,8 @@ public class TestDataRetrieverChainDefinitionManagement {
         retrieverLevels.add(new DataRetrieverLevelDTO(1, TestRaceFromSeriesRetrievalProcessor.class.getName(), new LocalizedTypeDTO(Test_HasRaceContext.class.getName(), "Not relevant"), null));
         DataRetrieverChainDefinitionDTO dtoWithUnmatchingLevels = new DataRetrieverChainDefinitionDTO("Not relevant", Collection.class.getName(), retrieverLevels);
         assertThat(server.getDataRetrieverChainDefinitionForDTO(dtoWithUnmatchingLevels), nullValue());
+        
+        assertThat(server.getDataRetrieverChainDefinitionForDTO(null), nullValue());
         
         retrieverLevels = new ArrayList<DataRetrieverLevelDTO>();
         retrieverLevels.add(new DataRetrieverLevelDTO(0, "Not relevant", new LocalizedTypeDTO("Impossible Class", "Impossible Class"), null));

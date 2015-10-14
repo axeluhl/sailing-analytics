@@ -132,42 +132,52 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
     @Override
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO, ClassLoader classLoader) {
         DataRetrieverChainDefinition<DataSourceType, DataType> chainDefinition = null;
-        try {
-            Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
-            Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
-            Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
-            
-            if (!chainDefinitions.isEmpty()) {
-                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> matchingChainDefinitions = new HashSet<>();
-                for (DataRetrieverChainDefinition<DataSourceType, DataType> chain : chainDefinitions) {
-                    List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = chain.getDataRetrieverLevels();
-                    if (retrieverLevels.size() == retrieverChainDTO.getLevelAmount()) {
-                        boolean matches = true;
-                        for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
-                            DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO.getRetrieverLevel(retrieverLevel.getLevel());
-                            Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true, classLoader);
-                            if (!retrieverLevel.getRetrieverType().isAssignableFrom(retrieverType)) {
-                                matches = false;
-                                break;
+        if (retrieverChainDTO != null) {
+            try {
+                Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(
+                        retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
+                Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(
+                        retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
+                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(
+                        dataSourceType, retrievedDataType);
+
+                if (!chainDefinitions.isEmpty()) {
+                    Set<DataRetrieverChainDefinition<DataSourceType, DataType>> matchingChainDefinitions = new HashSet<>();
+                    for (DataRetrieverChainDefinition<DataSourceType, DataType> chain : chainDefinitions) {
+                        List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = chain.getDataRetrieverLevels();
+                        if (retrieverLevels.size() == retrieverChainDTO.getLevelAmount()) {
+                            boolean matches = true;
+                            for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
+                                DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO
+                                        .getRetrieverLevel(retrieverLevel.getLevel());
+                                Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true,
+                                        classLoader);
+                                if (!retrieverLevel.getRetrieverType().isAssignableFrom(retrieverType)) {
+                                    matches = false;
+                                    break;
+                                }
+                            }
+                            if (matches) {
+                                matchingChainDefinitions
+                                        .add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
                             }
                         }
-                        if (matches) {
-                            matchingChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
-                        }
+                    }
+
+                    if (matchingChainDefinitions.size() == 1) {
+                        chainDefinition = matchingChainDefinitions.iterator().next();
+                    } else if (matchingChainDefinitions.size() > 1) {
+                        throw new MultipleDataMiningComponentsFoundForDTOException(retrieverChainDTO,
+                                matchingChainDefinitions);
                     }
                 }
-                
-                if (matchingChainDefinitions.size() == 1) {
-                    chainDefinition = matchingChainDefinitions.iterator().next();
-                } else if (matchingChainDefinitions.size() > 1) {
-                    throw new MultipleDataMiningComponentsFoundForDTOException(retrieverChainDTO, matchingChainDefinitions);
-                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Couldn't get classes for the retriever chain DTO "
+                        + retrieverChainDTO, e);
             }
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Couldn't get classes for the retriever chain DTO " + retrieverChainDTO, e);
-        }
-        if (chainDefinition == null) {
-            logger.log(Level.WARNING, "No retriever chain definition found for the DTO: " + retrieverChainDTO);
+            if (chainDefinition == null) {
+                logger.log(Level.WARNING, "No retriever chain definition found for the DTO: " + retrieverChainDTO);
+            }
         }
         return chainDefinition;
     }
