@@ -3385,6 +3385,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws Exception {
+        URL imageURL = new URL(imageUrlAsString);
+        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(imageURL);
+        return imageDimensions;
+    }
+    
+    @Override
     public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
         final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
         for (int i=0; i<courseAreaNames.length; i++) {

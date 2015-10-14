@@ -5,18 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -41,8 +36,8 @@ public class EventDetailsComposite extends Composite  {
     private final Anchor sailorsInfoWebsiteURL;
     private final Anchor eventOverviewURL;
     private final SimpleStringListComposite courseAreaNamesList;
-    private final SimpleStringListComposite imageURLList;
-    private final SimpleStringListComposite videoURLList;
+    private final SimpleAnchorListComposite imageURLList;
+    private final SimpleAnchorListComposite videoURLList;
     private final SimpleStringListComposite leaderboardGroupList;
     
     private final CaptionPanel mainPanel;
@@ -68,13 +63,13 @@ public class EventDetailsComposite extends Composite  {
         startDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.startDate(), "StartDateLabel");
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
-        officialWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
-        sailorsInfoWebsiteURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
-        eventOverviewURL = createAnchorAndValueWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
-        courseAreaNamesList = createLableAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
-        imageURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
-        videoURLList = createLableAndValueListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
-        leaderboardGroupList = createLableAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
+        officialWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
+        sailorsInfoWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
+        eventOverviewURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
+        courseAreaNamesList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
+        imageURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
+        videoURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.videos(), "VideoURLValueList");
+        leaderboardGroupList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.leaderboardGroups(), "LeaderboardGroupValueList");
         
         for(int i=0; i < rows; i++) {
             grid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_TOP);
@@ -92,7 +87,7 @@ public class EventDetailsComposite extends Composite  {
         return valueLabel;
     }
 
-    private Anchor createAnchorAndValueWidget(Grid grid, int row, String label, String debugId) {
+    private Anchor createLabelAndAnchorWidget(Grid grid, int row, String label, String debugId) {
         Anchor valueAnchor = new Anchor();
         valueAnchor.setTarget("_blank");
         valueAnchor.ensureDebugId(debugId);
@@ -101,7 +96,15 @@ public class EventDetailsComposite extends Composite  {
         return valueAnchor;
     }
 
-    private SimpleStringListComposite createLableAndValueListWidget(Grid grid, int row, String label, String debugId) {
+    private SimpleAnchorListComposite createLabelAndAnchorListWidget(Grid grid, int row, String label, String debugId) {
+        SimpleAnchorListComposite valueList = new SimpleAnchorListComposite();
+        valueList.ensureDebugId(debugId);
+        grid.setWidget(row , 0, new Label(label + ":"));
+        grid.setWidget(row , 1, valueList);
+        return valueList;
+    }
+
+    private SimpleStringListComposite createLabelAndValueListWidget(Grid grid, int row, String label, String debugId) {
         SimpleStringListComposite valueList = new SimpleStringListComposite();
         valueList.ensureDebugId(debugId);
         grid.setWidget(row , 0, new Label(label + ":"));
@@ -165,36 +168,36 @@ public class EventDetailsComposite extends Composite  {
     }
 
     private class SimpleStringListComposite extends Composite {
-        private final FlowPanel panel;
+        private final VerticalPanel panel;
             
         public SimpleStringListComposite() {
             super();
-            panel = new FlowPanel();
+            panel = new VerticalPanel();
             this.initWidget(panel);
         }
         
         public void setValues(List<String> values) {
             panel.clear();
             for(String value: values) {
-                panel.add(new ListItemWidget(value));
+                panel.add(new Label(value));
             }
         }
     }
-    
-    public class ListItemWidget extends SimplePanel {
-        public ListItemWidget() {
-            super((Element) Document.get().createLIElement().cast());
-            getElement().getStyle().setProperty("listStylePosition", "inside");
-        }
 
-        public ListItemWidget(String s) {
-            this();
-            getElement().setInnerText(s);
+    private class SimpleAnchorListComposite extends Composite {
+        private final VerticalPanel panel;
+            
+        public SimpleAnchorListComposite() {
+            super();
+            panel = new VerticalPanel();
+            this.initWidget(panel);
         }
-
-        public ListItemWidget(Widget w) {
-            this();
-            this.add(w);
+        
+        public void setValues(List<String> values) {
+            panel.clear();
+            for(String value: values) {
+                panel.add(new Anchor(value, value, "_blank"));
+            }
         }
     }
 }
