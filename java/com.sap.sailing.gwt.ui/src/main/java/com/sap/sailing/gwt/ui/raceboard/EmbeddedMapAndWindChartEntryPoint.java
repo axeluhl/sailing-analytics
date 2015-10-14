@@ -66,7 +66,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
 
     @Override
     protected void doOnModuleLoad() {
-        GWT.debugger();
         super.doOnModuleLoad();
         // read mandatory parameters
         regattaLikeName = Window.Location.getParameter(PARAM_REGATTA_LIKE_NAME);
