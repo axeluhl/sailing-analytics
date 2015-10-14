@@ -1,5 +1,11 @@
 package com.sap.sailing.gwt.home.shared;
 
+import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_LARGE;
+import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_NORMAL;
+import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALL;
+import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.SCALE_VALUE_SMALLER;
+import static com.sap.sailing.gwt.common.client.formfactor.MetaTagUtil.setViewportToDeviceWidth;
+
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -7,8 +13,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.MetaElement;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.user.client.Cookies;
@@ -145,22 +149,11 @@ public class SwitchingEntryPoint implements EntryPoint {
     }
 
     private void configureDesktopHeader() {
-        if(DeviceDetector.isTablet()) {
-            metaElement("viewport", "width=device-width,initial-scale=0.75,maximum-scale=2");
-        } else {
-            metaElement("viewport", "width=device-width,initial-scale=0.5,maximum-scale=2");
-        }
+        setViewportToDeviceWidth(DeviceDetector.isTablet() ? SCALE_VALUE_SMALLER : SCALE_VALUE_SMALL, SCALE_VALUE_LARGE);
     }
 
     private void configureMobileHeader() {
-        metaElement("viewport", "width=device-width,initial-scale=1,maximum-scale=1");
-    }
-
-    private void metaElement(String name, String content) {
-        MetaElement metaElement = Document.get().createMetaElement();
-        metaElement.setName(name);
-        metaElement.setContent(content);
-        Document.get().getHead().appendChild(metaElement);
+        setViewportToDeviceWidth(SCALE_VALUE_NORMAL, SCALE_VALUE_NORMAL);
     }
 
     public static void reloadApp() {
