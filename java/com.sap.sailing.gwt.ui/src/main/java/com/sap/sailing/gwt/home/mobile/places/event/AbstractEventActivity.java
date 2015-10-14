@@ -198,11 +198,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         linkParams.put("eventId", getCtx().getEventId());
         linkParams.put("leaderboardName", leaderboardName);
         linkParams.put("raceName", trackedRaceName);
+        linkParams.put("regattaName", regattaName);
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_MODE, "simple");
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
-        linkParams.put("regattaName", regattaName);
         return linkParams;
     }
 
