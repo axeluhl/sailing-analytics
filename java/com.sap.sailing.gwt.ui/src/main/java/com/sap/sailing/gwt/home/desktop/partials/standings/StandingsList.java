@@ -31,6 +31,7 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField SpanElement headerLabelUi;
     @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
+    @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
 
     public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
@@ -53,7 +54,11 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
         updateScoreInformation(data);
         
         LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        setVisible(!data.getItems().isEmpty());
+        if(data.getItems().isEmpty()) {
+            noResultsUi.getStyle().clearDisplay();
+            return;
+        }
+        noResultsUi.getStyle().setDisplay(Display.NONE);
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {
