@@ -18,10 +18,5 @@ public class TestRegattaRetrievalProcessor extends AbstractRetrievalProcessor<Co
     protected Iterable<Test_Regatta> retrieveData(Collection<Test_Regatta> regattas) {
         return regattas;
     }
-    
-//    @Override
-//    public Iterable<Processor<Test_Regatta, ?>> getResultReceivers() {
-//        return super.getResultReceivers();
-//    }
 
 }

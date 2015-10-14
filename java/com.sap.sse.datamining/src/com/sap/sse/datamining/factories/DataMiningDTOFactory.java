@@ -58,7 +58,7 @@ public class DataMiningDTOFactory {
      * The display name of the resulting DTO is the message key of the given aggregation definition.
      */
     public AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition) {
-        return createAggregationProcessorDefinitionDTO(aggregatorDefinition, aggregatorDefinition.getAggregationNameMessageKey());
+        return createAggregationProcessorDefinitionDTO(aggregatorDefinition, ResourceBundleStringMessages.NULL, null);
     }
 
 
@@ -67,14 +67,14 @@ public class DataMiningDTOFactory {
      */
     public AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition,
                                                                                      ResourceBundleStringMessages stringMessages, Locale locale) {
-        return createAggregationProcessorDefinitionDTO(aggregatorDefinition, stringMessages.get(locale, aggregatorDefinition.getAggregationNameMessageKey()));
-    }
-
-    private AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition, String displayName) {
         return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getAggregationNameMessageKey(),
                                                      aggregatorDefinition.getExtractedType().getName(),
                                                      aggregatorDefinition.getAggregatedType().getName(),
-                                                     displayName);
+                                                     stringMessages.get(locale, aggregatorDefinition.getAggregationNameMessageKey()));
+    }
+
+    public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return createDataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition, ResourceBundleStringMessages.NULL, null);
     }
 
     public DataRetrieverChainDefinitionDTO createDataRetrieverChainDefinitionDTO(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition,
@@ -83,9 +83,8 @@ public class DataMiningDTOFactory {
         for (DataRetrieverLevel<?, ?> retrieverLevel : dataRetrieverChainDefinition.getDataRetrieverLevels()) {
             retrieverLevels.add(createDataRetrieverLevelDTO(retrieverLevel, stringMessages, locale));
         }
-        return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(),
-                dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages), dataRetrieverChainDefinition
-                        .getDataSourceType().getName(), retrieverLevels);
+        return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages),
+                                                   dataRetrieverChainDefinition.getDataSourceType().getName(), retrieverLevels);
    }
 
     public DataRetrieverLevelDTO createDataRetrieverLevelDTO(DataRetrieverLevel<?, ?> retrieverLevel,

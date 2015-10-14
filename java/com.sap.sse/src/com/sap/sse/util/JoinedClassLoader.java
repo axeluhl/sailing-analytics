@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sse.util;
 
 import java.util.Set;
 
