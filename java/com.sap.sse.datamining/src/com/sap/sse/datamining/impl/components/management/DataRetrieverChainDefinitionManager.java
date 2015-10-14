@@ -134,12 +134,9 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
         DataRetrieverChainDefinition<DataSourceType, DataType> chainDefinition = null;
         if (retrieverChainDTO != null) {
             try {
-                Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(
-                        retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
-                Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(
-                        retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
-                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(
-                        dataSourceType, retrievedDataType);
+                Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
+                Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
+                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
 
                 if (!chainDefinitions.isEmpty()) {
                     Set<DataRetrieverChainDefinition<DataSourceType, DataType>> matchingChainDefinitions = new HashSet<>();
@@ -148,18 +145,15 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
                         if (retrieverLevels.size() == retrieverChainDTO.getLevelAmount()) {
                             boolean matches = true;
                             for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
-                                DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO
-                                        .getRetrieverLevel(retrieverLevel.getLevel());
-                                Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true,
-                                        classLoader);
+                                DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO.getRetrieverLevel(retrieverLevel.getLevel());
+                                Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true, classLoader);
                                 if (!retrieverLevel.getRetrieverType().isAssignableFrom(retrieverType)) {
                                     matches = false;
                                     break;
                                 }
                             }
                             if (matches) {
-                                matchingChainDefinitions
-                                        .add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
+                                matchingChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
                             }
                         }
                     }
@@ -167,13 +161,11 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
                     if (matchingChainDefinitions.size() == 1) {
                         chainDefinition = matchingChainDefinitions.iterator().next();
                     } else if (matchingChainDefinitions.size() > 1) {
-                        throw new MultipleDataMiningComponentsFoundForDTOException(retrieverChainDTO,
-                                matchingChainDefinitions);
+                        throw new MultipleDataMiningComponentsFoundForDTOException(retrieverChainDTO, matchingChainDefinitions);
                     }
                 }
             } catch (ClassNotFoundException e) {
-                throw new IllegalArgumentException("Couldn't get classes for the retriever chain DTO "
-                        + retrieverChainDTO, e);
+                throw new IllegalArgumentException("Couldn't get classes for the retriever chain DTO " + retrieverChainDTO, e);
             }
             if (chainDefinition == null) {
                 logger.log(Level.WARNING, "No retriever chain definition found for the DTO: " + retrieverChainDTO);

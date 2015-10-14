@@ -326,7 +326,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO) {
-        return aggregationProcessorDefinitionRegistry.getForDTO(aggregatorDefinitionDTO);
+        return aggregationProcessorDefinitionRegistry.getForDTO(aggregatorDefinitionDTO, getJoinedClassLoader());
     }
 
     @Override
