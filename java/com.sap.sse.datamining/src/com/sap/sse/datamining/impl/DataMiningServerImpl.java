@@ -36,7 +36,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
-import com.sap.sse.datamining.impl.components.management.RuntimeMemorInfoProvider;
+import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -74,7 +74,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
-        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemorInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
+        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemoryInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
                                                       createMemoryMonitorActions(), MEMORY_CHECK_PERIOD, MEMORY_CHECK_PERIOD_UNIT);
         this.functionRegistry = functionRegistry;
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;

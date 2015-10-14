@@ -2,11 +2,11 @@ package com.sap.sse.datamining.impl.components.management;
 
 import com.sap.sse.datamining.components.management.MemoryInfoProvider;
 
-public class RuntimeMemorInfoProvider implements MemoryInfoProvider {
+public class RuntimeMemoryInfoProvider implements MemoryInfoProvider {
     
     private Runtime runtime;
 
-    public RuntimeMemorInfoProvider(Runtime runtime) {
+    public RuntimeMemoryInfoProvider(Runtime runtime) {
         this.runtime = runtime;
     }
 

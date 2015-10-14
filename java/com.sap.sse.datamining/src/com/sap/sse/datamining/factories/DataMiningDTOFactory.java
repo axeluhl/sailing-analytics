@@ -39,8 +39,8 @@ public class DataMiningDTOFactory {
     
     private FunctionDTO createFunctionDTO(Function<?> function, String displayName) {
         String functionName = function.getSimpleName();
-        String sourceTypeName = function.getDeclaringType().getSimpleName();
-        String returnTypeName = function.getReturnType().getSimpleName();
+        String sourceTypeName = function.getDeclaringType().getName();
+        String returnTypeName = function.getReturnType().getName();
         List<String> parameterTypeNames = getParameterTypeNames(function);
         return new FunctionDTO(function.isDimension(), functionName, sourceTypeName, returnTypeName, parameterTypeNames, displayName, function.getOrdinal());
     }
@@ -48,7 +48,7 @@ public class DataMiningDTOFactory {
     private List<String> getParameterTypeNames(Function<?> function) {
         List<String> parameterTypeNames = new ArrayList<>();
         for (Class<?> parameterType : function.getParameters()) {
-            parameterTypeNames.add(parameterType.getSimpleName());
+            parameterTypeNames.add(parameterType.getName());
         }
         return parameterTypeNames;
     }
@@ -72,8 +72,8 @@ public class DataMiningDTOFactory {
 
     private AggregationProcessorDefinitionDTO createAggregationProcessorDefinitionDTO(AggregationProcessorDefinition<?, ?> aggregatorDefinition, String displayName) {
         return new AggregationProcessorDefinitionDTO(aggregatorDefinition.getAggregationNameMessageKey(),
-                                                     aggregatorDefinition.getExtractedType().getSimpleName(),
-                                                     aggregatorDefinition.getAggregatedType().getSimpleName(),
+                                                     aggregatorDefinition.getExtractedType().getName(),
+                                                     aggregatorDefinition.getAggregatedType().getName(),
                                                      displayName);
     }
 
@@ -85,12 +85,12 @@ public class DataMiningDTOFactory {
         }
         return new DataRetrieverChainDefinitionDTO(dataRetrieverChainDefinition.getID(),
                 dataRetrieverChainDefinition.getLocalizedName(locale, stringMessages), dataRetrieverChainDefinition
-                        .getDataSourceType().getSimpleName(), retrieverLevels);
+                        .getDataSourceType().getName(), retrieverLevels);
    }
 
     public DataRetrieverLevelDTO createDataRetrieverLevelDTO(DataRetrieverLevel<?, ?> retrieverLevel,
                                                              ResourceBundleStringMessages stringMessages, Locale locale) {
-        String typeName = retrieverLevel.getRetrievedDataType().getSimpleName();
+        String typeName = retrieverLevel.getRetrievedDataType().getName();
         String displayName = retrieverLevel.getRetrievedDataTypeMessageKey() != null
                 && !retrieverLevel.getRetrievedDataTypeMessageKey().isEmpty() ? stringMessages
                 .get(locale, retrieverLevel.getRetrievedDataTypeMessageKey()) : typeName;

@@ -49,7 +49,7 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
     
     @Override
     public String toString() {
-        return retrieverTypeName + "[retrievedDataType: " + retrievedDataType + "]";
+        return getRetrieverTypeName() + "[retrievedDataType: " + getRetrievedDataType() + "]";
     }
     
     @Override
