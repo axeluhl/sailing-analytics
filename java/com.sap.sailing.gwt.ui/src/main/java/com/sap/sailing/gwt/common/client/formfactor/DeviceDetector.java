@@ -9,7 +9,7 @@ public class DeviceDetector {
     private static Logger LOG = Logger.getLogger(DeviceDetector.class.getName());
     
     private static final RegExp isMobileRegExp = RegExp.compile(
-            "Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile Safari", "i");
+            "Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile Safari", "i");
     private static final RegExp tabletBlacklistRegExp = RegExp.compile(
             "iPad|" // Apple ;-)
             + "Nexus 7|Nexus 10|Nexus 9|" // Google Tablets
