@@ -197,11 +197,13 @@ public class StartlineAdvantagesOnLineChart extends Composite implements HasWidg
     }
     
     public void setStartlineAdvantages(List<StartLineAdvantageDTO> startlineAdvantages) {
-        if (series.getPoints() != null && series.getPoints().length > 0) {
-            updateStartlineAdvantages(startlineAdvantages, series);
-        } else {
-            addStartlineAdvantages(startlineAdvantages, series);
-            chart.addSeries(series , true, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS).setEasing(Easing.SWING));
+        if (startlineAdvantages != null) {
+            if (series.getPoints() != null && series.getPoints().length > 0) {
+                updateStartlineAdvantages(startlineAdvantages, series);
+            } else {
+                addStartlineAdvantages(startlineAdvantages, series);
+                chart.addSeries(series, true, new Animation().setDuration(POINT_ADDING_ANIMATION_DURATION_IN_MILLIS).setEasing(Easing.SWING));
+            }
         }
         chart.setSizeToMatchContainer();
     }
