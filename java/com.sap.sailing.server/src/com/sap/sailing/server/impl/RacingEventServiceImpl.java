@@ -230,6 +230,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,

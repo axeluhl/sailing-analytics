@@ -337,7 +337,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         
         Collection<Function<?>> functionsMatchingDTO = getFunctionsForDTO(functionDTO);
-        if (moreThanOneFunctionMatchedDTO(functionsMatchingDTO)) {
+        if (functionsMatchingDTO.size() > 1) {
             logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
         }
         
@@ -365,10 +365,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             allFunctions.addAll(asSet(functionMap));
         }
         return allFunctions;
-    }
-
-    private boolean moreThanOneFunctionMatchedDTO(Collection<Function<?>> functionsMatchingDTO) {
-        return functionsMatchingDTO.size() > 1;
     }
 
     private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {

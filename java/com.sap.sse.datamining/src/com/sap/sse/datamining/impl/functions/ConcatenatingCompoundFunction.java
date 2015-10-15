@@ -19,7 +19,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  */
 public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<ReturnType> {
 
-    private static final String SIMPLE_NAME_CHAIN_CONNECTOR = " -> ";
+    private static final String SIMPLE_NAME_CHAIN_CONNECTOR = ".";
     private static final String LOCALIZED_NAME_CHAIN_CONNECTOR = " ";
     
     private final List<Function<?>> functions;
