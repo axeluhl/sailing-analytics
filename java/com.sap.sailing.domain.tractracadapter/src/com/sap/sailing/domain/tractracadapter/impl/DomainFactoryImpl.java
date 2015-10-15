@@ -505,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Iterable<Pair<Competitor, Boat>> competitorBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -513,7 +513,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, competitorBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }

@@ -58,7 +58,6 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -196,7 +195,6 @@ import com.sap.sailing.server.operationaltransformation.RenameEvent;
 import com.sap.sailing.server.operationaltransformation.SetDataImportDeleteProgressFromMapTimer;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
-import com.sap.sailing.server.operationaltransformation.UpdateCompetitorToBoatAssignment;
 import com.sap.sailing.server.operationaltransformation.UpdateEndOfTracking;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateMediaTrackDurationOperation;
@@ -1733,11 +1731,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
                 Iterable<MarkPassing> markPassings) {
             replicate(new UpdateMarkPassings(getRaceIdentifier(), competitor, markPassings));
-        }
-
-        @Override
-        public void competitorToBoatAssigmentChanged(Competitor competitor, Boat boat) {
-            replicate(new UpdateCompetitorToBoatAssignment(getRaceIdentifier(), competitor, boat));
         }
 
         @Override

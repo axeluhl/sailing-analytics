@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -408,10 +407,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
-    }
-
-    private void notifyListenersCompetitorToBoatAssignmentChanged(Competitor competitor, Boat boat) {
-        notifyListeners(listener -> listener.competitorToBoatAssigmentChanged(competitor, boat));
     }
 
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -830,11 +825,5 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
-    }
-
-    @Override
-    public void setBoatForCompetitor(Competitor competitor, Boat boat) {
-        super.setBoatForCompetitor(competitor, boat);
-        notifyListenersCompetitorToBoatAssignmentChanged(competitor, boat);
     }
 }

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
@@ -104,11 +103,4 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
-
-    /**
-     * Sets the boat for the competitor only for this race. 
-     * @param competitor
-     * @param boat
-     */
-    void setBoatForCompetitor(Competitor competitor, Boat boat);
 }

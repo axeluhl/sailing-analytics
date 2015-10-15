@@ -1581,23 +1581,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
                 TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
                 List<CompetitorDTO> competitors = convertToCompetitorDTOs(race.getCompetitors());
+                HashMap<String, CompetitorDTO> competitorsMap = new HashMap<>();
+                for(CompetitorDTO competitorDTO: competitors) {
+                    competitorsMap.put(competitorDTO.getIdAsString(), competitorDTO);
+                }
+                competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    Boat boatOfCompetitor = trackedRace.getRace().getBoatOfCompetitorById(competitor.getId());
+                    if(boatOfCompetitor != null) {
+                        BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
+                        competitorBoats.put(competitorsMap.get(competitor.getId().toString()), boatDTO);
+                    }
+                }
                 TrackedRaceDTO trackedRaceDTO = null; 
                 if (trackedRace != null) {
                     trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
-
-                    HashMap<String, CompetitorDTO> competitorsMap = new HashMap<>();
-                    for(CompetitorDTO competitorDTO: competitors) {
-                        competitorsMap.put(competitorDTO.getIdAsString(), competitorDTO);
-                    }
-
-                    competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        Boat boatOfCompetitor = trackedRace.resolveBoatOfCompetitor(competitor);
-                        if(boatOfCompetitor != null) {
-                            BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
-                            competitorBoats.put(competitorsMap.get(competitor.getId().toString()), boatDTO);
-                        }
-                    }
                 }
                 raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, competitors, trackedRaceDTO, getService().isRaceBeingTracked(regatta, race));
                 if (trackedRace != null) {
