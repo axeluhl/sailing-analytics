@@ -15,7 +15,7 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;
     private final BoatClass boatClass;
     private String sailID;
-    private Color color;
+    private final Color color;
     private transient Set<BoatChangeListener> listeners;
 
     public BoatImpl(String name, BoatClass boatClass, String sailID) {
