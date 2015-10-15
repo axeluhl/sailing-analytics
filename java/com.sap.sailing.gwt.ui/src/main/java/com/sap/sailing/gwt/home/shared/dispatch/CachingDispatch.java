@@ -18,13 +18,24 @@ import com.sap.sse.common.Duration;
 public final class CachingDispatch implements DispatchAsync {
 
     private static final Logger LOG = Logger.getLogger(CachingDispatch.class.getName());
-    private final int DEFAULT_TIME_TO_LIVE_MILLIS = (int) Duration.ONE_MINUTE.times(3).asMillis();
-    private final CacheCleanupTask invalidationTask = new CacheCleanupTask();
+
+    private final CacheCleanupTask invalidationTask;
     private final HashMap<String, ResultHolder> resultsCache = new HashMap<>();
     private final DispatchAsync dispatch;
+    private final int defaultTimeToLive;
 
     public CachingDispatch(DispatchAsync service) {
+        this(service, true, (int) Duration.ONE_MINUTE.times(3).asMillis());
+    }
+
+    public CachingDispatch(DispatchAsync service, boolean enableCleanup, int defaultTimeToLive) {
         this.dispatch = service;
+        this.defaultTimeToLive = defaultTimeToLive;
+        if (enableCleanup) {
+            invalidationTask = new CacheCleanupTask();
+        } else {
+            invalidationTask = null;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +93,7 @@ public final class CachingDispatch implements DispatchAsync {
             if (action instanceof IsClientCacheable) {
                 final IsClientCacheable clientCacheableAction = (IsClientCacheable) action;
                 final String instanceKey = key(clientCacheableAction);
-                int cacheTotalTimeToLiveMillis = DEFAULT_TIME_TO_LIVE_MILLIS;
+                int cacheTotalTimeToLiveMillis = defaultTimeToLive;
                 if (result instanceof HasClientCacheTotalTimeToLive) {
                     cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) result).cacheTotalTimeToLiveMillis();
                 } else if (action instanceof HasClientCacheTotalTimeToLive) {
@@ -91,9 +102,9 @@ public final class CachingDispatch implements DispatchAsync {
                 resultsCache.put(key(clientCacheableAction), new ResultHolder(System.currentTimeMillis()
                         + cacheTotalTimeToLiveMillis, result));
                 LOG.finest("Added " + instanceKey + " to cache, ttl: " + cacheTotalTimeToLiveMillis + "ms");
-                if (!invalidationTask.isRunning()) {
+                if (invalidationTask != null && !invalidationTask.isRunning()) {
                     LOG.finest("Schedule cache cleanup");
-                    invalidationTask.schedule((int) Duration.ONE_MINUTE.asMillis());
+                    invalidationTask.schedule((int) Duration.ONE_MINUTE.times(5).asMillis());
                 }
             }
             callback.onSuccess(result);
@@ -141,6 +152,20 @@ public final class CachingDispatch implements DispatchAsync {
         }
     }
 
+    public void cleanupExpiredItems() {
+        final ArrayList<String> keys = new ArrayList<String>(resultsCache.keySet());
+        LOG.finest("Start cache cleanup");
+        for (String key : keys) {
+            if (!resultsCache.get(key).isValid()) {
+                resultsCache.remove(key);
+            }
+        }
+    }
+
+    public int ttlItemsInCache() {
+        return resultsCache.size();
+    }
+
     /**
      * Removes due elements from resultscache.
      * 
@@ -151,16 +176,10 @@ public final class CachingDispatch implements DispatchAsync {
         @Override
         public void run() {
             try {
-                LOG.finest("Start cache cleanup");
-                final ArrayList<String> keys = new ArrayList<String>(resultsCache.keySet());
-                for (String key : keys) {
-                    if (!resultsCache.get(key).isValid()) {
-                        resultsCache.remove(key);
-                    }
-                }
+                cleanupExpiredItems();
             } finally {
                 if (!resultsCache.isEmpty()) {
-                    invalidationTask.schedule((int) Duration.ONE_MINUTE.asMillis());
+                    invalidationTask.schedule((int) Duration.ONE_MINUTE.times(5).asMillis());
                 }
             }
         }
