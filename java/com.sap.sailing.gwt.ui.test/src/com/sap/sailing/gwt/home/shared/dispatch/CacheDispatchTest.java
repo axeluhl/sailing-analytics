@@ -30,7 +30,7 @@ public class CacheDispatchTest {
         Assert.assertEquals("One element in cache", 3, cd.ttlItemsInCache());
         wait(210);
         cd.cleanupExpiredItems();
-        Assert.assertEquals("No element in cache", 1, cd.ttlItemsInCache());
+        Assert.assertEquals("No element in cache", 0, cd.ttlItemsInCache());
     }
 
     @Test
