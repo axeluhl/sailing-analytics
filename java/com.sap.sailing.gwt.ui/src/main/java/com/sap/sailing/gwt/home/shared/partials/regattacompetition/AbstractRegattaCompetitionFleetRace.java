@@ -35,11 +35,12 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
         if (viewState == RaceViewState.RUNNING) {
             anchorUiElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
-        } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
-            anchorUiElement.addClassName(getRacePlannedStyleName());
-            getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+        } else if (viewState == RaceViewState.FINISHED) {
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
         } else {
-            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.finished() : I18N.actionAnalyze());
+            anchorUiElement.addClassName(getRacePlannedStyleName());
+            if (viewState == RaceViewState.SCHEDULED) getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+            else getRaceStateUiElement().setInnerText(viewState.getLabel());
         }
         setStyleName(anchorUiElement, getRaceUntrackedStyleName(), isUntrackedRace);
     }
