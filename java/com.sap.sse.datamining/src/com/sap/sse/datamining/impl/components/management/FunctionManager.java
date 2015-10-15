@@ -2,7 +2,9 @@ package com.sap.sse.datamining.impl.components.management;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,12 +37,6 @@ import com.sap.sse.datamining.util.Classes;
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
     private enum FunctionRetrievalStrategies {
-        All {
-            @Override
-            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
-                return manager.getAllFunctionsOf(declaringType);
-            }
-        },
         Dimensions {
             @Override
             public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
@@ -51,6 +47,12 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             @Override
             public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
                 return manager.getStatisticsOf(declaringType);
+            }
+        },
+        ExternalFunctions {
+            @Override
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
+                return manager.getExternalFunctionsOf(declaringType);
             }
         };
         
@@ -87,7 +89,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         functionMaps.add(dimensions);
         functionMaps.add(externalFunctions);
     }
-    
+
     @Override
     public boolean registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
         boolean functionsHaveBeenRegistered = false;
@@ -209,17 +211,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         return functionsHaveBeenUnregistered;
     }
-
-    private Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
-        Collection<Function<?>> allFunctions = new HashSet<>();
-        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            Collection<Function<?>> functions = functionMap.get(declaringType);
-            if (functions != null) {
-                allFunctions.addAll(functions);
-            }
-        }
-        return allFunctions;
-    }
     
     @Override
     public Collection<Function<?>> getAllStatistics() {
@@ -234,6 +225,10 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         return dimensions.get(declaringType);
     }
     
+    private Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType) {
+        return externalFunctions.get(declaringType);
+    }
+    
     protected Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
         Collection<Function<?>> set = new HashSet<>();
         for (Entry<?, Set<Function<?>>> entry : map.entrySet()) {
@@ -244,12 +239,42 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.All);
+        return getFunctionsFor(sourceType, Arrays.asList(FunctionRetrievalStrategies.values()));
     }
 
     @Override
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Dimensions);
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.Dimensions));
+    }
+
+    @Override
+    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.Statistics));
+    }
+    
+    @Override
+    public Collection<Function<?>> getExternalFunctionsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.ExternalFunctions));
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, Iterable<FunctionRetrievalStrategies> retrievalStrategies) {
+        Collection<Class<?>> typesToRetrieve = Classes.getSupertypesOf(sourceType);
+        typesToRetrieve.remove(Object.class);
+        typesToRetrieve.add(sourceType);
+        return getFunctionsFor(typesToRetrieve, retrievalStrategies);
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve, Iterable<FunctionRetrievalStrategies> retrievalStrategies) {
+        Collection<Function<?>> functions = new HashSet<>();
+        for (Class<?> typeToRetrieve : typesToRetrieve) {
+            for (FunctionRetrievalStrategies retrievalStrategy : retrievalStrategies) {
+                Collection<Function<?>> typeSpecificFunctions = retrievalStrategy.retrieveFunctions(typeToRetrieve, this);
+                if (typeSpecificFunctions != null) {
+                    functions.addAll(typeSpecificFunctions);
+                }
+            }
+        }
+        return functions;
     }
     
     @Override
@@ -306,32 +331,14 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         return reducedDimensions;
     }
-
-    @Override
-    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Statistics);
-    }
-
-    private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Class<?>> typesToRetrieve = Classes.getSupertypesOf(sourceType);
-        typesToRetrieve.remove(Object.class);
-        typesToRetrieve.add(sourceType);
-        return getFunctionsFor(typesToRetrieve, retrievalStrategy);
-    }
-
-    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Function<?>> functions = new HashSet<>();
-        for (Class<?> typeToRetrieve : typesToRetrieve) {
-            Collection<Function<?>> typeSpecificFunctions = retrievalStrategy.retrieveFunctions(typeToRetrieve, this);
-            if (typeSpecificFunctions != null) {
-                functions.addAll(typeSpecificFunctions);
-            }
-        }
-        return functions;
-    }
     
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
+//        Function<?> function = null;
+//        if (functionDTO != null) {
+//            
+//        }
+//        return function;
         if (functionDTO == null) {
             return null;
         }

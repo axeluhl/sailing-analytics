@@ -13,10 +13,9 @@ public interface FunctionProvider {
     public Collection<Function<?>> getAllStatistics();
 
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
-    
     public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);
-
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
+    public Collection<Function<?>> getExternalFunctionsFor(Class<?> sourceType);
     
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
