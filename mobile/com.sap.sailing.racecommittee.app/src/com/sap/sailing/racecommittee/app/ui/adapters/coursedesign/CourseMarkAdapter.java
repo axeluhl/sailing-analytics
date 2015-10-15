@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,12 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.ViewHolder> {
 
@@ -38,8 +39,7 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
 
         Mark mark = mMarks.get(position);
 
-        int drawable = mImageHelper.resolveMarkImage(mark);
-        holder.imageView.setImageResource(drawable);
+        holder.imageView.setImageDrawable(mImageHelper.resolveMarkImage(mContext, mark));
         holder.textView.setText(mark.getName());
     }
 

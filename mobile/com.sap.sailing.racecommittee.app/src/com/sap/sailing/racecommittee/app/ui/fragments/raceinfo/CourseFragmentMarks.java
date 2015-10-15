@@ -109,7 +109,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mHistoryCourse.setLayoutManager(layoutManager);
 
-            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(), false);
+            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
 
@@ -127,16 +127,16 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
-            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(), true);
+            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
             adapter.setListener(this);
             adapter.setEventListener(this);
 
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
+            @SuppressWarnings("unchecked") RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager
+                .createWrappedAdapter(adapter);
             mCourseAdapter = dragAdapter;
 
-            @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
+            @SuppressWarnings("unchecked") RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager
+                .createWrappedAdapter(mCourseAdapter);
             mCourseAdapter = swipeManager;
 
             mCurrentCourse.setLayoutManager(layoutManager);
@@ -144,8 +144,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                mCurrentCourse
-                    .addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z1)));
+                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat
+                    .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
             }
 
             mGuardManager.attachRecyclerView(mCurrentCourse);
@@ -158,7 +158,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
             mMarkGrid.setLayoutManager(layoutManager);
 
-            mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance());
+            mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()));
             mMarkAdapter.setListener(this);
             mMarkGrid.setAdapter(mMarkAdapter);
         }

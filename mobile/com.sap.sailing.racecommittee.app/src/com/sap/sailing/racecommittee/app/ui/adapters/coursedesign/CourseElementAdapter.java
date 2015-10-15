@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.coursedesign;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -8,10 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
@@ -20,9 +25,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolde
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElementAdapter.ViewHolder> {
 
@@ -36,8 +38,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
 
     private boolean mEditable;
 
-    public CourseElementAdapter(Context context, ArrayList<CourseListDataElementWithIdImpl> elements,
-        MarkImageHelper imageHelper, boolean editable) {
+    public CourseElementAdapter(Context context, ArrayList<CourseListDataElementWithIdImpl> elements, MarkImageHelper imageHelper, boolean editable) {
         mContext = context;
         mElements = elements;
         mImageHelper = imageHelper;
@@ -65,8 +66,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
             holder.leftText.setText(element.getLeftMark().getName());
             holder.leftText.setVisibility(View.VISIBLE);
 
-            int resId = mImageHelper.resolveMarkImage(element.getLeftMark());
-            holder.leftImage.setImageResource(resId);
+            holder.leftImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getLeftMark()));
             holder.leftImage.setVisibility(View.VISIBLE);
         }
 
@@ -82,8 +82,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
             holder.rightText.setText(element.getRightMark().getName());
             holder.rightText.setVisibility(View.VISIBLE);
 
-            int resId = mImageHelper.resolveMarkImage(element.getRightMark());
-            holder.rightImage.setImageResource(resId);
+            holder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
             holder.rightImage.setVisibility(View.VISIBLE);
         }
 
@@ -187,15 +186,15 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
     public void onSetSwipeBackground(ViewHolder viewHolder, int type) {
         int bgRes = 0;
         switch (type) {
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
-            bgRes = R.attr.swipe_idle;
-            break;
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
-            bgRes = R.attr.swipe_left;
-            break;
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
-            bgRes = R.attr.swipe_right;
-            break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
+                bgRes = R.attr.swipe_idle;
+                break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
+                bgRes = R.attr.swipe_left;
+                break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
+                bgRes = R.attr.swipe_right;
+                break;
         }
 
         viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
@@ -206,12 +205,12 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
     @Override
     public int onSwipeItem(ViewHolder holder, int result) {
         switch (result) {
-        case RecyclerViewSwipeManager.RESULT_SWIPED_LEFT:
-        case RecyclerViewSwipeManager.RESULT_SWIPED_RIGHT:
-            return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM;
+            case RecyclerViewSwipeManager.RESULT_SWIPED_LEFT:
+            case RecyclerViewSwipeManager.RESULT_SWIPED_RIGHT:
+                return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM;
 
-        default:
-            return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_DEFAULT;
+            default:
+                return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_DEFAULT;
         }
     }
 
@@ -221,17 +220,17 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
         CourseListDataElementWithIdImpl element = mElements.get(position);
 
         switch (reaction) {
-        case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
-            mElements.remove(element);
-            notifyItemRemoved(position);
+            case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
+                mElements.remove(element);
+                notifyItemRemoved(position);
 
-            if (mEventListener != null) {
-                mEventListener.onItemRemoved(position);
-            }
-            break;
+                if (mEventListener != null) {
+                    mEventListener.onItemRemoved(position);
+                }
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -246,7 +245,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
 
         public ViewGroup container;
-        public ImageView dragHandle;
+        public View dragHandle;
         public TextView leftText;
         public ImageView leftImage;
         public TextView roundingDirection;
@@ -260,13 +259,13 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
                 itemView.setOnLongClickListener(this);
             }
 
-            container = (ViewGroup) itemView.findViewById(R.id.container);
-            dragHandle = (ImageView) itemView.findViewById(R.id.drag_handle);
-            leftText = (TextView) itemView.findViewById(R.id.column_left_text);
-            leftImage = (ImageView) itemView.findViewById(R.id.column_left_image);
-            roundingDirection = (TextView) itemView.findViewById(R.id.rounding_direction);
-            rightText = (TextView) itemView.findViewById(R.id.column_right_text);
-            rightImage = (ImageView) itemView.findViewById(R.id.column_right_image);
+            container = ViewHelper.get(itemView, R.id.container);
+            dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
+            leftText = ViewHelper.get(itemView, R.id.column_left_text);
+            leftImage = ViewHelper.get(itemView, R.id.column_left_image);
+            roundingDirection = ViewHelper.get(itemView, R.id.rounding_direction);
+            rightText = ViewHelper.get(itemView, R.id.column_right_text);
+            rightImage = ViewHelper.get(itemView, R.id.column_right_image);
         }
 
         @Override
