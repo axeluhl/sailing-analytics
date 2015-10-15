@@ -4,11 +4,11 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-public class PhotoListItemDecoration extends RecyclerView.ItemDecoration {
+public class PaddingItemDecoration extends RecyclerView.ItemDecoration {
 
-    private int mPadding;
+    protected int mPadding;
 
-    public PhotoListItemDecoration(int padding) {
+    public PaddingItemDecoration(int padding) {
         mPadding = padding;
     }
 

@@ -52,6 +52,8 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdap
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
+import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -157,6 +159,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         if (mMarkGrid != null) {
             GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
             mMarkGrid.setLayoutManager(layoutManager);
+            mMarkGrid
+                .addItemDecoration(new ItemStrokeDecoration(getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line), getActivity()
+                    .getResources().getDimensionPixelSize(R.dimen.thin_line), ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray)));
 
             mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()));
             mMarkAdapter.setListener(this);

@@ -13,12 +13,19 @@
         android:orientation="horizontal"
         tools:ignore="UseCompoundDrawables">
 
-        <ImageView
+        <RelativeLayout
             android:id="@id/drag_handle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@drawable/dragster"
-            android:contentDescription="@string/drag_handle_description"/>
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/dragster"
+                android:contentDescription="@string/drag_handle_description"/>
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/position"

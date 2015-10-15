@@ -1,5 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,23 +22,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
-import com.sap.sailing.racecommittee.app.ui.views.decoration.PhotoListItemDecoration;
+import com.sap.sailing.racecommittee.app.ui.views.decoration.PaddingItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class PhotoListFragment extends BaseFragment {
 
@@ -85,7 +86,7 @@ public class PhotoListFragment extends BaseFragment {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
             mPhotoList.setLayoutManager(layoutManager);
-            mPhotoList.addItemDecoration(new PhotoListItemDecoration(getResources().getDimensionPixelOffset(R.dimen.side_padding)));
+            mPhotoList.addItemDecoration(new PaddingItemDecoration(getResources().getDimensionPixelOffset(R.dimen.side_padding)));
         }
 
         mSubmit = ViewHelper.get(layout, R.id.submit_button);
@@ -119,13 +120,13 @@ public class PhotoListFragment extends BaseFragment {
         }
 
         switch (requestCode) {
-        case PHOTO_SHOOTING:
-            refreshPhotoList();
-            ExLog.i(getActivity(), TAG, "Returned from Photo");
-            break;
+            case PHOTO_SHOOTING:
+                refreshPhotoList();
+                ExLog.i(getActivity(), TAG, "Returned from Photo");
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 

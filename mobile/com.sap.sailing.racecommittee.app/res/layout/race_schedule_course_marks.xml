@@ -21,7 +21,8 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/side_padding">
 
             <TextView
                 android:layout_width="0dp"
@@ -59,10 +60,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
-            android:paddingBottom="@dimen/default_padding_half"
-            android:paddingLeft="@dimen/default_padding"
-            android:paddingRight="@dimen/default_padding"
-            android:paddingTop="@dimen/default_padding">
+            android:paddingBottom="@dimen/side_padding"
+            android:paddingLeft="@dimen/side_padding"
+            android:paddingRight="@dimen/side_padding"
+            android:paddingTop="@dimen/side_padding">
 
             <Button
                 android:id="@+id/publishCourse"
@@ -96,7 +97,8 @@
             android:layout_marginLeft="@dimen/default_margin"
             android:layout_marginRight="@dimen/default_margin"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/side_padding">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/previous_course"
