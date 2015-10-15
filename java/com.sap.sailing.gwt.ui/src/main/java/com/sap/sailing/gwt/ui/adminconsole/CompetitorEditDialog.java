@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -174,11 +175,12 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
+        BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
-                /* countryName */ null, sailId.getText(), competitorToEdit.getIdAsString(),
-                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boatClass,
+                /* countryName */ null, competitorToEdit.getIdAsString(),
+                imageUrlAndUploadComposite.getURL(), flagImageURL.getURL(), boat, boatClass,
                 timeOnTimeFactor.getValue(),
                 timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue() == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile.getValue()*1000)));
