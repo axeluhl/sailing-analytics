@@ -137,12 +137,12 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
             try {
                 Class<DataSourceType> dataSourceType = (Class<DataSourceType>) ClassUtils.getClassForName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
                 Class<DataType> retrievedDataType = (Class<DataType>) ClassUtils.getClassForName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
-                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
+                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> possibleChainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
 
-                if (!chainDefinitions.isEmpty()) {
+                if (!possibleChainDefinitions.isEmpty()) {
                     Set<DataRetrieverChainDefinition<DataSourceType, DataType>> matchingChainDefinitions = new HashSet<>();
-                    for (DataRetrieverChainDefinition<DataSourceType, DataType> chain : chainDefinitions) {
-                        List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = chain.getDataRetrieverLevels();
+                    for (DataRetrieverChainDefinition<DataSourceType, DataType> possibleChainDefinition : possibleChainDefinitions) {
+                        List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = possibleChainDefinition.getDataRetrieverLevels();
                         if (retrieverLevels.size() == retrieverChainDTO.getLevelAmount()) {
                             boolean matches = true;
                             for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
@@ -154,7 +154,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
                                 }
                             }
                             if (matches) {
-                                matchingChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
+                                matchingChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) possibleChainDefinition);
                             }
                         }
                     }
