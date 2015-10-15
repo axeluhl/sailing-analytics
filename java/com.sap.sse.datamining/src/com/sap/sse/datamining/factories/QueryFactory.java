@@ -37,7 +37,7 @@ public class QueryFactory {
 
     public <DataSourceType, DataType, ExtractedType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition,
                                                                             ResourceBundleStringMessages stringMessages, ExecutorService executor) {
-        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData(queryDefinition.getDataRetrieverChainDefinition().getID())) {
+        return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData()) {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, ResultType>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
@@ -131,7 +131,7 @@ public class QueryFactory {
             final ResourceBundleStringMessages stringMessages, final ExecutorService executor) {
         @SuppressWarnings("unchecked")
         Class<HashSet<Object>> resultType = (Class<HashSet<Object>>)(Class<?>) HashSet.class;
-        return new ProcessorQuery<HashSet<Object>, DataSourceType>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dataRetrieverChainDefinition.getID(), dimensions)) {
+        return new ProcessorQuery<HashSet<Object>, DataSourceType>(dataSource, stringMessages, locale, resultType, new AdditionalDimensionValuesQueryData(dimensions)) {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);

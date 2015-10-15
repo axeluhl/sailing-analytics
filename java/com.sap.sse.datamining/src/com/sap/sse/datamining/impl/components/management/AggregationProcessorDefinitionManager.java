@@ -67,7 +67,7 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
         }
         
         Collection<AggregationProcessorDefinition<ExtractedType, ResultType>> definitionsMatchingDTO = getDefinitionsForDTO(aggregatorDefinitionDTO);
-        if (moreThanOneDefinitionMatchedDTO(definitionsMatchingDTO)) {
+        if (definitionsMatchingDTO.size() > 1) {
             logThatMoreThanOneDefinitionMatchedDTO(aggregatorDefinitionDTO, definitionsMatchingDTO);
         }
         
@@ -96,10 +96,6 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
             allDefinitions.addAll(map.values());
         }
         return allDefinitions;
-    }
-
-    private <ExtractedType, ResultType> boolean moreThanOneDefinitionMatchedDTO(Collection<AggregationProcessorDefinition<ExtractedType, ResultType>> definitionsMatchingDTO) {
-        return definitionsMatchingDTO.size() > 1;
     }
 
     private <ExtractedType, ResultType> void logThatMoreThanOneDefinitionMatchedDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO,

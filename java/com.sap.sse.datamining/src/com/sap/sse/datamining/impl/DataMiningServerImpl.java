@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -36,21 +36,25 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
-import com.sap.sse.datamining.impl.components.management.RuntimeMemorInfoProvider;
+import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
+import com.sap.sse.util.JoinedClassLoader;
 
 public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     private static final long MEMORY_CHECK_PERIOD = 5;
     private static final TimeUnit MEMORY_CHECK_PERIOD_UNIT = TimeUnit.SECONDS;
+    
+    private final Set<ClassLoader> dataMiningClassLoaders;
     
     private final CompoundResourceBundleStringMessages stringMessages;
     private final ExecutorService executorService;
@@ -69,12 +73,14 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
                                 DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
                                 AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
+        dataMiningClassLoaders = new HashSet<ClassLoader>();
+        dataMiningClassLoaders.add(this.getClass().getClassLoader());
         this.stringMessages = new CompoundResourceBundleStringMessages();
         this.executorService = executorService;
         componentsChangedTimepoint = new Date();
         this.queryFactory = new QueryFactory();
         dataMiningQueryManager = new StrategyPerQueryTypeManager();
-        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemorInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
+        memoryMonitor = new QueryManagerMemoryMonitor(new RuntimeMemoryInfoProvider(Runtime.getRuntime()), dataMiningQueryManager,
                                                       createMemoryMonitorActions(), MEMORY_CHECK_PERIOD, MEMORY_CHECK_PERIOD_UNIT);
         this.functionRegistry = functionRegistry;
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
@@ -124,6 +130,20 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public ExecutorService getExecutorService() {
         return executorService;
+    }
+    
+    private JoinedClassLoader getJoinedClassLoader() {
+        return new JoinedClassLoader(dataMiningClassLoaders);
+    }
+    
+    @Override
+    public void addDataMiningBundleClassLoader(ClassLoader classLoader) {
+        dataMiningClassLoaders.add(classLoader);
+    }
+    
+    @Override
+    public void removeDataMiningBundleClassLoader(ClassLoader classLoader) {
+        dataMiningClassLoaders.remove(classLoader);
     }
     
     @Override
@@ -272,8 +292,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     
     @Override
     public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
-            Class<DataType> dataType) {
-        return dataRetrieverChainDefinitionRegistry.getByDataType(dataType);
+            Class<DataType> retrievedDataType) {
+        return dataRetrieverChainDefinitionRegistry.getByDataType(retrievedDataType);
     }
 
     @Override
@@ -283,8 +303,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinition(UUID id) {
-        return dataRetrieverChainDefinitionRegistry.get(id);
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinitionForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO) {
+        return dataRetrieverChainDefinitionRegistry.getForDTO(retrieverChainDTO, getJoinedClassLoader());
     }
 
     @Override
@@ -335,7 +355,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         ModifiableStatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition = null;
         
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(queryDefinitionDTO.getLocaleInfoName());
-        DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinition(queryDefinitionDTO.getDataRetrieverChainDefinition().getId());
+        DataRetrieverChainDefinition<DataSourceType, DataType> retrieverChain = getDataRetrieverChainDefinitionForDTO(queryDefinitionDTO.getDataRetrieverChainDefinition());
         @SuppressWarnings("unchecked")
         Function<ExtractedType> statisticToCalculate = (Function<ExtractedType>) getFunctionForDTO(queryDefinitionDTO.getStatisticToCalculate());
         
