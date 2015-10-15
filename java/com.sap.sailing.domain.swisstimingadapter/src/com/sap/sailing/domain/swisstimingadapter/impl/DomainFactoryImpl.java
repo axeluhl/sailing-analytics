@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -196,7 +197,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Competitor> competitors = createCompetitorList(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, null, race.getRaceID());
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, /* competitorsAndTheirBoats */ Collections.emptySet(), race.getRaceID());
         regatta.addRace(result);
         return result;
     }

@@ -35,7 +35,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     }
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, Serializable id) {
-        this(name, course, boatClass, competitors, Collections.emptyList(), id);
+        this(name, course, boatClass, competitors, /* per-race boats for competitors */ Collections.emptyList(), id);
     }
     
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, 
