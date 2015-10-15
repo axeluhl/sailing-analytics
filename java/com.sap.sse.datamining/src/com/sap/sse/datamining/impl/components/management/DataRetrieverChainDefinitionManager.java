@@ -1,138 +1,187 @@
 package com.sap.sse.datamining.impl.components.management;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.exceptions.MultipleDataMiningComponentsFoundForDTOException;
+import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 
 public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
-    private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedBySourceType;
-    private final Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedByDataType;
-    private final Map<UUID, DataRetrieverChainDefinition<?, ?>> chainDefinitionsMappedByID;
+    private final Map<Class<?>, Set<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedBySourceType;
+    private final Map<Class<?>, Set<DataRetrieverChainDefinition<?, ?>>> chainDefinitionsMappedByDataType;
     
     public DataRetrieverChainDefinitionManager() {
         chainDefinitionsMappedBySourceType = new HashMap<>();
         chainDefinitionsMappedByDataType = new HashMap<>();
-        chainDefinitionsMappedByID = new HashMap<>();
     }
 
     @Override
     public boolean register(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        if (chainDefinitionsMappedByID.containsKey(dataRetrieverChainDefinition.getID())) {
-            logger.info("Can't register the data retriever chain definition " + dataRetrieverChainDefinition +
-                        ", because there's allready a definition registered for the ID " + dataRetrieverChainDefinition.getID());
-            return false;
-        }
+        Class<?> sourceType = dataRetrieverChainDefinition.getDataSourceType();
+        Class<?> retrievedDataType = dataRetrieverChainDefinition.getRetrievedDataType();
         
-        registerToBySourceTypeMap(dataRetrieverChainDefinition);
-        registerToByDataTypeMap(dataRetrieverChainDefinition);
-        DataRetrieverChainDefinition<?, ?> previousDefinition = chainDefinitionsMappedByID.put(dataRetrieverChainDefinition.getID(), dataRetrieverChainDefinition);
-        if (previousDefinition == null) {
-            logger.info("Registering the data retriever chain definition " + dataRetrieverChainDefinition +
-                        " for the ID " + dataRetrieverChainDefinition.getID());
-        } else {
-            logger.info("Registering the data retriever chain definition " + dataRetrieverChainDefinition +
-                        " for the ID " + dataRetrieverChainDefinition.getID() +
-                        " replacing " + previousDefinition);
+        boolean changedBySource = registerToByTypeMap(sourceType, chainDefinitionsMappedBySourceType, dataRetrieverChainDefinition);
+        boolean changedByData = registerToByTypeMap(retrievedDataType, chainDefinitionsMappedByDataType, dataRetrieverChainDefinition);
+        if (changedByData || changedBySource) {
+            StringBuilder logBuilder = new StringBuilder("Registering the data retriever chain definition " +
+                                                         dataRetrieverChainDefinition + " for the ");
+            if (changedByData && changedBySource) {
+                logBuilder.append("source type " + sourceType.getSimpleName() + " and the retrieved data type " + retrievedDataType.getSimpleName());
+            } else if (changedByData) {
+                logBuilder.append("retrieved data type " + retrievedDataType.getSimpleName());
+            } else {
+                logBuilder.append("source type " + sourceType.getSimpleName());
+            }
+            logger.info(logBuilder.toString());
         }
-        return true;
-    }
-    
-    private void registerToBySourceTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        registerToByTypeMap(dataRetrieverChainDefinition.getDataSourceType(), chainDefinitionsMappedBySourceType, dataRetrieverChainDefinition);
+        return changedByData || changedBySource;
     }
 
-    private void registerToByDataTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        registerToByTypeMap(dataRetrieverChainDefinition.getRetrievedDataType(), chainDefinitionsMappedByDataType, dataRetrieverChainDefinition);
-    }
-
-    private void registerToByTypeMap(Class<?> key, Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> byTypeMap, DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    private boolean registerToByTypeMap(Class<?> key, Map<Class<?>, Set<DataRetrieverChainDefinition<?, ?>>> byTypeMap, DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         if (!byTypeMap.containsKey(key)) {
             byTypeMap.put(key, new HashSet<DataRetrieverChainDefinition<?, ?>>());
         }
-        byTypeMap.get(key).add(dataRetrieverChainDefinition);
+        return byTypeMap.get(key).add(dataRetrieverChainDefinition);
     }
 
     @Override
     public boolean unregister(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        unregisterFromBySourceTypeMap(dataRetrieverChainDefinition);
-        unregisterFromByDataTypeMap(dataRetrieverChainDefinition);
-        DataRetrieverChainDefinition<?, ?> removedDefinition = chainDefinitionsMappedByID.remove(dataRetrieverChainDefinition.getID());
+        Class<?> sourceType = dataRetrieverChainDefinition.getDataSourceType();
+        Class<?> retrievedDataType = dataRetrieverChainDefinition.getRetrievedDataType();
         
-        if (removedDefinition != null) {
-            logger.info("Unregistering the data retriever chain definition " + dataRetrieverChainDefinition +
-                        " for the ID " + dataRetrieverChainDefinition.getID());
-            return true;
-        } else {
-            logger.info("Can't unregister the data retriever chain definition " + dataRetrieverChainDefinition +
-                        ", because there's no definition registered for the ID" + dataRetrieverChainDefinition.getID());
-            return false;
+        boolean changedBySource = unregisterFromByTypeMap(sourceType, chainDefinitionsMappedBySourceType, dataRetrieverChainDefinition);
+        boolean changedByData = unregisterFromByTypeMap(retrievedDataType, chainDefinitionsMappedByDataType, dataRetrieverChainDefinition);
+        
+        if (changedByData || changedBySource) {
+            StringBuilder logBuilder = new StringBuilder("Unregistering the data retriever chain definition " +
+                                                         dataRetrieverChainDefinition + " for the ");
+            if (changedByData && changedBySource) {
+                logBuilder.append("source type " + sourceType.getSimpleName() + " and the retrieved data type " + retrievedDataType.getSimpleName());
+            } else if (changedByData) {
+                logBuilder.append("retrieved data type " + retrievedDataType.getSimpleName());
+            } else {
+                logBuilder.append("source type " + sourceType.getSimpleName());
+            }
+            logger.info(logBuilder.toString());
         }
+        return changedByData || changedBySource;
     }
     
-    private void unregisterFromBySourceTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        unregisterFromByTypeMap(dataRetrieverChainDefinition.getDataSourceType(), chainDefinitionsMappedBySourceType, dataRetrieverChainDefinition);
-    }
-
-    private void unregisterFromByDataTypeMap(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        unregisterFromByTypeMap(dataRetrieverChainDefinition.getRetrievedDataType(), chainDefinitionsMappedByDataType, dataRetrieverChainDefinition);
-    }
-
-    private void unregisterFromByTypeMap(Class<?> key, Map<Class<?>, Collection<DataRetrieverChainDefinition<?, ?>>> byTypeMap, DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+    private boolean unregisterFromByTypeMap(Class<?> key, Map<Class<?>, Set<DataRetrieverChainDefinition<?, ?>>> byTypeMap, DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         if (byTypeMap.containsKey(key)) {
-            byTypeMap.get(key).remove(dataRetrieverChainDefinition);
+            return byTypeMap.get(key).remove(dataRetrieverChainDefinition);
         }
+        return false;
     }
     
     @Override
     public Iterable<DataRetrieverChainDefinition<?, ?>> getAll() {
-        return new HashSet<>(chainDefinitionsMappedByID.values());
+        Set<DataRetrieverChainDefinition<?, ?>> chainDefinitions = new HashSet<>();
+        for (Collection<DataRetrieverChainDefinition<?, ?>> chainDefinitionsBySourceType : chainDefinitionsMappedBySourceType.values()) {
+            chainDefinitions.addAll(chainDefinitionsBySourceType);
+        }
+        for (Collection<DataRetrieverChainDefinition<?, ?>> chainDefinitionsByDataType : chainDefinitionsMappedByDataType.values()) {
+            chainDefinitions.addAll(chainDefinitionsByDataType);
+        }
+        return Collections.unmodifiableSet(chainDefinitions);
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getBySourceType(
             Class<DataSourceType> dataSourceType) {
-        return chainDefinitionsMappedBySourceType.containsKey(dataSourceType) ? 
-               (Collection<DataRetrieverChainDefinition<DataSourceType, ?>>)(Collection<?>) 
-               new HashSet<>(chainDefinitionsMappedBySourceType.get(dataSourceType)) : 
-               new HashSet<DataRetrieverChainDefinition<DataSourceType, ?>>();
+        if (!chainDefinitionsMappedBySourceType.containsKey(dataSourceType)) {
+            return new HashSet<DataRetrieverChainDefinition<DataSourceType, ?>>();
+        }
+        Collection<DataRetrieverChainDefinition<?, ?>> retrieverChains = Collections.unmodifiableSet(chainDefinitionsMappedBySourceType.get(dataSourceType));
+        return (Collection<DataRetrieverChainDefinition<DataSourceType, ?>>)(Collection<?>) retrieverChains;
+               
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> dataType) {
-        return chainDefinitionsMappedByDataType.containsKey(dataType) ?
-               (Collection<DataRetrieverChainDefinition<?, DataType>>)(Collection<?>)
-               new HashSet<>(chainDefinitionsMappedByDataType.get(dataType)) :
-               new HashSet<DataRetrieverChainDefinition<?, DataType>>();
+    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getByDataType(Class<DataType> retrievedDataType) {
+        if (!chainDefinitionsMappedByDataType.containsKey(retrievedDataType)) {
+            return new HashSet<DataRetrieverChainDefinition<?, DataType>>();
+        }
+        Collection<DataRetrieverChainDefinition<?, ?>> retrieverChains = Collections.unmodifiableSet(chainDefinitionsMappedByDataType.get(retrievedDataType));
+        return (Collection<DataRetrieverChainDefinition<?, DataType>>)(Collection<?>) retrieverChains;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
-        Collection<DataRetrieverChainDefinition<DataSourceType, DataType>> dataRetrieverChainDefinitions = new HashSet<>();
-        for (DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition : getBySourceType(dataSourceType)) {
-            if (Objects.equals(retrievedDataType, dataRetrieverChainDefinition.getRetrievedDataType())) {
-                dataRetrieverChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) dataRetrieverChainDefinition);
-            }
-        }
-        return dataRetrieverChainDefinitions;
+        return Collections.unmodifiableSet(getInternalFor(dataSourceType, retrievedDataType));
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> get(UUID id) {
-        return (DataRetrieverChainDefinition<DataSourceType, DataType>) chainDefinitionsMappedByID.get(id);
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO, ClassLoader classLoader) {
+        DataRetrieverChainDefinition<DataSourceType, DataType> chainDefinition = null;
+        try {
+            Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
+            Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
+            Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
+            
+            if (!chainDefinitions.isEmpty()) {
+                Set<DataRetrieverChainDefinition<DataSourceType, DataType>> matchingChainDefinitions = new HashSet<>();
+                for (DataRetrieverChainDefinition<DataSourceType, DataType> chain : chainDefinitions) {
+                    List<? extends DataRetrieverLevel<?, ?>> retrieverLevels = chain.getDataRetrieverLevels();
+                    if (retrieverLevels.size() == retrieverChainDTO.getLevelAmount()) {
+                        boolean matches = true;
+                        for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
+                            DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO.getRetrieverLevel(retrieverLevel.getLevel());
+                            Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true, classLoader);
+                            if (!retrieverLevel.getRetrieverType().isAssignableFrom(retrieverType)) {
+                                matches = false;
+                                break;
+                            }
+                        }
+                        if (matches) {
+                            matchingChainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) chain);
+                        }
+                    }
+                }
+                
+                if (matchingChainDefinitions.size() == 1) {
+                    chainDefinition = matchingChainDefinitions.iterator().next();
+                } else if (matchingChainDefinitions.size() > 1) {
+                    throw new MultipleDataMiningComponentsFoundForDTOException(retrieverChainDTO, matchingChainDefinitions);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Couldn't get classes for the retriever chain DTO " + retrieverChainDTO, e);
+        }
+        if (chainDefinition == null) {
+            logger.log(Level.WARNING, "No retriever chain definition found for the DTO: " + retrieverChainDTO);
+        }
+        return chainDefinition;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <DataSourceType, DataType> Set<DataRetrieverChainDefinition<DataSourceType, DataType>> getInternalFor(
+            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
+        Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = new HashSet<>();
+        for (DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition : getBySourceType(dataSourceType)) {
+            if (Objects.equals(retrievedDataType, dataRetrieverChainDefinition.getRetrievedDataType())) {
+                chainDefinitions.add((DataRetrieverChainDefinition<DataSourceType, DataType>) dataRetrieverChainDefinition);
+            }
+        }
+        return chainDefinitions;
     }
 
 }
