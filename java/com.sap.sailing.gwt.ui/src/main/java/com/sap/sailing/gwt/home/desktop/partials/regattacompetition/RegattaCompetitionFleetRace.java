@@ -45,11 +45,12 @@ public class RegattaCompetitionFleetRace extends UIObject {
         if (viewState == RaceViewState.RUNNING) {
             anchorUi.addClassName(local_res.css().fleet_races_racelive());
             raceStateUi.setInnerText(isUntrackedRace ? i18n.live() : i18n.actionWatch());
-        } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
-            anchorUi.addClassName(local_res.css().fleet_races_raceplanned());
-            raceStateUi.setInnerText(i18n.raceIsPlanned());
+        } else if (viewState == RaceViewState.FINISHED) {
+            raceStateUi.setInnerText(isUntrackedRace ? i18n.raceIsFinished() : i18n.actionAnalyze());
         } else {
-            raceStateUi.setInnerText(isUntrackedRace ? i18n.finished() : i18n.actionAnalyze());
+            anchorUi.addClassName(local_res.css().fleet_races_raceplanned());
+            if (viewState == RaceViewState.SCHEDULED) raceStateUi.setInnerText(i18n.raceIsPlanned());
+            else raceStateUi.setInnerText(viewState.getLabel());
         }
         setStyleName(anchorUi, local_res.css().fleet_races_raceuntracked(), isUntrackedRace);
     }
