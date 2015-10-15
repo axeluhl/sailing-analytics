@@ -2,6 +2,8 @@ package com.sap.sailing.dashboards.gwt.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -86,6 +88,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
     private final String EVENT_ID_PARAMETER = "eventId";
+    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
@@ -169,6 +172,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @Override
     public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
         if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {
+            logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
             this.header.getElement().setInnerText(liveRaceInfoDTO.idOfLastTrackedRace.getRaceName());
         }
     }

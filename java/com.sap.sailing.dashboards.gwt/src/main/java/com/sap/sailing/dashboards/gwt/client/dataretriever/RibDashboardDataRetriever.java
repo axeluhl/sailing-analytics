@@ -57,26 +57,39 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
     private void loadLiveRaceInfoFromRibDashboadService() {
         
         GetRibDashboardRaceInfoAction getRibDashboardRaceInfoAction = new GetRibDashboardRaceInfoAction(ribDashboardService, leaderboardName);
-        
+        logger.log(Level.INFO, "Executing GetRibDashboardRaceInfoAction");
         asyncActionsExecutor.execute(getRibDashboardRaceInfoAction, new AsyncCallback<RibDashboardRaceInfoDTO>() {
             @Override
             public void onSuccess(RibDashboardRaceInfoDTO result) {
+                logger.log(Level.INFO, "Received RibDashboardRaceInfoDTO");
+                if (result != null) {
                 switch (result.responseMessage) {
                 case RACE_LIVE:
-                    List<RegattaAndRaceIdentifier> singletonList = Collections
-                            .singletonList(result.idOfLastTrackedRace);
+                    logger.log(Level.INFO, "RibDashboardRaceInfoDTO.responseMessage is RACE_LIVE");
+                    if(result.idOfLastTrackedRace != null) {
+                        logger.log(Level.INFO, "RibDashboardRaceInfoDTO idOfLastTrackedRace is "+result.idOfLastTrackedRace);
+                    List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(result.idOfLastTrackedRace);
                     setSelection(singletonList);
+                    } else {
+                        logger.log(Level.INFO, "RibDashboardRaceInfoDTO.idOfLastTrackedRace is null");
+                    }
                     notifyDataObservers(result);
                     break;
                 case NO_RACE_LIVE:
+                    logger.log(Level.INFO, "RibDashboardRaceInfoDTO.responseMessage is NO_RACE_LIVE");
                     break;
                 default:
+                    logger.log(Level.INFO, "RibDashboardRaceInfoDTO.responseMessage is null");
                     break;
+                }
+                } else {
+                    logger.log(Level.INFO, "RibDashboardRaceInfoDTO is null");
                 }
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                logger.log(Level.INFO, "Failed to received RibDashboardRaceInfoDTO");
                 logger.log(Level.INFO, caught.getMessage());
             }
         });
@@ -97,6 +110,7 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
     }
 
     public void notifyDataObservers(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
+        logger.log(Level.INFO, "Notifing RibDashboardDataRetrieverListener about new RibDashboardRaceInfoDTO");
         List<RibDashboardDataRetrieverListener> dataObserverCopy;
         synchronized (MUTEX) {
             dataObserverCopy = new ArrayList<RibDashboardDataRetrieverListener>(dataRetrieverListener);

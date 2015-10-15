@@ -58,7 +58,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
             didInitialLoading = true;
             from = new Date(from.getTime()-ONE_HOUR_IN_MILLISECONDS);
         }
-        logger.log(Level.INFO, "Executing WindInfoAction with from "+from+" and to "+to);
+        logger.log(Level.INFO, "Executing GetWindInfoAction with from "+from+" and to "+to);
         GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier, from, to,
                 WIND_CHART_RESOLUTION_IN_MILLISECONDS, windSourceTypeNames, /*
                                                               * onlyUpToNewestEvent==true because we don't want to
@@ -68,7 +68,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
-                        logger.log(Level.INFO, "Received Response from WindInfoAction");
+                        logger.log(Level.INFO, "Received WindInfoForRaceDTO");
                         if (result != null) {
                             if(windBotIDsInLiveRace.size() != getWindBotIdsFrom(result).size()){
                                 windBotIDsInLiveRace = getWindBotIdsFrom(result);
@@ -77,12 +77,13 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                             }
                             notifyWindBotDataRetrieverListeners(result);
                         } else {
-                            logger.log(Level.INFO, "Response WindInfoForRaceDTO from WindInfoAction null");                            
+                            logger.log(Level.INFO, "WindInfoForRaceDTO is null");                            
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO");
                         logger.log(Level.INFO, caught.getMessage());
                     }
                 });
@@ -123,6 +124,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     
     @Override
     public void notifyWindBotDataRetrieverListeners(WindInfoForRaceDTO windInfoForRaceDTO) {
+        logger.log(Level.INFO, "Notifing WindBotDataRetrieverListener about new WindInfoForRaceDTO");
         for (WindBotDataRetrieverListener windBotDataRetrieverListener : windBotDataRetrieverListeners) {
             windBotDataRetrieverListener.updateWindBotUI(windInfoForRaceDTO);
         }
@@ -133,15 +135,22 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
         final Date finalNewTime = newTime;
         final Date finaloldTime = oldTime;
         GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, leaderboardName);
+        logger.log(Level.INFO, "Executing GetIDFromRaceThatTakesWindFixesNowAction");
         asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
             public void onSuccess(RegattaAndRaceIdentifier result) {
-                if(result != null)
+                logger.log(Level.INFO, "Received RegattaAndRaceIdentifier from race that takes wind fixes now");
+                if(result != null) {
                 loadWindBotData(finaloldTime, finalNewTime, result);
+                } else {
+                    logger.log(Level.INFO, "RegattaAndRaceIdentifier is null");
+                    logger.log(Level.INFO, "Can´t load wind data");
+                }
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                logger.log(Level.INFO, " Failed to received RegattaAndRaceIdentifier from race that takes wind fixes now");
                 logger.log(Level.INFO, caught.getMessage());
             }
         });
