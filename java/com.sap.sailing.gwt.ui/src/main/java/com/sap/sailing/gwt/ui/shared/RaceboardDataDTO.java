@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -30,7 +29,7 @@ public class RaceboardDataDTO implements IsSerializable {
         return competitorAndTheirBoats;
     }
 
-    public List<CompetitorDTO> getCompetitors() {
+    public Iterable<CompetitorDTO> getCompetitors() {
         return race.getCompetitors();
     }
 
