@@ -162,7 +162,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                 break;
         }
 
-        viewHolder.container.setBackgroundColor(mContext.getResources().getColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30)));
+        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
         Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
         BitmapHelper.setBackground(viewHolder.itemView, background);
     }
