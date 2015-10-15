@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -242,6 +243,12 @@ public class TestFunctionManagerAsFunctionProvider {
     @Test
     public void testGetFunctionForNullDTO() {
         assertThat(server.getFunctionForDTO(null), is(nullValue()));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testGetFunctionForDTOWithNonExistingClass() {
+        FunctionDTO functionDTO = new FunctionDTO(false, "Not relevant", "Impossible Class", "Impossible Class", new ArrayList<String>(), "Not relevant", 0);
+        server.getFunctionForDTO(functionDTO);
     }
 
 }

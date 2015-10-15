@@ -17,6 +17,7 @@ import com.sap.sse.datamining.exceptions.MultipleDataMiningComponentsFoundForDTO
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
+import com.sap.sse.datamining.util.ClassUtils;
 
 public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDefinitionRegistry {
 
@@ -134,8 +135,8 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
         DataRetrieverChainDefinition<DataSourceType, DataType> chainDefinition = null;
         if (retrieverChainDTO != null) {
             try {
-                Class<DataSourceType> dataSourceType = (Class<DataSourceType>) Class.forName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
-                Class<DataType> retrievedDataType = (Class<DataType>) Class.forName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
+                Class<DataSourceType> dataSourceType = (Class<DataSourceType>) ClassUtils.getClassForName(retrieverChainDTO.getDataSourceTypeName(), true, classLoader);
+                Class<DataType> retrievedDataType = (Class<DataType>) ClassUtils.getClassForName(retrieverChainDTO.getRetrievedDataTypeName(), true, classLoader);
                 Set<DataRetrieverChainDefinition<DataSourceType, DataType>> chainDefinitions = getInternalFor(dataSourceType, retrievedDataType);
 
                 if (!chainDefinitions.isEmpty()) {
@@ -146,7 +147,7 @@ public class DataRetrieverChainDefinitionManager implements DataRetrieverChainDe
                             boolean matches = true;
                             for (DataRetrieverLevel<?, ?> retrieverLevel : retrieverLevels) {
                                 DataRetrieverLevelDTO retrieverLevelDTO = retrieverChainDTO.getRetrieverLevel(retrieverLevel.getLevel());
-                                Class<?> retrieverType = Class.forName(retrieverLevelDTO.getRetrieverTypeName(), true, classLoader);
+                                Class<?> retrieverType = ClassUtils.getClassForName(retrieverLevelDTO.getRetrieverTypeName(), true, classLoader);
                                 if (!retrieverLevel.getRetrieverType().isAssignableFrom(retrieverType)) {
                                     matches = false;
                                     break;

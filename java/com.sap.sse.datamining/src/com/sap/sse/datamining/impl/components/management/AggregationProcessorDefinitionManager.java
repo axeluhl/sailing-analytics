@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
-import com.sap.sse.datamining.util.Classes;
+import com.sap.sse.datamining.util.ClassUtils;
 
 public class AggregationProcessorDefinitionManager implements AggregationProcessorDefinitionRegistry {
     
@@ -33,8 +33,8 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
     @Override
     public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getByExtractedType(Class<ExtractedType> extractedType) {
         Collection<AggregationProcessorDefinition<? super ExtractedType, ?>> definitions = new HashSet<>();
-        Class<?> cleanExtractedType = Classes.primitiveToWrapperType(extractedType);
-        Collection<Class<?>> typesToGet = Classes.getSupertypesOf(cleanExtractedType);
+        Class<?> cleanExtractedType = ClassUtils.primitiveTypeToWrapperClass(extractedType);
+        Collection<Class<?>> typesToGet = ClassUtils.getSupertypesOf(cleanExtractedType);
         typesToGet.add(cleanExtractedType);
         typesToGet.add(Object.class);
         for (Class<?> type : typesToGet) {
@@ -61,7 +61,7 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
         AggregationProcessorDefinition<ExtractedType, ResultType> aggregatorDefinition = null;
         if (aggregatorDefinitionDTO != null) {
             try {
-                Class<ExtractedType> extractedType = (Class<ExtractedType>) Class.forName(aggregatorDefinitionDTO.getExtractedTypeName(), true, classLoader);
+                Class<ExtractedType> extractedType = (Class<ExtractedType>) ClassUtils.getClassForName(aggregatorDefinitionDTO.getExtractedTypeName(), true, classLoader);
                 aggregatorDefinition = (AggregationProcessorDefinition<ExtractedType, ResultType>) get(extractedType, aggregatorDefinitionDTO.getMessageKey());
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Couldn't get classes for the aggregator definition DTO " + aggregatorDefinitionDTO, e);

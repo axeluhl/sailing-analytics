@@ -234,7 +234,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
-        return functionRegistry.getFunctionForDTO(functionDTO);
+        return functionRegistry.getFunctionForDTO(functionDTO, getJoinedClassLoader());
     }
     
     @Override

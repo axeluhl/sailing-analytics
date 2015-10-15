@@ -23,8 +23,9 @@ public interface FunctionProvider {
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**
+     * @param classLoader TODO
      * @return The first function, that matches the given DTO or <code>null</code>
      */
-    public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO, ClassLoader classLoader);
 
 }
