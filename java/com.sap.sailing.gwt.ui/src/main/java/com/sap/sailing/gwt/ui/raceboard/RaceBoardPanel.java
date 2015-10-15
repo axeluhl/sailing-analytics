@@ -158,8 +158,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
         competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-        for(Entry<CompetitorDTO, BoatDTO> competitorAndBoat: competitorsAndTheirBoats.entrySet()) {
-            if(competitorAndBoat.getValue() != null) {
+        for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
+            if (competitorAndBoat.getValue() != null) {
                 colorProvider.setColor(competitorAndBoat.getKey(), selectedRaceIdentifier, competitorAndBoat.getValue().getColor());
             }
         }

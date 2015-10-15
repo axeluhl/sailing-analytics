@@ -575,7 +575,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
-            if(existingCompetitor != null && competitorBoatInfo != null) {
+            if (existingCompetitor != null && competitorBoatInfo != null) {
                 Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
                         competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
                 competitorBoatInfos.add(new Util.Pair<Competitor, Boat>(existingCompetitor, boatOfCompetitor));

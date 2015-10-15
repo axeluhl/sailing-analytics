@@ -26,20 +26,19 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
     @Override
     public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
         Color result = null;
-        if(raceIdentfier != null) {
+        if (raceIdentfier != null) {
             Map<CompetitorDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentfier);
-            if(raceColors != null) {
+            if (raceColors != null) {
                 result = raceColors.get(competitor);
             }
-        }       
-        if(result == null && competitor.getColor() != null) {
+        }
+        if (result == null && competitor.getColor() != null) {
             result = competitor.getColor();
         }
         // fallback
-        if(result == null) {
-            result = competitorsColorMap.getColorByID(competitor); 
+        if (result == null) {
+            result = competitorsColorMap.getColorByID(competitor);
         }
-
         return result;
     }
 
