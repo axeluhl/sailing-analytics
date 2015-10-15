@@ -9,6 +9,9 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface ModifiableDataMiningServer extends DataMiningServer {
 
+    public void addDataMiningBundleClassLoader(ClassLoader classLoader);
+    public void removeDataMiningBundleClassLoader(ClassLoader classLoader);
+
     public void addStringMessages(ResourceBundleStringMessages stringMessages);
     public void removeStringMessages(ResourceBundleStringMessages stringMessages);
 
