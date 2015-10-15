@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.datamining.developer.PredefinedQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedResultsPresenter;
@@ -68,6 +69,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         if (enableDeveloperOptions) {
             final QueryDefinitionViewer queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages(), queryDefinitionProviderWithControls);
             queryDefinitionProviderWithControls.addControl(queryDefinitionViewer.getEntryWidget());
+            
+            final PredefinedQueryRunner predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, this, resultsPresenter);
+            queryDefinitionProviderWithControls.addControl(predefinedQueryRunner.getEntryWidget());
         }
     }
 

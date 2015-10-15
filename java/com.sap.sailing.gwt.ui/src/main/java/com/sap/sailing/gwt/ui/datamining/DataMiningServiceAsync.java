@@ -45,6 +45,9 @@ public interface DataMiningServiceAsync {
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
     <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+
+    void getPredefinedQueryNames(AsyncCallback<HashSet<String>> callback);
+    <ResultType> void runPredefinedQuery(DataMiningSession session, String name, String localeInfoName, AsyncCallback<QueryResultDTO<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining

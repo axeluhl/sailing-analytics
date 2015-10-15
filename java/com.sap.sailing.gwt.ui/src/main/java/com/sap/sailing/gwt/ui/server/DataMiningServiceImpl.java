@@ -257,6 +257,27 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
+    public HashSet<String> getPredefinedQueryNames() {
+        HashSet<String> predefinedQueryNames = new HashSet<String>();
+        for (String predefinedQueryName : getDataMiningServer().getPredefinedQueryNames()) {
+            predefinedQueryNames.add(predefinedQueryName);
+        }
+        return predefinedQueryNames;
+    }
+    
+    @Override
+    public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, String name, String localeInfoName) {
+        // TODO Use local info name
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        Query<ResultType> query = dataMiningServer.createPredefinedQuery(name);
+        if (query != null) {
+            QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+            return dataMiningServer.convertToDTO(result);
+        }
+        return null;
+    }
+    
+    @Override
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
     }

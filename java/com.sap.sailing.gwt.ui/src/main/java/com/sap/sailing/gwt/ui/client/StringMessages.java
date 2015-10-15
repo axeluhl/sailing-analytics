@@ -1414,4 +1414,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String groupAverageDescending();
     String groupMedianAscending();
     String groupMedianDescending();
+    String runPredefinedQuery();
+    String selectPredefinedQuery();
+    String predefinedQueryRunner();
 }
