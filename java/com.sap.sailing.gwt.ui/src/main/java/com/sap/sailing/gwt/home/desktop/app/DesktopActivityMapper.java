@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactActivityProxy;
@@ -39,7 +40,7 @@ public class DesktopActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place rawPlace) {
         Place place = placeUpdater.getRealPlace(rawPlace);
-        if (SwitchingEntryPoint.isMobile() //
+        if (DeviceDetector.isMobile() //
                 && !SwitchingEntryPoint.viewIsLockedToDesktop()
                 && SwitchingEntryPoint.hasMobileVersion(place)) {
             SwitchingEntryPoint.reloadApp();

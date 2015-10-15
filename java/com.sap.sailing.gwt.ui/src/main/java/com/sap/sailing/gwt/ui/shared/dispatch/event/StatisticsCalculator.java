@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +35,8 @@ public class StatisticsCalculator implements LeaderboardCallback {
     private static final boolean CALCULATE_MAX_SPEED = false;
     private static final boolean CALCULATE_SAILED_MILES = true;
 
-    private int competitors, races, trackedRaces, regattas;
+    private Set<Competitor> competitors = new HashSet<>();
+    private int races, trackedRaces, regattas;
     private long numberOfGPSFixes, numberOfWindFixes;
     private Distance totalDistanceTraveled = Distance.NULL;
     private Triple<Competitor, Speed, TimePoint> maxSpeed = null;
@@ -41,7 +44,6 @@ public class StatisticsCalculator implements LeaderboardCallback {
 
     @Override
     public void doForLeaderboard(LeaderboardContext context) {
-        competitors += HomeServiceUtil.calculateCompetitorsCount(context.getLeaderboard());
         races += HomeServiceUtil.calculateRaceCount(context.getLeaderboard());
         trackedRaces += HomeServiceUtil.calculateTrackedRaceCount(context.getLeaderboard());
         regattas++;
@@ -59,6 +61,7 @@ public class StatisticsCalculator implements LeaderboardCallback {
     
     private void doForTrackedRace(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+            competitors.add(competitor);
             doForCompetitor(trackedRace, competitor);
         }
         for (Mark mark : trackedRace.getMarks()) {
@@ -136,7 +139,7 @@ public class StatisticsCalculator implements LeaderboardCallback {
     public ResultWithTTL<EventStatisticsDTO> getResult() {
         totalDistanceTraveled = totalDistanceTraveled == Distance.NULL ? null : totalDistanceTraveled;
         return new ResultWithTTL<EventStatisticsDTO>(Duration.ONE_MINUTE.times(5), new EventStatisticsDTO(regattas,
-                competitors, races, trackedRaces, numberOfGPSFixes, numberOfWindFixes, maxSpeed, totalDistanceTraveled));
+                competitors.size(), races, trackedRaces, numberOfGPSFixes, numberOfWindFixes, maxSpeed, totalDistanceTraveled));
     }
 
 }
