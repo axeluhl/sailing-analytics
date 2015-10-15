@@ -15,7 +15,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
     
     public CompetitorColorProviderImpl() {
         this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
-        this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO,Color>>();
+        this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
     }
 
     @Override
