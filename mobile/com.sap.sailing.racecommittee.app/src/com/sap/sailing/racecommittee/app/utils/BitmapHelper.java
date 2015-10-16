@@ -107,7 +107,7 @@ public class BitmapHelper {
         }
     }
 
-    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
+    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableResId);
         drawable = DrawableCompat.wrap(drawable).mutate();
         DrawableCompat.setTint(drawable, color);
