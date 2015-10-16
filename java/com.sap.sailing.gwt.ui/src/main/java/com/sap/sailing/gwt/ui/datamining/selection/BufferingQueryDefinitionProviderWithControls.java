@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningComponentProvider;
@@ -65,6 +66,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     private final DockLayoutPanel mainPanel;
     private final FlowPanel controlsPanel;
+    private final ToggleButton queryDefinitionViewerToggleButton;
     private final QueryDefinitionViewer queryDefinitionViewer;
     private final PredefinedQueryRunner predefinedQueryRunner;
     private final DataMiningSettingsControl settingsControl;
@@ -75,6 +77,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
     private final StatisticProvider statisticProvider;
     private final GroupingProvider groupingProvider;
+    private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
@@ -98,7 +101,14 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         settings = new AdvancedDataMiningSettings();
         this.settingsControl.addSettingsComponent(this);
         
-        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages(), this);
+        queryDefinitionViewerToggleButton = new ToggleButton(getStringMessages().viewQueryDefinition(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
+            }
+        });
+        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages());
+        addQueryDefinitionChangedListener(queryDefinitionViewer);
         predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, errorReporter, resultsPresenter);
         
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
@@ -120,7 +130,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         addControl(reloadButton);
 
         if (settings.isDeveloperOptions()) {
-            addControl(queryDefinitionViewer.getEntryWidget());
+            addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
 
@@ -143,8 +153,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         footerPanel.add(new ScrollPanel(groupingProvider.getEntryWidget()));
         
         // Composing the different components
-        SplitLayoutPanel filterSplitPanel = new SplitLayoutPanel(15);
+        filterSplitPanel = new SplitLayoutPanel(15);
         filterSplitPanel.addSouth(footerPanel, footerPanelHeight);
+        filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
+        filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
@@ -267,10 +279,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         if (settings.isDeveloperOptions() != newSettings.isDeveloperOptions()) {
             settings.setDeveloperOptions(newSettings.isDeveloperOptions());
             if (settings.isDeveloperOptions()) {
-                addControl(queryDefinitionViewer.getEntryWidget());
+                addControl(queryDefinitionViewerToggleButton);
+                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
                 addControl(predefinedQueryRunner.getEntryWidget());
             } else {
-                removeControl(queryDefinitionViewer.getEntryWidget());
+                removeControl(queryDefinitionViewerToggleButton);
+                filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
                 removeControl(predefinedQueryRunner.getEntryWidget());
             }
         }

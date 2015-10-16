@@ -50,6 +50,10 @@ table td,select,button {
     z-index: 20;
 }
 
+.gwt-ToggleButton {
+	display: inline-block;
+}
+
 .gwt-PopupPanelGlass {
 	z-index: 19;
 }
