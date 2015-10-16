@@ -9,6 +9,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
+import com.google.gwt.event.logical.shared.HasAttachHandlers;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -47,7 +48,8 @@ public class RefreshManager {
         this.content = content;
         this.container = container;
         this.actionExecutor = actionExecutor;
-        content.addAttachHandler(new Handler() {
+        HasAttachHandlers lifecycleWidget = (container instanceof HasAttachHandlers) ? ((HasAttachHandlers) container) : content;
+        lifecycleWidget.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
                 if (event.isAttached()) {
@@ -57,7 +59,7 @@ public class RefreshManager {
                 }
             }
         });
-        if(container != null) {
+        if(lifecycleWidget.isAttached() || (container != null && !(container instanceof HasAttachHandlers))) {
             reschedule();
         }
     }
