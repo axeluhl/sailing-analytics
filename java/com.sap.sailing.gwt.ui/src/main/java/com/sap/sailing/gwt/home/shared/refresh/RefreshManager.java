@@ -55,7 +55,7 @@ public class RefreshManager {
                 if (event.isAttached()) {
                     reschedule();
                 } else {
-                    timer.cancel();
+                    cancel();
                 }
             }
         });
@@ -141,8 +141,13 @@ public class RefreshManager {
     }
     
     public void forceReschule() {
-        timer.cancel();
+        cancel();
         reschedule();
+    }
+    
+    private void cancel() {
+        timer.cancel();
+        scheduled = false;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
