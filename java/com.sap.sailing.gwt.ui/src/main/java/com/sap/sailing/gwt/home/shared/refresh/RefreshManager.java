@@ -140,7 +140,7 @@ public class RefreshManager {
         }
     }
     
-    public void forceReschule() {
+    public void forceReschedule() {
         cancel();
         reschedule();
     }

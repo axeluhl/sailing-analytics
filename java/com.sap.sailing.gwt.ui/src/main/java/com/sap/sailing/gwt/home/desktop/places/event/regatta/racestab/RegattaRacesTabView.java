@@ -168,7 +168,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         @Override
         public void onSelectAction(Navigation action) {
             RegattaRacesTabView.this.currentlySelectedTab = action;
-            RegattaRacesTabView.this.refreshManager.forceReschule();
+            RegattaRacesTabView.this.refreshManager.forceReschedule();
             showWidget(listFormatContainerUi, action == Navigation.SORT_LIST_FORMAT);
             showWidget(compFormatContainerUi, action == Navigation.COMPETITION_FORMAT);
         }
