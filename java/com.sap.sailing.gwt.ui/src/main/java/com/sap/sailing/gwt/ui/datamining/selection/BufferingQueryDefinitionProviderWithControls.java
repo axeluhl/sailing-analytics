@@ -28,10 +28,15 @@ import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
+import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sailing.gwt.ui.datamining.WithControls;
+import com.sap.sailing.gwt.ui.datamining.developer.PredefinedQueryRunner;
+import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionViewer;
 import com.sap.sailing.gwt.ui.datamining.selection.filter.ListRetrieverChainFilterSelectionProvider;
+import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettings;
+import com.sap.sailing.gwt.ui.datamining.settings.AdvancedDataMiningSettingsDialogComponent;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -43,7 +48,7 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider implements WithControls {
+public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
 
     /**
      * The delay before a changed query definition is submitted to the listeners.
@@ -60,7 +65,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     
     private final DockLayoutPanel mainPanel;
     private final FlowPanel controlsPanel;
+    private final QueryDefinitionViewer queryDefinitionViewer;
+    private final PredefinedQueryRunner predefinedQueryRunner;
     private final DataMiningSettingsControl settingsControl;
+    private final AdvancedDataMiningSettings settings;
     
     private final ProviderListener providerListener;
     private final Collection<DataMiningComponentProvider<?>> providers;
@@ -70,7 +78,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final FilterSelectionProvider filterSelectionProvider;
 
     public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
-            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
+            ResultsPresenter<?> resultsPresenter) {
         super(stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         queryDefinitionReleaseTimer = new Timer() {
@@ -86,7 +95,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
-
+        settings = new AdvancedDataMiningSettings();
+        this.settingsControl.addSettingsComponent(this);
+        
+        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages(), this);
+        predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, errorReporter, resultsPresenter);
+        
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
             @Override
@@ -104,6 +118,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             }
         });
         addControl(reloadButton);
+
+        if (settings.isDeveloperOptions()) {
+            addControl(queryDefinitionViewer.getEntryWidget());
+            addControl(predefinedQueryRunner.getEntryWidget());
+        }
 
         retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
@@ -207,6 +226,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         controlWidget.addStyleName("definitionProviderControlsElements");
         controlsPanel.add(controlWidget);
     }
+    
+    @Override
+    public void removeControl(Widget controlWidget) {
+        controlsPanel.remove(controlWidget);
+    }
 
     @Override
     public Widget getEntryWidget() {
@@ -230,16 +254,27 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
     @Override
     public boolean hasSettings() {
-        return false;
+        return true;
     }
 
     @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
-        return null;
+    public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent() {
+        return new AdvancedDataMiningSettingsDialogComponent(settings, getStringMessages());
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) { }
+    public void updateSettings(AdvancedDataMiningSettings newSettings) {
+        if (settings.isDeveloperOptions() != newSettings.isDeveloperOptions()) {
+            settings.setDeveloperOptions(newSettings.isDeveloperOptions());
+            if (settings.isDeveloperOptions()) {
+                addControl(queryDefinitionViewer.getEntryWidget());
+                addControl(predefinedQueryRunner.getEntryWidget());
+            } else {
+                removeControl(queryDefinitionViewer.getEntryWidget());
+                removeControl(predefinedQueryRunner.getEntryWidget());
+            }
+        }
+    }
 
     @Override
     public String getDependentCssClassName() {

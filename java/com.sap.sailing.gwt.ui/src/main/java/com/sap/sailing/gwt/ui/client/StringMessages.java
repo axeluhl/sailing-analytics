@@ -1417,4 +1417,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String runPredefinedQuery();
     String selectPredefinedQuery();
     String predefinedQueryRunner();
+    String developerOptions();
 }

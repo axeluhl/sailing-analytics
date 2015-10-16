@@ -92,6 +92,11 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
     }
     
     @Override
+    public void removeControl(Widget controlWidget) {
+        controlsPanel.remove(controlWidget);
+    }
+    
+    @Override
     public void showResult(QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {

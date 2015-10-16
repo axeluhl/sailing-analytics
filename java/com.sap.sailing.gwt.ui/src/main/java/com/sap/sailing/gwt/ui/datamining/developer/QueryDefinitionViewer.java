@@ -17,14 +17,14 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public class QueryDefinitionViewer implements Component<SerializableSettings> {
     
     private final StringMessages stringMessages;
-    private final QueryDefinitionProvider queryDefinitionProvider;
+    private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final QueryDefinitionParser queryDefinitionParser;
     
     private final Button viewButton;
     private final DialogBox dialogBox;
     private final HTML definitionHtml;
 
-    public QueryDefinitionViewer(StringMessages stringMessages, QueryDefinitionProvider queryDefinitionProvider) {
+    public QueryDefinitionViewer(StringMessages stringMessages, QueryDefinitionProvider<?> queryDefinitionProvider) {
         this.stringMessages = stringMessages;
         this.queryDefinitionProvider = queryDefinitionProvider;
         queryDefinitionParser = new QueryDefinitionParser();
