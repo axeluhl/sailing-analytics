@@ -18,7 +18,9 @@ Require-Bundle: com.sap.sailing.server,
  slf4j.api;bundle-version="1.6.4",
  com.sap.sse.common,
  org.dom4j;bundle-version="1.6.1",
+ org.apache.xmlbeans;bundle-version="2.3.0",
  org.apache.poi;bundle-version="3.9.0",
- org.apache.xmlbeans;bundle-version="2.3.0"
+ org.apache.poi.ooxml;bundle-version="3.9.0",
+ org.apache.poi.ooxml.schemas;bundle-version="3.9.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.barbados.resultimport.impl;x-friends:="com.sap.sailing.barbados.resultimport.test"
