@@ -127,6 +127,7 @@ public class RefreshManager {
                 if (delayMillis == 0) {
                     update();
                 } else {
+                    LOG.log(Level.FINE, "Scheduling auto refresh in " + delayMillis + "ms");
                     timer.schedule(delayMillis);
                 }
             }
@@ -146,6 +147,7 @@ public class RefreshManager {
     }
     
     private void cancel() {
+        LOG.log(Level.FINE, "Cancelling auto refresh");
         timer.cancel();
         scheduled = false;
     }
