@@ -95,7 +95,7 @@ public final class CachingDispatch implements DispatchAsync {
                 } else if (action instanceof HasClientCacheTotalTimeToLive) {
                     cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) action).cacheTotalTimeToLiveMillis();
                 }
-                resultsCache.put(key(clientCacheableAction), new ResultHolder(System.currentTimeMillis()
+                resultsCache.put(instanceKey, new ResultHolder(System.currentTimeMillis()
                         + cacheTotalTimeToLiveMillis, result));
                 LOG.finest("Added " + instanceKey + " to cache, ttl: " + cacheTotalTimeToLiveMillis + "ms");
                 if (invalidationTask != null && !invalidationTask.isRunning()) {
