@@ -44,13 +44,9 @@ public final class CachingDispatch implements DispatchAsync {
         if (action instanceof IsClientCacheable) {
             final IsClientCacheable clientCacheableAction = (IsClientCacheable) action;
             final ResultHolder cachedResult = resultsCache.get(key(clientCacheableAction));
-            if (cachedResult != null) {
-                if (cachedResult.isValid()) {
-                    LOG.fine("Cache hit for " + action.getClass().getName());
-                    callback.onSuccess((R) cachedResult.getPayload());
-                } else {
-                    executeAndCache(action, callback);
-                }
+            if (cachedResult != null && cachedResult.isValid()) {
+                LOG.fine("Cache hit for " + action.getClass().getName());
+                callback.onSuccess((R) cachedResult.getPayload());
             } else {
                 LOG.fine("Cache miss for " + action.getClass().getName());
                 executeAndCache(action, callback);
