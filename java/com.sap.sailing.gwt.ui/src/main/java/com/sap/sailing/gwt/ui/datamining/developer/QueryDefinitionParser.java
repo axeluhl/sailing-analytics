@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.safehtml.shared.OnlyToBeUsedInGeneratedCodeStringBlessedAsSafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sse.common.settings.SerializableSettings;
@@ -17,18 +18,24 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public class QueryDefinitionParser {
 
-    private static final String BR = "<br />";
+    public String parseToDetailsAsText(StatisticQueryDefinitionDTO queryDefinition) {
+        return parseToDetails(queryDefinition, new TextBuilder());
+    }
     
-    public SafeHtml parseToSafeHtml(StatisticQueryDefinitionDTO queryDefinition) {
-        SafeHtmlBuilder htmlBuilder = new SafeHtmlBuilder();
-        htmlBuilder.appendEscaped("Locale: " + queryDefinition.getLocaleInfoName()).appendHtmlConstant(BR);
+    public SafeHtml parseToDetailsAsSafeHtml(StatisticQueryDefinitionDTO queryDefinition) {
+        String safeHtml = parseToDetails(queryDefinition, new HtmlBuilder());
+        return new OnlyToBeUsedInGeneratedCodeStringBlessedAsSafeHtml(safeHtml);
+    }
+    
+    private String parseToDetails(StatisticQueryDefinitionDTO queryDefinition, Builder builder) {
+        builder.appendText("Locale: " + queryDefinition.getLocaleInfoName()).appendLineBreak();
         
         DataRetrieverChainDefinitionDTO chainDefinition = queryDefinition.getDataRetrieverChainDefinition();
-        htmlBuilder.appendHtmlConstant(BR)
-                   .appendEscaped("Retrieval: " + chainDefinition).appendHtmlConstant(BR)
-                   .appendHtmlConstant(TAB(1)).appendEscaped("Levels: ").appendHtmlConstant(BR);
+        builder.appendLineBreak()
+               .appendText("Retrieval: " + chainDefinition).appendLineBreak()
+               .appendTab(1).appendText("Levels: ").appendLineBreak();
         for (int levelIndex = 0; levelIndex < chainDefinition.getLevelAmount(); levelIndex++) {
-            htmlBuilder.appendHtmlConstant(TAB(2)).appendEscaped(levelIndex + ": " + chainDefinition.getRetrieverLevel(levelIndex)).appendHtmlConstant(BR);
+            builder.appendTab(2).appendText(levelIndex + ": " + chainDefinition.getRetrieverLevel(levelIndex)).appendLineBreak();
         }
          
         HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = queryDefinition.getRetrieverSettings();
@@ -38,46 +45,122 @@ public class QueryDefinitionParser {
         
         HashMap<DataRetrieverLevelDTO,HashMap<FunctionDTO,HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
         if (!filterSelection.isEmpty()) {
-            htmlBuilder.appendHtmlConstant(BR).appendEscaped("Filter Selection:").appendHtmlConstant(BR);
+            builder.appendLineBreak().appendText("Filter Selection:").appendLineBreak();
             List<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>(filterSelection.keySet());
             Collections.sort(retrieverLevels);
             for (DataRetrieverLevelDTO retrieveLevel : retrieverLevels) {
-                htmlBuilder.appendHtmlConstant(TAB(1)).appendEscaped("Level " + retrieveLevel.getLevel() + ": ").appendHtmlConstant(BR);
+                builder.appendTab(1).appendText("Level " + retrieveLevel.getLevel() + ": ").appendLineBreak();
                 HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = filterSelection.get(retrieveLevel);
                 for (FunctionDTO dimension : levelFilterSelection.keySet()) {
-                    htmlBuilder.appendHtmlConstant(TAB(2)).appendEscaped(dimension.toString()).appendHtmlConstant(BR)
-                               .appendHtmlConstant(TAB(3)).appendEscaped("Values: ");
+                    builder.appendTab(2).appendText(dimension.toString()).appendLineBreak()
+                           .appendTab(3).appendText("Values: ");
                     boolean first = true;
                     for (Serializable value : levelFilterSelection.get(dimension)) {
                         if (!first) {
-                            htmlBuilder.appendEscaped(", ");
+                            builder.appendText(", ");
                         }
-                        htmlBuilder.appendEscaped(value.toString());
+                        builder.appendText(value.toString());
                         first = false;
                     }
-                    htmlBuilder.appendHtmlConstant(BR);
+                    builder.appendLineBreak();
                 }
             }
         }
 
-        htmlBuilder.appendHtmlConstant(BR)
-                   .appendEscaped("Group By:").appendHtmlConstant(BR);
+        builder.appendLineBreak()
+               .appendText("Group By:").appendLineBreak();
         ArrayList<FunctionDTO> dimensionsToGroupBy = queryDefinition.getDimensionsToGroupBy();
         for (int index = 0; index < dimensionsToGroupBy.size(); index++) {
-            htmlBuilder.appendHtmlConstant(TAB(1)).appendEscaped(index + ": " + dimensionsToGroupBy.get(index)).appendHtmlConstant(BR);
+            builder.appendTab(1).appendText(index + ": " + dimensionsToGroupBy.get(index)).appendLineBreak();
         }
         
-        htmlBuilder.appendHtmlConstant(BR)
-                   .appendEscaped("Statistic: " + queryDefinition.getStatisticToCalculate()).appendHtmlConstant(BR);
-        htmlBuilder.appendEscaped("Aggregator: " + queryDefinition.getAggregatorDefinition());
+        builder.appendLineBreak()
+               .appendText("Statistic: " + queryDefinition.getStatisticToCalculate()).appendLineBreak();
+        builder.appendText("Aggregator: " + queryDefinition.getAggregatorDefinition());
         
-        return htmlBuilder.toSafeHtml();
+        return builder.toString();
+    }
+
+    private static final String HTML_LINE_BREAK = "<br />";
+    private static final String HTML_TAB = "&emsp;";
+    
+    private static final String TEXT_LINE_BREAK = "\n";
+    private static final String TEXT_TAB = "\t";
+    
+    private interface Builder {
+        
+        Builder appendText(String text);
+        Builder appendLineBreak();
+        Builder appendTab(int tabAmount);
+        
+        String toString();
+        
     }
     
-    private String TAB(int indent) {
+    private class HtmlBuilder implements Builder {
+        
+        private final SafeHtmlBuilder builder;
+        public HtmlBuilder() {
+            builder = new SafeHtmlBuilder();
+        }
+
+        @Override
+        public Builder appendText(String text) {
+            builder.appendEscaped(text);
+            return this;
+        }
+        @Override
+        public Builder appendLineBreak() {
+            builder.appendHtmlConstant(HTML_LINE_BREAK);
+            return this;
+        }
+        @Override
+        public Builder appendTab(int tabAmount) {
+            builder.appendHtmlConstant(TAB(HTML_TAB, tabAmount));
+            return this;
+        }
+        
+        @Override
+        public String toString() {
+            return builder.toSafeHtml().asString();
+        }
+        
+    }
+    
+    private class TextBuilder implements Builder {
+        
+        private final StringBuilder builder;
+        public TextBuilder() {
+            builder = new StringBuilder();
+        }
+
+        @Override
+        public Builder appendText(String text) {
+            builder.append(text);
+            return this;
+        }
+        @Override
+        public Builder appendLineBreak() {
+            builder.append(TEXT_LINE_BREAK);
+            return this;
+        }
+        @Override
+        public Builder appendTab(int tabAmount) {
+            builder.append(TAB(TEXT_TAB, tabAmount));
+            return this;
+        }
+        
+        @Override
+        public String toString() {
+            return builder.toString();
+        }
+        
+    }
+    
+    private static String TAB(String tabCharacter, int tabAmount) {
         StringBuilder tabBuilder = new StringBuilder();
-        for (int i = 0; i < indent; i++) {
-            tabBuilder.append("&emsp;");
+        for (int i = 0; i < tabAmount; i++) {
+            tabBuilder.append(tabCharacter);
         }
         return tabBuilder.toString();
     }

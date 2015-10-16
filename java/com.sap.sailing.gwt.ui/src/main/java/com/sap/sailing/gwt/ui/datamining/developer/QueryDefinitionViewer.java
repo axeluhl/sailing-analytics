@@ -1,6 +1,12 @@
 package com.sap.sailing.gwt.ui.datamining.developer;
 
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -15,22 +21,42 @@ public class QueryDefinitionViewer implements Component<SerializableSettings>, Q
     private final StringMessages stringMessages;
     private final QueryDefinitionParser queryDefinitionParser;
     
-    private final ScrollPanel entryWidget;
-    private final HTML definitionHtml;
+    private final DockLayoutPanel dockPanel;
+    private final HTML definitionDetailsHtml;
+    
+    private StatisticQueryDefinitionDTO currentDefinition;
 
     public QueryDefinitionViewer(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         queryDefinitionParser = new QueryDefinitionParser();
         
-        definitionHtml = new HTML();
-        definitionHtml.setWordWrap(false);
+        definitionDetailsHtml = new HTML();
+        definitionDetailsHtml.setWordWrap(false);
+        
+        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                copyToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+            }
+        });
 
-        entryWidget = new ScrollPanel(definitionHtml);
+        HorizontalPanel controlsPanel = new HorizontalPanel();
+        controlsPanel.setSpacing(5);
+        controlsPanel.add(copyToClipboardButton);
+        
+        dockPanel = new DockLayoutPanel(Unit.PX);
+        dockPanel.addSouth(controlsPanel, 45);
+        dockPanel.add(new ScrollPanel(definitionDetailsHtml));
     }
+    
+    public static native void copyToClipboard(String text) /*-{
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    }-*/;
     
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
-        definitionHtml.setHTML(queryDefinitionParser.parseToSafeHtml(newQueryDefinition));
+        currentDefinition = newQueryDefinition;
+        definitionDetailsHtml.setHTML(queryDefinitionParser.parseToDetailsAsSafeHtml(currentDefinition));
     }
 
     @Override
@@ -40,17 +66,17 @@ public class QueryDefinitionViewer implements Component<SerializableSettings>, Q
 
     @Override
     public Widget getEntryWidget() {
-        return entryWidget;
+        return dockPanel;
     }
 
     @Override
     public boolean isVisible() {
-        return entryWidget.isVisible();
+        return dockPanel.isVisible();
     }
 
     @Override
     public void setVisible(boolean visibility) {
-        entryWidget.setVisible(visibility);
+        dockPanel.setVisible(visibility);
     }
 
     @Override
