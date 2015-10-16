@@ -69,7 +69,7 @@ public class RefreshManager {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
             if (refreshable.provider.isActive() && !refreshable.callRunning
-                    && refreshable.timeout < System.currentTimeMillis() + ResultWithTTL.maxTimeToLoadEarlier.asMillis()) {
+                    && refreshable.timeout < System.currentTimeMillis() + ResultWithTTL.MAX_TIME_TO_LOAD_EARLIER.asMillis()) {
                 refreshable.callRunning = true;
                 final Action<ResultWithTTL<DTO>> action = refreshable.provider.getAction();
                 actionExecutor.execute(action, new AsyncCallback<ResultWithTTL<DTO>>() {
