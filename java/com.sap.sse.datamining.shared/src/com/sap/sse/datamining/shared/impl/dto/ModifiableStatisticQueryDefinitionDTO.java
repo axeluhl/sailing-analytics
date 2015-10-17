@@ -34,6 +34,19 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.filterSelection = new HashMap<>();
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }
+    
+    public ModifiableStatisticQueryDefinitionDTO(ModifiableStatisticQueryDefinitionDTO definition) {
+        localeInfoName = definition.localeInfoName;
+        statisticToCalculate = definition.statisticToCalculate;
+        aggregatorDefinition = definition.aggregatorDefinition;
+        dataRetrieverChainDefinition = definition.dataRetrieverChainDefinition;
+        retrieverSettings = new HashMap<>(definition.retrieverSettings);
+        dimensionsToGroupBy = new ArrayList<>(definition.dimensionsToGroupBy);
+        filterSelection = new HashMap<>();
+        for (DataRetrieverLevelDTO retrieverLevel : definition.filterSelection.keySet()) {
+            filterSelection.put(retrieverLevel, new HashMap<>(definition.filterSelection.get(retrieverLevel)));
+        }
+    }
 
     @Override
     public String getLocaleInfoName() {
