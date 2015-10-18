@@ -614,6 +614,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRegattaLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
