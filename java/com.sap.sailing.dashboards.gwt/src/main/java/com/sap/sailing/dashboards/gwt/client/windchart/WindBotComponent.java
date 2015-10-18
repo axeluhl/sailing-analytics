@@ -169,7 +169,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * */
     @Override
     public void updateWindBotUI(WindInfoForRaceDTO windInfoForRaceDTO) {
-        
+        logger.log(Level.INFO, "WindBotComponent with id "+windBotId+" got notified about new WindInfoForRaceDTO");
         if (windInfoForRaceDTO != null) {
             WindTrackInfoDTO windTrackInfoDTO = getWindTrackInfoDTOFromAndWindBotID(windInfoForRaceDTO, windBotId);
             if (windTrackInfoDTO != null) {
@@ -198,6 +198,8 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
             } else {
                 logger.log(Level.INFO, "WindInfoForRaceDTO does not contains WindTrackInfoDTO for Windbot id "+ windBotId);
             }
+        } else {
+            logger.log(Level.INFO, "WindInfoForRaceDTO is null");
         }
     }
 

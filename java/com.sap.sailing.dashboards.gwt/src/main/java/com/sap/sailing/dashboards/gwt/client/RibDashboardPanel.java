@@ -158,6 +158,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
         for (WindBotComponent windBotComponent : windBotComponents) {
+            logger.log(Level.INFO, "Registering WindBotDataRetrieverListener");
             windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
         }
     }
@@ -178,8 +179,19 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     }
 
     @Override
-    public void numberOfWindBotsChanged(List<String> windBotIDs,
+    public void numberOfWindBotsReceivedChanged(List<String> windBotIDs,
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+        if(windBotIDs != null) {
+        logger.log(Level.INFO, "Number of available windbots changed to "+windBotIDs.size());
+        } else {
+            logger.log(Level.INFO, "Number of available windbots changed. WindBots List is null");
+        }
         initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
+    }
+
+    @Override
+    public void numberOfWindBotsReceivedIsZero() {
+        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotNotAvailable());
+        windloadinghintright.setInnerText(stringConstants.dashboardWindBotNotAvailable());
     }
 }
