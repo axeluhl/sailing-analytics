@@ -199,7 +199,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
         Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, retrieverSettings, filterSelection, locale);
         QueryResult<HashSet<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
-        return dataMiningServer.convertToDTO(result);
+        return dtoFactory.createResultDTO(result);
     }
 
     private Collection<Function<?>> functionDTOsAsFunctions(Iterable<FunctionDTO> functionDTOs) {
@@ -253,7 +253,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         StatisticQueryDefinition<RacingEventService, ?, ?, ResultType> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
         Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
         QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
-        return dataMiningServer.convertToDTO(result);
+        return dtoFactory.createResultDTO(result);
     }
     
     @Override
@@ -272,7 +272,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Query<ResultType> query = dataMiningServer.createPredefinedQuery(name);
         if (query != null) {
             QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
-            return dataMiningServer.convertToDTO(result);
+            return dtoFactory.createResultDTO(result);
         }
         return null;
     }
