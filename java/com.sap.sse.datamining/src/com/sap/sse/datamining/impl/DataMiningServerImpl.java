@@ -31,6 +31,7 @@ import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.MemoryMonitor;
 import com.sap.sse.datamining.components.management.MemoryMonitorAction;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -69,14 +70,13 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final DataSourceProviderRegistry dataSourceProviderRegistry;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
     private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
-    
-    private final QueryDefinitionDTOProvider queryDefinitionProvider;
+    private final QueryDefinitionDTORegistry queryDefinitionRegistry;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
                                 DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
                                 AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry,
-                                QueryDefinitionDTOProvider queryDefinitionProvider) {
+                                QueryDefinitionDTORegistry queryDefinitionRegistry) {
         dataMiningClassLoaders = new HashSet<ClassLoader>();
         dataMiningClassLoaders.add(this.getClass().getClassLoader());
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -91,7 +91,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
         
-        this.queryDefinitionProvider = queryDefinitionProvider;
+        this.queryDefinitionRegistry = queryDefinitionRegistry;
     }
     
     private Iterable<MemoryMonitorAction> createMemoryMonitorActions() {
@@ -357,6 +357,49 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
+    public QueryDefinitionDTOProvider getQueryDefinitionDTOProvider() {
+        return queryDefinitionRegistry;
+    }
+    
+    @Override
+    public Iterable<String> getPredefinedQueryNames() {
+        return queryDefinitionRegistry.getNames();
+    }
+
+    @Override
+    public <ResultType> Query<ResultType> createPredefinedQuery(String name) {
+        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionRegistry.get(name);
+        if (definitionDTO != null) {
+            StatisticQueryDefinition<?, ?, ?, ResultType> definition = getQueryDefinitionForDTO(definitionDTO);
+            if (definition != null) {
+                return createQuery(definition);
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public QueryDefinitionDTORegistry getQueryDefinitionDTORegistry() {
+        return queryDefinitionRegistry;
+    }
+    
+    @Override
+    public void registerPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition) {
+        boolean componentsChanged = queryDefinitionRegistry.register(name, queryDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
+    }
+    
+    @Override
+    public void unregisterPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition) {
+        boolean componentsChanged = queryDefinitionRegistry.unregister(name, queryDefinition);
+        if (componentsChanged) {
+            updateComponentsChangedTimepoint();
+        }
+    }
+    
+    @Override
     public <DataSourceType, DataType, ExtractedType, ResultType> StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> getQueryDefinitionForDTO(StatisticQueryDefinitionDTO queryDefinitionDTO) {
         ModifiableStatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition = null;
         
@@ -431,23 +474,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result) {
         return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
-    }
-    
-    @Override
-    public Iterable<String> getPredefinedQueryNames() {
-        return queryDefinitionProvider.getNames();
-    }
-
-    @Override
-    public <ResultType> Query<ResultType> createPredefinedQuery(String name) {
-        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionProvider.get(name);
-        if (definitionDTO != null) {
-            StatisticQueryDefinition<?, ?, ?, ResultType> definition = getQueryDefinitionForDTO(definitionDTO);
-            if (definition != null) {
-                return createQuery(definition);
-            }
-        }
-        return null;
     }
     
 }

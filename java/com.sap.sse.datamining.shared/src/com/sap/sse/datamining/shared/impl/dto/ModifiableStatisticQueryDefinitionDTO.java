@@ -136,4 +136,66 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.aggregatorDefinition = aggregatorDefinition;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((aggregatorDefinition == null) ? 0 : aggregatorDefinition.hashCode());
+        result = prime * result
+                + ((dataRetrieverChainDefinition == null) ? 0 : dataRetrieverChainDefinition.hashCode());
+        result = prime * result + ((dimensionsToGroupBy == null) ? 0 : dimensionsToGroupBy.hashCode());
+        result = prime * result + ((filterSelection == null) ? 0 : filterSelection.hashCode());
+        result = prime * result + ((localeInfoName == null) ? 0 : localeInfoName.hashCode());
+        result = prime * result + ((retrieverSettings == null) ? 0 : retrieverSettings.hashCode());
+        result = prime * result + ((statisticToCalculate == null) ? 0 : statisticToCalculate.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ModifiableStatisticQueryDefinitionDTO other = (ModifiableStatisticQueryDefinitionDTO) obj;
+        if (aggregatorDefinition == null) {
+            if (other.aggregatorDefinition != null)
+                return false;
+        } else if (!aggregatorDefinition.equals(other.aggregatorDefinition))
+            return false;
+        if (dataRetrieverChainDefinition == null) {
+            if (other.dataRetrieverChainDefinition != null)
+                return false;
+        } else if (!dataRetrieverChainDefinition.equals(other.dataRetrieverChainDefinition))
+            return false;
+        if (dimensionsToGroupBy == null) {
+            if (other.dimensionsToGroupBy != null)
+                return false;
+        } else if (!dimensionsToGroupBy.equals(other.dimensionsToGroupBy))
+            return false;
+        if (filterSelection == null) {
+            if (other.filterSelection != null)
+                return false;
+        } else if (!filterSelection.equals(other.filterSelection))
+            return false;
+        if (localeInfoName == null) {
+            if (other.localeInfoName != null)
+                return false;
+        } else if (!localeInfoName.equals(other.localeInfoName))
+            return false;
+        if (retrieverSettings == null) {
+            if (other.retrieverSettings != null)
+                return false;
+        } else if (!retrieverSettings.equals(other.retrieverSettings))
+            return false;
+        if (statisticToCalculate == null) {
+            if (other.statisticToCalculate != null)
+                return false;
+        } else if (!statisticToCalculate.equals(other.statisticToCalculate))
+            return false;
+        return true;
+    }
+
 }
