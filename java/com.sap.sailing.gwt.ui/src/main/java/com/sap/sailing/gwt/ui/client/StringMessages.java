@@ -1420,4 +1420,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String developerOptions();
     String copyToClipboard();
     String code();
+    String useClassGetName();
+    String useClassGetNameTooltip();
+    String useStringLiterals();
+    String useStringLiteralsTooltip();
 }

@@ -249,3 +249,8 @@ input.magnifier {
 .definitionProviderControlsElements {
 	margin: 2px;
 }
+
+.queryDefinitionViewerContent {
+	background-color: white;
+	padding: 5px;
+}
