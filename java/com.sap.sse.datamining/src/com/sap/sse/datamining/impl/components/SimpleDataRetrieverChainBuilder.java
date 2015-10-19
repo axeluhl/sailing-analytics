@@ -187,8 +187,8 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         
         SerializableSettings settings = null;
         if (settingsType != null) {
-            settings = this.settings.containsKey(retrieverLevelIndex) ? this.settings.get(retrieverLevelIndex)
-                                                                      : retrieverLevels.get(retrieverLevelIndex).getDefaultSettings();
+            SerializableSettings storedSettings = this.settings.get(retrieverLevelIndex);
+            settings = storedSettings != null ? storedSettings : retrieverLevels.get(retrieverLevelIndex).getDefaultSettings();
         }
         return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, settingsType, retrieverLevelIndex);
     }

@@ -63,22 +63,24 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
 
     @Override
     public void showResult(QueryResultDTO<?> result) {
-        if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
-            CloseableTabHeader oldHeader = getSelectedHeader();
-            addTabAndFocus(new PolarResultsPresenter(stringMessages));
-            removeTab(oldHeader);
-        } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
-            CloseableTabHeader oldHeader = getSelectedHeader();
-            addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
-            removeTab(oldHeader);
-        } else {
-            if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+        if (result != null) {
+            if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                addTabAndFocus(new PolarResultsPresenter(stringMessages));
                 removeTab(oldHeader);
+            } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
+                removeTab(oldHeader);
+            } else {
+                if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+                    CloseableTabHeader oldHeader = getSelectedHeader();
+                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    removeTab(oldHeader);
+                }
             }
+            getSelectedHeader().setText(result.getResultSignifier());
         }
-        getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
     }
 

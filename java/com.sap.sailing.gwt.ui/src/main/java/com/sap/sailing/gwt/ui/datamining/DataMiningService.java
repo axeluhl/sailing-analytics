@@ -41,6 +41,9 @@ public interface DataMiningService extends RemoteService {
     
     <ResultType> QueryResultDTO<ResultType> runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition);
 
+    HashSet<String> getPredefinedQueryNames();
+    <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, String name, String localeInfoName);
+
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
 
 }

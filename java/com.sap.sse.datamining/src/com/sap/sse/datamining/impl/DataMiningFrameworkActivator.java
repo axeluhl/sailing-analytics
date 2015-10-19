@@ -22,6 +22,7 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
@@ -32,6 +33,7 @@ import com.sap.sse.datamining.impl.components.management.AggregationProcessorDef
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
 import com.sap.sse.datamining.impl.components.management.FunctionManager;
+import com.sap.sse.datamining.impl.components.management.QueryDefinitionDTOManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
@@ -57,7 +59,12 @@ public class DataMiningFrameworkActivator implements BundleActivator {
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
-        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionRegistry, dataSourceProviderRegistry, dataRetrieverChainDefinitionRegistry, aggregationProcessorDefinitionRegistry);
+        QueryDefinitionDTOProvider queryDefinitionProvider = new QueryDefinitionDTOManager();
+        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionRegistry,
+                                                                               dataSourceProviderRegistry,
+                                                                               dataRetrieverChainDefinitionRegistry,
+                                                                               aggregationProcessorDefinitionRegistry,
+                                                                               queryDefinitionProvider);
         dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, this.getClass().getClassLoader()));
         for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : getDefaultAggregationProcessors()) {
             dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);

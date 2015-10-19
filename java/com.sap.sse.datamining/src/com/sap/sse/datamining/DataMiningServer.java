@@ -70,4 +70,7 @@ public interface DataMiningServer {
     
     public <ResultType> QueryResultDTO<ResultType> convertToDTO(QueryResult<ResultType> result);
     
+    public Iterable<String> getPredefinedQueryNames();
+    public <ResultType> Query<ResultType> createPredefinedQuery(String name);
+    
 }

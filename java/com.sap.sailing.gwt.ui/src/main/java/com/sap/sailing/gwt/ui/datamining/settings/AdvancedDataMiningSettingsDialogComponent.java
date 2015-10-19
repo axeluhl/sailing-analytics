@@ -9,14 +9,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class QueryRunnerSettingsDialogComponent implements SettingsDialogComponent<QueryRunnerSettings> {
+public class AdvancedDataMiningSettingsDialogComponent implements SettingsDialogComponent<AdvancedDataMiningSettings> {
     
-    private QueryRunnerSettings initialSettings;
+    private AdvancedDataMiningSettings initialSettings;
     private StringMessages stringMessages;
     
-    private CheckBox runAutomaticallyBox;
+    private CheckBox developerOptionsCheckBox;
 
-    public QueryRunnerSettingsDialogComponent(QueryRunnerSettings initialSettings, StringMessages stringMessages) {
+    public AdvancedDataMiningSettingsDialogComponent(AdvancedDataMiningSettings initialSettings, StringMessages stringMessages) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
     }
@@ -25,21 +25,20 @@ public class QueryRunnerSettingsDialogComponent implements SettingsDialogCompone
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel additionalWidget = new FlowPanel();
         
-        runAutomaticallyBox = dialog.createCheckbox(stringMessages.runAutomatically());
-        runAutomaticallyBox.setTitle(stringMessages.runAutomaticallyTooltip());
-        runAutomaticallyBox.setValue(initialSettings.isRunAutomatically());
-        additionalWidget.add(runAutomaticallyBox);
+        developerOptionsCheckBox = dialog.createCheckbox(stringMessages.developerOptions());
+        developerOptionsCheckBox.setValue(initialSettings.isDeveloperOptions());
+        additionalWidget.add(developerOptionsCheckBox);
         
         return additionalWidget;
     }
 
     @Override
-    public QueryRunnerSettings getResult() {
-        return new QueryRunnerSettings(runAutomaticallyBox.getValue());
+    public AdvancedDataMiningSettings getResult() {
+        return new AdvancedDataMiningSettings(developerOptionsCheckBox.getValue());
     }
 
     @Override
-    public Validator<QueryRunnerSettings> getValidator() {
+    public Validator<AdvancedDataMiningSettings> getValidator() {
         return null;
     }
 

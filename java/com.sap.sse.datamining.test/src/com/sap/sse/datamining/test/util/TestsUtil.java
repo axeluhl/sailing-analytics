@@ -5,12 +5,14 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
 import com.sap.sse.datamining.impl.components.management.FunctionManager;
+import com.sap.sse.datamining.impl.components.management.QueryDefinitionDTOManager;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -52,7 +54,12 @@ public class TestsUtil {
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
-        return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry, dataSourceProviderRegistry, dataRetrieverChainDefinitionRegistry, aggregationProcessorDefinitionRegistry);
+        QueryDefinitionDTOProvider queryDefinitionProvider = new QueryDefinitionDTOManager();
+        return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry,
+                                        dataSourceProviderRegistry,
+                                        dataRetrieverChainDefinitionRegistry,
+                                        aggregationProcessorDefinitionRegistry,
+                                        queryDefinitionProvider);
     }
     
     protected TestsUtil() { }

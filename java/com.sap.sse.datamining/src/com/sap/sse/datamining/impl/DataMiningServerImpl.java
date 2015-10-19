@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +30,7 @@ import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.MemoryMonitor;
 import com.sap.sse.datamining.components.management.MemoryMonitorAction;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.QueryFactory;
 import com.sap.sse.datamining.functions.Function;
@@ -68,11 +69,14 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     private final DataSourceProviderRegistry dataSourceProviderRegistry;
     private final DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry;
     private final AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry;
+    
+    private final QueryDefinitionDTOProvider queryDefinitionProvider;
 
     public DataMiningServerImpl(ExecutorService executorService, FunctionRegistry functionRegistry,
                                 DataSourceProviderRegistry dataSourceProviderRegistry,
                                 DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry,
-                                AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry) {
+                                AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry,
+                                QueryDefinitionDTOProvider queryDefinitionProvider) {
         dataMiningClassLoaders = new HashSet<ClassLoader>();
         dataMiningClassLoaders.add(this.getClass().getClassLoader());
         this.stringMessages = new CompoundResourceBundleStringMessages();
@@ -86,6 +90,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         this.dataSourceProviderRegistry = dataSourceProviderRegistry;
         this.dataRetrieverChainDefinitionRegistry = dataRetrieverChainDefinitionRegistry;
         this.aggregationProcessorDefinitionRegistry = aggregationProcessorDefinitionRegistry;
+        
+        this.queryDefinitionProvider = queryDefinitionProvider;
     }
     
     private Iterable<MemoryMonitorAction> createMemoryMonitorActions() {
@@ -234,7 +240,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
-        return functionRegistry.getFunctionForDTO(functionDTO);
+        return functionRegistry.getFunctionForDTO(functionDTO, getJoinedClassLoader());
     }
     
     @Override
@@ -326,7 +332,7 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
 
     @Override
     public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO) {
-        return aggregationProcessorDefinitionRegistry.getForDTO(aggregatorDefinitionDTO);
+        return aggregationProcessorDefinitionRegistry.getForDTO(aggregatorDefinitionDTO, getJoinedClassLoader());
     }
 
     @Override
@@ -427,5 +433,21 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
         return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
     }
     
+    @Override
+    public Iterable<String> getPredefinedQueryNames() {
+        return queryDefinitionProvider.getNames();
+    }
+
+    @Override
+    public <ResultType> Query<ResultType> createPredefinedQuery(String name) {
+        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionProvider.get(name);
+        if (definitionDTO != null) {
+            StatisticQueryDefinition<?, ?, ?, ResultType> definition = getQueryDefinitionForDTO(definitionDTO);
+            if (definition != null) {
+                return createQuery(definition);
+            }
+        }
+        return null;
+    }
     
 }
