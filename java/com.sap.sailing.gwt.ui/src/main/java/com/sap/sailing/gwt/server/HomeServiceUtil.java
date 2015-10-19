@@ -523,7 +523,7 @@ public final class HomeServiceUtil {
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-    private static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
+    public static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
         final URL url = new URL(request.getRequestURL().toString());
         final URL baseURL = getBaseURL(url);
         return baseURL;

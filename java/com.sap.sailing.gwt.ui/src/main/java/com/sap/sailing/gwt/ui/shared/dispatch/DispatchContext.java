@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,4 +24,6 @@ public interface DispatchContext {
     Date getCurrentClientTime();
     
     HttpServletRequest getRequest();
+
+    URL getRequestBaseURL() throws MalformedURLException;
 }
