@@ -8,13 +8,14 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 
-public class GetRecentEventsAction implements Action<ListResult<EventQuickfinderDTO>> {
+public class GetRecentEventsAction implements Action<ListResult<EventQuickfinderDTO>>, IsClientCacheable {
     
     private int limit;
 
@@ -51,5 +52,10 @@ public class GetRecentEventsAction implements Action<ListResult<EventQuickfinder
             }
         }
         return result;
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(limit);
     }
 }

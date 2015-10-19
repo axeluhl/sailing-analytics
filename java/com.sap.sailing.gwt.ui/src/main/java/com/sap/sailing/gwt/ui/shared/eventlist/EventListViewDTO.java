@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.ui.shared.eventlist;
 
 import java.util.ArrayList;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.Result;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 
-public class EventListViewDTO implements IsSerializable {
+public class EventListViewDTO implements DTO, Result {
     
     private ArrayList<EventListEventDTO> upcomingEvents = new ArrayList<>();
     private ArrayList<EventListYearDTO> recentEvents = new ArrayList<>();

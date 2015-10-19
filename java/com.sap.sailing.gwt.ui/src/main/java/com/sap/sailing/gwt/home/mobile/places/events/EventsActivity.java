@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventListViewAction;
 import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 
 public class EventsActivity extends AbstractActivity implements Presenter {
@@ -31,7 +32,8 @@ public class EventsActivity extends AbstractActivity implements Presenter {
         panel.setWidget(new Placeholder());
         Window.setTitle(TextMessages.INSTANCE.events());
         final EventsView view = new EventsViewImpl(this);
-        clientFactory.getHomeService().getEventListView(new AsyncCallback<EventListViewDTO>() {
+
+        clientFactory.getDispatch().execute(new GetEventListViewAction(), new AsyncCallback<EventListViewDTO>() {
             @Override
             public void onSuccess(EventListViewDTO eventListView) {
                 panel.setWidget(view.asWidget());

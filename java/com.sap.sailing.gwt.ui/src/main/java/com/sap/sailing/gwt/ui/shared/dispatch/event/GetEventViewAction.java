@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
@@ -23,7 +24,7 @@ import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
 
-public class GetEventViewAction implements Action<EventViewDTO> {
+public class GetEventViewAction implements Action<EventViewDTO>, IsClientCacheable {
     private static final Logger logger = Logger.getLogger(GetEventViewAction.class.getName());
 
     private UUID eventId;
@@ -112,7 +113,11 @@ public class GetEventViewAction implements Action<EventViewDTO> {
             localizedURL += "en";
             dto.setSailorsInfoWebsiteURL(localizedURL);
         }
-
         return dto;
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(eventId);
     }
 }

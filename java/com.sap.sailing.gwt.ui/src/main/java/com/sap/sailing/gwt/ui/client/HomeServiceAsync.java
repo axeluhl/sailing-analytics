@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
@@ -19,7 +18,7 @@ public interface HomeServiceAsync {
 
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
 
-    void getEventListView(AsyncCallback<EventListViewDTO> callback);
+    // void getEventListView(AsyncCallback<EventListViewDTO> callback);
 
     void getStartView(AsyncCallback<StartViewDTO> callback);
 }

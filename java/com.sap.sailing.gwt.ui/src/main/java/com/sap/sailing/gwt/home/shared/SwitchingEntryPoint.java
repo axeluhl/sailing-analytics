@@ -32,6 +32,7 @@ public class SwitchingEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        Document.get().getElementById("loading").removeFromParent();
         LOG.info("Start switching entry point");
         String hash = Window.Location.getHash();
         if (hash != null && hash.startsWith("#")) {

@@ -6,6 +6,8 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -21,6 +23,7 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
     private final HomeServiceAsync homeService;
     private final MediaServiceAsync mediaService;
     private final PlaceNavigator navigator;
+    private final DispatchSystem dispatch = new DispatchSystemImpl();
 
     public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
         super(root, eventBus, placeController);
@@ -56,5 +59,10 @@ public abstract class AbstractApplicationClientFactory extends SecureClientFacto
     @Override
     public PlaceNavigator getPlaceNavigator() {
         return navigator;
+    }
+
+    @Override
+    public DispatchSystem getDispatch() {
+        return dispatch;
     }
 }

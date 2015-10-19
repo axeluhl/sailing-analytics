@@ -25,7 +25,78 @@
 	</script>
 	
 	<script src="com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js"></script>
+	<style type="text/css">
+	.loading {
+		margin: 0px;
+		padding-top: 20px;
+		position: absolute; top: 0;
+		height: 100%;
+		width: 100%;
+	}
+	.loading >.sapsailing {
+		margin-top: 100px;
+		margin-left: 100px;
+		font-size: 40px;
+		color:#008fcc;
+		font-weight: bold;
+	}
+	.loading >.waitmessage {
+		margin-top: 50px;
+		margin-left: 100px;
+		font-size: 30px;
+	}
+	
+	.signal {
+	    border:3px solid #6a6a6a;
+	    border-radius:300px;
+	    height:300px;
+	    left:20%;
+	    margin:-15px 0 0 -15px;
+	    opacity:0;
+	    position:absolute;
+	    top:40%;
+	    width:300px;
+	 
+	    -webkit-animation: pulsate 2s ease-out;
+	 
+	            animation: pulsate 2s ease-out;
+	    -webkit-animation-iteration-count:infinite;
+	            animation-iteration-count:infinite;
+	  -webkit-transform: translate(-50%, -50%);
+	}
 
+	@-webkit-keyframes pulsate {
+	    0% {
+	      -webkit-transform:scale(.1);
+	              transform:scale(.1);
+	      opacity: 0.0;
+	    }
+	    50% {
+	      opacity:1;
+	    }
+	    100% {
+	      -webkit-transform:scale(1.2);
+	              transform:scale(1.2);
+	      opacity:0;
+	    }
+	}
+	
+	@keyframes pulsate {
+	    0% {
+	      -webkit-transform:scale(.1);
+	              transform:scale(.1);
+	      opacity: 0.0;
+	    }
+	    50% {
+	      opacity:1;
+	    }
+	    100% {
+	      -webkit-transform:scale(1.2);
+	              transform:scale(1.2);
+	      opacity:0;
+	    }
+	}
+	</style>
 </head>
 <body>
 	<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
@@ -35,6 +106,10 @@
 			Your web browser must have JavaScript enabled in order for this
 			application to display correctly.</div>
 	</noscript>
-
+	<div id="loading" class="loading">
+		<p class="sapsailing">SAP Sailing Analytics</p>
+		<p class="waitmessage">Loading, please wait...</p>
+		<div class="signal"></div>
+	</div>
 </body>
 </html>

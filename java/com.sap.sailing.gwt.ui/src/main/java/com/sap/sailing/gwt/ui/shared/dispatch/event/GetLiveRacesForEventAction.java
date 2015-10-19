@@ -4,13 +4,15 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.CalculationWithEvent;
 
-public class GetLiveRacesForEventAction implements Action<ResultWithTTL<SortedSetResult<LiveRaceDTO>>> {
+public class GetLiveRacesForEventAction implements Action<ResultWithTTL<SortedSetResult<LiveRaceDTO>>>,
+        IsClientCacheable {
     private UUID eventId;
     
     @SuppressWarnings("unused")
@@ -32,5 +34,10 @@ public class GetLiveRacesForEventAction implements Action<ResultWithTTL<SortedSe
                 return liveRaceCalculator.getResult();
             }
         });
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(eventId);
     }
 }

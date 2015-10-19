@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
@@ -22,7 +23,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
-public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
+public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>>, IsClientCacheable {
     
     private UUID eventId;
     private boolean useTeaserImage;
@@ -129,5 +130,10 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 //        }
 //        
 //        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(eventId).append("_").append(useTeaserImage);
     }
 }

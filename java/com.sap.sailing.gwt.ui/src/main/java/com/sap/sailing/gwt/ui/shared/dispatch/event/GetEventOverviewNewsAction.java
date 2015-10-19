@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
@@ -19,7 +20,7 @@ import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.Duration;
 
-public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>> {
+public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResult<NewsEntryDTO>>>, IsClientCacheable {
     private UUID eventId;
     /**
      * This is number of items to deliver
@@ -67,5 +68,10 @@ public class GetEventOverviewNewsAction implements Action<ResultWithTTL<ListResu
             }
         }
         return news;
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(eventId).append("_").append(limit);
     }
 }

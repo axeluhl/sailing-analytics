@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.home.shared.dispatch.IsClientCacheable;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
@@ -13,7 +14,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.LeaderboardC
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 import com.sap.sse.common.Duration;
 
-public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetResult<RegattaWithProgressDTO>>> {
+public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetResult<RegattaWithProgressDTO>>>,
+        IsClientCacheable {
     private UUID eventId;
     
     @SuppressWarnings("unused")
@@ -36,5 +38,10 @@ public class GetRegattaListViewAction implements Action<ResultWithTTL<SortedSetR
         });
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
                 Duration.ONE_MINUTE.times(3)), new SortedSetResult<>(result));
+    }
+
+    @Override
+    public void cacheInstanceKey(StringBuilder key) {
+        key.append(eventId);
     }
 }
