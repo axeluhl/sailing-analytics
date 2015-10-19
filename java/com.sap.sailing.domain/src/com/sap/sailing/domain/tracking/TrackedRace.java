@@ -299,11 +299,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * implementations shall override this and provide a meaningful implementation according to the specification given
      * above.
      */
-    default boolean takesWindFix(Wind wind) {
+    default boolean takesWindFixWithTimePoint(TimePoint timePoint) {
         return true;
     }
 
-    default boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+    default boolean takesWindFixWithTimePointRecursively(TimePoint windFixTimePoint, Set<TrackedRace> visited) {
         return true;
     }
 

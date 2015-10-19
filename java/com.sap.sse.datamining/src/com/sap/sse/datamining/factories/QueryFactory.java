@@ -36,7 +36,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 public class QueryFactory {
 
     public <DataSourceType, DataType, ExtractedType, ResultType> Query<ResultType> createQuery(DataSourceType dataSource, StatisticQueryDefinition<DataSourceType, DataType, ExtractedType, ResultType> queryDefinition,
-                                                                            ResourceBundleStringMessages stringMessages, ExecutorService executor) {
+                                                                                               ResourceBundleStringMessages stringMessages, ExecutorService executor) {
         return new ProcessorQuery<ResultType, DataSourceType>(dataSource, stringMessages, queryDefinition.getLocale(), queryDefinition.getResultType(), new AdditionalStatisticQueryData()) {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, ResultType>, Void> resultReceiver) {

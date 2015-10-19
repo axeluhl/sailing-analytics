@@ -1,81 +1,79 @@
 package com.sap.sailing.gwt.ui.datamining.developer;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class QueryDefinitionViewer implements Component<SerializableSettings> {
+public class QueryDefinitionViewer implements Component<SerializableSettings>, QueryDefinitionChangedListener {
     
     private final StringMessages stringMessages;
-    private final QueryDefinitionProvider queryDefinitionProvider;
     private final QueryDefinitionParser queryDefinitionParser;
     
-    private final Button viewButton;
-    private final DialogBox dialogBox;
-    private final HTML definitionHtml;
+    private final DockLayoutPanel dockPanel;
+    private final TabLayoutPanel contentPanel;
+    private final HTML definitionDetailsHtml;
+    private final HTML definitionCodeHtml;
+    
+    private StatisticQueryDefinitionDTO currentDefinition;
 
-    public QueryDefinitionViewer(StringMessages stringMessages, QueryDefinitionProvider queryDefinitionProvider) {
+    public QueryDefinitionViewer(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.queryDefinitionProvider = queryDefinitionProvider;
         queryDefinitionParser = new QueryDefinitionParser();
         
-        viewButton = new Button(stringMessages.viewQueryDefinition(), new ClickHandler() {
+        definitionDetailsHtml = new HTML();
+        definitionDetailsHtml.setWordWrap(false);
+        definitionCodeHtml = new HTML();
+        definitionCodeHtml.setWordWrap(false);
+        
+        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                show();
+                switch (contentPanel.getSelectedIndex()) {
+                case 0:
+                    copyToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    break;
+                case 1:
+                    copyToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition));
+                    break;
+                }
             }
         });
+
+        HorizontalPanel controlsPanel = new HorizontalPanel();
+        controlsPanel.setSpacing(5);
+        controlsPanel.add(copyToClipboardButton);
         
-        dialogBox = new DialogBox(false, true);
-        dialogBox.setText(stringMessages.viewQueryDefinition());
-        dialogBox.setAnimationEnabled(true);
+        contentPanel = new TabLayoutPanel(30, Unit.PX);
+        contentPanel.add(new ScrollPanel(definitionDetailsHtml), stringMessages.details());
+        contentPanel.add(new ScrollPanel(definitionCodeHtml), stringMessages.code());
         
-        Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dialogBox.hide();
-            }
-        });
-        
-        definitionHtml = new HTML();
-        definitionHtml.setWordWrap(false);
-        
-        DockPanel dockPanel = new DockPanel();
-        dockPanel.setSpacing(4);
-        dockPanel.add(closeButton, DockPanel.SOUTH);
-        dockPanel.setCellHorizontalAlignment(closeButton, DockPanel.ALIGN_RIGHT);
-        dockPanel.add(definitionHtml, DockPanel.CENTER);
-        dockPanel.setWidth("100%");
-        dialogBox.setWidget(dockPanel);
+        dockPanel = new DockLayoutPanel(Unit.PX);
+        dockPanel.addSouth(controlsPanel, 45);
+        dockPanel.add(contentPanel);
     }
-
-    /**
-     * Opens a dialog and shows the current {@link StatisticQueryDefinitionDTO QueryDefinition}
-     * of the {@link QueryDefinitionProvider}.<br>
-     * Does nothing, if there's already an open dialog.
-     */
-    public void show() {
-        show(queryDefinitionProvider.getQueryDefinition());
-    }
-
-
-    /**
-     * Opens a dialog and shows the given {@link StatisticQueryDefinitionDTO QueryDefinition}.<br>
-     * Does nothing, if there's already an open dialog.
-     */
-    public void show(StatisticQueryDefinitionDTO queryDefinition) {
-        definitionHtml.setHTML(queryDefinitionParser.parseToSafeHtml(queryDefinition));
-        dialogBox.center();
+    
+    public static native void copyToClipboard(String text) /*-{
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    }-*/;
+    
+    @Override
+    public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
+        currentDefinition = newQueryDefinition;
+        definitionDetailsHtml.setHTML(queryDefinitionParser.parseToDetailsAsSafeHtml(currentDefinition));
+        definitionCodeHtml.setHTML(queryDefinitionParser.parseToCodeAsSafeHtml(currentDefinition));
     }
 
     @Override
@@ -85,17 +83,17 @@ public class QueryDefinitionViewer implements Component<SerializableSettings> {
 
     @Override
     public Widget getEntryWidget() {
-        return viewButton;
+        return dockPanel;
     }
 
     @Override
     public boolean isVisible() {
-        return viewButton.isVisible();
+        return dockPanel.isVisible();
     }
 
     @Override
     public void setVisible(boolean visibility) {
-        viewButton.setVisible(visibility);
+        dockPanel.setVisible(visibility);
     }
 
     @Override
