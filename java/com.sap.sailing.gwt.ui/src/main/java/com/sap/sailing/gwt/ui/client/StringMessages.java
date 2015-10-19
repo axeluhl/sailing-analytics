@@ -1414,4 +1414,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String groupAverageDescending();
     String groupMedianAscending();
     String groupMedianDescending();
+    String resultsFoundForSearch(@PluralCount(DefaultRule_1_0n.class) int amount, String searchText);
 }
