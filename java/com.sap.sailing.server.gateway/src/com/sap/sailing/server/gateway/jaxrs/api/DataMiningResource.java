@@ -22,11 +22,13 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
+import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 
 /**
  * REST-API to run predefined queries and get the result as JSON.
@@ -76,22 +78,28 @@ public class DataMiningResource extends AbstractSailingServerResource {
         
         DataMiningServer dataMiningServer = getDataMiningServer();
         PredefinedQueryIdentifier queryIdentifier = new PredefinedQueryIdentifier(identifier, "");
-        Query<?> query = dataMiningServer.createPredefinedQuery(queryIdentifier);
-        if (query == null) {
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = dataMiningServer.getPredefinedQueryDefinitionDTO(queryIdentifier);
+        if (queryDefinitionDTO == null) {
             response = Response.status(Status.NOT_FOUND).entity("Couldn't find a predefined query with the identifier '" + identifier + "'.").type(MediaType.TEXT_PLAIN).build();
         } else {
-            DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-            QueryResult<?> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
-            
-            if (result == null || result.isEmpty()) {
-                response = Response.status(Status.NOT_FOUND).entity("No data found.").type(MediaType.TEXT_PLAIN).build();
+            StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+            Query<?> query = queryDefinition == null ? null : dataMiningServer.createQuery(queryDefinition);
+            if (query == null) {
+                response = Response.status(Status.NOT_FOUND).entity("Couldn't create a query for the identifier '" + identifier + "'.").type(MediaType.TEXT_PLAIN).build();
             } else {
-                JSONObject jsonResult = new JSONObject();
-                jsonResult.put("state", result.getState());
-                jsonResult.put("signifier", result.getResultSignifier());
-                jsonResult.put("resultType", result.getResultType().getSimpleName());
-                jsonResult.put("results", resultValuesToJSON(result.getResultType(), result.getResults()));
-                response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
+                DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
+                QueryResult<?> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+                
+                if (result == null || result.isEmpty()) {
+                    response = Response.status(Status.NOT_FOUND).entity("No data found.").type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    JSONObject jsonResult = new JSONObject();
+                    jsonResult.put("state", result.getState());
+                    jsonResult.put("signifier", result.getResultSignifier());
+                    jsonResult.put("resultType", result.getResultType().getSimpleName());
+                    jsonResult.put("results", resultValuesToJSON(result.getResultType(), result.getResults()));
+                    response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
+                }
             }
         }
         return response;

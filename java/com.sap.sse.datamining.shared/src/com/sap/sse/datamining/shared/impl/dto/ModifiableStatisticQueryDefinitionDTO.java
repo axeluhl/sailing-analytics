@@ -35,16 +35,17 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         this.dimensionsToGroupBy = new ArrayList<FunctionDTO>();
     }
     
-    public ModifiableStatisticQueryDefinitionDTO(ModifiableStatisticQueryDefinitionDTO definition) {
-        localeInfoName = definition.localeInfoName;
-        statisticToCalculate = definition.statisticToCalculate;
-        aggregatorDefinition = definition.aggregatorDefinition;
-        dataRetrieverChainDefinition = definition.dataRetrieverChainDefinition;
-        retrieverSettings = new HashMap<>(definition.retrieverSettings);
-        dimensionsToGroupBy = new ArrayList<>(definition.dimensionsToGroupBy);
+    public ModifiableStatisticQueryDefinitionDTO(StatisticQueryDefinitionDTO definition) {
+        localeInfoName = definition.getLocaleInfoName();
+        statisticToCalculate = definition.getStatisticToCalculate();
+        aggregatorDefinition = definition.getAggregatorDefinition();
+        dataRetrieverChainDefinition = definition.getDataRetrieverChainDefinition();
+        retrieverSettings = new HashMap<>(definition.getRetrieverSettings());
+        dimensionsToGroupBy = new ArrayList<>(definition.getDimensionsToGroupBy());
         filterSelection = new HashMap<>();
-        for (DataRetrieverLevelDTO retrieverLevel : definition.filterSelection.keySet()) {
-            filterSelection.put(retrieverLevel, new HashMap<>(definition.filterSelection.get(retrieverLevel)));
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionToCopy = definition.getFilterSelection();
+        for (DataRetrieverLevelDTO retrieverLevel : filterSelectionToCopy.keySet()) {
+            filterSelection.put(retrieverLevel, new HashMap<>(filterSelectionToCopy.get(retrieverLevel)));
         }
     }
 

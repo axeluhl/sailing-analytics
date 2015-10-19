@@ -35,6 +35,7 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -268,12 +269,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName) {
-        // TODO Use local info name
         DataMiningServer dataMiningServer = getDataMiningServer();
-        Query<ResultType> query = dataMiningServer.createPredefinedQuery(identifier);
-        if (query != null) {
-            QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
-            return dtoFactory.createResultDTO(result);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = dataMiningServer.getPredefinedQueryDefinitionDTO(identifier);
+        if (queryDefinitionDTO != null) {
+            queryDefinitionDTO.setLocaleInfoName(localeInfoName);
+            return runQuery(session, queryDefinitionDTO);
         }
         return null;
     }
