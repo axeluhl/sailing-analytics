@@ -77,7 +77,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName) {
-        Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinition(retrieverChainDefinition.getId()).getRetrievedDataType();
+        Class<?> retrievedDataType = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(retrieverChainDefinition).getRetrievedDataType();
         Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
         return functionsAsDTOs(statistics, localeInfoName);
     }
@@ -121,7 +121,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> dimensions = getDataMiningServer()
                 .getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         return dimensionsMappedByLevelAsDTOs(dimensions, localeInfoName);
@@ -130,7 +130,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
-        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensions = getDataMiningServer()
                 .getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
         return dimensionsMappedByLevelAsDTOs(reducedDimensions, localeInfoName);
@@ -191,7 +191,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             DataRetrieverLevelDTO retrieverLevelDTO, HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettingsDTO,
             HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO, String localeInfoName) {
         DataMiningServer dataMiningServer = getDataMiningServer();
-        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinition(dataRetrieverChainDefinitionDTO.getId());
+        DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         DataRetrieverLevel<?, ?> retrieverLevel = retrieverChainDefinition.getDataRetrieverLevel(retrieverLevelDTO.getLevel());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
         Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = retrieverSettingsDTOAsRetrieverSettings(retrieverSettingsDTO, retrieverChainDefinition);
@@ -254,6 +254,27 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         Query<ResultType> query = dataMiningServer.createQuery(queryDefinition);
         QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
         return dataMiningServer.convertToDTO(result);
+    }
+    
+    @Override
+    public HashSet<String> getPredefinedQueryNames() {
+        HashSet<String> predefinedQueryNames = new HashSet<String>();
+        for (String predefinedQueryName : getDataMiningServer().getPredefinedQueryNames()) {
+            predefinedQueryNames.add(predefinedQueryName);
+        }
+        return predefinedQueryNames;
+    }
+    
+    @Override
+    public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, String name, String localeInfoName) {
+        // TODO Use local info name
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        Query<ResultType> query = dataMiningServer.createPredefinedQuery(name);
+        if (query != null) {
+            QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+            return dataMiningServer.convertToDTO(result);
+        }
+        return null;
     }
     
     @Override

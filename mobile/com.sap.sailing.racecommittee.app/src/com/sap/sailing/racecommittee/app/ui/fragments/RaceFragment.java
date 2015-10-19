@@ -67,7 +67,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         if (getArguments() != null) {
             String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-            if (managedRace == null && !(getClass() == RaceFlagViewerFragment.class)) {
+            if (managedRace == null) {
                 throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());
             }
         } else {

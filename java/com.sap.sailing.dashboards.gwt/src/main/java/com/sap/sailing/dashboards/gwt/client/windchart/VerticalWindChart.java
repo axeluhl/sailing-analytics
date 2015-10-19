@@ -3,6 +3,8 @@ package com.sap.sailing.dashboards.gwt.client.windchart;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -71,6 +73,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private static final int MAX_SERIES_POINTS = 100000000;
 
     private static VerticalWindChartUiBinder uiBinder = GWT.create(VerticalWindChartUiBinder.class);
+    
+    private static final Logger logger = Logger.getLogger(VerticalWindChart.class.getName());
 
     interface VerticalWindChartUiBinder extends UiBinder<Widget, VerticalWindChart> {
     }
@@ -194,9 +198,11 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 if (verticalWindChartSeries == null) {
                     initVerticalWindChartSeries();
                     verticalWindChartSeries.setPoints(points, true);
+                    logger.log(Level.INFO, "Set Points");
                 } else {
                     for (Point point : points) {
                         verticalWindChartSeries.addPoint(point, true, false, false);
+                        logger.log(Level.INFO, "Add Point");
                     }
                 }
                 verticalWindChartSeries.updateThreshold("" + average);

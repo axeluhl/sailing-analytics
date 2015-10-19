@@ -87,8 +87,8 @@ public class TestDataRetrieverChainCreation {
         
         List<DataRetrieverLevel<?, ?>> cloneDataRetrieverTypesWithInformation = (List<DataRetrieverLevel<?, ?>>) chainClone.getDataRetrieverLevels();
         assertThat(cloneDataRetrieverTypesWithInformation, is(dataRetrieverChainDefinition.getDataRetrieverLevels()));
-        
-        assertThat(chainClone.getID(), not(dataRetrieverChainDefinition.getID()));
+
+        assertThat(chainClone, not(dataRetrieverChainDefinition));
         
         chainClone.startBuilding(ConcurrencyTestsUtil.getExecutor());
     }
