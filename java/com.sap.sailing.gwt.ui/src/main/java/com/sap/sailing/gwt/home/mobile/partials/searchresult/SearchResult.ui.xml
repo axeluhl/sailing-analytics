@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+		xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared"	xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResultResources" />
+	<g:HTMLPanel>
+		<div class="{res.mediaCss.grid}">
+			<div class="{local_res.css.searchresult}">
+				<div class="{local_res.css.searchresult_header} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.searchresult_header_form}">
+						<label for="searchfor" class="{local_res.css.searchresult_header_form_label}">
+							<ui:text from='{i18n.searchResultHeaderLabel}' />
+						</label>
+						<div class="{local_res.css.searchresult_header_form_inputwrapper} {res.mediaCss.small12} {res.mediaCss.columns}">
+							<g:TextBox addStyleNames="{local_res.css.searchresult_header_form_input}" ui:field="searchInputUi"/>
+							<!-- placeholder="{i18n.searchResultHeaderPlaceholder}" -->
+							<g:Button addStyleNames="{local_res.css.searchresult_header_form_button}" ui:field="searchButtonUi"/>
+						</div>
+					</div>
+				</div>
+				<div class="{local_res.css.searchresult_amount} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<span ui:field="searchResultCountUi" />&nbsp;<ui:text from='{i18n.searchResultsFound}'/> '<span ui:field="searchResultForUi" />'.
+				</div>
+				<g:FlowPanel ui:field="searchResultContainerUi" />
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>
