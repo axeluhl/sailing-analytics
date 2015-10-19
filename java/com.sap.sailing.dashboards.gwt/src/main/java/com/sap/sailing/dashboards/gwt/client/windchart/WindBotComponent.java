@@ -2,6 +2,8 @@ package com.sap.sailing.dashboards.gwt.client.windchart;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Point;
 
@@ -51,6 +53,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
 
     private static WindBotComponentUiBinder uiBinder = GWT.create(WindBotComponentUiBinder.class);
     private static final String IN_SIMULATION_MODE = "simulation";
+    private static final Logger logger = Logger.getLogger(WindBotComponent.class.getName());
 
     interface WindBotComponentUiBinder extends UiBinder<Widget, WindBotComponent> {
     }
@@ -166,10 +169,13 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * */
     @Override
     public void updateWindBotUI(WindInfoForRaceDTO windInfoForRaceDTO) {
+        
         if (windInfoForRaceDTO != null) {
             WindTrackInfoDTO windTrackInfoDTO = getWindTrackInfoDTOFromAndWindBotID(windInfoForRaceDTO, windBotId);
             if (windTrackInfoDTO != null) {
+                logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id "+ windBotId);
                 if (windTrackInfoDTO.windFixes != null && windTrackInfoDTO.windFixes.size() > 0) {
+                    logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id "+ windBotId);
                     Point[] speedPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes, WindType.SPEED);
                     Point[] directionPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes,
                             WindType.DIRECTION);
@@ -186,7 +192,11 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
                             movingAverageDirection.getAverage());
                     locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes
                             .get(windTrackInfoDTO.windFixes.size() - 1).position);
+                } else {
+                    logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is null or empty");
                 }
+            } else {
+                logger.log(Level.INFO, "WindInfoForRaceDTO does not contains WindTrackInfoDTO for Windbot id "+ windBotId);
             }
         }
     }
