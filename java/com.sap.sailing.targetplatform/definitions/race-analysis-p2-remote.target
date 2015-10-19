@@ -66,7 +66,7 @@
 <unit id="org.dom4j" version="1.6.1.v201312101416"/>
 <unit id="org.apache.xmlbeans" version="2.3.0.v201405241900"/>
 <unit id="org.apache.poi" version="3.9.0.v201405241750"/>
-<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241750"/>
+<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
 <unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
 </location>
