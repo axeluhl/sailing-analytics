@@ -64,7 +64,7 @@
             android:drawableLeft="?chevron_left_24dp"
             android:orientation="horizontal"
             android:text="@string/wind"
-            android:textAppearance="?textNormal"/>
+            android:textAppearance="?textHeader"/>
 
         <View
             android:id="@+id/line_top"
