@@ -49,7 +49,7 @@ public class TestCompoundFunction {
         //This is a workaround, because the assertion, that to types are equal checks for an instance of the given class instead.
         assertThat("The actual declaring class did'nt match the expected one.",
                 compoundFunction.getDeclaringType().equals(MarkedContainer.class), is(true));
-        assertThat(compoundFunction.getSimpleName(), is("getContainerElement -> getName"));
+        assertThat(compoundFunction.getSimpleName(), is("getContainerElement().getName()"));
         assertThat(compoundFunction.getLocalizedName(Locale.ENGLISH, TestsUtil.getTestStringMessages()), is("Name"));
         assertThat(compoundFunction.getResultDecimals(), is(0));
     }

@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
 public abstract class AbstractResultsPresenter<SettingsType extends Settings> implements ResultsPresenterWithControls<SettingsType> {
@@ -34,6 +35,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
     private final HTML labeledBusyIndicator;
     
     private QueryResultDTO<?> currentResult;
+    private boolean isCurrentResultSimple;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -90,6 +92,11 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
     }
     
     @Override
+    public void removeControl(Widget controlWidget) {
+        controlsPanel.remove(controlWidget);
+    }
+    
+    @Override
     public void showResult(QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
@@ -99,11 +106,12 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
             }
             
             this.currentResult = result;
+            updateIsCurrentResultSimple();
             
             internalShowResults(getCurrentResult());
-            
         } else {
             this.currentResult = null;
+            updateIsCurrentResultSimple();
             showError(getStringMessages().noDataFound() + ".");
         }
     }
@@ -121,6 +129,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
         }
         
         currentResult = null;
+        updateIsCurrentResultSimple();
         presentationPanel.setWidget(errorLabel);
     }
     
@@ -142,6 +151,25 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
         }
         
         currentResult = null;
+        updateIsCurrentResultSimple();
+    }
+    
+    private void updateIsCurrentResultSimple() {
+        boolean isSimple = false;
+        if (currentResult != null) {
+            isSimple = true;
+            for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
+                if (groupKey.hasSubKey()) {
+                    isSimple = false;
+                    break;
+                }
+            }
+        }
+        isCurrentResultSimple = isSimple;
+    }
+
+    protected boolean isCurrentResultSimple() {
+        return isCurrentResultSimple;
     }
     
     protected StringMessages getStringMessages() {

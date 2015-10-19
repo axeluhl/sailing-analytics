@@ -1245,7 +1245,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String distanceTraveledIncludingGateStartTooltip();
     String raceDistanceTraveledIncludingGateStartTooltip();
     String results();
-    String group();
+    String groupName();
     String valueAscending();
     String valueDescending();
     String sortBy();
@@ -1409,4 +1409,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String copyCompetitors();
     String smartphoneTracking();
     String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String viewQueryDefinition();
+    String queryDefinitionViewer();
+    String groupAverageAscending();
+    String groupAverageDescending();
+    String groupMedianAscending();
+    String groupMedianDescending();
+    String runPredefinedQuery();
+    String selectPredefinedQuery();
+    String predefinedQueryRunner();
+    String developerOptions();
+    String copyToClipboard();
+    String code();
+    String useClassGetName();
+    String useClassGetNameTooltip();
+    String useStringLiterals();
+    String useStringLiteralsTooltip();
 }

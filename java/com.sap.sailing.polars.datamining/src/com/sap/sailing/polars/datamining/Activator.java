@@ -46,7 +46,7 @@ public class Activator extends AbstractDataMiningActivator {
     
     public Activator() {
         dataRetrieverChainDefinitions = new PolarsDataRetrievalChainDefinitions();
-        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClass().getClassLoader());
+        sailingServerStringMessages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, getClassLoader());
     }
 
     @Override

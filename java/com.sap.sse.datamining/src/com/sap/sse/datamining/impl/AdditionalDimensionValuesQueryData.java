@@ -1,7 +1,5 @@
 package com.sap.sse.datamining.impl;
 
-import java.util.UUID;
-
 import com.sap.sse.datamining.Query.QueryType;
 import com.sap.sse.datamining.functions.Function;
 
@@ -9,8 +7,8 @@ public class AdditionalDimensionValuesQueryData extends AbstractAdditionalQueryD
     
     private final Iterable<Function<?>> dimensions;
 
-    public AdditionalDimensionValuesQueryData(UUID dataRetrieverChainID, Iterable<Function<?>> dimensions) {
-        super(QueryType.DIMENSION_VALUES, dataRetrieverChainID);
+    public AdditionalDimensionValuesQueryData(Iterable<Function<?>> dimensions) {
+        super(QueryType.DIMENSION_VALUES);
         this.dimensions = dimensions;
     }
 
