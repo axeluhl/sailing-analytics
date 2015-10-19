@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.home.desktop.places.searchresult;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class SearchResultPlace extends Place {
+public class SearchResultPlace extends Place implements HasMobileVersion {
     private final String searchText;
     
     public SearchResultPlace(String searchText) {
