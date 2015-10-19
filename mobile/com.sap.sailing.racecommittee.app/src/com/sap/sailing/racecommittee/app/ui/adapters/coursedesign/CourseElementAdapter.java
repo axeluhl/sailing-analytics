@@ -255,10 +255,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
         public ViewHolder(View itemView) {
             super(itemView);
 
-            if (mEditable) {
-                itemView.setOnLongClickListener(this);
-            }
-
             container = ViewHelper.get(itemView, R.id.container);
             dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
             leftText = ViewHelper.get(itemView, R.id.column_left_text);
@@ -266,6 +262,10 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<CourseElemen
             roundingDirection = ViewHelper.get(itemView, R.id.rounding_direction);
             rightText = ViewHelper.get(itemView, R.id.column_right_text);
             rightImage = ViewHelper.get(itemView, R.id.column_right_image);
+
+            if (mEditable && roundingDirection != null) {
+                roundingDirection.setOnLongClickListener(this);
+            }
         }
 
         @Override

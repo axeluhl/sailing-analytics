@@ -12,15 +12,15 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.MainScheduleItem;
+import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 
-public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapter.ViewHolder> {
+public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.ViewHolder> {
 
     private Context mContext;
-    private List<MainScheduleItem> mItems;
+    private List<SelectionItem> mItems;
     private ItemClick mListener;
 
-    public MainScheduleAdapter(Context context, List<MainScheduleItem> items, ItemClick listener) {
+    public SelectionAdapter(Context context, List<SelectionItem> items, ItemClick listener) {
         mContext = context;
         mItems = items;
         mListener = listener;
@@ -28,13 +28,13 @@ public class MainScheduleAdapter extends RecyclerView.Adapter<MainScheduleAdapte
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.race_schedule_list_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.selection_list_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final MainScheduleItem item = mItems.get(position);
+        final SelectionItem item = mItems.get(position);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -21,8 +21,9 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="@dimen/default_margin"
-        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginBottom="@dimen/side_padding"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
         android:text="@string/login_text"
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_32" />

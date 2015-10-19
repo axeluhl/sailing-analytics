@@ -10,6 +10,9 @@ import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.IdRes;
+import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,7 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -44,6 +48,8 @@ import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.ElementLongClick;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.EventListener;
@@ -57,7 +63,7 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener {
+public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener, SelectionAdapter.ItemClick {
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -66,12 +72,16 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
+    private ArrayList<SelectionItem> mItems;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
     private RecyclerView mMarkGrid;
     private CourseElementAdapter mHistoryAdapter;
+    private SelectionAdapter mAdapter;
     private RecyclerView.Adapter<CourseElementAdapter.ViewHolder> mCourseAdapter;
     private CourseMarkAdapter mMarkAdapter;
+    private ArrayList<RelativeLayout> mLayouts;
+    private TextView mHeaderCaption;
     private int mId;
 
     public CourseFragmentMarks() {
@@ -81,6 +91,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mHistory = new ArrayList<>();
         mElements = new ArrayList<>();
         mMarks = new ArrayList<>();
+        mLayouts = new ArrayList<>();
     }
 
     public static CourseFragmentMarks newInstance(@START_MODE_VALUES int startMode) {
@@ -93,20 +104,49 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
 
-        LinearLayout headerText = ViewHelper.get(view, R.id.header_text);
-        if (headerText != null) {
-            headerText.setOnClickListener(new View.OnClickListener() {
+        mHeaderCaption = ViewHelper.get(layout, R.id.header_caption);
 
-                @Override
-                public void onClick(View v) {
-                    openMainScheduleFragment();
-                }
-            });
+        RelativeLayout selection = ViewHelper.get(layout, R.id.selection);
+        if (selection != null) {
+            mLayouts.add(selection);
+            RecyclerView chooser = ViewHelper.get(layout, R.id.chooser);
+            if (chooser != null) {
+                mItems = new ArrayList<>();
+                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                mAdapter = new SelectionAdapter(getActivity(), mItems, this);
+                chooser.setLayoutManager(layoutManager);
+                chooser.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+                chooser.setAdapter(mAdapter);
+
+                Runnable prevRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showCourseLayout(R.id.course_prev, R.string.prev_course);
+                    }
+                };
+                SelectionItem prevCourse = new SelectionItem(getString(R.string.prev_course), null, null, prevRunnable);
+                mItems.add(prevCourse);
+
+                Runnable newRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        showCourseLayout(R.id.course_new, R.string.new_course);
+                    }
+                };
+                SelectionItem newCourse = new SelectionItem(getString(R.string.new_course), null, null, newRunnable);
+                mItems.add(newCourse);
+            }
         }
 
-        mHistoryCourse = (RecyclerView) view.findViewById(R.id.previous_course);
+        RelativeLayout coursePrev = ViewHelper.get(layout, R.id.course_prev);
+        if (coursePrev != null) {
+            mLayouts.add(coursePrev);
+        }
+
+        mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mHistoryCourse.setLayoutManager(layoutManager);
@@ -115,7 +155,11 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
 
-        mCurrentCourse = (RecyclerView) view.findViewById(R.id.new_course);
+        RelativeLayout courseLayout = ViewHelper.get(layout, R.id.course_layout);
+        if (courseLayout != null) {
+            mLayouts.add(courseLayout);
+        }
+        mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
             mGuardManager = new RecyclerViewTouchActionGuardManager();
             mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
@@ -133,12 +177,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             adapter.setListener(this);
             adapter.setEventListener(this);
 
-            @SuppressWarnings("unchecked") RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager
-                .createWrappedAdapter(adapter);
+            @SuppressWarnings("unchecked")
+            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
             mCourseAdapter = dragAdapter;
 
-            @SuppressWarnings("unchecked") RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager
-                .createWrappedAdapter(mCourseAdapter);
+            @SuppressWarnings("unchecked")
+            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
             mCourseAdapter = swipeManager;
 
             mCurrentCourse.setLayoutManager(layoutManager);
@@ -155,20 +199,30 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mDragDropManager.attachRecyclerView(mCurrentCourse);
         }
 
-        mMarkGrid = (RecyclerView) view.findViewById(R.id.assets);
+        RelativeLayout courseNew = ViewHelper.get(layout, R.id.course_new);
+        if (courseNew != null) {
+            mLayouts.add(courseNew);
+        }
+
+        mMarkGrid = (RecyclerView) layout.findViewById(R.id.assets);
         if (mMarkGrid != null) {
             GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
             mMarkGrid.setLayoutManager(layoutManager);
             mMarkGrid
                 .addItemDecoration(new ItemStrokeDecoration(getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line), getActivity()
-                    .getResources().getDimensionPixelSize(R.dimen.thin_line), ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray)));
+                    .getResources().getDimensionPixelSize(R.dimen.thin_line), ThemeHelper.getColor(getActivity(), R.attr.sap_gray_white_20)));
 
             mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()));
             mMarkAdapter.setListener(this);
             mMarkGrid.setAdapter(mMarkAdapter);
         }
 
-        return view;
+        return layout;
+    }
+
+    private void showCourseLayout(@IdRes int layout, @StringRes int stringId) {
+        showLayout(layout);
+        setHeaderCaption(stringId);
     }
 
     @Override
@@ -185,8 +239,14 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         fillPreviousCourseElementsWithLastPublishedCourseDesign();
 
         if (getView() != null) {
-            Button takePreviousButton = (Button) getView().findViewById(R.id.takeHistoryCourse);
-            takePreviousButton.setOnClickListener(new View.OnClickListener() {
+            if (mHistory.isEmpty()) {
+                showCourseLayout(R.id.course_new, R.string.new_course);
+            } else {
+                showCourseLayout(R.id.selection, 0);
+            }
+
+            Button takePrevious = (Button) getView().findViewById(R.id.takeHistoryCourse);
+            takePrevious.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
@@ -203,8 +263,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
                 }
             });
 
-            Button publishButton = (Button) getView().findViewById(R.id.publishCourse);
-            publishButton.setOnClickListener(new View.OnClickListener() {
+            Button publish = (Button) getView().findViewById(R.id.publishCourse);
+            publish.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
@@ -227,8 +287,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
                 }
             });
 
-            Button unpublishButton = (Button) getView().findViewById(R.id.unpublishCourse);
-            unpublishButton.setOnClickListener(new View.OnClickListener() {
+            Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
+            unpublish.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View arg0) {
@@ -358,6 +418,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             if (twoMarksCourseElement != null) {
                 twoMarksCourseElement.setRightMark(mark);
                 mCourseAdapter.notifyDataSetChanged();
+                if (mLayouts.size() != 0) {
+                    showCourseLayout(R.id.course_layout, R.string.layout_course);
+                }
             } else {
                 addNewCourseElementToList(mark);
             }
@@ -389,6 +452,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             public void onClick(DialogInterface dialog, int position) {
                 PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
                 onPassingInstructionPicked(courseElement, pickedDirection);
+                if (mLayouts.size() != 0) {
+                    showCourseLayout(R.id.course_layout, R.string.layout_course);
+                }
             }
         });
         builder.create().show();
@@ -442,6 +508,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mElements.clear();
         mElements.addAll(mHistory);
         mCourseAdapter.notifyDataSetChanged();
+        if (mLayouts.size() != 0) {
+            showCourseLayout(R.id.course_layout, R.string.layout_course);
+        }
     }
 
     protected CourseBase convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
@@ -507,5 +576,74 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     @Override
     public void onItemRemoved(int position) {
         // do nothing - later maybe show "undo" or something
+    }
+
+    @Override
+    public void onItemClick(Runnable runnable) {
+        if (runnable != null) {
+            Handler handler = new Handler();
+            handler.post(runnable);
+        }
+    }
+
+    @Override
+    protected void goHome() {
+        if (mLayouts.size() == 0) {
+            super.goHome();
+        } else {
+            switch (getCurrentFrame()) {
+                case R.id.course_prev:
+                    showCourseLayout(R.id.selection, 0);
+                    break;
+
+                case R.id.course_new:
+                    if (mHistory.isEmpty()) {
+                        super.goHome();
+                    } else {
+                        showCourseLayout(R.id.selection, 0);
+                    }
+                    break;
+
+                case R.id.course_layout:
+                    showCourseLayout(R.id.course_new, R.string.new_course);
+                    break;
+
+                default:
+                    super.goHome();
+                    break;
+            }
+        }
+    }
+
+    private void showLayout(@IdRes int id) {
+        for (View layout : mLayouts) {
+            layout.setVisibility(View.GONE);
+            if (layout.getId() == id) {
+                layout.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private
+    @IdRes
+    int getCurrentFrame() {
+        int id = 0;
+        for (View layout : mLayouts) {
+            if (layout.getVisibility() == View.VISIBLE) {
+                id = layout.getId();
+                break;
+            }
+        }
+        return id;
+    }
+
+    private void setHeaderCaption(@StringRes int id) {
+        if (mHeaderCaption != null) {
+            if (id != 0) {
+                mHeaderCaption.setText(String.format("%s - %s", getString(R.string.course), getString(id)));
+            } else {
+                mHeaderCaption.setText(getString(R.string.course));
+            }
+        }
     }
 }

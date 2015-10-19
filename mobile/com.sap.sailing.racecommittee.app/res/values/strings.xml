@@ -102,6 +102,7 @@
     <string name="publish">Publish</string>
     <string name="unpublish">Unpublish</string>
     <string name="take_previous">Use previous course</string>
+    <string name="take_previous_short">Use this</string>
     <string name="markImage">Mark image</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
@@ -472,5 +473,8 @@
     <string name="accuracy_value" translatable="false"><![CDATA[~ %.0fm]]></string>
     <string name="accuracy_timestamp">(since %s)</string>
     <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
+    <string name="prev_course">Previous Course</string>
+    <string name="new_course">New Course</string>
+    <string name="layout_course">Course Layout</string>
 
 </resources>

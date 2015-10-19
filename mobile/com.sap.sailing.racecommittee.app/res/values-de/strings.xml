@@ -91,6 +91,7 @@
     <string name="publish">Veröffentlichen</string>
     <string name="unpublish">Zurücknehmen</string>
     <string name="take_previous">Vorherigen Kurs übernehmen</string>
+    <string name="take_previous_short">übernehmen</string>
     <string name="markImage">Bild der Bahnmarke</string>
     <string name="cancel">Abbrechen</string>
     <string name="retry">Wiederholen</string>
@@ -448,5 +449,8 @@
     <string name="gate_time_schedule_short">%d Minuten</string>
     <string name="not_available">N/A</string>
     <string name="accuracy_timestamp">(vor %s)</string>
+    <string name="prev_course">Vorheriger Kurs</string>
+    <string name="new_course">Neuer Kurs</string>
+    <string name="layout_course">Kurs Layout</string>
 
 </resources>

@@ -2,13 +2,13 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.graphics.drawable.Drawable;
 
-public class MainScheduleItem {
+public class SelectionItem {
     private String mCaption;
     private String mValue;
     private Drawable mDrawable;
     private Runnable mRunnable;
 
-    public MainScheduleItem(String caption, String value, Drawable drawable, Runnable runnable) {
+    public SelectionItem(String caption, String value, Drawable drawable, Runnable runnable) {
         mCaption = caption;
         mDrawable = drawable;
         mValue = value;

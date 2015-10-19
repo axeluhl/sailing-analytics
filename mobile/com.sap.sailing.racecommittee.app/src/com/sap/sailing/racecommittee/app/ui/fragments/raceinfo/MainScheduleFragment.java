@@ -26,9 +26,9 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.MainScheduleItem;
+import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
-import com.sap.sailing.racecommittee.app.ui.adapters.MainScheduleAdapter;
+import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -38,7 +38,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, MainScheduleAdapter.ItemClick {
+public class MainScheduleFragment extends BaseFragment implements View.OnClickListener, SelectionAdapter.ItemClick {
 
     public static final String START_TIME = "startTime";
     public static final String DEPENDENT_RACE = "dependentRace";
@@ -46,10 +46,10 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
     private static final String TAG = MainScheduleFragment.class.getName();
 
-    private MainScheduleAdapter mAdapter;
-    private ArrayList<MainScheduleItem> mItems;
-    private MainScheduleItem mItemStartTime;
-    private MainScheduleItem mItemStartWind;
+    private SelectionAdapter mAdapter;
+    private ArrayList<SelectionItem> mItems;
+    private SelectionItem mItemStartTime;
+    private SelectionItem mItemStartWind;
 
     private String mStartTimeString;
     private SimpleRaceLogIdentifier mRaceId;
@@ -81,7 +81,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         RecyclerView raceData = ViewHelper.get(layout, R.id.race_data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        mAdapter = new MainScheduleAdapter(getActivity(), mItems, this);
+        mAdapter = new SelectionAdapter(getActivity(), mItems, this);
         raceData.setLayoutManager(layoutManager);
         raceData.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
         raceData.setAdapter(mAdapter);
@@ -123,7 +123,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace()));
             }
         };
-        MainScheduleItem courseItem = new MainScheduleItem(getString(R.string.course), null, null, runnable);
+        SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, runnable);
         if (getRaceState().getCourseDesign() != null) {
             courseItem.setValue(getCourseName());
         }
@@ -137,7 +137,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(WindFragment.newInstance(START_MODE_PRESETUP));
             }
         };
-        mItemStartWind = new MainScheduleItem(getString(R.string.wind), null, null, runnable);
+        mItemStartWind = new SelectionItem(getString(R.string.wind), null, null, runnable);
         mItems.add(mItemStartWind);
     }
 
@@ -150,7 +150,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
                 }
             };
-            mItems.add(new MainScheduleItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, runnableProcedure));
+            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, runnableProcedure));
             if (RacingProcedureType.RRS26.equals(mRacingProcedureType)) {
                 // LineStart
                 RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
@@ -162,7 +162,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
-                mItems.add(new MainScheduleItem(getString(R.string.start_mode), flag.name(), drawable, runnableMode));
+                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, runnableMode));
             } else if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
                 // GateStart
                 GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
@@ -173,7 +173,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartPathFinderFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
 
                     Runnable runnableTiming = new Runnable() {
                         @Override
@@ -181,7 +181,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new MainScheduleItem(getString(R.string.gate_start_timing), RaceHelper
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper
                         .getGateTiming(getActivity(), procedure), null, runnableTiming));
                 }
             }
@@ -216,7 +216,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(StartTimeFragment.newInstance(getArguments()));
             }
         };
-        mItemStartTime = new MainScheduleItem(getString(R.string.start_time), mStartTimeString, null, runnable);
+        mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, runnable);
         mItems.add(mItemStartTime);
     }
 
