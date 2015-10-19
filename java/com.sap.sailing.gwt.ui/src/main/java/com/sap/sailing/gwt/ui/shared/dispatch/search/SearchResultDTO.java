@@ -32,11 +32,13 @@ public class SearchResultDTO implements DTO {
         this.displayName = hit.getLeaderboard().getDisplayName() != null ? hit.getLeaderboard().getDisplayName() :
             (hit.getRegattaName() != null ? hit.getRegattaName() : leaderboardName);
         EventBase event = hit.getEvent();
-        this.eventId = (UUID) event.getId();
-        this.eventName = event.getName();
-        this.eventVenueName = event.getVenue() != null ? event.getVenue().getName() : null;
-        this.eventStartDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-        this.eventEndDate = event.getEndDate() != null ? event.getEndDate().asDate() : null;
+        if (event != null) {
+            this.eventId = (UUID) event.getId();
+            this.eventName = event.getName();
+            this.eventVenueName = event.getVenue() != null ? event.getVenue().getName() : null;
+            this.eventStartDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
+            this.eventEndDate = event.getEndDate() != null ? event.getEndDate().asDate() : null;
+        }
         this.baseUrl = baseUrl.toString();
         this.isOnRemoteServer = isOnRemoteServer;
     }
