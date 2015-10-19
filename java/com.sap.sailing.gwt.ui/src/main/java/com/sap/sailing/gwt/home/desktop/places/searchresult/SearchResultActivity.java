@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.gwt.client.mvp.ErrorView;

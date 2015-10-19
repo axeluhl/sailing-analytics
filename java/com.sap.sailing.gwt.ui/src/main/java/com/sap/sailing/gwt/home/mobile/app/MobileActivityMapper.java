@@ -4,7 +4,6 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultActivityProxy;
@@ -18,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 

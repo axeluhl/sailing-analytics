@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 
 public class SearchResult extends Composite {

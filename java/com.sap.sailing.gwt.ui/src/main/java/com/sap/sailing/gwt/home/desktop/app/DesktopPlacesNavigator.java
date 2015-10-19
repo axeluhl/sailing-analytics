@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegatt
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
@@ -21,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;

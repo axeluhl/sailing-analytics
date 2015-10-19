@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultActivityProxy;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 

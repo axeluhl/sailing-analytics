@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeri
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
@@ -28,6 +27,7 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
