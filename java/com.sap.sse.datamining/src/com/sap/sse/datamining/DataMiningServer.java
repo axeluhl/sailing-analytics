@@ -19,6 +19,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -61,7 +62,7 @@ public interface DataMiningServer {
     <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO);
     
     QueryDefinitionDTOProvider getQueryDefinitionDTOProvider();
-    Iterable<String> getPredefinedQueryNames();
-    <ResultType> Query<ResultType> createPredefinedQuery(String name);
+    Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
+    <ResultType> Query<ResultType> createPredefinedQuery(PredefinedQueryIdentifier identifier);
     
 }

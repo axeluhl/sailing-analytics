@@ -29,6 +29,7 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivatorWithPredefinedQueries;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
@@ -115,7 +116,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     }
     
     @Override
-    public Map<String, StatisticQueryDefinitionDTO> getPredefinedQueries() {
+    public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> getPredefinedQueries() {
         return predefinedQueries.get();
     }
     

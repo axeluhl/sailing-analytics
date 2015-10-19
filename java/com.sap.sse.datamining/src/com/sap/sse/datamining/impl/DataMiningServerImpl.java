@@ -42,6 +42,7 @@ import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvid
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -361,13 +362,13 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Iterable<String> getPredefinedQueryNames() {
-        return queryDefinitionRegistry.getNames();
+    public Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
+        return queryDefinitionRegistry.getIdentifiers();
     }
 
     @Override
-    public <ResultType> Query<ResultType> createPredefinedQuery(String name) {
-        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionRegistry.get(name);
+    public <ResultType> Query<ResultType> createPredefinedQuery(PredefinedQueryIdentifier identifier) {
+        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionRegistry.get(identifier);
         if (definitionDTO != null) {
             StatisticQueryDefinition<?, ?, ?, ResultType> definition = getQueryDefinitionForDTO(definitionDTO);
             if (definition != null) {
@@ -383,16 +384,16 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public void registerPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition) {
-        boolean componentsChanged = queryDefinitionRegistry.register(name, queryDefinition);
+    public void registerPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, StatisticQueryDefinitionDTO queryDefinition) {
+        boolean componentsChanged = queryDefinitionRegistry.register(identifier, queryDefinition);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
         }
     }
     
     @Override
-    public void unregisterPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition) {
-        boolean componentsChanged = queryDefinitionRegistry.unregister(name, queryDefinition);
+    public void unregisterPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, StatisticQueryDefinitionDTO queryDefinition) {
+        boolean componentsChanged = queryDefinitionRegistry.unregister(identifier, queryDefinition);
         if (componentsChanged) {
             updateComponentsChangedTimepoint();
         }

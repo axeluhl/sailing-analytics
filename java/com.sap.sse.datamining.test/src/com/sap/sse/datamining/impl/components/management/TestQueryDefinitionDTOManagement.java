@@ -4,9 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,6 +12,7 @@ import org.junit.Test;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.exceptions.DataMiningComponentAlreadyRegisteredForKeyException;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -46,51 +45,49 @@ public class TestQueryDefinitionDTOManagement {
         
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.registerPredefinedQueryDefinition("Test", pseudoQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
         
         beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.registerPredefinedQueryDefinition("Test", pseudoQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
     }
     
     @Test(expected=DataMiningComponentAlreadyRegisteredForKeyException.class)
     public void testQueryDefinitionRegistrationWithConflict() {
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
-        server.registerPredefinedQueryDefinition("Test", pseudoQueryDefinition);
-        server.registerPredefinedQueryDefinition("Test", differentQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), differentQueryDefinition);
     }
 
     @Test
     public void testQueryDefinitionUnregistration() {
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
-        server.registerPredefinedQueryDefinition("Test", pseudoQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.unregisterPredefinedQueryDefinition("Test", pseudoQueryDefinition);
+        server.unregisterPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(true));
         
         beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
-        server.unregisterPredefinedQueryDefinition("Test", pseudoQueryDefinition);
+        server.unregisterPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
     }
     
     @Test
-    public void getByName() {
+    public void testGetByIdentifier() {
         ModifiableDataMiningServer server = TestsUtil.createNewServer();
-        server.registerPredefinedQueryDefinition("Test", pseudoQueryDefinition);
-        server.registerPredefinedQueryDefinition("Different", differentQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
+        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Different", "Description"), differentQueryDefinition);
 
-        assertThat(server.getQueryDefinitionDTOProvider().get("Test"), is(pseudoQueryDefinition));
-        assertThat(server.getQueryDefinitionDTOProvider().get("Different"), is(differentQueryDefinition));
+        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Test", "Description")), is(pseudoQueryDefinition));
+        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Different", "Description")), is(differentQueryDefinition));
         
-        Collection<String> predefinedQueryNames = new HashSet<>();
-        predefinedQueryNames.add("Test");
-        predefinedQueryNames.add("Different");
-        assertThat(server.getPredefinedQueryNames(), is(predefinedQueryNames));
+        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Test", "")), is(pseudoQueryDefinition));
+        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Different", "")), is(differentQueryDefinition));
     }
 
 }

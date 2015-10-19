@@ -37,6 +37,7 @@ import com.sap.sse.datamining.impl.components.management.DataSourceProviderManag
 import com.sap.sse.datamining.impl.components.management.FunctionManager;
 import com.sap.sse.datamining.impl.components.management.QueryDefinitionDTOManager;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
@@ -111,7 +112,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
             @Override
             public DataMiningPredefinedQueryService addingService(ServiceReference<DataMiningPredefinedQueryService> reference) {
                 DataMiningPredefinedQueryService predefinedQueryService = context.getService(reference);
-                for (Entry<String, StatisticQueryDefinitionDTO> predefinedQueryEntry : predefinedQueryService.getPredefinedQueries().entrySet()) {
+                for (Entry<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> predefinedQueryEntry : predefinedQueryService.getPredefinedQueries().entrySet()) {
                     dataMiningServer.registerPredefinedQueryDefinition(predefinedQueryEntry.getKey(), predefinedQueryEntry.getValue());
                 }
                 return predefinedQueryService;
@@ -120,7 +121,7 @@ public class DataMiningFrameworkActivator implements BundleActivator {
             public void modifiedService(ServiceReference<DataMiningPredefinedQueryService> reference, DataMiningPredefinedQueryService service) { }
             @Override
             public void removedService(ServiceReference<DataMiningPredefinedQueryService> reference, DataMiningPredefinedQueryService predefinedQueryService) {
-                for (Entry<String, StatisticQueryDefinitionDTO> predefinedQueryEntry : predefinedQueryService.getPredefinedQueries().entrySet()) {
+                for (Entry<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> predefinedQueryEntry : predefinedQueryService.getPredefinedQueries().entrySet()) {
                     dataMiningServer.unregisterPredefinedQueryDefinition(predefinedQueryEntry.getKey(), predefinedQueryEntry.getValue());
                 }
             }

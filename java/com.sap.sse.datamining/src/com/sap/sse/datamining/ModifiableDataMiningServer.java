@@ -7,6 +7,7 @@ import com.sap.sse.datamining.components.management.DataRetrieverChainDefinition
 import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface ModifiableDataMiningServer extends DataMiningServer {
@@ -34,7 +35,7 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     void unregisterAggregationProcessor(AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition);
     
     QueryDefinitionDTORegistry getQueryDefinitionDTORegistry();
-    void registerPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition);
-    void unregisterPredefinedQueryDefinition(String name, StatisticQueryDefinitionDTO queryDefinition);
+    void registerPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, StatisticQueryDefinitionDTO queryDefinition);
+    void unregisterPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, StatisticQueryDefinitionDTO queryDefinition);
     
 }

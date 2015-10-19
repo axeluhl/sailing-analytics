@@ -30,6 +30,7 @@ import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -257,19 +258,19 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
     
     @Override
-    public HashSet<String> getPredefinedQueryNames() {
-        HashSet<String> predefinedQueryNames = new HashSet<String>();
-        for (String predefinedQueryName : getDataMiningServer().getPredefinedQueryNames()) {
+    public HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
+        HashSet<PredefinedQueryIdentifier> predefinedQueryNames = new HashSet<PredefinedQueryIdentifier>();
+        for (PredefinedQueryIdentifier predefinedQueryName : getDataMiningServer().getPredefinedQueryIdentifiers()) {
             predefinedQueryNames.add(predefinedQueryName);
         }
         return predefinedQueryNames;
     }
     
     @Override
-    public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, String name, String localeInfoName) {
+    public <ResultType> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName) {
         // TODO Use local info name
         DataMiningServer dataMiningServer = getDataMiningServer();
-        Query<ResultType> query = dataMiningServer.createPredefinedQuery(name);
+        Query<ResultType> query = dataMiningServer.createPredefinedQuery(identifier);
         if (query != null) {
             QueryResult<ResultType> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
             return dtoFactory.createResultDTO(result);

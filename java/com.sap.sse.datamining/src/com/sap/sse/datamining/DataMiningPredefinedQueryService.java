@@ -3,6 +3,7 @@ package com.sap.sse.datamining;
 import java.util.Map;
 
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 
 /**
  * A Service that provides predefined {@link StatisticQueryDefinitionDTO}s of a data mining bundle.
@@ -18,6 +19,6 @@ public interface DataMiningPredefinedQueryService {
     /**
      * @return The predefined {@link StatisticQueryDefinitionDTO}s mapped by their name.
      */
-    public Map<String, StatisticQueryDefinitionDTO> getPredefinedQueries();
+    public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> getPredefinedQueries();
 
 }
