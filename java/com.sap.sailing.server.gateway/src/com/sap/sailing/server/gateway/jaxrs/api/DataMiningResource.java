@@ -54,7 +54,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("query/names")
+    @Path("query/identifiers")
     public Response getPredefinedQueryNames() {
         JSONArray predefinedQueryNames = new JSONArray();
         for (PredefinedQueryIdentifier id : getDataMiningServer().getPredefinedQueryIdentifiers()) {
