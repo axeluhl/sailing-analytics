@@ -1,5 +1,6 @@
 package com.sap.sailing.dashboards.gwt.client.notifications;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -15,18 +16,21 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
 
     private Label rotateDeviceLabel;
     
+    private static NotificationsResources resources = GWT.create(NotificationsResources.class);
+    
     public WrongDeviceOrientationNotification() {
         super();
-        this.addStyleName("wrongOrientationNotification");
-        this.addStyleName("wrongOrientationNotification_hidden");
+        resources.notificationsStyle().ensureInjected();
+        this.addStyleName(resources.notificationsStyle().wrongorientationnotification());
+        this.addStyleName(resources.notificationsStyle().wrongorientationnotification_hidden());
 
         Image rotateDeviceIcon = new Image();
         rotateDeviceIcon.setResource(RibDashboardImageResources.INSTANCE.rotatedevice());
-        rotateDeviceIcon.getElement().addClassName("wrongOrientationNotification_logo");
+        rotateDeviceIcon.getElement().addClassName(resources.notificationsStyle().wrongorientationnotification_logo());
         add(rotateDeviceIcon);
 
         rotateDeviceLabel = new Label();
-        rotateDeviceLabel.getElement().addClassName("wrongOrientationNotification_text");
+        rotateDeviceLabel.getElement().addClassName(resources.notificationsStyle().wrongorientationnotification_text());
         rotateDeviceLabel.setText("Rotate Device");
         add(rotateDeviceLabel);
         
@@ -35,14 +39,14 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
     }
 
     public void show() {
-        this.removeStyleName("wrongOrientationNotification_hidden");
-        this.addStyleName("wrongOrientationNotification_shown");
+        this.removeStyleName(resources.notificationsStyle().wrongorientationnotification_hidden());
+        this.addStyleName(resources.notificationsStyle().wrongorientationnotification_shown());
         BlurEffect.getInstance().addToView(RootLayoutPanel.get());
     }
 
     public void hide() {
-        this.removeStyleName("wrongOrientationNotification_shown");
-        this.addStyleName("wrongOrientationNotification_hidden");
+        this.removeStyleName(resources.notificationsStyle().wrongorientationnotification_shown());
+        this.addStyleName(resources.notificationsStyle().wrongorientationnotification_hidden());
         BlurEffect.getInstance().removeFromView(RootLayoutPanel.get());
     }
 

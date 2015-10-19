@@ -2,14 +2,15 @@ package com.sap.sse.datamining.impl.components.management;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sse.common.Util;
@@ -18,29 +19,22 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.management.FunctionProvider;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
-import com.sap.sse.datamining.factories.DataMiningDTOFactory;
+import com.sap.sse.datamining.exceptions.MultipleDataMiningComponentsFoundForDTOException;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.functions.ConcatenatingCompoundFunction;
 import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
-import com.sap.sse.datamining.impl.functions.criterias.FunctionMatchesDTOFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidConnectorFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidDimensionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidExternalFunctionFilterCriterion;
 import com.sap.sse.datamining.impl.functions.criterias.MethodIsValidStatisticFilterCriterion;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.util.Classes;
+import com.sap.sse.datamining.util.ClassUtils;
 
 public class FunctionManager implements FunctionRegistry, FunctionProvider {
     
     private enum FunctionRetrievalStrategies {
-        All {
-            @Override
-            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
-                return manager.getAllFunctionsOf(declaringType);
-            }
-        },
         Dimensions {
             @Override
             public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
@@ -51,6 +45,12 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             @Override
             public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
                 return manager.getStatisticsOf(declaringType);
+            }
+        },
+        ExternalFunctions {
+            @Override
+            public Collection<Function<?>> retrieveFunctions(Class<?> declaringType, FunctionManager manager) {
+                return manager.getExternalFunctionsOf(declaringType);
             }
         };
         
@@ -66,7 +66,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final FilterCriterion<Method> isValidExternalFunction = new MethodIsValidExternalFunctionFilterCriterion();
 
     private final FunctionFactory functionFactory;
-    private final DataMiningDTOFactory dtoFactory;
     
     protected final Map<Class<?>, Set<Function<?>>> statistics;
     protected final Map<Class<?>, Set<Function<?>>> dimensions;
@@ -75,7 +74,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
     private final Collection<Map<Class<?>, Set<Function<?>>>> functionMaps;
 
     public FunctionManager() {
-        dtoFactory = new DataMiningDTOFactory();
         functionFactory = new FunctionFactory();
         
         statistics = new HashMap<>();
@@ -87,7 +85,7 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         functionMaps.add(dimensions);
         functionMaps.add(externalFunctions);
     }
-    
+
     @Override
     public boolean registerAllClasses(Iterable<Class<?>> internalClassesToScan) {
         boolean functionsHaveBeenRegistered = false;
@@ -209,17 +207,6 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         return functionsHaveBeenUnregistered;
     }
-
-    private Collection<Function<?>> getAllFunctionsOf(Class<?> declaringType) {
-        Collection<Function<?>> allFunctions = new HashSet<>();
-        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            Collection<Function<?>> functions = functionMap.get(declaringType);
-            if (functions != null) {
-                allFunctions.addAll(functions);
-            }
-        }
-        return allFunctions;
-    }
     
     @Override
     public Collection<Function<?>> getAllStatistics() {
@@ -234,6 +221,10 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         return dimensions.get(declaringType);
     }
     
+    private Collection<Function<?>> getExternalFunctionsOf(Class<?> declaringType) {
+        return externalFunctions.get(declaringType);
+    }
+    
     protected Collection<Function<?>> asSet(Map<?, Set<Function<?>>> map) {
         Collection<Function<?>> set = new HashSet<>();
         for (Entry<?, Set<Function<?>>> entry : map.entrySet()) {
@@ -244,12 +235,42 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
 
     @Override
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.All);
+        return getFunctionsFor(sourceType, Arrays.asList(FunctionRetrievalStrategies.values()));
     }
 
     @Override
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Dimensions);
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.Dimensions));
+    }
+
+    @Override
+    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.Statistics));
+    }
+    
+    @Override
+    public Collection<Function<?>> getExternalFunctionsFor(Class<?> sourceType) {
+        return getFunctionsFor(sourceType, Collections.singleton(FunctionRetrievalStrategies.ExternalFunctions));
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, Iterable<FunctionRetrievalStrategies> retrievalStrategies) {
+        Collection<Class<?>> typesToRetrieve = ClassUtils.getSupertypesOf(sourceType);
+        typesToRetrieve.remove(Object.class);
+        typesToRetrieve.add(sourceType);
+        return getFunctionsFor(typesToRetrieve, retrievalStrategies);
+    }
+
+    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve, Iterable<FunctionRetrievalStrategies> retrievalStrategies) {
+        Collection<Function<?>> functions = new HashSet<>();
+        for (Class<?> typeToRetrieve : typesToRetrieve) {
+            for (FunctionRetrievalStrategies retrievalStrategy : retrievalStrategies) {
+                Collection<Function<?>> typeSpecificFunctions = retrievalStrategy.retrieveFunctions(typeToRetrieve, this);
+                if (typeSpecificFunctions != null) {
+                    functions.addAll(typeSpecificFunctions);
+                }
+            }
+        }
+        return functions;
     }
     
     @Override
@@ -306,76 +327,41 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
         }
         return reducedDimensions;
     }
-
-    @Override
-    public Collection<Function<?>> getStatisticsFor(Class<?> sourceType) {
-        return getFunctionsFor(sourceType, FunctionRetrievalStrategies.Statistics);
-    }
-
-    private Collection<Function<?>> getFunctionsFor(Class<?> sourceType, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Class<?>> typesToRetrieve = Classes.getSupertypesOf(sourceType);
-        typesToRetrieve.remove(Object.class);
-        typesToRetrieve.add(sourceType);
-        return getFunctionsFor(typesToRetrieve, retrievalStrategy);
-    }
-
-    private Collection<Function<?>> getFunctionsFor(Collection<Class<?>> typesToRetrieve, FunctionRetrievalStrategies retrievalStrategy) {
-        Collection<Function<?>> functions = new HashSet<>();
-        for (Class<?> typeToRetrieve : typesToRetrieve) {
-            Collection<Function<?>> typeSpecificFunctions = retrievalStrategy.retrieveFunctions(typeToRetrieve, this);
-            if (typeSpecificFunctions != null) {
-                functions.addAll(typeSpecificFunctions);
-            }
-        }
-        return functions;
-    }
     
     @Override
-    public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
-        if (functionDTO == null) {
-            return null;
-        }
-        
-        Collection<Function<?>> functionsMatchingDTO = getFunctionsForDTO(functionDTO);
-        if (functionsMatchingDTO.size() > 1) {
-            logThatMoreThanOneFunctionMatchedDTO(functionDTO, functionsMatchingDTO);
-        }
-        
-        Function<?> function = getFunctionToReturn(functionsMatchingDTO);
-        if (function == null) {
-            logger.log(Level.WARNING, "No function found for the DTO: " + functionDTO);
-        }
-        return function;
-    }
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO, ClassLoader classLoader) {
+        Function<?> function = null;
+        if (functionDTO != null) {
+            try {
+                Class<?> sourceType = ClassUtils.getClassForName(functionDTO.getSourceTypeName(), true, classLoader);
+                Collection<Function<?>> possibleFunctions;
+                if (functionDTO.isDimension()) {
+                    possibleFunctions = getDimensionsFor(sourceType);
+                } else {
+                    possibleFunctions = getFunctionsFor(sourceType, Arrays.asList(FunctionRetrievalStrategies.ExternalFunctions, FunctionRetrievalStrategies.Statistics));
+                }
+                
+                if (!possibleFunctions.isEmpty()) {
+                    Class<?> returnType = ClassUtils.getClassForName(functionDTO.getReturnTypeName(), true, classLoader);
+                    Set<Function<?>> matchingFunctions = new HashSet<>();
+                    for (Function<?> possibleFunction : possibleFunctions) {
+                        if (returnType.equals(possibleFunction.getReturnType()) &&
+                            functionDTO.getFunctionName().equals(possibleFunction.getSimpleName())) {
+                            matchingFunctions.add(possibleFunction);
+                        }
+                    }
 
-    private Collection<Function<?>> getFunctionsForDTO(FunctionDTO functionDTO) {
-        Collection<Function<?>> functionsMatchingDTO = new HashSet<>();
-        FilterCriterion<Function<?>> functionDTOFilterCriteria = new FunctionMatchesDTOFilterCriterion(dtoFactory, functionDTO);
-        for (Function<?> function : getAllFunctions()) {
-            if (functionDTOFilterCriteria.matches(function)) {
-                functionsMatchingDTO.add(function);
+                    if (matchingFunctions.size() == 1) {
+                        function = matchingFunctions.iterator().next();
+                    } else if (matchingFunctions.size() > 1) {
+                        throw new MultipleDataMiningComponentsFoundForDTOException(functionDTO, matchingFunctions);
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("Couldn't get classes for the function DTO " + functionDTO, e);
             }
         }
-        return functionsMatchingDTO;
-    }
-
-    private Collection<Function<?>> getAllFunctions() {
-        Collection<Function<?>> allFunctions = new HashSet<>();
-        for (Map<Class<?>, Set<Function<?>>> functionMap : functionMaps) {
-            allFunctions.addAll(asSet(functionMap));
-        }
-        return allFunctions;
-    }
-
-    private void logThatMoreThanOneFunctionMatchedDTO(FunctionDTO functionDTO, Collection<Function<?>> functionsMatchingDTO) {
-        logger.log(Level.INFO, "More than on registered function matched the function DTO '" + functionDTO.toString() + "'");
-        for (Function<?> function : functionsMatchingDTO) {
-            logger.log(Level.FINER, "The function '" + function.toString() + "' matched the function DTO '" + functionDTO.toString() + "'");
-        }
-    }
-
-    private Function<?> getFunctionToReturn(Collection<Function<?>> functionsMatchingDTO) {
-        return functionsMatchingDTO.isEmpty() ? null : functionsMatchingDTO.iterator().next();
+        return function;
     }
 
 }
