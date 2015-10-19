@@ -1,5 +1,13 @@
 package com.sap.sailing.racecommittee.app.services;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -13,6 +21,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
@@ -33,10 +42,6 @@ import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
 
 public class RaceStateService extends Service {
 
@@ -104,6 +109,7 @@ public class RaceStateService extends Service {
             .setContentTitle(getText(R.string.service_info))
             .setContentText(getText(R.string.service_text_no_races))
             .setContentIntent(contentIntent)
+            .setColor(getResources().getColor(R.color.constant_sap_blue_1))
             .setOngoing(true);
     }
 
