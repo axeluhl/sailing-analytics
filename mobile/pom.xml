@@ -28,7 +28,7 @@
     <app-version></app-version>
     <android.support.version>22.1.1</android.support.version>
     <play.services.version>7.3.0</play.services.version>
-    
+
     <sign.keystore>../android-keystore/STG-debug.jks</sign.keystore>
     <sign.alias>stg_debug</sign.alias>
     <sign.storepass>stg_debug</sign.storepass>
@@ -43,40 +43,47 @@
         <version>5.1.1_r2</version>
         <scope>provided</scope>
       </dependency>
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>appcompat-v7</artifactId>
-            <version>${android.support.version}</version>
-            <type>aar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>support-v4</artifactId>
-            <version>${android.support.version}</version>
-            <type>aar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.android.support</groupId>
-            <artifactId>recyclerview-v7</artifactId>
-            <version>${android.support.version}</version>
-            <type>aar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services-location</artifactId>
-            <version>${play.services.version}</version>
-            <type>aar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.android.gms</groupId>
-            <artifactId>play-services-gcm</artifactId>
-            <version>${play.services.version}</version>
-            <type>aar</type>
-        </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>appcompat-v7</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>support-v4</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>recyclerview-v7</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android.gms</groupId>
+        <artifactId>play-services-location</artifactId>
+        <version>${play.services.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android.gms</groupId>
+        <artifactId>play-services-gcm</artifactId>
+        <version>${play.services.version}</version>
+        <type>aar</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/assets_resources</directory>
+        <filtering>true</filtering>
+        <targetPath>${project.basedir}/assets</targetPath>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -92,7 +99,7 @@
             <androidManifestFile>AndroidManifest.xml</androidManifestFile>
             <destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
-            <assetsDirectory>assets</assetsDirectory>
+            <assetsDirectory>${project.basedir}/assets</assetsDirectory>
             <failOnNonStandardStructure>false</failOnNonStandardStructure>
             <failOnConflictingLayouts>false</failOnConflictingLayouts>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
@@ -104,7 +111,7 @@
               <platform>22</platform>
             </sdk>
             <release>false</release>
-			<outputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</outputApk>
+            <outputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</outputApk>
 
             <proguard>
               <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
@@ -152,44 +159,44 @@
               <debug>false</debug>
             </sign>
           </configuration>
-             <executions>
-                <execution>
-                    <id>alignApk</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>zipalign</goal>
-                    </goals>
-                </execution>
-            </executions>
+          <executions>
+            <execution>
+              <id>alignApk</id>
+              <phase>package</phase>
+              <goals>
+                <goal>zipalign</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jarsigner-plugin</artifactId>
-            <version>1.4</version>
-            <executions>
-                <execution>
-                    <id>signing</id>
-                    <goals>
-                        <goal>sign</goal>
-                        <goal>verify</goal>
-                    </goals>
-                    <phase>package</phase>
-                    <inherited>true</inherited>
-                    <configuration>
-                        <removeExistingSignatures>true</removeExistingSignatures>
-                        <archive>${project.build.directory}/${project.build.finalName}-unaligned.apk</archive>
-                        <keystore>${sign.keystore}</keystore>
-                        <alias>${sign.alias}</alias>
-                        <storepass>${sign.storepass}</storepass>
-                        <keypass>${sign.keypass}</keypass>
-                        <!--<verbose>true</verbose>-->
-                        <arguments>
-                            <argument>-sigalg</argument><argument>MD5withRSA</argument>
-                            <argument>-digestalg</argument><argument>SHA1</argument>
-                        </arguments>
-                    </configuration>
-                </execution>
-            </executions>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jarsigner-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+              <id>signing</id>
+              <goals>
+                <goal>sign</goal>
+                <goal>verify</goal>
+              </goals>
+              <phase>package</phase>
+              <inherited>true</inherited>
+              <configuration>
+                <removeExistingSignatures>true</removeExistingSignatures>
+                <archive>${project.build.directory}/${project.build.finalName}-unaligned.apk</archive>
+                <keystore>${sign.keystore}</keystore>
+                <alias>${sign.alias}</alias>
+                <storepass>${sign.storepass}</storepass>
+                <keypass>${sign.keypass}</keypass>
+                <!--<verbose>true</verbose>-->
+                <arguments>
+                  <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                  <argument>-digestalg</argument><argument>SHA1</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -268,41 +275,69 @@
           </configuration>
         </plugin>
         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.9.1</version>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.9.1</version>
         </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
-  
-  <profiles>
-    <profile>
-      <!-- activate with parameter '-P app-release'-->
-      <id>app-release</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <properties>
-        <sign.keystore>../android-keystore/STG.jks</sign.keystore>
-        <sign.alias></sign.alias>
-        <sign.storepass></sign.storepass>
-        <sign.keypass></sign.keypass>
-      </properties>
-      
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>com.simpligility.maven.plugins</groupId>
-              <artifactId>android-maven-plugin</artifactId>
-              <configuration>
-                <release>true</release>
-              </configuration>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
-    </profile>
-  </profiles>
-</project>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>2.2.0</version>
+          <configuration>
+            <verbose>true</verbose>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>revision</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+         <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          ...
+          <nonFilteredFileExtensions>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+          </nonFilteredFileExtensions>
+          ...
+        </configuration>
+      </plugin>
+        </plugins>
+      </pluginManagement>
+    </build>
+
+    <profiles>
+      <profile>
+        <!-- activate with parameter '-P app-release'-->
+        <id>app-release</id>
+        <activation>
+          <activeByDefault>false</activeByDefault>
+        </activation>
+        <properties>
+          <sign.keystore>../android-keystore/STG.jks</sign.keystore>
+          <sign.alias></sign.alias>
+          <sign.storepass></sign.storepass>
+          <sign.keypass></sign.keypass>
+        </properties>
+
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                  <release>true</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+    </profiles>
+  </project>
