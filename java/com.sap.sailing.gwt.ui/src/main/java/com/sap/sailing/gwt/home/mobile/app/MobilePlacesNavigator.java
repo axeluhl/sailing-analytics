@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
@@ -84,5 +85,10 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
         return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
+    }
+    
+    public PlaceNavigation<?> getRegattaOverviewNavigation(String eventId, String leaderboardName, String baseUrl,
+            boolean isOnRemoteServer) {
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
     }
 }

@@ -19,15 +19,17 @@ import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.regatta.RegattaActivity;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventViewAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class EventActivityProxy extends AbstractActivityProxy {
 
     private final MobileApplicationClientFactory clientFactory;
-    private final AbstractEventPlace currentPlace;
+    private AbstractEventPlace currentPlace;
 
     public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
         this.currentPlace = place;
@@ -45,6 +47,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             @Override
             public void onSuccess(final EventViewDTO event) {
                 currentPlace.getCtx().updateContext(event);
+                currentPlace = getRealPlace(event);
                 afterEventLoad();
             }
             
@@ -57,6 +60,14 @@ public class EventActivityProxy extends AbstractActivityProxy {
                 clientFactory.getPlaceController().goTo(errorPlace);
             }
         });
+    }
+    
+    private AbstractEventPlace getRealPlace(EventViewDTO event) {
+        if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
+            EventContext contextWithoutRegatta = new EventContext(currentPlace.getCtx()).withRegattaId(null);
+            return new EventDefaultPlace(contextWithoutRegatta);
+        }
+        return currentPlace;
     }
     
     private void afterEventLoad() {
