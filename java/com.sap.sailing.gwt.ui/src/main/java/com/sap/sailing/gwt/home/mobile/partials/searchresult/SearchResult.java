@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.mobile.partials.searchresult;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultView.Presenter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResult extends Composite {
@@ -27,8 +28,7 @@ public class SearchResult extends Composite {
 
     @UiField TextBox searchInputUi;
     @UiField Button searchButtonUi;
-    @UiField SpanElement searchResultCountUi;
-    @UiField SpanElement searchResultForUi;
+    @UiField DivElement searchResultAmountUi;
     @UiField FlowPanel searchResultContainerUi;
     
     private final Presenter presenter;
@@ -42,8 +42,7 @@ public class SearchResult extends Composite {
     public void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems) {
         searchResultContainerUi.clear();
         searchInputUi.setValue(searchText);
-        searchResultCountUi.setInnerText(String.valueOf(searchResultItems.size()));
-        searchResultForUi.setInnerText(searchText);
+        searchResultAmountUi.setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(searchResultItems.size(), searchText));
         for (SearchResultDTO searchResult : searchResultItems) {
             searchResultContainerUi.add(new SearchResultItem(presenter.getNavigator(), searchResult));
         }

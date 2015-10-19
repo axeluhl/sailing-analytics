@@ -19,8 +19,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="{local_res.css.searchresult_amount} {res.mediaCss.small12} {res.mediaCss.columns}">
-					<span ui:field="searchResultCountUi" />&nbsp;<ui:text from='{i18n.searchResultsFound}'/> '<span ui:field="searchResultForUi" />'.
+				<div class="{local_res.css.searchresult_amount} {res.mediaCss.small12} {res.mediaCss.columns}" ui:field="searchResultAmountUi">
 				</div>
 				<g:FlowPanel ui:field="searchResultContainerUi" />
 			</div>

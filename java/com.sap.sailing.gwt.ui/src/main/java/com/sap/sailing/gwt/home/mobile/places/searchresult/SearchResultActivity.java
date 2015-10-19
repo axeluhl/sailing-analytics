@@ -26,7 +26,7 @@ public class SearchResultActivity extends AbstractActivity implements SearchResu
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         panel.setWidget(view);
-        if (searchResultPlace.getSearchText() != null) {
+        if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
             clientFactory.getDispatch().execute(new GetSearchResultsAction(searchText), 
                     new AsyncCallback<ListResult<SearchResultDTO>>() {
