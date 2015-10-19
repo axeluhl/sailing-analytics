@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -32,11 +33,9 @@ public class AppUtils {
      * @param activity Activity to lock
      */
     public static void lockOrientation(Activity activity) {
-//        if (with(activity).isTablet()) {
-//            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-//        } else {
-//            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-//        }
+        if (with(activity).isPhone() && (with(activity).isMDPI() || with(activity).isHDPI())) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        }
     }
 
     public PackageInfo getPackageInfo() {
@@ -94,5 +93,17 @@ public class AppUtils {
 
     public boolean isLand() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    public boolean isMDPI() {
+        return getDensity() == 1f;
+    }
+
+    public boolean isHDPI() {
+        return getDensity() == 1.5f;
+    }
+
+    private float getDensity() {
+        return mContext.getResources().getDisplayMetrics().density;
     }
 }
