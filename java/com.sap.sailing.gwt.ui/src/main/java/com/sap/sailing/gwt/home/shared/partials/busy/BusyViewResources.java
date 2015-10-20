@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.refresh;
+package com.sap.sailing.gwt.home.shared.partials.busy;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
