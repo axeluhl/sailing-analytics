@@ -103,7 +103,16 @@ public abstract class RefreshManager {
             public void execute() {
                 scheduled = false;
 
-                if (refreshables.isEmpty() || !started || !canExecute()) {
+                if (refreshables.isEmpty()) {
+                    LOG.log(Level.FINE, "No refreshables found -> skipping refresh");
+                    return;
+                }
+                if (!started) {
+                    LOG.log(Level.FINE, "Refresh not started yet -> skipping refresh");
+                    return;
+                }
+                if (!canExecute()) {
+                    LOG.log(Level.FINE, "Refresh not allowed to execute -> skipping refresh");
                     return;
                 }
 
