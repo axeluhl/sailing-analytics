@@ -55,7 +55,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.jvnet.mimepull;bundle-version="1.9.4",
  com.sap.sailing.polars,
  com.sap.sse.datamining;bundle-version="1.0.0",
- com.sap.sse.datamining.shared;bundle-version="1.0.0"
+ com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.datamining
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

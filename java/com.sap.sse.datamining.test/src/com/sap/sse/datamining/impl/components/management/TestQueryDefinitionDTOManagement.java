@@ -83,11 +83,11 @@ public class TestQueryDefinitionDTOManagement {
         server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
         server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Different", "Description"), differentQueryDefinition);
 
-        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Test", "Description")), is(pseudoQueryDefinition));
-        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Different", "Description")), is(differentQueryDefinition));
+        assertThat(server.getPredefinedQueryDefinitionDTO(new PredefinedQueryIdentifier("Test", "Description")), is(pseudoQueryDefinition));
+        assertThat(server.getPredefinedQueryDefinitionDTO(new PredefinedQueryIdentifier("Different", "Description")), is(differentQueryDefinition));
         
-        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Test", "")), is(pseudoQueryDefinition));
-        assertThat(server.getQueryDefinitionDTOProvider().get(new PredefinedQueryIdentifier("Different", "")), is(differentQueryDefinition));
+        assertThat(server.getPredefinedQueryDefinitionDTO(new PredefinedQueryIdentifier("Test", "")), is(pseudoQueryDefinition));
+        assertThat(server.getPredefinedQueryDefinitionDTO(new PredefinedQueryIdentifier("Different", "")), is(differentQueryDefinition));
     }
 
 }
