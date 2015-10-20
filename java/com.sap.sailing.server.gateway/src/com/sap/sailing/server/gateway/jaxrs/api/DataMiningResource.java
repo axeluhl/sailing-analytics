@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
 import com.sap.sse.datamining.DataMiningServer;
@@ -187,15 +188,31 @@ public class DataMiningResource extends AbstractSailingServerResource {
         if (Number.class.isAssignableFrom(resultType)) {
             return numericalResultValuesToJSON((Map<GroupKey, Number>) resultValues);
         }
+        if (Distance.class.isAssignableFrom(resultType)) {
+            return distanceResultValuesToJSON((Map<GroupKey, Distance>) resultValues);
+        }
         throw new NotSerializableException(resultType.getName());
     }
-    
+
     private JSONArray numericalResultValuesToJSON(Map<GroupKey, Number> resultValues) {
         JSONArray jsonResultValues = new JSONArray();
         for (GroupKey groupKey : resultValues.keySet()) {
             JSONObject jsonResultEntry = new JSONObject();
             jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
             jsonResultEntry.put("value", resultValues.get(groupKey));
+            jsonResultValues.add(jsonResultEntry);
+        }
+        return jsonResultValues;
+    }
+    
+    private JSONArray distanceResultValuesToJSON(Map<GroupKey, Distance> resultValues) {
+        DistanceJsonSerializer distanceSerializer = new DistanceJsonSerializer();
+        
+        JSONArray jsonResultValues = new JSONArray();
+        for (GroupKey groupKey : resultValues.keySet()) {
+            JSONObject jsonResultEntry = new JSONObject();
+            jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
+            jsonResultEntry.put("value", distanceSerializer.serialize(resultValues.get(groupKey)));
             jsonResultValues.add(jsonResultEntry);
         }
         return jsonResultValues;

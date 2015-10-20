@@ -18,6 +18,7 @@ import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrieva
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
@@ -41,6 +42,8 @@ public class SailingPredefinedQueries {
                               create_AvgSpeed_Per_Regatta_Race());
         predefinedQueries.put(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"),
                               create_AvgSpeed_Per_Competitor_LegType());
+        predefinedQueries.put(new PredefinedQueryIdentifier("SumDistance_Per_Competitor-LegType", "Sum of the traveled Distance grouped by Competitor Team Name and Leg Type"),
+                              create_SumDistance_Per_Competitor_LegType());
     }
     
     private StatisticQueryDefinitionDTO create_AvgSpeed_49erEuros2015_CompetitorName_LegType() {
@@ -117,6 +120,29 @@ public class SailingPredefinedQueries {
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
 
         FunctionDTO dimensionToGroupBy1 = new FunctionDTO(true, "getTrackedLegOfCompetitorContext().getTrackedLegContext().getLegType()", HasGPSFixContext.class.getName(), LegType.class.getName(), new ArrayList<String>(), "", 0);
+        queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy1);
+        
+        return queryDefinition;
+    }
+    
+    private StatisticQueryDefinitionDTO create_SumDistance_Per_Competitor_LegType() {
+        FunctionDTO statistic = new FunctionDTO(false, "getDistanceTraveled()", HasTrackedLegOfCompetitorContext.class.getName(), Distance.class.getName(), new ArrayList<String>(), "", 0);
+        AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Distance.class.getName(), Distance.class.getName(), "");
+
+        ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), "Leaderboard Group"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), "Leaderboard"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), "Race"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), "Leg"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(4, TrackedLegOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegOfCompetitorContext.class.getName(), "Leg of competitor"), null));
+        DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("", RacingEventService.class.getName(), retrieverLevels);
+
+        ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("default", statistic, aggregator, retrieverChain);
+
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getTeam().getName()", HasTrackedLegOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
+
+        FunctionDTO dimensionToGroupBy1 = new FunctionDTO(true, "getTrackedLegContext().getLegType()", HasTrackedLegOfCompetitorContext.class.getName(), LegType.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy1);
         
         return queryDefinition;
