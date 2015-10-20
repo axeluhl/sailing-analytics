@@ -32,37 +32,37 @@
 		position: absolute; top: 0;
 		height: 100%;
 		width: 100%;
+			
 	}
 	.loading >.sapsailing {
 		margin-top: 100px;
-		margin-left: 100px;
-		font-size: 40px;
+		margin-left: 40px;
+		width: 100%;
+		font-size: 120%;
 		color:#008fcc;
 		font-weight: bold;
 	}
 	.loading >.waitmessage {
-		margin-top: 50px;
-		margin-left: 100px;
-		font-size: 30px;
+		margin-top: 60px;
+		margin-bottom: 70px;
+		margin-left: 40px;
+		width: 100%;
+		font-size: 120%;
 	}
 	
 	.signal {
 	    border:3px solid #6a6a6a;
-	    border-radius:300px;
+	    border-radius: 50%;
+	    position: relative;
 	    height:300px;
-	    left:20%;
-	    margin:-15px 0 0 -15px;
-	    opacity:0;
-	    position:absolute;
-	    top:40%;
 	    width:300px;
-	 
+	    margin: 0px auto;
+	    opacity:0;	 
 	    -webkit-animation: pulsate 2s ease-out;
-	 
 	            animation: pulsate 2s ease-out;
 	    -webkit-animation-iteration-count:infinite;
 	            animation-iteration-count:infinite;
-	  -webkit-transform: translate(-50%, -50%);
+	    -webkit-transform: translate(-50%, -50%);
 	}
 
 	@-webkit-keyframes pulsate {
@@ -109,7 +109,7 @@
 	<div id="loading" class="loading">
 		<p class="sapsailing">SAP Sailing Analytics</p>
 		<p class="waitmessage">Loading, please wait...</p>
-		<div class="signal"></div>
+		<div class="signal" />
 	</div>
 </body>
 </html>
