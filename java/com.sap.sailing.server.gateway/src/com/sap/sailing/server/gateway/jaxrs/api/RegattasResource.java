@@ -69,6 +69,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -1040,4 +1041,39 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
+    
+    private DataMiningResource dataMiningResource;
+    
+    private DataMiningResource getDataMiningResource() {
+        if (dataMiningResource == null) {
+            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
+        }
+        return dataMiningResource;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("datamining")
+    public Response getRegattaPredefinedQueries() {
+        // TODO Fetch the predefined queries for regattas dynamically
+        ArrayList<PredefinedQueryIdentifier> predefinedRegattaQueries = new ArrayList<>();
+        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"));
+        return getDataMiningResource().predefinedQueryIdentifiersToJSON(predefinedRegattaQueries);
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor-LegType")
+    public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().avgSpeedPerCompetitorAndLegTypeForRegatta(regattaName);
+        }
+        return response;
+    }
+    
 }
