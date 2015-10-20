@@ -4,6 +4,8 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
+import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
+import com.sap.sailing.gwt.home.mobile.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultActivityProxy;
@@ -38,7 +40,9 @@ public class MobileActivityMapper implements ActivityMapper {
             SwitchingEntryPoint.reloadApp();
             return null;
         }
-        if (place instanceof StartPlace) {
+        if (place instanceof ErrorPlace) {
+            return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
+        } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory);

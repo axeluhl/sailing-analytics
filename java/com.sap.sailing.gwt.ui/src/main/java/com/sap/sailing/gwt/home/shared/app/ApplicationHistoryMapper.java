@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.regattastab.MultiregattaRegattasPlace;
@@ -56,7 +57,8 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
         // Mobile only places:
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
-        SeriesMiniOverallLeaderboardPlace.Tokenizer.class
+        SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
+        ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }

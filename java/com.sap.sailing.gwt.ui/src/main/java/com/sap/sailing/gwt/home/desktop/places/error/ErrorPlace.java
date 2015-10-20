@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.home.desktop.places.error;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
-public class ErrorPlace extends AbstractBasePlace {
+public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
     
     /**
      * Place provided for reload action
