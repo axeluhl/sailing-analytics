@@ -16,7 +16,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/side_padding"
             android:layout_marginTop="@dimen/race_flag_margin"
             android:src="?arrow_up_normal"
             android:visibility="gone"
@@ -28,7 +27,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:padding="6dp"
-            tools:src="@drawable/flag_class_96dp" />
+            tools:src="@drawable/flag_class_96dp"
+            android:layout_marginTop="@dimen/side_padding"/>
 
         <TextView
             android:id="@+id/flag_text"
