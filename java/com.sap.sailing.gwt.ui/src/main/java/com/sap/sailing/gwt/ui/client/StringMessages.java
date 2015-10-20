@@ -1426,4 +1426,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String useClassGetNameTooltip();
     String useStringLiterals();
     String useStringLiteralsTooltip();
+    String errorLoadingDataWithTryAgain();
 }

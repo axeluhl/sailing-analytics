@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.refresh;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 public class RefreshManagerWithErrorAndBusy extends AutoAttachingRefreshManager {
@@ -24,8 +25,7 @@ public class RefreshManagerWithErrorAndBusy extends AutoAttachingRefreshManager 
     protected void onFailedUpdate(Throwable errorCause) {
         super.onFailedUpdate(errorCause);
         if(!hadSuccess && !hadFailure) {
-            // TODO I18n
-            container.setWidget(errorAndBusyViewFactory.createErrorView("Error while loading data. We will try", errorCause));
+            container.setWidget(errorAndBusyViewFactory.createErrorView(StringMessages.INSTANCE.errorLoadingDataWithTryAgain(), errorCause));
         }
         hadFailure = true;
     }
