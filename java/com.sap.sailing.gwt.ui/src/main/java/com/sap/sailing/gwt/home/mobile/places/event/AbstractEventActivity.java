@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -116,6 +117,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     public DispatchSystem getDispatch() {
         return clientFactory.getDispatch();
+    }
+    
+    @Override
+    public ErrorAndBusyClientFactory getErrorAndBusyClientFactory() {
+        return clientFactory;
     }
     
     @Override

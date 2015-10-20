@@ -18,8 +18,8 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -47,18 +47,30 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     protected final P currentPresenter;
     protected final RefreshManager refreshManager;
     private final AbstractEventViewLayout layout;
+    
+    private final SimplePanel contentRoot = new SimplePanel();
+    private final boolean supportsRefresh;
 
     public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation) {
+        this(presenter, showRegattaName, enableLogoNavigation, true);
+    }
+    
+    public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation, boolean supportsRefresh) {
         this.currentPresenter = presenter;
-        this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
+        this.supportsRefresh = supportsRefresh;
         String regattaName = showRegattaName ? currentPresenter.getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
         this.layout = new AbstractEventViewLayout(currentPresenter.getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
+        this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
     }
     
     protected void setViewContent(Widget contentWidget) {
-        layout.viewContentUi.setWidget(contentWidget);
+        if(supportsRefresh) {
+            contentRoot.setWidget(contentWidget);
+        } else {
+            layout.viewContentUi.setWidget(contentWidget);
+        }
     }
     
     protected UUID getEventId() {

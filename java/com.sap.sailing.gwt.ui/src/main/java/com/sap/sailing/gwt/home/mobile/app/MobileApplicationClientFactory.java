@@ -4,11 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
+import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
@@ -80,12 +79,6 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl impl
 
     @Override
     public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
-        // TODO use correct view
-        return new ErrorView() {
-            @Override
-            public Widget asWidget() {
-                return new Label(errorMessage);
-            }
-        };
+        return new ErrorViewImpl(errorMessage, errorReason, null);
     }
 }

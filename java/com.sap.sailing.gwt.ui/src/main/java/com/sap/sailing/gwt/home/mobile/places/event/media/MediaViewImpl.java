@@ -25,7 +25,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     @UiField ImageGallery imageGalleryUi;
 
     public MediaViewImpl(MediaView.Presenter presenter) {
-        super(presenter, false, true);
+        super(presenter, false, true, false);
         setViewContent(uiBinder.createAndBindUi(this));
     }
     

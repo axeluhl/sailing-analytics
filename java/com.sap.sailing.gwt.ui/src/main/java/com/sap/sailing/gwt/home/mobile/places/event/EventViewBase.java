@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
@@ -35,6 +36,8 @@ public interface EventViewBase extends IsWidget {
         EventContext getCtx();
 
         DispatchSystem getDispatch();
+        
+        ErrorAndBusyClientFactory getErrorAndBusyClientFactory();
         
         PlaceNavigation<?> getEventNavigation();
 
