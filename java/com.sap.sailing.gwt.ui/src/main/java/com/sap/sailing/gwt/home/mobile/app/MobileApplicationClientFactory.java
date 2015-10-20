@@ -4,16 +4,22 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
+import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 /**
@@ -21,7 +27,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
  * @author pgtaboada
  *
  */
-public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
+public class MobileApplicationClientFactory extends SecureClientFactoryImpl implements ErrorAndBusyClientFactory {
     private final HomeServiceAsync homeService;
     private final MobilePlacesNavigator navigator;
     private final DispatchSystem dispatch = new DispatchSystemImpl();
@@ -65,5 +71,21 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl {
     @Override
     public Place getDefaultPlace() {
         return new StartPlace();
+    }
+
+    @Override
+    public BusyView createBusyView() {
+        return new BusyViewImpl();
+    }
+
+    @Override
+    public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
+        // TODO use correct view
+        return new ErrorView() {
+            @Override
+            public Widget asWidget() {
+                return new Label(errorMessage);
+            }
+        };
     }
 }
