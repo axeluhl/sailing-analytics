@@ -8,7 +8,7 @@ public class BlastRandom extends Random {
 
     // random number having uniform distribution
     public double nextDouble(double min, double max) {
-        return (min + (max - min)*this.nextDouble());
+        return (min + (max - min) * this.nextDouble());
     }
 
     // random number having Gaussian distribution
@@ -18,12 +18,12 @@ public class BlastRandom extends Random {
 
     // random number having exponential distribution
     public double nextExponential(double lambda) {
-        return -Math.log(1.0 - this.nextDouble())/lambda;
+        return -Math.log(this.nextDouble())/lambda;
     }
 
     // random number having geometric distribution
     public int nextGeometric(double p) {
-        return (int)Math.floor(nextExponential(p));
+        return (int)Math.floor(nextExponential(-Math.log(1.0 - p)));
     }
     
 }
