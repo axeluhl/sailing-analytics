@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
@@ -49,7 +50,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
 
     public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation) {
         this.currentPresenter = presenter;
-        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         String regattaName = showRegattaName ? currentPresenter.getCtx().getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
         this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), regattaName, logoNavigation);

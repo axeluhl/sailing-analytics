@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYear
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
+import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
@@ -40,7 +41,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
 
     public SeriesViewImpl(SeriesView.Presenter presenter) {
         this.currentPresenter = presenter;
-        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
         this.setupStatisticsBox(series);

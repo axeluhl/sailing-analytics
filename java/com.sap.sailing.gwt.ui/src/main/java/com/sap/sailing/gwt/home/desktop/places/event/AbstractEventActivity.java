@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
@@ -72,6 +73,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     public DispatchSystem getDispatch() {
         return clientFactory.getDispatch();
+    }
+    
+    @Override
+    public ErrorAndBusyClientFactory getErrorAndBusyClientFactory() {
+        return clientFactory;
     }
 
     @Override

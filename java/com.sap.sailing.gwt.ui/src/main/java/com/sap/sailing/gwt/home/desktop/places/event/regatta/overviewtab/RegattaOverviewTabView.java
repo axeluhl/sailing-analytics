@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
@@ -71,7 +72,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
             @Override
             public void setData(RegattaWithProgressDTO data) {

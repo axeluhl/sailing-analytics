@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultirega
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
@@ -65,7 +66,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
         
         refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));

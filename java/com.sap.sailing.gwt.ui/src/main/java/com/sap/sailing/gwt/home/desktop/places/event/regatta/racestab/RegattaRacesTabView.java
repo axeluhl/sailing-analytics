@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProvider;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
@@ -114,7 +115,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         initWidget(ourUiBinder.createAndBindUi(RegattaRacesTabView.this));
         raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
+        refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         UUID eventId = myPlace.getCtx().getEventDTO().getId();
         String regattaId = myPlace.getRegattaId();
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {

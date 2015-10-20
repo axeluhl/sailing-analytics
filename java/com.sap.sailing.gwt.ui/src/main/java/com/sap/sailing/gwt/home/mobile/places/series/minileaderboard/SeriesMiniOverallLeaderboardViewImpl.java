@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
@@ -37,7 +38,7 @@ public class SeriesMiniOverallLeaderboardViewImpl extends Composite implements S
         minileaderboardUi = new MinileaderboardBox(true);
         eventHeaderUi = new SeriesHeader(presenter.getCtx().getSeriesDTO(), presenter.getSeriesNavigation());
         initWidget(uiBinder.createAndBindUi(this));
-        RefreshManager refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
         SeriesContext ctx = presenter.getCtx();
         refreshManager.add(minileaderboardUi, new GetMiniOverallLeaderbordAction(UUID.fromString(ctx.getSeriesId())));
         minileaderboardUi.setAction(MSG.details(), presenter.getOverallLeaderboardNavigation());

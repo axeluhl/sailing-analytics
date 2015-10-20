@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
@@ -67,6 +68,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         boolean hasMedia();
         
         DispatchSystem getDispatch();
+        
+        ErrorAndBusyClientFactory getErrorAndBusyClientFactory();
     }
     
     public interface PlaceCallback {

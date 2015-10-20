@@ -7,13 +7,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.event.logical.shared.HasAttachHandlers;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.DefaultActionProvider;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
@@ -21,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sse.common.Duration;
 
-public class RefreshManager {
+public abstract class RefreshManager {
     private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());
 
     private static final long PAUSE_ON_ERROR = Duration.ONE_SECOND.times(30).asMillis();
@@ -37,32 +32,26 @@ public class RefreshManager {
 
     private final DispatchSystem actionExecutor;
 
-    private final Widget content;
-
-    private AcceptsOneWidget container;
-
-    public RefreshManager(Widget content, DispatchSystem actionExecutor) {
-        this(content, null, actionExecutor);
+    public RefreshManager(DispatchSystem actionExecutor) {
+        this.actionExecutor = actionExecutor;
     }
     
-    public RefreshManager(Widget content, AcceptsOneWidget container, DispatchSystem actionExecutor) {
-        this.content = content;
-        this.container = container;
-        this.actionExecutor = actionExecutor;
-        HasAttachHandlers lifecycleWidget = (container instanceof HasAttachHandlers) ? ((HasAttachHandlers) container) : content;
-        lifecycleWidget.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached()) {
-                    reschedule();
-                } else {
-                    cancel();
-                }
-            }
-        });
-        if(lifecycleWidget.isAttached() || (container != null && !(container instanceof HasAttachHandlers))) {
-            reschedule();
-        }
+    protected void start() {
+        reschedule();
+    }
+    
+    protected void cancel() {
+        LOG.log(Level.FINE, "Cancelling auto refresh");
+        timer.cancel();
+        scheduled = false;
+    }
+    
+    protected abstract boolean canStart();
+    
+    protected void onSuccessfulUpdate() {
+    }
+    
+    protected  void onFailedUpdate(Throwable errorCause) {
     }
 
     private void update() {
@@ -80,6 +69,7 @@ public class RefreshManager {
                         refreshable.callRunning = false;
                         refreshable.timeout = System.currentTimeMillis() + PAUSE_ON_ERROR;
                         reschedule();
+                        onFailedUpdate(caught);
                     }
 
                     @Override
@@ -88,7 +78,7 @@ public class RefreshManager {
                         refreshable.timeout = System.currentTimeMillis() + result.getTtlMillis();
                         try {
                             refreshable.widget.setData(result.getDto());
-                            initContentIfNecessary();
+                            onSuccessfulUpdate();
                         } catch(Throwable error) {
                             LOG.log(Level.SEVERE, "Error while refreshing content with action " + action.getClass().getName(), error);
                         }
@@ -109,7 +99,7 @@ public class RefreshManager {
             public void execute() {
                 scheduled = false;
 
-                if (refreshables.isEmpty() || (!content.isAttached() && container == null)) {
+                if (refreshables.isEmpty() || !canStart()) {
                     return;
                 }
 
@@ -135,22 +125,9 @@ public class RefreshManager {
         });
     }
     
-    private void initContentIfNecessary() {
-        if(container != null) {
-            container.setWidget(content);
-            container = null;
-        }
-    }
-    
     public void forceReschedule() {
         cancel();
         reschedule();
-    }
-    
-    private void cancel() {
-        LOG.log(Level.FINE, "Cancelling auto refresh");
-        timer.cancel();
-        scheduled = false;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
