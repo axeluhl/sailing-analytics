@@ -116,23 +116,29 @@ public abstract class RefreshManager {
                     return;
                 }
 
-                long nextUpdate = 0;
+                Long nextUpdate = null;
                 for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
                     if (refreshable.callRunning || !refreshable.provider.isActive()) {
                         continue;
                     }
-                    if (nextUpdate == 0) {
+                    if (nextUpdate == null) {
                         nextUpdate = refreshable.timeout;
                     } else {
                         nextUpdate = Math.min(nextUpdate, refreshable.timeout);
                     }
                 }
-                int delayMillis = Math.max(0, (int) (nextUpdate - System.currentTimeMillis()));
-                if (delayMillis == 0) {
-                    update();
+                if(nextUpdate == null) {
+                    LOG.log(Level.FINE, "Nothing to auto update");
                 } else {
-                    LOG.log(Level.FINE, "Scheduling auto refresh in " + delayMillis + "ms");
-                    timer.schedule(delayMillis);
+                    int delayMillis = (int) (nextUpdate - System.currentTimeMillis());
+                    if (delayMillis <= 0) {
+                        LOG.log(Level.FINE, "Auto updating immediately");
+                        update();
+                    } else {
+                        LOG.log(Level.FINE, "Scheduling auto refresh in " + delayMillis + "ms");
+                        timer.schedule(delayMillis);
+                    }
+                    
                 }
             }
         });
