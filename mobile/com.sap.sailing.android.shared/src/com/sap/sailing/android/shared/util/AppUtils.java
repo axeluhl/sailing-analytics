@@ -11,6 +11,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 public class AppUtils {
@@ -46,6 +47,11 @@ public class AppUtils {
         }
     }
 
+    /**
+     * Read the build.info from the asset folder, which is written at build time with git information
+     *
+     * @return content of the build.info file or an empty string, if no file was found
+     */
     public String getBuildInfo() {
         String buildInfo = "";
         BufferedReader reader = null;
@@ -67,43 +73,83 @@ public class AppUtils {
         return buildInfo;
     }
 
+    /**
+     * Returns true, if device is identified as phone
+     *
+     * @return true, if probably a phone
+     */
     public boolean isPhone() {
         return !isTablet();
     }
 
+    /**
+     * Returns true, if device is identified as tablet
+     *
+     * @return true, if probably a tablet
+     */
     public boolean isTablet() {
         return is7inch() || is10inch();
     }
 
+    /**
+     * Returns true, if device is identified as 7" tablet
+     *
+     * @return true, if probably a 7" tablet
+     */
     public boolean is7inch() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
             == Configuration.SCREENLAYOUT_SIZE_LARGE));
     }
 
+    /**
+     * Returns true, if device is identified as 10" tablet
+     *
+     * @return true, if probably a 10" tablet
+     */
     public boolean is10inch() {
         int screenLayout = mContext.getResources().getConfiguration().screenLayout;
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
             == Configuration.SCREENLAYOUT_SIZE_XLARGE));
     }
 
+    /**
+     * Returns true, is device is used in portrait mode
+     *
+     * @return true, if portrait mode
+     */
     public boolean isPort() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
+    /**
+     * Returns true, if device is used in landscape mode
+     *
+     * @return true, if landscape mode
+     */
     public boolean isLand() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
+    /**
+     * Returns true, if device has a medium density screen
+     *
+     * @return true, if device is used in medium density mode
+     */
     public boolean isMDPI() {
-        return getDensity() == 1f;
+        return getDensity() == DisplayMetrics.DENSITY_MEDIUM;
     }
 
+    /**
+     * Returns true, if device has a high density screen
+     *
+     * @return true, if device is used in high density mode
+     */
     public boolean isHDPI() {
-        return getDensity() == 1.5f;
+        return getDensity() == DisplayMetrics.DENSITY_HIGH;
     }
 
-    private float getDensity() {
-        return mContext.getResources().getDisplayMetrics().density;
+    private int getDensity() {
+        return mContext.getResources().getDisplayMetrics().densityDpi;
     }
 }
