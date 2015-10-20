@@ -24,6 +24,7 @@ public class RefreshManagerWithErrorAndBusy extends AutoAttachingRefreshManager 
     protected void onFailedUpdate(Throwable errorCause) {
         super.onFailedUpdate(errorCause);
         if(!hadSuccess && !hadFailure) {
+            // TODO I18n
             container.setWidget(errorAndBusyViewFactory.createErrorView("Error while loading data. We will try", errorCause));
         }
         hadFailure = true;
