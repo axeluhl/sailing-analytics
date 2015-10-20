@@ -42,8 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/finished_line_padding_half"
-                android:paddingBottom="@dimen/finished_line_padding_half"
-                android:orientation="horizontal">
+                android:paddingBottom="@dimen/finished_line_padding_half">
 
                 <TextView
                     android:layout_width="0dp"
@@ -238,7 +237,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="right"
                         android:textColor="?white"
                         android:textSize="@dimen/finished_default_text_size"
@@ -265,7 +264,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="2"
+                        android:layout_weight="1"
                         android:gravity="right"
                         android:textColor="?white"
                         android:textSize="@dimen/finished_default_text_size"
