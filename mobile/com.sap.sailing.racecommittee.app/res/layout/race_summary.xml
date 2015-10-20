@@ -227,7 +227,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="2"
+                        android:layout_weight="3"
                         android:text="@string/race_summary_wind_direction"
                         android:textColor="?white"
                         android:textSize="@dimen/finished_default_text_size"/>
@@ -254,7 +254,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="2"
+                        android:layout_weight="3"
                         android:text="@string/race_summary_wind_speed"
                         android:textColor="?white"
                         android:textSize="@dimen/finished_default_text_size"/>
