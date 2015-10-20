@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -24,6 +23,4 @@ public interface SailingClientFactory extends ClientFactory {
     UserService getUserService();
     
     ErrorView createErrorView(String errorMessage, Throwable errorReason);
-    
-    DispatchSystem getDispatch();
 }
