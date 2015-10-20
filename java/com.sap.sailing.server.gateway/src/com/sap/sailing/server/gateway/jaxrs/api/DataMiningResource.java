@@ -42,6 +42,8 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 @Path("/v1/datamining")
 public class DataMiningResource extends AbstractSailingServerResource {
     
+    private static final String AVG_SPEED_PER_COMPETITOR_LEG_TYPE = "AvgSpeed_Per_Competitor-LegType";
+
     public DataMiningServer getDataMiningServer() {
         @SuppressWarnings("unchecked")
         ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker = (ServiceTracker<DataMiningServer, DataMiningServer>) getServletContext().getAttribute(RestServletContainer.DATA_MINING_SERVER_TRACKER_NAME);
@@ -102,26 +104,47 @@ public class DataMiningResource extends AbstractSailingServerResource {
     
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
         Response response;
-        String identifier = "AvgSpeed_Per_Competitor-LegType";
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(identifier);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(identifier);
+            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
         } else {
-            // Filter by the given regatta name
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> retrieverlevel2_FilterSelection = new HashMap<>();
-            FunctionDTO filterDimension0 = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> filterDimension0_Selection = new HashSet<>();
-            filterDimension0_Selection.add(regattaName);
-            retrieverlevel2_FilterSelection.put(filterDimension0, filterDimension0_Selection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), retrieverlevel2_FilterSelection);
+            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
+            getRegattaName_FilterSelection.add(regattaName);
             
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
             response = runQuery(queryDefinitionDTO);
         }
-        
         return response;
     }
-    
+
+    public Response avgSpeedPerCompetitorAndLegType(String regattaName, String raceName) {
+        Response response;
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+        
+        if (queryDefinitionDTO == null) {
+            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+        } else {
+            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
+            getRegattaName_FilterSelection.add(regattaName);
+
+            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+            getRaceName_FilterSelection.add(raceName);
+            
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
+            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
+            response = runQuery(queryDefinitionDTO);
+        }
+        return response;
+    }
+
     private ModifiableStatisticQueryDefinitionDTO getPredefinedQuery(String identifier) {
         DataMiningServer dataMiningServer = getDataMiningServer();
         PredefinedQueryIdentifier queryIdentifier = new PredefinedQueryIdentifier(identifier, "");

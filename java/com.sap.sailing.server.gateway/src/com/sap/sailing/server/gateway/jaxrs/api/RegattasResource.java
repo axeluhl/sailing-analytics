@@ -1071,7 +1071,27 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            response = getDataMiningResource().avgSpeedPerCompetitorAndLegTypeForRegatta(regattaName);
+            response = getDataMiningResource().avgSpeedPerCompetitorAndLegType(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor-LegType")
+    public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().avgSpeedPerCompetitorAndLegType(regattaName, raceName);
+            }
         }
         return response;
     }
