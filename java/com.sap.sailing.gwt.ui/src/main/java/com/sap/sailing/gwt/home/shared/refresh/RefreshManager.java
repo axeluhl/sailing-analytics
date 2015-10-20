@@ -70,6 +70,7 @@ public abstract class RefreshManager {
                 actionExecutor.execute(action, new AsyncCallback<ResultWithTTL<DTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
+                        LOG.log(Level.FINE, "Error on auto refresh");
                         refreshable.callRunning = false;
                         refreshable.timeout = System.currentTimeMillis() + PAUSE_ON_ERROR;
                         reschedule();
