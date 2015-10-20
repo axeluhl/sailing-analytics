@@ -77,6 +77,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
@@ -91,7 +92,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -171,7 +171,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
-import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
@@ -210,7 +210,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
-import com.sap.sse.BuildVersion;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -230,6 +230,8 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.JoinedClassLoader;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -239,7 +241,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
@@ -397,6 +399,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final Set<ClassLoader> masterDataClassLoaders = new HashSet<ClassLoader>();
     
     private final JoinedClassLoader joinedClassLoader;
+
+    private SailingServerConfiguration sailingServerConfiguration;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -593,11 +597,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
-        
+        sailingServerConfiguration = domainObjectFactory.loadServerConfiguration();
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
         loadRaceIDToRegattaAssociations();
@@ -658,10 +658,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         // TODO clear user store? See bug 2430.
         this.competitorStore.clear();
-        // Add one default leaderboard that aggregates all races currently tracked by this service.
-        // This is more for debugging purposes than for anything else.
-        addFlexibleLeaderboard(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME, null, new int[] { 5, 8 },
-                getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), null);
     }
 
     @Override
@@ -1145,6 +1141,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
+    public SailingServerConfiguration getSailingServerConfiguration() {
+        return sailingServerConfiguration;
+    }
+    
+    @Override
+    public void updateServerConfiguration(SailingServerConfiguration serverConfiguration) {
+        this.sailingServerConfiguration = serverConfiguration;
+        mongoObjectFactory.storeServerConfiguration(serverConfiguration);
+    }
+    
+    @Override
     public Map<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> getPublicEventsOfAllSailingServers() {
         return remoteSailingServerSet.getCachedEventsForRemoteSailingServers(); // FIXME should probably add our own
                                                                                 // stuff here... Is it enough to pass on
@@ -1432,6 +1439,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
             } else {
+                logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
@@ -1595,12 +1603,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
-            final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName
-                    .get(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-            if (defaultLeaderboard != null) {
-                String columnName = trackedRace.getRace().getName();
-                defaultLeaderboard.addRace(trackedRace, columnName, /* medalRace */false);
-            }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */true, true);
@@ -1824,9 +1826,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
                 stopTrackingWind(regatta, race);
-                // remove from default leaderboard
-                FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) getLeaderboardByName(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME);
-                defaultLeaderboard.removeRaceColumn(race.getName());
             }
         }
     }
@@ -1922,7 +1921,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (RegattaLeaderboard regattaLeaderboardToRemove : leaderboardsToRemove) {
             removeLeaderboard(regattaLeaderboardToRemove.getName());
         }
-        for (RaceDefinition race : regatta.getAllRaces()) {
+        // avoid ConcurrentModificationException by copying the races to remove:
+        Set<RaceDefinition> racesToRemove = new HashSet<>();
+        Util.addAll(regatta.getAllRaces(), racesToRemove);
+        for (RaceDefinition race : racesToRemove) {
             removeRace(regatta, race);
             mongoObjectFactory.removeRegattaForRaceID(race.getName(), regatta);
             persistentRegattasForRaceIDs.remove(race.getId().toString());
@@ -2770,38 +2772,46 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public CourseArea addCourseArea(UUID eventId, String courseAreaName, UUID courseAreaId) {
-        CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
-        addCourseAreaWithoutReplication(eventId, courseAreaId, courseAreaName);
-        replicate(new AddCourseArea(eventId, courseAreaName, courseAreaId));
-        return courseArea;
+    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
+        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
+        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds));
+        return courseAreas;
     }
 
     @Override
-    public CourseArea addCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId, String courseAreaName) {
-        final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaId, courseAreaName);
+    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames) {
+        final CourseArea[] result = new CourseArea[courseAreaNames.length];
+        for (int i=0; i<courseAreaIds.length; i++) {
+            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i]);
+            final Event event = eventsById.get(eventId);
+            if (event == null) {
+                throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
+            }
+            event.getVenue().addCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
+            result[i] = courseArea;
+        }
+        return result;
+    }
+
+    @Override
+    public CourseArea[] removeCourseAreaWithoutReplication(UUID eventId, UUID[] courseAreaIds) {
         final Event event = eventsById.get(eventId);
         if (event == null) {
             throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
         }
-        event.getVenue().addCourseArea(courseArea);
-        mongoObjectFactory.storeEvent(event);
-        return courseArea;
-    }
-
-    @Override
-    public CourseArea removeCourseAreaWithoutReplication(UUID eventId, UUID courseAreaId) {
-        final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
-        if (courseArea == null) {
-            throw new IllegalArgumentException("No course area with ID " + courseAreaId + " found.");
+        final CourseArea[] courseAreasRemoved = new CourseArea[courseAreaIds.length];
+        int i=0;
+        for (final UUID courseAreaId : courseAreaIds) {
+            final CourseArea courseArea = getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
+            if (courseArea == null) {
+                throw new IllegalArgumentException("No course area with ID " + courseAreaId + " found.");
+            }
+            courseAreasRemoved[i++] = courseArea;
+            event.getVenue().removeCourseArea(courseArea);
+            mongoObjectFactory.storeEvent(event);
         }
-        final Event event = eventsById.get(eventId);
-        if (event == null) {
-            throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
-        }
-        event.getVenue().removeCourseArea(courseArea);
-        mongoObjectFactory.storeEvent(event);
-        return courseArea;
+        return courseAreasRemoved;
     }
 
     @Override
@@ -2925,7 +2935,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public String toString() {
-        return "RacingEventService: " + this.hashCode() + " Build: " + BuildVersion.getBuildVersion();
+        return "RacingEventService: " + this.hashCode() + " Build: " + ServerInfo.getBuildVersion();
     }
 
     @Override
@@ -3239,7 +3249,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public void setPolarDataService(PolarDataService service) {
-        if (this.polarDataService == null) {
+        if (this.polarDataService == null && service != null) {
             polarDataService = service;
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);

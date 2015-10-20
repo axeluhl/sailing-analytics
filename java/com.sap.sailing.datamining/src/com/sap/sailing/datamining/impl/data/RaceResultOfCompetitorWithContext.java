@@ -52,6 +52,10 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         return leaderboardWithContext;
     }
 
+    private Leaderboard getLeaderboard() {
+        return getLeaderboardContext().getLeaderboard();
+    }
+
     @Override
     public Competitor getCompetitor() {
         return competitor;
@@ -59,8 +63,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
 
     @Override
     public double getRelativeRank() {
-        Leaderboard leaderboard = getLeaderboardContext().getLeaderboard();
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
         double competitorCount = Util.size(leaderboard.getCompetitors());
         double points = leaderboard.getNetPoints(competitor, raceColumn, now);
         double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
@@ -154,9 +158,35 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
 
     @Override
     public String getRegattaName() {
-        Leaderboard leaderboard = getLeaderboardContext().getLeaderboard();;
+        Leaderboard leaderboard = getLeaderboard();;
         final String result = leaderboard.getName();
         return result;
+    }
+
+    @Override
+    public Boolean isPodiumFinish() {
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
+        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        if (leaderboard.getScoringScheme().isHigherBetter()) {
+            double competitorCount = Util.size(leaderboard.getCompetitors());
+            return points >= (competitorCount - 2.05);
+        } else {
+            return points <= 3.05;
+        }
+    }
+
+    @Override
+    public Boolean isWin() {
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
+        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        if (leaderboard.getScoringScheme().isHigherBetter()) {
+            double competitorCount = Util.size(leaderboard.getCompetitors());
+            return points >= (competitorCount - 0.05);
+        } else {
+            return points <= 1.05;
+        }
     }
     
 }

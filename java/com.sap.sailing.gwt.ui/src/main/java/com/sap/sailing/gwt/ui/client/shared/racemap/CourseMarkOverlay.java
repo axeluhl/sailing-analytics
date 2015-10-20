@@ -42,6 +42,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Double lastHeight;
     private Double lastScaleFactor;
     private Boolean lastShowBuoyZone;
+    private Boolean lastIsSelected;
     private Double lastBuoyZoneRadiusInMeter;
 
     public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
@@ -70,7 +71,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             double canvasWidth = markScaleAndSize.getB().getWidth();
             double canvasHeight = markScaleAndSize.getB().getHeight();
             double buoyZoneRadiusInPixel = -1;
-            if (showBuoyZone && mark.type == MarkType.BUOY) {
+            if (showBuoyZone && isMarkWithBuoyZone(mark)) {
                 buoyZoneRadiusInPixel = calculateRadiusOfBoundingBoxInPixels(mapProjection, position,
                         buoyZoneRadiusInMeter);
                 if (buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
@@ -78,14 +79,14 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                     canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
-            if (needToDraw(showBuoyZone, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
+            if (needToDraw(showBuoyZone, isSelected, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
                 setCanvasSize((int) canvasWidth, (int) canvasHeight);
                 Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
-                markVectorGraphics.drawMarkToCanvas(context2d, showBuoyZone, canvasWidth, canvasHeight, markSizeScaleFactor);
+                markVectorGraphics.drawMarkToCanvas(context2d, isSelected, canvasWidth, canvasHeight, markSizeScaleFactor);
                 // draw the buoy zone
-                if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
-                    CssColor grayTransparentColor = CssColor.make("rgba(50,90,135,0.75)");
+                if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
+                    CssColor grayTransparentColor = CssColor.make("rgba(37,158,255,0.75)");
                     // this translation is important for drawing lines with a real line width of 1 pixel
                     context2d.setStrokeStyle(grayTransparentColor);
                     context2d.setLineWidth(1.0);
@@ -98,11 +99,12 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastBuoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
                 lastScaleFactor = markSizeScaleFactor;
                 lastShowBuoyZone = showBuoyZone;
+                lastIsSelected = isSelected;
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
-            if (showBuoyZone && mark.type == MarkType.BUOY && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
+            if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
                 setCanvasPosition(buoyPositionInPx.getX() - canvasWidth / 2.0, buoyPositionInPx.getY() - canvasHeight / 2.0);
@@ -110,12 +112,18 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         }
     }
     
+    private boolean isMarkWithBuoyZone(MarkDTO mark) {
+        return mark.type == null || mark.type == MarkType.BUOY || mark.type == MarkType.STARTBOAT || 
+                mark.type == MarkType.FINISHBOAT || mark.type == MarkType.LANDMARK;
+    }
+    
     /**
      * Compares the drawing parameters to {@link #lastLegType} and the other <code>last...</code>. If anything has
      * changed, the result is <code>true</code>.
      */
-    private boolean needToDraw(boolean showBuoyZone, double buoyZoneRadiusInMeters, double width, double height, double scaleFactor) {
+    private boolean needToDraw(boolean showBuoyZone, boolean isSelected, double buoyZoneRadiusInMeters, double width, double height, double scaleFactor) {
         return lastShowBuoyZone == null || lastShowBuoyZone != showBuoyZone ||
+               lastIsSelected == null || lastIsSelected != isSelected ||
                lastBuoyZoneRadiusInMeter == null || lastBuoyZoneRadiusInMeter != buoyZoneRadiusInMeters ||
                lastScaleFactor == null || lastScaleFactor != scaleFactor ||
                lastWidth == null || lastWidth != width ||

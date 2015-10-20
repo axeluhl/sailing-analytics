@@ -12,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -54,12 +54,12 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         }
 
         StartMode startMode = getItem(position);
-        ImageView flag = ViewHolder.get(convertView, R.id.flag);
+        ImageView flag = ViewHelper.get(convertView, R.id.flag);
         if (flag != null) {
             flag.setImageDrawable(FlagsResources.getFlagDrawable(mContext, startMode.getFlagName(), 64));
         }
 
-        TextView flagName = ViewHolder.get(convertView, R.id.flag_name);
+        TextView flagName = ViewHelper.get(convertView, R.id.flag_name);
         if (flagName != null) {
             flagName.setText(startMode.getFlagName());
             flagName.setTextColor(ThemeHelper.getColor(mContext, R.attr.sap_light_gray));
@@ -68,7 +68,7 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
             }
         }
 
-        mChecked = ViewHolder.get(convertView, R.id.checked);
+        mChecked = ViewHelper.get(convertView, R.id.checked);
         if (mChecked != null) {
             mChecked.setTag(position);
             mChecked.setVisibility(View.INVISIBLE);
@@ -86,7 +86,7 @@ public class StartModeAdapter extends BaseAdapter implements OnClickListener {
         for (StartMode startMode : mStartMode) {
             startMode.setChecked(false);
         }
-        mChecked = ViewHolder.get(view, R.id.checked);
+        mChecked = ViewHelper.get(view, R.id.checked);
         if (mChecked != null) {
             Integer position = (Integer) mChecked.getTag();
             if (position != null) {

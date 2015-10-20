@@ -35,7 +35,15 @@ public class CoursePositionsDTO implements IsSerializable {
     public NauticalSide finishLineAdvantageousSide;
     public Double finishLineAdvantageInMeters;
     public Double finishLineLengthInMeters;
-    
+
+    public WaypointDTO getEndWaypointForLegNumber(int legNumber) {
+        WaypointDTO result = null;
+        if(legNumber > 0 && legNumber <= totalLegsCount && course != null && course.waypoints != null) {
+            result = course.waypoints.get(legNumber);
+        }
+        return result;
+    }
+
     public List<Position> getStartMarkPositions() {
         final List<Position> result = new ArrayList<>();
         if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {

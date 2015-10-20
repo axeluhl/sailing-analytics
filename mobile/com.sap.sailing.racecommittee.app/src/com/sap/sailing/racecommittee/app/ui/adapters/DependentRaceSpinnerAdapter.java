@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
@@ -40,7 +40,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
             layout = LayoutInflater.from(mContext).inflate(mLayout, parent, false);
         }
 
-        TextView mainText = ViewHolder.get(layout, android.R.id.text1);
+        TextView mainText = ViewHelper.get(layout, android.R.id.text1);
         if (mainText != null) {
             String text = mData.get(position).getB();
             if (TextUtils.isEmpty(text)) {
@@ -99,7 +99,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
             layout = LayoutInflater.from(mContext).inflate(mLayout, parent, false);
         }
 
-        TextView text = ViewHolder.get(layout, android.R.id.text1);
+        TextView text = ViewHelper.get(layout, android.R.id.text1);
         String spinnerText = mData.get(position).getB();
         if (TextUtils.isEmpty(spinnerText)) {
             spinnerText = mData.get(position).getA();
@@ -116,7 +116,7 @@ public class DependentRaceSpinnerAdapter implements SpinnerAdapter {
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 1;
     }
 
     @Override

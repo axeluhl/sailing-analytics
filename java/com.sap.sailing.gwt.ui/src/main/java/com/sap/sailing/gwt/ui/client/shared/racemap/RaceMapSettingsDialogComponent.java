@@ -37,6 +37,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
+    private CheckBox showWindStreamletColorsCheckbox;
     private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
@@ -69,6 +70,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
+        
+        showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
+        showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
+        showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
+        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckboxIntended");
+        vp.add(showWindStreamletColorsCheckbox);
+
+        showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
+            }
+        });
         
         if (showViewSimulation) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
@@ -236,6 +250,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
+        result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
         if (showViewSimulation) {
             result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
         } else {

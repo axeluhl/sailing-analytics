@@ -6,11 +6,10 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.logging.Level;
 
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.functions.ParameterProvider;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnType> {
@@ -18,15 +17,15 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     private final Method method;
     private Class<ReturnType> returnType;
     private AdditionalMethodWrappingFunctionData additionalData;
-    
+
     /**
-     * Throws an {@link IllegalArgumentException}, if the return type of the method and the given <code>returnType</code>
-     * aren't equal.
+     * Throws an {@link IllegalArgumentException}, if the return type of the method and the given
+     * <code>returnType</code> aren't equal.
      */
     public MethodWrappingFunction(Method method, Class<ReturnType> returnType) throws IllegalArgumentException {
         super(isMethodADimension(method));
         checkThatReturnTypesMatch(method, returnType);
-        
+
         this.method = method;
         this.returnType = returnType;
         initializeAdditionalData();
@@ -39,26 +38,29 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     private void checkThatReturnTypesMatch(Method method, Class<ReturnType> returnType) {
         if (!method.getReturnType().equals(returnType)) {
             throw new IllegalArgumentException("The method return type " + method.getReturnType().getName()
-                                             + " and expected return type " + returnType.getName() + " don't match");
+                    + " and expected return type " + returnType.getName() + " don't match");
         }
     }
 
     private void initializeAdditionalData() {
-        additionalData = new AdditionalMethodWrappingFunctionData("", Unit.None, 0, Integer.MAX_VALUE);
-        
+        additionalData = new AdditionalMethodWrappingFunctionData("", 0, Integer.MAX_VALUE);
+
         if (method.getAnnotation(Dimension.class) != null) {
             Dimension dimensionData = method.getAnnotation(Dimension.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), Unit.None, 0, dimensionData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(dimensionData.messageKey(), 0,
+                    dimensionData.ordinal());
         }
-        
+
         if (method.getAnnotation(Statistic.class) != null) {
             Statistic statisticData = method.getAnnotation(Statistic.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(), statisticData.resultUnit(), statisticData.resultDecimals(), statisticData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(statisticData.messageKey(),
+                    statisticData.resultDecimals(), statisticData.ordinal());
         }
-        
+
         if (method.getAnnotation(Connector.class) != null) {
             Connector connectorData = method.getAnnotation(Connector.class);
-            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), Unit.None, 0, connectorData.ordinal());
+            additionalData = new AdditionalMethodWrappingFunctionData(connectorData.messageKey(), 0,
+                    connectorData.ordinal());
         }
     }
 
@@ -66,28 +68,29 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     public Class<?> getDeclaringType() {
         return method.getDeclaringClass();
     }
-    
+
     @Override
     public Iterable<Class<?>> getParameters() {
         return Arrays.asList(method.getParameterTypes());
     }
-    
+
     @Override
     public Class<ReturnType> getReturnType() {
         return returnType;
     }
-    
+
     @Override
     public ReturnType tryToInvoke(Object instance) {
         return tryToInvoke(instance, new Object[0]);
     }
-    
+
     @Override
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
         return tryToInvoke(instance, parameterProvider.getParameters());
     }
-    
-    @SuppressWarnings("unchecked") // The cast has to work, because the constructor checks, that the return types match
+
+    @SuppressWarnings("unchecked")
+    // The cast has to work, because the constructor checks, that the return types match
     private ReturnType tryToInvoke(Object instance, Object... parameters) {
         if (instance != null) {
             try {
@@ -100,15 +103,10 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
-    public Unit getResultUnit() {
-        return additionalData.getResultUnit();
-    }
-
-    @Override
     public int getResultDecimals() {
         return additionalData.getResultDecimals();
     }
-    
+
     @Override
     public int getOrdinal() {
         return additionalData.getOrdinal();
@@ -116,43 +114,42 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
 
     @Override
     public String getSimpleName() {
-        return method.getName();
+        return method.getName() + "(" + parametersAsString() + ")";
     }
-    
+
+    private String parametersAsString() {
+        StringBuilder parameterBuilder = new StringBuilder();
+        boolean first = true;
+        for (Class<?> parameterType : getParameters()) {
+            if (!first) {
+                parameterBuilder.append(", ");
+            }
+            parameterBuilder.append(parameterType.getName());
+            first = false;
+        }
+        return parameterBuilder.toString();
+    }
+
     @Override
     public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages) {
         if (!isLocalizable()) {
             return getSimpleName();
         }
-        
-        String localizedName = "";
-        if (!additionalData.getMessageKey().isEmpty()) {
-            localizedName = stringMessages.get(locale, additionalData.getMessageKey());
-        }
-        
-        if (hasUnit()) {
-            String unitSignifier = stringMessages.get(locale, getResultUnit().toString());
-            localizedName = stringMessages.get(locale, "SignifierInUnit", localizedName, unitSignifier);
-        }
-        
-        return localizedName;
+        return stringMessages.get(locale, additionalData.getMessageKey());
     }
 
     @Override
     public boolean isLocalizable() {
-        return additionalData != null && (!additionalData.getMessageKey().isEmpty() || hasUnit());
-    }
-    
-    private boolean hasUnit() {
-        return getResultUnit() != null && getResultUnit() != Unit.None;
-    }
-    
-    @Override
-    public String toString() {
-        return getDeclaringType().getSimpleName() + "." + method.getName() + "(" + parametersAsString() + ") : " + method.getReturnType().getSimpleName();
+        return additionalData != null && (!additionalData.getMessageKey().isEmpty());
     }
 
-    private String parametersAsString() {
+    @Override
+    public String toString() {
+        return getDeclaringType().getSimpleName() + "." + method.getName() + "(" + parametersAsSimpleString() + ") : "
+                + method.getReturnType().getSimpleName();
+    }
+
+    private String parametersAsSimpleString() {
         StringBuilder parameterBuilder = new StringBuilder();
         boolean first = true;
         for (Class<?> parameterType : getParameters()) {

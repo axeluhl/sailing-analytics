@@ -149,4 +149,6 @@ public interface ReadonlyDataManager {
      */
     public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
             LoadClient<DeviceConfiguration> callback);
+
+    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls);
 }

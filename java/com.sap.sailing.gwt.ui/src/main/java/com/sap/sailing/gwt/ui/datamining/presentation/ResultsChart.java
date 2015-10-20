@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +16,7 @@ import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
+import org.moxieapps.gwt.highcharts.client.Exporting;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -22,24 +24,22 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.text.shared.AbstractRenderer;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.panels.ResizingSimplePanel;
-import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
+import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ResultsChart implements ResultsPresenter<Number> {
+public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Settings> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -48,20 +48,19 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }
         @Override
         public String toString() {
-            return stringMessages.group();
+            return getStringMessages().groupName();
         };
     };
     private final Comparator<GroupKey> ascendingByValueKeyComparator = new Comparator<GroupKey>() {
         @Override
         public int compare(GroupKey key1, GroupKey key2) {
-            Map<GroupKey, ? extends Number> resultData = currentResult.getResults();
-            double doubleValue1 = resultData.get(key1).doubleValue();
-            double doubleValue2 = resultData.get(key2).doubleValue();
+            double doubleValue1 = currentResultValues.get(key1).doubleValue();
+            double doubleValue2 = currentResultValues.get(key2).doubleValue();
             return Double.compare(doubleValue1, doubleValue2);
         }
         @Override
         public String toString() {
-            return stringMessages.valueAscending();
+            return getStringMessages().valueAscending();
         };
     };
     private final Comparator<GroupKey> descendingByValueKeyComparator = new Comparator<GroupKey>() {
@@ -71,35 +70,70 @@ public class ResultsChart implements ResultsPresenter<Number> {
         }
         @Override
         public String toString() {
-            return stringMessages.valueDescending();
+            return getStringMessages().valueDescending();
+        };
+    };
+    private final Comparator<GroupKey> ascendingByGroupAverageComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            GroupKey mainKey1 = key1.getMainKey();
+            GroupKey mainKey2 = key2.getMainKey();
+            return Double.compare(averagePerMainKey.get(mainKey1), averagePerMainKey.get(mainKey2));
+        }
+        public String toString() {
+            return getStringMessages().groupAverageAscending();
+        };
+    };
+    private final Comparator<GroupKey> descendingByGroupAverageComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            return -1 * ascendingByGroupAverageComparator.compare(key1, key2);
+        }
+        public String toString() {
+            return getStringMessages().groupAverageDescending();
+        };
+    };
+    private final Comparator<GroupKey> ascendingByGroupMedianComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            GroupKey mainKey1 = key1.getMainKey();
+            GroupKey mainKey2 = key2.getMainKey();
+            return Double.compare(medianPerMainKey.get(mainKey1), medianPerMainKey.get(mainKey2));
+        }
+        public String toString() {
+            return getStringMessages().groupMedianAscending();
+        };
+    };
+    private final Comparator<GroupKey> descendingByGroupMedianComparator = new Comparator<GroupKey>() {
+        @Override
+        public int compare(GroupKey key1, GroupKey key2) {
+            return -1 * ascendingByGroupMedianComparator.compare(key1, key2);
+        }
+        public String toString() {
+            return getStringMessages().groupMedianDescending();
         };
     };
     
-    private final StringMessages stringMessages;
-    private final DockLayoutPanel mainPanel;
-
     private final HorizontalPanel sortByPanel;
     private final ValueListBox<Comparator<GroupKey>> keyComparatorListBox;
+    private final ValueListBox<Integer> decimalsListBox;
 
-    private final ResizingSimplePanel presentationPanel;
+    private final SimpleLayoutPanel chartPanel;
     private final Chart chart;
-    private final HTML errorLabel;
-    private final HTML labeledBusyIndicator;
-
-    private Map<GroupKey, Series> seriesMappedByGroupKey;
+    private final Map<GroupKey, Series> seriesMappedByGroupKey;
     private final GroupKey simpleResultSeriesKey;
-    private QueryResult<? extends Number> currentResult;
-    private Map<GroupKey, Integer> mainKeyToXValueMap;
+    private final Map<GroupKey, Integer> mainKeyToXValueMap;
+    private Map<GroupKey, Number> currentResultValues;
+
+    private final Map<GroupKey, Double> averagePerMainKey;
+    private final Map<GroupKey, Double> medianPerMainKey;
 
     public ResultsChart(StringMessages stringMessages) {
-        super();
-        this.stringMessages = stringMessages;
-        
-        mainPanel = new DockLayoutPanel(Unit.PX);
+        super(stringMessages);
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
-        sortByPanel.add(new Label(stringMessages.sortBy()));
+        sortByPanel.add(new Label(stringMessages.sortBy() + ":"));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
             public String render(Comparator<?> object) {
@@ -114,132 +148,159 @@ public class ResultsChart implements ResultsPresenter<Number> {
             }
         });
         sortByPanel.add(keyComparatorListBox);
-        mainPanel.addNorth(sortByPanel, 40);
-        mainPanel.setWidgetHidden(sortByPanel, true);
+        sortByPanel.setVisible(false);
+        addControl(sortByPanel);
         
-        presentationPanel = new ResizingSimplePanel() {
+        HorizontalPanel decimalsPanel = new HorizontalPanel();
+        decimalsPanel.setSpacing(5);
+        decimalsPanel.add(new Label(getStringMessages().shownDecimals() + ":"));
+        decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
+        decimalsPanel.add(decimalsListBox);
+        decimalsListBox.setValue(0);
+        decimalsListBox.setAcceptableValues(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+        decimalsListBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                updateChartLabels();
+                resetChartSeries();
+                showResultData();
+            }
+        });
+        addControl(decimalsPanel);
+        
+        chartPanel = new SimpleLayoutPanel() {
             @Override
             public void onResize() {
                 chart.setSizeToMatchContainer();
                 chart.redraw();
             }
         };
-        mainPanel.add(presentationPanel);
-        
         chart = createChart();
+        chartPanel.setWidget(chart);
+        
         seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
         simpleResultSeriesKey = new GenericGroupKey<String>(stringMessages.results());
-        
-        errorLabel = new HTML();
-        errorLabel.setStyleName("chart-importantMessage");
-        
-        labeledBusyIndicator = new HTML(stringMessages.runningQuery());
-        labeledBusyIndicator.setStyleName("chart-busyMessage");
-
-        showError(this.stringMessages.invalidSelection());
-    }
-
-    @Override
-    public void showError(String error) {
-        currentResult = null;
-        errorLabel.setHTML(error);
-        presentationPanel.setWidget(errorLabel);
+        mainKeyToXValueMap = new HashMap<>();
+        averagePerMainKey = new HashMap<>();
+        medianPerMainKey = new HashMap<>();
     }
     
     @Override
-    public void showError(String mainError, Iterable<String> detailedErrors) {
-        StringBuilder errorBuilder = new StringBuilder(mainError + ":<br /><ul>");
-        for (String detailedError : detailedErrors) {
-            errorBuilder.append("<li>" + detailedError + "</li>");
-        }
-        errorBuilder.append("</ul>");
-        showError(errorBuilder.toString());
-    }
-    
-    @Override
-    public void showBusyIndicator() {
-        currentResult = null;
-        presentationPanel.setWidget(labeledBusyIndicator);
+    protected Widget getPresentationWidget() {
+        return chartPanel;
     }
 
     @Override
-    public void showResult(QueryResult<Number> result) {
-        if (result != null && !result.isEmpty()) {
-            currentResult = result;
-            updateKeyComparatorListBox();
-            resetChartSeries();
-            updateYAxisLabels();
-            updateChartSubtitleAndSetChartAsWidget();
-            showResultData();
-        } else {
-            showError(stringMessages.noDataFound() + ".");
-        }
+    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
+        this.currentResultValues = resultValues;
+        updateKeyComparatorListBox();
+        resetChartSeries();
+        updateChartLabels();
+        updateChartSubtitle();
+        showResultData();
     }
 
     private void updateKeyComparatorListBox() {
-        boolean hidden = true;
+        boolean visible = false;
         Comparator<GroupKey> valueToBeSelected = standardKeyComparator;
         Collection<Comparator<GroupKey>> acceptableValues = new ArrayList<>();
         acceptableValues.add(valueToBeSelected);
-        if (currentResult != null && isCurrentResultSimple()) {
-            valueToBeSelected = getKeyComparator() != null ? getKeyComparator() : valueToBeSelected;
-            acceptableValues.add(ascendingByValueKeyComparator);
-            acceptableValues.add(descendingByValueKeyComparator);
-            hidden = false;
+        if (getCurrentResult() != null) {
+            if (isCurrentResultSimple()) {
+                acceptableValues.add(ascendingByValueKeyComparator);
+                acceptableValues.add(descendingByValueKeyComparator);
+            } else {
+                acceptableValues.add(ascendingByGroupAverageComparator);
+                acceptableValues.add(descendingByGroupAverageComparator);
+                acceptableValues.add(ascendingByGroupMedianComparator);
+                acceptableValues.add(descendingByGroupMedianComparator);
+            }
+            visible = true;
         }
         keyComparatorListBox.setValue(valueToBeSelected);
         keyComparatorListBox.setAcceptableValues(acceptableValues);
-        mainPanel.setWidgetHidden(sortByPanel, hidden);
-        mainPanel.forceLayout();
-    }
-
-    private boolean isCurrentResultSimple() {
-        for (GroupKey groupKey : currentResult.getResults().keySet()) {
-            if (groupKey.hasSubKey()) {
-                return false;
-            }
-        }
-        return true;
+        sortByPanel.setVisible(visible);
     }
 
     private void resetChartSeries() {
         chart.removeAllSeries(false);
-        seriesMappedByGroupKey = new HashMap<GroupKey, Series>();
+        seriesMappedByGroupKey.clear();
     }
 
-    private void updateYAxisLabels() {
-        chart.getYAxis().setAxisTitleText(currentResult.getResultSignifier());
-        chart.setToolTip(new ToolTip().setValueDecimals(currentResult.getValueDecimals()).setValueSuffix(
-                currentResult.getUnitSignifier()));
+    private void updateChartLabels() {
+        chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
+        chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
     }
 
-    private void updateChartSubtitleAndSetChartAsWidget() {
-        chart.setChartSubtitle(new ChartSubtitle().setText(stringMessages.queryResultsChartSubtitle(
-                currentResult.getRetrievedDataAmount(), currentResult.getCalculationTimeInSeconds())));
-        // This is needed, so that the subtitle is updated. Otherwise the text would stay empty
-        presentationPanel.setWidget(null);
-        presentationPanel.setWidget(chart);
+    private void updateChartSubtitle() {
+        chart.setChartSubtitle(new ChartSubtitle().setText(getStringMessages().queryResultsChartSubtitle(
+                getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
     }
 
     private void showResultData() {
         buildMainKeyMapAndSetXAxisCategories();
         createAndAddSeriesToChart();
         
-        for (Entry<GroupKey, ? extends Number> resultEntry : currentResult.getResults().entrySet()) {
+        Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
+        for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
             GroupKey mainKey = resultEntry.getKey().getMainKey();
-            Point point = new Point(mainKeyToXValueMap.get(mainKey), resultEntry.getValue());
+            Number value = resultEntry.getValue();
+            
+            if (!isCurrentResultSimple()) {
+                if (!valuesPerMainKey.containsKey(mainKey)) {
+                    valuesPerMainKey.put(mainKey, new ArrayList<Number>());
+                }
+                valuesPerMainKey.get(mainKey).add(value);
+            }
+            
+            Point point = new Point(mainKeyToXValueMap.get(mainKey), value);
             point.setName(mainKey.asString());
             seriesMappedByGroupKey.get(groupKeyToSeriesKey(resultEntry.getKey()))
                 .addPoint(point, false, false, false);
         }
         
+        averagePerMainKey.clear();
+        medianPerMainKey.clear();
+        if (!isCurrentResultSimple()) {
+            for (GroupKey mainKey : valuesPerMainKey.keySet()) {
+                List<Number> values = valuesPerMainKey.get(mainKey);
+                averagePerMainKey.put(mainKey, getAverageFromValues(values));
+                medianPerMainKey.put(mainKey, getMedianFromValues(values));
+            }
+        }
+        
         chart.redraw();
+    }
+
+    private Double getAverageFromValues(Collection<Number> values) {
+        double sum = 0;
+        for (Number value : values) {
+            sum += value.doubleValue();
+        }
+        return sum / values.size();
+    }
+
+    private Double getMedianFromValues(List<Number> values) {
+        Collections.sort(values, new Comparator<Number>() {
+            @Override
+            public int compare(Number n1, Number n2) {
+                return Double.compare(n1.doubleValue(), n2.doubleValue());
+            }
+        });
+        if (values.size() % 2 == 0) {
+            int index1 = (values.size() / 2) - 1;
+            int index2 = index1 + 1;
+            return (values.get(index1).doubleValue() + values.get(index2).doubleValue()) / 2;
+        } else {
+            int index = ((values.size() + 1) / 2) - 1;
+            return values.get(index).doubleValue();
+        }
     }
 
     private void buildMainKeyMapAndSetXAxisCategories() {
         List<GroupKey> sortedMainKeys = getSortedMainKeys();
         String[] categories = new String[sortedMainKeys.size()];
-        mainKeyToXValueMap = new HashMap<>();
+        mainKeyToXValueMap.clear();
         for (int i = 0; i < sortedMainKeys.size(); i++) {
             GroupKey mainKey = sortedMainKeys.get(i);
             categories[i] = mainKey.asString();
@@ -248,9 +309,9 @@ public class ResultsChart implements ResultsPresenter<Number> {
         chart.getXAxis().setCategories(false, categories);
     }
 
-    public List<GroupKey> getSortedMainKeys() {
+    private List<GroupKey> getSortedMainKeys() {
         Collection<GroupKey> mainKeySet = new HashSet<>();
-        for (GroupKey groupKey : currentResult.getResults().keySet()) {
+        for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
             mainKeySet.add(groupKey.getMainKey());
         }
         List<GroupKey> sortedKeys = new ArrayList<>(mainKeySet);
@@ -263,7 +324,7 @@ public class ResultsChart implements ResultsPresenter<Number> {
     }
 
     private void createAndAddSeriesToChart() {
-        for (GroupKey groupKey : currentResult.getResults().keySet()) {
+        for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
             GroupKey seriesKey = groupKeyToSeriesKey(groupKey);
             if (!seriesMappedByGroupKey.containsKey(seriesKey)) {
                 seriesMappedByGroupKey.put(seriesKey, chart.createSeries().setName(seriesKey.asString()));
@@ -290,7 +351,9 @@ public class ResultsChart implements ResultsPresenter<Number> {
                 .setBorderColor(new Color("#F0AB00"))
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(stringMessages.dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(getStringMessages().dataMiningResult()));
+        
+        chart.setExporting(new Exporting().setEnabled(false));
 
         chart.getXAxis().setAllowDecimals(false);
 
@@ -307,10 +370,29 @@ public class ResultsChart implements ResultsPresenter<Number> {
         
         return chart;
     }
-    
+
     @Override
-    public Widget getWidget() {
-        return mainPanel;
+    public String getLocalizedShortName() {
+        return getStringMessages().resultsChart();
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<Settings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(Settings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "resultsChart";
     }
 
 }

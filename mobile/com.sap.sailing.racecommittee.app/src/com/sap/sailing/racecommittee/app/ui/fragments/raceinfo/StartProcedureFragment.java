@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -39,7 +39,7 @@ public class StartProcedureFragment extends BaseFragment implements StartProcedu
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
-        LinearLayout headerText = ViewHolder.get(layout, R.id.header_text);
+        LinearLayout headerText = ViewHelper.get(layout, R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
 

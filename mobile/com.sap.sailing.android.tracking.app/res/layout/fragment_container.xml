@@ -2,7 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
             
         </LinearLayout>
         
-    </com.sap.sailing.android.tracking.app.customviews.OpenSansToolbar>
+    </com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar>
 
     <FrameLayout
         android:id="@+id/content_frame"

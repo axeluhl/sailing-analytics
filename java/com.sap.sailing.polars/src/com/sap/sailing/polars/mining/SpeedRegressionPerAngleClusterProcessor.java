@@ -21,7 +21,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -29,15 +29,23 @@ import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Holds one speed regression per BoatClass, WindSpeed, Beat Angle Range combination and provides means for adding and
+ * accessing data. Data is added incrementally in and not all historic fixes need to be maintained. This allows for a
+ * very space efficient structure.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class SpeedRegressionPerAngleClusterProcessor implements
         Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
-   
+
     private static final long serialVersionUID = 3279917556091599077L;
 
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
-    
+
     private final Map<GroupKey, IncrementalLeastSquares> regressions = new HashMap<>();
-    
+
     private final Map<BoatClass, Long> fixCountPerBoatClass = new HashMap<>();
 
     private final ClusterGroup<Bearing> angleClusterGroup;
@@ -48,16 +56,16 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
     private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
-    
+
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
-    
+
     @Override
-        public boolean canProcessElements() {
-            // TODO Auto-generated method stub
-            return true;
-        }
+    public boolean canProcessElements() {
+        // TODO Auto-generated method stub
+        return true;
+    }
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
@@ -87,14 +95,16 @@ public class SpeedRegressionPerAngleClusterProcessor implements
             }
         }
     }
-    
+
     /**
-     * There are angle clusters (size defined in the data mining pipeline construction), which each have their own 
-     * regression for boatspeed over windspeed. 
-     * We don't know the thresholds or centers of the angle clusters here, so we roughly interpolate by taking 10 
-     * values from angle-5 deg to angle+5 deg and average the speeds.
+     * There are angle clusters (size defined in the data mining pipeline construction), which each have their own
+     * regression for boatspeed over windspeed. We don't know the thresholds or centers of the angle clusters here, so
+     * we roughly interpolate by taking 10 values from angle-5 deg to angle+5 deg and average the speeds.
+     * 
+     * At the time of writing the size of each angle range is 5° so this method provides a pretty smooth interpolation.
      */
-    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle) throws NotEnoughDataHasBeenAddedException {
+    public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
         double speedSum = 0;
         double numberOfSpeeds = 0;
         long fixCount = 0;
@@ -107,7 +117,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
                     speedSum += incrementalLeastSquares.getOrCreatePolynomialFunction().value(windSpeed.getKnots());
                     numberOfSpeeds++;
                 }
-            } 
+            }
         }
         fixCount = (long) (fixCount / numberOfSpeeds);
         long fixCountOverall = 0;
@@ -116,12 +126,12 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         } else {
             synchronized (fixCountPerBoatClass) {
                 fixCountOverall = fixCountPerBoatClass.get(boatClass);
-             }
+            }
         }
         Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
         return new SpeedWithConfidenceImpl<Void>(speed, Math.min(1, 5.0 * ((double) fixCount / fixCountOverall)), null);
     }
-    
+
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {
         AngleClusterPolarClusterKey key = new AngleClusterPolarClusterKey() {
 
@@ -152,7 +162,14 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         logger.severe("Polar Data Mining Pipe failed.");
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
-    
+
+
+    /**
+     * Allows direct access to angle regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #estimateBoatSpeed(BoatClass, Speed, Bearing)}.
+     */
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, double trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(trueWindAngle));
@@ -164,18 +181,18 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         return polynomialFunction;
     }
-    
+
     public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
-    
+
     Set<BoatClass> getAvailableBoatClasses() {
         return availableBoatClasses;
     }
-    
+
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
-     // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -185,27 +202,26 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return null;
     }
 
-    
     @Override
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
-    
+
     @Override
-        public boolean isFinished() {
-            return false;
-        }
+    public boolean isFinished() {
+        return false;
+    }
 
     @Override
     public void abort() {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
-        public boolean isAborted() {
-            // TODO Auto-generated method stub
-            return false;
-        }
+    public boolean isAborted() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {

@@ -356,14 +356,24 @@ public class RegattasResource extends AbstractSailingServerResource {
                         lastAdded = false;
                         break;
                     }
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                    addFixToJsonFixes(jsonFixes, fix);
                     lastAdded = true;
                 }
                 
-                if (addLastKnown && fix != null && !lastAdded){
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                if (addLastKnown && !lastAdded) {
+                    // find a fix earlier than the interval requested:
+                    Iterator<GPSFix> earlierFixIter = track.getFixesDescendingIterator(from, /* inclusive */false);
+                    final GPSFix earlierFix;
+                    if (earlierFixIter.hasNext()) {
+                        earlierFix = earlierFixIter.next();
+                    } else {
+                        earlierFix = null;
+                    }
+                    if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from).compareTo(to.until(fix.getTimePoint())) <= 0)) {
+                        addFixToJsonFixes(jsonFixes, earlierFix); // the earlier fix is closer to the interval's beginning than fix is to its end
+                    } else if (fix != null) {
+                        addFixToJsonFixes(jsonFixes, fix);
+                    }
                 }
                 
             } finally {
@@ -377,6 +387,12 @@ public class RegattasResource extends AbstractSailingServerResource {
         String json = jsonRace.toJSONString();
 
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
+    private JSONObject addFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
+        JSONObject jsonFix = constructFixJson(fix);
+        jsonFixes.add(jsonFix);
+        return jsonFix;
     }
 
     private JSONObject constructFixJson(GPSFix fix) {
@@ -800,9 +816,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         JSONObject jsonLeg = new JSONObject();
                         jsonLeg.put("from", leg.getLeg().getFrom().getName());
-                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId());
+                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId() != null ? leg.getLeg().getFrom().getId().toString() : null);
                         jsonLeg.put("to", leg.getLeg().getTo().getName());
-                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId());
+                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId() != null ? leg.getLeg().getTo().getId().toString() : null);
                         try {
                             jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
                         } catch (NoWindException e) {

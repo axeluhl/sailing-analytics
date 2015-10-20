@@ -22,10 +22,12 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -124,14 +126,35 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         return trackedRegatta;
     }
 
+    /**
+     * See bugs 3249 and 3006. The hypothesis for these two bugs is that the TrackedRace, when replicated through the initial load,
+     * loses its listener relationship with the CourseImpl object because the course's listener collection is transient.
+     */
+    @Test
+    public void testReplicatedTrackedRaceIsRegisteredAsCourseListener() throws InterruptedException {
+        final String HUMBA = "Humba";
+        final TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        final Waypoint newMasterWaypoint = new WaypointImpl(new MarkImpl(HUMBA));
+        trackedRace.getRace().getCourse().addWaypoint(/* zeroBasedPosition */ 0, newMasterWaypoint);
+        assertEquals(newMasterWaypoint, trackedRace.getRace().getCourse().getWaypoints().iterator().next());
+        assertEquals(newMasterWaypoint, trackedRace.getRace().getCourse().getLegs().iterator().next().getFrom());
+        assertEquals(newMasterWaypoint, trackedRace.getTrackedLegs().iterator().next().getLeg().getFrom());
+        
+        Thread.sleep(1000); // wait until course change has been replicated
+        
+        assertEquals(HUMBA, replicaTrackedRace.getRace().getCourse().getWaypoints().iterator().next().getName());
+        assertEquals(HUMBA, replicaTrackedRace.getRace().getCourse().getLegs().iterator().next().getFrom().getName());
+        assertEquals(Util.size(trackedRace.getTrackedLegs()), Util.size(replicaTrackedRace.getTrackedLegs()));
+    }
+    
     @Test
     public void testGPSFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(1, 2), new MillisecondsTimePoint(12345),
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         trackedRace.recordFix(competitor, fix);
         Thread.sleep(1000);
-        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
+        final TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        final Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
         assertNotNull(replicaCompetitor);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
         competitorTrack.lockForRead();

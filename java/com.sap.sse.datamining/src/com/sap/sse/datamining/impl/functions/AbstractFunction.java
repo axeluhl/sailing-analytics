@@ -22,5 +22,11 @@ public abstract class AbstractFunction<ReturnType> implements Function<ReturnTyp
     protected Logger getLogger() {
         return LOGGER;
     }
+    
+    //Enforce hash code and equals in all subclasses
+    @Override
+    public abstract boolean equals(Object other);
+    @Override
+    public abstract int hashCode();
 
 }

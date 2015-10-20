@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +28,6 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -103,8 +103,6 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<com.sap.sse.common.Util.Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
     
-    private final Map<Serializable, DynamicTeam> teamCache = new HashMap<>();
-    
     /**
      * Caches regattas by their name and their boat class's name
      */
@@ -122,7 +120,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
      * identified by that UUID
      */
-    private final Map<UUID, RaceDefinition> raceCache = new HashMap<>();
+    private final ConcurrentHashMap<UUID, RaceDefinition> raceCache = new ConcurrentHashMap<>();
     
     private final MetadataParser metadataParser;
 
@@ -260,7 +258,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 nationality = null;
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
-            DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
+            DynamicTeam team = createTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
@@ -269,27 +267,15 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    /**
-     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
-     * is split along "+" signs with one {@link Person} object created for each part. If an existing team is found, its
-     * nationality will be updated to match <code>nationality</code>.
-     */
-    private DynamicTeam getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
-        synchronized (teamCache) {
-            DynamicTeam result = teamCache.get(competitorId);
-            if (result == null) {
-                String[] sailorNames = name.split("\\b*\\+\\b*");
-                List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
-                for (String sailorName : sailorNames) {
-                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
-                }
-                result = new TeamImpl(name, sailors, /* TODO coach not known */null);
-                teamCache.put(competitorId, result);
-            } else {
-                result.setNationality(nationality);
-            }
-            return result;
+    private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
+        DynamicTeam result;
+        String[] sailorNames = name.split("\\b*\\+\\b*");
+        List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
+        for (String sailorName : sailorNames) {
+            sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
         }
+        result = new TeamImpl(name, sailors, /* TODO coach not known */null);
+        return result;
     }
 
     @Override
@@ -328,11 +314,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds) {
         long start = System.currentTimeMillis();
-        synchronized (raceCache) {
-            RaceDefinition result = raceCache.get(raceId);
-            boolean interrupted = false;
-            while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
-                try {
+        RaceDefinition result = raceCache.get(raceId);
+        boolean interrupted = false;
+        while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
+            try {
+                synchronized (raceCache) {
                     if (timeoutInMilliseconds == -1) {
                         raceCache.wait();
                     } else {
@@ -341,13 +327,13 @@ public class DomainFactoryImpl implements DomainFactory {
                             raceCache.wait(timeToWait);
                         }
                     }
-                    result = raceCache.get(raceId);
-                } catch (InterruptedException e) {
-                    interrupted = true;
                 }
+                result = raceCache.get(raceId);
+            } catch (InterruptedException e) {
+                interrupted = true;
             }
-            return result;
         }
+        return result;
     }
 
     @Override

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
@@ -40,6 +41,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -58,7 +60,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final GPSTrackListeners<ItemType, FixType> listeners;
     
-
+    /**
+     * When the owning {@link TrackedRace} is still {@link TrackedRaceStatusEnum#LOADING loading}, validity cache updates are
+     * suspended.
+     */
+    private boolean validityCachingSuspended;
+    
     private static class GPSTrackListeners<I, F extends GPSFix> implements Serializable {
         private static final long serialVersionUID = -7117842092078781722L;
         private Set<GPSTrackListener<I, F>> listeners;
@@ -186,6 +193,25 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.listeners = new GPSTrackListeners<ItemType, FixType>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
+        this.validityCachingSuspended = false;
+    }
+    
+    @Override
+    public void suspendValidityCaching() {
+        validityCachingSuspended = true;
+    }
+    
+    @Override
+    public void resumeValidityCaching() {
+        lockForWrite();
+        try {
+            this.validityCachingSuspended = false;
+            for (FixType fix : getRawFixes()) {
+                fix.invalidateCache();
+            }
+        } finally {
+            unlockAfterWrite();
+        }
     }
 
     protected MaxSpeedCache<ItemType, FixType> createMaxSpeedCache() {
@@ -552,7 +578,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             } finally {
                 unlockAfterRead();
             }
-            getDistanceCache().cache(from, to, result);
+            if (recursionDepth == 0) {
+                getDistanceCache().cache(from, to, result);
+            }
         }
         return result;
     }
@@ -958,7 +986,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
      * of <code>gpsFix</code>, the distance cache must be invalidated starting with the first fix whose validity changed.
      */
-    protected void invalidateValidityAndEstimatedSpeedAndDistanceCaches(FixType gpsFix) {
+    private void invalidateValidityAndEstimatedSpeedAndDistanceCaches(FixType gpsFix) {
         assertWriteLock();
         TimePoint distanceCacheInvalidationStart = gpsFix.getTimePoint();
         // see also bug 968: cache entries for intervals ending after the last fix need to be removed because they are
@@ -1058,7 +1086,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         try {
             firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix);
-            invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
+            if (!validityCachingSuspended) {
+                invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
+            }
         } finally {
             unlockAfterWrite();
         }

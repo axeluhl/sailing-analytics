@@ -9,15 +9,13 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private String boatClass;
     private String boatCategory;
     private String defaultCourseAreaName;
+    private String defaultCourseAreaId;
     private Date startDate;
     private Date endDate;
     private RegattaState state;
+    private boolean flexibleLeaderboard;
     
     public RegattaMetadataDTO() {
-    }
-    
-    public RegattaMetadataDTO(String id, String name) {
-        super(id, name);
     }
 
     @Override
@@ -89,5 +87,21 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setDefaultCourseAreaName(String defaultCourseAreaName) {
         this.defaultCourseAreaName = defaultCourseAreaName;
+    }
+
+    public boolean isFlexibleLeaderboard() {
+        return flexibleLeaderboard;
+    }
+
+    public void setFlexibleLeaderboard(boolean flexibleLeaderboard) {
+        this.flexibleLeaderboard = flexibleLeaderboard;
+    }
+
+    public String getDefaultCourseAreaId() {
+        return defaultCourseAreaId;
+    }
+
+    public void setDefaultCourseAreaId(String defaultCourseAreaId) {
+        this.defaultCourseAreaId = defaultCourseAreaId;
     }
 }

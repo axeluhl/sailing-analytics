@@ -249,12 +249,12 @@ public class DomainFactoryImpl implements DomainFactory {
     private Iterable<Competitor> createCompetitorList(StartList startList, String raceId, BoatClass boatClass) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-        	Competitor domainCompetitor;
-        	if(swissTimingCompetitor.getID() != null) {
+            Competitor domainCompetitor;
+            if (swissTimingCompetitor.getID() != null) {
                 domainCompetitor = createCompetitorWithID(swissTimingCompetitor, boatClass);
-        	} else {
+            } else {
                 domainCompetitor = createCompetitorWithoutID(swissTimingCompetitor, raceId, boatClass);
-        	}
+            }
             result.add(domainCompetitor);
         }
         return result;
@@ -336,10 +336,9 @@ public class DomainFactoryImpl implements DomainFactory {
         Regatta regatta = raceIDToRegattaCache.get(raceID);
         if (regatta != null) {
             Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceID)) {
-                    toRemove.add(race);
-                }
+            RaceDefinition race = regatta.getRaceByName(raceID);
+            if (race != null) {
+                toRemove.add(race);
             }
             for (RaceDefinition raceToRemove : toRemove) {
                 regatta.removeRace(raceToRemove);

@@ -1,0 +1,7 @@
+@provide 'colors';
+ 
+@def C_PRIMARY        eval("com.company.project.client.resources.Colors.C_PRIMARY");
+@def C_SECONDARY      eval("com.company.project.client.resources.Colors.C_SECONDARY");
+@def C_BACKGROUND     eval("com.company.project.client.resources.Colors.C_BACKGROUND");
+@def C_TEXT           eval("com.company.project.client.resources.Colors.C_TEXT");
+@def C_TEXT_LIGHT     eval("com.company.project.client.resources.Colors.C_TEXT_LIGHT");

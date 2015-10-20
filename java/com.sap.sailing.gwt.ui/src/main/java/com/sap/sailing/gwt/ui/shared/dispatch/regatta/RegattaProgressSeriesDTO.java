@@ -9,15 +9,15 @@ import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 public class RegattaProgressSeriesDTO implements DTO {
     private String name;
     private int totalRaceCount;
+    private int maxRacesPerFleet;
     private TreeMap<FleetMetadataDTO, RegattaProgressFleetDTO> fleetState = new TreeMap<>();
     
     @SuppressWarnings("unused")
     private RegattaProgressSeriesDTO() {
     }
     
-    public RegattaProgressSeriesDTO(String name, int totalRaceCount) {
+    public RegattaProgressSeriesDTO(String name) {
         this.name = name;
-        this.totalRaceCount = totalRaceCount;
     }
     
     public String getName() {
@@ -28,17 +28,32 @@ public class RegattaProgressSeriesDTO implements DTO {
         return totalRaceCount;
     }
     
+    public int getMaxRacesPerFleet() {
+        return maxRacesPerFleet;
+    }
+    
     public Map<FleetMetadataDTO, RegattaProgressFleetDTO> getFleetState() {
         return fleetState;
     }
     
     public void addFleet(FleetMetadataDTO fleet, RegattaProgressFleetDTO stats) {
         fleetState.put(fleet, stats);
+        totalRaceCount += stats.getRaceCount();
+        maxRacesPerFleet =  Math.max(maxRacesPerFleet, stats.getRaceCount());
+    }
+    
+    public String[] getFleetNames() {
+        String[] fleetNames = new String[fleetState.size()];
+        int i = 0;
+        for (FleetMetadataDTO fleet : fleetState.keySet()) {
+            fleetNames[i++] = fleet.getFleetName();
+        }
+        return fleetNames;
     }
     
     public boolean isCompleted() {
         for (RegattaProgressFleetDTO stats : fleetState.values()) {
-            if (stats.getFinishedRaceCount() < totalRaceCount) {
+            if (stats.getRaceCount() != stats.getFinishedRaceCount()) {
                 return false;
             }
         }
@@ -48,7 +63,7 @@ public class RegattaProgressSeriesDTO implements DTO {
     public int getProgressRaceCount() {
         int progressRaceCount = 0;
         for (RegattaProgressFleetDTO stats : fleetState.values()) {
-            progressRaceCount = Math.max(progressRaceCount, stats.getFinishedRaceCount());
+            progressRaceCount += stats.getFinishedRaceCount();
         }
         return progressRaceCount;
     }

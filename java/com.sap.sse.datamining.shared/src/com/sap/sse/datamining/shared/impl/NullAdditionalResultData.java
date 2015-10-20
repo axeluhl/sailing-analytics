@@ -1,7 +1,6 @@
 package com.sap.sse.datamining.shared.impl;
 
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.data.Unit;
 
 /**
  * Null Object pattern for {@link AdditionalResultData} with the values:
@@ -31,16 +30,6 @@ public class NullAdditionalResultData implements AdditionalResultData {
 
     @Override
     public String getResultSignifier() {
-        return "";
-    }
-
-    @Override
-    public Unit getUnit() {
-        return Unit.None;
-    }
-    
-    @Override
-    public String getUnitSignifier() {
         return "";
     }
 

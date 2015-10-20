@@ -25,8 +25,8 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -38,13 +38,11 @@ public class Footer extends Composite {
 
     private String otherLanguage;
     private final LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
-    private MobileApplicationClientFactory appContext;
+    private MobilePlacesNavigator placeNavigator;
 
     @UiField Anchor changeLanguageLink;
     @UiField DivElement languageSelectionDiv;
     @UiField AnchorElement desktopUi;
-    
-    // private final String desktopBaseUrl;
 
     @UiField(provided = true) ValueListBox<Pair<String, String>> changeLanguageList = new ValueListBox<Pair<String,String>>(new Renderer<Pair<String, String>>() {
         @Override
@@ -64,8 +62,8 @@ public class Footer extends Composite {
         }
     });
 
-    public Footer(final MobileApplicationClientFactory appContext) {
-        this.appContext = appContext;
+    public Footer(MobilePlacesNavigator placeNavigator) {
+        this.placeNavigator = placeNavigator;
         FooterResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
@@ -81,9 +79,7 @@ public class Footer extends Composite {
                 }
             }
         });
-
     }
-
 
     @UiHandler("changeLanguageLink")
     public void changeLanguage(ClickEvent e) {
@@ -104,10 +100,7 @@ public class Footer extends Composite {
     
     @UiHandler("whatsNewLinkUi")
     void onWhatsNew(ClickEvent e) {
-        appContext //
-                .getNavigator() //
-                .getWhatsNewNavigation(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics) //
-                .goToPlace();
+        placeNavigator.getWhatsNewNavigation(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics).goToPlace();
     }
 
     private void updateUI() {

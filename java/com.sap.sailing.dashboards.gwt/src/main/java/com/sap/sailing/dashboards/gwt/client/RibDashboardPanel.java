@@ -24,7 +24,8 @@ import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverP
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.WrongDeviceOrientationNotification;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComponent;
-import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageComponent;
+import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageByGeometryComponent;
+import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -44,7 +45,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     }
 
     private static RootUiBinder uiBinder = GWT.create(RootUiBinder.class);
-    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     @UiField
     RibDashboardPanelStyle style;
@@ -63,9 +63,9 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField
     HTMLPanel rightwindbotcontainer;
-
+    
     @UiField(provided = true)
-    public StartLineAdvantageComponent startLineCAComponent;
+    StartlineAdvantagesByWindComponent startlineAdvantagesByWindComponent;
 
     @UiField
     public DivElement windloadinghintleft;
@@ -81,16 +81,21 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     @UiField(provided = true)
     public StartlineAnalysisComponent startanalysisComponent;
+    
+    @UiField(provided = true)
+    public StartLineAdvantageByGeometryComponent startlineAdvantageByGeometryComponent;
 
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
     private final String EVENT_ID_PARAMETER = "eventId";
+    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
         windBotComponents = new ArrayList<WindBotComponent>();
         ribDashboardDataRetriever.addDataObserver(this);
         startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
-        startLineCAComponent = new StartLineAdvantageComponent(ribDashboardDataRetriever);
+        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
+        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(ribDashboardDataRetriever);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
@@ -167,6 +172,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @Override
     public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
         if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {
+            logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
             this.header.getElement().setInnerText(liveRaceInfoDTO.idOfLastTrackedRace.getRaceName());
         }
     }
@@ -174,7 +180,6 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     @Override
     public void numberOfWindBotsChanged(List<String> windBotIDs,
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        logger.log(Level.INFO, "Number of Windbots changed");
         initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
     }
 }

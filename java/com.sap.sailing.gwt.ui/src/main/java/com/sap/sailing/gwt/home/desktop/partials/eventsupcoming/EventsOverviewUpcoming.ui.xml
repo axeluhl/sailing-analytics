@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventsupcoming.EventsOverviewUpcomingResources" />
+	<g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewupcoming} {local_res.css.accordion}">
+		<!-- IFEND upcomingEvents.events.length > 1 ADD CLASS local_res.css.accordion ELSE ADD CLASS local_res.css.accordioncollapsed -->
+		<g:HTMLPanel ui:field="header" addStyleNames="{local_res.css.eventsoverviewupcoming_header} {local_res.css.accordion_trigger}">
+			<div class="{res.mediaCss.grid}">
+				<div class="{res.mediaCss.small9} {res.mediaCss.columns}">
+					<img src="images/home/upcoming-events-icon.png" class="{local_res.css.eventsoverviewupcoming_header_icon}"></img>
+					<!-- IF upcomingEvents.events.length < 2 -->
+					<span>
+						<h3 class="{local_res.css.eventsoverviewupcoming_header_title}">
+							<ui:text from="{i18n_ubi.seriesHeaderUpcoming}" />
+							<span ui:field="colon" style="display: none;">:</span>
+						</h3>
+						<span ui:field="ticker" class="{local_res.css.eventsoverviewupcoming_header_ticker}" style="display: none;" />
+					</span>
+					<!-- IFEND upcomingEvents.events.length < 2 -->
+				</div>
+				<!-- IF upcomingEvents.events.length > 1 -->
+				<div class="{res.mediaCss.small3} {res.mediaCss.columns}">
+					<table class="{local_res.css.eventsoverviewupcoming_header_info}">
+						<tr>
+							<td>
+								<div class="{local_res.css.eventsoverviewupcoming_header_info_item}">
+									<span ui:field="eventsCount" class="{local_res.css.eventsoverviewupcoming_header_info_item_value}" />
+								</div>
+							</td>
+							<td>
+								<div class="{local_res.css.eventsoverviewupcoming_header_info_arrow}">
+									<img src="images/home/arrow-down-grey.png" class="{local_res.css.eventsoverviewupcoming_header_info_arrow_image}"></img>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<!-- IFEND upcomingEvents.events.length > 1 -->
+			</div>
+		</g:HTMLPanel>
+		<!-- IF upcomingEvents.events.length > 1 -->
+		<g:FlowPanel ui:field="eventsPlaceholder" addStyleNames="{local_res.css.eventsoverviewupcoming_content} {local_res.css.accordion_content}" />
+		<!-- IFEND upcomingEvents.events.length > 1 -->
+	</g:HTMLPanel>
+</ui:UiBinder>

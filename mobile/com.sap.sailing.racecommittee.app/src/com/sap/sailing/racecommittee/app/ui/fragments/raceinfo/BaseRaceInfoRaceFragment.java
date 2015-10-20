@@ -1,12 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -28,8 +32,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.CourseDesignerChooser;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.List;
 
 public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProcedure> extends RaceFragment {
 
@@ -161,8 +163,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
     private void showMainContent() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-        RacingActivity activity = (RacingActivity) getActivity();
-        activity.processIntent(intent);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     private class FlagPoleCache {

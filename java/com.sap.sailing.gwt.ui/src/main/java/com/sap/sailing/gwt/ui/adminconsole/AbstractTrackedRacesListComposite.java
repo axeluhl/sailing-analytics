@@ -33,7 +33,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -44,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -59,19 +59,17 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private boolean dontFireNextSelectionChangeEvent;
 
-    private final SelectionModel<RaceDTO> selectionModel;
+    private SelectionModel<RaceDTO> selectionModel;
     
-    private final SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
+    private SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
 
-    private final CellTable<RaceDTO> raceTable;
+    private CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
 
     private Iterable<RaceDTO> allRaces;
 
-    private final VerticalPanel panel;
-
-    private final Label noTrackedRacesLabel;
+    private Label noTrackedRacesLabel;
 
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
@@ -79,11 +77,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     private final RaceSelectionProvider raceSelectionProvider;
     protected final StringMessages stringMessages;
 
-    private final Button btnRefresh;
+    private Button btnRefresh;
 
-    private final LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
+    private LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
 
-    protected final TrackedRacesSettings settings;
+    protected TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -101,6 +99,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
+    }
+
+    protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
@@ -119,7 +120,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
 
-        panel = new VerticalPanel();
+        VerticalPanel panel = new VerticalPanel();
         setWidget(panel);
 
         HorizontalPanel filterPanel = new HorizontalPanel();
@@ -194,8 +195,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         trackedRacesButtonPanel.add(btnRefresh);
         addControlButtons(trackedRacesButtonPanel);
     }
-
+    
     abstract protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces);
+
+    abstract protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas);
 
     abstract protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel);
 
@@ -529,7 +532,5 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     protected boolean raceIsToBeAddedToList(RaceDTO race) {
         return true;
     }
-
-    abstract protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas);
 
 }

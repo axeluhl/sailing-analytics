@@ -34,7 +34,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StarbordSideOfStartLineRecognitionTest {
-    private MillisecondsTimePoint now;
+    private TimePoint now;
 
     @Before
     public void setUp() {

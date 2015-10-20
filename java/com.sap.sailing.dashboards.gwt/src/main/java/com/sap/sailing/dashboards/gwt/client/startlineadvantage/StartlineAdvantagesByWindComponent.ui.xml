@@ -1,0 +1,17 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:startlineadvantage="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage">
+
+    <ui:style type='com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent.StartlineAdvantagesByWindComponentStyle'
+		src='StartlineAdvantagesByWindComponentStyle.css'></ui:style>
+
+	<g:HTMLPanel styleName="{style.startline_advantages_by_wind_component_container}">
+		<g:HTMLPanel styleName="{style.advantage_maximum_live_average}">
+			<startlineadvantage:LiveAverageComponent ui:field="advantageMaximumLiveAverage"></startlineadvantage:LiveAverageComponent>
+		</g:HTMLPanel>
+		<g:HTMLPanel styleName="{style.advantages_on_line_chart_container}">
+			<startlineadvantage:StartlineAdvantagesOnLineChart ui:field="startlineAdvantagesOnLineChart"></startlineadvantage:StartlineAdvantagesOnLineChart>
+		</g:HTMLPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

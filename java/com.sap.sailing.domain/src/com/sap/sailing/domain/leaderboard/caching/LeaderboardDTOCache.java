@@ -74,7 +74,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     private static final Executor computeLeadearboardByNameExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
             /* maximumPoolSize */ THREAD_POOL_SIZE,
             /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1));
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     

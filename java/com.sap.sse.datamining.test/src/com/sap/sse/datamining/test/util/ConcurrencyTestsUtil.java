@@ -31,7 +31,7 @@ public class ConcurrencyTestsUtil extends TestsUtil {
         }
     }
 
-    public static <T> void processElements(Processor<T, ?> processor, Collection<T> elements) {
+    public static <T> void processElements(Processor<? super T, ?> processor, Collection<T> elements) {
         for (T element : elements) {
             processor.processElement(element);
         }

@@ -1,13 +1,14 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import com.sap.sse.datamining.shared.dto.QueryDefinitionDTO;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
-public interface QueryDefinitionProvider extends DataMiningComponentProvider  {
+public interface QueryDefinitionProvider<SettingsType extends Settings> extends DataMiningComponentProvider<SettingsType>  {
 
-    public Iterable<String> validateQueryDefinition(QueryDefinitionDTO queryDefinition);
-    public QueryDefinitionDTO getQueryDefinition();
+    public Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
+    public StatisticQueryDefinitionDTO getQueryDefinition();
     
-    public void applyQueryDefinition(QueryDefinitionDTO queryDefinition);
+    public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition);
 
     public void addQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);
     public void removeQueryDefinitionChangedListener(QueryDefinitionChangedListener listener);

@@ -10,10 +10,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
@@ -30,33 +30,36 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+    
+    private boolean showIfEmpty = false;
 
     public MinileaderboardBox(boolean isOverall) {
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
         headerUi.setInfoText(StringMessages.INSTANCE.details());
-
-
-    }
-
-    @Override
-    public void setData(final GetMiniLeaderboardDTO data, long nextUpdate, int updateNo) {
-        setData(data);
+        setVisible(false);
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
     }
+    
+    public void setShowIfEmpty(boolean showIfEmpty) {
+        this.showIfEmpty = showIfEmpty;
+    }
 
+    @Override
     public void setData(final GetMiniLeaderboardDTO data) {
         itemContainerUi.clearContent();
         
         if(data.getItems().isEmpty()) {
+            setVisible(showIfEmpty);
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
         
+        setVisible(true);
         headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
         
         if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {
