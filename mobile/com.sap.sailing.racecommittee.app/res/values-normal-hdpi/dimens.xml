@@ -13,4 +13,7 @@
 
     <dimen name="textSize_40">22sp</dimen>
 
+    <dimen name="finished_header_text_size">@dimen/textSize_26</dimen>
+    <dimen name="finished_default_text_size">@dimen/textSize_14</dimen>
+
 </resources>
