@@ -22,8 +22,8 @@ public class AutoAttachingRefreshManager extends LifecycleRefreshManager {
     }
     
     @Override
-    protected boolean canStart() {
-        return super.canStart() || container != null;
+    protected boolean canExecute() {
+        return super.canExecute() || container != null;
     }
     
     @Override

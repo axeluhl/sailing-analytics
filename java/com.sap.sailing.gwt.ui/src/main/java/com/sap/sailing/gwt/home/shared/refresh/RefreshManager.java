@@ -31,22 +31,27 @@ public abstract class RefreshManager {
     };
 
     private final DispatchSystem actionExecutor;
+    
+    boolean started = false;
 
     public RefreshManager(DispatchSystem actionExecutor) {
         this.actionExecutor = actionExecutor;
     }
     
     protected void start() {
+        LOG.log(Level.FINE, "Starting auto refresh");
+        started = true;
         reschedule();
     }
     
     protected void cancel() {
         LOG.log(Level.FINE, "Cancelling auto refresh");
+        started = false;
         timer.cancel();
         scheduled = false;
     }
     
-    protected abstract boolean canStart();
+    protected abstract boolean canExecute();
     
     protected void onSuccessfulUpdate() {
     }
@@ -99,7 +104,7 @@ public abstract class RefreshManager {
             public void execute() {
                 scheduled = false;
 
-                if (refreshables.isEmpty() || !canStart()) {
+                if (refreshables.isEmpty() || !started || !canExecute()) {
                     return;
                 }
 

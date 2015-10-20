@@ -27,7 +27,7 @@ public class LifecycleRefreshManager extends RefreshManager {
         Scheduler.get().scheduleFinally(new ScheduledCommand() {
             @Override
             public void execute() {
-                if(canStart()) {
+                if(canExecute()) {
                     start();
                 }
             }
@@ -35,7 +35,7 @@ public class LifecycleRefreshManager extends RefreshManager {
     }
     
     @Override
-    protected boolean canStart() {
+    protected boolean canExecute() {
         return lifecycleWidget.isAttached();
     }
 }
