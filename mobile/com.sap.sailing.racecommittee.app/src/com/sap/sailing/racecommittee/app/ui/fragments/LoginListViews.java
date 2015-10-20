@@ -163,12 +163,16 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         private RelativeLayout mHeader;
         private List<View> mLayouts;
 
+        private AppUtils mAppUtils;
+
         public ToggleContainer(View rootView, FrameLayout frame, RelativeLayout header, TextView text, List<View> layouts) {
             mRootView = rootView;
             mFrame = frame;
             mText = text;
             mHeader = header;
             mLayouts = layouts;
+
+            mAppUtils = AppUtils.with(getActivity());
         }
 
         public void toggle() {
@@ -178,7 +182,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                 // open the frame
                 if (mFrame.getLayoutParams().height == 0) {
                     mFrame.getLocationOnScreen(pos);
-                    if (AppUtils.with(getActivity()).isPhone() && AppUtils.with(getActivity()).isLand()) {
+                    if ((mAppUtils.isPhone() && mAppUtils.isLand()) || (mAppUtils.isPhone() && mAppUtils.isHDPI())) {
                         if (mLayouts != null) {
                             for (View view : mLayouts) {
                                 setVisibility(view, View.GONE);
@@ -198,8 +202,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         public void close() {
             if (mFrame != null && mFrame.getLayoutParams() != null) {
-                if (!AppUtils.with(getActivity()).is10inch()
-                    && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if ((!mAppUtils.is10inch() && mAppUtils.isLand()) || mAppUtils.isPhone() && mAppUtils.isHDPI() ) {
                     if (mLayouts != null) {
                         for (View view : mLayouts) {
                             setVisibility(view, View.VISIBLE);
