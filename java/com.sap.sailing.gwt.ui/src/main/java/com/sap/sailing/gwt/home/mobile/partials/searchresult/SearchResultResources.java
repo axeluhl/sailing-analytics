@@ -23,5 +23,7 @@ public interface SearchResultResources extends ClientBundle {
         String searchresult_item_headline();
         String searchresult_item_event();
         String searchresult_item_event_link();
+        String searchresult_item_event_separator();
+        String searchresult_item_arrow();
     }
 }

@@ -55,10 +55,12 @@
 .searchresult_item_headline {
   font-size: 1.066666666666667em;
   font-weight: 700;
+  margin-right: 2em;
 }
 .searchresult_item_event {
   font-size: 0.866666666666667em;
   color: #0a0a0a;
+  margin-right: 2em;
 }
 .searchresult_item_event_link {
   color: #0a0a0a;
@@ -67,13 +69,23 @@
 .searchresult_item_event_link:active {
   color: #0a0a0a;
 }
-.searchresult_item_event > *:after {
+.searchresult_item_event_separator:after {
   content: "|";
   margin: 0 0.384615384615385em;
   color: #ccc;
   text-decoration: none;
 }
-.searchresult_item_event > *:last-child:after {
-  content: "";
-  margin: 0;
+.searchresult_item_arrow {
+  background: url("images/home/arrow-down-grey.png");
+  background-size: contain;
+  display: block;
+  width: 1.333333333333333em;
+  height: 1.333333333333333em;
+  top: 50%;
+  right: 1em;
+  position: absolute;
+  -webkit-transform: translateY(-50%) rotate(-90deg);
+     -moz-transform: translateY(-50%) rotate(-90deg);
+      -ms-transform: translateY(-50%) rotate(-90deg);
+          transform: translateY(-50%) rotate(-90deg);
 }
