@@ -16,9 +16,11 @@ Require-Bundle: com.sap.sailing.server,
  jcl.over.slf4j;bundle-version="1.6.4",
  com.sap.sailing.resultimport,
  slf4j.api;bundle-version="1.6.4",
- com.sap.sse.common
-Bundle-ClassPath: lib/org.apache.poi_3.7.0.jar,
- .,
- lib/xmlbeans-2.4.0.jar,
- lib/dom4j-1.6.1.jar
+ com.sap.sse.common,
+ org.dom4j;bundle-version="1.6.1",
+ org.apache.xmlbeans;bundle-version="2.3.0",
+ org.apache.poi;bundle-version="3.9.0",
+ org.apache.poi.ooxml;bundle-version="3.9.0",
+ org.apache.poi.ooxml.schemas;bundle-version="3.9.0"
+Bundle-ClassPath: .
 Export-Package: com.sap.sailing.barbados.resultimport.impl;x-friends:="com.sap.sailing.barbados.resultimport.test"
