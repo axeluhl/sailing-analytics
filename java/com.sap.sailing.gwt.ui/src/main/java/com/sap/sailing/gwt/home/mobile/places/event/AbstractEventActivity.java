@@ -39,8 +39,10 @@ import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final PLACE place;
+    protected final EventViewDTO eventDTO;
     
-    protected AbstractEventActivity(PLACE place, MobileApplicationClientFactory clientFactory) {
+    protected AbstractEventActivity(PLACE place, EventViewDTO eventDTO, MobileApplicationClientFactory clientFactory) {
+        this.eventDTO = eventDTO;
         this.clientFactory = clientFactory;
         this.place = place;
     }
@@ -54,7 +56,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     protected abstract EventViewBase initView();
     
     protected final void initSailorInfoOrSeriesNavigation(EventViewBase view) {
-        EventViewDTO event = getCtx().getEventDTO();
+        EventViewDTO event = eventDTO;
         String sailorInfoUrl = event.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
@@ -66,7 +68,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initQuickfinder(EventViewBase view, boolean showQuickfinder) {
-        EventViewDTO event = getCtx().getEventDTO();
+        EventViewDTO event = eventDTO;
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
             view.setQuickFinderValues(getSortedQuickFinderValues());
         } else if(showQuickfinder && event.getType() == EventType.SERIES_EVENT) {
@@ -77,7 +79,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     private Collection<RegattaMetadataDTO> getSortedQuickFinderValues() {
-        Collection<RegattaMetadataDTO> regattas = place.getCtx().getEventDTO().getRegattas();
+        Collection<RegattaMetadataDTO> regattas = eventDTO.getRegattas();
         List<RegattaMetadataDTO> sortedRegattas = new ArrayList<RegattaMetadataDTO>(regattas);
         Collections.sort(sortedRegattas, new Comparator<RegattaMetadataDTO>() {
             private Comparator<String> bootCatComparator = new NullSafeComparableComparator<String>();
@@ -91,8 +93,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     protected final void initMedia(AsyncMediaCallback callback) {
-        if (getCtx().getEventDTO().isHasMedia()) {
-            clientFactory.getHomeService().getMediaForEvent(getCtx().getEventDTO().getId(), callback);
+        if (eventDTO.isHasMedia()) {
+            clientFactory.getHomeService().getMediaForEvent(eventDTO.getId(), callback);
         }
     }
     
@@ -144,7 +146,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     public PlaceNavigation<?> getMediaPageNavigation() {
-        if (getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA) {
+        if (eventDTO.getType() == EventType.MULTI_REGATTA) {
             return clientFactory.getNavigator().getEventNavigation(new MultiregattaMediaPlace(getCtx()), null, false);
         } else {
             return clientFactory.getNavigator().getEventNavigation(new RegattaMediaPlace(getCtx()), null, false);
@@ -185,5 +187,34 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     public String getRaceViewerURL(String regattaName, String trackedRaceName) {
         return null; // TODO No mobile "RaceViewer implemented yet
+    }
+    
+    public String getRegattaId() {
+        String regattaId = place.getRegattaId();
+        if(regattaId  != null) {
+            return regattaId;
+        }
+        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+            return eventDTO.getRegattas().iterator().next().getId();
+        }
+        return null;
+    }
+    
+    public RegattaMetadataDTO getRegatta() {
+        String regattaId = getRegattaId();
+        if(regattaId == null) {
+            return null;
+        }
+        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
+            if(regattaId.equals(regatta.getId())) {
+                return regatta;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public EventViewDTO getEventDTO() {
+        return eventDTO;
     }
 }

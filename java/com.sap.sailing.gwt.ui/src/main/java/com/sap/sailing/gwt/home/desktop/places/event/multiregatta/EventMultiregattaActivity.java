@@ -7,14 +7,15 @@ import com.sap.sailing.gwt.home.desktop.places.event.AbstractEventActivity;
 import com.sap.sailing.gwt.home.desktop.places.event.EventClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
 public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
 
     private EventMultiregattaView currentView = new TabletAndDesktopMultiRegattaEventView();
 
-    public EventMultiregattaActivity(AbstractMultiregattaEventPlace place, EventClientFactory clientFactory,
+    public EventMultiregattaActivity(AbstractMultiregattaEventPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator) {
-        super(place, clientFactory, homePlacesNavigator);
+        super(place, eventDTO, clientFactory, homePlacesNavigator);
     }
 
     @Override

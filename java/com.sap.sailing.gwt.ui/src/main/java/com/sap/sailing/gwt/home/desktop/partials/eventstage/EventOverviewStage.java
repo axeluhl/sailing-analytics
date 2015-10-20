@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class EventOverviewStage extends Composite {
@@ -73,10 +74,11 @@ public class EventOverviewStage extends Composite {
     
     public void setupRefresh(RefreshManager refreshManager) {
         this.refreshManager = refreshManager;
-        refreshManager.add(refreshable, new GetEventOverviewStageAction(presenter.getCtx().getEventDTO().getId(), false));
+        EventViewDTO eventDTO = presenter.getEventDTO();
+        refreshManager.add(refreshable, new GetEventOverviewStageAction(eventDTO.getId(), false));
         
-        if(presenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
-            refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getCtx().getEventDTO().getId(), 15));
+        if(presenter.getEventDTO().getState() == EventState.RUNNING) {
+            refreshManager.add(newsRefreshable, new GetEventOverviewNewsAction(presenter.getEventDTO().getId(), 15));
         } else {
             updatesUi.removeFromParent();
             updatesWrapperUi.removeFromParent();

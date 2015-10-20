@@ -64,7 +64,7 @@ public class EventHeader extends Composite {
     private Presenter presenter;
     
     public EventHeader(EventView.Presenter presenter) {
-        this.event = presenter.getCtx().getEventDTO();
+        this.event = presenter.getEventDTO();
         this.presenter = presenter;
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

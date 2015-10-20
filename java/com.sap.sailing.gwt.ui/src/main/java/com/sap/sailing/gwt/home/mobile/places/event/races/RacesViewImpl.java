@@ -25,7 +25,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     @UiField(provided = true) RegattaCompetition regattaCompetitionUi;
 
     public RacesViewImpl(RacesView.Presenter presenter) {
-        super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
+        super(presenter, presenter.getEventDTO().getType() == EventType.MULTI_REGATTA, true);
         regattaCompetitionUi = new RegattaCompetition(presenter);
         refreshManager.add(regattaCompetitionUi, new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
         setViewContent(uiBinder.createAndBindUi(this));

@@ -13,6 +13,9 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -27,9 +30,9 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
 
-    public EventRegattaActivity(AbstractEventRegattaPlace place, EventClientFactory clientFactory,
+    public EventRegattaActivity(AbstractEventRegattaPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator) {
-        super(place, clientFactory, homePlacesNavigator);
+        super(place, eventDTO, clientFactory, homePlacesNavigator);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
                     clientFactory.getSailingService(),
@@ -49,13 +52,13 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     
     @Override
     public boolean needsSelectionInHeader() {
-        EventViewDTO event = ctx.getEventDTO();
+        EventViewDTO event = eventDTO;
         return (event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.MULTI_REGATTA);
     }
     
     @Override
     public void forPlaceSelection(PlaceCallback callback) {
-        EventViewDTO event = ctx.getEventDTO();
+        EventViewDTO event = eventDTO;
         if (event.getType() == EventType.SERIES_EVENT) {
             for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
                 AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
@@ -64,14 +67,14 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         } else {
             for(RegattaReferenceDTO regatta : event.getRegattas()) {
                 AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(contextForRegatta(regatta.getId()));
-                callback.forPlace(place, regatta.getDisplayName(), (ctx.getRegattaId().equals(regatta.getId())));
+                callback.forPlace(place, regatta.getDisplayName(), (getRegattaId().equals(regatta.getId())));
             }
         }
     }
     
     @Override
     public boolean showRegattaMetadata() {
-        return ctx.getEventDTO().getType() == EventType.MULTI_REGATTA && ctx.getRegatta() != null;
+        return eventDTO.getType() == EventType.MULTI_REGATTA && getRegatta() != null;
     }
     
     @Override
@@ -87,5 +90,33 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     @Override
     protected EventView<AbstractEventRegattaPlace, ?> getView() {
         return currentView;
+    }
+    
+    public RegattaMetadataDTO getRegatta() {
+        String regattaId = getRegattaId();
+        if(regattaId == null) {
+            return null;
+        }
+        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
+            if(regattaId.equals(regatta.getId())) {
+                return regatta;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public HasRegattaMetadata getRegattaMetadata() {
+        return getRegatta();
+    }
+    
+    @Override
+    public boolean isEventOrRegattaLive() {
+        if(showRegattaMetadata()) {
+            if(getRegatta().getState() == RegattaState.RUNNING) {
+                return true;
+            }
+        }
+        return super.isEventOrRegattaLive();
     }
 }

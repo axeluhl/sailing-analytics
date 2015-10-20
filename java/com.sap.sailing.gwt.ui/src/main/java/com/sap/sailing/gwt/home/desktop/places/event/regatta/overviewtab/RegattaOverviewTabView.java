@@ -56,7 +56,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @Override
     public TabView.State getState() {
         if(ExperimentalFeatures.SHOW_SINGLE_REGATTA_OVERVIEW) {
-            return currentPresenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA ? TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE
+            return currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA ? TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE
                     : TabView.State.VISIBLE;
         } else {
             return TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
@@ -68,7 +68,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         stageUi = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
-        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(myPlace.getRegattaId()));
+        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
@@ -78,13 +78,13 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
             public void setData(RegattaWithProgressDTO data) {
                 regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
             }
-        }, new GetRegattaWithProgressAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
+        }, new GetRegattaWithProgressAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId()));
 
         stageUi.setupRefresh(refreshManager);
-        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getCtx().getEventDTO()
-                .getId(), currentPresenter.getCtx().getRegattaId()));
-        refreshManager.add(standingsUi, new GetMiniLeaderbordAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId(), 5));
-        refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(myPlace.getCtx().getEventDTO().getId(), myPlace.getRegattaId()));
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO()
+                .getId(), currentPresenter.getRegattaId()));
+        refreshManager.add(standingsUi, new GetMiniLeaderbordAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId(), 5));
+        refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId()));
     }
 
     @Override

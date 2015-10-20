@@ -51,9 +51,9 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation) {
         this.currentPresenter = presenter;
         this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
-        String regattaName = showRegattaName ? currentPresenter.getCtx().getRegatta().getDisplayName() : null;
+        String regattaName = showRegattaName ? currentPresenter.getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
-        this.layout = new AbstractEventViewLayout(currentPresenter.getCtx().getEventDTO(), regattaName, logoNavigation);
+        this.layout = new AbstractEventViewLayout(currentPresenter.getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
     }
     
@@ -62,15 +62,15 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     }
     
     protected UUID getEventId() {
-        return currentPresenter.getCtx().getEventDTO().getId();
+        return currentPresenter.getEventDTO().getId();
     }
     
     protected String getRegattaId() {
-        return currentPresenter.getCtx().getRegattaId();
+        return currentPresenter.getRegattaId();
     }
     
     protected boolean isMultiRegattaEvent() {
-        return currentPresenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA;
+        return currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA;
     }
     
     protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
@@ -84,7 +84,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     protected void initRacesNavigation(Panel container) {
         MobileSection mobileSection = new MobileSection();
         SectionHeaderContent header = new SectionHeaderContent();
-        header.setSectionTitle(StringMessages.INSTANCE.racesCount(currentPresenter.getCtx().getRegatta().getRaceCount()));
+        header.setSectionTitle(StringMessages.INSTANCE.racesCount(currentPresenter.getRegatta().getRaceCount()));
         header.setInfoText(StringMessages.INSTANCE.showAll());
         header.setClickAction(currentPresenter.getRegattaRacesNavigation(getRegattaId()));
         mobileSection.addHeader(header);

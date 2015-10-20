@@ -38,17 +38,12 @@ public class EventActivityProxy extends AbstractActivityProxy {
 
     @Override
     protected void startAsync() {
-        if(currentPlace.getCtx().getEventDTO() != null) {
-            afterEventLoad();
-            return;
-        }
         UUID eventId = UUID.fromString(currentPlace.getCtx().getEventId());
         clientFactory.getDispatch().execute(new GetEventViewAction(eventId), new AsyncCallback<EventViewDTO>() {
             @Override
             public void onSuccess(final EventViewDTO event) {
-                currentPlace.getCtx().updateContext(event);
                 currentPlace = getRealPlace(event);
-                afterEventLoad();
+                afterEventLoad(event);
             }
             
             @Override
@@ -70,22 +65,22 @@ public class EventActivityProxy extends AbstractActivityProxy {
         return currentPlace;
     }
     
-    private void afterEventLoad() {
+    private void afterEventLoad(final EventViewDTO event) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
                 if (currentPlace instanceof EventDefaultPlace) {
-                    super.onSuccess(new EventActivity(currentPlace, clientFactory));
+                    super.onSuccess(new EventActivity(currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaOverviewPlace) {
-                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, clientFactory));
+                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaRacesPlace) {
-                    super.onSuccess(new RacesActivity((RegattaRacesPlace) currentPlace, clientFactory));
+                    super.onSuccess(new RacesActivity((RegattaRacesPlace) currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof MiniLeaderboardPlace) {
-                    super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) currentPlace, clientFactory));
+                    super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof LatestNewsPlace) {
-                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) currentPlace, clientFactory));
+                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaMediaPlace || currentPlace instanceof MultiregattaMediaPlace) {
-                    super.onSuccess(new MediaActivity(currentPlace, clientFactory));
+                    super.onSuccess(new MediaActivity(currentPlace, event, clientFactory));
                 }
             }
         });

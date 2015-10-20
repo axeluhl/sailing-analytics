@@ -98,7 +98,7 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupUpdateBox(Panel container) {
         updatesBoxUi = new UpdatesBox(currentPresenter, refreshManager);
-        if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+        if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
             refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(getEventId(), 2));
             container.add(updatesBoxUi);
         }

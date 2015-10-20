@@ -44,58 +44,50 @@ public class EventActivityProxy extends AbstractActivityProxy {
 
     @Override
     protected void startAsync() {
-        if (ctx.getEventDTO() != null) {
-            afterEventLoad();
-        } else {
-            final UUID eventUUID = UUID.fromString(ctx.getEventId());
-            
-            clientFactory.getDispatch().execute(new GetEventViewAction(eventUUID), new AsyncCallback<EventViewDTO>() {
-                @Override
-                public void onSuccess(final EventViewDTO event) {
-                    ctx.updateContext(event);
-                    afterEventLoad();
-                }
+        final UUID eventUUID = UUID.fromString(ctx.getEventId());
+        
+        clientFactory.getDispatch().execute(new GetEventViewAction(eventUUID), new AsyncCallback<EventViewDTO>() {
+            @Override
+            public void onSuccess(final EventViewDTO event) {
+                afterEventLoad(event);
+            }
 
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
-                    // TODO @FM: reload sinnvoll hier?
-                    errorPlace.setComingFrom(place);
-                    clientFactory.getPlaceController().goTo(errorPlace);
-                }
-            });
-
-        }
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO @FM: extract text?
+                ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
+                // TODO @FM: reload sinnvoll hier?
+                errorPlace.setComingFrom(place);
+                clientFactory.getPlaceController().goTo(errorPlace);
+            }
+        });
     }
 
-    private void afterEventLoad() {
+    private void afterEventLoad(EventViewDTO event) {
         if(place instanceof EventDefaultPlace) {
-            place = getRealPlace();
+            place = getRealPlace(event);
         }
-        place = verifyAndAdjustPlace();
-        afterLoad();
+        place = verifyAndAdjustPlace(event);
+        afterLoad(event);
     }
 
-    private void afterLoad() {
+    private void afterLoad(final EventViewDTO event) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
                 if(place instanceof AbstractEventRegattaPlace) {
-                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, clientFactory,
+                    super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
                             homePlacesNavigator));
                 }
                 if(place instanceof AbstractMultiregattaEventPlace) {
-                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place,
+                    super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
                             clientFactory, homePlacesNavigator));
                 }
             }
         });
     }
 
-    private AbstractEventPlace getRealPlace() {
-        EventViewDTO event = ctx.getEventDTO();
-
+    private AbstractEventPlace getRealPlace(EventViewDTO event) {
         if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
             return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
         }
@@ -105,11 +97,12 @@ public class EventActivityProxy extends AbstractActivityProxy {
     /**
      * Checks if the place is valid for the given event.
      * If not, the place is automatically being adjusted.
+     * @param event 
      */
-    private AbstractEventPlace verifyAndAdjustPlace() {
+    private AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
         EventContext contextWithoutRegatta = new EventContext(ctx).withRegattaId(null);
         // TODO check if regatta ID is valid
-        if(place instanceof AbstractMultiregattaEventPlace && ctx.getEventDTO().getType() != EventType.MULTI_REGATTA) {
+        if(place instanceof AbstractMultiregattaEventPlace && event.getType() != EventType.MULTI_REGATTA) {
             // Events with a type other than multi regatta only have regatta level pages
             if(place instanceof MultiregattaRegattasPlace) {
                 return new RegattaRacesPlace(contextWithoutRegatta);
@@ -121,22 +114,22 @@ public class EventActivityProxy extends AbstractActivityProxy {
         }
         
         if(place instanceof AbstractEventRegattaPlace) {
-            boolean regattaKnown = ctx.getEventDTO().isRegattaIDKnown(ctx.getRegattaId());
-            if(ctx.getEventDTO().getType() != EventType.MULTI_REGATTA && ctx.getRegattaId() != null && !regattaKnown) {
+            boolean regattaKnown = event.isRegattaIDKnown(ctx.getRegattaId());
+            if(event.getType() != EventType.MULTI_REGATTA && ctx.getRegattaId() != null && !regattaKnown) {
                 // Regatta ID unknown but unnecessary ...
                 ctx.withRegattaId(null);
-            } else if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA && !regattaKnown) {
+            } else if(event.getType() == EventType.MULTI_REGATTA && !regattaKnown) {
                 return new MultiregattaRegattasPlace(contextWithoutRegatta);
             }
         }
         
-        if(place instanceof RegattaMediaPlace && ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+        if(place instanceof RegattaMediaPlace && event.getType() == EventType.MULTI_REGATTA) {
             // The media page for multi regatta events is on event level only but not on regatta level
             return new MultiregattaMediaPlace(new EventContext(ctx).withRegattaId(null));
         }
         
         if(place instanceof LatestNewsPlace) {
-            if(ctx.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            if(event.getType() == EventType.MULTI_REGATTA) {
                 return new MultiregattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
             }
             return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));

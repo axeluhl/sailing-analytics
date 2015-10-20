@@ -29,7 +29,7 @@ public class MultiRegattaListItem extends Composite {
     }
 
     public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
-        this(regattaWithProgress, presenter.getCtx().getEventDTO().isRunning());
+        this(regattaWithProgress, presenter.getEventDTO().isRunning());
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
         PlaceNavigation<?> leaderboardNavigation = presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId());
         regattaStepsUi.setLeaderboardNavigation(regattaWithProgress.getState(), leaderboardNavigation);

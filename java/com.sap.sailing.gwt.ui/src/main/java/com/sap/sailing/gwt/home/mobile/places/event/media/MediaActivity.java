@@ -5,12 +5,13 @@ import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.media.MediaView.Presenter;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 
 public class MediaActivity extends AbstractEventActivity<AbstractEventPlace> implements Presenter {
 
-    public MediaActivity(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
-        super(place, clientFactory);
+    public MediaActivity(AbstractEventPlace place, EventViewDTO eventDTO, MobileApplicationClientFactory clientFactory) {
+        super(place, eventDTO, clientFactory);
     }
     
     @Override

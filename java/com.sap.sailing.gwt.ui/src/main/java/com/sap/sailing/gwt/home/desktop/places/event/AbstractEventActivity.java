@@ -32,8 +32,9 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -55,8 +56,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
-    public AbstractEventActivity(PLACE place, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
+    protected final EventViewDTO eventDTO;
+
+    public AbstractEventActivity(PLACE place, EventViewDTO eventDTO, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
+        this.eventDTO = eventDTO;
         this.homePlacesNavigator = homePlacesNavigator;
         this.ctx = new EventContext(place.getCtx());
         this.timerForClientServerOffset = new Timer(PlayModes.Replay);
@@ -103,7 +107,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public HasRegattaMetadata getRegattaMetadata() {
-        return ctx.getRegatta();
+        return null;
     }
 
     @Override
@@ -191,12 +195,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
-        if (ctx.getMedia() != null) {
-            callback.onSuccess(ctx.getMedia());
-            return;
-        }
-
-        getHomeService().getMediaForEvent(ctx.getEventDTO().getId(), new AsyncCallback<MediaDTO>() {
+        getHomeService().getMediaForEvent(eventDTO.getId(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO @FM: extract error message
@@ -208,7 +207,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
             @Override
             public void onSuccess(MediaDTO result) {
-                ctx.withMedia(result);
                 callback.onSuccess(result);
             }
         });
@@ -219,13 +217,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if (showRegattaMetadata()) {
             return false;
         }
-        return ctx.getEventDTO().isHasMedia();
+        return eventDTO.isHasMedia();
     }
     
     @Override
     public String getRegattaOverviewLink() {
         String url = "RegattaOverview.html?ignoreLocalSettings=true&onlyrunningraces=false&event=" + getCtx().getEventId();
-        url += "&onlyracesofsameday=" + getCtx().getEventDTO().isRunning();
+        url += "&onlyracesofsameday=" + eventDTO.isRunning();
         if(showRegattaMetadata()) {
             if(getRegattaMetadata().isFlexibleLeaderboard()) {
                 String defaultCourseAreaId = getRegattaMetadata().getDefaultCourseAreaId();
@@ -233,7 +231,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                     url += "&coursearea=" + defaultCourseAreaId;
                 }
             } else {
-                url += "&regatta=" + getCtx().getRegattaId();
+                url += "&regatta=" + getRegattaId();
             }
         }
         return url;
@@ -241,12 +239,23 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public boolean isEventOrRegattaLive() {
-        if(showRegattaMetadata()) {
-            if(ctx.getRegatta().getState() == RegattaState.RUNNING) {
-                return true;
-            }
+        return eventDTO.getState() == EventState.RUNNING;
+    }
+    
+    public String getRegattaId() {
+        String regattaId = currentPlace.getRegattaId();
+        if(regattaId  != null) {
+            return regattaId;
         }
-        return ctx.getEventDTO().getState() == EventState.RUNNING;
+        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+            return eventDTO.getRegattas().iterator().next().getId();
+        }
+        return null;
+    }
+    
+    @Override
+    public EventViewDTO getEventDTO() {
+        return eventDTO;
     }
 
     protected abstract EventView<PLACE, ?> getView();

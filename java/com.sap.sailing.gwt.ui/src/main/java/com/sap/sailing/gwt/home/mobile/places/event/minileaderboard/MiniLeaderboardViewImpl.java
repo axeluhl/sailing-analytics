@@ -13,7 +13,7 @@ public class MiniLeaderboardViewImpl extends AbstractEventView<MiniLeaderboardVi
     private final MinileaderboardBox minileaderboard;
 
     public MiniLeaderboardViewImpl(MiniLeaderboardView.Presenter presenter) {
-        super(presenter, presenter.getCtx().getEventDTO().getType() == EventType.MULTI_REGATTA, true);
+        super(presenter, presenter.getEventDTO().getType() == EventType.MULTI_REGATTA, true);
         setViewContent(minileaderboard = new MinileaderboardBox(false));
         refreshManager.add(minileaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId()));
         minileaderboard.setAction(MSG.details(), presenter.getRegattaLeaderboardNavigation(getRegattaId()));

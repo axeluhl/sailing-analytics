@@ -74,10 +74,10 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         
         RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         stageUi.setupRefresh(refreshManager);
-        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getEventDTO().getId()));
         
-        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getEventDTO().getId()));
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getEventDTO().getId()));
     }
 
     @Override

@@ -50,13 +50,13 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String regattaId = myPlace.getRegattaId();
+        String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
@@ -66,7 +66,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             }
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-            if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+            if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
             }
             regattaAnalyticsManager.hideCompetitorChart();

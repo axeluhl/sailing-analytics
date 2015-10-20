@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
@@ -37,5 +38,10 @@ public interface EventViewBase extends IsWidget {
         
         PlaceNavigation<?> getEventNavigation();
 
+        String getRegattaId();
+        
+        RegattaMetadataDTO getRegatta();
+
+        EventViewDTO getEventDTO();
     }
 }

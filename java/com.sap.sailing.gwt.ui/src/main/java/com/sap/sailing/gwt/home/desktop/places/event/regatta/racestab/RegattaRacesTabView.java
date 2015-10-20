@@ -116,8 +116,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         raceOfficeSectionUi.addLink(I18N.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
-        UUID eventId = myPlace.getCtx().getEventDTO().getId();
-        String regattaId = myPlace.getRegattaId();
+        UUID eventId = currentPresenter.getEventDTO().getId();
+        String regattaId = currentPresenter.getRegattaId();
         refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
             @Override
             public void setData(RegattaWithProgressDTO data) {
