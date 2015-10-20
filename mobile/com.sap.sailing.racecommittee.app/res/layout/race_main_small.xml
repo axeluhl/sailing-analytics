@@ -62,6 +62,7 @@
                 android:id="@+id/panel_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
                 tools:src="@drawable/ic_dot"/>
 
             <ImageView
@@ -74,8 +75,10 @@
                 android:id="@+id/panel_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
                 android:visibility="gone"
-                tools:src="@drawable/ic_dot"/>
+                tools:src="@drawable/ic_dot"
+                tools:visibility="visible"/>
         </LinearLayout>
 
         <View
