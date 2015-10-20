@@ -48,7 +48,6 @@ public abstract class RefreshManager {
         LOG.log(Level.FINE, "Cancelling auto refresh");
         started = false;
         timer.cancel();
-        scheduled = false;
     }
     
     protected abstract boolean canExecute();
