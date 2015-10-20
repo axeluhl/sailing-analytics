@@ -331,11 +331,11 @@
     <string name="race_start_time_ago">%s</string>
     <string name="tomorrow">Morgen</string>
     <string name="race_begin_finish_header">Beginn des Zieleinlaufs</string>
-    <string name="race_begin_finish_current">Aktuelle Zeit verwenden</string>
-    <string name="race_begin_finish_custom">Angegebene Zeit verwenden</string>
+    <string name="race_begin_finish_current">Aktuelle Zeit</string>
+    <string name="race_begin_finish_custom">Individuelle Zeit</string>
     <string name="wind_sensor"><![CDATA[um %1$s / von %2$.0f° / %3$.1f kn]]></string>
     <string name="wind_no_data">Keine Daten</string>
-    <string name="wind_panel"><![CDATA[von %1$.0f° mit %2$.1f kn]]></string>
+    <string name="wind_panel"><![CDATA[von %1$.0f°\nmit %2$.1f kn]]></string>
     <string name="settings_category_developer">Entwickler Optionen</string>
     <string name="preference_offline_header">Offline Modus</string>
     <string name="preference_offline_summary">Deaktiviert die Verbindung zum Server und benutzt statische Daten</string>
@@ -419,7 +419,7 @@
     <string name="author_type_shore_control">Regattaleitung an Land</string>
     <string name="author_viewer">Demo-Modus</string>
     <string name="yesterday">Gestern</string>
-    <string name="change_proceed">Trotzdem fortfahren</string>
+    <string name="change_proceed">fortfahren</string>
     <string name="change_cancel">Abbrechen</string>
     <string name="change_message">Nach den Wettfahrtregeln sind diese Daten im aktuellen Rennenstatus nicht veränderbar.\nSie könnten jedoch die falschen Eingaben korrigieren.</string>
     <string name="change_title">Warnung</string>

@@ -327,7 +327,7 @@
     <string name="wind_kn">kn</string>
     <string name="wind_address_hint">Enter Address</string>
     <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kn]]></string>
-    <string name="wind_panel"><![CDATA[from %1$.0f° with %2$.1f kn]]></string>
+    <string name="wind_panel"><![CDATA[from %1$.0f°\nwith %2$.1f kn]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
@@ -357,8 +357,8 @@
     <string name="race_reset_message">Do you really want to reset this race including all settings and actions that have be made? This can not be undone.</string>
     <string name="race_begin_finish_header">Begin Finish</string>
     <string name="race_end_finish_header">End Finish\n(Begin Finish: %s)</string>
-    <string name="race_begin_finish_current">Use Current Time</string>
-    <string name="race_begin_finish_custom">Use Custom Time</string>
+    <string name="race_begin_finish_current">Current Time</string>
+    <string name="race_begin_finish_custom">Custom Time</string>
     <string name="race_setup_confirm">Confirm Setup</string>
 
     <string name="race_summary_title">Race Summary</string>
@@ -440,7 +440,7 @@
     <string name="author_type_shore_control">Shore Control</string>
     <string name="author_viewer">Viewer</string>
     <string name="yesterday">Yesterday</string>
-    <string name="change_proceed">Proceed anyway</string>
+    <string name="change_proceed">Proceed</string>
     <string name="change_cancel">Cancel</string>
     <string name="change_message">According to the racing rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
     <string name="change_title">Warning</string>
