@@ -28,14 +28,12 @@ public class ErrorMessage extends Composite {
 
     public ErrorMessage(String errorMessageDetail, Throwable errorReason, Command reloadCommand) {
         this(TextMessages.INSTANCE.errorMessageLoadingData(), errorMessageDetail, errorReason, reloadCommand);
-
     }
     
     public ErrorMessage(String errorMessage, String errorMessageDetail, Throwable errorReason, Command reloadCommand) {
         ErrorMessageResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.reloadCommand = reloadCommand;
-        this.setHeight(Window.getClientHeight() + "px");
         
         if (errorMessage != null && !errorMessage.isEmpty()) {
             this.errorMessage.setInnerText(errorMessage);
@@ -45,6 +43,10 @@ public class ErrorMessage extends Composite {
 
         this.errorMessageDetail.setInnerText(errorMessageDetail);
         Window.setStatus(errorMessageDetail);
+    }
+    
+    public void addReloadPageButtonStyleNames(String styleNames) {
+        reloadPageAnchor.addStyleName(styleNames);
     }
     
     @UiHandler("reloadPageAnchor")

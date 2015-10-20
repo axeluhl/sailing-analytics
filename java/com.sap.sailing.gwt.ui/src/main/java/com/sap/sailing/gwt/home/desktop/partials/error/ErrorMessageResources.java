@@ -15,5 +15,6 @@ public interface ErrorMessageResources extends ClientBundle {
         String error_message();
         String error_message_detail();
         String reload_page_message();
+        String reload_page_button();
     }
 }

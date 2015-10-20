@@ -1,24 +1,19 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.error.ErrorMessageResources" />
 	<g:HTMLPanel>
-		<div class="{res.mediaCss.grid}">
-			<div class="{res.mediaCss.columns}">
-				<div class="{local_res.css.error_content}">
-					<div ui:field="errorMessage" class="{local_res.css.error_message}"></div>
-					<div ui:field="errorMessageDetail" class="{local_res.css.error_message_detail}"></div>
-				</div>
-				<div>
-					<div class="{local_res.css.reload_page_message}">
-						<ui:text from='{i18n.pleaseTryAgain}' />
-					</div>
-					<g:Anchor ui:field="reloadPageAnchor" href="javascript:;" styleName="{res.mainCss.button}">
-						<ui:text from='{i18n.reloadPage}' />
-					</g:Anchor>
-				</div>
+		<div class="{local_res.css.error_content}">
+			<div ui:field="errorMessage" class="{local_res.css.error_message}"></div>
+			<div ui:field="errorMessageDetail" class="{local_res.css.error_message_detail}"></div>
+		</div>
+		<div>
+			<div class="{local_res.css.reload_page_message}">
+				<ui:text from='{i18n.pleaseTryAgain}' />
 			</div>
+			<g:Anchor ui:field="reloadPageAnchor" href="javascript:;" styleName="{local_res.css.reload_page_button}">
+				<ui:text from='{i18n.reloadPage}' />
+			</g:Anchor>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
