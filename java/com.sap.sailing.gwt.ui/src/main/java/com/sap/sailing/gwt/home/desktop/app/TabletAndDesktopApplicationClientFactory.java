@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
 import com.sap.sailing.gwt.home.desktop.places.events.EventsView;
@@ -15,11 +16,12 @@ import com.sap.sailing.gwt.home.desktop.places.sponsoring.TabletAndDesktopSponso
 import com.sap.sailing.gwt.home.desktop.places.start.StartView;
 import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
-import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {
@@ -79,5 +81,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public DispatchSystem getDispatch() {
         return dispatch;
+    }
+
+    @Override
+    public IsWidget createBusyView() {
+        return new BusyView();
     }
 }
