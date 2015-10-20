@@ -110,7 +110,7 @@ public abstract class RefreshManager {
 
                 long nextUpdate = 0;
                 for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
-                    if (refreshable.callRunning) {
+                    if (refreshable.callRunning || !refreshable.provider.isActive()) {
                         continue;
                     }
                     if (nextUpdate == 0) {
