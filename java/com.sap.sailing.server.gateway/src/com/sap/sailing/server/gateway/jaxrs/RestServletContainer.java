@@ -15,7 +15,7 @@ public class RestServletContainer extends ServletContainer {
 
     public static final String OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME = "osgi-bundlecontext"; 
 
-    public static final String RACING_EVENT_SERVICE_TRACKER_NAME = "racingEventServiceTracker"; 
+    public static final String RACING_EVENT_SERVICE_TRACKER_NAME = "racingEventServiceTracker";
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     

@@ -16,7 +16,7 @@ import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
-import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
@@ -62,12 +62,12 @@ public class TestFunctionManagerAsFunctionRegistry {
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
-        QueryDefinitionDTOProvider queryDefinitionProvider = new QueryDefinitionDTOManager();
+        QueryDefinitionDTORegistry queryDefinitionRegistry = new QueryDefinitionDTOManager();
         ModifiableDataMiningServer server = new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionManager,
                                                                      dataSourceProviderRegistry,
                                                                      dataRetrieverChainDefinitionRegistry,
                                                                      aggregationProcessorDefinitionRegistry,
-                                                                     queryDefinitionProvider);
+                                                                     queryDefinitionRegistry);
         
         Date beforeRegistration = new Date();
         ConcurrencyTestsUtil.sleepFor(10);
