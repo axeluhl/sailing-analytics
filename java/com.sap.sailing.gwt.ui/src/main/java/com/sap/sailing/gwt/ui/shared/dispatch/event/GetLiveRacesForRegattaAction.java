@@ -40,6 +40,6 @@ public class GetLiveRacesForRegattaAction implements Action<ResultWithTTL<Sorted
 
     @Override
     public void cacheInstanceKey(StringBuilder key) {
-        key.append(eventId);
+        key.append(eventId).append("_").append(regattaName);
     }
 }
