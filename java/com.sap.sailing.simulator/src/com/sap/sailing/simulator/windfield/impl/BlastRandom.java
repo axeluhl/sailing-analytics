@@ -18,7 +18,7 @@ public class BlastRandom extends Random {
 
     // random number having exponential distribution
     public double nextExponential(double lambda) {
-        return -Math.log(1.0 - this.nextDouble())/lambda;
+        return -Math.log(this.nextDouble())/lambda;
     }
 
     // random number having geometric distribution
