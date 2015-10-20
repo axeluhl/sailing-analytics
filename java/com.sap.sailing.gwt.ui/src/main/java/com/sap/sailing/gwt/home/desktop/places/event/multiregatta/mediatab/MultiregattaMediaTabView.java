@@ -34,7 +34,7 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
 
     @Override
     public void start(MultiregattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
-        final MediaPage mediaPage = new MediaPage();
+        final MediaPage mediaPage = new MediaPage(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         initWidget(mediaPage);
         
         currentPresenter.ensureMedia(new AsyncCallback<MediaDTO>() {
