@@ -38,6 +38,7 @@ public class GetSearchResultsAction implements Action<ListResult<SearchResultDTO
         return resultList;
     }
     
+    @GwtIncompatible
     private void addResult(ListResult<SearchResultDTO> list, LeaderboardSearchResultBase hit, URL baseUrl, boolean isOnRemoteServer) {
         // TODO: for now filter all results where we no event is defined
         if (hit.getEvent() != null) {
