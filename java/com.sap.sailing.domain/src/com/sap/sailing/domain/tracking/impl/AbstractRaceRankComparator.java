@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Compares two competitors by their ranking in the overall race for a given time point. Competitors who haven't started
@@ -43,6 +45,8 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
     private final TimePoint timePoint;
     private final DummyMarkPassingWithTimePointOnly markPassingWithTimePoint;
     private final boolean lessIsBetter;
+    private final ConcurrentHashMap<Competitor, MarkPassing> lastMarkPassingBeforeTimePoint;
+    private final ConcurrentHashMap<Competitor, TrackedLegOfCompetitor> currentLeg;
     
     /**
      * @param lessIsBetter
@@ -55,6 +59,8 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         this.timePoint = timePoint;
         this.markPassingWithTimePoint = new DummyMarkPassingWithTimePointOnly(timePoint);
         this.lessIsBetter = lessIsBetter;
+        this.lastMarkPassingBeforeTimePoint = new ConcurrentHashMap<>();
+        this.currentLeg = new ConcurrentHashMap<>();
     }
 
     protected TimePoint getTimePoint() {
@@ -65,6 +71,35 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         return trackedRace;
     }
 
+    private Pair<MarkPassing, TrackedLegOfCompetitor> getLastMarkPassingBeforeTimePointAndCurrentLeg(Competitor competitor) {
+        final TrackedLegOfCompetitor currentLegForCompetitor;
+        final MarkPassing lastMarkPassingBeforeTimePointForCompetitor;
+        if (lastMarkPassingBeforeTimePoint.containsKey(competitor)) {
+            lastMarkPassingBeforeTimePointForCompetitor = lastMarkPassingBeforeTimePoint.get(competitor);
+            currentLegForCompetitor = currentLeg.get(competitor);
+        } else {
+            NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(competitor);
+            NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
+            trackedRace.lockForRead(o1MarkPassings);
+            try {
+                o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(markPassingWithTimePoint, /* inclusive */true);
+                final int o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
+                if (o1MarkPassingsBeforeTimePointSize > 0) {
+                    lastMarkPassingBeforeTimePointForCompetitor = o1MarkPassingsBeforeTimePoint.last();
+                } else {
+                    lastMarkPassingBeforeTimePointForCompetitor = null;
+                }
+                currentLegForCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
+                // cache the results of analyzing the mark passings:
+                lastMarkPassingBeforeTimePoint.put(competitor, lastMarkPassingBeforeTimePointForCompetitor);
+                currentLeg.put(competitor, currentLegForCompetitor);
+            } finally {
+                trackedRace.unlockAfterRead(o1MarkPassings);
+            }
+        }
+        return new Pair<>(lastMarkPassingBeforeTimePointForCompetitor, currentLegForCompetitor);
+    }
+
     @Override
     public int compare(Competitor o1, Competitor o2) {
         int result;
@@ -72,39 +107,14 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
             result = 0;
         } else {
             final Course course = trackedRace.getRace().getCourse();
-            NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1);
-            NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
-            MarkPassing o1LastMarkPassingBeforeTimePoint = null;
-            int o1MarkPassingsBeforeTimePointSize;
-            TrackedLegOfCompetitor o1Leg;
-            trackedRace.lockForRead(o1MarkPassings);
-            try {
-                o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
-                        markPassingWithTimePoint, /* inclusive */true);
-                o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
-                if (o1MarkPassingsBeforeTimePointSize > 0) {
-                    o1LastMarkPassingBeforeTimePoint = o1MarkPassingsBeforeTimePoint.last();
-                }
-                o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
-            } finally {
-                trackedRace.unlockAfterRead(o1MarkPassings);
-            }
-            NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
-            NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint;
-            MarkPassing o2LastMarkPassingBeforeTimePoint = null;
-            int o2MarkPassingsBeforeTimePointSize;
-            TrackedLegOfCompetitor o2Leg;
-            trackedRace.lockForRead(o2MarkPassings);
-            try {
-                o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(markPassingWithTimePoint, /* inclusive */true);
-                o2MarkPassingsBeforeTimePointSize = o2MarkPassingsBeforeTimePoint.size();
-                if (o2MarkPassingsBeforeTimePointSize > 0) {
-                    o2LastMarkPassingBeforeTimePoint = o2MarkPassingsBeforeTimePoint.last();
-                }
-                o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
-            } finally {
-                trackedRace.unlockAfterRead(o2MarkPassings);
-            }
+            final TrackedLegOfCompetitor o1Leg;
+            final MarkPassing o1LastMarkPassingBeforeTimePoint;
+            Pair<MarkPassing, TrackedLegOfCompetitor> lastMarkPassingBeforeTimePointAndCurrentLegForO1 = getLastMarkPassingBeforeTimePointAndCurrentLeg(o1);
+            o1LastMarkPassingBeforeTimePoint = lastMarkPassingBeforeTimePointAndCurrentLegForO1.getA();
+            o1Leg = lastMarkPassingBeforeTimePointAndCurrentLegForO1.getB();
+            Pair<MarkPassing, TrackedLegOfCompetitor> lastMarkPassingBeforeTimePointAndCurrentLegForO2 = getLastMarkPassingBeforeTimePointAndCurrentLeg(o2);
+            final MarkPassing o2LastMarkPassingBeforeTimePoint = lastMarkPassingBeforeTimePointAndCurrentLegForO2.getA();
+            final TrackedLegOfCompetitor o2Leg = lastMarkPassingBeforeTimePointAndCurrentLegForO2.getB();
             final List<Leg> legs = course.getLegs();
             result = o1LastMarkPassingBeforeTimePoint == null
                   ? o2LastMarkPassingBeforeTimePoint == null ? 0  // both haven't started yet
@@ -112,7 +122,7 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
                   : o2LastMarkPassingBeforeTimePoint == null ? -1 // only o1 has started; o1 is better ("less") than o2
                   /* both have started; any difference */    : course.getIndexOfWaypoint(o2LastMarkPassingBeforeTimePoint.getWaypoint()) -
                   /* in last waypoint passed?          */      course.getIndexOfWaypoint(o1LastMarkPassingBeforeTimePoint.getWaypoint());
-            if (result == 0 && o1MarkPassingsBeforeTimePointSize > 0) {
+            if (result == 0 && o1LastMarkPassingBeforeTimePoint != null) {
                 assert o2LastMarkPassingBeforeTimePoint != null;
                 // Competitors are on same leg and both have already started the first leg.
                 // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
