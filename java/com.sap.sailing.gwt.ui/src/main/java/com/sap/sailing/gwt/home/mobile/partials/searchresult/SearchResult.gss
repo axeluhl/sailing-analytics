@@ -51,6 +51,7 @@
 .searchresult_item {
   padding: 1.333333333333333em 1em;
   border-bottom: 1px solid #ccc;
+  text-decoration: none !important;
 }
 .searchresult_item_headline {
   font-size: 1.066666666666667em;
@@ -73,7 +74,6 @@
   content: "|";
   margin: 0 0.384615384615385em;
   color: #ccc;
-  text-decoration: none;
 }
 .searchresult_item_arrow {
   background: url("images/home/arrow-down-grey.png");
