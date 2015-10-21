@@ -132,6 +132,8 @@ public class Header extends Composite {
             setActiveLink(startPageLink);
         } else if(place instanceof SolutionsPlace) {
             setActiveLink(solutionsPageLink);
+        } else {
+            setActiveLink(null);
         }
         // TODO add more rules
     }
