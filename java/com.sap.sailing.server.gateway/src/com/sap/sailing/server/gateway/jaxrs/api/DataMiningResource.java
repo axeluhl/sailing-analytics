@@ -45,6 +45,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
 
     private static final String AVG_SPEED_PER_COMPETITOR_LEG_TYPE = "AvgSpeed_Per_Competitor-LegType";
     private static final String SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE = "SumDistance_Per_Competitor-LegType";
+    private static final String SUM_MANEUVERS_PER_COMPETITOR = "SumManeuvers_Per_Competitor";
 
     public DataMiningServer getDataMiningServer() {
         @SuppressWarnings("unchecked")
@@ -152,7 +153,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -171,7 +172,50 @@ public class DataMiningResource extends AbstractSailingServerResource {
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+        } else {
+            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
+            getRegattaName_FilterSelection.add(regattaName);
+
+            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+            getRaceName_FilterSelection.add(raceName);
+            
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
+            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
+            response = runQuery(queryDefinitionDTO);
+        }
+        return response;
+    }
+
+    public Response sumManeuversPerCompetitor(String regattaName) {
+        Response response;
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
+        
+        if (queryDefinitionDTO == null) {
+            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
+        } else {
+            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
+            getRegattaName_FilterSelection.add(regattaName);
+            
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
+            response = runQuery(queryDefinitionDTO);
+        }
+        return response;
+    }
+
+    public Response sumManeuversPerCompetitor(String regattaName, String raceName) {
+        Response response;
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
+        
+        if (queryDefinitionDTO == null) {
+            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
