@@ -1,0 +1,64 @@
+package com.sap.sailing.gwt.home.shared.partials.searchresult;
+
+import java.util.Collection;
+
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
+
+public abstract class AbstractSearchResult extends Composite {
+    
+    protected final void init(final AbstractPlaceNavigator navigator, Widget widget) {
+        super.initWidget(widget);
+        getSearchTextInputUi().getElement().setAttribute("placeholder", TextMessages.INSTANCE.searchResultHeaderPlaceholder());
+        getSearchTextInputUi().addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                    search(navigator);
+                }                
+            }
+        });
+        getSearchButtonUi().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                search(navigator);
+            }
+        });
+    }
+    
+    private void search(AbstractPlaceNavigator navigator) {
+        navigator.getSearchResultNavigation(getSearchTextInputUi().getValue()).goToPlace();
+    }
+
+    public void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems) {
+        getSearchResultContainerUi().clear();
+        getSearchTextInputUi().setValue(searchText);
+        getSearchResultAmountUi().setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(searchResultItems.size(), searchText));
+        for (SearchResultDTO searchResult : searchResultItems) {
+            addSearchResultItem(searchResult);
+        }
+    }
+    
+    protected abstract TextBox getSearchTextInputUi();
+    
+    protected abstract Button getSearchButtonUi();
+    
+    protected abstract Element getSearchResultAmountUi();
+    
+    protected abstract HasWidgets getSearchResultContainerUi();
+    
+    protected abstract void addSearchResultItem(SearchResultDTO searchResult);
+}
