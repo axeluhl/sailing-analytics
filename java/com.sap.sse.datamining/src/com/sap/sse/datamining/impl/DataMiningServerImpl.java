@@ -47,6 +47,7 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 import com.sap.sse.util.JoinedClassLoader;
@@ -367,15 +368,8 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
 
     @Override
-    public <ResultType> Query<ResultType> createPredefinedQuery(PredefinedQueryIdentifier identifier) {
-        StatisticQueryDefinitionDTO definitionDTO = queryDefinitionRegistry.get(identifier);
-        if (definitionDTO != null) {
-            StatisticQueryDefinition<?, ?, ?, ResultType> definition = getQueryDefinitionForDTO(definitionDTO);
-            if (definition != null) {
-                return createQuery(definition);
-            }
-        }
-        return null;
+    public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier) {
+        return queryDefinitionRegistry.get(identifier);
     }
     
     @Override
