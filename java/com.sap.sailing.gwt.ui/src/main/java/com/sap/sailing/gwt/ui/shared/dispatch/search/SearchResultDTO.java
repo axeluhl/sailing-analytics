@@ -23,7 +23,8 @@ public class SearchResultDTO implements DTO {
     private String baseUrl;
     private boolean isOnRemoteServer;
     
-    protected SearchResultDTO() {
+    @SuppressWarnings("unused")
+    private SearchResultDTO() {
     }
     
     @GwtIncompatible
