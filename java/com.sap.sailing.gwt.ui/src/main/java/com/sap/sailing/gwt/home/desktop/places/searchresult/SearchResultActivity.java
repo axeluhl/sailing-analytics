@@ -5,85 +5,42 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
-import com.sap.sse.common.search.KeywordQuery;
-import com.sap.sse.gwt.client.mvp.ErrorView;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
+import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchResultsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResultActivity extends AbstractActivity {
+   
     private final SearchResultClientFactory clientFactory;
-
     private final SearchResultPlace searchResultPlace;
 
-    private SearchResultView view;
-    private AcceptsOneWidget panel;
-    
     public SearchResultActivity(SearchResultPlace place, SearchResultClientFactory clientFactory) {
         this.clientFactory = clientFactory;
         this.searchResultPlace = place;
-        
-        bindEvents();
-    }
-
-    private void bindEvents() {
-        clientFactory.getEventBus().addHandler(SearchEvent.TYPE, new SearchEventHandler() {
-            public void onDoSearch(SearchEvent event) {
-                if(view != null) {
-                    doSearch(event.getSearchText());
-                }
-            }
-        });
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        this.panel = panel;
-        panel.setWidget(new Placeholder());
-
-        view = clientFactory.createSearchResultView();
-        panel.setWidget(view.asWidget());
         Window.setTitle(searchResultPlace.getTitle());
-
-
-        doSearch(searchResultPlace.getSearchText());
-    }
-
-    protected void doSearch(final String searchText) {
-        if (searchText == null || searchText.isEmpty())
-            return;
-
-        final KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
-        clientFactory.getSailingService().getSearchServerNames(new AsyncCallback<Iterable<String>>() {
-            @Override
-            public void onSuccess(Iterable<String> serverNames) {
-                view.initSearchResult(searchText);
-                searchSingleServer(searchText, searchQuery, /* null meaning the "local" server */ null);
-                for (String serverName : serverNames) {
-                    searchSingleServer(searchText, searchQuery, serverName);
+        final SearchResultView view = clientFactory.createSearchResultView();
+        panel.setWidget(view.asWidget());
+        if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
+            final String searchText = searchResultPlace.getSearchText();
+            clientFactory.getDispatch().execute(new GetSearchResultsAction(searchText), 
+                    new AsyncCallback<ListResult<SearchResultDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    panel.setWidget(clientFactory.createErrorView("Error while executing search!", caught));
                 }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert("Error: "+caught.getMessage());
-            }
-        });
-    }
-
-    private void searchSingleServer(final String searchText, KeywordQuery searchQuery, String serverName) {
-        clientFactory.getSailingService().search(serverName, searchQuery, new AsyncCallback<Iterable<LeaderboardSearchResultDTO>>() {
-            @Override
-            public void onSuccess(Iterable<LeaderboardSearchResultDTO> searchResults) {
-                view.updateSearchResult(searchText, searchResults);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                final ErrorView view = clientFactory.createErrorView("Error while seaching with service search()", caught);
-                panel.setWidget(view.asWidget());
-            }
-        });
+                
+                @Override
+                public void onSuccess(ListResult<SearchResultDTO> result) {
+                    view.updateSearchResult(searchText, result.getValues());
+                }
+            });
+        }
     }
 
 }

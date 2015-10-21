@@ -6,7 +6,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
 import com.sap.sailing.gwt.home.desktop.places.events.EventsView;
 import com.sap.sailing.gwt.home.desktop.places.events.TabletAndDesktopEventsView;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.TabletAndDesktopSearchResultView;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsView;
 import com.sap.sailing.gwt.home.desktop.places.solutions.TabletAndDesktopSolutionsView;
@@ -20,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 
