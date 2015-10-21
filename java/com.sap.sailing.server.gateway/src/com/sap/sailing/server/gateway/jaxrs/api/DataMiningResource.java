@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -72,11 +69,11 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 type(MediaType.TEXT_PLAIN).build();
     }
 
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    public Response getPredefinedQueries() {
-        return predefinedQueryIdentifiersToJSON(getDataMiningServer().getPredefinedQueryIdentifiers());
-    }
+//    @GET
+//    @Produces("application/json;charset=UTF-8")
+//    public Response getPredefinedQueries() {
+//        return predefinedQueryIdentifiersToJSON(getDataMiningServer().getPredefinedQueryIdentifiers());
+//    }
     
     public Response predefinedQueryIdentifiersToJSON(Iterable<PredefinedQueryIdentifier> identifiers) {
         JSONArray predefinedQueryNames = new JSONArray();
@@ -91,19 +88,19 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
     
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("{identifier}")
-    public Response runPredefinedQuery(@PathParam("identifier") String identifier) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(identifier);
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(identifier);
-        } else {
-            response = runQuery(queryDefinitionDTO);
-        }
-        return response;
-    }
+//    @GET
+//    @Produces("application/json;charset=UTF-8")
+//    @Path("{identifier}")
+//    public Response runPredefinedQuery(@PathParam("identifier") String identifier) {
+//        Response response;
+//        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(identifier);
+//        if (queryDefinitionDTO == null) {
+//            response = getBadIdentifierErrorResponse(identifier);
+//        } else {
+//            response = runQuery(queryDefinitionDTO);
+//        }
+//        return response;
+//    }
     
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
         Response response;
