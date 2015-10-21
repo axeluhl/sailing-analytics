@@ -1,7 +1,6 @@
-package com.sap.sailing.gwt.home.desktop.places.searchresult;
+package com.sap.sailing.gwt.home.shared.places.searchresult;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SearchResultActivityProxy extends AbstractActivityProxy {

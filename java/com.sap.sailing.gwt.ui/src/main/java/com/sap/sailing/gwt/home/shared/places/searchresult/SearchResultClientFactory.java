@@ -1,6 +1,5 @@
-package com.sap.sailing.gwt.home.desktop.places.searchresult;
+package com.sap.sailing.gwt.home.shared.places.searchresult;
 
-import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.ui.client.refresh.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
