@@ -17,6 +17,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -70,7 +71,7 @@ public interface TracTracAdapter {
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow,  boolean useInternalMarkPassingAlgorithm,
+            long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
