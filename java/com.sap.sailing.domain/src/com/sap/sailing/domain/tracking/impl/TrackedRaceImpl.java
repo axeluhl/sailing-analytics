@@ -54,7 +54,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEv
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.BoatClass;
@@ -614,6 +614,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRegattaLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
@@ -3175,8 +3176,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            final TimePoint startOfTimeWindowToLoad = getStartOfTracking();
-            final TimePoint endOfTimeWindowToLoad = getEndOfTracking();
+            final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event
+            final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event
             loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
@@ -3235,6 +3236,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         try {
                             gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
                                     log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
+                            if (getOrCreateTrack(mark).getFirstRawFix() == null) {
+                                logger.fine("Loading mark positions from outside of start/end of tracking interval ("+
+                                        startOfTimeWindowToLoad+".."+endOfTimeWindowToLoad+
+                                        ") because no fixes were found in that interval");
+                                // got an empty track for the mark; try again without constraining the mapping interval
+                                // by start/end of tracking to at least attempt to get fixes at all in case there were any
+                                // within the device mapping interval specified
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
+                                        log, mark, /* startOfTimeWindowToLoad */ null, /* endOfTimeWindowToLoad */ null);
+                            }
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load track for " + mark, e);
                         }
@@ -3874,7 +3885,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                  new MapWithValueCollectionReducer<>(), allLogs).analyze();
          final Set<Mark> result = new HashSet<>();
          result.addAll(markMappings.keySet());
-         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new DefinedMarkFinder.Factory();
+         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new RaceLogDefinedMarkFinder.Factory();
          Set<Mark> marksDefinedInRaceLog = new MultiLogAnalyzer<>(analyzerFactory, new SetReducer<Mark>(), raceLogs).analyze();
          result.addAll(marksDefinedInRaceLog);
          return result;

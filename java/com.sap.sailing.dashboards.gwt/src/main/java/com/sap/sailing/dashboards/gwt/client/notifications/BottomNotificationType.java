@@ -4,18 +4,18 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public enum BottomNotificationType {
     
-    NEW_STARTANALYSIS_AVAILABLE(StringMessages.INSTANCE.dashboardNewStartAnalysisAvailable(), "#F0AB00", "#000000", true);
+    NEW_STARTANALYSIS_AVAILABLE(StringMessages.INSTANCE.dashboardNewStartAnalysisAvailable(), "#F0AB00", "#000000", 20000);
     
     private String message;
     private String backgroundColorAsHex;
     private String textColorAsHex;
-    private boolean shouldDisappearAfter20Seconds;
+    private int timeToDisappearInMilliseconds;
 
-    private BottomNotificationType(String message, String backgroundColorAsHex, String textColorAsHex, boolean shouldDisappearAfter20Seconds) {
+    private BottomNotificationType(String message, String backgroundColorAsHex, String textColorAsHex, int timeToDisappearInMilliseconds) {
         this.message = message;
         this.backgroundColorAsHex = backgroundColorAsHex;
         this.textColorAsHex = textColorAsHex;
-        this.shouldDisappearAfter20Seconds = shouldDisappearAfter20Seconds;    
+        this.timeToDisappearInMilliseconds = timeToDisappearInMilliseconds;    
     }
 
     public String getMessage() {
@@ -30,7 +30,7 @@ public enum BottomNotificationType {
         return textColorAsHex;
     }
 
-    public boolean isShouldDisappearAfter20Seconds() {
-        return shouldDisappearAfter20Seconds;
+    public int timeToDisappearInMilliseconds() {
+        return timeToDisappearInMilliseconds;
     }
 }

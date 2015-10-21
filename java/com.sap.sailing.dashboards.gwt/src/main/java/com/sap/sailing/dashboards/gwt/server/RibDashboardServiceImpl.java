@@ -40,7 +40,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -91,7 +90,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
     
     protected RacingEventService getRacingEventService() {
-        return racingEventServiceTracker.getService(); // grab the service
+        return racingEventServiceTracker.getService();
     }
     
     private PolarDataService getPolarService() {
@@ -138,7 +137,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         if(leaderboardName != null) {
             List<TrackedRace> trackedRaces = getTrackedRacesFromLeaderboard(leaderboardName);
             List<TrackedRace> filteredTrackedRaces = trackedRaces.stream().filter(trackedRace -> trackedRace.takesWindFixWithTimePoint(MillisecondsTimePoint.now())).collect(Collectors.toList());
-            if(filteredTrackedRaces != null) {
+            if(filteredTrackedRaces != null && filteredTrackedRaces.size() > 0) {
                 TrackedRace raceThatTakesWindNow = filteredTrackedRaces.get(0);
                 if(raceThatTakesWindNow != null) {
                     result = raceThatTakesWindNow.getRaceIdentifier();
@@ -182,16 +181,9 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
             for (RaceColumn column : lb.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
-                    if (race != null) {
+                    if (race != null && race.isLive(MillisecondsTimePoint.now())) {
+                        result = race;
                         notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(race);
-                        TimePoint startOfRace = race.getStartOfRace();
-                        // not relying on isLive() because the time window is too short
-                        // to retrieve wind information we need to extend the time window
-                        if (startOfRace != null && race.getEndOfRace() == null && 
-                                MillisecondsTimePoint.now().after(startOfRace.minus(Duration.ONE_MINUTE.times(20)))) {
-                            result = race;
-                            // no break here as we want to have the last race that is deemed to be live
-                        }
                     }
                 }
             }
@@ -286,20 +278,23 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     @Override
     public List<StartAnalysisDTO> getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString,
             String leaderboardName) {
-        List<StartAnalysisDTO> startAnalysisDTOs = new ArrayList<StartAnalysisDTO>();
-        try {
-            Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
-            List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
-            for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
-                StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController.checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
-                if (startAnalysisDTO != null) {
-                    startAnalysisDTOs.add(startAnalysisDTO);
+        List<StartAnalysisDTO> result = null;
+        if (competitorIdAsString != null && leaderboardName != null) {
+            result = new ArrayList<StartAnalysisDTO>();
+            try {
+                Competitor competitor = baseDomainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);
+                List<TrackedRace> trackedRacesForLeaderBoardName = getTrackedRacesFromLeaderboard(leaderboardName);
+                for (TrackedRace trackedRace : trackedRacesForLeaderBoardName) {
+                    StartAnalysisDTO startAnalysisDTO = startAnalysisCreationController.checkStartAnalysisForCompetitorInTrackedRace(competitor, trackedRace);
+                    if (startAnalysisDTO != null) {
+                        result.add(startAnalysisDTO);
+                    }
                 }
+            } catch (NullPointerException e) {
+                logger.log(Level.INFO, "", e);
             }
-        } catch (NullPointerException e) {
-            logger.log(Level.INFO, "", e);
         }
-        return startAnalysisDTOs;
+        return result;
     }
 
     @Override

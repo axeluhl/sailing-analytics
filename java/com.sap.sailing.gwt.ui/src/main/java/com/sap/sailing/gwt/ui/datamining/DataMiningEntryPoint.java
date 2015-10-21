@@ -23,6 +23,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
+
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
@@ -42,17 +43,16 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         rootPanel.add(splitPanel);
         
         DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(getStringMessages());
+        final ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
 
         DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
         selectionDockPanel.addNorth(createLogoAndTitlePanel(), 68);
         BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), dataMiningService, this, settingsControl);
+                new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), dataMiningService, this, settingsControl, resultsPresenter);
         queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
         selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
 
-        final ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
         splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
-        
         splitPanel.add(selectionDockPanel);
         
         final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);

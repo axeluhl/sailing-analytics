@@ -283,6 +283,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
     String competitorCharts();
     String selectAtLeastOneCompetitor();
+    String selectAtLeastOneCompetitorForInvitation();
     String directionChange();
     String speedChange();
     String degreesShort();
@@ -1021,7 +1022,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addRaceLogTracker();
     String addRaceLogTrackers();
     String denoteForRaceLogTracking();
-    String raceLogTracking();
     String startRaceLogTracking();
     String filterByLeaderboard();
     String removeLeaderboardFilter();
@@ -1113,6 +1113,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
+    String showWindStreamletColors();
     String showSimulationOverlay();
     String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
@@ -1245,7 +1246,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String distanceTraveledIncludingGateStartTooltip();
     String raceDistanceTraveledIncludingGateStartTooltip();
     String results();
-    String group();
+    String groupName();
     String valueAscending();
     String valueDescending();
     String sortBy();
@@ -1334,7 +1335,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String raceCalculatedTimeAtEstimatedArrivalAtCompetitorFarthestAheadInSecondsTooltip();
     String sailorInfo();
     String sailorInfoLongText();
+    String eventQuickfinder();
+    String regattaQuickfinder();
     String resultsQuickfinder();
+    String racesQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1370,6 +1374,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String currentOfTotal(int current, int total);
     String noFinishedRaces();
     String racesOverview();
+    String listFormatLabel();
+    String competitionFormatLabel();
     String empty();
     String runAQuery();
     String latestRegattaStandings();
@@ -1380,6 +1386,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String shownDecimals();
     String openFullscreenView();
     String closeFullscreenView();
+    String progress();
+    String videosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String photosCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String eventsHaveTakenPlace(@PluralCount(DefaultRule_1_0n.class) int eventCount);
+    String raceOffice();
     String analyze();
     String dataMiningSettings();
     String multiResultsPresenter();
@@ -1388,5 +1399,31 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String tabbedResultsPresenter();
     String polarResultsPresenter();
     String dataMiningRetrieval();
+    String actionWatch();
+    String actionAnalyze();
+    String inviteSelectedCompetitors();
     String denoteAllRacesForRaceLogTrackingShorctut();
+    String registerCompetitors();
+    String createDefaultRegattaLeaderboard();
+    String doYouWantToCreateADefaultRegattaLeaderboard();
+    String copyCourse();
+    String copyCompetitors();
+    String smartphoneTracking();
+    String flightsCount(@PluralCount(DefaultRule_1_0n.class) int count);
+    String viewQueryDefinition();
+    String queryDefinitionViewer();
+    String groupAverageAscending();
+    String groupAverageDescending();
+    String groupMedianAscending();
+    String groupMedianDescending();
+    String runPredefinedQuery();
+    String selectPredefinedQuery();
+    String predefinedQueryRunner();
+    String developerOptions();
+    String copyToClipboard();
+    String code();
+    String useClassGetName();
+    String useClassGetNameTooltip();
+    String useStringLiterals();
+    String useStringLiteralsTooltip();
 }

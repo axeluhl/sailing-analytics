@@ -45,8 +45,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Speed getSpeedAtStart() {
-        return getTrackedRace().getSpeed(getCompetitor(), 0);
+    public Speed getSpeedWhenStarting() {
+        return getTrackedRace().getSpeedWhenCrossingStartLine(getCompetitor());
     }
     
     @Override

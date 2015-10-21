@@ -1,13 +1,15 @@
 package com.sap.sse.datamining.impl.data;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 
-public class ClusterWithLowerAndUpperBoundaries<ElementType> extends AbstractCluster<ElementType> {
-
+public class ClusterWithLowerAndUpperBoundaries<ElementType extends Serializable> extends AbstractCluster<ElementType> {
+    private static final long serialVersionUID = -845964568416163995L;
+    
     /**
      * A {@link Cluster} with a lower and an upper boundary. This <code>Cluster</code> contains
      * all elements, that are contained by the given <code>lowerBound</code> <b>and</b> the given

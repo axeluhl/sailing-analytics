@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.event.EventActionUtil.RaceCallback;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
 
 public class OverallRacesStateCalculator implements RaceCallback {
     private boolean hasLiveRace = false;

@@ -110,10 +110,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
-            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o1, timePoint)
-            &&  getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint)) {
-                int preemptiveColumnResult = 0;
-                final Double o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
+            final boolean o1ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o1, timePoint);
+            final boolean o2ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint);
+            final Double o1Score;
+            if (o1ValidInTotalScore) {
+                o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
                 if (o1Score != null) {
                     o1Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o1Score));
                     if (needToResetO1ScoreUponNextValidResult) {
@@ -122,7 +123,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o1ScoreSum += o1Score;
                 }
-                final Double o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
+            } else {
+                o1Score = null;
+            }
+            final Double o2Score;
+            if (o2ValidInTotalScore) {
+                o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
                 if (o2Score != null) {
                     o2Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o2Score));
                     if (needToResetO2ScoreUponNextValidResult) {
@@ -131,6 +137,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o2ScoreSum += o2Score;
                 }
+            } else {
+                o2Score = null;
+            }
+            if (o1ValidInTotalScore && o2ValidInTotalScore) {
+                int preemptiveColumnResult = 0;
                 if (raceColumn.isMedalRace()) {
                     // only count the score for the medal race score if it wasn't a carry-forward column
                     if (!raceColumn.isCarryForward()) {
