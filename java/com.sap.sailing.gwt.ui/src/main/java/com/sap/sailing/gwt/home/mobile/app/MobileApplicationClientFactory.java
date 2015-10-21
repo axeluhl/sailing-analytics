@@ -7,10 +7,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
+import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
+import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.HomeService;
 import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
@@ -26,7 +29,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
  * @author pgtaboada
  *
  */
-public class MobileApplicationClientFactory extends SecureClientFactoryImpl implements ErrorAndBusyClientFactory {
+public class MobileApplicationClientFactory extends SecureClientFactoryImpl implements ErrorAndBusyClientFactory, SearchResultClientFactory {
     private final HomeServiceAsync homeService;
     private final MobilePlacesNavigator navigator;
     private final DispatchSystem dispatch = new DispatchSystemImpl();
@@ -81,4 +84,10 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl impl
     public ErrorView createErrorView(final String errorMessage, final Throwable errorReason) {
         return new ErrorViewImpl(errorMessage, errorReason, null);
     }
+    
+    @Override
+    public SearchResultView createSearchResultView() {
+        return new SearchResultViewImpl(navigator);
+    }
+
 }

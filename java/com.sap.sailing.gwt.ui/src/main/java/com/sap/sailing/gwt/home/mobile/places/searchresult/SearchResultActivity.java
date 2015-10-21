@@ -4,8 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
@@ -14,17 +13,17 @@ import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResultActivity extends AbstractActivity implements SearchResultView.Presenter {
 
-    private final MobileApplicationClientFactory clientFactory;
+    private final SearchResultClientFactory clientFactory;
     private final SearchResultPlace searchResultPlace;
     
-    public SearchResultActivity(SearchResultPlace place, MobileApplicationClientFactory clientFactory) {
+    public SearchResultActivity(SearchResultPlace place, SearchResultClientFactory clientFactory) {
         this.searchResultPlace = place;
         this.clientFactory = clientFactory;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        final SearchResultView view = new SearchResultViewImpl(clientFactory.getNavigator());
+        final SearchResultView view = clientFactory.createSearchResultView();
         panel.setWidget(view);
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
@@ -43,9 +42,4 @@ public class SearchResultActivity extends AbstractActivity implements SearchResu
         }
     }
     
-    @Override
-    public MobilePlacesNavigator getNavigator() {
-        return clientFactory.getNavigator();
-    }
-
 }
