@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -83,6 +84,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private CellTable<TracTracRaceRecordDTO> racesTable;
+    private static final String ZERO_AS_STRING = "0";
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
@@ -276,10 +278,42 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
+        final TextBox offsetToStartTimeOfSimulatedRace = new TextBox();
+        offsetToStartTimeOfSimulatedRace.setWidth("80px");
+        offsetToStartTimeOfSimulatedRace.setEnabled(false);
+        offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
+        
         final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateWithStartTimeNow());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
+        simulateWithStartTimeNowCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                offsetToStartTimeOfSimulatedRace.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
+                offsetToStartTimeOfSimulatedRace.setFocus(simulateWithStartTimeNowCheckBox.getValue());
+            }
+        });
+        final FlowPanel simulateAsLiveRacePanel = new FlowPanel();
+        simulateAsLiveRacePanel.add(simulateWithStartTimeNowCheckBox);
+        simulateAsLiveRacePanel.add(offsetToStartTimeOfSimulatedRace);
+        
+        simulateWithStartTimeNowCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                offsetToStartTimeOfSimulatedRace.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
+                offsetToStartTimeOfSimulatedRace.setFocus(simulateWithStartTimeNowCheckBox.getValue());
+            }
+        });
+        
+        final Label offsetToStartLabel = new Label("Offset to start in minutes:");
+        
+        final HorizontalPanel simulateWithOffsetPanel = new HorizontalPanel();
+        simulateWithOffsetPanel.add(offsetToStartLabel);
+        simulateWithOffsetPanel.add(offsetToStartTimeOfSimulatedRace);
+        
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
@@ -287,8 +321,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(1, 0, trackSettingsLabel);
         layoutTable.setWidget(1, 1, trackWindCheckBox);
         layoutTable.setWidget(2, 1, correctWindCheckBox);
-        layoutTable.setWidget(3, 1, simulateWithStartTimeNowCheckBox);
-        layoutTable.setWidget(4, 1, ignoreTracTracMarkPassingsCheckbox);
+        layoutTable.setWidget(3, 1, simulateAsLiveRacePanel);
+        layoutTable.setWidget(4, 1, simulateWithOffsetPanel);
+        layoutTable.setWidget(5, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
