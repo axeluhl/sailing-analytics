@@ -8,6 +8,7 @@ import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -15,6 +16,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class DataMiningDTOFactory {
@@ -97,6 +99,10 @@ public class DataMiningDTOFactory {
         return new DataRetrieverLevelDTO(retrieverLevel.getLevel(),
                                          retrieverLevel.getRetrieverType().getName(),
                                          localizedRetrievedDataType, retrieverLevel.getDefaultSettings());
+    }
+    
+    public <ResultType> QueryResultDTO<ResultType> createResultDTO(QueryResult<ResultType> result) {
+        return new QueryResultDTO<ResultType>(result.getState(), result.getResultType(), result.getResults(), result.getAdditionalData());
     }
 
 }

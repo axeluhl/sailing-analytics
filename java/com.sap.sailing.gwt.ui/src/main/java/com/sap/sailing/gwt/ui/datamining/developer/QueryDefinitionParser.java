@@ -85,16 +85,16 @@ public class QueryDefinitionParser {
         return builder.toString();
     }
 
-    public SafeHtml parseToCodeAsSafeHtml(StatisticQueryDefinitionDTO queryDefinition) {
-        String safeHtml = parseToCode(queryDefinition, new HtmlBuilder());
+    public SafeHtml parseToCodeAsSafeHtml(StatisticQueryDefinitionDTO queryDefinition, TypeToCodeStrategy typeStrategy) {
+        String safeHtml = parseToCode(queryDefinition, typeStrategy, new HtmlBuilder());
         return new OnlyToBeUsedInGeneratedCodeStringBlessedAsSafeHtml(safeHtml);
     }
     
-    public String parseToCodeAsText(StatisticQueryDefinitionDTO queryDefinition) {
-        return parseToCode(queryDefinition, new TextBuilder());
+    public String parseToCodeAsText(StatisticQueryDefinitionDTO queryDefinition, TypeToCodeStrategy typeStrategy) {
+        return parseToCode(queryDefinition, typeStrategy, new TextBuilder());
     }
     
-    private String parseToCode(StatisticQueryDefinitionDTO queryDefinition, Builder builder) {
+    private String parseToCode(StatisticQueryDefinitionDTO queryDefinition, TypeToCodeStrategy typeStrategy, Builder builder) {
         String functionClassName = FunctionDTO.class.getSimpleName();
         String aggregatorClassName = AggregationProcessorDefinitionDTO.class.getSimpleName();
         String retrieverLevelClassName = DataRetrieverLevelDTO.class.getSimpleName();
@@ -110,13 +110,13 @@ public class QueryDefinitionParser {
 
         // Extraction Function
         String statisticVariable = "statistic";
-        builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate())).appendLineBreak();
+        builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate(), typeStrategy)).appendLineBreak();
 
         // Aggregator Definition
         String aggregatorVariable = "aggregator";
         AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
         builder.appendText(aggregatorClassName + " " + aggregatorVariable + " = new " + aggregatorClassName + "(" + literal(aggregator.getMessageKey()) + ", " +
-                           literal(aggregator.getExtractedTypeName()) + ", " + literal(aggregator.getAggregatedTypeName()) + ", \"\");").appendLineBreak()
+                           typeStrategy.toCode(aggregator.getExtractedTypeName()) + ", " + typeStrategy.toCode(aggregator.getAggregatedTypeName()) + ", \"\");").appendLineBreak()
                .appendLineBreak();
         
         // Retriever Levels and Retriever Chain Definition
@@ -124,15 +124,15 @@ public class QueryDefinitionParser {
         builder.appendText(arrayListClassName + "<" + retrieverLevelClassName + "> " + retrieverLevelsVariable + " = new " + arrayListClassName + "<>();").appendLineBreak();
         for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
             LocalizedTypeDTO retrievedType = retrieverLevel.getRetrievedDataType();
-            String retrievedTypeAsCode = "new " + localizedTypeClassName + "(" + literal(retrievedType.getTypeName()) + ", " + literal(retrievedType.getDisplayName()) + ")";
+            String retrievedTypeAsCode = "new " + localizedTypeClassName + "(" + typeStrategy.toCode(retrievedType.getTypeName()) + ", " + literal(retrievedType.getDisplayName()) + ")";
             String retrieverSettingsAsCode = "null";
             // TODO Handle the retriever level settings
             builder.appendText(retrieverLevelsVariable + ".add(new " + retrieverLevelClassName + "(" + retrieverLevel.getLevel() + ", " +
-                               literal(retrieverLevel.getRetrieverTypeName()) + ", " + retrievedTypeAsCode + ", " + retrieverSettingsAsCode + "));").appendLineBreak();
+                               typeStrategy.toCode(retrieverLevel.getRetrieverTypeName()) + ", " + retrievedTypeAsCode + ", " + retrieverSettingsAsCode + "));").appendLineBreak();
         }
         String retrieverChainVariable = "retrieverChain";
         builder.appendText(retrieverChainClassName + " " + retrieverChainVariable + " = new " + retrieverChainClassName + "(\"\", " + 
-                           literal(retrieverChain.getDataSourceTypeName()) + ", " + retrieverLevelsVariable + ");").appendLineBreak()
+                           typeStrategy.toCode(retrieverChain.getDataSourceTypeName()) + ", " + retrieverLevelsVariable + ");").appendLineBreak()
                .appendLineBreak();
         
         // Query Definition instantiation
@@ -152,7 +152,7 @@ public class QueryDefinitionParser {
                 int filterDimensionCounter = 0;
                 for (FunctionDTO filterDimension : levelFilterSelection.keySet()) {
                     String filterDimensionVariable = "filterDimension" + filterDimensionCounter;
-                    builder.appendText(functionToCode(filterDimensionVariable, filterDimension)).appendLineBreak();
+                    builder.appendText(functionToCode(filterDimensionVariable, filterDimension, typeStrategy)).appendLineBreak();
                     
                     String dimensionFilterSelectionVariable = filterDimensionVariable + "_Selection";
                     builder.appendText(hashSetClassName + "<" + serializableClassName + "> " + dimensionFilterSelectionVariable +
@@ -181,7 +181,7 @@ public class QueryDefinitionParser {
             }
             
             String dimensionToGroupByVariable = "dimensionToGroupBy" + dimensionToGroupByCounter;
-            builder.appendText(functionToCode(dimensionToGroupByVariable, dimensionToGroupBy)).appendLineBreak();
+            builder.appendText(functionToCode(dimensionToGroupByVariable, dimensionToGroupBy, typeStrategy)).appendLineBreak();
             builder.appendText(queryDefinitionVariable + ".appendDimensionToGroupBy(" + dimensionToGroupByVariable + ");");
             
             first = false;
@@ -191,13 +191,14 @@ public class QueryDefinitionParser {
         return builder.toString();
     }
     
-    private String functionToCode(String functionVariable, FunctionDTO function) {
+    private String functionToCode(String functionVariable, FunctionDTO function, TypeToCodeStrategy typeStrategy) {
         String functionClassName = FunctionDTO.class.getSimpleName();
         return functionClassName + " " + functionVariable + " = new " + functionClassName + "(" + function.isDimension() + ", " + literal(function.getFunctionName()) + ", " +
-               literal(function.getSourceTypeName()) + ", " + literal(function.getReturnTypeName()) + ", " + functionParametersToCode(function) + ", \"\", 0);";
+               typeStrategy.toCode(function.getSourceTypeName()) + ", " + typeStrategy.toCode(function.getReturnTypeName()) + ", " +
+               functionParametersToCode(function, typeStrategy) + ", \"\", 0);";
     }
     
-    private String functionParametersToCode(FunctionDTO function) {
+    private String functionParametersToCode(FunctionDTO function, TypeToCodeStrategy typeStrategy) {
         List<String> parameterTypeNames = function.getParameterTypeNames();
         if (parameterTypeNames.isEmpty()) {
             return "new " + ArrayList.class.getSimpleName() + "<" + String.class.getSimpleName() + ">()";
@@ -210,11 +211,30 @@ public class QueryDefinitionParser {
             if (!first) {
                 builder.append(", ");
             }
-            builder.append("\"" + parameterTypeName + "\"");
+            builder.append(typeStrategy.toCode(parameterTypeName));
             first = false;
         }
         builder.append(")");
         return builder.toString();
+    }
+    
+    public enum TypeToCodeStrategy {
+        CLASS_GET_NAME {
+            @Override
+            public String toCode(String fullQualifiedTypeName) {
+                String[] splittedTypeName = fullQualifiedTypeName.split("[.]");
+                String typeName = splittedTypeName[splittedTypeName.length - 1];
+                return typeName + ".class.getName()";
+            }
+        },
+        STRING_LITERALS {
+            @Override
+            public String toCode(String fullQualifiedTypeName) {
+                return literal(fullQualifiedTypeName);
+            }
+        };
+
+        public abstract String toCode(String fullQualifiedTypeName);
     }
     
     private static String literal(Serializable value) {

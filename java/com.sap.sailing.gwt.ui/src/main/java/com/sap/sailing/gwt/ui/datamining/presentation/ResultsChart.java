@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -338,7 +339,17 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     }
     
     private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
-        return groupKey.hasSubKey() ? groupKey.getSubKey() : simpleResultSeriesKey;
+        if (groupKey.hasSubKeys()) {
+            List<GroupKey> subKeys = groupKey.getSubKeys();
+            GroupKey subMainKey = subKeys.get(0);
+            List<GroupKey> subSubKeys = new ArrayList<>();
+            for (int i = 1; i < subKeys.size(); i++) {
+                subSubKeys.add(subKeys.get(i));
+            }
+            return subSubKeys.isEmpty() ? subMainKey : new CompoundGroupKey(subMainKey, subSubKeys);
+        } else {
+            return simpleResultSeriesKey;
+        }
     }
 
     private Chart createChart() {

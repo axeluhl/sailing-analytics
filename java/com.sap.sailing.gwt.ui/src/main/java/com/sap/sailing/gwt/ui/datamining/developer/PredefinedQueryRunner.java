@@ -16,12 +16,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.SimpleObjectRenderer;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -39,7 +40,7 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     private final Button showDialogButton;
     private final DialogBox dialogBox;
     private final SimpleBusyIndicator busyIndicator;
-    private final ValueListBox<String> selectionListBox;
+    private final ValueListBox<PredefinedQueryIdentifier> selectionListBox;
     private final Button runButton;
 
     public PredefinedQueryRunner(DataMiningSession session, StringMessages stringMessages,
@@ -84,7 +85,12 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
         busyIndicator.setVisible(false);
         contentPanel.add(busyIndicator);
         
-        selectionListBox = new ValueListBox<>(new SimpleObjectRenderer<String>());
+        selectionListBox = new ValueListBox<>(new AbstractObjectRenderer<PredefinedQueryIdentifier>() {
+            @Override
+            protected String convertObjectToString(PredefinedQueryIdentifier nonNullObject) {
+                return nonNullObject.getDescription();
+            }
+        });
         contentPanel.add(selectionListBox);
         
         DockPanel dockPanel = new DockPanel();
@@ -105,17 +111,17 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
         selectionListBox.setVisible(false);
         busyIndicator.setVisible(true);
         dialogBox.center();
-        dataMiningService.getPredefinedQueryNames(new AsyncCallback<HashSet<String>>() {
+        dataMiningService.getPredefinedQueryIdentifiers(new AsyncCallback<HashSet<PredefinedQueryIdentifier>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the predefined query names: " + caught.getMessage());
                 busyIndicator.setVisible(false);
             }
             @Override
-            public void onSuccess(HashSet<String> predefinedQueryNames) {
-                if (!predefinedQueryNames.isEmpty()) {
-                    String valueToBeSelected = Util.get(predefinedQueryNames, 0);
-                    List<String> acceptableValues = new ArrayList<>(predefinedQueryNames);
+            public void onSuccess(HashSet<PredefinedQueryIdentifier> predefinedQueryIdentifiers) {
+                if (!predefinedQueryIdentifiers.isEmpty()) {
+                    PredefinedQueryIdentifier valueToBeSelected = Util.get(predefinedQueryIdentifiers, 0);
+                    List<PredefinedQueryIdentifier> acceptableValues = new ArrayList<>(predefinedQueryIdentifiers);
                     selectionListBox.setValue(valueToBeSelected);
                     selectionListBox.setAcceptableValues(acceptableValues);
                     
@@ -130,9 +136,9 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     }
     
     protected void runSelectedPredefinedQuery() {
-        String predefinedQueryName = selectionListBox.getValue();
+        PredefinedQueryIdentifier predefinedQueryIdentifier = selectionListBox.getValue();
         resultsPresenter.showBusyIndicator();
-        dataMiningService.runPredefinedQuery(session, predefinedQueryName, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Object>>() {
+        dataMiningService.runPredefinedQuery(session, predefinedQueryIdentifier, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<Object>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error running the query: " + caught.getMessage());
