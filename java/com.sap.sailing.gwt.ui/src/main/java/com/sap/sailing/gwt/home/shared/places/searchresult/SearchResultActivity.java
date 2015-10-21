@@ -6,7 +6,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
+import com.sap.sailing.gwt.ui.shared.dispatch.StringsResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchResultsAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchServerNamesAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResultActivity extends AbstractActivity {
@@ -23,22 +25,42 @@ public class SearchResultActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(searchResultPlace.getTitle());
         final SearchResultView view = clientFactory.createSearchResultView();
-        panel.setWidget(view.asWidget());
+        panel.setWidget(view);
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
-            clientFactory.getDispatch().execute(new GetSearchResultsAction(searchText), 
-                    new AsyncCallback<ListResult<SearchResultDTO>>() {
+            GetSearchServerNamesAction action = new GetSearchServerNamesAction();
+            searchOnServer(panel, view, new GetSearchResultsAction(searchText));
+            clientFactory.getDispatch().execute(action, new AsyncSearchCallback<StringsResult>(panel) {
                 @Override
-                public void onFailure(Throwable caught) {
-                    panel.setWidget(clientFactory.createErrorView("Error while executing search!", caught));
-                }
-                
-                @Override
-                public void onSuccess(ListResult<SearchResultDTO> result) {
-                    view.updateSearchResult(searchText, result.getValues());
+                public void onSuccess(StringsResult result) {
+                    for (String serverName : result.getValues()) {
+                        searchOnServer(panel, view, new GetSearchResultsAction(searchText, serverName));
+                    }
                 }
             });
         }
     }
+    
+    private void searchOnServer(AcceptsOneWidget panel, final SearchResultView view, GetSearchResultsAction action) {
+        clientFactory.getDispatch().execute(action, new AsyncSearchCallback<ListResult<SearchResultDTO>>(panel) {
+            @Override
+            public void onSuccess(ListResult<SearchResultDTO> result) {
+                view.updateSearchResult(searchResultPlace.getSearchText(), result.getValues());
+            }
+        });
+    }
+    
+    private abstract class AsyncSearchCallback<T> implements AsyncCallback<T> {
+        private final AcceptsOneWidget panel;
 
+        private AsyncSearchCallback(AcceptsOneWidget panel) {
+            this.panel = panel;
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+            panel.setWidget(clientFactory.createErrorView("Error while executing search!", caught));
+        }
+    }
+    
 }

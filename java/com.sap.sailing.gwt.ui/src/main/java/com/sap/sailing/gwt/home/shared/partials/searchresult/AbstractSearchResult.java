@@ -20,6 +20,8 @@ import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public abstract class AbstractSearchResult extends Composite {
     
+    private int resultsCount = 0;
+    
     protected final void init(final AbstractPlaceNavigator navigator, Widget widget) {
         super.initWidget(widget);
         getSearchTextInputUi().getElement().setAttribute("placeholder", TextMessages.INSTANCE.searchResultHeaderPlaceholder());
@@ -44,12 +46,12 @@ public abstract class AbstractSearchResult extends Composite {
     }
 
     public void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems) {
-        getSearchResultContainerUi().clear();
         getSearchTextInputUi().setValue(searchText);
-        getSearchResultAmountUi().setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(searchResultItems.size(), searchText));
         for (SearchResultDTO searchResult : searchResultItems) {
             addSearchResultItem(searchResult);
+            resultsCount++;
         }
+        getSearchResultAmountUi().setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(resultsCount, searchText));
     }
     
     protected abstract TextBox getSearchTextInputUi();
