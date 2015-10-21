@@ -3358,6 +3358,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
         loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
+        try {
+            // The log is attached to the tracked race by a background thread; this method wants
+            // to guarantee that the log is at least really attached to the TrackedRace before returning:
+            waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+        }
     }
 
     @Override
