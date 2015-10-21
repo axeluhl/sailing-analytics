@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchResultsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
@@ -15,16 +16,15 @@ public class SearchResultActivity extends AbstractActivity implements SearchResu
 
     private final MobileApplicationClientFactory clientFactory;
     private final SearchResultPlace searchResultPlace;
-    private final SearchResultView view;
     
     public SearchResultActivity(SearchResultPlace place, MobileApplicationClientFactory clientFactory) {
         this.searchResultPlace = place;
         this.clientFactory = clientFactory;
-        this.view = new SearchResultViewImpl(this);
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        final SearchResultView view = new SearchResultViewImpl(clientFactory.getNavigator());
         panel.setWidget(view);
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
@@ -32,7 +32,7 @@ public class SearchResultActivity extends AbstractActivity implements SearchResu
                     new AsyncCallback<ListResult<SearchResultDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    // TODO Auto-generated method stub
+                    panel.setWidget(clientFactory.createErrorView("Error while executing search!", caught));
                 }
                 
                 @Override
@@ -41,11 +41,6 @@ public class SearchResultActivity extends AbstractActivity implements SearchResu
                 }
             });
         }
-    }
-    
-    @Override
-    public void doSearch(final String searchString) {
-        getNavigator().getSearchResultNavigation(searchString).goToPlace();
     }
     
     @Override
