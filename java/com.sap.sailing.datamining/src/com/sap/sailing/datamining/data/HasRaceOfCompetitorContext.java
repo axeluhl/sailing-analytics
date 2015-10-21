@@ -28,17 +28,20 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=4)
     public Double getRankAtFirstMark();
-
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=5)
-    public Double getNumberOfTacks();
-
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=6)
-    public Double getNumberOfJibes();
-
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=7)
-    public Double getNumberOfPenaltyCircles();
     
-    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=8)
+    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=5)
+    public int getNumberOfManeuvers();
+
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=6)
+    public int getNumberOfTacks();
+
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=7)
+    public int getNumberOfJibes();
+
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=8)
+    public int getNumberOfPenaltyCircles();
+    
+    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=9)
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
 }

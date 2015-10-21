@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.shared;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 public interface GroupKey extends Serializable, Comparable<GroupKey> {
@@ -14,7 +15,7 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
      * Checks if this group key has a sub key. For example if the data was grouped primary by competitor and secondary by leg type.
      * @return true, if this group key has a sub key
      */
-    public boolean hasSubKey();
+    public boolean hasSubKeys();
 
     /**
      * @return the main key, if there is one. Otherwise it returns <code>this</code>. 
@@ -22,8 +23,14 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
     public GroupKey getMainKey();
     
     /**
-     * @return the sub key or null, if there's none.
+     * @return the sub keys or an empty list, if there are none.
      */
-    public GroupKey getSubKey();
+    public List<GroupKey> getSubKeys();
+    
+    //Enforce hash code and equals in all subclasses
+    @Override
+    public abstract boolean equals(Object other);
+    @Override
+    public abstract int hashCode();
 
 }

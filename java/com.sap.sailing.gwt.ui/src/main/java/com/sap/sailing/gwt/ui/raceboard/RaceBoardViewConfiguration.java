@@ -14,6 +14,7 @@ public class RaceBoardViewConfiguration {
     private final boolean autoSelectMedia;
     private final String defaultMedia;
     private final boolean showViewStreamlets;
+    private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
@@ -23,6 +24,7 @@ public class RaceBoardViewConfiguration {
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
     public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
     public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
+    public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
@@ -31,18 +33,19 @@ public class RaceBoardViewConfiguration {
 
     public RaceBoardViewConfiguration() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
-                /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewSimulation */ false,
+                /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewStreamletColors */ false, /* showViewSimulation */ false,
         /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
             boolean autoSelectMedia, String defaultMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
         this.showViewStreamlets = showViewStreamlets;
+        this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.autoSelectMedia = autoSelectMedia;
@@ -59,6 +62,10 @@ public class RaceBoardViewConfiguration {
 
     public boolean isShowViewStreamlets() {
         return showViewStreamlets;
+    }
+
+    public boolean isShowViewStreamletColors() {
+        return showViewStreamletColors;
     }
 
     public boolean isShowViewSimulation() {
