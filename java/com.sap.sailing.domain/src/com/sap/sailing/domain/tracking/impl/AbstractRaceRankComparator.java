@@ -79,7 +79,6 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
             TrackedLegOfCompetitor o1Leg;
             trackedRace.lockForRead(o1MarkPassings);
             try {
-                // FIXME for the XMLExportTest.testExportingESSNice2014 the "inclusive" parameter doesn't seem to work properly; problem is caused by the MarkPassingByTimeComparator falling back to competitor ID if times are equal
                 o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
                         markPassingWithTimePoint, /* inclusive */true);
                 o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
