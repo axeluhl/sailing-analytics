@@ -4,7 +4,7 @@ import static com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil.form
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 
 public abstract class AbstractSearchResultItem extends Widget {
 

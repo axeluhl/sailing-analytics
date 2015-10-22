@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import com.google.gwt.event.logical.shared.HasAttachHandlers;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 
 public class AutoAttachingRefreshManager extends LifecycleRefreshManager {
     private static final Logger LOG = Logger.getLogger(AutoAttachingRefreshManager.class.getName());
@@ -15,7 +15,7 @@ public class AutoAttachingRefreshManager extends LifecycleRefreshManager {
 
     private AcceptsOneWidget container;
     
-    public AutoAttachingRefreshManager(Widget content, AcceptsOneWidget container, DispatchSystem actionExecutor) {
+    public AutoAttachingRefreshManager(Widget content, AcceptsOneWidget container, SailingDispatchSystem actionExecutor) {
         super((container instanceof HasAttachHandlers) ? ((HasAttachHandlers) container) : content, actionExecutor);
         this.content = content;
         this.container = container;

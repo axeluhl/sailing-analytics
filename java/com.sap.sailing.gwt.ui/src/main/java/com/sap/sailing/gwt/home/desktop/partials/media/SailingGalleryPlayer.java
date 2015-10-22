@@ -12,7 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.common.Util;
 
 public class SailingGalleryPlayer extends ResizeComposite {

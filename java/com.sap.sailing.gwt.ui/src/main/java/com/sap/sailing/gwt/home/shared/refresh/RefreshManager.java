@@ -9,18 +9,18 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.dispatch.client.DTO;
+import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sailing.gwt.home.communication.SailingAction;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.DefaultActionProvider;
-import com.sap.sailing.gwt.ui.shared.dispatch.Action;
-import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
 import com.sap.sse.common.Duration;
 
 public abstract class RefreshManager {
     private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());
 
     private static final long PAUSE_ON_ERROR = Duration.ONE_SECOND.times(30).asMillis();
-    private List<RefreshHolder<DTO, Action<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
+    private List<RefreshHolder<DTO, SailingAction<ResultWithTTL<DTO>>>> refreshables = new ArrayList<>();
 
     private boolean scheduled;
     private final Timer timer = new Timer() {
@@ -30,11 +30,11 @@ public abstract class RefreshManager {
         }
     };
 
-    private final DispatchSystem actionExecutor;
+    private final SailingDispatchSystem actionExecutor;
     
     boolean started = false;
 
-    public RefreshManager(DispatchSystem actionExecutor) {
+    public RefreshManager(SailingDispatchSystem actionExecutor) {
         this.actionExecutor = actionExecutor;
     }
     
@@ -60,13 +60,13 @@ public abstract class RefreshManager {
 
     private void update() {
 
-        for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
+        for (final RefreshHolder<DTO, SailingAction<ResultWithTTL<DTO>>> refreshable : refreshables) {
             // Everything that needs refresh within the next 5000ms will be refreshed now.
             // This makes it possible to use batching resulting in less requests.
             if (refreshable.provider.isActive() && !refreshable.callRunning
                     && refreshable.timeout < System.currentTimeMillis() + ResultWithTTL.MAX_TIME_TO_LOAD_EARLIER.asMillis()) {
                 refreshable.callRunning = true;
-                final Action<ResultWithTTL<DTO>> action = refreshable.provider.getAction();
+                final SailingAction<ResultWithTTL<DTO>> action = refreshable.provider.getAction();
                 actionExecutor.execute(action, new AsyncCallback<ResultWithTTL<DTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -118,7 +118,7 @@ public abstract class RefreshManager {
                 }
 
                 Long nextUpdate = null;
-                for (final RefreshHolder<DTO, Action<ResultWithTTL<DTO>>> refreshable : refreshables) {
+                for (final RefreshHolder<DTO, SailingAction<ResultWithTTL<DTO>>> refreshable : refreshables) {
                     if (refreshable.callRunning || !refreshable.provider.isActive()) {
                         continue;
                     }
@@ -151,21 +151,21 @@ public abstract class RefreshManager {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget,
+    public <D extends DTO, A extends SailingAction<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget,
             ActionProvider<A> provider) {
         refreshables.add(new RefreshHolder(widget, provider));
         reschedule();
     }
 
-    public <D extends DTO, A extends Action<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget, A action) {
+    public <D extends DTO, A extends SailingAction<ResultWithTTL<D>>> void add(RefreshableWidget<? super D> widget, A action) {
         add(widget, new DefaultActionProvider<>(action));
     }
     
-    public DispatchSystem getDispatchSystem() {
+    public SailingDispatchSystem getDispatchSystem() {
         return actionExecutor;
     }
 
-    private static class RefreshHolder<D extends DTO, A extends Action<ResultWithTTL<D>>> {
+    private static class RefreshHolder<D extends DTO, A extends SailingAction<ResultWithTTL<D>>> {
         private final RefreshableWidget<D> widget;
         private final ActionProvider<A> provider;
 

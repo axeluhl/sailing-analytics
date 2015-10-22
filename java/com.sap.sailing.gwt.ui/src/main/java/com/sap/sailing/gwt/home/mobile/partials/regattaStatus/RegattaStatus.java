@@ -8,6 +8,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
+import com.sap.sailing.gwt.home.communication.event.RegattasAndLiveRacesDTO;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
@@ -15,9 +18,6 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RegattasAndLiveRacesDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class RegattaStatus extends Composite implements RefreshableWidget<RegattasAndLiveRacesDTO> {
 

@@ -6,8 +6,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.gwt.home.communication.start.StageEventType;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
-import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;

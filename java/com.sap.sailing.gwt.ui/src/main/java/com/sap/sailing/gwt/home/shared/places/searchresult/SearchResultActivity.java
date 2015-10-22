@@ -5,11 +5,11 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.StringsResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchResultsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.GetSearchServerNamesAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
+import com.sap.sailing.gwt.dispatch.client.ListResult;
+import com.sap.sailing.gwt.dispatch.client.StringsResult;
+import com.sap.sailing.gwt.home.communication.search.GetSearchResultsAction;
+import com.sap.sailing.gwt.home.communication.search.GetSearchServerNamesAction;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 
 public class SearchResultActivity extends AbstractActivity {
    

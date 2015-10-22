@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.places.event.minileaderboard;
 
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardView.Presenter;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 
 public class MiniLeaderboardActivity extends AbstractEventActivity<MiniLeaderboardPlace> implements Presenter {
 

@@ -10,14 +10,14 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class StandingsList extends Widget implements RefreshableWidget<GetMiniLeaderboardDTO> {
     interface MyUiBinder extends UiBinder<Element, StandingsList> {

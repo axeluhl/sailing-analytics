@@ -14,6 +14,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
@@ -22,9 +25,6 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class SeriesHeader extends Composite {
     private static SeriesHeaderUiBinder uiBinder = GWT.create(SeriesHeaderUiBinder.class);

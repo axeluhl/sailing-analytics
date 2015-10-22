@@ -7,14 +7,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDTO;
+import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
 
 public class RegattaCompetitionSeries extends Composite {
 

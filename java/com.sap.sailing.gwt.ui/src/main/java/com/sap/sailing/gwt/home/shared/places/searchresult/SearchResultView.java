@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.shared.places.searchresult;
 import java.util.Collection;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 
 public interface SearchResultView extends IsWidget {
     

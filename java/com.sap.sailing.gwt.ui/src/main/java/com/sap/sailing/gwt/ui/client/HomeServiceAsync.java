@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
 
 
 /**

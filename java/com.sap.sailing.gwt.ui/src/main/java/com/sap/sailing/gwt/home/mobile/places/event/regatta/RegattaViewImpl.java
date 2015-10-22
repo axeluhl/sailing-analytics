@@ -4,6 +4,11 @@ import java.util.Collection;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
 import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
@@ -12,11 +17,6 @@ import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
 
 public class RegattaViewImpl extends AbstractEventView<RegattaView.Presenter> implements RegattaView {
 

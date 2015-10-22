@@ -76,7 +76,7 @@
 	<servlet>
 	    <display-name>Dispatch Service</display-name>
 	    <servlet-name>DispatchService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.ui.server.dispatch.DispatchRPCImpl</servlet-class>
+	    	<servlet-class>com.sap.sailing.gwt.home.server.servlets.DispatchRPCServletImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DispatchService</servlet-name>

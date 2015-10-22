@@ -6,11 +6,11 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystemImpl;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
@@ -32,7 +32,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 public class MobileApplicationClientFactory extends SecureClientFactoryImpl implements ErrorAndBusyClientFactory, SearchResultClientFactory {
     private final HomeServiceAsync homeService;
     private final MobilePlacesNavigator navigator;
-    private final DispatchSystem dispatch = new DispatchSystemImpl();
+    private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 
     public MobileApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -66,7 +66,7 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl impl
         return homeService;
     }
 
-    public DispatchSystem getDispatch() {
+    public SailingDispatchSystem getDispatch() {
         return dispatch;
     }
 

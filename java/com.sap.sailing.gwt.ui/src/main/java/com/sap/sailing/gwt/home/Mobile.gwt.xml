@@ -5,6 +5,8 @@
 <module>
 	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
 
+	<inherits name="com.sap.sailing.gwt.dispatch.Dispatch" />
+	
 	<!-- Other module inherits -->
 	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
@@ -21,6 +23,7 @@
 	<source path='shared' />
 	<source path='client' />
 	<source path='mobile' />
+	<source path='communication' />
 		
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
 	

@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.partials.searchresult.AbstractSearchResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResult extends AbstractSearchResult {
 

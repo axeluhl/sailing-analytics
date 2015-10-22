@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
-import static com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
+import static com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
 
 import java.util.Date;
 
@@ -27,6 +27,17 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
+import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
+import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
+import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
@@ -34,17 +45,6 @@ import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.LiveRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
-import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceProgressDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
-import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
-import com.sap.sailing.gwt.ui.shared.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.Duration;

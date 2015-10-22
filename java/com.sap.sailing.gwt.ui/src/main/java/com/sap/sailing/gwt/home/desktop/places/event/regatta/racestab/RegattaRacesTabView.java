@@ -15,6 +15,17 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.dispatch.client.DTO;
+import com.sap.sailing.gwt.dispatch.client.ListResult;
+import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sailing.gwt.home.communication.SailingAction;
+import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
+import com.sap.sailing.gwt.home.communication.event.GetFinishedRacesAction;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
+import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
@@ -37,17 +48,6 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.Action;
-import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetFinishedRacesAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -145,7 +145,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private <D extends DTO, A extends Action<ResultWithTTL<D>>> void addRacesAction(
+    private <D extends DTO, A extends SailingAction<ResultWithTTL<D>>> void addRacesAction(
             RefreshableWidget<? super D> widget, A action, Navigation assosiatedTab) {
         refreshManager.add(widget, new RegattaRacesTabViewActionProvider<>(action, assosiatedTab));
     }
@@ -183,7 +183,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
     
-    private class RegattaRacesTabViewActionProvider<A extends Action<?>> extends AbstractActionProvider<A> {
+    private class RegattaRacesTabViewActionProvider<A extends SailingAction<?>> extends AbstractActionProvider<A> {
         private final Navigation assosiatedTab;
 
         public RegattaRacesTabViewActionProvider(A action, Navigation assosiatedTab) {

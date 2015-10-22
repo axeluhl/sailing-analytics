@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.stage;
 
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
 
 /**
  * Teaser band with no action on the homepage stage

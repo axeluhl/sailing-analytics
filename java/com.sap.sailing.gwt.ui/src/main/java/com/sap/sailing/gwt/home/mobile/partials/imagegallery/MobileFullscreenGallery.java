@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO>{

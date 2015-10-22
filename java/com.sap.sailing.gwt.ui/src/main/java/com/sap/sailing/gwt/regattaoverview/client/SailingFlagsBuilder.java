@@ -12,7 +12,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
+import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 
 public class SailingFlagsBuilder {
     

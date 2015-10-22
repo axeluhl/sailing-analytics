@@ -5,16 +5,16 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.dispatch.client.ListResult;
+import com.sap.sailing.gwt.home.communication.start.EventQuickfinderDTO;
+import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
+import com.sap.sailing.gwt.home.communication.start.GetRecentEventsAction;
+import com.sap.sailing.gwt.home.communication.start.GetStagedEventsAction;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.start.GetRecentEventsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.start.GetStagedEventsAction;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class StartActivity extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;

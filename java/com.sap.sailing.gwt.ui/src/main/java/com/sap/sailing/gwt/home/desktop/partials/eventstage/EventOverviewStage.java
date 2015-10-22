@@ -12,6 +12,16 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
+import com.sap.sailing.gwt.dispatch.client.ListResult;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageContentDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewVideoStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOverviewStageAction;
+import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.desktop.partials.updates.UpdatesBox;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -21,16 +31,6 @@ import com.sap.sailing.gwt.home.shared.partials.message.Message;
 import com.sap.sailing.gwt.home.shared.partials.video.Video;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class EventOverviewStage extends Composite {
     

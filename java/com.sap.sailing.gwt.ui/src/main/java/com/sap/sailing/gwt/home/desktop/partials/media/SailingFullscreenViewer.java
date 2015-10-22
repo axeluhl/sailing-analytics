@@ -5,8 +5,8 @@ import java.util.Collection;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryPlayer> implements

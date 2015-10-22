@@ -13,10 +13,14 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.shared.dispatch.Action;
-import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
-import com.sap.sailing.gwt.ui.shared.dispatch.DispatchException;
-import com.sap.sailing.gwt.ui.shared.dispatch.Result;
+import com.sap.sailing.gwt.dispatch.client.DispatchAsync;
+import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sailing.gwt.dispatch.client.caching.CachingDispatch;
+import com.sap.sailing.gwt.dispatch.client.caching.HasClientCacheTotalTimeToLive;
+import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sailing.gwt.home.communication.SailingAction;
+import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 
@@ -104,7 +108,7 @@ public class CacheDispatchTest {
         checkIfExpired(holder, action, 110);
     }
 
-    private <R extends Result, A extends Action<R>> void checkIfCached(final ResultHolder holder, A action, int waitTime) {
+    private <R extends Result, A extends SailingAction<R>> void checkIfCached(final ResultHolder holder, A action, int waitTime) {
         cd.execute(action, new SimpleCallback<R>() {
             @Override
             public void onSuccess(Result result) {
@@ -120,7 +124,7 @@ public class CacheDispatchTest {
         });
     }
 
-    private <R extends Result, A extends Action<R>> void checkIfExpired(final ResultHolder holder, A action,
+    private <R extends Result, A extends SailingAction<R>> void checkIfExpired(final ResultHolder holder, A action,
             int waitTime) {
         wait(waitTime);
         cd.execute(action, new SimpleCallback<R>() {
@@ -131,18 +135,18 @@ public class CacheDispatchTest {
         });
     }
 
-    private class SomeNoCacheAction implements Action<SomeResult> {
+    private class SomeNoCacheAction implements SailingAction<SomeResult> {
         @Override
-        public SomeResult execute(DispatchContext ctx) throws Exception {
+        public SomeResult execute(SailingDispatchContext ctx) throws Exception {
             return new SomeResult();
         }
     }
 
-    private class SomeDefaultCacheAction implements Action<SomeResult>, IsClientCacheable {
+    private class SomeDefaultCacheAction implements SailingAction<SomeResult>, IsClientCacheable {
         private String instanceIdentifier = UUID.randomUUID().toString();
 
         @Override
-        public SomeResult execute(DispatchContext ctx) throws Exception {
+        public SomeResult execute(SailingDispatchContext ctx) throws Exception {
             return new SomeResult();
         }
 
@@ -166,7 +170,7 @@ public class CacheDispatchTest {
         }
     }
 
-    private class SomeResultWithTTLCacheAction implements Action<SomeResultWithTTL>, IsClientCacheable {
+    private class SomeResultWithTTLCacheAction implements SailingAction<SomeResultWithTTL>, IsClientCacheable {
         private String instanceIdentifier = UUID.randomUUID().toString();
         private int ttl;
 
@@ -175,7 +179,7 @@ public class CacheDispatchTest {
         }
 
         @Override
-        public SomeResultWithTTL execute(DispatchContext ctx) throws Exception {
+        public SomeResultWithTTL execute(SailingDispatchContext ctx) throws Exception {
             return new SomeResultWithTTL(ttl);
         }
 
@@ -185,7 +189,7 @@ public class CacheDispatchTest {
         }
     }
 
-    private class SomeActionAndResultWithTTLCacheAction implements Action<SomeResultWithTTL>, IsClientCacheable,
+    private class SomeActionAndResultWithTTLCacheAction implements SailingAction<SomeResultWithTTL>, IsClientCacheable,
             HasClientCacheTotalTimeToLive {
         private String instanceIdentifier = UUID.randomUUID().toString();
         private int actionTTL;
@@ -197,7 +201,7 @@ public class CacheDispatchTest {
         }
 
         @Override
-        public SomeResultWithTTL execute(DispatchContext ctx) throws Exception {
+        public SomeResultWithTTL execute(SailingDispatchContext ctx) throws Exception {
             return new SomeResultWithTTL(resultTTL);
         }
 
@@ -233,7 +237,7 @@ public class CacheDispatchTest {
         Result value;
     }
 
-    private class DispatchContextMock implements DispatchContext {
+    private class DispatchContextMock implements SailingDispatchContext {
         @Override
         public RacingEventService getRacingEventService() {
             return null;
@@ -278,7 +282,7 @@ public class CacheDispatchTest {
 
     private class DispatchMock implements DispatchAsync {
         @Override
-        public <R extends Result, A extends Action<R>> void execute(A action, AsyncCallback<R> callback) {
+        public <R extends Result, A extends SailingAction<R>> void execute(A action, AsyncCallback<R> callback) {
             try {
                 R result = action.execute(new DispatchContextMock());
                 callback.onSuccess(result);

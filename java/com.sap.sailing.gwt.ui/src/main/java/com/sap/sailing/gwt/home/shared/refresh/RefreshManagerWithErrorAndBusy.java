@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.refresh;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
@@ -14,7 +14,8 @@ public class RefreshManagerWithErrorAndBusy extends AutoAttachingRefreshManager 
     private boolean hadSuccess = false;
     private boolean hadFailure = false;
     
-    public RefreshManagerWithErrorAndBusy(Widget content, AcceptsOneWidget container, DispatchSystem actionExecutor, ErrorAndBusyClientFactory errorAndBusyViewFactory) {
+    public RefreshManagerWithErrorAndBusy(Widget content, AcceptsOneWidget container,
+            SailingDispatchSystem actionExecutor, ErrorAndBusyClientFactory errorAndBusyViewFactory) {
         super(content, container, actionExecutor);
         this.container = container;
         this.errorAndBusyViewFactory = errorAndBusyViewFactory;

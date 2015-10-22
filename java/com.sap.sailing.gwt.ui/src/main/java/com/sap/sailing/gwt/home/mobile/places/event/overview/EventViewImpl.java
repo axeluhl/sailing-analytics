@@ -5,6 +5,17 @@ import java.util.Collection;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattasAndLiveRacesForEventAction;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOverviewStageAction;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
+import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
@@ -17,17 +28,6 @@ import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
-import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
 public class EventViewImpl extends AbstractEventView<EventView.Presenter> implements EventView {
     

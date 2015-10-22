@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.home.mobile.places.searchresult;
 import java.util.Collection;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResult;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
-import com.sap.sailing.gwt.ui.shared.dispatch.search.SearchResultDTO;
 
 public class SearchResultViewImpl extends Composite implements SearchResultView {
     

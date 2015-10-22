@@ -13,14 +13,14 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
-import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
-import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 
 public class MediaPage extends Composite {
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
