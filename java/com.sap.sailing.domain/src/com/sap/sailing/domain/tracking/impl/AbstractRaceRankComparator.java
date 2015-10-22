@@ -48,6 +48,9 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
     private final ConcurrentHashMap<Competitor, MarkPassing> lastMarkPassingBeforeTimePoint;
     private final ConcurrentHashMap<Competitor, TrackedLegOfCompetitor> currentLeg;
     
+    private final MarkPassing NULL_MARK_PASSING = new MarkPassingImpl(null, null, null);
+    private final TrackedLegOfCompetitor NULL_TRACKED_LEG_OF_COMPETITOR = new TrackedLegOfCompetitorImpl(null, null);
+    
     /**
      * @param lessIsBetter
      *            tells whether lesser return values for {@link #getComparisonValueForSameLeg(Competitor)} denote a
@@ -75,8 +78,10 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
         final TrackedLegOfCompetitor currentLegForCompetitor;
         final MarkPassing lastMarkPassingBeforeTimePointForCompetitor;
         if (lastMarkPassingBeforeTimePoint.containsKey(competitor)) {
-            lastMarkPassingBeforeTimePointForCompetitor = lastMarkPassingBeforeTimePoint.get(competitor);
-            currentLegForCompetitor = currentLeg.get(competitor);
+            final MarkPassing markPassingFromMap = lastMarkPassingBeforeTimePoint.get(competitor);
+            lastMarkPassingBeforeTimePointForCompetitor = markPassingFromMap == NULL_MARK_PASSING ? null : markPassingFromMap;
+            final TrackedLegOfCompetitor trackedLegOfCompetitorFromMap = currentLeg.get(competitor);
+            currentLegForCompetitor = trackedLegOfCompetitorFromMap == NULL_TRACKED_LEG_OF_COMPETITOR ? null : trackedLegOfCompetitorFromMap;
         } else {
             NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(competitor);
             NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
@@ -91,8 +96,9 @@ public abstract class AbstractRaceRankComparator<C extends Comparable<C>> implem
                 }
                 currentLegForCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
                 // cache the results of analyzing the mark passings:
-                lastMarkPassingBeforeTimePoint.put(competitor, lastMarkPassingBeforeTimePointForCompetitor);
-                currentLeg.put(competitor, currentLegForCompetitor);
+                lastMarkPassingBeforeTimePoint.put(competitor, lastMarkPassingBeforeTimePointForCompetitor == null ?
+                        NULL_MARK_PASSING : lastMarkPassingBeforeTimePointForCompetitor);
+                currentLeg.put(competitor, currentLegForCompetitor == null ? NULL_TRACKED_LEG_OF_COMPETITOR : currentLegForCompetitor);
             } finally {
                 trackedRace.unlockAfterRead(o1MarkPassings);
             }
