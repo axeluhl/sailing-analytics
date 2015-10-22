@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.dispatch;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 

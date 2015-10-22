@@ -1,50 +1,25 @@
 package com.sap.sailing.gwt.home.mobile.places.error;
 
-import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
-import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.places.error.AbstractErrorActivity;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
+import com.sap.sse.gwt.client.mvp.ErrorView;
 
-public class ErrorActivity extends AbstractActivity {
-
-    private ErrorPlace currentPlace;
-    private MobileApplicationClientFactory clientFactory;
+public class ErrorActivity extends AbstractErrorActivity {
 
     public ErrorActivity(ErrorPlace place, MobileApplicationClientFactory clientFactory) {
-        this.currentPlace = place;
-        this.clientFactory = clientFactory;
+        super(place, clientFactory.getPlaceController());
     }
 
     @Override
-    public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        // TODO: the error place should get the error message from the place
-        final TabletAndDesktopErrorView view;
-        
-        Command reloadCommand = null;
-        if (currentPlace.getComingFrom() != null) {
-            reloadCommand = new Command() {
+    protected ErrorView createView(String errorMsg, Throwable reason, Command reloadCommand) {
+        return new ErrorViewImpl(errorMsg, reason, reloadCommand);
+    }
 
-                @Override
-                public void execute() {
-                    clientFactory.getPlaceController().goTo(currentPlace.getComingFrom());
-                }
-            };
-        }
-
-        if (currentPlace.hasCustomErrorMessages()) {
-            view = new TabletAndDesktopErrorView(
-                    currentPlace.getErrorMessage(),
-                    currentPlace.getErrorMessageDetail(),
-                    currentPlace.getException(), reloadCommand);
-        } else {
-            view = new TabletAndDesktopErrorView(currentPlace.getErrorMessageDetail(), currentPlace.getException(),
-                    reloadCommand);
-        }
-        
-        panel.setWidget(view);
+    @Override
+    protected ErrorView createView(String customMsg, String errorMsg, Throwable reason, Command reloadCommand) {
+        return new ErrorViewImpl(customMsg, errorMsg, reason, reloadCommand);
     }
 
 }
