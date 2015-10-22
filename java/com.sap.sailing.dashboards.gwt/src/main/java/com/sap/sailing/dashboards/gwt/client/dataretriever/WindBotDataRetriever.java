@@ -89,8 +89,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO");
-                        logger.log(Level.INFO, caught.getMessage());
+                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO, "+caught.getMessage());
                     }
                 });
     }
