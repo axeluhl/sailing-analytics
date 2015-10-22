@@ -42,7 +42,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
         clientFactory.getDispatch().execute(new GetEventViewAction(eventId), new AsyncCallback<EventViewDTO>() {
             @Override
             public void onSuccess(final EventViewDTO event) {
-                currentPlace = getRealPlace(event);
+                currentPlace = getRealPlace(event.getType());
                 afterEventLoad(event);
             }
             
@@ -57,8 +57,8 @@ public class EventActivityProxy extends AbstractActivityProxy {
         });
     }
     
-    private AbstractEventPlace getRealPlace(EventViewDTO event) {
-        if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
+    private AbstractEventPlace getRealPlace(EventType eventType) {
+        if(currentPlace instanceof RegattaOverviewPlace && (eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA)) {
             EventContext contextWithoutRegatta = new EventContext(currentPlace.getCtx()).withRegattaId(null);
             return new EventDefaultPlace(contextWithoutRegatta);
         }
