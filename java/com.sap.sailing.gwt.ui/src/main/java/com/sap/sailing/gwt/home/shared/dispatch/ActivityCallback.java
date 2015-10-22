@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.dispatch;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HasOneWidget;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 /**
@@ -12,15 +12,15 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 public abstract class ActivityCallback<T> implements AsyncCallback<T> {
     
     private final ErrorAndBusyClientFactory clientFactory;
-    private final HasOneWidget contentPanel;
+    private final AcceptsOneWidget contentPanel;
     
-    public ActivityCallback(ErrorAndBusyClientFactory clientFactory, HasOneWidget contentPanel) {
+    public ActivityCallback(ErrorAndBusyClientFactory clientFactory, AcceptsOneWidget contentPanel) {
         this.clientFactory = clientFactory;
         this.contentPanel = contentPanel;
     }
 
     @Override
-    public void onFailure(Throwable caught) {
+    public final void onFailure(Throwable caught) {
         contentPanel.setWidget(clientFactory.createErrorView("Error while loading data!", caught));
     }
 

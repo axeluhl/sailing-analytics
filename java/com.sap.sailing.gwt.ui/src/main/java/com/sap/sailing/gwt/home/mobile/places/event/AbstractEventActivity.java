@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
@@ -22,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.dispatch.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
@@ -41,6 +40,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     private final MobileApplicationClientFactory clientFactory;
     private final PLACE place;
     protected final EventViewDTO eventDTO;
+    private AcceptsOneWidget panel;
     
     protected AbstractEventActivity(PLACE place, EventViewDTO eventDTO, MobileApplicationClientFactory clientFactory) {
         this.eventDTO = eventDTO;
@@ -50,6 +50,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public final void start(final AcceptsOneWidget panel, final EventBus eventBus) {
+        this.panel = panel;
         final EventViewBase view = initView();
         panel.setWidget(view.asWidget());
     }
@@ -93,17 +94,20 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return sortedRegattas;
     }
     
-    protected final void initMedia(AsyncMediaCallback callback) {
+    protected final void initMedia(final MediaCallback callback) {
         if (eventDTO.isHasMedia()) {
-            clientFactory.getHomeService().getMediaForEvent(eventDTO.getId(), callback);
+            clientFactory.getHomeService().getMediaForEvent(eventDTO.getId(), 
+                    new ActivityCallback<MediaDTO>(clientFactory, panel) {
+                @Override
+                public void onSuccess(MediaDTO result) {
+                    callback.onSuccess(result);
+                }
+            });
         }
     }
     
-    protected abstract class AsyncMediaCallback implements AsyncCallback<MediaDTO> {
-        @Override
-        public void onFailure(Throwable caught) {
-            GWT.log("Failed to load media");
-        }
+    protected interface MediaCallback {
+        void onSuccess(MediaDTO result);
     }
     
     protected final PLACE getPlace() {

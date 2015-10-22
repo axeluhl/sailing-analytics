@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.home.mobile.places.start;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.start.StartView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.dispatch.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.shared.dispatch.ListResult;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
@@ -29,12 +29,8 @@ public class StartActivity extends AbstractActivity implements Presenter {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
-        clientFactory.getDispatch().execute(new GetStagedEventsAction(true), new AsyncCallback<ListResult<EventStageDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-            }
-            
+        clientFactory.getDispatch().execute(new GetStagedEventsAction(true), 
+                new ActivityCallback<ListResult<EventStageDTO>>(clientFactory, panel) {
             @Override
             public void onSuccess(ListResult<EventStageDTO> result) {
                 panel.setWidget(view.asWidget());
@@ -42,12 +38,8 @@ public class StartActivity extends AbstractActivity implements Presenter {
                 view.setFeaturedEvents(result.getValues());
             }
         });
-        clientFactory.getDispatch().execute(new GetRecentEventsAction(15), new AsyncCallback<ListResult<EventQuickfinderDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-            }
-            
+        clientFactory.getDispatch().execute(new GetRecentEventsAction(15),
+                new ActivityCallback<ListResult<EventQuickfinderDTO>>(clientFactory, panel) {
             @Override
             public void onSuccess(ListResult<EventQuickfinderDTO> result) {
                 view.setQuickFinderValues(result.getValues());

@@ -21,7 +21,7 @@ public abstract class ActivityProxyCallback<T> implements AsyncCallback<T> {
     }
 
     @Override
-    public void onFailure(Throwable caught) {
+    public final void onFailure(Throwable caught) {
         // TODO @FM: extract text?
         ErrorPlace errorPlace = new ErrorPlace("Error while loading page: " + comingFromPlace.getClass().getSimpleName() + "!");
         // TODO @FM: reload sinnvoll hier?

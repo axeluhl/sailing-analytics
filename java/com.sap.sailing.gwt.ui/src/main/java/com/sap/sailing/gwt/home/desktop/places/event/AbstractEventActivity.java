@@ -37,7 +37,6 @@ import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.MediaDTO;
-import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -195,21 +194,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
-        getHomeService().getMediaForEvent(eventDTO.getId(), new AsyncCallback<MediaDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO @FM: extract error message
-                ErrorView errorView = clientFactory.createErrorView("Load media failure for event", caught);
-                getView().showErrorInCurrentTab(errorView);
-                // TODO: notify callback of failure?
-                // callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(MediaDTO result) {
-                callback.onSuccess(result);
-            }
-        });
+        getHomeService().getMediaForEvent(eventDTO.getId(), callback);
     }
 
     @Override

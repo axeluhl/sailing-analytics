@@ -19,7 +19,7 @@ public class EventActivity extends AbstractEventActivity<AbstractEventPlace> imp
         final EventView view = new EventViewImpl(this);
         initSailorInfoOrSeriesNavigation(view);
         initQuickfinder(view, true);
-        initMedia(new AsyncMediaCallback() {
+        initMedia(new MediaCallback() {
             @Override
             public void onSuccess(MediaDTO result) {
                 view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
