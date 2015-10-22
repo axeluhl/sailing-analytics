@@ -72,7 +72,7 @@ public class SailingDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
     }
 
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> get() {
         return dataRetrieverChainDefinitions;
     }
 

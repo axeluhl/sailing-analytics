@@ -15,7 +15,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class EventStageCandidateCalculator implements EventVisitor {
     private final TimePoint now = MillisecondsTimePoint.now();
-    private final SortedSet<Pair<StageEventType, EventHolder>> featuredEvents = new TreeSet<>(FeaturedEventsComparator.INSTANCE);
+    private final SortedSet<Pair<StageEventType, EventHolder>> featuredEvents = new TreeSet<>(new FeaturedEventsComparator());
 
     @Override
     public void visit(EventBase event, boolean onRemoteServer, URL baseURL) {

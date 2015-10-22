@@ -2,6 +2,8 @@ package com.sap.sailing.dashboards.gwt.client.startlineadvantage;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -14,6 +16,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesAction;
+import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -48,6 +51,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     
     private RibDashboardServiceAsync ribDashboardService;
     private AsyncActionsExecutor asyncActionsExecutor;
+    private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
     
     public StartlineAdvantagesByWindComponent(RibDashboardServiceAsync ribDashboardService) {
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart();
@@ -62,22 +66,30 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     }
     
     private void loadData() {
-        GetStartlineAdvantagesAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesAction(
-                ribDashboardService, "");
-        asyncActionsExecutor.execute(getRibDashboardRaceInfoAction, new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
-            
-            @Override
-            public void onFailure(Throwable caught) {
-            }
+        GetStartlineAdvantagesAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesAction(ribDashboardService, "");
+        logger.log(Level.INFO, "Executing GetStartlineAdvantagesAction");
+        asyncActionsExecutor.execute(getRibDashboardRaceInfoAction,
+                new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
 
-            @Override
-            public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
-                startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
-                advantageMaximumLiveAverage.setLiveValue(""+result.maximum);
-                advantageMaximumLiveAverage.setAverageValue(""+result.average);
-            }
+                    @Override
+                    public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
+                        logger.log(Level.INFO, "Received StartlineAdvantagesWithMaxAndAverageDTO");
+                        if (result != null) {
+                            logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
+                            startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
+                            advantageMaximumLiveAverage.setLiveValue("" + result.maximum);
+                            advantageMaximumLiveAverage.setAverageValue("" + result.average);
+                        } else {
+                            logger.log(Level.INFO, "StartlineAdvantagesWithMaxAndAverageDTO is null");
+                        }
+                    }
 
-        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO");
+                        logger.log(Level.INFO, caught.getMessage());
+                    }
+                });
     }
     
     private void initSampleTimer(){

@@ -51,42 +51,45 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
     // Calculate duration from two new distances for normal upwind starts
     // Put all durations in one set
     // Get the smallest of the durations and subtract number from every other number
-    public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineAtTimePoint(TimePoint timepoint){
+    public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineAtTimePoint(TimePoint timepoint) {
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
         if (currentLiveTrackedRace != null) {
             retrieveDataForCalculation(currentLiveTrackedRace);
-            if(isStartlineCompletelyUnderneathLaylines()) {
-                logger.log(Level.INFO, "Startline is completely underneath laylines");
-                Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                result.advantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
-                double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
-                result.maximum = maximum;
-                advantageMaximumAverage.add(maximum);
-                result.average = advantageMaximumAverage.getAverage();
-            } else if (isStartlineCompletelyAboveLaylines()) {
-                logger.log(Level.INFO, "Startline is completely above laylines");
-                Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                result.advantages = calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
-                subtractMinimumOfAllStartlineAdvantages(result.advantages);
-                double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
-                result.maximum = maximum;
-                advantageMaximumAverage.add(maximum);
-                result.average = advantageMaximumAverage.getAverage();
-                subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
-            } else {
-                logger.log(Level.INFO, "Layline(s) cross startline");
-                Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
-                Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
-                Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
-                Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
-                result.advantages = calculatePolarBasedStartlineAdvantagesInRange(polarBasedStartlineAdvatagesRange);
-                subtractMinimumOfAllStartlineAdvantages(result.advantages);
-                double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
-                result.maximum = maximum;
-                advantageMaximumAverage.add(maximum);
-                result.average = advantageMaximumAverage.getAverage();
-                subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
-                addClosingZeroPointToMixedAdvantages(result.advantages, pinEndStartlineAdvatagesRange);
+            if (wind != null) {
+                if (isStartlineCompletelyUnderneathLaylines()) {
+                    logger.log(Level.INFO, "Startline is completely underneath laylines");
+                    Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
+                    result.advantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    result.maximum = maximum;
+                    advantageMaximumAverage.add(maximum);
+                    result.average = advantageMaximumAverage.getAverage();
+                } else if (isStartlineCompletelyAboveLaylines()) {
+                    logger.log(Level.INFO, "Startline is completely above laylines");
+                    Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
+                    result.advantages = calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
+                    subtractMinimumOfAllStartlineAdvantages(result.advantages);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    result.maximum = maximum;
+                    advantageMaximumAverage.add(maximum);
+                    result.average = advantageMaximumAverage.getAverage();
+                    subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
+                } else {
+                    logger.log(Level.INFO, "Layline(s) cross startline");
+                    Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
+                    Position intersectionOfleftLaylineAndStartline = getIntersectionOfLeftLaylineAndStartline();
+                    Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
+                            intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
+                    Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
+                    result.advantages = calculatePolarBasedStartlineAdvantagesInRange(polarBasedStartlineAdvatagesRange);
+                    subtractMinimumOfAllStartlineAdvantages(result.advantages);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    result.maximum = maximum;
+                    advantageMaximumAverage.add(maximum);
+                    result.average = advantageMaximumAverage.getAverage();
+                    subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
+                    addClosingZeroPointToMixedAdvantages(result.advantages, pinEndStartlineAdvatagesRange);
+                }
             }
         } else {
             logger.log(Level.INFO, "No live race available for startlineadvantages calculation");

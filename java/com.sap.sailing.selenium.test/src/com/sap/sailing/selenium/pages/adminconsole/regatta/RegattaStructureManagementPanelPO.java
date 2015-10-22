@@ -47,8 +47,15 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         addSeriesDialog.pressOk();
         // QUESTION: How do we handle an error (here or in the dialog)?
         createRegattaDialog.pressOk();
+        DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboardDialog = createDefaultRegattaLeaderboard();
+        createDefaultRegattaLeaderboardDialog.pressCancel();
     }
     
+    private DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboard() {
+            WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaDialog"); //$NON-NLS-1$
+            return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
+    }
+
     public RegattaListCompositePO getRegattaList() {
         return new RegattaListCompositePO(this.driver, this.regattaList);
     }

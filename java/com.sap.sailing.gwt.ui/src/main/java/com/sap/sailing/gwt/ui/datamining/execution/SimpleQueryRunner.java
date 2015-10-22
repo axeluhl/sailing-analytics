@@ -27,12 +27,12 @@ public class SimpleQueryRunner implements QueryRunner {
     private final ManagedDataMiningQueriesCounter counter;
 
     private QueryRunnerSettings settings;
-    private final QueryDefinitionProvider queryDefinitionProvider;
+    private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final ResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
+            ErrorReporter errorReporter, QueryDefinitionProvider<?> queryDefinitionProvider,
             ResultsPresenter<?> resultsPresenter) {
         this.session = session;
         this.stringMessages = stringMessages;

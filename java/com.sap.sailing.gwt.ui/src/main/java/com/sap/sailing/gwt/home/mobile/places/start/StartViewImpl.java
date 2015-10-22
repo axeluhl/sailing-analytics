@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.home.mobile.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.start.EventQuickfinderDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 public class StartViewImpl extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -36,14 +36,14 @@ public class StartViewImpl extends Composite implements StartView {
 
     public StartViewImpl(Presenter presenter) {
         this.currentPresenter = presenter;
-        stage = new Stage(presenter.getNavigator());
+        stage = new Stage(presenter.getNavigator(), true);
         initWidget(uiBinder.createAndBindUi(this));
         
         presenter.getNavigator().getEventsNavigation().configureAnchorElement(showAllEventsUi);
     }
     
     @Override
-    public void setFeaturedEvents(List<EventStageDTO> list) {
+    public void setFeaturedEvents(List<? extends EventLinkAndMetadataDTO> list) {
         stage.setFeaturedEvents(list);
     }
 

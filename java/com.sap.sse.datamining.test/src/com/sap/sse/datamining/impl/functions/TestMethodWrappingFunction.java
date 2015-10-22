@@ -64,7 +64,7 @@ public class TestMethodWrappingFunction {
         assertThat(sideEffectFreeValue.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedGermanName));
 
         Function<?> externalLibraryFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(externalLibraryMethod);
-        String expectedName = "foo";
+        String expectedName = "foo()";
         assertThat(externalLibraryFunction.getLocalizedName(Locale.ENGLISH, stringMessages), is(expectedName));
         assertThat(externalLibraryFunction.getLocalizedName(Locale.GERMAN, stringMessages), is(expectedName));
     }

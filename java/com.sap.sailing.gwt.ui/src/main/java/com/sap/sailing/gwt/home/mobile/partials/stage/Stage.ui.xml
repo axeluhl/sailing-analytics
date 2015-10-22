@@ -11,7 +11,7 @@
 	<g:HTMLPanel>
 		<!-- The main stage -->
 		<div class="{local_res.css.stage}">
-			<div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}">
+			<div class="{local_res.css.stage_teasers} {local_res.css.swipercontainer}" ui:field="stageContainer">
 				<sse:carousel.WidgetCarousel ui:field="widgetCarousel" />
 			</div>
 			<div class="{local_res.css.stage_progress}">
