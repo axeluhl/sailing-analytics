@@ -30,7 +30,6 @@ public class ErrorViewImpl extends Composite implements ErrorView {
     private ErrorViewImpl(ErrorMessage errorMessage) {
         errorMessageUi = errorMessage;
         initWidget(uiBinder.createAndBindUi(this));
-        errorMessageUi.addReloadPageButtonStyleNames(SharedResources.INSTANCE.mainCss().button());
         errorMessageUi.addReloadPageButtonStyleNames(SharedResources.INSTANCE.mediaCss().small12());
     }
 
