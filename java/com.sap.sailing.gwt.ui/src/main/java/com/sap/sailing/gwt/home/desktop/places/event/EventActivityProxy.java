@@ -3,9 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.event;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaActivity;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
@@ -19,6 +17,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.dispatch.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
@@ -30,7 +29,6 @@ import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 public class EventActivityProxy extends AbstractActivityProxy {
 
     private AbstractEventPlace place;
-    private EventContext ctx;
     private EventClientFactory clientFactory;
     private DesktopPlacesNavigator homePlacesNavigator;
 
@@ -38,27 +36,16 @@ public class EventActivityProxy extends AbstractActivityProxy {
             DesktopPlacesNavigator homePlacesNavigator) {
         this.place = place;
         this.homePlacesNavigator = homePlacesNavigator;
-        this.ctx = this.place.getCtx();
         this.clientFactory = clientFactory;
     }
 
     @Override
     protected void startAsync() {
-        final UUID eventUUID = UUID.fromString(ctx.getEventId());
-        
-        clientFactory.getDispatch().execute(new GetEventViewAction(eventUUID), new AsyncCallback<EventViewDTO>() {
+        GetEventViewAction action = new GetEventViewAction(UUID.fromString(place.getEventUuidAsString()));
+        clientFactory.getDispatch().execute(action, new ActivityProxyCallback<EventViewDTO>(clientFactory, place) {
             @Override
-            public void onSuccess(final EventViewDTO event) {
+            public void onSuccess(EventViewDTO event) {
                 afterEventLoad(event);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO @FM: extract text?
-                ErrorPlace errorPlace = new ErrorPlace("Error while loading the event with service getEventViewById()");
-                // TODO @FM: reload sinnvoll hier?
-                errorPlace.setComingFrom(place);
-                clientFactory.getPlaceController().goTo(errorPlace);
             }
         });
     }
@@ -89,7 +76,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
 
     private AbstractEventPlace getRealPlace(EventViewDTO event) {
         if(event.getType() == EventType.SERIES_EVENT || event.getType() == EventType.SINGLE_REGATTA) {
-            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            return new RegattaOverviewPlace(new EventContext(place.getCtx()).withRegattaId(null));
         }
         return new MultiregattaOverviewPlace(place.getCtx());
     }
@@ -100,7 +87,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
      * @param event 
      */
     private AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
-        EventContext contextWithoutRegatta = new EventContext(ctx).withRegattaId(null);
+        EventContext contextWithoutRegatta = new EventContext(place.getCtx()).withRegattaId(null);
         // TODO check if regatta ID is valid
         if(place instanceof AbstractMultiregattaEventPlace && event.getType() != EventType.MULTI_REGATTA) {
             // Events with a type other than multi regatta only have regatta level pages
@@ -114,10 +101,10 @@ public class EventActivityProxy extends AbstractActivityProxy {
         }
         
         if(place instanceof AbstractEventRegattaPlace) {
-            boolean regattaKnown = event.isRegattaIDKnown(ctx.getRegattaId());
-            if(event.getType() != EventType.MULTI_REGATTA && ctx.getRegattaId() != null && !regattaKnown) {
+            boolean regattaKnown = event.isRegattaIDKnown(place.getCtx().getRegattaId());
+            if(event.getType() != EventType.MULTI_REGATTA && place.getCtx().getRegattaId() != null && !regattaKnown) {
                 // Regatta ID unknown but unnecessary ...
-                ctx.withRegattaId(null);
+                place.getCtx().withRegattaId(null);
             } else if(event.getType() == EventType.MULTI_REGATTA && !regattaKnown) {
                 return new MultiregattaRegattasPlace(contextWithoutRegatta);
             }
@@ -125,14 +112,14 @@ public class EventActivityProxy extends AbstractActivityProxy {
         
         if(place instanceof RegattaMediaPlace && event.getType() == EventType.MULTI_REGATTA) {
             // The media page for multi regatta events is on event level only but not on regatta level
-            return new MultiregattaMediaPlace(new EventContext(ctx).withRegattaId(null));
+            return new MultiregattaMediaPlace(new EventContext(place.getCtx()).withRegattaId(null));
         }
         
         if(place instanceof LatestNewsPlace) {
             if(event.getType() == EventType.MULTI_REGATTA) {
-                return new MultiregattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+                return new MultiregattaOverviewPlace(new EventContext(place.getCtx()).withRegattaId(null));
             }
-            return new RegattaOverviewPlace(new EventContext(ctx).withRegattaId(null));
+            return new RegattaOverviewPlace(new EventContext(place.getCtx()).withRegattaId(null));
         }
         
         if(place instanceof MiniLeaderboardPlace) {
