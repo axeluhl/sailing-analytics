@@ -104,8 +104,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.LeaderboardSearchResult;
-import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -301,7 +299,6 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -444,8 +441,6 @@ import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
-import com.sap.sse.common.search.KeywordQuery;
-import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -5463,45 +5458,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     numFixes, from, to));
         }
         return result;
-    }
-
-    @Override
-    public Iterable<String> getSearchServerNames() {
-        List<String> result = new ArrayList<>();
-        for (RemoteSailingServerReference remoteServerRef : getService().getLiveRemoteServerReferences()) {
-            result.add(remoteServerRef.getName());
-        }
-        return result;
-    }
-
-    @Override
-    public Iterable<LeaderboardSearchResultDTO> search(String serverNameOrNullForMain, KeywordQuery query) throws MalformedURLException {
-        final List<LeaderboardSearchResultDTO> result = new ArrayList<>();
-        if (serverNameOrNullForMain == null) {
-            Result<LeaderboardSearchResult> searchResult = getService().search(query);
-            for (LeaderboardSearchResult hit : searchResult.getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, getRequestBaseURL(), false));
-            }
-        } else {
-            RemoteSailingServerReference remoteRef = getService().getRemoteServerReferenceByName(serverNameOrNullForMain);
-            for (LeaderboardSearchResultBase hit : getService().searchRemotely(serverNameOrNullForMain, query).getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, remoteRef.getURL(), true));
-            }
-        }
-        return result;
-    }
-
-    private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL,
-            boolean isOnRemoteServer) {
-        ArrayList<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
-        for (LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
-            LeaderboardGroupBaseDTO leaderboardGroupDTO = convertToLeaderboardGroupBaseDTO(lgb);
-            leaderboardGroups.add(leaderboardGroupDTO);
-        }
-        return new LeaderboardSearchResultDTO(baseURL.toString(), isOnRemoteServer, leaderboardSearchResult.getLeaderboard().getName(),
-                leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
-                leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
-                leaderboardGroups);
     }
 
     @Override
