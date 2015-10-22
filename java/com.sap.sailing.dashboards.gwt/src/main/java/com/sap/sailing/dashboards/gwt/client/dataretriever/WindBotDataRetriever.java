@@ -157,8 +157,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                 loadWindBotData(finaloldTime, finalNewTime, result);
                 } else {
                     notifyListenersAboutNumberOfWindBotsReceivedIsZero();
-                    logger.log(Level.INFO, "RegattaAndRaceIdentifier for race which takes wind is null");
-                    logger.log(Level.INFO, "Can´t load wind data");
+                    logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
                 }
             }
 
