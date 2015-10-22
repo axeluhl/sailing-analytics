@@ -655,7 +655,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint) && 
                (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
-                        trackedRaceForCompetitorInColumn.hasStarted(timePoint)));
+                        trackedRaceForCompetitorInColumn.hasStarted(timePoint) &&
+                        trackedRaceForCompetitorInColumn.getRank(competitor, timePoint) != 0));
     }
     
     @Override
