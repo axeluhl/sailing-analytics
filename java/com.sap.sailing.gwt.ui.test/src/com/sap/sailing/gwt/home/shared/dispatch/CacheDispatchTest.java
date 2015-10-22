@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.dispatch;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
@@ -246,7 +245,7 @@ public class CacheDispatchTest {
         }
 
         @Override
-        public URL getRequestBaseURL() throws MalformedURLException {
+        public URL getRequestBaseURL() throws DispatchException {
             return null;
         }
     }
