@@ -173,6 +173,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
                 newOrLoadedRaceLog.addListener(listener);
                 raceLogs.put(fleet, newOrLoadedRaceLog);
+                final TrackedRace trackedRace = getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    // need to attach race log
+                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
+                }
             } else {
                 // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
                 raceLogAvailable.merge(newOrLoadedRaceLog);
