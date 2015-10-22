@@ -1239,10 +1239,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) {
         int result;
-        if (getMarkPassings(competitor).isEmpty()) {
+        final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        if (markPassings.isEmpty()) {
             result = 0;
         } else {
-            result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+            final boolean hasMarkPassingAtOrBeforeTimePoint;
+            lockForRead(markPassings);
+            try {
+                hasMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
+            } finally {
+                unlockAfterRead(markPassings);
+            }
+            if (hasMarkPassingAtOrBeforeTimePoint) {
+                // no mark passing at or before timePoint; competitor has not started / participated yet
+                result = 0;
+            } else {
+                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+            }
         }
         return result;
     }
