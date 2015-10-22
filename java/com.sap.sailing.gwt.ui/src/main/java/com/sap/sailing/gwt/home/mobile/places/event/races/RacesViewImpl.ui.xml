@@ -4,7 +4,7 @@
 		xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
 		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
 		.pageTitle {
 			font-size: 1.066666666666667em;

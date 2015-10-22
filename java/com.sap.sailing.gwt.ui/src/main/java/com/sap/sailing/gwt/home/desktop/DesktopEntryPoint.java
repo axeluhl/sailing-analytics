@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -20,6 +21,8 @@ import com.sap.sse.gwt.resources.Highcharts;
 public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
     @Override
     public void doOnModuleLoad() {
+        Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
+        
         CommonControlsCSS.ensureInjected();
         Highcharts.ensureInjected();
 
@@ -43,9 +46,6 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
         DesktopClientFactory clientFactory = new TabletAndDesktopApplicationClientFactory(isStandaloneServer);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new DesktopActivityMapper(clientFactory));
-
-        SharedResources.INSTANCE.mediaCss().ensureInjected();
-        SharedResources.INSTANCE.mainCss().ensureInjected();
     }
     
     @Override
