@@ -81,7 +81,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (trackedRace != null) {
-                trackedRace.attachRaceLog(getRaceLog(fleet));
+                final RaceLog raceLog = getRaceLog(fleet);
+                if (raceLog != null) {
+                    trackedRace.attachRaceLog(raceLog);
+                }
                 trackedRace.attachRaceExecutionProvider(getRaceExecutionOrderProvider());
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
