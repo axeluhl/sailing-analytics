@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -10,8 +9,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPage;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
+import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -37,13 +37,7 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
         final MediaPage mediaPage = new MediaPage(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         initWidget(mediaPage);
         
-        currentPresenter.ensureMedia(new AsyncCallback<MediaDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-
+        currentPresenter.ensureMedia(new ActivityCallback<MediaDTO>(currentPresenter.getErrorAndBusyClientFactory(), contentArea) {
             @Override
             public void onSuccess(MediaDTO media) {
                 contentArea.setWidget(MultiregattaMediaTabView.this);

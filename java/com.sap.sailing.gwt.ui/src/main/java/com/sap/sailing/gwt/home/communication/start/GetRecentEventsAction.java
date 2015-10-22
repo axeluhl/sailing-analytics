@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.communication.start;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -10,6 +9,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -27,7 +27,7 @@ public class GetRecentEventsAction implements SailingAction<ListResult<EventQuic
     }
     
     @GwtIncompatible
-    public ListResult<EventQuickfinderDTO> execute(final SailingDispatchContext context) throws MalformedURLException {
+    public ListResult<EventQuickfinderDTO> execute(final SailingDispatchContext context) throws DispatchException {
         final SortedSet<EventQuickfinderDTO> events = new TreeSet<>();
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), new EventVisitor() {
             @Override

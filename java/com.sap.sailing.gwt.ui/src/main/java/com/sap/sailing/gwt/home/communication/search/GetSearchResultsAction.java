@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.dispatch.client.batching.NonBatchableAction;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.server.RacingEventService;
@@ -40,7 +41,7 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
 
     @Override
     @GwtIncompatible
-    public ListResult<SearchResultDTO> execute(SailingDispatchContext ctx) throws Exception {
+    public ListResult<SearchResultDTO> execute(SailingDispatchContext ctx) throws DispatchException {
         KeywordQuery searchQuery = new KeywordQuery(searchText.split("[ \t]+"));
         RacingEventService service = ctx.getRacingEventService();
         if (remoteServerName == null) {

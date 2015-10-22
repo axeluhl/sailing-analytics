@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.dispatch.client.exceptions;
 
+import java.util.UUID;
 
 
 public class ServerDispatchException extends DispatchException {
@@ -13,6 +14,11 @@ public class ServerDispatchException extends DispatchException {
     public ServerDispatchException(String uuid, Throwable cause) {
         super(cause.getMessage());
         this.uuid = uuid;
+    }
+
+    public ServerDispatchException(Throwable cause) {
+        super(cause.getMessage());
+        this.uuid = UUID.randomUUID().toString();
     }
 
     public String getUuid() {

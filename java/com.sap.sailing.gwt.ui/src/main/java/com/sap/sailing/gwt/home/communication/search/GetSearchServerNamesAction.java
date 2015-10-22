@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.search;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.gwt.dispatch.client.StringsResult;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 
@@ -25,7 +26,7 @@ public class GetSearchServerNamesAction implements SailingAction<StringsResult> 
 
     @Override
     @GwtIncompatible
-    public StringsResult execute(SailingDispatchContext ctx) throws Exception {
+    public StringsResult execute(SailingDispatchContext ctx) throws DispatchException {
         StringsResult result = new StringsResult();
         for (RemoteSailingServerReference remoteServerRef : ctx.getRacingEventService().getLiveRemoteServerReferences()) {
             result.addValue(remoteServerRef.getName());

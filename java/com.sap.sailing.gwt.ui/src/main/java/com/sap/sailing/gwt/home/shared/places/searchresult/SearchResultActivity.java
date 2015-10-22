@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.home.shared.places.searchresult;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.dispatch.client.StringsResult;
 import com.sap.sailing.gwt.home.communication.search.GetSearchResultsAction;
 import com.sap.sailing.gwt.home.communication.search.GetSearchServerNamesAction;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
+import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 
 public class SearchResultActivity extends AbstractActivity {
    
@@ -30,7 +30,7 @@ public class SearchResultActivity extends AbstractActivity {
             final String searchText = searchResultPlace.getSearchText();
             GetSearchServerNamesAction action = new GetSearchServerNamesAction();
             searchOnServer(panel, view, new GetSearchResultsAction(searchText));
-            clientFactory.getDispatch().execute(action, new AsyncSearchCallback<StringsResult>(panel) {
+            clientFactory.getDispatch().execute(action, new ActivityCallback<StringsResult>(clientFactory, panel) {
                 @Override
                 public void onSuccess(StringsResult result) {
                     for (String serverName : result.getValues()) {
@@ -42,25 +42,12 @@ public class SearchResultActivity extends AbstractActivity {
     }
     
     private void searchOnServer(AcceptsOneWidget panel, final SearchResultView view, GetSearchResultsAction action) {
-        clientFactory.getDispatch().execute(action, new AsyncSearchCallback<ListResult<SearchResultDTO>>(panel) {
+        clientFactory.getDispatch().execute(action, new ActivityCallback<ListResult<SearchResultDTO>>(clientFactory, panel) {
             @Override
             public void onSuccess(ListResult<SearchResultDTO> result) {
                 view.updateSearchResult(searchResultPlace.getSearchText(), result.getValues());
             }
         });
-    }
-    
-    private abstract class AsyncSearchCallback<T> implements AsyncCallback<T> {
-        private final AcceptsOneWidget panel;
-
-        private AsyncSearchCallback(AcceptsOneWidget panel) {
-            this.panel = panel;
-        }
-
-        @Override
-        public void onFailure(Throwable caught) {
-            panel.setWidget(clientFactory.createErrorView("Error while executing search!", caught));
-        }
     }
     
 }

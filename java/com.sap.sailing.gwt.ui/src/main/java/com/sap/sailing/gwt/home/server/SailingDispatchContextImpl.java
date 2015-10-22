@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.server;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
@@ -8,6 +7,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.news.EventNewsService;
@@ -64,7 +64,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     }
     
     @Override
-    public URL getRequestBaseURL() throws MalformedURLException {
+    public URL getRequestBaseURL() throws DispatchException {
         return HomeServiceUtil.getRequestBaseURL(request);
     }
     

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.home.desktop.DesktopEntryPoint;
 import com.sap.sailing.gwt.home.mobile.MobileEntryPoint;
@@ -34,6 +35,10 @@ public class SwitchingEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         Document.get().getElementById("loading").removeFromParent();
         LOG.info("Start switching entry point");
+        
+        SharedResources.INSTANCE.mediaCss().ensureInjected();
+        SharedResources.INSTANCE.mainCss().ensureInjected();
+        
         String hash = Window.Location.getHash();
         if (hash != null && hash.startsWith("#")) {
             hash = hash.substring(1);

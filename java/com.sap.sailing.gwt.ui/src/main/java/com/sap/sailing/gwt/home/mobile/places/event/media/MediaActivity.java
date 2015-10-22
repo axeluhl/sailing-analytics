@@ -18,7 +18,7 @@ public class MediaActivity extends AbstractEventActivity<AbstractEventPlace> imp
     protected EventViewBase initView() {
         final MediaView view = new MediaViewImpl(this);
         initQuickfinder(view, false);
-        initMedia(new AsyncMediaCallback() {
+        initMedia(new MediaCallback() {
             @Override
             public void onSuccess(MediaDTO result) {
                 view.setMedia(result.getVideos(), result.getPhotos());

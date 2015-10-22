@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
 import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
@@ -26,7 +27,7 @@ public class GetRegattaStatisticsAction implements SailingAction<ResultWithTTL<E
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws Exception {
+    public ResultWithTTL<EventStatisticsDTO> execute(SailingDispatchContext context) throws DispatchException {
         StatisticsCalculator statisticsCalculator = new StatisticsCalculator();
         statisticsCalculator.doForLeaderboard(EventActionUtil.getLeaderboardContext(context, eventId, regattaId));
         return statisticsCalculator.getResult();

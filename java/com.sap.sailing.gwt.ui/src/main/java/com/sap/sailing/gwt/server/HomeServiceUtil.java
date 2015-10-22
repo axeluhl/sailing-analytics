@@ -29,6 +29,8 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sailing.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -491,7 +493,8 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor... visitors) throws MalformedURLException {
+    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request,
+            EventVisitor... visitors) throws DispatchException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
             if(event.isPublic()) {
@@ -523,14 +526,23 @@ public final class HomeServiceUtil {
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-    public static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
-        final URL url = new URL(request.getRequestURL().toString());
-        final URL baseURL = getBaseURL(url);
-        return baseURL;
+    public static URL getRequestBaseURL(HttpServletRequest request) throws DispatchException {
+        URL url;
+        try {
+            url = new URL(request.getRequestURL().toString());
+            final URL baseURL = getBaseURL(url);
+            return baseURL;
+        } catch (MalformedURLException e) {
+            throw new ServerDispatchException(e);
+        }
     }
 
-    private static URL getBaseURL(URL url) throws MalformedURLException {
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
+    private static URL getBaseURL(URL url) throws DispatchException {
+        try {
+            return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */"");
+        } catch (MalformedURLException e) {
+            throw new ServerDispatchException(e);
+        }
     }
 
     public static boolean hasRegattaData(EventBase event) {

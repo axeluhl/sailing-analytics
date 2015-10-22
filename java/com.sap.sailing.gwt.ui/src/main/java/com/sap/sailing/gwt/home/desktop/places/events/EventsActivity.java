@@ -3,13 +3,12 @@ package com.sap.sailing.gwt.home.desktop.places.events;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.event.GetEventListViewAction;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
+import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
-import com.sap.sse.gwt.client.mvp.ErrorView;
 
 public class EventsActivity extends AbstractActivity {
 
@@ -24,21 +23,14 @@ public class EventsActivity extends AbstractActivity {
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(new Placeholder());
-        
-        clientFactory.getDispatch().execute(new GetEventListViewAction(), new AsyncCallback<EventListViewDTO>() {
+        clientFactory.getDispatch().execute(new GetEventListViewAction(),
+                new ActivityCallback<EventListViewDTO>(clientFactory, panel) {
             @Override
             public void onSuccess(EventListViewDTO eventListView) {
                 final EventsView eventsView = clientFactory.createEventsView();
                 panel.setWidget(eventsView.asWidget());
                 Window.setTitle(place.getTitle());
-                
                 eventsView.setEvents(eventListView);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                final ErrorView view = clientFactory.createErrorView("Error while loading the sailing server instances with service getEventListView()", caught);
-                panel.setWidget(view.asWidget());
             }
         });
     }

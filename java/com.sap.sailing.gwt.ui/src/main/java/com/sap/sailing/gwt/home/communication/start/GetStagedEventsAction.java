@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.home.communication.start;
 
-import java.net.MalformedURLException;
-
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.EventHolder;
@@ -24,7 +23,7 @@ public class GetStagedEventsAction implements SailingAction<ListResult<EventStag
     }
 
     @GwtIncompatible
-    public ListResult<EventStageDTO> execute(final SailingDispatchContext context) throws MalformedURLException {
+    public ListResult<EventStageDTO> execute(final SailingDispatchContext context) throws DispatchException {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(),
                 stageCandidateCalculator);
