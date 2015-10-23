@@ -788,12 +788,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
+                }
                 startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (startTime != null) {
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
+                    }
                     break;
                 }
             }
             if (startTime == null) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("No start time found in race logs for race "+getRace().getName());
+                }
                 startTime = getStartTimeReceived();
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
@@ -812,8 +821,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                                }
                             } else {
                                 startTime = startTimeReceived;
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+startTime);
+                                }
                             }
                         }
                     } else {
@@ -821,6 +836,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         if (markPassingsForFirstWaypointInOrder != null) {
                             startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
                                     getRace().getCompetitors());
+                            if (startTime != null && logger.isLoggable(Level.FINEST)) {
+                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                            }
                         }
                     }
                 }
@@ -3189,8 +3207,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event
-            final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event
+            final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
+            final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
@@ -3301,6 +3319,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRaceLog(final RaceLog raceLog) {
         loadFixesForLog(raceLog, attachedRaceLogs, /* wait for fixes to load */ false);
+        try {
+            // The log is attached to the tracked race by a background thread; this method wants
+            // to guarantee that the log is at least really attached to the TrackedRace before returning:
+            waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+        }
     }
 
     @Override
@@ -3346,6 +3371,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
         loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
+        try {
+            // The log is attached to the tracked race by a background thread; this method wants
+            // to guarantee that the log is at least really attached to the TrackedRace before returning:
+            waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+        }
     }
 
     @Override
