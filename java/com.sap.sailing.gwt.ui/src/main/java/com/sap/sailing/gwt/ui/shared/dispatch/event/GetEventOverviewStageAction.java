@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
-import java.util.Arrays;
-import java.util.Collection;
+import static com.sap.sailing.gwt.server.HomeServiceUtil.findEventThumbnailImageUrlAsString;
+import static com.sap.sailing.gwt.server.HomeServiceUtil.getStageImageURLAsString;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -10,6 +13,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.dispatch.Action;
 import com.sap.sailing.gwt.ui.shared.dispatch.DispatchContext;
 import com.sap.sailing.gwt.ui.shared.dispatch.ResultWithTTL;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO.Type;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -19,17 +23,17 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOverviewStageDTO>> {
-    private static final Collection<String> rankedTags = Arrays.asList(MediaTagConstants.LIVESTREAM, MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
-    private static final Collection<String> rankedTagsFinished = Arrays.asList(MediaTagConstants.FEATURED, MediaTagConstants.HIGHLIGHT);
     
     private UUID eventId;
+    private boolean useTeaserImage;
     
     @SuppressWarnings("unused")
     private GetEventOverviewStageAction() {
     }
 
-    public GetEventOverviewStageAction(UUID eventId) {
+    public GetEventOverviewStageAction(UUID eventId, boolean useTeaserImage) {
         this.eventId = eventId;
+        this.useTeaserImage = useTeaserImage;
     }
     
     @Override
@@ -53,23 +57,25 @@ public class GetEventOverviewStageAction implements Action<ResultWithTTL<EventOv
 
     @GwtIncompatible
     public EventOverviewStageContentDTO getStageContent(DispatchContext context, Event event, EventState state, TimePoint now) {
-        // Simple solution:
-        // P1: Show the best matching video if available
-        // P2: Show Countdown for upcoming events
-        // P3: Show Stage image without Countdown
-        
-        Collection<String> tags = state == EventState.FINISHED ? rankedTagsFinished : rankedTags;
-        VideoDescriptor stageVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), tags, true);
-        if(stageVideo != null) {
-            return new EventOverviewVideoStageDTO(EventOverviewVideoStageDTO.Type.MEDIA, HomeServiceUtil.toVideoDTO(stageVideo));
+        // P1: Featured video if available
+        List<String> videoTags = Collections.singletonList(MediaTagConstants.FEATURED);
+        VideoDescriptor featuredVideo = HomeServiceUtil.getStageVideo(event, context.getClientLocale(), videoTags , false);
+        if (featuredVideo != null) {
+            return new EventOverviewVideoStageDTO(Type.MEDIA, HomeServiceUtil.toVideoDTO(featuredVideo));
         }
-        String stageImageUrl = HomeServiceUtil.getStageImageURLAsString(event);
+        
+        // P2: Featured image if available
+        String imageUrl = HomeServiceUtil.getFeaturedImageUrlAsString(event);
+        if (imageUrl == null) {
+            // P3: Show Teaser/Stage image
+            imageUrl = useTeaserImage ? findEventThumbnailImageUrlAsString(event) : getStageImageURLAsString(event);
+        }
+        
+        // Show countdown for planned or upcoming events
         if(state == EventState.UPCOMING || state == EventState.PLANNED) {
-            return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), stageImageUrl);
+            return new EventOverviewTickerStageDTO(event.getStartDate().asDate(), event.getName(), imageUrl);
         }
-        return new EventOverviewTickerStageDTO(null, null, stageImageUrl);
-        
-        
+        return new EventOverviewTickerStageDTO(null, null, imageUrl);
         
         // TODO do the full implementation
         

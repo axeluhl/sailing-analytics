@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 
@@ -22,7 +22,7 @@ public class FinishedSubmitFragment extends BasePanelFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_finished_right, container, false);
 
-        Button protest = ViewHolder.get(layout, R.id.protest_button);
+        Button protest = ViewHelper.get(layout, R.id.protest_button);
         if (protest != null) {
             protest.setOnClickListener(new View.OnClickListener() {
                 @Override

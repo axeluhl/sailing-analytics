@@ -40,7 +40,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                new RaceSelectionModel(), stringMessages, /* multiselection */true) {
+                new RaceSelectionModel(), stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrackIsInTimerangeOf(race.trackedRace)) {

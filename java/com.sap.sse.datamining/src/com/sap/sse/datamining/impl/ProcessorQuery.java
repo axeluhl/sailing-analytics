@@ -19,21 +19,23 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.QueryState;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.impl.components.OverwritingResultDataBuilder;
+import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.QueryResult;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.impl.NullAdditionalResultData;
-import com.sap.sse.datamining.shared.impl.QueryResultImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements Query<AggregatedType> {
+public abstract class ProcessorQuery<ResultType, DataSourceType> implements Query<ResultType> {
     
     private static final Logger LOGGER = Logger.getLogger(ProcessorQuery.class.getSimpleName());
     
     private final DataSourceType dataSource;
     private final Processor<DataSourceType, ?> firstProcessor;
+    private QueryState state;
+    private final Class<ResultType> resultType;
 
     private final ProcessResultReceiver resultReceiver;
     
@@ -43,7 +45,6 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
     private final Object monitorObject = new Object();
     private Thread workingThread;
-    private QueryState state;
     
     /**
      * Creates a query
@@ -52,8 +53,8 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
      *   <li> that returns a result without {@link AdditionalResultData} (more exactly with {@link NullAdditionalResultData} as additional data).</li>
      * </ul>
      */
-    public ProcessorQuery(DataSourceType dataSource) {
-        this(dataSource, AdditionalQueryData.NULL_INSTANCE);
+    public ProcessorQuery(DataSourceType dataSource, Class<ResultType> resultType) {
+        this(dataSource, resultType, AdditionalQueryData.NULL_INSTANCE);
     }
 
     
@@ -61,29 +62,35 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
      * Creates a query that returns a result without {@link AdditionalResultData}
      * (more exactly with {@link NullAdditionalResultData} as additional data).
      */
-    public ProcessorQuery(DataSourceType dataSource, AdditionalQueryData additionalData) {
-        this(dataSource, null, null, additionalData);
+    public ProcessorQuery(DataSourceType dataSource, Class<ResultType> resultType, AdditionalQueryData additionalData) {
+        this(dataSource, null, null, resultType, additionalData);
     }
 
     /**
      * Creates a query that returns a result with additional data.
      */
-    public ProcessorQuery(DataSourceType dataSource, ResourceBundleStringMessages stringMessages, Locale locale, AdditionalQueryData additionalData) {
+    public ProcessorQuery(DataSourceType dataSource, ResourceBundleStringMessages stringMessages, Locale locale, Class<ResultType> resultType, AdditionalQueryData additionalData) {
         this.dataSource = dataSource;
         this.stringMessages = stringMessages;
         this.locale = locale;
-        this.additionalData = additionalData;
         state = QueryState.NOT_STARTED;
+        this.resultType = resultType;
+        this.additionalData = additionalData;
 
         resultReceiver = new ProcessResultReceiver();
-        firstProcessor = createFirstProcessor();
+        firstProcessor = createChainAndReturnFirstProcessor(resultReceiver);
     }
 
-    protected abstract Processor<DataSourceType, ?> createFirstProcessor();
+    protected abstract Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, ResultType>, Void> resultReceiver);
     
     @Override
     public QueryState getState() {
         return state;
+    }
+    
+    @Override
+    public Class<ResultType> getResultType() {
+        return resultType;
     }
     
     @Override
@@ -101,7 +108,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     }
 
     @Override
-    public QueryResult<AggregatedType> run() {
+    public QueryResult<ResultType> run() {
         try {
             return run(0, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
@@ -113,7 +120,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
     }
     
     @Override
-    public QueryResult<AggregatedType> run(long timeout, TimeUnit unit) throws TimeoutException {
+    public QueryResult<ResultType> run(long timeout, TimeUnit unit) throws TimeoutException {
         try {
             return processQuery(unit.toMillis(timeout));
         } catch (InterruptedException e) {
@@ -123,7 +130,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         return null;
     }
 
-    private QueryResult<AggregatedType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
+    private QueryResult<ResultType> processQuery(long timeoutInMillis) throws InterruptedException, TimeoutException {
         state = QueryState.RUNNING;
         final long startTime = System.nanoTime();
         startWorking();
@@ -133,15 +140,15 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         logOccuredFailuresAndThrowSevereFailure();
 
         long calculationTimeInNanos = endTime - startTime;
-        Map<GroupKey, AggregatedType> results = resultReceiver.getResult();
+        Map<GroupKey, ResultType> results = resultReceiver.getResult();
         QueryResultState resultState = state.asResultState();
         
         if (stringMessages != null && locale != null) {
             AdditionalResultDataBuilder additionalDataBuilder = new OverwritingResultDataBuilder();
             additionalDataBuilder = firstProcessor.getAdditionalResultData(additionalDataBuilder);
-            return new QueryResultImpl<>(resultState, results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
+            return new QueryResultImpl<>(resultState, getResultType(), results, additionalDataBuilder.build(calculationTimeInNanos, stringMessages, locale));
         } else {
-            return new QueryResultImpl<>(resultState, results);
+            return new QueryResultImpl<>(resultState, getResultType(), results);
         }
     }
 
@@ -222,14 +229,14 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
     }
 
-    public Processor<Map<GroupKey, AggregatedType>, Void> getResultReceiver() {
+    public Processor<Map<GroupKey, ResultType>, Void> getResultReceiver() {
         return resultReceiver;
     }
     
-    private class ProcessResultReceiver implements Processor<Map<GroupKey, AggregatedType>, Void> {
+    private class ProcessResultReceiver implements Processor<Map<GroupKey, ResultType>, Void> {
         
         private final ReentrantLock resultsLock;
-        private Map<GroupKey, AggregatedType> results;
+        private Map<GroupKey, ResultType> results;
         private List<Throwable> occuredFailures;
         private Throwable severeFailure;
         
@@ -245,7 +252,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
         }
 
         @Override
-        public void processElement(Map<GroupKey, AggregatedType> groupedAggregations) {
+        public void processElement(Map<GroupKey, ResultType> groupedAggregations) {
             resultsLock.lock();
             try {
                 results.putAll(groupedAggregations);
@@ -296,7 +303,7 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
             return false;
         }
         
-        public Map<GroupKey, AggregatedType> getResult() {
+        public Map<GroupKey, ResultType> getResult() {
             return results;
         }
         
@@ -315,8 +322,8 @@ public abstract class ProcessorQuery<AggregatedType, DataSourceType> implements 
 
         @SuppressWarnings("unchecked")
         @Override
-        public Class<Map<GroupKey, AggregatedType>> getInputType() {
-            return (Class<Map<GroupKey, AggregatedType>>)(Class<?>) Map.class;
+        public Class<Map<GroupKey, ResultType>> getInputType() {
+            return (Class<Map<GroupKey, ResultType>>)(Class<?>) Map.class;
         }
 
         @Override

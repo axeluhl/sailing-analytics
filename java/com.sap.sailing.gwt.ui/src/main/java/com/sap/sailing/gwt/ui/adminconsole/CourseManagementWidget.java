@@ -46,7 +46,6 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final HorizontalPanel waypointsBtnsPanel;
     protected final HorizontalPanel controlPointsBtnsPanel;
     protected final HorizontalPanel marksBtnsPanel;
-    protected final HorizontalPanel buttonsPanel;
     
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
@@ -103,6 +102,7 @@ public abstract class CourseManagementWidget implements IsWidget {
                 }
             }
         });
+        
         waypoints.getTable().addColumn(waypointsActionColumn);
         
         waypoints.getSelectionModel().addSelectionChangeHandler(new Handler() {
@@ -154,25 +154,6 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         });
         controlPointsBtnsPanel.add(addControlPoint);
-        
-        buttonsPanel = new HorizontalPanel();
-        mainPanel.setWidget(2, 2, buttonsPanel);
-        Button refreshBtn = new Button(stringMessages.refresh());
-        refreshBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refresh();
-            }
-        });
-        buttonsPanel.add(refreshBtn);
-        Button saveBtn = new Button(stringMessages.save());
-        saveBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                save();
-            }
-        });
-        buttonsPanel.add(saveBtn);
     }
     
     private void removeWaypoint(WaypointDTO waypoint) {
@@ -193,7 +174,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }
     }
 
-    protected abstract void save();
+    protected void save(){};
     
     private <T> T getFirstSelected(SetSelectionModel<T> selectionModel) {
         if (selectionModel.getSelectedSet().isEmpty()) {
@@ -245,7 +226,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }).show();
     }
 
-    public abstract void refresh();
+    public void refresh(){};
 
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO) {
         waypoints.getDataProvider().getList().clear();

@@ -82,7 +82,19 @@ public class CandidateChooserImpl implements CandidateChooser {
             TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new Comparator<Candidate>() {
                 @Override
                 public int compare(Candidate o1, Candidate o2) {
-                    return o1.getOneBasedIndexOfWaypoint() - o2.getOneBasedIndexOfWaypoint();
+                    final int result;
+                    if (o1 == null) {
+                        if (o2 == null) {
+                            result = 0;
+                        } else {
+                            result = -1;
+                        }
+                    } else if (o2 == null) {
+                        result = 1;
+                    } else {
+                        result = o1.getOneBasedIndexOfWaypoint() - o2.getOneBasedIndexOfWaypoint();
+                    }
+                    return result;
                 }
             });
             fixedPassings.put(c, fixedPasses);
@@ -133,14 +145,16 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
         Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
         NavigableSet<Candidate> fixed = fixedPassings.get(c);
-        if (!fixed.add(fixedCan)) {
-            Candidate old = fixed.ceiling(fixedCan);
-            fixed.remove(old);
-            removeCandidates(c, Arrays.asList(old));
-            fixed.add(fixedCan);
+        if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
+            if (!fixed.add(fixedCan)) {
+                Candidate old = fixed.ceiling(fixedCan);
+                fixed.remove(old);
+                removeCandidates(c, Arrays.asList(old));
+                fixed.add(fixedCan);
+            }
+            addCandidates(c, Arrays.asList(fixedCan));
+            findShortestPath(c);
         }
-        addCandidates(c, Arrays.asList(fixedCan));
-        findShortestPath(c);
     }
 
     @Override
@@ -152,9 +166,11 @@ public class CandidateChooserImpl implements CandidateChooser {
                 break;
             }
         }
-        fixedPassings.get(c).remove(toRemove);
-        removeCandidates(c, Arrays.asList(toRemove));
-        findShortestPath(c);
+        if (toRemove != null) {
+            fixedPassings.get(c).remove(toRemove);
+            removeCandidates(c, Arrays.asList(toRemove));
+            findShortestPath(c);
+        }
     }
 
     @Override
@@ -294,30 +310,34 @@ public class CandidateChooserImpl implements CandidateChooser {
                     0, race.getRace().getCourse().getNumberOfWaypoints()), 0.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
-                Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
-                Double currentCheapestCost = cheapestEdgeWithCost.getB();
-                // If the shortest path to this candidate is already known the new edge is not added.
-                if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
-                    // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
-                    candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
-                            currentCheapestEdge.getStart(), currentCheapestCost));
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
-                    }
-                    endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
-                    if (!endFound) {
-                        // the end of the segment was not yet found; add edges leading away from
-                        // currentCheapestEdge.getEnd(), summing up their cost with the cost required
-                        // to reach currentCheapestEdge.getEnd()
-                        Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
-                        if (edgesForNewCandidate != null) {
-                            for (Edge e : edgesForNewCandidate) {
-                                int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
-                                // only add edge if it stays within the current segment, not exceeding
-                                // the next fixed mark passing
-                                if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
-                                        && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                    currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                if (cheapestEdgeWithCost == null) {
+                    endFound = true;
+                } else {
+                    Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
+                    Double currentCheapestCost = cheapestEdgeWithCost.getB();
+                    // If the shortest path to this candidate is already known the new edge is not added.
+                    if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
+                        // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
+                        candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
+                                currentCheapestEdge.getStart(), currentCheapestCost));
+                        if (logger.isLoggable(Level.FINEST)) {
+                            logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                        }
+                        endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
+                        if (!endFound) {
+                            // the end of the segment was not yet found; add edges leading away from
+                            // currentCheapestEdge.getEnd(), summing up their cost with the cost required
+                            // to reach currentCheapestEdge.getEnd()
+                            Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
+                            if (edgesForNewCandidate != null) {
+                                for (Edge e : edgesForNewCandidate) {
+                                    int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                                    // only add edge if it stays within the current segment, not exceeding
+                                    // the next fixed mark passing
+                                    if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
+                                            && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                                        currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                                    }
                                 }
                             }
                         }
@@ -448,7 +468,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         for (Candidate can : wrongCandidates) {
-            logger.finest("Removing all edges containing " + can.toString() + "of "+ c);
+            logger.finest("Removing all edges containing " + can + "of "+ c);
             candidates.get(c).remove(can);
             Map<Candidate, Set<Edge>> edges = allEdges.get(c);
             edges.remove(can);

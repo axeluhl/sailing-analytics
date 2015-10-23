@@ -537,7 +537,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         }));
     }
 
-    void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
+    public void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
         if (timer.getPlayState() != Timer.PlayStates.Playing) {
             // wait for the first update and adjust leaderboard once the race times have been received
@@ -3019,7 +3019,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return new CarryColumn();
     }
 
-    protected SortedCellTable<LeaderboardRowDTO> getLeaderboardTable() {
+    public SortedCellTable<LeaderboardRowDTO> getLeaderboardTable() {
         return leaderboardTable;
     }
 

@@ -201,13 +201,11 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogStartOfTrackingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
-        
     }
 
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
         mongoObjectFactory.storeRaceLogEventEvent(object);
-        
     }
 }

@@ -12,6 +12,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -22,7 +23,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.StatisticChangedListener;
 import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -31,6 +32,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class SimpleStatisticProvider implements StatisticProvider {
+    
+    private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
     
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
@@ -42,7 +45,7 @@ public class SimpleStatisticProvider implements StatisticProvider {
     private final Collection<FunctionDTO> extractionFunctions;
     private final Collection<AggregationProcessorDefinitionDTO> aggregatorDefinitions;
     
-    private final HorizontalPanel mainPanel;
+    private final FlowPanel mainPanel;
     private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
@@ -58,16 +61,19 @@ public class SimpleStatisticProvider implements StatisticProvider {
         extractionFunctions = new HashSet<>();
         aggregatorDefinitions = new HashSet<>();
         
-        mainPanel = new HorizontalPanel();
-        mainPanel.setSpacing(5);
-
-        mainPanel.add(new Label(this.stringMessages.calculateThe()));
+        HorizontalPanel selectionPanel = new HorizontalPanel();
         extractionFunctionListBox = createExtractionFunctionListBox();
-        mainPanel.add(extractionFunctionListBox);
-        
+        extractionFunctionListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
+        selectionPanel.add(extractionFunctionListBox);
         aggregatorListBox = createAggregatorListBox();
-        HorizontalPanel aggregatorPanel = surroundAggregatorListBoxWithBraces(aggregatorListBox);
-        mainPanel.add(aggregatorPanel);
+        aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
+        selectionPanel.add(aggregatorListBox);
+        
+        mainPanel = new FlowPanel();
+        Label label = new Label(this.stringMessages.calculateThe());
+        label.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
+        mainPanel.add(label);
+        mainPanel.add(selectionPanel);
 
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
@@ -101,9 +107,9 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     private void updateContent() {
-        dataMiningService.getStatisticsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<FunctionDTO>>() {
+        dataMiningService.getStatisticsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
             @Override
-            public void onSuccess(Iterable<FunctionDTO> functions) {
+            public void onSuccess(HashSet<FunctionDTO> functions) {
                 extractionFunctions.clear();
                 
                 if (functions.iterator().hasNext()) {
@@ -126,13 +132,13 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
     
     private void updateAggregators() {
-        dataMiningService.getAggregatorDefinitionsFor(getStatisticToCalculate(), LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<Iterable<AggregationProcessorDefinitionDTO>>() {
+        dataMiningService.getAggregatorDefinitionsFor(getStatisticToCalculate(), LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the available aggregators from the server: " + caught.getMessage());
             }
             @Override
-            public void onSuccess(Iterable<AggregationProcessorDefinitionDTO> definitions) {
+            public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> definitions) {
                 aggregatorDefinitions.clear();
                 
                 if (definitions.iterator().hasNext()) {
@@ -210,16 +216,6 @@ public class SimpleStatisticProvider implements StatisticProvider {
         return aggregatorListBox;
     }
 
-    private HorizontalPanel surroundAggregatorListBoxWithBraces(ValueListBox<?> aggregatorListBox) {
-        HorizontalPanel aggregatorPanel = new HorizontalPanel();
-        aggregatorPanel.setSpacing(1);
-        aggregatorPanel.add(new Label("("));
-        
-        aggregatorPanel.add(aggregatorListBox);
-        aggregatorPanel.add(new Label(")"));
-        return aggregatorPanel;
-    }
-
     @Override
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         extractionFunctionListBox.setValue(queryDefinition.getStatisticToCalculate());
@@ -273,12 +269,12 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
         return null;
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) { }
+    public void updateSettings(SerializableSettings newSettings) { }
     
     @Override
     public String getDependentCssClassName() {

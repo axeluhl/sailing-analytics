@@ -1,6 +1,6 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -81,15 +82,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
     }
 
-    private void checkAndSwitchToThankYouScreenIfRegattaOver() {
-        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-        long regattaEnd = regattaActivity.event.endMillis;
-
-        if (System.currentTimeMillis() > regattaEnd) {
-            switchToThankYouScreen();
-        }
-    }
-
     /**
      * If the regatta started, don't display the countdown any more.
      */
@@ -115,7 +107,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void switchToThankYouScreen() {
         showingThankYouNote = true;
 
@@ -124,7 +116,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
 
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             startTrackingButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_btn_yellow));
         } else {
             startTrackingButton.setBackground(getResources().getDrawable(R.drawable.rounded_btn_yellow));
@@ -147,7 +139,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
         timer = new TimerRunnable();
         timer.start();
-        checkAndSwitchToThankYouScreenIfRegattaOver();
         checkAndHideCountdownIfRegattaIsInProgress();
     }
 

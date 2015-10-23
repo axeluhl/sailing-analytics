@@ -1,0 +1,36 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
+	<g:HTMLPanel styleName=" {local_res.css.marginFix}">
+		<div class="{res.mediaCss.grid}">
+			<div class="{res.mediaCss.small7} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
+				<div ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></div>
+				<div ui:field="hasLiveRaceDiv" class="{local_res.css.regattaleaderboard_meta_liverace}"></div>
+				<div ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></div>
+			</div>
+			<div class="{res.mediaCss.small5} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
+				<div class="{local_res.css.regattaleaderboard_meta_update}">
+					<div ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></div>
+					<div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></div>
+				</div>
+				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
+				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
+				<g:Anchor ui:field="fullscreenAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button}"></g:Anchor>
+			</div>
+		</div>
+		  
+		<div class="{res.mediaCss.grid}">
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.letItScroll}">
+				<table class="{local_res.css.regattaleaderboard_table}">
+					<tr>
+						<td>
+							<g:HTMLPanel ui:field="oldLeaderboardPanel"></g:HTMLPanel>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>    

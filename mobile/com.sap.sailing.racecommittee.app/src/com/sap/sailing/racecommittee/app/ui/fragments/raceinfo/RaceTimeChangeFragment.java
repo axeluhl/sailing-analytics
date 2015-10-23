@@ -1,8 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.Calendar;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,8 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
@@ -17,8 +20,6 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.Calendar;
 
 public class RaceTimeChangeFragment extends BaseFragment implements View.OnClickListener {
 
@@ -217,6 +218,6 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
     private void closeFragment() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 }

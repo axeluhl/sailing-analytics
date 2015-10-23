@@ -15,7 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -71,10 +71,10 @@ public class GateStartFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_pathfinder, container, false);
 
-            mNat = ViewHolder.get(layout, R.id.pathfinder_nat);
-            mNum = ViewHolder.get(layout, R.id.pathfinder_num);
-            mHeader = ViewHolder.get(layout, R.id.header_text);
-            mButton = ViewHolder.get(layout, R.id.set_path_finder);
+            mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
+            mNum = ViewHelper.get(layout, R.id.pathfinder_num);
+            mHeader = ViewHelper.get(layout, R.id.header_text);
+            mButton = ViewHelper.get(layout, R.id.set_path_finder);
 
             if (getArguments() != null) {
                 if (mNat != null) {
@@ -142,7 +142,7 @@ public class GateStartFragment {
             if (getArguments() != null) {
                 if (getArguments().getInt(START_MODE, 0) != 0) {
                     if (getView() != null) {
-                        View header = ViewHolder.get(getView(), R.id.header);
+                        View header = ViewHelper.get(getView(), R.id.header);
                         if (header != null) {
                             header.setVisibility(View.GONE);
                         }
@@ -234,7 +234,7 @@ public class GateStartFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_gate_start_timing, container, false);
 
-            View caption = ViewHolder.get(layout, R.id.header_text);
+            View caption = ViewHelper.get(layout, R.id.header_text);
             if (caption != null) {
                 caption.setOnClickListener(new OnClickListener() {
 
@@ -245,7 +245,7 @@ public class GateStartFragment {
                 });
             }
 
-            View additional = ViewHolder.get(layout, R.id.addition_golf_time);
+            View additional = ViewHelper.get(layout, R.id.addition_golf_time);
             if (additional != null) {
                 if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
                     additional.setVisibility(View.VISIBLE);

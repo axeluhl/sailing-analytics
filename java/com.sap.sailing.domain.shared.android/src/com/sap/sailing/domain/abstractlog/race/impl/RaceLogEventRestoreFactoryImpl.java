@@ -129,8 +129,8 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
 
     @Override
     public RaceLogWindFixEvent createWindFixEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, List<Competitor> competitors, Integer passId, Wind wind) {
-        return new RaceLogWindFixEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, wind);
+            Serializable id, List<Competitor> competitors, Integer passId, Wind wind, boolean isMagnetic) {
+        return new RaceLogWindFixEventImpl(createdAt, author, logicalTimePoint, id, competitors, passId, wind, isMagnetic);
     }
 
     @Override

@@ -57,6 +57,7 @@ body {
   background-color: #fff;  
   padding: 2px 2px 5px 0px;
   text-align: right;
+  min-width: 170px;
 }
 .functionBarLeft {
   height: 80px;

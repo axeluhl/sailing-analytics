@@ -9,8 +9,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.common.client.LinkUtil;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.mobile.app.AbstractPlaceNavigator;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
@@ -25,7 +23,7 @@ public class PlaceNavigation<T extends Place> {
         this.destinationPlace = destinationPlace;
         this.mapper = mapper;
         String locationURL = getLocationURL();
-        this.isDestinationOnRemoteServer = !(isLocationOnLocalhostOrDevServer(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
+        this.isDestinationOnRemoteServer = !(placeNavigator.isStandaloneServer() || isLocationOnLocalhost(locationURL) || isLocationOnDefaultSapSailingServer(locationURL));
         this.baseUrl = isDestinationOnRemoteServer ? AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL : locationURL;
     }
 
@@ -78,12 +76,11 @@ public class PlaceNavigation<T extends Place> {
     }
 
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
-        return urlToCheck.contains(DesktopPlacesNavigator.DEFAULT_SAPSAILING_SERVER);
+        return urlToCheck.contains(AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER);
     }
 
-    private boolean isLocationOnLocalhostOrDevServer(String urlToCheck) {
-        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1")
-                || urlToCheck.contains(DesktopPlacesNavigator.DEFAULT_SAPSAILING_DEV_SERVER);
+    private boolean isLocationOnLocalhost(String urlToCheck) {
+        return urlToCheck.contains("localhost") || urlToCheck.contains("127.0.0.1");
     }
 
     private String getLocationURL() {
@@ -102,6 +99,7 @@ public class PlaceNavigation<T extends Place> {
             public void onBrowserEvent(Event event) {
                 if (LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
+                    event.stopPropagation();
                     goToPlace();
                 }
             }

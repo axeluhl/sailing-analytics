@@ -5,8 +5,8 @@ import java.io.Serializable;
 import com.sap.sse.datamining.data.ClusterBoundary;
 
 public abstract class AbstractClusterBoundary<ElementType extends Serializable> implements ClusterBoundary<ElementType> {
-
     private static final long serialVersionUID = 513488430319010656L;
+    
     private final ElementType boundaryValue;
     private final ComparisonStrategy strategy;
 

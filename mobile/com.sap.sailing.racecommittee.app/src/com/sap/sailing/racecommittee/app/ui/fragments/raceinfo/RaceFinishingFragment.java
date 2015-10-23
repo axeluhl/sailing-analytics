@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -36,14 +36,14 @@ public class RaceFinishingFragment extends BaseFragment {
         View layout = inflater.inflate(R.layout.race_finishing, container, false);
 
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
-        mFinishingSince = ViewHolder.get(layout, R.id.first_vessel_since);
+        mFinishingSince = ViewHelper.get(layout, R.id.first_vessel_since);
 
-        ImageView flag = ViewHolder.get(layout, R.id.flag);
+        ImageView flag = ViewHelper.get(layout, R.id.flag);
         if (flag != null) {
             flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), 96));
         }
 
-        Button down = ViewHolder.get(layout, R.id.flag_down);
+        Button down = ViewHelper.get(layout, R.id.flag_down);
         if (down != null) {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -61,7 +61,7 @@ public class RaceFinishingFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getView() != null) {
-            TextView first_vessel = ViewHolder.get(getView(), R.id.first_vessel);
+            TextView first_vessel = ViewHelper.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
                 first_vessel.setText(getString(R.string.finishing_started, mDateFormat.format(getRaceState().getFinishingTime().asDate())));
             }

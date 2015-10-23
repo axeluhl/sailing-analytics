@@ -16,7 +16,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import com.sap.sse.BuildVersion;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 
@@ -79,7 +79,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
                 + uuid.toString() + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "="
-                + java.net.URLEncoder.encode(BuildVersion.getBuildVersion(), "UTF-8"));
+                + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8"));
     }
 
     @Override

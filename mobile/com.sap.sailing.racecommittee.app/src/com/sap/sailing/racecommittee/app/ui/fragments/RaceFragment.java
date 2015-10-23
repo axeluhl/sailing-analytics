@@ -3,9 +3,9 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -13,7 +13,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
@@ -68,7 +67,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         if (getArguments() != null) {
             String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-            if (managedRace == null && !(getClass() == RaceFlagViewerFragment.class)) {
+            if (managedRace == null) {
                 throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());
             }
         } else {
@@ -108,7 +107,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             if (extra_key != null) {
                 intent.putExtra(extra_key, extra_value);
             }
-            LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+            BroadcastManager.getInstance(getActivity()).addIntent(intent);
         }
     }
 

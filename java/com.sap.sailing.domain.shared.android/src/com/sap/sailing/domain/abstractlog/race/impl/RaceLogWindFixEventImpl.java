@@ -14,11 +14,13 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
     private static final long serialVersionUID = 7879094280634905183L;
     
     private final Wind windFix;
+    private final boolean isMagnetic;
     
     public RaceLogWindFixEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Wind windFix) {
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Wind windFix, boolean isMagnetic) {
         super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
         this.windFix = windFix;
+        this.isMagnetic = isMagnetic;
     }
 
     @Override
@@ -29,6 +31,11 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
     @Override
     public Wind getWindFix() {
         return windFix;
+    }
+    
+    @Override
+    public boolean isMagnetic() {
+        return isMagnetic;
     }
 
     @Override

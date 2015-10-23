@@ -7,6 +7,7 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -39,13 +40,13 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public double getDistanceToStartLineAtStart() {
-        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0).getMeters();
+    public Distance getDistanceToStartLineAtStart() {
+        return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0);
     }
     
     @Override
-    public Speed getSpeedAtStart() {
-        return getTrackedRace().getSpeed(getCompetitor(), 0);
+    public Speed getSpeedWhenStarting() {
+        return getTrackedRace().getSpeedWhenCrossingStartLine(getCompetitor());
     }
     
     @Override
@@ -60,25 +61,30 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Competitor competitor = getCompetitor();
         return Double.valueOf(getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint()));
     }
+    
+    @Override
+    public int getNumberOfManeuvers() {
+        return getNumberOfTacks() + getNumberOfJibes();
+    }
 
     @Override
-    public Double getNumberOfTacks() {
+    public int getNumberOfTacks() {
         return getNumberOf(ManeuverType.TACK);
     }
 
     @Override
-    public Double getNumberOfJibes() {
+    public int getNumberOfJibes() {
         return getNumberOf(ManeuverType.JIBE);
     }
 
     @Override
-    public Double getNumberOfPenaltyCircles() {
+    public int getNumberOfPenaltyCircles() {
         return getNumberOf(ManeuverType.PENALTY_CIRCLE);
     }
 
-    private Double getNumberOf(ManeuverType maneuverType) {
+    private int getNumberOf(ManeuverType maneuverType) {
         TrackedRace trackedRace = getTrackedRace();
-        double number = 0;
+        int number = 0;
         for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), trackedRace.getStartOfRace(), trackedRace.getEndOfTracking(), false)) {
             if (maneuver.getType() == maneuverType) {
                 number++;

@@ -46,6 +46,18 @@ table td,select,button {
 	font-size: 14px;
 }
 
+.gwt-DialogBox {
+    z-index: 20;
+}
+
+.gwt-ToggleButton {
+	display: inline-block;
+}
+
+.gwt-PopupPanelGlass {
+	z-index: 19;
+}
+
 .contentOuterPanel {
 	background: #dddcdc;
 	margin: 0 12px 0 12px;
@@ -226,10 +238,19 @@ input.magnifier {
 	margin: 2px;
 }
 
+.statisticProviderElement {
+	margin: 2px;
+}
+
 .definitionProviderControls {
 	margin: 2px;
 }
 
 .definitionProviderControlsElements {
 	margin: 2px;
+}
+
+.queryDefinitionViewerContent {
+	background-color: white;
+	padding: 5px;
 }

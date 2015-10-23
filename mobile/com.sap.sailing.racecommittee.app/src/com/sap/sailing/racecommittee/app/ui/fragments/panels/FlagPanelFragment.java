@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -63,35 +63,35 @@ public class FlagPanelFragment extends BasePanelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_panel_flags, container, false);
 
-        mAbandonFlags = ViewHolder.get(layout, R.id.abandon_flags);
+        mAbandonFlags = ViewHelper.get(layout, R.id.abandon_flags);
         if (mAbandonFlags != null) {
             mAbandonFlags.setOnClickListener(new AbandonFlagsClick());
         }
-        mAbandonLock = ViewHolder.get(layout, R.id.abandon_flags_lock);
+        mAbandonLock = ViewHelper.get(layout, R.id.abandon_flags_lock);
 
-        mRecallFlags = ViewHolder.get(layout, R.id.recall_flags);
+        mRecallFlags = ViewHelper.get(layout, R.id.recall_flags);
         if (mRecallFlags != null) {
             mRecallFlags.setOnClickListener(new RecallFlagsClick());
         }
-        mRecallLock = ViewHolder.get(layout, R.id.recall_flags_lock);
+        mRecallLock = ViewHelper.get(layout, R.id.recall_flags_lock);
 
-        mPostponeFlags = ViewHolder.get(layout, R.id.postpone_flags);
+        mPostponeFlags = ViewHelper.get(layout, R.id.postpone_flags);
         if (mPostponeFlags != null) {
             mPostponeFlags.setOnClickListener(new PostponeFlagsClick());
         }
-        mPostponeLock = ViewHolder.get(layout, R.id.postpone_flags_lock);
+        mPostponeLock = ViewHelper.get(layout, R.id.postpone_flags_lock);
 
-        mCourseFlags = ViewHolder.get(layout, R.id.course_flags);
+        mCourseFlags = ViewHelper.get(layout, R.id.course_flags);
         if (mCourseFlags != null) {
             mCourseFlags.setOnClickListener(new CourseFlagsClick());
         }
-        mCourseLock = ViewHolder.get(layout, R.id.course_flags_lock);
+        mCourseLock = ViewHelper.get(layout, R.id.course_flags_lock);
 
-        mMoreFlags = ViewHolder.get(layout, R.id.more_flags);
+        mMoreFlags = ViewHelper.get(layout, R.id.more_flags);
         if (mMoreFlags != null) {
             mMoreFlags.setOnClickListener(new MoreFlagsClick());
         }
-        mMoreLock = ViewHolder.get(layout, R.id.more_flags_lock);
+        mMoreLock = ViewHelper.get(layout, R.id.more_flags_lock);
 
         return layout;
     }
