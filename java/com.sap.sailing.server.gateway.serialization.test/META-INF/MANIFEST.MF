@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.sap.sailing.server.gateway.serialization.test
 Bundle-SymbolicName: com.sap.sailing.server.gateway.serialization.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.server.gateway.serialization

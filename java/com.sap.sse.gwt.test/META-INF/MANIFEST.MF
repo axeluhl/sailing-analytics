@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sse.gwt.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sse.gwt;bundle-version="1.0.0",

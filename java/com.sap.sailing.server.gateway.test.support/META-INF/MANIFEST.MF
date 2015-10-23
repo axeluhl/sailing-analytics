@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test Support
 Bundle-SymbolicName: com.sap.sailing.server.gateway.test.support
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: javax.servlet;bundle-version="2.6.0",
