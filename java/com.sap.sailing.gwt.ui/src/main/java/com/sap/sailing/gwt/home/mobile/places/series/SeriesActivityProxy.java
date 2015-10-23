@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.series;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class SeriesActivityProxy extends AbstractActivityProxy {

@@ -1,21 +1,29 @@
 package com.sap.sse.datamining.factories;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
 
 public class GroupKeyFactory {
 
-    public static <DataType> GroupKey createNestingCompoundKeyFor(DataType input, Iterator<Function<?>> dimensionsIterator) {
+    public static <DataType> GroupKey createNestingCompoundKeyFor(DataType input, Iterable<Function<?>> dimensions) {
+        Iterator<Function<?>> dimensionsIterator = dimensions.iterator();
+        
         Function<?> mainDimension = dimensionsIterator.next();
-        GroupKey key = createDimensionValueGroupKeyFor(input, mainDimension);
+        GroupKey mainKey = createDimensionValueGroupKeyFor(input, mainDimension);
+        List<GroupKey> subKeys = new ArrayList<>();
         if (dimensionsIterator.hasNext()) {
-            key = new NestingCompoundGroupKey(key, createNestingCompoundKeyFor(input, dimensionsIterator));
+            while (dimensionsIterator.hasNext()) {
+                Function<?> dimension = dimensionsIterator.next();
+                subKeys.add(createDimensionValueGroupKeyFor(input, dimension));
+            }
         }
-        return key;
+        return subKeys.isEmpty() ? mainKey : new CompoundGroupKey(mainKey, subKeys);
     }
 
     public static <DataType> GroupKey createDimensionValueGroupKeyFor(DataType input, Function<?> mainDimension) {

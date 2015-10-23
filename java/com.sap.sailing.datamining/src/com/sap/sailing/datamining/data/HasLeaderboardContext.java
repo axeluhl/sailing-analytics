@@ -4,9 +4,9 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.polars.PolarDataService;
 
 public interface HasLeaderboardContext {
-    
+
     Leaderboard getLeaderboard();
 
-	PolarDataService getPolarDataService();
+    PolarDataService getPolarDataService();
 
 }

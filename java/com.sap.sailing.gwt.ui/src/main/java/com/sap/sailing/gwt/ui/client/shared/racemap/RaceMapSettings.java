@@ -26,6 +26,8 @@ public class RaceMapSettings extends AbstractSettings {
 
     private boolean showSelectedCompetitorsInfo = true;
     
+    private boolean showWindStreamletColors = false;
+    
     private boolean showWindStreamletOverlay = false;
 
     private boolean showSimulationOverlay = false;
@@ -59,6 +61,7 @@ public class RaceMapSettings extends AbstractSettings {
         this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
         this.showSimulationOverlay = settings.showSimulationOverlay;
         this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
+        this.showWindStreamletColors = settings.showWindStreamletColors;
         this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
         this.windUp = settings.windUp;
         this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
@@ -97,6 +100,14 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setShowWindStreamletOverlay(boolean showWindStreamletOverlay) {
         this.showWindStreamletOverlay = showWindStreamletOverlay;
+    }
+
+    public boolean isShowWindStreamletColors() {
+        return showWindStreamletColors;
+    }
+
+    public void setShowWindStreamletColors(boolean showWindStreamletColors) {
+        this.showWindStreamletColors = showWindStreamletColors;
     }
 
     public boolean isShowSimulationOverlay() {

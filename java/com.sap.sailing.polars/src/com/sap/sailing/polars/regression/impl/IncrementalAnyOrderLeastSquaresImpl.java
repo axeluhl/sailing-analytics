@@ -21,19 +21,23 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 /**
  * This class implements the incremental polynomial regression approach described here:
  * 
- * <a href="http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/">
- * http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/</a>
+ * <a href=
+ * "http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/"
+ * > http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/
+ * </a>
+ * 
+ * It can be used in parallel, because it uses locking for adding and reading data.
  * 
  * 
  * @author Frederik Petersen D054528
  *
  */
 public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSquares {
-    
+
     private static final long serialVersionUID = -5282614133220702724L;
 
     private class NaNCheckerVisitor implements RealMatrixPreservingVisitor {
-        
+
         private boolean hasNaNEntry = false;
 
         @Override
@@ -44,7 +48,8 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         }
 
         @Override
-        public void start(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {}
+        public void start(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
+        }
 
         @Override
         public double end() {
@@ -56,29 +61,30 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         }
 
     }
-     
+
     private double[][] matrixOfXSums;
 
     private double[] vectorOfXYMultSums;
 
     private int polynomialOrder;
-    
+
     private AtomicLong numberOfPointsAdded = new AtomicLong(0);
-    
+
     private AtomicBoolean functionNeedsUpdate = new AtomicBoolean(true);
 
     private transient NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
             false);
-    
-    private transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
-            true);
+
+    private transient NamedReentrantReadWriteLock cacheLock = new NamedReentrantReadWriteLock(
+            "IncrementalLeastSquaresCacheLock", true);
 
     private PolynomialFunction cachedFunction;
-    
+
     private final boolean hasIntercept;
     private final boolean useSymbollicInversionIfPossible;
-    
-    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept, boolean useSymbollicInversionIfPossible) {  
+
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept,
+            boolean useSymbollicInversionIfPossible) {
         this.hasIntercept = hasIntercept;
         this.polynomialOrder = polynomialOrder;
         this.useSymbollicInversionIfPossible = useSymbollicInversionIfPossible;
@@ -90,15 +96,15 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             vectorOfXYMultSums = new double[polynomialOrder];
         }
     }
-    
-    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder) {  
+
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder) {
         this(polynomialOrder, true, true);
     }
-    
-    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept) {  
+
+    public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept) {
         this(polynomialOrder, hasIntercept, true);
     }
-    
+
     @Override
     public void addData(double x, double y) {
         LockUtil.lockForWrite(lock);
@@ -106,14 +112,14 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             numberOfPointsAdded.incrementAndGet();
             functionNeedsUpdate.set(true);
             for (int i = 0; hasIntercept ? i <= polynomialOrder : i < polynomialOrder; i++) {
-                int powerI = hasIntercept ? i : i+1;
+                int powerI = hasIntercept ? i : i + 1;
                 vectorOfXYMultSums[i] += y * Math.pow(x, powerI);
                 for (int j = 0; hasIntercept ? j <= polynomialOrder : j < polynomialOrder; j++) {
-                    int powerJ = hasIntercept ? j : j+1;
+                    int powerJ = hasIntercept ? j : j + 1;
                     if (powerI == 0 && powerJ == 0) {
                         matrixOfXSums[i][j] += 1;
                     } else {
-                        matrixOfXSums[i][j] += Math.pow(x, powerI+powerJ);
+                        matrixOfXSums[i][j] += Math.pow(x, powerI + powerJ);
                     }
                 }
             }
@@ -121,7 +127,7 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             LockUtil.unlockAfterWrite(lock);
         }
     }
-    
+
     @Override
     public PolynomialFunction getOrCreatePolynomialFunction() throws NotEnoughDataHasBeenAddedException {
 
@@ -173,7 +179,8 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             try {
                 inversedMatrix = new LUDecompositionImpl(matrixOfXSumsCopy).getSolver().getInverse();
             } catch (SingularMatrixException singularMatrixException) {
-                throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?", singularMatrixException);
+                throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?",
+                        singularMatrixException);
             }
         } else {
             NaNCheckerVisitor nanChecker = new NaNCheckerVisitor();
@@ -181,7 +188,7 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             if (nanChecker.hasNaNEntry()) {
                 throw new NotEnoughDataHasBeenAddedException("Matrix singular, all x input equal?");
             }
-            
+
         }
         RealVector coeffs = inversedMatrix.operate(vectorOfXYMultSumsCopy);
         if (!hasIntercept) {
@@ -198,7 +205,7 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         double[] coeffsWithZeroIntercept = new double[coeffsNoIntercept.length + 1];
         coeffsWithZeroIntercept[0] = 0;
         for (int i = 1; i < coeffsWithZeroIntercept.length; i++) {
-            coeffsWithZeroIntercept[i] = coeffsNoIntercept[i-1];
+            coeffsWithZeroIntercept[i] = coeffsNoIntercept[i - 1];
         }
         resultFunction = new PolynomialFunction(coeffsWithZeroIntercept);
         return resultFunction;
@@ -214,16 +221,17 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         }
         return new PolynomialFunction(coeff);
     }
-    
+
     private enum LeastSquaresInversionHelperType {
 
-        CUBIC,
-        CUBIC_NO_INTERCEPT;
-        
-        
+        CUBIC, CUBIC_NO_INTERCEPT;
+
         /**
+         * Use to provide a fast alternative to actually computing the inverseMatrix from scratch.
+         * Right now this uses precalculated equations for cubic functions.
          * 
-         * @param realMatrix matrix to inverse
+         * @param realMatrix
+         *            matrix to inverse
          * @return Inversed matrix if symbolic inversion was found. Else null
          */
         private RealMatrix inverseMatrix(RealMatrix realMatrix) {
@@ -240,7 +248,7 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
                         { b * e - c * d, c * c - a * e, a * d - b * c },
                         { c * c - b * d, a * d - b * c, b * b - a * c } };
                 RealMatrix intermediateMatrixCNI = MatrixUtils.createRealMatrix(matrixDataCNI);
-                double factorCNI = (1.0 / (-a*c*e + a*d*d + b*b*e-2*b*c*d+c*c*c));
+                double factorCNI = (1.0 / (-a * c * e + a * d * d + b * b * e - 2 * b * c * d + c * c * c));
                 result = intermediateMatrixCNI.scalarMultiply(factorCNI);
                 break;
             case CUBIC:
@@ -281,11 +289,13 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
             }
             return result;
         }
-        
+
         /**
          * 
-         * @param order Order of the polynomial
-         * @param hasIntercept If the least squares is set to no intercept
+         * @param order
+         *            Order of the polynomial
+         * @param hasIntercept
+         *            If the least squares is set to no intercept
          * @return type of the polynomial or null if it doesn't exist in this implementation
          */
         private static LeastSquaresInversionHelperType getType(int order, boolean hasIntercept) {
@@ -299,14 +309,11 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         }
 
     }
-    
-    private void readObject(java.io.ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
+
+    private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock",
-                false);
-        cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock",
-                true);
+        lock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresLock", false);
+        cacheLock = new NamedReentrantReadWriteLock("IncrementalLeastSquaresCacheLock", true);
     }
 
     @Override

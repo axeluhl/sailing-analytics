@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class MediaUtils {
@@ -95,5 +96,14 @@ public class MediaUtils {
                 }
             });
         return imageSizeFetcher;
+    }
+    
+    public static Util.Pair<Integer, Integer> fitImageSizeToBox(int boxWidth, int boxHeight, int imageWidth, int imageHeight, boolean neverScaleUp) {
+        double scale = Math.min((double) boxWidth / (double) imageWidth, (double) boxHeight / (double) imageHeight);
+
+        int h = (int) (!neverScaleUp || scale < 1.0 ? scale * imageHeight : imageHeight);
+        int w = (int) (!neverScaleUp || scale < 1.0 ? scale * imageWidth : imageWidth);
+        
+        return new Util.Pair<Integer, Integer>(w,h);
     }
 }

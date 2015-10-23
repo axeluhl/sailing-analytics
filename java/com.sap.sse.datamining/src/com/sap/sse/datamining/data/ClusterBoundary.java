@@ -13,7 +13,7 @@ import com.sap.sse.datamining.impl.data.ComparisonStrategy;
  * 
  * @see Cluster
  */
-public interface ClusterBoundary<ElementType> extends Serializable {
+public interface ClusterBoundary<ElementType extends Serializable> extends Serializable {
 
     public boolean contains(ElementType value);
 

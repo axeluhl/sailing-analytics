@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -32,7 +33,7 @@ public class CourseFragmentName extends CourseFragment implements CourseNameAdap
 
         mListView = (ListView) layout.findViewById(R.id.listView);
 
-        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
+        LinearLayout headerText = ViewHelper.get(layout, R.id.header_text);
         if (headerText != null) {
             headerText.setOnClickListener(new View.OnClickListener() {
 

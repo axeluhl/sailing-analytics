@@ -30,7 +30,7 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     protected Iterable<ImageSpec> getImageSpecs() {
         ArrayList<ImageSpec> result = new ArrayList<ImageSpec>();
         
-        result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteForRaceLogTracking(),
+        result.add(new ImageSpec(ACTION_DENOTE_FOR_RACELOG_TRACKING, stringMessages.denoteAllRacesForRaceLogTrackingShorctut(),
                 makeImagePrototype(resources.denoteForRaceLogTracking())));
         result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(),
                 makeImagePrototype(resources.competitorRegistrations())));

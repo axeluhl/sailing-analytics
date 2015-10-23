@@ -76,6 +76,7 @@ public abstract class HttpRequest {
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(15000);
         connection.setRequestProperty("connection", "close");
+        connection.setRequestProperty("Accept-Encoding", "");
 
         BufferedInputStream responseInputStream = null;
         try {

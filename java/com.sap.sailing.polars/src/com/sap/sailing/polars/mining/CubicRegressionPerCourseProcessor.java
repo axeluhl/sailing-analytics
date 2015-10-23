@@ -16,20 +16,27 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
+/**
+ * Groups incoming fixes by boatclass and legtype into {@link AngleAndSpeedRegression} instances and
+ * provides access methods to regression data.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
 public class CubicRegressionPerCourseProcessor implements
         Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
 
     private static final long serialVersionUID = 3059764273262382648L;
 
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
- 
+
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
 
     /**
@@ -65,7 +72,10 @@ public class CubicRegressionPerCourseProcessor implements
             }
         }
     }
-    
+
+    /**
+     * Returns speed and twa for a given scenario, if data is available in the regression.
+     */
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -77,7 +87,10 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return estimatedSpeedAndAngle;
     }
-    
+
+    /**
+     * Returns windspeed and windangle candidates for a given scenario, if enough data is available.
+     */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -93,7 +106,7 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return result;
     }
-    
+
     private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType) {
         LegTypePolarClusterKey key = new LegTypePolarClusterKey() {
 
@@ -110,14 +123,22 @@ public class CubicRegressionPerCourseProcessor implements
         GroupKey compoundKey;
         try {
             compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
-                    .getCubicRegressionPerCourseClusterKeyDimensions().iterator());
+                    .getCubicRegressionPerCourseClusterKeyDimensions());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
         return compoundKey;
     }
-    
+
+    /**
+     * Allows direct access to speed regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -129,7 +150,15 @@ public class CubicRegressionPerCourseProcessor implements
         }
         return polynomialFunction;
     }
-    
+
+    /**
+     * Allows direct access to angle regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -148,15 +177,14 @@ public class CubicRegressionPerCourseProcessor implements
         logger.severe("Polar Data Mining Pipe failed. Cause: " + failure.getMessage());
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
-    
+
     public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
 
-
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
-     // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -166,12 +194,11 @@ public class CubicRegressionPerCourseProcessor implements
         return null;
     }
 
-    
     @Override
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
-    
+
     @Override
     public boolean isFinished() {
         return false;
@@ -181,7 +208,7 @@ public class CubicRegressionPerCourseProcessor implements
     public void abort() {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean isAborted() {
         // TODO Auto-generated method stub
@@ -193,7 +220,5 @@ public class CubicRegressionPerCourseProcessor implements
         // TODO Auto-generated method stub
         return null;
     }
-
-
 
 }

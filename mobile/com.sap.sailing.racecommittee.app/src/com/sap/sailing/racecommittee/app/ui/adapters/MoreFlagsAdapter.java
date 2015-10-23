@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.util.ViewHolder;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -63,7 +63,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
         final MoreFlag item = getItem(position);
 
-        final ImageView flagImage = ViewHolder.get(convertView, R.id.flag);
+        final ImageView flagImage = ViewHelper.get(convertView, R.id.flag);
         if (flagImage != null) {
             flagImage.setVisibility(View.INVISIBLE);
             if (!TextUtils.isEmpty(item.file_name)) {
@@ -78,7 +78,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final TextView first_line = ViewHolder.get(convertView, R.id.first_line);
+        final TextView first_line = ViewHelper.get(convertView, R.id.first_line);
         if (first_line != null) {
             first_line.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(item.first_line)) {
@@ -87,7 +87,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final TextView second_line = ViewHolder.get(convertView, R.id.second_line);
+        final TextView second_line = ViewHelper.get(convertView, R.id.second_line);
         if (second_line != null) {
             second_line.setVisibility(View.GONE);
             if (!TextUtils.isEmpty(item.second_line)) {
@@ -96,7 +96,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final Button confirm = ViewHolder.get(convertView, R.id.confirm);
+        final Button confirm = ViewHelper.get(convertView, R.id.confirm);
         if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
             if (item.touched) {
@@ -111,7 +111,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             });
         }
 
-        final ImageView more_data = ViewHolder.get(convertView, R.id.more_data);
+        final ImageView more_data = ViewHelper.get(convertView, R.id.more_data);
         if (more_data != null) {
             more_data.setVisibility(View.GONE);
             if (item.more) {
@@ -119,7 +119,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             }
         }
 
-        final RelativeLayout layout = ViewHolder.get(convertView, R.id.line);
+        final RelativeLayout layout = ViewHelper.get(convertView, R.id.line);
         if (layout != null) {
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -20,10 +26,13 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
@@ -53,12 +62,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSe
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
     implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -106,7 +109,7 @@ public class LoginActivity extends BaseActivity
             //send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
-            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
     private ItemSelectedListener<CourseArea> courseAreaSelectionListener = new ItemSelectedListener<CourseArea>() {
@@ -127,7 +130,7 @@ public class LoginActivity extends BaseActivity
             //send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
-            LocalBroadcastManager.getInstance(LoginActivity.this).sendBroadcast(intent);
+            BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
         }
     };
 
@@ -274,7 +277,10 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ExLog.i(this, TAG, "Starting Login: " + AppUtils.getBuildInfo(this));
+        ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
+
+        // This is required to reactivate the loader manager after configuration change (screen rotation)
+        getLoaderManager();
 
         dataManager = DataManager.create(this);
         DataStore dataStore = dataManager.getDataStore();
@@ -349,7 +355,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -444,8 +449,13 @@ public class LoginActivity extends BaseActivity
             return;
         }
 
-        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -backdrop.getHeight() + (backdrop.getHeight() / 5));
-        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, backdrop.getHeight() - (backdrop.getHeight() / 5));
+        int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
+        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_subtitle);
+        if (subTitle != null) {
+            upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+        }
+        ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
+        ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -462,9 +472,7 @@ public class LoginActivity extends BaseActivity
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
         animators.add(getAlphaAnimator(findViewById(R.id.backdrop_subtitle)));
-        animators.add(getAlphaAnimator(findViewById(R.id.refresh_data)));
-        animators.add(getAlphaAnimator(findViewById(R.id.technical_info)));
-        animators.add(getAlphaAnimator(findViewById(R.id.settings_button)));
+        animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animators);

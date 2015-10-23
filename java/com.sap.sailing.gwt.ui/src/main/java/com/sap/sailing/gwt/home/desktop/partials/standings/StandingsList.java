@@ -1,0 +1,85 @@
+package com.sap.sailing.gwt.home.desktop.partials.standings;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.ui.shared.general.LabelType;
+
+public class StandingsList extends Widget implements RefreshableWidget<GetMiniLeaderboardDTO> {
+    interface MyUiBinder extends UiBinder<Element, StandingsList> {
+    }
+    
+    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+    private static final StringMessages i18n = StringMessages.INSTANCE;
+    
+    @UiField AnchorElement headerLinkUi;
+    @UiField SpanElement headerTitleUi;
+    @UiField SpanElement headerLabelUi;
+    @UiField DivElement headerArrowUi;
+    @UiField DivElement itemContainerUi;
+    @UiField DivElement scoreInformationUi;
+
+    public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
+        StandingsResources.INSTANCE.css().ensureInjected();
+        setElement(uiBinder.createAndBindUi(this));
+        setVisible(false);
+        headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
+        if(headerNavigation == null) {
+            headerArrowUi.removeFromParent();
+        } else {
+            headerNavigation.configureAnchorElement(headerLinkUi);
+        }
+    }
+
+    @Override
+    public void setData(GetMiniLeaderboardDTO data) {
+        itemContainerUi.removeAllChildren();
+        scoreInformationUi.removeAllChildren();
+        getElement().getStyle().clearDisplay();
+        updateScoreInformation(data);
+        
+        LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
+        setVisible(!data.getItems().isEmpty());
+        
+        boolean showRaceCounts = data.hasDifferentRaceCounts();
+        for (MiniLeaderboardItemDTO item : data.getItems()) {
+            itemContainerUi.appendChild(new StandingsListCompetitor(item, showRaceCounts).getElement());
+        }
+    }
+
+    private void updateScoreInformation(GetMiniLeaderboardDTO data) {
+        scoreInformationUi.removeAllChildren();
+        if(data.getItems().isEmpty() || (data.getScoreCorrectionText() == null && data.getLastScoreUpdate() == null)) {
+            scoreInformationUi.getStyle().setDisplay(Display.NONE);
+            return;
+        }
+        scoreInformationUi.getStyle().clearDisplay();
+        
+        if (data.getScoreCorrectionText() != null) {
+            DivElement scoreCorrectionText = Document.get().createDivElement();
+            scoreCorrectionText.setInnerText(data.getScoreCorrectionText());
+            scoreInformationUi.appendChild(scoreCorrectionText);
+        }
+        if (data.getLastScoreUpdate() != null) {
+            DivElement lastUpdateElement = Document.get().createDivElement();
+            String lastUpdate = DateAndTimeFormatterUtil.longDateFormatter.render(data.getLastScoreUpdate()) + " "
+                    + DateAndTimeFormatterUtil.formatElapsedTime(data.getLastScoreUpdate().getTime());
+            lastUpdateElement.setInnerText(StringMessages.INSTANCE.lastScoreUpdate() + ": " + lastUpdate);
+            scoreInformationUi.appendChild(lastUpdateElement);
+        }
+    }
+}

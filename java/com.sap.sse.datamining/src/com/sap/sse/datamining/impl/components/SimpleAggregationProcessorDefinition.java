@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataStoringAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelGroupedDataAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class SimpleAggregationProcessorDefinition<ExtractedType, AggregatedType> implements
@@ -18,14 +18,14 @@ public class SimpleAggregationProcessorDefinition<ExtractedType, AggregatedType>
     private final Class<ExtractedType> extractedType;
     private final Class<AggregatedType> aggregatedType;
     private final String aggregationNameMessageKey;
-    private final Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor;
-    private final Constructor<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> constructor;
+    private final Class<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor;
+    private final Constructor<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> constructor;
     
     public SimpleAggregationProcessorDefinition(
             Class<ExtractedType> extractedType,
             Class<AggregatedType> aggregatedType,
             String aggregationNameMessageKey,
-            Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor) {
+            Class<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor) {
         this.extractedType = extractedType;
         this.aggregatedType = aggregatedType;
         this.aggregationNameMessageKey = aggregationNameMessageKey;
@@ -33,9 +33,9 @@ public class SimpleAggregationProcessorDefinition<ExtractedType, AggregatedType>
         constructor = ensureValidConstructor(aggregationProcessor);
     }
 
-    private Constructor<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> ensureValidConstructor(Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor) {
+    private Constructor<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> ensureValidConstructor(Class<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> aggregationProcessor) {
         try {
-            Constructor<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> constructor = aggregationProcessor.getConstructor(ExecutorService.class, Collection.class);
+            Constructor<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> constructor = aggregationProcessor.getConstructor(ExecutorService.class, Collection.class);
             if (Modifier.isPublic(constructor.getModifiers())) {
                 // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
                 constructor.setAccessible(true);
@@ -63,7 +63,7 @@ public class SimpleAggregationProcessorDefinition<ExtractedType, AggregatedType>
     }
 
     @Override
-    public Class<? extends AbstractParallelGroupedDataStoringAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor() {
+    public Class<? extends AbstractParallelGroupedDataAggregationProcessor<ExtractedType, AggregatedType>> getAggregationProcessor() {
         return aggregationProcessor;
     }
     

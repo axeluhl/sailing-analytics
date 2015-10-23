@@ -25,10 +25,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -130,22 +130,14 @@ public class VideosListComposite extends Composite {
         table.setWidth("100%");
 
         AnchorCell anchorCell = new AnchorCell();
-        Column<VideoDTO, SafeHtml> shortVideoNameColumn = new Column<VideoDTO, SafeHtml>(anchorCell) {
+        Column<VideoDTO, SafeHtml> videoTitleAsLinkColumn = new Column<VideoDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(VideoDTO video) {
-                String linkName = "";
-                int index = video.getSourceRef().lastIndexOf("/");
-                if(index > 0) {
-                    linkName =  video.getSourceRef().substring(index+1, video.getSourceRef().length());
+                String linkName = video.getTitle() != null ? video.getTitle() : "";
+                if(linkName.length() >= 25) {
+                    linkName = linkName.substring(0, 22) + "...";     
                 }
                 return ANCHORTEMPLATE.cell(video.getSourceRef(), linkName);
-            }
-        };
-
-        TextColumn<VideoDTO> titleColumn = new TextColumn<VideoDTO>() {
-            @Override
-            public String getValue(VideoDTO image) {
-                return image.getTitle() != null ? image.getTitle() : "";
             }
         };
 
@@ -206,24 +198,23 @@ public class VideosListComposite extends Composite {
             }
         });
 
-        titleColumn.setSortable(true);
+        videoTitleAsLinkColumn.setSortable(true);
         createdAtDateColumn.setSortable(true);
 
-        table.addColumn(shortVideoNameColumn, "Short name");
-        table.addColumn(titleColumn, stringMessages.title());
+        table.addColumn(videoTitleAsLinkColumn, stringMessages.title());
         table.addColumn(createdAtDateColumn, "Created At");
         table.addColumn(mimeTypeColumn, stringMessages.mimeType());
         table.addColumn(localeColumn, "Lang");
         table.addColumn(tagsColumn, "Tags");
         table.addColumn(videoActionColumn, stringMessages.actions());
-        table.addColumnSortHandler(getVideoTableColumnSortHandler(videoListDataProvider.getList(), titleColumn, createdAtDateColumn));
+        table.addColumnSortHandler(getVideoTableColumnSortHandler(videoListDataProvider.getList(), videoTitleAsLinkColumn, createdAtDateColumn));
         table.getColumnSortList().push(createdAtDateColumn);
 
         return table;
     }
 
     private ListHandler<VideoDTO> getVideoTableColumnSortHandler(List<VideoDTO> videoRecords,
-            TextColumn<VideoDTO> titleColumn, TextColumn<VideoDTO> createdAtDateColumn) {
+            Column<VideoDTO, SafeHtml> titleColumn, TextColumn<VideoDTO> createdAtDateColumn) {
         ListHandler<VideoDTO> result = new ListHandler<VideoDTO>(videoRecords);
         result.setComparator(titleColumn, new Comparator<VideoDTO>() {
             @Override

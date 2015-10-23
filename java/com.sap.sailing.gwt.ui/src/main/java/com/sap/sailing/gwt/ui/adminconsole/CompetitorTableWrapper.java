@@ -17,12 +17,12 @@ import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -224,20 +224,16 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     }
     
     public void refreshCompetitorList(String leaderboardName) {
-        refreshCompetitorList(leaderboardName, false, null);
-    }
-    
-    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs) {
-        refreshCompetitorList(leaderboardName, lookInRaceLogs, null);
+        refreshCompetitorList(leaderboardName, null);
     }
     
     /**
      * @param leaderboardName If null, all existing competitors are loaded
      */
-    public void refreshCompetitorList(String leaderboardName, boolean lookInRaceLogs, final Callback<Iterable<CompetitorDTO>,
+    public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
         if(leaderboardName != null) {
-            sailingService.getCompetitorsOfLeaderboard(leaderboardName, lookInRaceLogs, new AsyncCallback<Iterable<CompetitorDTO>>() {
+            sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());

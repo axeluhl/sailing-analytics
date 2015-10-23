@@ -360,6 +360,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
+    private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
     
     private static final String GET_POLAR_CATEGORY = "getPolar";
@@ -398,7 +399,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
-            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewSimulation,
+            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
             RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
@@ -427,6 +428,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
+        this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
         this.hasPolar = false;
         headerPanel = new FlowPanel();
@@ -494,21 +496,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             coordinateSystem.setCoordinateSystem(new IdentityCoordinateSystem());
         }
-        fixesAndTails.clearTails();
-        redraw();
-        // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                if (map != null) {
-                    map.setOptions(mapOptions);
-                    // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
-                    mapFirstZoomDone = false;
-                    trueNorthIndicatorPanel.redraw();
-                    orientationChangeInProgress = false;
+        if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
+            fixesAndTails.clearTails();
+            redraw();
+            // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    if (map != null) {
+                        map.setOptions(mapOptions);
+                        // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
+                        mapFirstZoomDone = false;
+                        trueNorthIndicatorPanel.redraw();
+                        orientationChangeInProgress = false;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -602,6 +606,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
               if (showViewStreamlets) {
+                  streamletOverlay.setColors(showViewStreamletColors);
                   streamletOverlay.setVisible(true);
               }
 
@@ -2306,6 +2311,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+        }
+        if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
+            settings.setShowWindStreamletColors(newSettings.isShowWindStreamletColors());
+            streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());

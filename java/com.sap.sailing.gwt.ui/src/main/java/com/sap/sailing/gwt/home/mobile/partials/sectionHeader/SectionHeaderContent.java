@@ -15,12 +15,14 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
-import com.sap.sailing.gwt.home.client.shared.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
+import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class SectionHeaderContent extends Widget {
     
+    protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Element, SectionHeaderContent> {
@@ -73,6 +75,23 @@ public class SectionHeaderContent extends Widget {
         infoTextUi.setInnerText(infoText);
     }
     
+    public void initCollapsibility(Element content, boolean showInitial) {
+        final CollapseAnimation animation = new CollapseAnimation(content, showInitial);
+        setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !showInitial);
+        LinkUtil.configureForAction(headerMainUi, new Runnable() {
+            @Override
+            public void run() {
+                boolean collapsed = actionArrowUi.hasClassName(ACCORDION_COLLAPSED_STYLE);
+                setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
+                animation.animate(collapsed);
+            }
+        });
+        actionArrowUi.setSrc("images/mobile/arrow-down-grey.png");
+        actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
+        actionArrowUi.getStyle().clearDisplay();
+        headerRightUi.getStyle().clearDisplay();
+    }
+    
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerMainUi);
         headerRightUi.getStyle().clearDisplay();
@@ -95,6 +114,11 @@ public class SectionHeaderContent extends Widget {
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
         LinkUtil.configureForAction(headerMainUi, commandToExecute);
+    }
+    
+    private void setClassName(Element element, String className, boolean set) {
+        if (set) element.addClassName(className);
+        else element.removeClassName(className);
     }
     
 }

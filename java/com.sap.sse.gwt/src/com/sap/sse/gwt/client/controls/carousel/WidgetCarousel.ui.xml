@@ -19,6 +19,10 @@
 		background-color: #fcfcfc;
 	}
 	
+	.slider .slick-slide:focus {
+		outline: 0;
+	}
+	
 	.slider .slick-prev {
 		left: 0px;
 		height: 60px;

@@ -50,6 +50,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
+import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -113,6 +114,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
+        case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
+            return new LowPointWithEliminationsAndRoundsWinnerGets07();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -187,7 +190,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
                 statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
                 if (track != null) {
-                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
+                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
                 }
             }
         } catch (NoWindException e) {

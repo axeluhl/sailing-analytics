@@ -1,7 +1,9 @@
 package com.sap.sse.datamining.impl.components;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
@@ -11,13 +13,17 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
 import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 
 public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<DataType>
                       extends AbstractParallelProcessor<DataType, GroupedDataEntry<DataType>> {
 
     private Iterable<ParameterizedFunction<?>> parameterizedDimensions;
 
+    /**
+     * @throws IllegalArgumentException if any of the given function isn't a dimension
+     *                                  or the given iterable is empty.
+     */
     @SuppressWarnings("unchecked")
     public AbstractParallelMultiDimensionalNestingGroupingProcessor(Class<DataType> dataType,
                                                              ExecutorService executor,
@@ -58,11 +64,15 @@ public abstract class AbstractParallelMultiDimensionalNestingGroupingProcessor<D
     
     private GroupKey createCompoundKeyFor(DataType input, Iterator<ParameterizedFunction<?>> dimensionsIterator) {
         ParameterizedFunction<?> mainDimension = dimensionsIterator.next();
-        GroupKey key = createGroupKeyFor(input, mainDimension.getFunction(), mainDimension.getParameterProvider());
+        GroupKey mainKey = createGroupKeyFor(input, mainDimension.getFunction(), mainDimension.getParameterProvider());
+        List<GroupKey> subKeys = new ArrayList<>();
         if (dimensionsIterator.hasNext()) {
-            key = new NestingCompoundGroupKey(key, createCompoundKeyFor(input, dimensionsIterator));
+            while (dimensionsIterator.hasNext()) {
+                ParameterizedFunction<?> dimension = dimensionsIterator.next();
+                subKeys.add(createGroupKeyFor(input, dimension.getFunction(), dimension.getParameterProvider()));
+            }
         }
-        return key;
+        return subKeys.isEmpty() ? mainKey : new CompoundGroupKey(mainKey, subKeys);
     }
 
     protected abstract GroupKey createGroupKeyFor(DataType input, Function<?> dimension, ParameterProvider parameterProvider);

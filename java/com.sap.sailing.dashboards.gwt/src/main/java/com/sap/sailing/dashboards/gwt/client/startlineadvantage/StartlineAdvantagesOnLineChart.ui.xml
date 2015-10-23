@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:highcharts="urn:import:org.moxieapps.gwt.highcharts.client">
+
+    	<ui:style
+		type='com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesOnLineChart.StartlineAdvantagesOnLineChartStyle'
+		src='StartlineAdvantagesOnLineChartStyle.css'></ui:style>
+
+	<g:HTMLPanel>
+	<g:HTMLPanel ui:field="chartContainer" styleName="{style.advantages_on_line_chart_container}"></g:HTMLPanel>
+	<div class="{style.confidence_bar_container}">
+			<div class="{style.confidence_bar}"></div>
+			<div ui:field="confidenceBarHeader" class="{style.confidence_bar_header}"></div>
+			<div ui:field="confidenceBarMinLabel" class="{style.confidence_bar_label} {style.confidence_bar_min_label}"></div>
+			<div ui:field="confidenceBarMaxLabel" class="{style.confidence_bar_label} {style.confidence_bar_max_label}"></div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

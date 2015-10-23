@@ -13,8 +13,9 @@
         android:layout_height="match_parent"
         android:verticalSpacing="5dp"/>
 
-    <TimePicker
+    <include
         android:id="@+id/protest_time_time_time_picker"
+        layout="@layout/time_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

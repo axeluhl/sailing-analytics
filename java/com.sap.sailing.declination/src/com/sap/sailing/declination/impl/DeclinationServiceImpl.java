@@ -42,13 +42,13 @@ public class DeclinationServiceImpl implements DeclinationService {
 
     @Override
     public Declination getDeclination(TimePoint timePoint, Position position,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
         return getDeclination(timePoint, position, defaultMaxDistance, timeoutForOnlineFetchInMilliseconds);
     }
 
     @Override
     public Declination getDeclination(TimePoint timePoint, Position position, Distance maxDistance,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
         Calendar cal = new GregorianCalendar();
         cal.setTime(timePoint.asDate());
         Declination result = null;
@@ -98,13 +98,18 @@ public class DeclinationServiceImpl implements DeclinationService {
         return result;
     }
 
-    private QuadTree<Declination> getYearStore(int year) throws IOException, ClassNotFoundException,
-            ParseException {
+    private QuadTree<Declination> getYearStore(int year) throws IOException, ParseException {
         QuadTree<Declination> result = yearStore.get(year);
         if (result == null) {
-            result = persistentStore.getStoredDeclinations(year);
-            if (result != null) {
-                yearStore.put(year, result);
+            synchronized (this) {
+                // make sure we only trigger one invocation of persistentStore.getStoredDeclinations(year) even for multiple threads
+                result = yearStore.get(year);
+                if (result == null) {
+                    result = persistentStore.getStoredDeclinations(year);
+                    if (result != null) {
+                        yearStore.put(year, result);
+                    }
+                }
             }
         }
         return result;

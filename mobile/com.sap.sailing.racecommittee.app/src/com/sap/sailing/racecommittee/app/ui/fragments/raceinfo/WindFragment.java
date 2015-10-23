@@ -410,7 +410,7 @@ public class WindFragment extends BaseFragment
      */
     private void onSendClick() {
         Wind wind = getResultingWindFix();
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind);
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, /* isMagnetic */ true);
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
         case 1:

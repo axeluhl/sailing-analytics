@@ -12,7 +12,6 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -77,7 +76,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * more races.
      */
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         boolean result;
         Iterable<? extends Fleet> fleets = raceColumn.getFleets();
         if (Util.size(fleets) <= 1 || allFleetsOrdered(fleets)) {
@@ -182,8 +181,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2,
-            TimePoint timePoint) throws NoWindException {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
         return 0;
     }
 }
