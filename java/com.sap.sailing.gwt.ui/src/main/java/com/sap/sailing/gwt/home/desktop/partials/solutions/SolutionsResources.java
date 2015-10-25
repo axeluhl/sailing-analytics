@@ -15,18 +15,26 @@ public interface SolutionsResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String solutions();
         String solutions_nav();
-        String solutions_navsticky();
         String solutions_nav_link();
         String solutions_nav_linkactive();
         String solutions_content();
         String parallax();
         String gridalternator();
+
+        String solutions_contentsapinsailing();
+
+        String solutions_contentsapinsailing_body();
         String solutions_contentsap();
-        String solutions_contentrace();
+
+        String solutions_contentsapsailingracemanager();
+
+        String solutions_contentsapsailingracemanager_body();
+
+        String solutions_contentpost();
+
+        String solutions_contenttraining();
         String background();
         String noparallax();
-        String solutions_contentpost();
-        String solutions_contenttraining();
         String solutions_contentsimulator();
         String solutions_content_linkappstore();
     }

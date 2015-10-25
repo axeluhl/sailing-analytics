@@ -1,53 +1,57 @@
+/**
+ * The solutions page
+ */
 .solutions {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
-  padding-top: 3.4em;
+  font-size: 1rem;
 }
 .solutions_nav {
   position: absolute;
-  top: 4.666666666666667em;
+ 
   right: 0;
   left: 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #f2f2f2;
   background: #fff;
   z-index: 10;
   text-align: center;
 }
-.solutions_navsticky {
-  position: fixed;
-  top: 0;
-}
 .solutions_nav_link {
   display: inline-block;
   padding: 1em 0 0.733333333333333em 0;
-  border-bottom: 0.266666666666667em solid transparent;
   font-weight: 600;
-  color: #333;
+  color: #666;
   -webkit-transition: 0.2s border ease;
-  -moz-transition: 0.2s border ease;
-  -o-transition: 0.2s border ease;
-  -ms-transition: 0.2s border ease;
-  transition: 0.2s border ease;
+     -moz-transition: 0.2s border ease;
+          transition: 0.2s border ease;
   margin-right: 1em;
 }
 .solutions_nav_link:hover,
-.solutions_nav_link:focus,
 .solutions_nav_linkactive {
-  border-bottom-color: #f0ab00;
   text-decoration: none;
-  color: #666;
+	color: #666;
+	border-bottom: 4px solid #efaa00;
+	margin-bottom: -1px
 }
 .solutions_nav_link:last-child {
   margin-right: 0;
+}
+@media (min-width: 45em) {
+  .solutions_nav_link {
+    margin-right: 1em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_nav_link {
+    margin-right: 2em;
+  }
 }
 .solutions_content {
   position: relative;
   z-index: 2;
 }
-.solutions_content:nth-child(odd) {
+.solutions_content:nth-child(even) {
   background-color: #f8f8f8;
 }
-.solutions_content:nth-child(even) {
+.solutions_content:nth-child(odd) {
   background-color: #fff;
 }
 .solutions_content .parallax {
@@ -62,79 +66,129 @@
   height: 100%;
   padding: 3.333333333333333em 0;
 }
+@media (min-width: 45em) {
+  .solutions_content .gridalternator {
+    padding: 5em 0;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_content .gridalternator {
+    padding: 6.666666666666667em 0;
+  }
+}
+.solutions_contentsapinsailing {
+  width: 100%;
+}
+.solutions_contentsapinsailing_body {
+  margin: auto;
+  padding-right: 50%;
+  max-width: 88em;
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: contain;
+  background-image: url("images/home/solutions-sap-in-sailing.jpg");
+}
+.solutions_contentsapinsailing_body .gridalternator {
+  padding: 4em 0 4.333333333333333em;
+}
+@media (min-width: 45em) {
+  .solutions_contentsapinsailing_body .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contentsapinsailing_body .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
+}
 .solutions_contentsap {
   max-width: 88em;
   margin: auto;
   background-repeat: no-repeat;
   background-position: center center;
-  -webkit-background-size: 100%;
-  -moz-background-size: 100%;
   background-size: 100%;
   background-image: url("images/home/solutions-sap.png");
 }
 .solutions_contentsap .gridalternator {
   padding: 4em 0 4.333333333333333em;
 }
-.solutions_contentrace {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+@media (min-width: 45em) {
+  .solutions_contentsap .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
 }
-.solutions_contentrace .gridalternator {
-  padding: 2.666666666666667em 0 10%;
+@media (min-width: 61em) {
+  .solutions_contentsap .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
 }
-.solutions_contentrace .parallax {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+.solutions_contentsapsailingracemanager {
+  width: 100%;
 }
-.solutions_contentrace .parallax .background {
+.solutions_contentsapsailingracemanager_body {
   margin: auto;
-  height: 100%;
+  padding: 4em 50% 4.333333333333333em 0;
   max-width: 88em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-race.png");
-  -webkit-background-size: 100% auto;
-  -moz-background-size: 100% auto;
-  background-size: 100% auto;
-  background-position: center 20em;
+  background-image: url("images/home/solutions-sap-sailing-race-manager.png");
+  background-size: 40%;
+  background-position: center right;
 }
-.solutions_contentrace .parallax.noparallax .background {
-  margin-left: 40px;
-  margin-right: -80px;
-  margin-top: 110px;
-  background-position: center bottom;
+@media (min-width: 45em) {
+  .solutions_contentsapsailingracemanager_body .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contentsapsailingracemanager_body .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
 }
 .solutions_contentpost {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+  font-size: 1rem;
 }
 .solutions_contentpost .gridalternator {
   background-repeat: no-repeat;
   background-image: url("images/home/solutions-post.png");
   background-position: left center;
-  -webkit-background-size: 100%;
-  -moz-background-size: 100%;
   background-size: 100%;
   padding: 1.666666666666667em 0;
 }
+@media (min-width: 45em) {
+  .solutions_contentpost .gridalternator {
+    padding: 3.333333333333333em 0;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contentpost .gridalternator {
+    padding: 5em 0;
+  }
+}
 .solutions_contenttraining {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+  font-size: 1rem;
 }
 .solutions_contenttraining .gridalternator {
   padding-top: 5em;
 }
+@media (min-width: 45em) {
+  .solutions_contenttraining .gridalternator {
+    padding-top: 6.666666666666667em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contenttraining .gridalternator {
+    padding-top: 8.333333333333334em;
+  }
+}
 .solutions_contenttraining .parallax {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+  font-size: 1rem;
 }
 .solutions_contenttraining .parallax .background {
   margin: auto;
   height: 100%;
   max-width: 80em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-training.png");
-  -webkit-background-size: 100% auto;
-  -moz-background-size: 100% auto;
+  background-image: url("images/home/	-training.png");
   background-size: 100% auto;
   background-position: center 13.333333333333334em;
 }
@@ -142,72 +196,26 @@
   background-position: center 6.666666666666667em;
 }
 .solutions_contentsimulator {
-  font-size: 15px;
-  /* @alternate */ font-size: 1rem;
+  font-size: 1rem;
 }
 .solutions_contentsimulator .gridalternator {
   background-repeat: no-repeat;
   background-image: url("images/home/solutions-simulator.png");
   background-position: left center;
-  -webkit-background-size: 100%;
-  -moz-background-size: 100%;
   background-size: 100%;
   padding: 3.333333333333333em 0 3.333333333333333em;
 }
-.solutions_content_linkappstore {
-  display: inline-block;
-  margin-top: 2.666666666666667em;
-}
-
-@media (min-width: 25em) {
-  .solutions_nav_link {
-    margin-right: 1em;
-  }
-  .solutions_content .gridalternator {
-    padding: 5em 0;
-  }
-  .solutions_contentsap .gridalternator {
-    padding: 5em 0 5.666666666666667em;
-  }
-  .solutions_contentrace .gridalternator {
-    padding: 4em 0 15%;
-  }
-  .solutions_contentrace .parallax .background {
-    background-position: center 16.666666666666668em;
-  }
-  .solutions_contentpost .gridalternator {
-    padding: 3.333333333333333em 0;
-  }
-  .solutions_contenttraining .gridalternator {
-    padding-top: 6.666666666666667em;
-  }
+@media (min-width: 45em) {
   .solutions_contentsimulator .gridalternator {
     padding: 5em 0 6.666666666666667em;
   }
 }
-@media (min-width: 50em) {
-  .solutions_nav_link {
-    margin-right: 2em;
-  }
-  .solutions_content .gridalternator {
-    padding: 6.666666666666667em 0;
-  }
-  .solutions_contentsap .gridalternator {
-    padding: 6.666666666666667em 0 12em;
-  }
-  .solutions_contentrace .gridalternator {
-    padding: 4em 0 20%;
-  }
-  .solutions_contentrace .parallax .background {
-    background-position: center 13.333333333333334em;
-  }
-  .solutions_contentpost .gridalternator {
-    padding: 5em 0;
-  }
-  .solutions_contenttraining .gridalternator {
-    padding-top: 8.333333333333334em;
-  }
+@media (min-width: 61em) {
   .solutions_contentsimulator .gridalternator {
     padding: 6.666666666666667em 0 13.333333333333334em;
   }
+}
+.solutions_content_linkappstore {
+  display: inline-block;
+  margin-top: 2.666666666666667em;
 }
