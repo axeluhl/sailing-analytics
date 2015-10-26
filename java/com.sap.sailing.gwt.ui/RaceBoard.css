@@ -98,6 +98,24 @@ table {
 	pointer-events: all;
 }
 
+.MapSimulationLegendParentDiv {
+	padding-bottom: 10px;
+	padding-right: 10px;
+	pointer-events: none;
+}
+
+.MapStreamletLegend {
+	pointer-events: none;
+}
+
+.MapStreamletLegendParentDiv {
+	pointer-events: none;
+}
+
+.RaceMapSettingsDialogCheckboxIntended {
+	margin-left: 1.2em;
+}
+
 .RaceMap-HeaderPanel {
 	height: 60px;
 	width: 100%;

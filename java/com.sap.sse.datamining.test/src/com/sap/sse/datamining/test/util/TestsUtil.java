@@ -5,7 +5,7 @@ import com.sap.sse.datamining.components.management.AggregationProcessorDefiniti
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 import com.sap.sse.datamining.components.management.FunctionRegistry;
-import com.sap.sse.datamining.components.management.QueryDefinitionDTOProvider;
+import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.impl.DataMiningServerImpl;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
@@ -54,12 +54,12 @@ public class TestsUtil {
         DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
         DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
         AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
-        QueryDefinitionDTOProvider queryDefinitionProvider = new QueryDefinitionDTOManager();
+        QueryDefinitionDTORegistry queryDefinitionRegistry = new QueryDefinitionDTOManager();
         return new DataMiningServerImpl(ConcurrencyTestsUtil.getExecutor(), functionRegistry,
                                         dataSourceProviderRegistry,
                                         dataRetrieverChainDefinitionRegistry,
                                         aggregationProcessorDefinitionRegistry,
-                                        queryDefinitionProvider);
+                                        queryDefinitionRegistry);
     }
     
     protected TestsUtil() { }

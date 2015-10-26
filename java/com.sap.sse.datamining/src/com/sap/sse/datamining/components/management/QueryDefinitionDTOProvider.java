@@ -1,10 +1,11 @@
 package com.sap.sse.datamining.components.management;
 
-import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 
 public interface QueryDefinitionDTOProvider {
     
-    Iterable<String> getNames();
-    StatisticQueryDefinitionDTO get(String name);
+    Iterable<PredefinedQueryIdentifier> getIdentifiers();
+    ModifiableStatisticQueryDefinitionDTO get(PredefinedQueryIdentifier identifier);
 
 }
