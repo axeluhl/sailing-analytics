@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="side_button_large">150dp</dimen>
+
+    <dimen name="default_button_height">60dp</dimen>
+    <dimen name="default_button_width">230dp</dimen>
+
+</resources>

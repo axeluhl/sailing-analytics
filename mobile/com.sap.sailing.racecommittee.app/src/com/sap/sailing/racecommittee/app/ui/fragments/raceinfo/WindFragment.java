@@ -73,7 +73,7 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-    //    private View mWindOn;
+//    private View mWindOn;
 //    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
