@@ -69,21 +69,21 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                             MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                         MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                        MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
+                        MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
             } else if (imageToValidate.hasTag(MediaTagConstants.TEASER)
                     && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                             MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
                             MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                         MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                        MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
+                        MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
             } else if (imageToValidate.hasTag(MediaTagConstants.STAGE)
                     && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                             MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
                             MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                         MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                        MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
+                        MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
             }
             return errorMessage;
         }
@@ -92,10 +92,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             return width >= minWidth && width <= maxWidth && height >= minHeight && height <= maxHeight;
         }
         
-        private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight) {
-            String errorMessage = "The size of the " + imageType + " image does not fit. ";
-            errorMessage += "The width should be between " + minWidth + " and " + maxWidth + " px ";
-            errorMessage += " and the height between " + minHeight + " and " + maxHeight + " px.";
+        private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageSizeError(imageType, minWidth, maxWidth, minHeight, maxHeight);
             return errorMessage;
         }
     }

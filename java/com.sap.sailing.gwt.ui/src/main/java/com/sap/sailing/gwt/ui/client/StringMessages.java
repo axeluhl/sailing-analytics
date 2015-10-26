@@ -1430,4 +1430,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String addTeaserImage();
     String addEventLogo();
     String noImagesDefinedYet();
+    String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
 }
