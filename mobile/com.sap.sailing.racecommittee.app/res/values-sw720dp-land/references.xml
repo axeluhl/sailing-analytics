@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="race_schedule_course_marks" type="layout">@layout/race_schedule_course_marks_large</item>
+
+</resources>
