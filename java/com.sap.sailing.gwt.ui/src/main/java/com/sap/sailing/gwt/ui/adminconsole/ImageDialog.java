@@ -59,22 +59,31 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
             
-            if(imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
+            if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
-            } else if(imageWidth == null || imageHeight == null) {
+            } else if (imageWidth == null || imageHeight == null) {
                 errorMessage = "The width and height of the image could not retrieved yet.";
-            } else if(imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                    MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
+            } else if (imageToValidate.hasTag(MediaTagConstants.LOGO)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                            MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
+                            MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                        MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
-            } else if(imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                    MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
+                        MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
+                        MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
+            } else if (imageToValidate.hasTag(MediaTagConstants.TEASER)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                            MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
+                            MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                        MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
-            } else if(imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                    MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
+                        MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
+                        MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
+            } else if (imageToValidate.hasTag(MediaTagConstants.STAGE)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                            MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
+                            MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                        MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
+                        MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
+                        MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
             }
             return errorMessage;
         }
