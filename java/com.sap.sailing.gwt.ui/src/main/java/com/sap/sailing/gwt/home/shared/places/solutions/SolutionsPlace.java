@@ -8,7 +8,9 @@ import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
-    public enum SolutionsNavigationTabs { SailingAnalytics, RaceCommiteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
+    public enum SolutionsNavigationTabs {
+        SapInSailing, SailingAnalytics, RaceCommiteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator
+    };
     private final SolutionsNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab"; 
 

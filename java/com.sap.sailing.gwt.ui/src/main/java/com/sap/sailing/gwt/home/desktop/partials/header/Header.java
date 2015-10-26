@@ -78,7 +78,7 @@ public class Header extends Composite {
 
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
-        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
+        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
 
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
