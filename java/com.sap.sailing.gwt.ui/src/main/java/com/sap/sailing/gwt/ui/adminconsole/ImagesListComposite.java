@@ -78,7 +78,7 @@ public class ImagesListComposite extends Composite {
         imagesControlsPanel.setSpacing(5);
         panel.add(imagesControlsPanel);
 
-        Button addPhotoBtn = new Button("Add gallery photo");
+        Button addPhotoBtn = new Button(stringMessages.addGalleryPhoto());
         addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -87,7 +87,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addPhotoBtn);
 
-        Button addStateImageBtn = new Button("Add stage image");
+        Button addStateImageBtn = new Button(stringMessages.addStageImage());
         addStateImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -96,7 +96,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addStateImageBtn);
 
-        Button addEventTeaseImageBtn = new Button("Add teaser image");
+        Button addEventTeaseImageBtn = new Button(stringMessages.addTeaserImage());
         addEventTeaseImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -105,7 +105,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addEventTeaseImageBtn);
 
-        Button addLogoImageBtn = new Button("Add event logo");
+        Button addLogoImageBtn = new Button(stringMessages.addEventLogo());
         addLogoImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
