@@ -2,12 +2,12 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/side_button_large"
+    android:layout_height="match_parent"
     android:background="?sap_gray"
     android:orientation="horizontal">
 
     <RelativeLayout
-        android:layout_width="@dimen/side_button_large"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
@@ -30,7 +30,8 @@
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black"/>
+            android:background="?black"
+            android:visibility="gone"/>
     </RelativeLayout>
 
     <RelativeLayout

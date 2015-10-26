@@ -32,7 +32,7 @@
     <dimen name="textSize_72">32sp</dimen>
 
     <dimen name="setup_text_width">150dp</dimen>
-    <dimen name="compound_padding">12dp</dimen>
+    <dimen name="compound_padding">3dp</dimen>
 
     <dimen name="default_button_height">40dp</dimen>
     <dimen name="default_button_width">216dp</dimen>
@@ -50,7 +50,7 @@
     <dimen name="race_flag_margin">50dp</dimen>
 
     <dimen name="side_button">86dp</dimen>
-    <dimen name="side_button_large">100dp</dimen>
+    <dimen name="side_button_large">110dp</dimen>
     <dimen name="side_button_imageSize">50dp</dimen>
     <dimen name="side_button_lockSize">14dp</dimen>
 

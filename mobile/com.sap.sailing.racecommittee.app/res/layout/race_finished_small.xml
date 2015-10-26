@@ -7,13 +7,13 @@
     <FrameLayout
         android:id="@+id/finished_panel_buttons"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/side_button_large"
+        android:layout_height="@dimen/side_button"
         android:layout_alignParentTop="true"/>
 
     <FrameLayout
         android:id="@+id/finished_panel_desc"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/side_button_large"
+        android:layout_height="@dimen/side_button"
         android:layout_alignParentBottom="true"/>
 
     <FrameLayout
