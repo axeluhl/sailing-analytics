@@ -1432,4 +1432,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String noImagesDefinedYet();
     String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
     String couldNotRetrieveImageSizeYet();
+    @Override
+    String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
 }
