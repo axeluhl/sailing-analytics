@@ -34,7 +34,7 @@ public class AppUtils {
      * @param activity Activity to lock
      */
     public static void lockOrientation(Activity activity) {
-        if (with(activity).isPhone() && (with(activity).isMDPI() || with(activity).isHDPI())) {
+        if (with(activity).isPhone()) {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         }
     }
