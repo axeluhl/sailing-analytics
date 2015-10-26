@@ -463,7 +463,7 @@
     <string name="dependent_races_relative">Relative Start Time</string>
     <string name="dependent_races_prompt">Please select the race</string>
     <string name="minutes_after">Minutes after</string>
-    <string name="minutes_after_long">%1$.0f Minutes after %2$s</string>
+    <string name="minutes_after_long">%1$.0f Min after %2$s</string>
     <string name="wind_accuracy_ago">ago</string>
     <string name="gate_time_schedule_long">%1$d + %2$d = %3$d Minutes</string>
     <string name="gate_time_schedule_short">%d Minutes</string>
