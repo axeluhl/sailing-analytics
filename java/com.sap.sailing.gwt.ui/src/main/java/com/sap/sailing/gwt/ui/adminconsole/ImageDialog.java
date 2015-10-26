@@ -62,7 +62,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
             } else if (imageWidth == null || imageHeight == null) {
-                errorMessage = "The width and height of the image could not retrieved yet.";
+                errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
             } else if (imageToValidate.hasTag(MediaTagConstants.LOGO)
                     && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                             MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
