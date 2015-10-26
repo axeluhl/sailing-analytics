@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="selector_header_height">80dp</dimen>
+
+    <dimen name="thin_line">1dp</dimen>
+
+    <dimen name="panel_button_caption_size">14sp</dimen>
+    <dimen name="panel_button_header_size">16sp</dimen>
+
+    <item name="flag_size_xlarge" format="integer" type="integer">64</item>
+    <dimen name="race_flag_margin">50dp</dimen>
+
+    <dimen name="textSize_40">26sp</dimen>
+
+    <dimen name="finished_header_text_size">@dimen/textSize_32</dimen>
+    <dimen name="finished_default_text_size">@dimen/textSize_22</dimen>
+
+</resources>
