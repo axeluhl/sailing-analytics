@@ -128,7 +128,7 @@ public class ImagesListComposite extends Composite {
 
         panel.add(imageTable);
 
-        noImagesLabel = new Label("No images defined yet.");
+        noImagesLabel = new Label(stringMessages.noImagesDefinedYet());
         noImagesLabel.ensureDebugId("NoImagesLabel");
         noImagesLabel.setWordWrap(false);
         panel.add(noImagesLabel);

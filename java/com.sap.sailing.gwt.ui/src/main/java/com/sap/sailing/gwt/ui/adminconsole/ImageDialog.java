@@ -101,15 +101,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     }
 
     public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator,
-                callback);
+        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
-
         busyIndicator = new SimpleBusyIndicator();
-
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -120,7 +117,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                     @Override
                     public void onSuccess(Pair<Integer, Integer> imageSize) {
                         busyIndicator.setBusy(false);
-                        if(imageSize != null) {
+                        if (imageSize != null) {
                             widthInPxBox.setValue(imageSize.getA());
                             heightInPxBox.setValue(imageSize.getB());
                         }
@@ -147,7 +144,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());
-        if(widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
+        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
             result.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
         }
         List<String> tags = new ArrayList<String>();
