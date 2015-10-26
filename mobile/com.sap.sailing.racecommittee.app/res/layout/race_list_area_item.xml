@@ -54,6 +54,17 @@
             android:textColor="?sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/update_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/updateIndicator"
+            android:src="@drawable/updated"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:scaleType="matrix"
+            android:layout_alignParentEnd="true"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -101,7 +112,7 @@
                     android:id="@+id/current_flag"
                     android:layout_width="40dp"
                     android:layout_height="25dp"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="center"
                     android:scaleType="centerInside"
                     tools:src="@drawable/flag_alpha_64dp"/>
 
@@ -109,7 +120,7 @@
                     android:id="@+id/flag_timer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="center"
                     android:drawableLeft="?arrow_down"
                     android:textAppearance="?textXSmall"
                     tools:text="01:12"/>
@@ -146,18 +157,6 @@
                 tools:visibility="visible"/>
         </LinearLayout>
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/update_badge"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:contentDescription="@string/updateIndicator"
-        android:src="@drawable/updated"
-        android:visibility="gone"
-        tools:visibility="visible"/>
 
     <ImageView
         android:layout_width="match_parent"
