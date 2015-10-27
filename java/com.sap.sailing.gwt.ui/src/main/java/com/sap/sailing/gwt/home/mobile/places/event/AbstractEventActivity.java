@@ -227,4 +227,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public EventViewDTO getEventDTO() {
         return eventDTO;
     }
+    
+    @Override
+    public boolean isMultiRegattaEvent() {
+        return getEventDTO().getType() == EventType.MULTI_REGATTA;
+    }
 }

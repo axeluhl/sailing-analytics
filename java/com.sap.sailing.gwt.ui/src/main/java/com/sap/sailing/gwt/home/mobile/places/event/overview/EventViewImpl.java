@@ -41,7 +41,7 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     private UpdatesBox updatesBoxUi;
 
     public EventViewImpl(EventView.Presenter presenter) {
-        super(presenter, false, false);
+        super(presenter, presenter.isMultiRegattaEvent(), false);
         FlowPanel container = new FlowPanel();
         if (isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
