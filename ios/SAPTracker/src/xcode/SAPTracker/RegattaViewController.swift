@@ -140,20 +140,23 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         if DataManager.sharedManager.selectedCheckIn?.event != nil {
             let event = DataManager.sharedManager.selectedCheckIn!.event!
-            // finished
-            if now.timeIntervalSinceDate(event.endDate) > 0 {
-                isFinished = true
-                regattaStartLabel.text = NSLocalizedString("Thank you for participating!", comment: "")
-                leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
-                daysHeight.constant = 0
-                hoursHeight.constant = 0
-                minutesHeight.constant = 0
-                startTrackingButton.setTitle(NSLocalizedString("Check-Out", comment: ""), forState: UIControlState.Normal)
-                startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
-                announcementsLabel.text = " "
-            }
-                // before race
-            else if now.timeIntervalSinceDate(event.startDate) < 0 {
+
+//            // finished
+//            if now.timeIntervalSinceDate(event.endDate) > 0 {
+//                isFinished = true
+//                regattaStartLabel.text = NSLocalizedString("Thank you for participating!", comment: "")
+//                leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
+//                daysHeight.constant = 0
+//                hoursHeight.constant = 0
+//                minutesHeight.constant = 0
+//                startTrackingButton.setTitle(NSLocalizedString("Check-Out", comment: ""), forState: UIControlState.Normal)
+//                startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
+//                announcementsLabel.text = " "
+//            }
+//            else
+            
+            // before race
+            if now.timeIntervalSinceDate(event.startDate) < 0 {
                 regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
                 lastSyncLabel.hidden = false
                 leaderBoardButtonHeight.constant = 0
