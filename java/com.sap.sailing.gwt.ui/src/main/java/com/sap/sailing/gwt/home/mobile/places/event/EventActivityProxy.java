@@ -17,9 +17,9 @@ import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.media.MediaActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.multiregatta.MultiRegattaActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.regatta.RegattaActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
-import com.sap.sailing.gwt.home.mobile.places.event.regatta.RegattaActivity;
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
@@ -62,7 +62,7 @@ public class EventActivityProxy extends AbstractActivityProxy {
             @Override
             public void onSuccess() {
                 if (currentPlace instanceof MultiregattaOverviewPlace) {
-                    super.onSuccess(new EventActivity(currentPlace, event, clientFactory));
+                    super.onSuccess(new MultiRegattaActivity(currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaOverviewPlace) {
                     super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaRacesPlace) {

@@ -57,15 +57,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     protected abstract EventViewBase initView();
     
-    protected final void initSailorInfoOrSeriesNavigation(EventViewBase view) {
-        EventViewDTO event = eventDTO;
-        String sailorInfoUrl = event.getSailorsInfoWebsiteURL();
+    protected final void initSeriesNavigation(EventViewBase view) {
+        if (eventDTO.getType() == EventType.SERIES_EVENT) {
+            String seriesIdAsString = eventDTO.getSeriesIdAsString();
+            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
+            view.setSeriesNavigation(eventDTO.getSeriesName(), navigation);
+        }
+    }
+    
+    protected final void initSailorInfo(EventViewBase view) {
+        String sailorInfoUrl = eventDTO.getSailorsInfoWebsiteURL();
         if (sailorInfoUrl != null && !sailorInfoUrl.isEmpty()) {
             view.setSailorInfos(StringMessages.INSTANCE.sailorInfoLongText(), StringMessages.INSTANCE.sailorInfo(), sailorInfoUrl);
-        } else if (event.getType() == EventType.SERIES_EVENT) {
-            String seriesIdAsString = event.getSeriesIdAsString();
-            PlaceNavigation<?> navigation = clientFactory.getNavigator().getEventSeriesNavigation(seriesIdAsString, null, false);
-            view.setSeriesNavigation(event.getSeriesName(), navigation);
         }
     }
     

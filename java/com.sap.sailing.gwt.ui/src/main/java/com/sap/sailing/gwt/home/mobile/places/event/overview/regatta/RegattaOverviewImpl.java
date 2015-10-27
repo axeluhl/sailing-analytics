@@ -1,44 +1,33 @@
-package com.sap.sailing.gwt.home.mobile.places.event.overview;
+package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 
 import java.util.Collection;
 
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
-import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
-import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
-import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
-import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
-import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
-import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
-import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
-import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public class EventViewImpl extends AbstractEventView<EventView.Presenter> implements EventView {
+public class RegattaOverviewImpl extends AbstractEventOverview {
     
     private static final StringMessages MSG = StringMessages.INSTANCE;
 
-    private EventOverviewStage overviewStageUi;
     private EventSteps eventStepsUi;
     private RegattaLiveRaces liveRacesUi;
-    private Impressions impressionsUi;
-    private StatisticsBox statisticsBoxUi;
-    private UpdatesBox updatesBoxUi;
 
-    public EventViewImpl(EventView.Presenter presenter) {
-        super(presenter, presenter.isMultiRegattaEvent(), false);
+    public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
+        super(presenter, presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
         this.setupProgress(container);
         this.setupLiveRaces(container);
@@ -65,12 +54,6 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
         }
     }
     
-    private void setupOverviewStage(Panel container) {
-        overviewStageUi = new EventOverviewStage(currentPresenter);
-        refreshManager.add(overviewStageUi, new GetEventOverviewStageAction(getEventId(), true));
-        container.add(overviewStageUi);
-    }
-    
     private void setupLiveRaces(Panel container) {
         if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
             liveRacesUi = new RegattaLiveRaces();
@@ -86,24 +69,9 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
         container.add(miniLeaderboard);
     }
     
-    private void setupUpdateBox(Panel container) {
-        updatesBoxUi = new UpdatesBox(currentPresenter, refreshManager);
-        if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
-            refreshManager.add(updatesBoxUi, new GetEventOverviewNewsAction(getEventId(), 2));
-            container.add(updatesBoxUi);
-        }
-    }
-    
-    private void setupImpressions(Panel container) {
-        impressionsUi = new Impressions();
-        impressionsUi.getElement().getStyle().setDisplay(Display.NONE);
-        container.add(impressionsUi);
-    }
-    
-    private void setupStatisticsBox(Panel container) {
-        statisticsBoxUi = new StatisticsBox(isMultiRegattaEvent());
-        refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(getEventId(), getRegattaId()));
-        container.add(statisticsBoxUi);
+    @Override
+    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
+        QuickfinderPresenter.getForRegattaOverview(quickfinder, currentPresenter, regattaMetadatas);
     }
     
     @Override
@@ -111,12 +79,4 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
         QuickfinderPresenter.getForSeriesEventOverview(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
 
-    @Override
-    public void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images) {
-        impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
-        impressionsUi.setStatistis(nrOfImages, nrOfVideos);
-        impressionsUi.addImages(images);
-        // TODO: desktop media navigation
-        impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());
-    }
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.event.regatta;
+package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
@@ -6,10 +6,9 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventView;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventViewImpl;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 
-public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace> implements EventView.Presenter {
+public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace> implements EventViewBase.Presenter {
 
     public RegattaActivity(RegattaOverviewPlace place, EventViewDTO eventDTO, MobileApplicationClientFactory clientFactory) {
         super(place, eventDTO, clientFactory);
@@ -17,8 +16,8 @@ public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace>
 
     @Override
     protected EventViewBase initView() {
-        final EventView view = new EventViewImpl(this);
-        initSailorInfoOrSeriesNavigation(view);
+        final AbstractEventOverview view = new RegattaOverviewImpl(this);
+        initSeriesNavigation(view);
         initQuickfinder(view, true);
         if (!isMultiRegattaEvent()) {
             initMedia(new MediaCallback() {
