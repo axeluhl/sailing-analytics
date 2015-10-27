@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
@@ -41,25 +42,26 @@ public class EventActivityProxy extends AbstractActivityProxy {
         clientFactory.getDispatch().execute(action, new ActivityProxyCallback<EventViewDTO>(clientFactory, currentPlace) {
             @Override
             public void onSuccess(EventViewDTO event) {
-                currentPlace = getRealPlace(event.getType());
+                if (currentPlace instanceof EventDefaultPlace) {
+                    currentPlace = getRealPlace(event.getType());
+                }
                 afterEventLoad(event);
             }
         });
     }
     
     private AbstractEventPlace getRealPlace(EventType eventType) {
-        if(currentPlace instanceof RegattaOverviewPlace && (eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA)) {
-            EventContext contextWithoutRegatta = new EventContext(currentPlace.getCtx()).withRegattaId(null);
-            return new EventDefaultPlace(contextWithoutRegatta);
+        if(eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA) {
+            return new RegattaOverviewPlace(new EventContext(currentPlace.getCtx()).withRegattaId(null));
         }
-        return currentPlace;
+        return new MultiregattaOverviewPlace(currentPlace.getCtx());
     }
     
     private void afterEventLoad(final EventViewDTO event) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                if (currentPlace instanceof EventDefaultPlace) {
+                if (currentPlace instanceof MultiregattaOverviewPlace) {
                     super.onSuccess(new EventActivity(currentPlace, event, clientFactory));
                 } else if (currentPlace instanceof RegattaOverviewPlace) {
                     super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, event, clientFactory));

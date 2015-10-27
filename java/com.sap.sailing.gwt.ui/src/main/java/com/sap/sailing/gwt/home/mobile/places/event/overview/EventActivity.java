@@ -16,17 +16,15 @@ public class EventActivity extends AbstractEventActivity<AbstractEventPlace> imp
     
     @Override
     protected EventViewBase initView() {
-        final EventView view = new EventViewImpl(this);
+        final EventView view = new MultiRegattaViewImpl(this);
         initSailorInfoOrSeriesNavigation(view);
         initQuickfinder(view, true);
-        if (!isMultiRegattaEvent()) {
-            initMedia(new MediaCallback() {
-                @Override
-                public void onSuccess(MediaDTO result) {
-                    view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
-                }
-            });
-        }
+        initMedia(new MediaCallback() {
+            @Override
+            public void onSuccess(MediaDTO result) {
+                view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
+            }
+        });
         return view;
     }
 
