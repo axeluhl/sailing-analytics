@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaOverviewNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaRacesNavigationProvider;
@@ -31,7 +32,7 @@ public interface EventViewBase extends IsWidget {
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
             RegattaRacesNavigationProvider, SeriesEventRacesNavigationProvider, RegattaOverviewNavigationProvider,
-            SeriesEventOverviewNavigationProvider {
+            SeriesEventOverviewNavigationProvider, NewsItemLinkProvider {
         
         EventContext getCtx();
 
@@ -40,11 +41,17 @@ public interface EventViewBase extends IsWidget {
         ErrorAndBusyClientFactory getErrorAndBusyClientFactory();
         
         PlaceNavigation<?> getEventNavigation();
+        
+        PlaceNavigation<?> getMediaPageNavigation();
 
+        String getRaceViewerURL(String regattaName, String trackedRaceName);
+        
         String getRegattaId();
         
         RegattaMetadataDTO getRegatta();
 
         EventViewDTO getEventDTO();
+
+        boolean isMultiRegattaEvent();
     }
 }

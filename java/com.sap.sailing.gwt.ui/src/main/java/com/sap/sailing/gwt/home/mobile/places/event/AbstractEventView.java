@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
@@ -82,7 +81,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     }
     
     protected boolean isMultiRegattaEvent() {
-        return currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA;
+        return currentPresenter.isMultiRegattaEvent();
     }
     
     protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {

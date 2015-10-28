@@ -33,7 +33,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     private final StageCountdownNavigationProvider countdownNavigationProvider = new StageCountdownNavigationProvider();
     private Widget lastContent;
     
-    public EventOverviewStage(EventView.Presenter presenter) {
+    public EventOverviewStage(EventViewBase.Presenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
     }

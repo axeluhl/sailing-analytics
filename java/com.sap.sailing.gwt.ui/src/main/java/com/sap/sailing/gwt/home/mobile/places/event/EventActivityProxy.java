@@ -1,12 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
-import java.util.UUID;
-
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.regattastab.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
@@ -16,61 +14,36 @@ import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.media.MediaActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
-import com.sap.sailing.gwt.home.mobile.places.event.overview.EventActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.multiregatta.MultiRegattaActivity;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.regatta.RegattaActivity;
 import com.sap.sailing.gwt.home.mobile.places.event.races.RacesActivity;
-import com.sap.sailing.gwt.home.mobile.places.event.regatta.RegattaActivity;
-import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.shared.places.event.EventContext;
-import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
-import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
-public class EventActivityProxy extends AbstractActivityProxy {
-
-    private final MobileApplicationClientFactory clientFactory;
-    private AbstractEventPlace currentPlace;
+public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplicationClientFactory> {
 
     public EventActivityProxy(AbstractEventPlace place, MobileApplicationClientFactory clientFactory) {
-        this.currentPlace = place;
-        this.clientFactory = clientFactory;
+        super(clientFactory, place);
     }
-
+    
     @Override
-    protected void startAsync() {
-        GetEventViewAction action = new GetEventViewAction(UUID.fromString(currentPlace.getEventUuidAsString()));
-        clientFactory.getDispatch().execute(action, new ActivityProxyCallback<EventViewDTO>(clientFactory, currentPlace) {
-            @Override
-            public void onSuccess(EventViewDTO event) {
-                currentPlace = getRealPlace(event.getType());
-                afterEventLoad(event);
-            }
-        });
-    }
-    
-    private AbstractEventPlace getRealPlace(EventType eventType) {
-        if(currentPlace instanceof RegattaOverviewPlace && (eventType == EventType.SERIES_EVENT || eventType == EventType.SINGLE_REGATTA)) {
-            EventContext contextWithoutRegatta = new EventContext(currentPlace.getCtx()).withRegattaId(null);
-            return new EventDefaultPlace(contextWithoutRegatta);
-        }
-        return currentPlace;
-    }
-    
-    private void afterEventLoad(final EventViewDTO event) {
+    protected void afterEventLoad(final MobileApplicationClientFactory clientFactory, final EventViewDTO event,
+            final AbstractEventPlace place) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                if (currentPlace instanceof EventDefaultPlace) {
-                    super.onSuccess(new EventActivity(currentPlace, event, clientFactory));
-                } else if (currentPlace instanceof RegattaOverviewPlace) {
-                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) currentPlace, event, clientFactory));
-                } else if (currentPlace instanceof RegattaRacesPlace) {
-                    super.onSuccess(new RacesActivity((RegattaRacesPlace) currentPlace, event, clientFactory));
-                } else if (currentPlace instanceof MiniLeaderboardPlace) {
-                    super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) currentPlace, event, clientFactory));
-                } else if (currentPlace instanceof LatestNewsPlace) {
-                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) currentPlace, event, clientFactory));
-                } else if (currentPlace instanceof RegattaMediaPlace || currentPlace instanceof MultiregattaMediaPlace) {
-                    super.onSuccess(new MediaActivity(currentPlace, event, clientFactory));
+                if (place instanceof MultiregattaOverviewPlace || place instanceof MultiregattaRegattasPlace) {
+                    super.onSuccess(new MultiRegattaActivity(place, event, clientFactory));
+                } else if (place instanceof RegattaOverviewPlace) {
+                    super.onSuccess(new RegattaActivity((RegattaOverviewPlace) place, event, clientFactory));
+                } else if (place instanceof RegattaRacesPlace) {
+                    super.onSuccess(new RacesActivity((RegattaRacesPlace) place, event, clientFactory));
+                } else if (place instanceof MiniLeaderboardPlace) {
+                    super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) place, event, clientFactory));
+                } else if (place instanceof LatestNewsPlace) {
+                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) place, event, clientFactory));
+                } else if (place instanceof RegattaMediaPlace || place instanceof MultiregattaMediaPlace) {
+                    super.onSuccess(new MediaActivity(place, event, clientFactory));
                 }
             }
         });
