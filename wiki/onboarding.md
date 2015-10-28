@@ -64,7 +64,6 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
-  * In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF
   * Rebuild all projects
 4. Run the Race Analysis Suite
   * Start the MongoDB
