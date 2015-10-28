@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.media;
+package com.sap.sailing.gwt.ui.shared.media;
 
 import java.util.Arrays;
 import java.util.HashSet;
