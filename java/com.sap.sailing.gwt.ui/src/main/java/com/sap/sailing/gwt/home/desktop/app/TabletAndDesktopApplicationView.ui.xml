@@ -1,17 +1,30 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
+	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
+	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
 	.mainContent {
 		height: 100%;
+	}
+	.breadcrumb {
+		font-size: 1rem;
+		/* @alternate */ font-size: 0.866666666666667em;
+		font-weight: 600;
+		padding: 0.666666666666667em 0;
 	}
 	</ui:style>
 
 	<g:HTMLPanel addStyleNames="{style.mainContent}">
 		<div class="{res.mainCss.wrapper}">
 			<dp:header.Header ui:field="headerPanel" />
+			<div ui:field="breadcrumbWrapperUi" class="{res.mediaCss.grid}" style="display: none;">
+				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+					<c:BreadcrumbPane ui:field="breadcrumbsUi"
+						addStyleNames="{style.breadcrumb}" />
+				</div>
+			</div>
 			<g:SimplePanel ui:field="mainContentPanel" />
 		</div>
 		<dp:footer.Footer ui:field="footerPanel" />
