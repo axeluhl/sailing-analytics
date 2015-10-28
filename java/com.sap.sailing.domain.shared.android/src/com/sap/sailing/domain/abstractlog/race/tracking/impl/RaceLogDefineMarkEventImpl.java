@@ -2,25 +2,32 @@ package com.sap.sailing.domain.abstractlog.race.tracking.impl;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventDataImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.shared.events.impl.AbstractDefineMarkEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sse.common.TimePoint;
 
 @Deprecated //see bug2851
-public class RaceLogDefineMarkEventImpl extends RaceLogEventImpl implements RaceLogDefineMarkEvent {
+public class RaceLogDefineMarkEventImpl extends AbstractDefineMarkEventImpl<RaceLogEventVisitor> implements RaceLogDefineMarkEvent {
     private static final long serialVersionUID = 277007856878002208L;
-    
-    private final Mark mark;
+
+    private RaceLogEventDataImpl raceLogEventData;
     
     public RaceLogDefineMarkEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, int pPassId, Mark mark) {
-        super(createdAt, author, logicalTimePoint, pId, Collections.<Competitor>emptyList(), pPassId);
-        this.mark = mark;
+            Serializable pId, int passId, Mark mark) {
+        super(createdAt, author, logicalTimePoint, pId, mark);
+        this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+    }
+
+    @Override
+    public int getPassId() {
+        return raceLogEventData.getPassId();
     }
 
     @Override
@@ -29,8 +36,8 @@ public class RaceLogDefineMarkEventImpl extends RaceLogEventImpl implements Race
     }
 
     @Override
-    public Mark getMark() {
-        return mark;
+    public List<Competitor> getInvolvedBoats() {
+        return Collections.<Competitor>emptyList();
     }
 
 }

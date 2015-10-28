@@ -37,7 +37,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         new DataEntryDialog.DialogCallback<MarkDTO>() {
                             @Override
                             public void ok(MarkDTO mark) {
-                                sailingService.addMarkToRaceLog(leaderboardName, raceColumnName, fleetName, mark,
+                                sailingService.addMarkToRegattaLog(leaderboardName, mark,
                                         new AsyncCallback<Void>() {
                                             @Override
                                             public void onSuccess(Void result) {
@@ -134,7 +134,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                     }
                 });
 
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName,
+        sailingService.getMarksInRegattaLog(leaderboardName,
                 new AsyncCallback<Iterable<MarkDTO>>() {
                     @Override
                     public void onSuccess(Iterable<MarkDTO> result) {

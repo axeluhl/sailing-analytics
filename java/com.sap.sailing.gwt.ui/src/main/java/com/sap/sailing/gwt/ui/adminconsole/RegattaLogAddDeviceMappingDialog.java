@@ -95,9 +95,6 @@ public class RegattaLogAddDeviceMappingDialog extends AbstractLogAddDeviceMappin
     @Override
     protected void loadCompetitorsAndMarks() {
         sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
-        // fetching marks definitions from the race logs; note that currently there are no mark *definitions*
-        // on regatta logs although there can be mark/device assignments on a regatta log which then gives the
-        // mark a position that applies across all races in the regatta-like thing
-        sailingService.getMarksInRaceLogsAndTrackedRaces(leaderboardName, itemSelectionPanel.getSetMarksCallback());
+        sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

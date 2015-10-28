@@ -33,12 +33,14 @@ import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInfor
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.events.DefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
@@ -75,6 +77,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -173,6 +176,12 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     @Override
                     public void visit(RegattaLogDeviceMarkMappingEvent event) {
                         RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
+                    }
+                    
+                    //FIXME: check with Axel whether this is the desired behavior
+                    @Override
+                    public void visit(RegattaLogDefineMarkEvent event) {
+                        RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
                 };
                 visitors.put(log, visitor);
@@ -373,7 +382,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
      * {@link RaceLogDefineMarkEvent} is received, the existence of the track for that mark in the {@link TrackedRace}
      * has to be ensured, also ensuring that the mark will exist in the mark tracks map key set.
      */
-    private void onDefineMarkEvent(RaceLogDefineMarkEvent event) {
+    private void onDefineMarkEvent(DefineMarkEvent<?> event) {
         if (trackedRace != null) {
             trackedRace.getOrCreateTrack(event.getMark());
         }

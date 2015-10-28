@@ -87,6 +87,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
@@ -4970,12 +4971,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
+    public void addMarkToRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException {
         Mark mark = convertToMark(markDTO, false);
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
-        raceLog.add(event);
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
+                getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
+        regattaLog.add(event);
     }
     
     @Override
@@ -4998,42 +4999,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RaceLog.");
         }
-    }
-    
-    @Override
-    public Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Iterable<Mark> marks = new RaceLogDefinedMarkFinder(raceLog).analyze();
-        return convertToMarkDTOs((LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName), raceLog, marks);
-    }
-    
-    @Override
-    public Iterable<MarkDTO> getMarksInRaceLogsAndTrackedRaces(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            // TODO: implement proper Exception Handling
-            return null;
-        }
-        Set<MarkDTO> markDTOs = new HashSet<>();
-        Map<Serializable, Mark> marksById = new HashMap<>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
-                for (Mark markDefinitionFromRaceLog : new RaceLogDefinedMarkFinder(raceLog).analyze()) {
-                    marksById.put(markDefinitionFromRaceLog.getId(), markDefinitionFromRaceLog);
-                }
-                if (trackedRace != null) {
-                    for (Mark markFromTrackedRace : trackedRace.getMarks()) {
-                        marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
-                    }
-                }
-                Util.addAll(convertToMarkDTOs(
-                                (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName),
-                                raceLog, marksById.values()), markDTOs);
-            }
-        }
-        return markDTOs;
     }
 
     @Override
