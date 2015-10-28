@@ -18,6 +18,7 @@ public class RestApiApplication extends Application {
         classes.add(GPSFixesResource.class);
         classes.add(CompetitorsResource.class);
         classes.add(FileStorageResource.class);
+        classes.add(DataMiningResource.class);
         return classes;
     }
 }

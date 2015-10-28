@@ -1112,6 +1112,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String showPingMarkMappings();
     String errorFetchingWindStreamletData(String message);
     String showWindStreamletOverlay();
+    String showWindStreamletColors();
     String showSimulationOverlay();
     String simulationLegendTooltip();
     String regattaNameMustNotContainSlashes();
@@ -1414,4 +1415,23 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String groupAverageDescending();
     String groupMedianAscending();
     String groupMedianDescending();
+    String runPredefinedQuery();
+    String selectPredefinedQuery();
+    String predefinedQueryRunner();
+    String developerOptions();
+    String copyToClipboard();
+    String code();
+    String useClassGetName();
+    String useClassGetNameTooltip();
+    String useStringLiterals();
+    String useStringLiteralsTooltip();
+    String addGalleryPhoto();
+    String addStageImage();
+    String addTeaserImage();
+    String addEventLogo();
+    String noImagesDefinedYet();
+    String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String couldNotRetrieveImageSizeYet();
+    @Override
+    String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
 }

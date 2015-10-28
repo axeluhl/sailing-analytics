@@ -30,8 +30,8 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final Grid raceDataGrid;
     
     public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
-        super(sailingService, errorReporter, regattaRefresher, stringConstants);
+            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true, stringMessages);
         
         HorizontalPanel controlsPanel = new HorizontalPanel();
         Button setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {

@@ -166,7 +166,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelection, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(),
+                competitorSelection, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
                 selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelection, stringMessages, raceMap,
                 new LeaderboardFetcher() {

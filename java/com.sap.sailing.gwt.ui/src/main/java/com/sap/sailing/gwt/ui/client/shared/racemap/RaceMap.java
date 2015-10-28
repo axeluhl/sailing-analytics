@@ -360,6 +360,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
+    private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
     
     private static final String GET_POLAR_CATEGORY = "getPolar";
@@ -427,6 +428,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         this.showViewStreamlets = showViewStreamlets;
+        this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
         this.hasPolar = false;
         headerPanel = new FlowPanel();
@@ -604,6 +606,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
               if (showViewStreamlets) {
+                  streamletOverlay.setColors(showViewStreamletColors);
                   streamletOverlay.setVisible(true);
               }
 
@@ -2308,6 +2311,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+        }
+        if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
+            settings.setShowWindStreamletColors(newSettings.isShowWindStreamletColors());
+            streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
