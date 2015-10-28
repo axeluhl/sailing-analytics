@@ -11,7 +11,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
-import com.sap.sse.gwt.client.mvp.impl.CustomActivityManager;
 
 /**
  * Subclasses implement their {@link EntryPoint#onModuleLoad()} by delegating to

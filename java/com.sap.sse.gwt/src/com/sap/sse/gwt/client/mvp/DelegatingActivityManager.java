@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.mvp.impl;
+package com.sap.sse.gwt.client.mvp;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityManager;

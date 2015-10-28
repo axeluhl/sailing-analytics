@@ -1,9 +1,8 @@
-package com.sap.sse.gwt.client.mvp.impl;
+package com.sap.sse.gwt.client.mvp;
 
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class CustomActivityManager extends DelegatingActivityManager {
 
