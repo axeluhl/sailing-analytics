@@ -49,7 +49,7 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
         StageResources.INSTANCE.css().ensureInjected();
         
         TimePoint eventStart = new MillisecondsTimePoint(event.getStartDate());
-        countdownTimerUi = new CountdownTimer(eventStart.asDate());
+        countdownTimerUi = new CountdownTimer(eventStart.asDate(), false);
         initWidget(uiBinder.createAndBindUi(this));
         
         if(MillisecondsTimePoint.now().after(eventStart)) {

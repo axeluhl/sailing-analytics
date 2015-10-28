@@ -9,7 +9,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceCompetitionFormatFleetDTO;
+import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.RGBColor;
 
 public class RegattaCompetitionFleet extends Widget {
 
@@ -31,12 +34,22 @@ public class RegattaCompetitionFleet extends Widget {
         if (fleet.getFleet() != null) {
             fleetNameUi.setInnerText(fleet.getFleet().getFleetName());
             fleetCornerUi.getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
+            if (fleet.getFleet().isDefaultFleet()) {
+                addStyleName(RegattaCompetitionResources.INSTANCE.css().default_fleet());
+            } else {
+                getElement().getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
+            }
         }
     }
     
     public void addRace(SimpleRaceMetadataDTO race, String raceViewerURL) {
         RegattaCompetitionFleetRace competitionRace = new RegattaCompetitionFleetRace(race, raceViewerURL);
         racesContainerUi.appendChild(competitionRace.getElement());
+    }
+    
+    private String getBackgroundColor(FleetMetadataDTO fleet) {
+        Triple<Integer, Integer, Integer> rgbValues = new RGBColor(fleet.getFleetColor()).getAsRGB();
+        return "rgba(" + rgbValues.getA() + "," + rgbValues.getB() + "," + rgbValues.getC() + ", 0.1)";
     }
 
 }

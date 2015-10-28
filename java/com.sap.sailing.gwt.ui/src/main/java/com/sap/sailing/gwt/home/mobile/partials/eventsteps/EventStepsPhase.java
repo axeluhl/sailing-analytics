@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,7 +28,7 @@ public class EventStepsPhase extends Composite {
     
     @UiField DivElement nameUi;
     @UiField ImageElement checkUi;
-    @UiField SpanElement progressUi;
+    @UiField DivElement progressUi;
     @UiField DivElement fleetsContainerUi;
 
     public EventStepsPhase(RegattaProgressSeriesDTO seriesProgress) {
@@ -45,7 +44,7 @@ public class EventStepsPhase extends Composite {
         if (seriesProgress.getProgressRaceCount() == 0) {
             addStyleName(EventStepsResources.INSTANCE.css().eventsteps_phases_phaseinactive());
         }
-        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getTotalRaceCount());
+        addFleetProgresses(seriesProgress.getFleetState(), seriesProgress.getMaxRacesPerFleet());
     }
     
     private void addFleetProgresses(Map<FleetMetadataDTO, RegattaProgressFleetDTO> fleetStates, int totalRaceCount) {

@@ -12,7 +12,7 @@ import com.sap.sse.common.media.VideoDescriptor;
 
 /**
  * Creates an {@link Event} in the server, with a new venue and an empty course area list.
- * See the {@link AddCourseArea} operation for adding course areas to the event's venue.
+ * See the {@link AddCourseAreas} operation for adding course areas to the event's venue.
  * 
  * @author Axel Uhl (d043530)
  *

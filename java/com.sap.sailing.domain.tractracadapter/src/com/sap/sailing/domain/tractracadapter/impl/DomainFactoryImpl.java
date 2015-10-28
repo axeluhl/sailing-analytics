@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
@@ -105,8 +104,6 @@ public class DomainFactoryImpl implements DomainFactory {
         new HashMap<TracTracControlPoint, com.sap.sailing.domain.base.ControlPoint>();
     
     private final Map<com.sap.sse.common.Util.Pair<String, UUID>, DynamicPerson> personCache = new HashMap<>();
-    
-    private final Map<Serializable, DynamicTeam> teamCache = new HashMap<>();
     
     /**
      * Caches regattas by their name and their boat class's name
@@ -263,7 +260,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 nationality = null;
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
-            DynamicTeam team = getOrCreateTeam(name, nationality, competitorId);
+            DynamicTeam team = createTeam(name, nationality, competitorId);
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
@@ -272,27 +269,15 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    /**
-     * If a team called <code>name</code> already is known by this domain factory, it is returned. Otherwise, the team name
-     * is split along "+" signs with one {@link Person} object created for each part. If an existing team is found, its
-     * nationality will be updated to match <code>nationality</code>.
-     */
-    private DynamicTeam getOrCreateTeam(String name, Nationality nationality, UUID competitorId) {
-        synchronized (teamCache) {
-            DynamicTeam result = teamCache.get(competitorId);
-            if (result == null) {
-                String[] sailorNames = name.split("\\b*\\+\\b*");
-                List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
-                for (String sailorName : sailorNames) {
-                    sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
-                }
-                result = new TeamImpl(name, sailors, /* TODO coach not known */null);
-                teamCache.put(competitorId, result);
-            } else {
-                result.setNationality(nationality);
-            }
-            return result;
+    private DynamicTeam createTeam(String name, Nationality nationality, UUID competitorId) {
+        DynamicTeam result;
+        String[] sailorNames = name.split("\\b*\\+\\b*");
+        List<DynamicPerson> sailors = new ArrayList<DynamicPerson>();
+        for (String sailorName : sailorNames) {
+            sailors.add(getOrCreatePerson(sailorName.trim(), nationality, competitorId));
         }
+        result = new TeamImpl(name, sailors, /* TODO coach not known */null);
+        return result;
     }
 
     @Override
@@ -520,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Iterable<Pair<Competitor, Boat>> competitorBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -528,7 +513,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, competitorBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
@@ -590,7 +575,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
-            if(existingCompetitor != null && competitorBoatInfo != null) {
+            if (existingCompetitor != null && competitorBoatInfo != null) {
                 Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
                         competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
                 competitorBoatInfos.add(new Util.Pair<Competitor, Boat>(existingCompetitor, boatOfCompetitor));

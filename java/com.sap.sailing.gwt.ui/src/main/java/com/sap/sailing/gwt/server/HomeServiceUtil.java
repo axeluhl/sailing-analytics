@@ -168,7 +168,9 @@ public final class HomeServiceUtil {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                acceptedImages.add(candidateImageUrl);
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                    acceptedImages.add(candidateImageUrl);
+                }
             }
         }
         return acceptedImages;
@@ -179,11 +181,13 @@ public final class HomeServiceUtil {
     }
     
     public static int calculateRaceCount(Leaderboard sl) {
-        int count=0;
+        int nonCarryForwardRacesCount = 0;
         for (RaceColumn column : sl.getRaceColumns()) {
-            count += Util.size(column.getFleets());
+            if (!column.isCarryForward()) {
+                nonCarryForwardRacesCount += Util.size(column.getFleets());
+            }
         }
-        return count;
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateRaceColumnCount(Leaderboard sl) {

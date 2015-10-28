@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -26,7 +27,6 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -39,6 +39,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -317,23 +318,32 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     }
                 }));
 
-        for (SeriesDTO series : editedRegatta.series) {
-            sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
-                    series.getDiscardThresholds(), series.isStartsWithZeroScore(),
-                    series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                    series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()
-                                    + ": " + caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(Void result) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    }));
-        }
+        final Iterator<SeriesDTO> seriesIter = editedRegatta.series.iterator();
+        final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                if (seriesIter.hasNext()) {
+                    final SeriesDTO series = seriesIter.next();
+                    sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
+                        series.getDiscardThresholds(), series.isStartsWithZeroScore(),
+                        series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()
+                                        + ": " + caught.getMessage());
+                            }
+    
+                            @Override
+                            public void onSuccess(Void result) {
+                                regattaRefresher.fillRegattas();
+                                run(); // update next series if iterator has next element
+                            }
+                        }));
+                }
+            }
+        };
+        r.run();
     }
 
     protected List<RegattaDTO> getSelectedRegattas() {

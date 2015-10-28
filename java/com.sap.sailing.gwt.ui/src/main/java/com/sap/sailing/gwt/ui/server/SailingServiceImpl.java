@@ -79,13 +79,16 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
@@ -153,9 +156,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.PolarSheetGenerationResponse;
-import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
-import com.sap.sailing.domain.common.PolarSheetsData;
 import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
@@ -201,7 +201,6 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.PolarSheetGenerationResponseImpl;
 import com.sap.sailing.domain.common.impl.PolarSheetsXYDiagramDataImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -247,6 +246,7 @@ import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -367,7 +367,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
-import com.sap.sailing.server.operationaltransformation.AddCourseArea;
+import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
@@ -383,7 +383,7 @@ import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDow
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
-import com.sap.sailing.server.operationaltransformation.RemoveCourseArea;
+import com.sap.sailing.server.operationaltransformation.RemoveCourseAreas;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
@@ -1575,29 +1575,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceWithCompetitorsDTO raceDTO = null;
         Map<CompetitorDTO, BoatDTO> competitorBoats = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
-        if(regatta != null) {
+        if (regatta != null) {
             RaceDefinition race = regatta.getRaceByName(raceName);
-            if(race != null) {
+            if (race != null) {
                 RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
                 TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
                 List<CompetitorDTO> competitors = convertToCompetitorDTOs(race.getCompetitors());
-                TrackedRaceDTO trackedRaceDTO = null; 
+                HashMap<String, CompetitorDTO> competitorsMap = new HashMap<>();
+                for (CompetitorDTO competitorDTO : competitors) {
+                    competitorsMap.put(competitorDTO.getIdAsString(), competitorDTO);
+                }
+                competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
+                for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
+                    Boat boatOfCompetitor = trackedRace.getRace().getBoatOfCompetitorById(competitor.getId());
+                    if (boatOfCompetitor != null) {
+                        BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(),
+                                boatOfCompetitor.getColor());
+                        competitorBoats.put(competitorsMap.get(competitor.getId().toString()), boatDTO);
+                    }
+                }
+                TrackedRaceDTO trackedRaceDTO = null;
                 if (trackedRace != null) {
                     trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
-
-                    HashMap<String, CompetitorDTO> competitorsMap = new HashMap<>();
-                    for(CompetitorDTO competitorDTO: competitors) {
-                        competitorsMap.put(competitorDTO.getIdAsString(), competitorDTO);
-                    }
-
-                    competitorBoats = new HashMap<CompetitorDTO, BoatDTO>();
-                    for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                        Boat boatOfCompetitor = trackedRace.resolveBoatOfCompetitor(competitor);
-                        if(boatOfCompetitor != null) {
-                            BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getName(), boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
-                            competitorBoats.put(competitorsMap.get(competitor.getId().toString()), boatDTO);
-                        }
-                    }
                 }
                 raceDTO = new RaceWithCompetitorsDTO(raceIdentifier, competitors, trackedRaceDTO, getService().isRaceBeingTracked(regatta, race));
                 if (trackedRace != null) {
@@ -1630,7 +1629,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }
-
         RaceboardDataDTO result = new RaceboardDataDTO(raceDTO, competitorBoats, isValidLeaderboard, isValidLeaderboardGroup, isValidEvent);
         return result;
     }
@@ -3380,20 +3378,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         officialWebsiteURL, sailorsInfoWebsiteURL, eventImages, eventVideos));
-        for (String courseAreaName : courseAreaNames) {
-            createCourseArea(eventUuid, courseAreaName);
-        }
+        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
         return getEventById(eventUuid, false);
     }
 
     @Override
-    public void createCourseArea(UUID eventId, String courseAreaName) {
-        getService().apply(new AddCourseArea(eventId, courseAreaName, UUID.randomUUID()));
+    public Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws Exception {
+        URL imageURL = new URL(imageUrlAsString);
+        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(imageURL);
+        return imageDimensions;
+    }
+    
+    @Override
+    public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+        final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
+        for (int i=0; i<courseAreaNames.length; i++) {
+            courseAreaIDs[i] = UUID.randomUUID();
+        }
+        getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIDs));
     }
 
     @Override
-    public void removeCourseArea(UUID eventId, UUID courseAreaId) {
-        getService().apply(new RemoveCourseArea(eventId, courseAreaId));
+    public void removeCourseAreas(UUID eventId, UUID[] courseAreaIds) {
+        getService().apply(new RemoveCourseAreas(eventId, courseAreaIds));
     }
 
     @Override
@@ -3640,6 +3647,62 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         }
                         raceGroups.add(raceGroup);
                     }
+                }
+            }
+        }
+        return raceGroups;
+    }
+
+    /** the replacement service for getRegattaStructureForEvent() */
+    @Override
+    public List<RaceGroupDTO> getRegattaStructureOfEvent(UUID eventId) {
+        List<RaceGroupDTO> raceGroups = new ArrayList<RaceGroupDTO>();
+        Event event = getService().getEvent(eventId);
+        Map<Leaderboard, LeaderboardGroup> leaderboardWithLeaderboardGroups = new HashMap<Leaderboard, LeaderboardGroup>();
+        for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+            for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                leaderboardWithLeaderboardGroups.put(leaderboard, leaderboardGroup);
+            }
+        }
+        if (event != null) {
+            for(LeaderboardGroup leaderboardGroup: event.getLeaderboardGroups()) {
+                for(Leaderboard leaderboard: leaderboardGroup.getLeaderboards()) {
+                    RaceGroupDTO raceGroup = new RaceGroupDTO(leaderboard.getName());
+                    for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                        if (leaderboard.getDefaultCourseArea() != null && leaderboard.getDefaultCourseArea() == courseArea) {
+                            raceGroup.courseAreaIdAsString = courseArea.getId().toString();
+                            break;
+                        }
+                    }
+                    raceGroup.displayName = getRegattaNameFromLeaderboard(leaderboard);
+                    if(leaderboardWithLeaderboardGroups.containsKey(leaderboard)) {
+                        raceGroup.leaderboardGroupName = leaderboardWithLeaderboardGroups.get(leaderboard).getName(); 
+                    }
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
+                        raceGroup.boatClass = regattaLeaderboard.getRegatta().getBoatClass().getDisplayName();
+                        for (Series series : regattaLeaderboard.getRegatta().getSeries()) {
+                            RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(series.getName());
+                            raceGroup.getSeries().add(seriesDTO);
+                            for (Fleet fleet : series.getFleets()) {
+                                FleetDTO fleetDTO = new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
+                                seriesDTO.getFleets().add(fleetDTO);
+                            }
+                            seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(series.getRaceColumns()));
+                        }
+                    } else {
+                        RaceGroupSeriesDTO seriesDTO = new RaceGroupSeriesDTO(LeaderboardNameConstants.DEFAULT_SERIES_NAME);
+                        raceGroup.getSeries().add(seriesDTO);
+                        FleetDTO fleetDTO = new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null);
+                        seriesDTO.getFleets().add(fleetDTO);
+                        seriesDTO.getRaceColumns().addAll(convertToRaceColumnDTOs(leaderboard.getRaceColumns()));
+                        for(Competitor c: leaderboard.getCompetitors()) {
+                            if(c.getBoat() != null && c.getBoat().getBoatClass() != null) {
+                                raceGroup.boatClass = c.getBoat().getBoatClass().getDisplayName();
+                            }
+                        }
+                    }
+                    raceGroups.add(raceGroup);
                 }
             }
         }
@@ -3959,56 +4022,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 swissTimingJsonUrl));
     }
 
-    @Override
-    public PolarSheetGenerationResponse generatePolarSheetForRaces(List<RegattaAndRaceIdentifier> selectedRaces,
-            PolarSheetGenerationSettings settings, String name) throws Exception {
-        String id = UUID.randomUUID().toString();
-        RacingEventService service = getService();
-        Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
-        for (RegattaAndRaceIdentifier race : selectedRaces) {
-            trackedRaces.add(service.getTrackedRace(race));
-        }
-        if (name == null || name.isEmpty()) {
-            name = getCommonBoatClass(trackedRaces);
-        }
-        PolarDataService polarDataService = service.getPolarDataService();
-        PolarSheetsData result = polarDataService.generatePolarSheet(trackedRaces, settings, executor);
-        return new PolarSheetGenerationResponseImpl(id, name, result);
-    }
-
-    @Override
-    public List<String> getBoatClassNamesWithPolarSheetsAvailable() {
-        Set<BoatClass> boatClasses = getService().getPolarDataService().getAllBoatClassesWithPolarSheetsAvailable();
-        List<String> names = new ArrayList<String>();
-        for (BoatClass boatClass : boatClasses) {
-            names.add(boatClass.getName());
-        }
-        return names;
-    }
-
-    @Override
-    public PolarSheetGenerationResponse showCachedPolarSheetForBoatClass(String boatClassName) {
-        BoatClass boatClass = getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        PolarSheetsData data = getService().getPolarDataService().getPolarSheetForBoatClass(boatClass);
-        String name = boatClassName + "_OVERALL";
-        String id = name;
-        return new PolarSheetGenerationResponseImpl(id, name, data);
-    }
-
-    private String getCommonBoatClass(Set<TrackedRace> trackedRaces) {
-        BoatClass boatClass = null;
-        for (TrackedRace race : trackedRaces) {
-            if (boatClass == null) {
-                boatClass = race.getRace().getBoatClass();
-            }
-            if (!boatClass.getName().toLowerCase().matches(race.getRace().getBoatClass().getName().toLowerCase())) {
-                return "Mixed";
-            }
-        }
-
-        return boatClass.getName();
-    }
-
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
         return baseDomainFactory;
     }
@@ -4194,13 +4207,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private void getRegattaOverviewEntries(boolean showOnlyRacesOfSameDay, Calendar dayToCheck,
             CourseArea courseArea, Leaderboard leaderboard, String boatClassName, String regattaName, String seriesName, RaceColumn raceColumn,
             Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet) {
-
-        for (Fleet fleet : raceColumn.getFleets()) {
-            RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
-                    leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
-                    showOnlyRacesOfSameDay, dayToCheck);
-            if (entry != null) {
-                addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+        if (!raceColumn.isCarryForward()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RegattaOverviewEntryDTO entry = createRegattaOverviewEntryDTO(courseArea,
+                        leaderboard, boatClassName, regattaName, seriesName, raceColumn, fleet, 
+                        showOnlyRacesOfSameDay, dayToCheck);
+                if (entry != null) {
+                    addRegattaOverviewEntryToEntriesPerFleet(entriesPerFleet, fleet, entry);
+                }
             }
         }
     }
@@ -4563,21 +4577,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName, boolean lookInRaceLogs) {
-        if (lookInRaceLogs) {
-            Set<Competitor> result = new HashSet<Competitor>();
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                    result.addAll(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
-                }
-            }
-            return convertToCompetitorDTOs(result);
-        } else {
+    public Iterable<CompetitorDTO> getCompetitorsOfLeaderboard(String leaderboardName) {
             Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
-        }
     }
 
     @Override
@@ -4981,28 +4983,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         return raceColumn.getRaceLog(fleet);
     }
-    
-    @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName) {
-        return convertToCompetitorDTOs(
-                new RegisteredCompetitorsAnalyzer<>(
-                        getRaceLog(leaderboardName, raceColumnName, fleetName)).analyze());
-    }
-    
-    @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrations(String leaderboardName)
-            throws DoesNotHaveRegattaLogException {
-        return convertToCompetitorDTOs(
-                new RegisteredCompetitorsAnalyzer<>(
-                        getRegattaLogInternal(leaderboardName)).analyze());
-    }
-    
+
     private Competitor getCompetitor(CompetitorDTO dto) {
         return getService().getCompetitorStore().getExistingCompetitorByIdAsString(dto.getIdAsString());
     }
     
     @Override
-    public void setCompetitorRegistrations(String leaderboardName, String raceColumnName, String fleetName,
+    public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -5014,7 +5001,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void setCompetitorRegistrations(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
+    public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
             throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         Set<Competitor> competitors = new HashSet<Competitor>();
@@ -5059,9 +5046,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        
+        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */ true, RaceLogDefineMarkEvent.class).analyze();
+        
+        RaceLogEvent eventToRevoke = null;
+        for (RaceLogEvent event : raceLogDeviceMarkMappingEvents) {
+            RaceLogDefineMarkEvent defineMarkEvent = (RaceLogDefineMarkEvent) event;
+            if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())){
+                eventToRevoke = event;
+            }
+        }
+        
+        if (eventToRevoke != null){
+            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(getService().getServerAuthor(), raceLog.getCurrentPassId(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
+            raceLog.add(event);
+        } else {
+            logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RaceLog.");
+        }
+    }
+    
+    @Override
     public Iterable<MarkDTO> getMarksInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Iterable<Mark> marks = new DefinedMarkFinder(raceLog).analyze();
+        Iterable<Mark> marks = new RaceLogDefinedMarkFinder(raceLog).analyze();
         return convertToMarkDTOs((LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName), raceLog, marks);
     }
     
@@ -5078,7 +5087,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
-                for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder(raceLog).analyze()) {
+                for (Mark markDefinitionFromRaceLog : new RaceLogDefinedMarkFinder(raceLog).analyze()) {
                     marksById.put(markDefinitionFromRaceLog.getId(), markDefinitionFromRaceLog);
                 }
                 if (trackedRace != null) {
@@ -5187,14 +5196,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void copyCourseAndCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
+    public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
-        getRaceLogTrackingAdapter().copyCourseAndCompetitors(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
+        getRaceLogTrackingAdapter().copyCourse(fromRaceLog, toRaceLogs, baseDomainFactory, getService());
+    }
+    
+    @Override
+    public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
+        RaceLog fromRaceLog = getRaceLog(fromTriple);
+        Set<RaceLog> toRaceLogs = new HashSet<>();
+        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+            toRaceLogs.add(getRaceLog(toTriple));
+        }
+        getRaceLogTrackingAdapter().copyCompetitors(fromRaceLog, toRaceLogs, getService());
     }
     
     private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
@@ -5253,7 +5273,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) {
         List<AbstractLog<?, ?>> result = new ArrayList<>();
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        result.add(raceLog);
+        
+        if (raceLog != null){
+            result.add(raceLog);
+        }
+        
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard instanceof HasRegattaLike) {
             result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
@@ -5321,6 +5345,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public void addDeviceMappingToRegattaLog(String leaderboardName,
+            DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        DeviceMapping<?> mapping = convertToDeviceMapping(dto);
+        TimePoint now = MillisecondsTimePoint.now();
+        RegattaLogEvent event = null;
+        TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
+        TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
+        if (dto.mappedTo instanceof MarkDTO) {
+            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
+            event = new RegattaLogDeviceMarkMappingEventImpl(now, getService().getServerAuthor(), now, UUID.randomUUID(), 
+                    mark, mapping.getDevice(), from, to);
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
+            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, getService().getServerAuthor(), now, UUID.randomUUID(), 
+                    competitor, mapping.getDevice(), from, to);                  
+        } else {
+            throw new RuntimeException("Can only map devices to competitors or marks");
+        }
+        regattaLog.add(event);
+    }
+    
+    @Override
     public List<String> getDeserializableDeviceIdentifierTypes() {
         List<String> result = new ArrayList<String>();
         for (ServiceReference<DeviceIdentifierStringSerializationHandler> reference :
@@ -5352,6 +5400,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
             DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
         List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+        closeOpenEndedDeviceMapping(logHierarchy, mappingDTO, closingTimePoint);
+    }
+
+    private void closeOpenEndedDeviceMapping(List<AbstractLog<?, ?>> logHierarchy, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException {
         for (AbstractLog<?, ?> abstractLog : logHierarchy) {
             //check if abstractLog is the correct log for the closingEvent
             final AbstractLogEvent<?> event;
@@ -5387,11 +5439,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds) throws NotRevokableException {
-        List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+        List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
+        revokeEventsFromLogs(logs, eventIds);
+    }
+    
+    @Override
+    public void revokeRaceAndRegattaLogEvents(String leaderboardName,
+        List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException {
+        List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
+        revokeEventsFromLogs(logs, eventIds);
+    }
+    
+    private void revokeEventsFromLogs(List<AbstractLog<?, ?>> logs, List<UUID> eventIds) throws NotRevokableException{
         boolean eventRevoked = false;
         for (Serializable idToRevoke : eventIds) {
             eventRevoked = false;
-            for (AbstractLog<?, ?> abstractLog : logHierarchy) {
+            for (AbstractLog<?, ?> abstractLog : logs) {
                 eventRevoked = revokeEvent(eventRevoked, idToRevoke, abstractLog);
             }
             if (!eventRevoked){
@@ -5744,7 +5807,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Set<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {
@@ -5765,6 +5828,102 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
+    public ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id) {
+        Event event = getService().getEvent(id);
+        if (event == null) {
+            throw new RuntimeException("Event not found");
+        }
+        
+        ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
+        for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
+            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+        }
+        return result;
+    }
+    
+    @Override
+    public List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException {
+        List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
+        return getDeviceMappingsFromLogs(logs);
+    }
+
+    /**
+     * Gets all Marks defined in the RaceLogs of the RaceColumns corresponding to the leaderboard leaderboardName
+     */
+    @Override
+    public Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            // TODO: implement proper Exception Handling
+            return null;
+        }
+        
+        if (!(leaderboard instanceof IsRegattaLike)){
+            return null; 
+        }
+        
+        Set<MarkDTO> markDTOs = new HashSet<>();
+        
+        Map<Serializable, Mark> marksById = new HashMap<>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
+                
+                if (trackedRace != null) {
+                    for (Mark markFromTrackedRace : trackedRace.getMarks()) {
+                        marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
+                    }
+                }
+                Util.addAll(convertToMarkDTOs(
+                                (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName),
+                                raceLog, marksById.values()), markDTOs);
+            }
+        }
+        return markDTOs;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+            return convertToCompetitorDTOs(
+                    new RegisteredCompetitorsAnalyzer<>(
+                            getRegattaLogInternal(leaderboardName)).analyze());
+    }
+
+    @Override
+    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException {
+        List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
+        closeOpenEndedDeviceMapping(logs, mappingDTO, closingTimePoint);
+    }
+    
+    
+    /**
+     * Gets all the logs corresponding to a leaderboard. This includes all the RaceLogs of the leaderBoard's raceColumns
+     * @param leaderboardName
+     * @return
+     */
+    private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName) {
+        List<AbstractLog<?, ?>> result = new ArrayList<>();
+        
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return null;
+        }
+        
+        if (leaderboard instanceof HasRegattaLike) {
+            result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
+        }
+        
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                result.add(raceLog);
+            }
+        }
+        
+        return result;
+    }   
+
     public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         
@@ -5795,5 +5954,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return result;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName) {
+        List<AbstractLog<?,?>> logHierarchy = getLogHierarchy(leaderboardName);
+
+        Collection<CompetitorDTO> competitorRegistrations = new ArrayList<CompetitorDTO>();
+
+        for (AbstractLog<?, ?> abstractLog : logHierarchy) {
+            competitorRegistrations.addAll(convertToCompetitorDTOs(
+                    new RegisteredCompetitorsAnalyzer<>(
+                            abstractLog).analyze()));
+        }
+
+        return competitorRegistrations;
+    }
+
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        return convertToCompetitorDTOs(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
     }
 }

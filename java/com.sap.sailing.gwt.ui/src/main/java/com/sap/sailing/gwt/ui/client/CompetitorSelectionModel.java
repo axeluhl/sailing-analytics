@@ -104,7 +104,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
         }
-        if(competitor.getColor() != null) {
+        if (competitor.getColor() != null) {
             competitorColorProvider.removeBlockedColor(competitor.getColor());
         }
         boolean changed = allCompetitors.remove(competitor);

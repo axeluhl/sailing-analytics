@@ -7,7 +7,6 @@ import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.QueryResultBase;
 import com.sap.sse.datamining.shared.data.QueryResultState;
-import com.sap.sse.datamining.shared.data.Unit;
 
 public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase<ResultType> {
     private static final long serialVersionUID = 5696532932535299241L;
@@ -61,16 +60,6 @@ public abstract class QueryResultBaseImpl<ResultType> implements QueryResultBase
     @Override
     public String getResultSignifier() {
         return additionalData.getResultSignifier();
-    }
-
-    @Override
-    public Unit getUnit() {
-        return additionalData.getUnit();
-    }
-
-    @Override
-    public String getUnitSignifier() {
-        return additionalData.getUnitSignifier();
     }
 
     @Override

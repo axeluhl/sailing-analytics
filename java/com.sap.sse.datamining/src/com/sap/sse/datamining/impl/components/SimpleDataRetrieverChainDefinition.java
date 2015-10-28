@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
@@ -14,35 +14,26 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implements
         DataRetrieverChainDefinition<DataSourceType, DataType> {
-
-    private final UUID id;
-    private final String nameMessageKey;
     
     private final Class<DataSourceType> dataSourceType;
     private final Class<DataType> retrievedDataType;
-    private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
-    
+    private final List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation;
+
+    private final String nameMessageKey;
     protected boolean isComplete;
 
     public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
-        id = UUID.randomUUID();
-        this.nameMessageKey = nameMessageKey;
-        
         this.dataSourceType = dataSourceType;
         this.retrievedDataType = retrievedDataType;
         dataRetrieverTypesWithInformation = new ArrayList<>();
-        
+
+        this.nameMessageKey = nameMessageKey;
         isComplete = false;
     }
 
     public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
         this(dataRetrieverChainDefinition.getDataSourceType(), retrievedDataType, nameMessageKey);
-        dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverTypesWithInformation());
-    }
-    
-    @Override
-    public UUID getID() {
-        return id;
+        dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverLevels());
     }
     
     @Override
@@ -59,53 +50,82 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     public Class<DataType> getRetrievedDataType() {
         return retrievedDataType;
     }
-
+    
     @Override
     public <ResultType> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
-                                       Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+            Class<ResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        startWith(retrieverType, retrievedDataType, null, null, retrievedDataTypeMessageKey);
+    }
+
+    @Override
+    public <ResultType, SettingsType extends SerializableSettings> void startWith(Class<? extends Processor<DataSourceType, ResultType>> retrieverType,
+                                       Class<ResultType> retrievedDataType, Class<SettingsType> settingsType, SettingsType defaultSettings,
+                                       String retrievedDataTypeMessageKey) {
         if (isInitialized()) {
             throw new IllegalStateException("This retriever chain definition already has been started with '"
                                                     + dataRetrieverTypesWithInformation.get(0).getRetrieverType().getSimpleName() + "'");
         }
-        checkThatRetrieverHasUsableConstructor(retrieverType);
+        checkThatRetrieverHasUsableConstructor(retrieverType, settingsType);
+        if (settingsType != null && defaultSettings == null) {
+            throw new NullPointerException("No default settings have been given");
+        }
         
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(retrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
+                dataRetrieverTypesWithInformation.size(), retrieverType, retrievedDataType, settingsType, retrievedDataTypeMessageKey, defaultSettings);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
     private boolean isInitialized() {
         return !dataRetrieverTypesWithInformation.isEmpty();
     }
-
+    
     @Override
     public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType> void addAfter(
-            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
             Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
             Class<NextResultType> retrievedDataType, String retrievedDataTypeMessageKey) {
+        addAfter(lastAddedRetrieverType, nextRetrieverType, retrievedDataType, null, null, retrievedDataTypeMessageKey);
+    }
+
+    @Override
+    public <NextInputType, NextResultType, PreviousInputType, PreviousResultType extends NextInputType, SettingsType extends SerializableSettings> void addAfter(
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
+            Class<? extends Processor<NextInputType, NextResultType>> nextRetrieverType,
+            Class<NextResultType> retrievedDataType, Class<SettingsType> settingsType,
+            SettingsType defaultSettings, String retrievedDataTypeMessageKey) {
         if (!isInitialized()) {
             throw new IllegalStateException("This retriever chain definition hasn't been started yet");
         }
         if (isComplete) {
             throw new IllegalStateException("This retriever chain definition is already complete");
         }
-        DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
+        DataRetrieverLevel<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(dataRetrieverTypesWithInformation.size() - 1);
         @SuppressWarnings("unchecked")
         Class<Processor<?, ?>> lastRetrieverInList = (Class<Processor<?, ?>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
-        if (!lastRetrieverInList.equals(previousRetrieverType)) {
-            throw new IllegalArgumentException("The given previousRetrieverType '" + previousRetrieverType.getSimpleName()
+        if (!lastRetrieverInList.equals(lastAddedRetrieverType)) {
+            throw new IllegalArgumentException("The given previousRetrieverType '" + lastAddedRetrieverType.getSimpleName()
                                                + "' doesn't match the last retriever type in the chain '" 
                                                + lastRetrieverInList.getSimpleName() + "'");
         }
-        checkThatRetrieverHasUsableConstructor(nextRetrieverType);
+        checkThatRetrieverHasUsableConstructor(nextRetrieverType, settingsType);
+        if (settingsType != null && defaultSettings == null) {
+            throw new NullPointerException("No default settings have been given");
+        }
 
-        DataRetrieverTypeWithInformation<?, ?> retrieverTypeWithInformation = new DataRetrieverTypeWithInformation<>(nextRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        DataRetrieverLevel<?, ?> retrieverTypeWithInformation = new DataRetrieverLevel<>(
+                dataRetrieverTypesWithInformation.size(), nextRetrieverType, retrievedDataType,
+                settingsType, retrievedDataTypeMessageKey, defaultSettings);
         dataRetrieverTypesWithInformation.add(retrieverTypeWithInformation);
     }
 
-    private <InputType, ResultType> void checkThatRetrieverHasUsableConstructor(
-            Class<? extends Processor<InputType, ResultType>> retrieverType) {
+    private <InputType, ResultType, SettingsType> void checkThatRetrieverHasUsableConstructor(
+            Class<? extends Processor<InputType, ResultType>> retrieverType, Class<SettingsType> settingsType) {
         try {
-            retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            if (settingsType == null) {
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            } else {
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+            }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"
                     + retrieverType.getSimpleName() + "'", e);
@@ -114,16 +134,32 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     
     @Override
     public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType> void endWith(
-            Class<? extends Processor<PreviousInputType, PreviousResultType>> previousRetrieverType,
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
             Class<? extends Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
             String retrievedDataTypeMessageKey) {
-        addAfter(previousRetrieverType, lastRetrieverType, retrievedDataType, retrievedDataTypeMessageKey);
+        endWith(lastAddedRetrieverType, lastRetrieverType, retrievedDataType, null, null, retrievedDataTypeMessageKey);
+    }
+    
+    @Override
+    public <NextInputType, PreviousInputType, PreviousResultType extends NextInputType, SettingsType extends SerializableSettings> void endWith(
+            Class<? extends Processor<PreviousInputType, PreviousResultType>> lastAddedRetrieverType,
+            Class<? extends Processor<NextInputType, DataType>> lastRetrieverType, Class<DataType> retrievedDataType,
+            Class<SettingsType> settingsType, SettingsType defaultSettings, String retrievedDataTypeMessageKey) {
+        addAfter(lastAddedRetrieverType, lastRetrieverType, retrievedDataType, settingsType, defaultSettings, retrievedDataTypeMessageKey);
         isComplete = true;
     }
     
     @Override
-    public List<? extends DataRetrieverTypeWithInformation<?, ?>> getDataRetrieverTypesWithInformation() {
+    public List<? extends DataRetrieverLevel<?, ?>> getDataRetrieverLevels() {
         return dataRetrieverTypesWithInformation;
+    }
+    
+    @Override
+    public DataRetrieverLevel<?, ?> getDataRetrieverLevel(int levelIndex) {
+        if (levelIndex < 0 || levelIndex >= getDataRetrieverLevels().size()) {
+            return null;
+        }
+        return getDataRetrieverLevels().get(levelIndex);
     }
 
     @Override
@@ -134,6 +170,12 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
         
         return new SimpleDataRetrieverChainBuilder<>(executor, dataRetrieverTypesWithInformation);
     }
+    
+    @Override
+    public String toString() {
+        return getDataSourceType().getSimpleName() + " -> " + getRetrievedDataType().getSimpleName() +
+               "[messageKey: " + nameMessageKey + ", isComplete: " + isComplete + "]";
+    }
 
     @Override
     public int hashCode() {
@@ -143,7 +185,6 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
                 + ((dataRetrieverTypesWithInformation == null) ? 0 : dataRetrieverTypesWithInformation.hashCode());
         result = prime * result + ((dataSourceType == null) ? 0 : dataSourceType.hashCode());
         result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -170,11 +211,6 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
             if (other.retrievedDataType != null)
                 return false;
         } else if (!retrievedDataType.equals(other.retrievedDataType))
-            return false;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
             return false;
         return true;
     }

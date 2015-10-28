@@ -1,12 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.presentation;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -19,44 +12,34 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.datamining.shared.dto.DistanceDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenter implements ResultsPresenterWithControls {
+public abstract class AbstractResultsPresenter<SettingsType extends Settings> implements ResultsPresenterWithControls<SettingsType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
     private ResultsPresenterState state;
     
     private final DockLayoutPanel mainPanel;
     private final HorizontalPanel controlsPanel;
-    private final ValueListBox<String> dataSelectionListBox;
-    private final DeckLayoutPanel presentationPanel;
+    protected final ValueListBox<String> dataSelectionListBox;
+    protected final DeckLayoutPanel presentationPanel;
     
     private final HTML errorLabel;
     private final HTML labeledBusyIndicator;
     
-    private final NumberDataProvider numberDataProvider;
-    private final Map<String, AbstractResultDataProvider<?>> dataProviders;
-    private AbstractResultDataProvider<?> currentDataProvider;
     private QueryResultDTO<?> currentResult;
+    private boolean isCurrentResultSimple;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         mainPanel = new DockLayoutPanel(Unit.PX);
-        
-        numberDataProvider = new NumberDataProvider();
-        dataProviders = new HashMap<>();
-        AbstractResultDataProvider<DistanceDTO> distanceDataProvider = new DistanceDataProvider();
-        dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -72,7 +55,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
                 // Call a servlet to download the previously pushed result as json file
             }
         });
-        addControl(exportButton);
+//        addControl(exportButton);
         
         dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
             @Override
@@ -84,8 +67,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowResult(resultValues);
+                onDataSelectionValueChange();
             }
         });
         addControl(dataSelectionListBox);
@@ -102,6 +84,8 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         showError(getStringMessages().runAQuery());
     }
     
+    abstract protected void onDataSelectionValueChange();
+
     @Override
     public void addControl(Widget controlWidget) {
         controlsPanel.add(controlWidget);
@@ -117,47 +101,19 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
             }
             
             this.currentResult = result;
-            currentDataProvider = selectCurrentDataProvider();
-            updateDataSelectionListBox();
-            if (currentDataProvider != null) {
-                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowResult(resultValues);
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        presentationPanel.onResize();
-                    }
-                });
-            } else {
-                showError(getStringMessages().cantDisplayDataOfType(getCurrentResult().getResultType()));
-            }
+            updateIsCurrentResultSimple();
+            
+            internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
+            updateIsCurrentResultSimple();
             showError(getStringMessages().noDataFound() + ".");
         }
     }
 
-    private AbstractResultDataProvider<?> selectCurrentDataProvider() {
-        if (numberDataProvider.acceptsResultsOfType(getCurrentResult().getResultType())) {
-            return numberDataProvider;
-        }
-        return dataProviders.get(getCurrentResult().getResultType());
-    }
-    
-    private void updateDataSelectionListBox() {
-        if (currentDataProvider == null) {
-            dataSelectionListBox.setAcceptableValues(Collections.<String>emptyList());
-        } else {
-            Collection<String> dataKeys = currentDataProvider.getDataKeys();
-            String keyToSelect = currentDataProvider.getDefaultDataKeyFor(getCurrentResult());
-            dataSelectionListBox.setValue(keyToSelect, false);
-            dataSelectionListBox.setAcceptableValues(dataKeys);
-        }
-    }
+    abstract protected void internalShowResults(QueryResultDTO<?> result);
 
     protected abstract Widget getPresentationWidget();
-    
-    protected abstract void internalShowResult(Map<GroupKey, Number> resultValues);
 
     @Override
     public void showError(String error) {
@@ -168,6 +124,7 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         }
         
         currentResult = null;
+        updateIsCurrentResultSimple();
         presentationPanel.setWidget(errorLabel);
     }
     
@@ -189,6 +146,25 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
         }
         
         currentResult = null;
+        updateIsCurrentResultSimple();
+    }
+    
+    private void updateIsCurrentResultSimple() {
+        boolean isSimple = false;
+        if (currentResult != null) {
+            isSimple = true;
+            for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
+                if (groupKey.hasSubKey()) {
+                    isSimple = false;
+                    break;
+                }
+            }
+        }
+        isCurrentResultSimple = isSimple;
+    }
+
+    protected boolean isCurrentResultSimple() {
+        return isCurrentResultSimple;
     }
     
     protected StringMessages getStringMessages() {
@@ -201,8 +177,18 @@ public abstract class AbstractResultsPresenter implements ResultsPresenterWithCo
     }
 
     @Override
-    public Widget getWidget() {
+    public Widget getEntryWidget() {
         return mainPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
     }
 
 }

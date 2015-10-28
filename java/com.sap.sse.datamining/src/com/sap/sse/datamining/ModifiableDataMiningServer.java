@@ -4,10 +4,13 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
-import com.sap.sse.datamining.functions.FunctionRegistry;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface ModifiableDataMiningServer extends DataMiningServer {
+
+    public void addDataMiningBundleClassLoader(ClassLoader classLoader);
+    public void removeDataMiningBundleClassLoader(ClassLoader classLoader);
 
     public void addStringMessages(ResourceBundleStringMessages stringMessages);
     public void removeStringMessages(ResourceBundleStringMessages stringMessages);
@@ -17,8 +20,8 @@ public interface ModifiableDataMiningServer extends DataMiningServer {
     public void registerAllWithExternalFunctionPolicy(Iterable<Class<?>> externalClassesToScan);
     public void unregisterAllFunctionsOf(Iterable<Class<?>> classesToUnregister);
     
-    public void setDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
-    public void removeDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
+    public void registerDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
+    public void unregisterDataSourceProvider(DataSourceProvider<?> dataSourceProvider);
     
     public DataRetrieverChainDefinitionRegistry getDataRetrieverChainDefinitionRegistry();
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);

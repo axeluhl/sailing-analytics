@@ -3,10 +3,9 @@ package com.sap.sailing.gwt.home.desktop.partials.media;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -30,15 +29,11 @@ public class SailingGalleryPlayer extends ResizeComposite {
 
     public SailingGalleryPlayer(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
-        selectedIdx = Math.max(selectedIdx, Util.indexOf(images, selected));
+        selectedIdx = Math.max(0, Util.indexOf(images, selected));
         for (SailingImageDTO i : images) {
             mainSliderUi.appendChild(createMainImgElement(i));
             subSliderUi.appendChild(createThumbImgElement(i));
         }
-    }
-    
-    public void setFocusToSubSlider() {
-        subSliderUi.getFirstChildElement().focus();
     }
 
     private ImageElement createThumbImgElement(SailingImageDTO i ) {
@@ -60,12 +55,8 @@ public class SailingGalleryPlayer extends ResizeComposite {
     @Override
     protected void onLoad() {
         _onLoad();
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                gotoSlider(selectedIdx);
-            }
-        });
+        mainSliderUi.getChild(0).<Element>cast().setTabIndex(0);
+        mainSliderUi.getChild(0).<Element>cast().focus();
     }
 
     @Override
@@ -73,16 +64,9 @@ public class SailingGalleryPlayer extends ResizeComposite {
         refreshSlider();
     }
 
-    native void gotoSlider(int index) /*-{
-	$wnd.$('.mainSlider').slick('slickGoTo', index, true);
-	$wnd.$('.subSlider').slick('slickGoTo', index, true);
-	$wnd.$('.mainSlider').slick('setPosition');
-	$wnd.$('.subSlider').slick('setPosition');
-    }-*/;
-
     native void refreshSlider() /*-{
-	$wnd.$('.mainSlider').slick('setOption', null, null, true);
-	$wnd.$('.subSlider').slick('setOption', null, null, true);
+      $wnd.$('.mainSlider').slick('setOption', null, null, true);
+      $wnd.$('.subSlider').slick('setOption', null, null, true);
     }-*/;
 
     /**
@@ -91,28 +75,30 @@ public class SailingGalleryPlayer extends ResizeComposite {
      * @param uniqueId
      */
     native void _onLoad() /*-{
-	$wnd.$('.mainSlider').slick({
-	    lazyLoad : 'ondemand',
-	    slidesToShow : 1,
-	    slidesToScroll : 1,
-	    arrows : false,
-	    centerMode : false,
-	    variableWidth : false,
-	    adaptiveHeight : false,
-	    asNavFor : '.subSlider'
-	});
-	$wnd.$('.subSlider').slick({
-	    lazyLoad : 'ondemand',
-	    infinite : true,
-	    slidesToShow : 1,
-	    slidesToScroll : 1,
-	    swipeToSlide : true,
-	    centerMode : true,
-	    asNavFor : '.mainSlider',
-	    arrows : false,
-	    variableWidth : true,
-	    focusOnSelect : true,
-	    draggable : false
-	});
+      $wnd.$('.mainSlider').slick({
+          lazyLoad : 'ondemand',
+          slidesToShow : 1,
+          slidesToScroll : 1,
+          arrows : false,
+          centerMode : false,
+          variableWidth : false,
+          adaptiveHeight : false,
+          asNavFor : '.subSlider',
+          initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
+      });
+      $wnd.$('.subSlider').slick({
+          lazyLoad : 'ondemand',
+          infinite : true,
+          slidesToShow : 1,
+          slidesToScroll : 1,
+          swipeToSlide : true,
+          centerMode : true,
+          asNavFor : '.mainSlider',
+          arrows : false,
+          variableWidth : true,
+          focusOnSelect : true,
+          draggable : false,
+          initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
+      });
     }-*/;
 }

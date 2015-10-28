@@ -41,14 +41,21 @@ public class RaceCompetitionFormatDataCalculator implements RaceCallback {
         for (Entry<String, Map<FleetMetadataDTO, SeriesFleetData>> seriesData : dataPerSeriesAndFleet.entrySet()) {
             RaceCompetitionFormatSeriesDTO series = new RaceCompetitionFormatSeriesDTO(seriesData.getKey());
             Set<SimpleCompetitorDTO> competitorsForSeries = new HashSet<>();
+            int sumOfSeparatCompetitorsInFleets = 0;
             for (Entry<FleetMetadataDTO, SeriesFleetData> fleetData : seriesData.getValue().entrySet()) {
                 competitorsForSeries.addAll(fleetData.getValue().competitors);
-                int competitorCountForFleet = fleetData.getValue().competitors.size();
+                sumOfSeparatCompetitorsInFleets += fleetData.getValue().competitors.size();
+            }
+            series.setCompetitorCount(competitorsForSeries.size());
+            // if competitors change the fleets race by race, they can't be associated to a single fleet
+            // Therefore, the competitors by fleet statistic will be hidden to avoid confusing information
+            boolean showCompetitorCountForFleet = series.getCompetitorCount() == sumOfSeparatCompetitorsInFleets;
+            for (Entry<FleetMetadataDTO, SeriesFleetData> fleetData : seriesData.getValue().entrySet()) {
+                int competitorCountForFleet = showCompetitorCountForFleet ? fleetData.getValue().competitors.size() : 0;
                 RaceCompetitionFormatFleetDTO fleet = new RaceCompetitionFormatFleetDTO(fleetData.getKey(), competitorCountForFleet);
                 fleet.addRaces(fleetData.getValue().races);
                 series.addFleet(fleet);
             }
-            series.setCompetitorCount(competitorsForSeries.size());
             result.add(series);
         }
         return result;

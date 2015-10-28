@@ -18,6 +18,7 @@ public interface RegattaCompetitionResources extends ClientBundle {
         String phase_head_info_item();
         String regattalistitem();
         String fleet();
+        String default_fleet();
         String fleet_corner();
         String fleet_details();
         String fleet_details_name();
@@ -25,9 +26,11 @@ public interface RegattaCompetitionResources extends ClientBundle {
         String fleet_races();
         String fleet_races_race();
         String fleet_races_race_name();
-        String fleet_races_race_date();
+        String fleet_races_race_info();
         String fleet_races_raceuntracked();
         String fleet_races_racelive();
         String fleet_races_raceplanned();
+        String fleet_races_race_date();
+        String fleet_races_race_state();
     }
 }

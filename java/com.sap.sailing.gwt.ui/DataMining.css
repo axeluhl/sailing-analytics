@@ -46,6 +46,14 @@ table td,select,button {
 	font-size: 14px;
 }
 
+.gwt-DialogBox {
+    z-index: 20;
+}
+
+.gwt-PopupPanelGlass {
+	z-index: 19;
+}
+
 .contentOuterPanel {
 	background: #dddcdc;
 	margin: 0 12px 0 12px;
@@ -223,6 +231,10 @@ input.magnifier {
 }
 
 .groupingProviderElement {
+	margin: 2px;
+}
+
+.statisticProviderElement {
 	margin: 2px;
 }
 

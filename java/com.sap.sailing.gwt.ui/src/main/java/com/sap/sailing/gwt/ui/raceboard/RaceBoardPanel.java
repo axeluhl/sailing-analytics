@@ -158,9 +158,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
         competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-        competitorSelection.setCompetitors(competitorsAndTheirBoats.keySet());
-        for(Entry<CompetitorDTO, BoatDTO> competitorAndBoat: competitorsAndTheirBoats.entrySet()) {
-            if(competitorAndBoat.getValue() != null) {
+        for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
+            if (competitorAndBoat.getValue() != null) {
                 colorProvider.setColor(competitorAndBoat.getKey(), selectedRaceIdentifier, competitorAndBoat.getValue().getColor());
             }
         }
@@ -226,7 +225,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
-        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
                 stringMessages, competitorSelection, errorReporter, timer);
         editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
         editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());

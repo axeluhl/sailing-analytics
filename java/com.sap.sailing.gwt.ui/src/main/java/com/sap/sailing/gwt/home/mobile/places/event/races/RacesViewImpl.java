@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 
 public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implements RacesView {
 
@@ -34,5 +35,10 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
         QuickfinderPresenter.getForRegattaRaces(quickfinder, currentPresenter, regattaMetadatas);
     }
-
+    
+    @Override
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        QuickfinderPresenter.getForSeriesEventRaces(quickfinder, seriesName, currentPresenter, eventsOfSeries);
+    }
+    
 }

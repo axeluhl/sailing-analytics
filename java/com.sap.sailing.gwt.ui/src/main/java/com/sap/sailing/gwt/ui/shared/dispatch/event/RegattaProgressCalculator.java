@@ -1,10 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.dispatch.event;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
 import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressFleetDTO;
@@ -12,71 +11,56 @@ import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 
 public class RegattaProgressCalculator implements EventActionUtil.RaceCallback {
-    private final Map<String, Set<String>> racesPerSeries = new LinkedHashMap<>();
-    private final Map<String, Map<String, Set<String>>> racesPerSeriesAndFleet = new HashMap<>();
-    private final Map<String, Map<String, Set<String>>> liveRacesPerSeriesAndFleet = new HashMap<>();
-    private final Map<String, FleetMetadataDTO> fleets = new HashMap<>();
 
+    private Map<String, Map<String, FleetInfo>> infoPerSeriesAndFleet = new LinkedHashMap<>();
+    
     @Override
     public void doForRace(RaceContext context) {
-        String seriesName = context.getSeriesName();
-        
-        Set<String> racesInSeries = racesPerSeries.get(seriesName);
-        if(racesInSeries == null) {
-            racesInSeries = new HashSet<>();
-            racesPerSeries.put(seriesName, racesInSeries);
+        FleetInfo fleetInfo = getFleetInfo(context.getSeriesName(), context.getFleetName());
+        if (fleetInfo.metadata == null) fleetInfo.metadata = context.getFleetMetadata();
+        fleetInfo.numberOfRaces++;
+        if (context.isFinished()) fleetInfo.numberOfFinishedRaces++;
+        if (context.isLive()) fleetInfo.numberOfLiveRaces++;
+    }
+    
+    private Map<String, FleetInfo> getSeriesInfo(String seriesName) {
+        Map<String, FleetInfo> seriesInfo = infoPerSeriesAndFleet.get(seriesName);
+        if (seriesInfo == null) {
+            infoPerSeriesAndFleet.put(seriesName, seriesInfo = new HashMap<>());
         }
-        String raceName = context.getRaceName();
-        racesInSeries.add(raceName);
-        
-        Map<String, Set<String>> racesInSeriesAndFleet = racesPerSeriesAndFleet.get(seriesName);
-        if(racesInSeriesAndFleet == null) {
-            racesInSeriesAndFleet = new LinkedHashMap<String, Set<String>>();
-            racesPerSeriesAndFleet.put(seriesName, racesInSeriesAndFleet);
+        return seriesInfo;
+    }
+    
+    private FleetInfo getFleetInfo(String seriesName, String fleetName) {
+        Map<String, FleetInfo> seriesInfo = getSeriesInfo(seriesName);
+        FleetInfo fleetInfo = seriesInfo.get(fleetName);
+        if (fleetInfo == null) {
+            seriesInfo.put(fleetName, fleetInfo = new FleetInfo());
         }
-        String fleetName = context.getFleetName();
-        Set<String> racesInFleet = racesInSeriesAndFleet.get(fleetName);
-        if(racesInFleet == null) {
-            racesInFleet = new HashSet<>();
-            racesInSeriesAndFleet.put(fleetName, racesInFleet);
-        }
-        Map<String, Set<String>> liveRacesInSeriesAndFleet = liveRacesPerSeriesAndFleet.get(seriesName);
-        if(liveRacesInSeriesAndFleet == null) {
-            liveRacesInSeriesAndFleet = new LinkedHashMap<String, Set<String>>();
-            liveRacesPerSeriesAndFleet.put(seriesName, liveRacesInSeriesAndFleet);
-        }
-        Set<String> liveRacesInFleet = liveRacesInSeriesAndFleet.get(fleetName);
-        if(liveRacesInFleet == null) {
-            liveRacesInFleet = new HashSet<>();
-            liveRacesInSeriesAndFleet.put(fleetName, liveRacesInFleet);
-        }
-        if(context.isFinished()) {
-            racesInFleet.add(raceName);
-        }
-        if(context.isLive()) {
-            liveRacesInFleet.add(raceName);
-        }
-        
-        if(!fleets.containsKey(fleetName)) {
-            fleets.put(fleetName, context.getFleetMetadata());
-        }
+        return fleetInfo;
     }
     
     public RegattaProgressDTO getResult() {
         RegattaProgressDTO progress = new RegattaProgressDTO();
-        for(Map.Entry<String, Set<String>> racesInSeries : racesPerSeries.entrySet()) {
-            String seriesName = racesInSeries.getKey();
-            int totalRaceCount = racesInSeries.getValue().size();
-            RegattaProgressSeriesDTO regattaProgressOfSeries = new RegattaProgressSeriesDTO(seriesName, totalRaceCount);
-            for(Map.Entry<String, Set<String>> racesInFleet : racesPerSeriesAndFleet.get(seriesName).entrySet()) {
-                String fleetName = racesInFleet.getKey();
-                int finishedRacesForFleet = racesInFleet.getValue().size();
-                int liveRacesForFleet = liveRacesPerSeriesAndFleet.get(seriesName).get(fleetName).size();
-                regattaProgressOfSeries.addFleet(fleets.get(fleetName), new RegattaProgressFleetDTO(finishedRacesForFleet, liveRacesForFleet));
+        for (Entry<String, Map<String, FleetInfo>> seriesInfo : infoPerSeriesAndFleet.entrySet()) {
+            RegattaProgressSeriesDTO series = new RegattaProgressSeriesDTO(seriesInfo.getKey());
+            for (FleetInfo fleetInfo : seriesInfo.getValue().values()) {
+                series.addFleet(fleetInfo.metadata, fleetInfo.getRegattaProgressFleetDTO());
             }
-            progress.addSeries(regattaProgressOfSeries);
+            progress.addSeries(series);
         }
         return progress;
+    }
+    
+    private class FleetInfo {
+        private FleetMetadataDTO metadata;
+        private int numberOfRaces = 0;
+        private int numberOfFinishedRaces = 0;
+        private int numberOfLiveRaces = 0;
+        
+        private RegattaProgressFleetDTO getRegattaProgressFleetDTO() {
+            return new RegattaProgressFleetDTO(numberOfRaces, numberOfFinishedRaces, numberOfLiveRaces);
+        }
     }
 
 }

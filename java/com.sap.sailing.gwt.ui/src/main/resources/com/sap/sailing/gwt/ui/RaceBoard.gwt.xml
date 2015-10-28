@@ -28,8 +28,7 @@
 	<!-- Specify the paths for translatable code                    -->
 	<extend-property name="locale" values="de"/>
 	<extend-property name="locale" values="ru"/>
-	
-	
+  
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared' />

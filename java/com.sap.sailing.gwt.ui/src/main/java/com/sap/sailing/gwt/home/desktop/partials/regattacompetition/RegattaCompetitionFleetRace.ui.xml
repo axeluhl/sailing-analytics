@@ -6,8 +6,9 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetitionResources" />
 	<a class="{local_res.css.fleet_races_race}" target="_blank">
 		<div class="{local_res.css.fleet_races_race_name}" ui:field="raceNameUi"></div>
-		<div class="{local_res.css.fleet_races_race_date} {res.mediaCss.hideonsmall}" ui:field="raceDateUi">
-			<ui:text from="{i18n.raceIsPlanned}" />	
+		<div class="{local_res.css.fleet_races_race_info} {res.mediaCss.hideonsmall}">
+			<div class="{local_res.css.fleet_races_race_state}" ui:field="raceStateUi"></div>
+			<div class="{local_res.css.fleet_races_race_date}" ui:field="raceDateUi"></div>
 		</div>
 	</a>
 </ui:UiBinder>

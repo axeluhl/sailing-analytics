@@ -29,11 +29,16 @@ public class RegattaCompetitionFleet extends Widget {
 
     public RegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet, int fleetCount) {
         setElement(uiBinder.createAndBindUi(this));
-        raceContainerUi.getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
         raceContainerUi.getStyle().setWidth(100.0 / fleetCount, Unit.PCT);
         if (fleetCount < 2) raceContainerUi.addClassName(CSS.regattacompetition_phase_fleetfullwidth());
         fleetCornerUi.getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
         fleetNameUi.setInnerText(fleet.getFleet().getFleetName());
+        if (fleet.getFleet().isDefaultFleet()) {
+            fleetCornerUi.removeFromParent();
+            fleetNameUi.removeFromParent();
+        } else {
+            raceContainerUi.getStyle().setBackgroundColor(getBackgroundColor(fleet.getFleet()));
+        }
     }
     
     public void addRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {

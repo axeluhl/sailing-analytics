@@ -20,6 +20,8 @@ import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.management.AggregationProcessorDefinitionRegistry;
 import com.sap.sse.datamining.components.management.DataRetrieverChainDefinitionRegistry;
+import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
+import com.sap.sse.datamining.components.management.FunctionRegistry;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCountAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataAverageAggregationProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataMaxAggregationProcessor;
@@ -28,7 +30,8 @@ import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberD
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedNumberDataSumAggregationProcessor;
 import com.sap.sse.datamining.impl.components.management.AggregationProcessorDefinitionManager;
 import com.sap.sse.datamining.impl.components.management.DataRetrieverChainDefinitionManager;
-import com.sap.sse.datamining.impl.functions.FunctionManager;
+import com.sap.sse.datamining.impl.components.management.DataSourceProviderManager;
+import com.sap.sse.datamining.impl.components.management.FunctionManager;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
@@ -50,11 +53,12 @@ public class DataMiningFrameworkActivator implements BundleActivator {
 
     private ModifiableDataMiningServer createDataMiningServer() {
         ExecutorService executor = new DataMiningExecutorService(THREAD_POOL_SIZE);
-        FunctionManager functionManager = new FunctionManager();
-        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionManager = new DataRetrieverChainDefinitionManager();
-        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionManager = new AggregationProcessorDefinitionManager();
-        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionManager, dataRetrieverChainDefinitionManager, aggregationProcessorDefinitionManager);
-        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, DataMiningFrameworkActivator.class.getClassLoader()));
+        FunctionRegistry functionRegistry = new FunctionManager();
+        DataSourceProviderRegistry dataSourceProviderRegistry = new DataSourceProviderManager();
+        DataRetrieverChainDefinitionRegistry dataRetrieverChainDefinitionRegistry = new DataRetrieverChainDefinitionManager();
+        AggregationProcessorDefinitionRegistry aggregationProcessorDefinitionRegistry = new AggregationProcessorDefinitionManager();
+        ModifiableDataMiningServer dataMiningServer = new DataMiningServerImpl(executor, functionRegistry, dataSourceProviderRegistry, dataRetrieverChainDefinitionRegistry, aggregationProcessorDefinitionRegistry);
+        dataMiningServer.addStringMessages(new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME, this.getClass().getClassLoader()));
         for (AggregationProcessorDefinition<?, ?> aggregationProcessorDefinition : getDefaultAggregationProcessors()) {
             dataMiningServer.registerAggregationProcessor(aggregationProcessorDefinition);
         }
@@ -84,11 +88,9 @@ public class DataMiningFrameworkActivator implements BundleActivator {
                 return dataMiningBundleService;
             }
             @Override
-            public void modifiedService(ServiceReference<DataMiningBundleService> reference,
-                    DataMiningBundleService service) { }
+            public void modifiedService(ServiceReference<DataMiningBundleService> reference, DataMiningBundleService service) { }
             @Override
-            public void removedService(ServiceReference<DataMiningBundleService> reference,
-                    DataMiningBundleService dataMiningBundleService) {
+            public void removedService(ServiceReference<DataMiningBundleService> reference, DataMiningBundleService dataMiningBundleService) {
                 unregisterDataMiningBundle(dataMiningBundleService);
             }
         });
@@ -98,11 +100,12 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private void registerDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
-        logger.info("Registering data mining bundle "+dataMiningBundleService);
+        logger.info("Registering data mining bundle " + dataMiningBundleService);
+        dataMiningServer.addDataMiningBundleClassLoader(dataMiningBundleService.getClassLoader());
         dataMiningServer.addStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.registerAllClasses(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
-            dataMiningServer.setDataSourceProvider(dataSourceProvider);
+            dataMiningServer.registerDataSourceProvider(dataSourceProvider);
         }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.registerDataRetrieverChainDefinition(dataRetrieverChainDefinition);
@@ -113,11 +116,12 @@ public class DataMiningFrameworkActivator implements BundleActivator {
     }
 
     private void unregisterDataMiningBundle(DataMiningBundleService dataMiningBundleService) {
-        logger.info("Unregistering data mining bundle "+dataMiningBundleService);
+        logger.info("Unregistering data mining bundle " + dataMiningBundleService);
+        dataMiningServer.removeDataMiningBundleClassLoader(dataMiningBundleService.getClassLoader());
         dataMiningServer.removeStringMessages(dataMiningBundleService.getStringMessages());
         dataMiningServer.unregisterAllFunctionsOf(dataMiningBundleService.getClassesWithMarkedMethods());
         for (DataSourceProvider<?> dataSourceProvider : dataMiningBundleService.getDataSourceProviders()) {
-            dataMiningServer.removeDataSourceProvider(dataSourceProvider);
+            dataMiningServer.unregisterDataSourceProvider(dataSourceProvider);
         }
         for (DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition : dataMiningBundleService.getDataRetrieverChainDefinitions()) {
             dataMiningServer.unregisterDataRetrieverChainDefinition(dataRetrieverChainDefinition);

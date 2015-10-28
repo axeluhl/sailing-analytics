@@ -224,11 +224,10 @@ public class MetadataParserImpl implements MetadataParser {
                     parsedColor = entry.getValue();
                 }
             }
-            if(parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
+            if (parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
                 result = new Util.Triple<String, String, String>(parsedBoatName, parsedBoatId, parsedColor);
             }
         }
-        
         return result;
     }
 }

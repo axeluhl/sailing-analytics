@@ -12,6 +12,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -145,7 +147,7 @@ public abstract class DataEntryDialog<T> {
         if (validator != null) {
             errorMessage = validator.getErrorMessage(getResult());
         }
-        if (errorMessage == null) {
+        if (errorMessage == null || errorMessage.isEmpty()) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);
         } else {
@@ -175,9 +177,21 @@ public abstract class DataEntryDialog<T> {
         oracle.addAll(suggestValuesAsCollection);
         oracle.setDefaultSuggestionsFromText(suggestValuesAsCollection);
         final SuggestBox result = new SuggestBox(oracle);
+        result.getValueBox().addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                validate();
+            }
+        });
         result.getValueBox().addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        result.getValueBox().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
                 validate();
             }
         });

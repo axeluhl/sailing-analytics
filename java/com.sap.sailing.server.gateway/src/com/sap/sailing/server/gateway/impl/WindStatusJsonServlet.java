@@ -71,6 +71,7 @@ public class WindStatusJsonServlet extends WindStatusServlet implements IgtimiWi
                         windFix.put("windFromInDegrees", message.getWind().getFrom().getDegrees());
                         windFix.put("windToInDegrees", message.getWind().getFrom().reverse().getDegrees());
                         windFix.put("windSpeedInMetersPerSecond", message.getWind().getMetersPerSecond());
+                        windFix.put("windSpeedInStatuteMilesPerHour", message.getWind().getStatuteMilesPerHour());
                         windFix.put("windSpeedInKilometersPerHour", message.getWind().getKilometersPerHour());
                         windFix.put("windSpeedInKnots", message.getWind().getKnots());
                         windFix.put("measurementTimePointAsMillis", message.getWind().getTimePoint().asMillis());
@@ -95,6 +96,7 @@ public class WindStatusJsonServlet extends WindStatusServlet implements IgtimiWi
             put("windToInDegrees", 270.0);
             put("windSpeedInMetersPerSecond", 6.944444);
             put("windSpeedInKilometersPerHour", 25.0);
+            put("windSpeedInStatuteMilesPerHour", 15.43);
             put("windSpeedInKnots", 13.498920086);
             put("measurementTimePointAsMillis", MillisecondsTimePoint.now().minus(Duration.ONE_SECOND.times(4)).asMillis());
         }});
@@ -106,6 +108,7 @@ public class WindStatusJsonServlet extends WindStatusServlet implements IgtimiWi
             put("windToInDegrees", 280.0);
             put("windSpeedInMetersPerSecond", 6.944444);
             put("windSpeedInKilometersPerHour", 25.0);
+            put("windSpeedInStatuteMilesPerHour", 15.43);
             put("windSpeedInKnots", 13.498920086);
             put("measurementTimePointAsMillis", MillisecondsTimePoint.now().minus(Duration.ONE_SECOND.times(5)).asMillis());
         }});
@@ -117,6 +120,7 @@ public class WindStatusJsonServlet extends WindStatusServlet implements IgtimiWi
             put("windToInDegrees", 265.0);
             put("windSpeedInMetersPerSecond", 6.944444);
             put("windSpeedInKilometersPerHour", 25.0);
+            put("windSpeedInStatuteMilesPerHour", 15.43);
             put("windSpeedInKnots", 13.498920086);
             put("measurementTimePointAsMillis", MillisecondsTimePoint.now().minus(Duration.ONE_SECOND.times(6)).asMillis());
         }});

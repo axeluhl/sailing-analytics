@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.shared.race;
 import java.util.Date;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.dispatch.DTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadataDTO> {
     public enum RaceViewState {

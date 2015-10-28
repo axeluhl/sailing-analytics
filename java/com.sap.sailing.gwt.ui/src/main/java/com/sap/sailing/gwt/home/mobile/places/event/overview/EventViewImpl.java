@@ -9,9 +9,11 @@ import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
 import com.sap.sailing.gwt.home.mobile.partials.impressions.Impressions;
 import com.sap.sailing.gwt.home.mobile.partials.liveraces.RegattaLiveRaces;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
+import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
+import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -20,8 +22,10 @@ import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattasAndLiveRacesForEventAction;
+import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
 
@@ -108,8 +112,14 @@ public class EventViewImpl extends AbstractEventView<EventView.Presenter> implem
     
     private void setupStatisticsBox(Panel container) {
         statisticsBoxUi = new StatisticsBox(isMultiRegattaEvent());
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(getEventId()));
+        refreshManager.add(statisticsBoxUi, isMultiRegattaEvent() ? new GetEventStatisticsAction(getEventId())
+                : new GetRegattaStatisticsAction(getEventId(), getRegattaId()));
         container.add(statisticsBoxUi);
+    }
+    
+    @Override
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        QuickfinderPresenter.getForSeriesEventOverview(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
 
     @Override

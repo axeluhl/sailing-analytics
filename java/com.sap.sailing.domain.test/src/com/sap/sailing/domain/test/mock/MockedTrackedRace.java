@@ -10,7 +10,6 @@ import java.util.TreeSet;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -50,6 +49,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -470,6 +470,21 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public RaceColumn getRaceColumnByName(String raceColumnName) {
+                        return null;
+                    }
+
+                    @Override
+                    public IsRegattaLike getRegattaLike() {
+                        return null;
+                    }
+
+                    @Override
+                    public RaceLog getRacelog(String raceColumnName, String fleetName) {
+                        return null;
+                    }
+
+                    @Override
+                    public Iterable<? extends RaceColumn> getRaceColumns() {
                         return null;
                     }
                 };
@@ -992,14 +1007,5 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
-    }
-
-    @Override
-    public Boat resolveBoatOfCompetitor(Competitor competitor) {
-        return null;
-    }
-
-    @Override
-    public void setBoatForCompetitor(Competitor competitor, Boat boat) {
     }
 }

@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
@@ -19,6 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.simpleinfoblock.SimpleInfoBlock;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
 import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
@@ -76,6 +76,10 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
     }
     
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
+        QuickfinderPresenter.getForSeriesLeaderboards(quickfinder, seriesName, currentPresenter, eventsOfSeries);
+    }
+    
     protected void initRacesNavigation(Panel container) {
         MobileSection mobileSection = new MobileSection();
         SectionHeaderContent header = new SectionHeaderContent();
@@ -93,7 +97,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     @Override
     public final void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
-        QuickfinderPresenter.getForSeriesLeaderboards(layout.quickFinderUi, seriesName, currentPresenter, eventsOfSeries);
+        setQuickFinderValues(layout.quickFinderUi, seriesName, eventsOfSeries);
     }
     
     @Override

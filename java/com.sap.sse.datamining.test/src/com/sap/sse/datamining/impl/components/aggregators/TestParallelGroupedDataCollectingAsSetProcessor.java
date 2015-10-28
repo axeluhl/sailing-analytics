@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,15 +18,15 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestParallelGroupedDataCollectingAsSetProcessor {
 
-    private Collection<Processor<Map<GroupKey, Set<Double>>, ?>> receivers;
-    private Map<GroupKey, Set<Double>> receivedData = null;
+    private Collection<Processor<Map<GroupKey, HashSet<Double>>, ?>> receivers;
+    private Map<GroupKey, HashSet<Double>> receivedData = null;
     
     @Before
     public void initializeReceivers() {
         @SuppressWarnings("unchecked")
-        Processor<Map<GroupKey, Set<Double>>, Void> receiver = new NullProcessor<Map<GroupKey, Set<Double>>, Void>((Class<Map<GroupKey, Set<Double>>>)(Class<?>) Map.class, Void.class) {
+        Processor<Map<GroupKey, HashSet<Double>>, Void> receiver = new NullProcessor<Map<GroupKey, HashSet<Double>>, Void>((Class<Map<GroupKey, HashSet<Double>>>)(Class<?>) Map.class, Void.class) {
             @Override
-            public void processElement(Map<GroupKey, Set<Double>> element) {
+            public void processElement(Map<GroupKey, HashSet<Double>> element) {
                 receivedData = element;
             }
         };
@@ -38,13 +37,13 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
 
     @Test
     public void testDataCollecting() throws InterruptedException {
-        Processor<GroupedDataEntry<Double>, Map<GroupKey, Set<Double>>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getExecutor(), receivers);
+        Processor<GroupedDataEntry<Double>, Map<GroupKey, HashSet<Double>>> collectingProcessor = new ParallelGroupedDataCollectingAsSetProcessor<Double>(ConcurrencyTestsUtil.getExecutor(), receivers);
         Collection<GroupedDataEntry<Double>> elements = createElements();
         
         ConcurrencyTestsUtil.processElements(collectingProcessor, elements);
         collectingProcessor.finish();
         
-        Map<GroupKey, Set<Double>> expectedReceivedData = buildExpectedReceivedData(elements);
+        Map<GroupKey, HashSet<Double>> expectedReceivedData = buildExpectedReceivedData(elements);
         ConcurrencyTestsUtil.verifyResultData(receivedData, expectedReceivedData);
     }
 
@@ -70,8 +69,8 @@ public class TestParallelGroupedDataCollectingAsSetProcessor {
         return elements;
     }
 
-    private Map<GroupKey, Set<Double>> buildExpectedReceivedData(Collection<GroupedDataEntry<Double>> elements) {
-        Map<GroupKey, Set<Double>> expectedReceivedData = new HashMap<>();
+    private Map<GroupKey, HashSet<Double>> buildExpectedReceivedData(Collection<GroupedDataEntry<Double>> elements) {
+        Map<GroupKey, HashSet<Double>> expectedReceivedData = new HashMap<>();
         for (GroupedDataEntry<Double> element : elements) {
             if (!expectedReceivedData.containsKey(element.getKey())) {
                 expectedReceivedData.put(element.getKey(), new HashSet<Double>());
