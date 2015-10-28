@@ -481,9 +481,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, Position position);
     
-    void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping)
-            throws TransformationException;
-    
     List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws TransformationException;
     

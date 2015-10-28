@@ -5219,30 +5219,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void addDeviceMappingToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        DeviceMapping<?> mapping = convertToDeviceMapping(dto);
-        TimePoint now = MillisecondsTimePoint.now();
-        RaceLogEvent event = null;
-        TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
-        TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
-        if (dto.mappedTo instanceof MarkDTO) {
-            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
-            event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), mark, raceLog.getCurrentPassId(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorDTO) {
-            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), competitor, raceLog.getCurrentPassId(), from, to);
-        } else {
-            throw new RuntimeException("Can only map devices to competitors or marks");
-        }
-        raceLog.add(event);
-    }
-    
-    @Override
     public void addDeviceMappingToRegattaLog(String leaderboardName,
             DeviceMappingDTO dto) throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
