@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -40,7 +39,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         void forPlaceSelection(PlaceCallback callback);
         Timer getTimerForClientServerOffset();
         SailingServiceAsync getSailingService();
-        HomeServiceAsync getHomeService();
         
         AbstractEventRegattaPlace getPlaceForRegatta(String regattaId);
         AbstractEventRegattaPlace getPlaceForRegattaRaces(String regattaId);

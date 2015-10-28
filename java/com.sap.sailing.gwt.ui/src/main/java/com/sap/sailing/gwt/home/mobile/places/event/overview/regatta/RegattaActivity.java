@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventActivity;
@@ -20,12 +19,7 @@ public class RegattaActivity extends AbstractEventActivity<RegattaOverviewPlace>
         initSeriesNavigation(view);
         initQuickfinder(view, true);
         if (!isMultiRegattaEvent()) {
-            initMedia(new MediaCallback() {
-                @Override
-                public void onSuccess(MediaDTO result) {
-                    view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
-                }
-            });
+            initMedia(view);
         }
         return view;
     }

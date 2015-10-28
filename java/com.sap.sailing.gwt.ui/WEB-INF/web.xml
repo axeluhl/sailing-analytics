@@ -82,15 +82,6 @@
 		<servlet-name>DispatchService</servlet-name>
 		<url-pattern>/service/dispatch</url-pattern>
 	</servlet-mapping>
-	<servlet>
-	    <display-name>Home Service</display-name>
-	    <servlet-name>HomeService</servlet-name>
-    	<servlet-class>com.sap.sailing.gwt.server.HomeServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>HomeService</servlet-name>
-		<url-pattern>/service/home</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<display-name>Media Service</display-name>

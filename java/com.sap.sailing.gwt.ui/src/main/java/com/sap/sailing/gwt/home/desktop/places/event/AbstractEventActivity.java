@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
@@ -32,7 +33,6 @@ import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
@@ -66,10 +66,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         this.clientFactory = clientFactory;
     }
 
-    public HomeServiceAsync getHomeService() {
-        return clientFactory.getHomeService();
-    }
-    
     public SailingServiceAsync getSailingService() {
         return clientFactory.getSailingService();
     }
@@ -194,7 +190,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     @Override
     public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
-        getHomeService().getMediaForEvent(eventDTO.getId(), callback);
+        getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), callback);
     }
 
     @Override

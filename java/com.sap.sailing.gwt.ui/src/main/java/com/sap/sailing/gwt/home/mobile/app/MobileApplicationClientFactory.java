@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.app;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -15,12 +13,8 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.client.HomeService;
-import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
@@ -30,7 +24,6 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
  *
  */
 public class MobileApplicationClientFactory extends SecureClientFactoryImpl implements ErrorAndBusyClientFactory, SearchResultClientFactory {
-    private final HomeServiceAsync homeService;
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 
@@ -54,16 +47,10 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl impl
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
-        this.homeService = GWT.create(HomeService.class);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) homeService, RemoteServiceMappingConstants.homeServiceRemotePath);
     }
 
     public MobilePlacesNavigator getNavigator() {
         return navigator;
-    }
-
-    public HomeServiceAsync getHomeService() {
-        return homeService;
     }
 
     public SailingDispatchSystem getDispatch() {

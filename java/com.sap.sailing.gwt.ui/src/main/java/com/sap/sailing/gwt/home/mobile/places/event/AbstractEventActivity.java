@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
@@ -25,6 +26,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRac
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -97,9 +99,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return sortedRegattas;
     }
     
+    protected final void initMedia(final AbstractEventOverview view) {
+        this.initMedia(new MediaCallback() {
+            @Override
+            public void onSuccess(MediaDTO result) {
+                view.setMediaForImpressions(result.getPhotos().size(), result.getVideos().size(), result.getPhotos());
+            }
+        });
+    }
+    
     protected final void initMedia(final MediaCallback callback) {
         if (eventDTO.isHasMedia()) {
-            clientFactory.getHomeService().getMediaForEvent(eventDTO.getId(), 
+            clientFactory.getDispatch().execute(new GetMediaForEventAction(eventDTO.getId()), 
                     new ActivityCallback<MediaDTO>(clientFactory, panel) {
                 @Override
                 public void onSuccess(MediaDTO result) {
