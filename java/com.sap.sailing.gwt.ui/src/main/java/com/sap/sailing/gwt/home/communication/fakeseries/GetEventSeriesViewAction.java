@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
@@ -32,6 +33,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
     }
 
     @Override
+    @GwtIncompatible
     public EventSeriesViewDTO execute(SailingDispatchContext ctx) throws DispatchException {
         Event o = ctx.getRacingEventService().getEvent(id);
         if (o == null) {
