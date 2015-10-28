@@ -10,20 +10,16 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
  */
 public class SeriesContext {
 
-    private String seriesId;
+    private final String seriesId;
     private EventSeriesAnalyticsDataManager analyticsManager;
 
-    public SeriesContext() {
+    public SeriesContext(String seriesId) {
+        this.seriesId = seriesId;
     }
 
     public SeriesContext(SeriesContext ctx) {
-        withId(ctx.seriesId).
+        this.seriesId = ctx.seriesId;
         withAnalyticsManager(ctx.analyticsManager);
-    }
-
-    public SeriesContext withId(String eventId) {
-        this.seriesId = eventId;
-        return this;
     }
 
     public String getSeriesId() {
