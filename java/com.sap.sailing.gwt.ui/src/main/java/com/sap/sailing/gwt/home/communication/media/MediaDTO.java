@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.communication.media;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.TreeSet;
 
-public class MediaDTO implements Serializable {
-    private static final long serialVersionUID = 4932700214423641309L;
+import com.sap.sailing.gwt.dispatch.client.Result;
+
+public class MediaDTO implements Result {
     
     private TreeSet<SailingImageDTO> photos = new TreeSet<>();
     private TreeSet<SailingVideoDTO> videos = new TreeSet<>();
