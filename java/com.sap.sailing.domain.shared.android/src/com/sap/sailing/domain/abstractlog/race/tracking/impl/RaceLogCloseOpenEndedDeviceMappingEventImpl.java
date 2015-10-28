@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.shared.events.impl.BaseCloseOpenEndedD
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
+@Deprecated //bug2851
 public class RaceLogCloseOpenEndedDeviceMappingEventImpl extends BaseCloseOpenEndedDeviceMappingEventImpl<RaceLogEventVisitor>
 implements RaceLogCloseOpenEndedDeviceMappingEvent {
     private static final long serialVersionUID = -5114645637316367845L;

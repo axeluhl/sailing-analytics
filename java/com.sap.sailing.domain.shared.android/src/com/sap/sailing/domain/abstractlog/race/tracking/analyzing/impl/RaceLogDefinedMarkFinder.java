@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.base.Mark;
 
+@Deprecated //bug2851
 public class RaceLogDefinedMarkFinder extends RaceLogAnalyzer<Collection<Mark>> {
     public RaceLogDefinedMarkFinder(RaceLog raceLog) {
         super(raceLog);

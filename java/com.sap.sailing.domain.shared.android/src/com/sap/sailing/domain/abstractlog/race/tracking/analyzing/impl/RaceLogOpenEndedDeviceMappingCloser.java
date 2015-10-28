@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.OpenEndedDeviceMappin
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
 
+@Deprecated //bug2851
 public class RaceLogOpenEndedDeviceMappingCloser extends
         OpenEndedDeviceMappingCloser<RaceLog, RaceLogEvent, RaceLogEventVisitor, RaceLogCloseOpenEndedDeviceMappingEvent> {
 

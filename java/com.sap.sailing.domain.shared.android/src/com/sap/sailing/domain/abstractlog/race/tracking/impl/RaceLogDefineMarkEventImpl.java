@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sse.common.TimePoint;
 
+@Deprecated //see bug2851
 public class RaceLogDefineMarkEventImpl extends RaceLogEventImpl implements RaceLogDefineMarkEvent {
     private static final long serialVersionUID = 277007856878002208L;
     

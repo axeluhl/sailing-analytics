@@ -250,17 +250,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             });
                         }
                     }).show();
-
-                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, new DialogCallback<Void>() {
-                        @Override
-                        public void ok(Void editedObject) {
-                        }
-
-                        @Override
-                        public void cancel() {
-                        }
-                    }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());

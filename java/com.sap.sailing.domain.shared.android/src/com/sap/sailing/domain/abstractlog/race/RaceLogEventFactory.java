@@ -102,9 +102,11 @@ public interface RaceLogEventFactory {
     RaceLogWindFixEvent createWindFixEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable id, List<Competitor> competitors, int passId, Wind wind, boolean isMagnetic);
 
+    @Deprecated //bug2851
     RaceLogDeviceCompetitorMappingEvent createDeviceCompetitorMappingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             DeviceIdentifier device, Competitor mappedTo, int passId, TimePoint from, TimePoint to);
 
+    @Deprecated //bug2851
     RaceLogDeviceMarkMappingEvent createDeviceMarkMappingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             DeviceIdentifier device, Mark mappedTo, int passId, TimePoint from, TimePoint to);
 
@@ -117,8 +119,10 @@ public interface RaceLogEventFactory {
     
     RaceLogRegisterCompetitorEvent createRegisterCompetitorEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, Competitor competitor);
     
+    @Deprecated //bug2851
     RaceLogDefineMarkEvent createDefineMarkEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId, Mark mark);
     
+    @Deprecated //bug2851
     RaceLogCloseOpenEndedDeviceMappingEvent createCloseOpenEndedDeviceMappingEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId,
             Serializable deviceMappingEventId, TimePoint closingTimePoint);
     

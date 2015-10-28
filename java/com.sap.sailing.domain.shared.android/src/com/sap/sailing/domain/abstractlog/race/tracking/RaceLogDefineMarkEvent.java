@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Mark;
  * @author Fredrik Teschke
  *
  */
+@Deprecated //see bug 2851
 public interface RaceLogDefineMarkEvent extends RaceLogEvent, Revokable {
     Mark getMark();
 }
