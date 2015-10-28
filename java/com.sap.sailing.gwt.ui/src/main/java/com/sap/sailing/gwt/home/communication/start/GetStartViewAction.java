@@ -27,7 +27,6 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 
 public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClientCacheable {
-    public static final int MAX_STAGE_EVENTS = 5;
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
 
@@ -49,7 +48,7 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
             EventHolder holder = pair.getB();
 
             count++;
-            if(count > MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
+            if(count > EventStageCandidateCalculator.MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
                 break;
             }
             

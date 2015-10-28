@@ -8,7 +8,6 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.EventHolder;
 import com.sap.sailing.gwt.server.EventStageCandidateCalculator;
-import com.sap.sailing.gwt.server.HomeServiceImpl;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Util.Pair;
 
@@ -31,7 +30,7 @@ public class GetStagedEventsAction implements SailingAction<ListResult<EventStag
         int count = 0;
         for (Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
             count++;
-            if (count > HomeServiceImpl.MAX_STAGE_EVENTS) {
+            if (count > EventStageCandidateCalculator.MAX_STAGE_EVENTS) {
                 break;
             }
             StageEventType stageType = pair.getA();

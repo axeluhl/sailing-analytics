@@ -26,8 +26,6 @@ import com.sap.sse.util.ServiceTrackerFactory;
 public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements HomeService {
     private static final long serialVersionUID = 3947782997746039939L;
     
-    public static final int MAX_STAGE_EVENTS = 5;
-
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     public HomeServiceImpl() {
