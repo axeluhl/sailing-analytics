@@ -45,7 +45,7 @@ public class SeriesHeader extends Composite {
     boolean dropdownShown = false;
     
     public SeriesHeader(SeriesView.Presenter presenter) {
-        this.series = presenter.getCtx().getSeriesDTO();
+        this.series = presenter.getSeriesDTO();
         this.presenter = presenter;
         
         SeriesHeaderResources.INSTANCE.css().ensureInjected();

@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity implements SeriesMiniOverallLeaderboardView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final SeriesMiniOverallLeaderboardPlace place;
+    private EventSeriesViewDTO series;
 
     public SeriesMiniOverallLeaderboardActivity(SeriesMiniOverallLeaderboardPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
@@ -28,24 +29,20 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        if (ctx.getSeriesDTO() != null) {
-            initUi(panel, eventBus);
-        } else {
-            final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-                    new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
-                @Override
-                public void onSuccess(final EventSeriesViewDTO event) {
-                    ctx.updateContext(event);
-                    initUi(panel, eventBus);
-                }
-            });
-        }
+        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+                new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
+
+            @Override
+            public void onSuccess(final EventSeriesViewDTO series) {
+                SeriesMiniOverallLeaderboardActivity.this.series = series;
+                initUi(panel, eventBus, series);
+            }
+        });
     }
 
-    private void initUi(AcceptsOneWidget panel, EventBus eventBus) {
+    private void initUi(AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this);
-        EventSeriesViewDTO series = getCtx().getSeriesDTO();
         view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
     }
@@ -78,5 +75,10 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     @Override
     public PlaceNavigation<?> getSeriesNavigation() {
         return clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(getCtx()), null, false);
+    }
+    
+    @Override
+    public EventSeriesViewDTO getSeriesDTO() {
+        return series;
     }
 }

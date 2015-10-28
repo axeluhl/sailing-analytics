@@ -33,37 +33,32 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
 
     @Override
     protected void startAsync() {
-        if (ctx.getSeriesDTO() != null) {
-            afterLoad();
-        } else {
-            final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-                    new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
-                @Override
-                public void onSuccess(EventSeriesViewDTO series) {
-                    ctx.updateContext(series);
-                    afterLoad();
-                }
-            });
-        }
+        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+                new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
+            @Override
+            public void onSuccess(EventSeriesViewDTO series) {
+                afterLoad(series);
+            }
+        });
     }
 
-    private void afterLoad() {
+    private void afterLoad(final EventSeriesViewDTO series) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
                 if (place instanceof SeriesDefaultPlace) {
-                    place = getRealPlace();
+                    place = getRealPlace(series);
                 }
                 place = verifyAndAdjustPlace();
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, clientFactory,
+                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
                         homePlacesNavigator));
             }
         });
     }
 
-    private AbstractSeriesPlace getRealPlace() {
-        if (ctx.getSeriesDTO().isHasAnalytics()) {
+    private AbstractSeriesPlace getRealPlace(EventSeriesViewDTO series) {
+        if (series.isHasAnalytics()) {
             return new EventSeriesOverallLeaderboardPlace(ctx);
         } else {
             return new SeriesEventsPlace(ctx);

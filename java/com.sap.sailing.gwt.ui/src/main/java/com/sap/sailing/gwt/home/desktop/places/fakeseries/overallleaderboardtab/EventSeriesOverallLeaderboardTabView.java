@@ -49,13 +49,13 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(final EventSeriesOverallLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String leaderboardName = myPlace.getCtx().getSeriesDTO().getLeaderboardId();
+        String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
             LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.getLeaderboardPanel(); 

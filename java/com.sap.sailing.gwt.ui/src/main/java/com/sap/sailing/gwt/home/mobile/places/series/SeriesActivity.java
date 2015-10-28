@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
+    private EventSeriesViewDTO series;
     
     public SeriesActivity(AbstractSeriesPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
@@ -29,24 +30,19 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        if (ctx.getSeriesDTO() != null) {
-            initUi(panel, eventBus);
-        } else {
-            final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-                    new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
-                        @Override
-                        public void onSuccess(EventSeriesViewDTO series) {
-                            ctx.updateContext(series);
-                            initUi(panel, eventBus);
-                        }
-                    });
-        }
+        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+                new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
+                    @Override
+                    public void onSuccess(EventSeriesViewDTO series) {
+                        SeriesActivity.this.series = series;
+                        initUi(panel, eventBus, series);
+                    }
+                });
     }
     
-    private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
+    private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this);
-        EventSeriesViewDTO series = getCtx().getSeriesDTO();
         view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
     }
@@ -78,5 +74,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public PlaceNavigation<?> getEventNavigation(String eventId) {
         return clientFactory.getNavigator().getEventNavigation(eventId, null, false);
+    }
+    
+    @Override
+    public EventSeriesViewDTO getSeriesDTO() {
+        return series;
     }
 }

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
-import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import java.util.UUID;
+
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 
 /**
@@ -11,16 +11,13 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
 public class SeriesContext {
 
     private String seriesId;
-    private EventSeriesViewDTO seriesDTO;
-    private MediaDTO media;
     private EventSeriesAnalyticsDataManager analyticsManager;
 
     public SeriesContext() {
     }
 
     public SeriesContext(SeriesContext ctx) {
-        updateContext(ctx.getSeriesDTO());
-        withMedia(ctx.media);
+        withId(ctx.seriesId).
         withAnalyticsManager(ctx.analyticsManager);
     }
 
@@ -29,37 +26,16 @@ public class SeriesContext {
         return this;
     }
 
-    /**
-     * Used to update context with dto instance
-     * 
-     * @param dto
-     * @return
-     */
-    public SeriesContext updateContext(EventSeriesViewDTO dto) {
-        this.seriesDTO = dto;
-        if (seriesDTO == null) {
-            withId(null);
-        } else {
-            withId(dto.getId().toString());
-        }
-        return this;
-    }
-
-    public EventSeriesViewDTO getSeriesDTO() {
-        return seriesDTO;
-    }
-
     public String getSeriesId() {
         return seriesId;
     }
     
-    public MediaDTO getMedia() {
-        return media;
-    }
-
-    public SeriesContext withMedia(MediaDTO media) {
-        this.media = media;
-        return this;
+    public UUID getSeriesUUID() {
+        if(seriesId == null) {
+            // TODO assert because seriesId is required
+            return null;
+        }
+        return UUID.fromString(seriesId);
     }
     
     public EventSeriesAnalyticsDataManager getAnalyticsManager() {

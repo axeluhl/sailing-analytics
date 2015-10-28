@@ -42,7 +42,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
     public SeriesViewImpl(SeriesView.Presenter presenter) {
         this.currentPresenter = presenter;
         this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
-        EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
+        EventSeriesViewDTO series = currentPresenter.getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
         this.setupStatisticsBox(series);
         leaderboardUi = new MinileaderboardBox(true);

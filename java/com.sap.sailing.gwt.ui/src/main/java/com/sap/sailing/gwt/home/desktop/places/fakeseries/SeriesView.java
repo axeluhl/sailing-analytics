@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
@@ -37,6 +38,8 @@ public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends Seri
         boolean hasMedia();
         
         Timer getAutoRefreshTimer();
+
+        EventSeriesViewDTO getSeriesDTO();
     }
     
     /**

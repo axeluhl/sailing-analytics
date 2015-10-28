@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
@@ -44,9 +45,11 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+    private final EventSeriesViewDTO series;
 
-    public SeriesActivity(AbstractSeriesTabPlace place, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
+    public SeriesActivity(AbstractSeriesTabPlace place, EventSeriesViewDTO series, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
+        this.series = series;
         this.ctx = new SeriesContext(place.getCtx());
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
@@ -112,11 +115,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     @Override
     public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
-        if(ctx.getMedia() != null) {
-            callback.onSuccess(ctx.getMedia());
-            return;
-        }
-        clientFactory.getHomeService().getMediaForEventSeries(ctx.getSeriesDTO().getId(), new AsyncCallback<MediaDTO>() {
+        clientFactory.getHomeService().getMediaForEventSeries(ctx.getSeriesUUID(), new AsyncCallback<MediaDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
@@ -124,7 +123,6 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
             
             @Override
             public void onSuccess(MediaDTO result) {
-                ctx.withMedia(result);
                 callback.onSuccess(result);
             }
         });
@@ -132,11 +130,16 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     @Override
     public boolean hasMedia() {
-        return ctx.getSeriesDTO().isHasMedia();
+        return series.isHasMedia();
     }
 
     @Override
     public Timer getAutoRefreshTimer() {
         return ctx.getAnalyticsManager().getTimer();
+    }
+    
+    @Override
+    public EventSeriesViewDTO getSeriesDTO() {
+        return series;
     }
 }
