@@ -65,16 +65,4 @@ public class HomeServiceImpl extends ProxiedRemoteServiceServlet implements Home
         return media;
     }
 
-    @Override
-    public MediaDTO getMediaForEventSeries(UUID seriesId) {
-        // TODO implement correctly. We currently do not show media for series.
-        return getMediaForEvent(seriesId);
-    }
-    
-    // @Override
-    // public EventListViewDTO getEventListView() throws MalformedURLException {
-    // EventListDataCalculator eventListDataCalculator = new EventListDataCalculator(getService());
-    // HomeServiceUtil.forAllPublicEvents(getService(), getThreadLocalRequest(), eventListDataCalculator);
-    // return eventListDataCalculator.getResult();
-    // }
 }

@@ -7,6 +7,4 @@ import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 
 public interface HomeService extends RemoteService {
     MediaDTO getMediaForEvent(UUID eventId);
-    
-    MediaDTO getMediaForEventSeries(UUID seriesId);
 }

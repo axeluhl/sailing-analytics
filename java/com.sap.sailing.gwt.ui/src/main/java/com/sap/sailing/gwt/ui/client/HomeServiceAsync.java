@@ -11,6 +11,4 @@ import com.sap.sailing.gwt.home.communication.media.MediaDTO;
  */
 public interface HomeServiceAsync {
     void getMediaForEvent(UUID eventId, AsyncCallback<MediaDTO> callback); 
-
-    void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
 }
