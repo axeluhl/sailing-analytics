@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
@@ -36,7 +37,7 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
             afterLoad();
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, 
+            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
                     new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
                 @Override
                 public void onSuccess(EventSeriesViewDTO series) {

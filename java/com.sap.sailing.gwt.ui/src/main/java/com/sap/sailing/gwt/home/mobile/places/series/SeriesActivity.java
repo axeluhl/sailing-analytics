@@ -7,6 +7,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
@@ -32,7 +33,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
             initUi(panel, eventBus);
         } else {
             final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, 
+            clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
                     new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
                         @Override
                         public void onSuccess(EventSeriesViewDTO series) {

@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.dispatch.client.Result;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
-public class EventSeriesViewDTO implements IsSerializable, HasLogo {
+public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID id;
     private String displayName;
     private ArrayList<EventMetadataDTO> events = new ArrayList<>();
