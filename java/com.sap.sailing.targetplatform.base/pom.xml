@@ -13,7 +13,7 @@
 		pom. Therefore, the parent was not set here - which means we have to define 
 		$tycho-version again. -->
 	<groupId>com.sap.sailing</groupId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<properties>
 		<tycho-version>0.21.0</tycho-version>
