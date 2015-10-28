@@ -1,14 +1,18 @@
 package com.sap.sailing.gwt.home.desktop;
 
+import com.google.gwt.activity.shared.ActivityManager;
+import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.desktop.app.DesktopActivityMapper;
 import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.SailingActivityManager;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
@@ -51,5 +55,11 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
     @Override
     protected StringMessages createStringMessages() {
         return GWT.create(StringMessages.class);
+    }
+    
+    @Override
+    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, EventBus eventBus) {
+        SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, eventBus);
+        return sailingActivityManager;
     }
 }

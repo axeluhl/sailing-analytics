@@ -58,7 +58,7 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends Ab
         historyHandler.handleCurrentHistory();
     }
 
-    protected ActivityManager createActivityManager(ActivityMapperRegistry activityMapperRegistry, EventBus eventBus) {
+    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, EventBus eventBus) {
         return new CustomActivityManager(activityMapperRegistry, eventBus);
     }
 }
