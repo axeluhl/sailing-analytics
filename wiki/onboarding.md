@@ -37,11 +37,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
   * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/
-3. Race Analysis user
-  * Add yourself as an user to the Race Analysis suite by adding a Jetty user in the file java\target\configuration\jetty\etc\realm.properties
-4. Wiki
+3. Wiki
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: http://www.sha1-online.com/.
-5. Hudson
+4. Hudson
   * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
  
 #### Steps to build and run the Race Analysis Suite 
