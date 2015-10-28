@@ -4,11 +4,9 @@ import java.util.UUID;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
@@ -33,9 +31,6 @@ public interface SeriesView<PLACE extends AbstractSeriesPlace, PRES extends Seri
         PlaceNavigation<SeriesDefaultPlace> getCurrentEventSeriesNavigation();
 
         PlaceNavigation<EventDefaultPlace> getEventNavigation(UUID eventId);
-        
-        void ensureMedia(AsyncCallback<MediaDTO> asyncCallback);
-        boolean hasMedia();
         
         Timer getAutoRefreshTimer();
 

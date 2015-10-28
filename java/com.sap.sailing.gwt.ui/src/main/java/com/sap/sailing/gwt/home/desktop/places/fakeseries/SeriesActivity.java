@@ -9,12 +9,10 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -113,26 +111,6 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
         return homePlacesNavigator.getEventSeriesNavigation(ctx.getSeriesId(), null, false);
     }
     
-    @Override
-    public void ensureMedia(final AsyncCallback<MediaDTO> callback) {
-        clientFactory.getHomeService().getMediaForEventSeries(ctx.getSeriesUUID(), new AsyncCallback<MediaDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
-            }
-            
-            @Override
-            public void onSuccess(MediaDTO result) {
-                callback.onSuccess(result);
-            }
-        });
-    }
-    
-    @Override
-    public boolean hasMedia() {
-        return series.isHasMedia();
-    }
-
     @Override
     public Timer getAutoRefreshTimer() {
         return ctx.getAnalyticsManager().getTimer();
