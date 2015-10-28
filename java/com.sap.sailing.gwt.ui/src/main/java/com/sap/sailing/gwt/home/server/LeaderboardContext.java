@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.home.server;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,8 +27,8 @@ import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -44,6 +46,7 @@ public class LeaderboardContext {
     private final LeaderboardGroup leaderboardGroup;
     private final Leaderboard leaderboard;
     private final RacingEventService service;
+    private Boolean hasMultipleFleets = null;
 
     public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
         this.service = dispatchContext.getRacingEventService();
@@ -56,7 +59,7 @@ public class LeaderboardContext {
         for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if(!raceColumn.isCarryForward()) {
                 for(Fleet fleet : raceColumn.getFleets()) {
-                    callback.doForRace(new RaceContext(service, event, leaderboard, raceColumn, fleet, service));
+                    callback.doForRace(new RaceContext(service, event, this, raceColumn, fleet, service));
                 }
             }
         }
@@ -235,5 +238,23 @@ public class LeaderboardContext {
     
     public Leaderboard getLeaderboard() {
         return leaderboard;
+    }
+    
+    private boolean calculateHasMultipleFleets() {
+        Set<Fleet> fleets = new HashSet<Fleet>();
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            Util.addAll(raceColumn.getFleets(), fleets);
+            if (fleets.size() > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+        
+    public boolean hasMultipleFleets() {
+        if (hasMultipleFleets == null) {
+            hasMultipleFleets = calculateHasMultipleFleets();
+        }
+        return hasMultipleFleets;
     }
 }

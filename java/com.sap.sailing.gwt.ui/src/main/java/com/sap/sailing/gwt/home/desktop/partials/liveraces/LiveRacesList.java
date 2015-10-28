@@ -32,6 +32,10 @@ public class LiveRacesList extends Composite {
         return raceListContainer;
     }
     
+    public AbstractRaceList<LiveRaceDTO> getRaceList() {
+        return raceList;
+    }
+    
     private class RaceListLiveRaces extends AbstractRaceList<LiveRaceDTO> {
         private final SortableRaceListColumn<LiveRaceDTO, ?> regattaNameColumn = RaceListColumnFactory.getRegattaNameColumn();
         private final SortableRaceListColumn<LiveRaceDTO, ?> flagsColumn = RaceListColumnFactory.getFlagsColumn();

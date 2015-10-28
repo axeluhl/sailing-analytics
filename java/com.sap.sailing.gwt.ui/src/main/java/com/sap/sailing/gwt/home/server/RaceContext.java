@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTra
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
@@ -74,6 +75,7 @@ public class RaceContext {
     private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 60 * 60 * 1000; // 1 hour
     private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
     private final TimePoint now = MillisecondsTimePoint.now();
+    private final LeaderboardContext leaderboardContext;
     private final Leaderboard leaderboard;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
@@ -90,11 +92,12 @@ public class RaceContext {
     private RaceViewState raceViewState;
     private List<Competitor> competitors;
 
-    public RaceContext(RacingEventService service, Event event, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, RaceLogResolver raceLogResolver) {
+    public RaceContext(RacingEventService service, Event event, LeaderboardContext leaderboardContext, 
+            RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
         this.service = service;
         this.event = event;
-        this.leaderboard = leaderboard;
+        this.leaderboardContext = leaderboardContext;
+        this.leaderboard = leaderboardContext.getLeaderboard();
         this.raceColumn = raceColumn;
         this.raceDefinition = raceColumn.getRaceDefinition(fleet);
         this.fleet = fleet;
@@ -446,15 +449,8 @@ public class RaceContext {
             if (Util.size(raceColumn.getFleets()) == 1) {
                 return new SimpleCompetitorDTO(competitors.get(0));
             }
-            if (trackedRace == null) {
-                return null;
-            }
             for (Competitor competitor : competitors) {
-                Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                if (fleetOfCompetitor == null) {
-                    continue;
-                }
-                if (Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName())) {
+                if (isCompetitorInFleet(competitor)) {
                     return new SimpleCompetitorDTO(competitor);
                 }
             }
@@ -477,6 +473,9 @@ public class RaceContext {
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
+        if (ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER) {
+            dto.setCompetitors(getCompetitors());
+        }
     }
 
     private void fillRaceMetadata(RaceMetadataDTO<?> dto) {
@@ -637,11 +636,22 @@ public class RaceContext {
     
     public Collection<SimpleCompetitorDTO> getCompetitors() {
         Set<SimpleCompetitorDTO> compotitorDTOs = new HashSet<>();
-        if (raceDefinition != null) {
-            for (Competitor competitor : raceDefinition.getCompetitors()) {
-                compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
+        if (leaderboardContext.hasMultipleFleets()) {
+            boolean isFleetRacing = Util.size(raceColumn.getFleets()) > 1;
+            for (Competitor competitor : leaderboard.getCompetitors()) {
+                if (!isFleetRacing || isCompetitorInFleet(competitor)) {
+                    compotitorDTOs.add(new SimpleCompetitorDTO(competitor));
+                } 
             }
         }
         return compotitorDTOs;
+    }
+    
+    private boolean isCompetitorInFleet(Competitor competitor) {
+        if (trackedRace == null) {
+            return false;
+        }
+        Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
+        return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
     }
 }

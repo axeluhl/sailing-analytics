@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.partials.regattacompetition;
+package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

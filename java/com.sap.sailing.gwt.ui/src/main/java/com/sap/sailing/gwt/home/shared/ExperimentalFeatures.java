@@ -34,4 +34,8 @@ public class ExperimentalFeatures {
      * Provide button to show the competitor analytics in fullscreen view (work in progress)
      */
     public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
+    /**
+     * Provide textbox to filter races by competitor in desktop regatta races tab
+     */
+    public static final boolean SHOW_RACES_BY_COMPETITOR_FILTER = false;
 }

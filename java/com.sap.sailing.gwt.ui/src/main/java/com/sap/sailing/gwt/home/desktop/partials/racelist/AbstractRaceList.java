@@ -14,15 +14,19 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
-public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>> extends Composite {
+public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>>
+        extends Composite implements FilterValueChangeHandler<SimpleRaceMetadataDTO> {
 
     private static final LocalCss CSS = RaceListResources.INSTANCE.css();
 
@@ -105,6 +109,27 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
             comperator.setAscending(ascending);
         }
         this.cellTable.addColumn(column, header, comperator, ascending);
+    }
+    
+    @Override
+    public void onFilterValueChanged(final Filter<SimpleRaceMetadataDTO> filter) {
+        this.cellTable.setRowStyles(new RowStyles<T>() {
+            @Override
+            public String getStyleNames(T row, int rowIndex) {
+                return filter.matches(row) ? null : CSS.racesListHideColumn();
+            }
+        });
+        this.cellTable.redraw();
+    }
+    
+    @Override
+    public boolean hasFilterableValues() {
+        for (T entry : cellTable.getDataProvider().getList()) {
+            if (!entry.getCompetitors().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }
