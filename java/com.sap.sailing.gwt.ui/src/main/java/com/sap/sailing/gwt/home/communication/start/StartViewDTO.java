@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.dispatch.client.Result;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 
-public class StartViewDTO implements IsSerializable {
+public class StartViewDTO implements Result {
 
     private ArrayList<EventStageDTO> stageEvents = new ArrayList<EventStageDTO>();
 

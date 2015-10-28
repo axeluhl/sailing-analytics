@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
-import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
 
 
 /**
@@ -17,8 +16,4 @@ public interface HomeServiceAsync {
     void getMediaForEvent(UUID eventId, AsyncCallback<MediaDTO> callback); 
 
     void getMediaForEventSeries(UUID seriesId, AsyncCallback<MediaDTO> callback);
-
-    // void getEventListView(AsyncCallback<EventListViewDTO> callback);
-
-    void getStartView(AsyncCallback<StartViewDTO> callback);
 }
