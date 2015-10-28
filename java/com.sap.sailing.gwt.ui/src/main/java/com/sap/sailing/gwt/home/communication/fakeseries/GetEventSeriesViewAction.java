@@ -96,6 +96,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
 
     @Override
     public void cacheInstanceKey(StringBuilder key) {
+        key.append(String.valueOf(id));
     }
 
 }
