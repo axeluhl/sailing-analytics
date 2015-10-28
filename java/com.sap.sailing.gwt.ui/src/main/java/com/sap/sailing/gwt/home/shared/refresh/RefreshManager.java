@@ -146,7 +146,8 @@ public abstract class RefreshManager {
     }
     
     public void forceReschedule() {
-        cancel();
+        scheduled = false;
+        timer.cancel();
         reschedule();
     }
 
