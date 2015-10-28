@@ -11,12 +11,9 @@ import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.Multi
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.regattastab.MultiregattaRegattasPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
-import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
@@ -68,7 +65,7 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
      * 
      * @param event
      */
-    private AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
+    protected AbstractEventPlace verifyAndAdjustPlace(EventViewDTO event) {
         EventContext contextWithoutRegatta = new EventContext(place.getCtx()).withRegattaId(null);
         // TODO check if regatta ID is valid
         if(place instanceof AbstractMultiregattaEventPlace && event.getType() != EventType.MULTI_REGATTA) {
@@ -97,18 +94,6 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
             return new MultiregattaMediaPlace(contextWithoutRegatta);
         }
         
-        if(place instanceof LatestNewsPlace) {
-            if(event.getType() == EventType.MULTI_REGATTA) {
-                return new MultiregattaOverviewPlace(contextWithoutRegatta);
-            }
-            return new RegattaOverviewPlace(contextWithoutRegatta);
-        }
-        
-        if(place instanceof MiniLeaderboardPlace) {
-            return new RegattaLeaderboardPlace(place.getCtx());
-        }
-        
-        // no adjustment necessary
         return place;
     }
 
