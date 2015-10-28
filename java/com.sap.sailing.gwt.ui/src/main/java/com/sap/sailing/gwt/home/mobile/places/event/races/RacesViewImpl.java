@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
@@ -40,6 +41,9 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
         RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
         refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
+        if (!ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER) {
+            competitorFilterUi.removeFromParent();
+        }
     }
     
     @Override

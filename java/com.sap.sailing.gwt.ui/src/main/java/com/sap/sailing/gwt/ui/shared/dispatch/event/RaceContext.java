@@ -48,6 +48,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.race.FlagStateDTO;
 import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
@@ -469,7 +470,9 @@ public class RaceContext {
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
-        dto.setCompetitors(getCompetitors());
+        if (ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER) {
+            dto.setCompetitors(getCompetitors());
+        }
     }
 
     private void fillRaceMetadata(RaceMetadataDTO<?> dto) {
