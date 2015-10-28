@@ -600,9 +600,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
 
-    void revokeMarkDefinitionEventInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            MarkDTO markDTO);
-
     Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName);
 
     /**
@@ -627,4 +624,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String fleetName);
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark) throws DoesNotHaveRegattaLogException;
+
+    void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException;
 }

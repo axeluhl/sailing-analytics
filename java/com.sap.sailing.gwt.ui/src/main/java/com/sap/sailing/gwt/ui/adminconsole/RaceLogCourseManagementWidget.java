@@ -59,6 +59,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         });
         marksBtnsPanel.add(addMark);
 
+        /* TODO: implement the functionality as described in bug2851
         Button removeMark = new Button(stringMessages.remove(stringMessages.mark()));
         removeMark.addClickHandler(new ClickHandler() {
             @Override
@@ -66,7 +67,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
 
                 for (MarkDTO markToRemove : marksToRemove) {
-                    sailingService.revokeMarkDefinitionEventInRaceLog(leaderboardName, raceColumnName, fleetName,
+                    sailingService.revokeMarkDefinitionEventInRegattaLog(leaderboardName,
                             markToRemove, new AsyncCallback<Void>() {
 
                                 @Override
@@ -81,8 +82,12 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                 }
             }
         });
+        
+        removeMark.setEnabled(false);
+        removeMark.setTitle("Is used in x races");
         marksBtnsPanel.add(removeMark);
-
+        */
+        
         ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn = new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
                 new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
         actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
