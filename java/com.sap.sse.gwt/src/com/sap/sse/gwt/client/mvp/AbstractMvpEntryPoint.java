@@ -46,7 +46,7 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages, CF extends
             activityMapperRegistry.addActivityMapper(activityMapper);
         }
         EventBus eventBus = clientFactory.getEventBus();
-        ActivityManager activityManager = createActivityManager(activityMapperRegistry, eventBus);
+        ActivityManager activityManager = createActivityManager(activityMapperRegistry, clientFactory);
         activityManager.setDisplay(clientFactory.getContent());
 
         // Start PlaceHistoryHandler with our PlaceHistoryMapper
@@ -58,7 +58,7 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages, CF extends
         historyHandler.handleCurrentHistory();
     }
 
-    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, EventBus eventBus) {
-        return new CustomActivityManager(activityMapperRegistry, eventBus);
+    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, CF clientFactory) {
+        return new CustomActivityManager(activityMapperRegistry, clientFactory.getEventBus());
     }
 }

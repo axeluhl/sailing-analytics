@@ -6,7 +6,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.app.MobileActivityMapper;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
@@ -56,8 +55,8 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
     }
     
     @Override
-    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, EventBus eventBus) {
-        SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, eventBus);
+    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, MobileApplicationClientFactory clientFactory) {
+        SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, clientFactory.getEventBus());
         return sailingActivityManager;
     }
 
