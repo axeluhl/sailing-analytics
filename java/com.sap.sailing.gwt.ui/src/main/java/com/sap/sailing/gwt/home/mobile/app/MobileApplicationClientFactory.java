@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
@@ -76,4 +77,7 @@ public class MobileApplicationClientFactory extends SecureClientFactoryImpl<Mobi
         return new SearchResultViewImpl(navigator);
     }
 
+    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+        return getTopLevelView().getNavigationPathDisplay();
+    }
 }

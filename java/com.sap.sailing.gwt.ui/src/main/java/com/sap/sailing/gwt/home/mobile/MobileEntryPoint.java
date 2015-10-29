@@ -57,6 +57,7 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
     @Override
     protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, MobileApplicationClientFactory clientFactory) {
         SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, clientFactory.getEventBus());
+        sailingActivityManager.setNavigationPathDisplay(clientFactory.getNavigationPathDisplay());
         return sailingActivityManager;
     }
 
