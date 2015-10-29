@@ -23,7 +23,7 @@ public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMul
         initNavigationPath(navigationPathDisplay);
     }
     
-    protected void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
+    private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         StringMessages i18n = StringMessages.INSTANCE;
         navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
                 new NavigationItem(i18n.events(), getEventsNavigation()),

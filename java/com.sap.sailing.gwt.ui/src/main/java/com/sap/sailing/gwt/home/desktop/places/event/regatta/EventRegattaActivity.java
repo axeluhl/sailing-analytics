@@ -51,7 +51,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
         initNavigationPath(navigationPathDisplay);
     }
     
-    protected void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
+    private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         StringMessages i18n = StringMessages.INSTANCE;
         List<NavigationItem> navigationItems = new ArrayList<>();
         navigationItems.add(new NavigationItem(i18n.home(), getHomeNavigation()));
