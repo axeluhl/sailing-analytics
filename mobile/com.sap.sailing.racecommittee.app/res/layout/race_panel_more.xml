@@ -38,18 +38,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/start_mode"
                     android:textAppearance="?textPanelHeader"/>
-
-                <ImageView
-                    android:id="@+id/start_mode_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -64,13 +52,22 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerInParent="true"
                     tools:src="@drawable/flag_papa_64dp"/>
+
+                <ImageView
+                    android:id="@+id/start_mode_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_black"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
 
             <ImageView
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:src="?white"/>
+                android:src="?black"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -101,18 +98,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/gate_start_pathfinder"
                     android:textAppearance="?textPanelHeader"/>
-
-                <ImageView
-                    android:id="@+id/gate_pathfinder_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -127,13 +112,22 @@
                     android:layout_centerInParent="true"
                     android:textAppearance="?textPanelCaption"
                     tools:text="SAD123"/>
+
+                <ImageView
+                    android:id="@+id/gate_pathfinder_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_alpha"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
 
             <ImageView
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:src="?white"/>
+                android:src="?black"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -164,18 +158,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/gate_start_timing"
                     android:textAppearance="?textPanelHeader"/>
-
-                <ImageView
-                    android:id="@+id/gate_timing_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -190,7 +172,22 @@
                     android:layout_centerInParent="true"
                     android:textAppearance="?textPanelCaption"
                     tools:text="4 + 3 = 7 Minuten"/>
+
+                <ImageView
+                    android:id="@+id/gate_timing_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_alpha"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
+
+            <ImageView
+                android:layout_width="@dimen/thin_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:src="?black"/>
         </RelativeLayout>
     </LinearLayout>
 

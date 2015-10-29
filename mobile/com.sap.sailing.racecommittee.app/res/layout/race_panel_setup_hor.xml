@@ -36,21 +36,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/start_procedure"
-                    android:textAppearance="?textPanelHeader"
-                    android:layout_gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/start_procedure_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
+                    android:text="@string/start_procedure"
+                    android:textAppearance="?textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -68,6 +56,15 @@
                     android:paddingRight="@dimen/default_padding_half"
                     android:textAppearance="?textPanelCaption"
                     tools:text="@string/start_procedure_line_start"/>
+
+                <ImageView
+                    android:id="@+id/start_procedure_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_alpha"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
 
             <ImageView
@@ -102,21 +99,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/course"
-                    android:textAppearance="?textPanelHeader"
-                    android:layout_gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/course_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
+                    android:text="@string/course"
+                    android:textAppearance="?textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -132,7 +117,15 @@
                     android:gravity="center_horizontal"
                     android:textAppearance="?textPanelCaption"
                     tools:text="012"/>
-                <!--tools:drawableTop="@drawable/course_updown_64dp_dark" -->
+
+                <ImageView
+                    android:id="@+id/course_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_alpha"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
 
             <ImageView
@@ -166,21 +159,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/wind"
-                    android:textAppearance="?textPanelHeader"
-                    android:layout_gravity="center"/>
-
-                <ImageView
-                    android:id="@+id/wind_lock"
-                    android:layout_width="@dimen/side_button_lockSize"
-                    android:layout_height="@dimen/side_button_lockSize"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/lock_margin"
-                    android:layout_marginRight="@dimen/lock_margin"
-                    android:src="?lock_outline"
-                    android:tint="?sap_light_gray"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
+                    android:text="@string/wind"
+                    android:textAppearance="?textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -196,6 +177,15 @@
                     android:gravity="center"
                     android:text="@string/wind_no_data"
                     android:textAppearance="?textPanelCaption"/>
+
+                <ImageView
+                    android:id="@+id/wind_lock"
+                    android:layout_width="@dimen/side_button_imageSize"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_centerInParent="true"
+                    android:src="?lock_outline_alpha"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
