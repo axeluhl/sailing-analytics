@@ -10,7 +10,7 @@
         android:layout_centerInParent="true"
         android:orientation="vertical">
 
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="@dimen/side_button_imageSize"
             android:layout_height="@dimen/side_button_imageSize"
             android:layout_gravity="center_horizontal">
@@ -22,12 +22,13 @@
 
             <ImageView
                 android:id="@+id/more_flags_lock"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:src="?lock_outline_black"
                 android:visibility="gone"
                 tools:visibility="visible"/>
-        </FrameLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"

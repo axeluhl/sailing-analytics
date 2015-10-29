@@ -59,8 +59,8 @@
 
                 <ImageView
                     android:id="@+id/start_procedure_lock"
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:src="?lock_outline_alpha"
                     android:visibility="gone"
@@ -120,8 +120,8 @@
 
                 <ImageView
                     android:id="@+id/course_lock"
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:src="?lock_outline_alpha"
                     android:visibility="gone"
@@ -180,8 +180,8 @@
 
                 <ImageView
                     android:id="@+id/wind_lock"
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:src="?lock_outline_alpha"
                     android:visibility="gone"
