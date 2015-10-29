@@ -98,11 +98,11 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.nav_prev:
-                viewPanel(-1);
+                viewPanel(MOVE_DOWN);
                 break;
 
             case R.id.nav_next:
-                viewPanel(1);
+                viewPanel(MOVE_UP);
                 break;
         }
     }
@@ -123,7 +123,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
                     }
                 }
                 transaction.commit();
-                viewPanel(0);
+                viewPanel(MOVE_NONE);
             }
         }
     }

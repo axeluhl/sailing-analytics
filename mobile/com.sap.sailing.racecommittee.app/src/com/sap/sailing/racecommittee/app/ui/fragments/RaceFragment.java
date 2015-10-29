@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -7,6 +9,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -29,13 +32,22 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
+    @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
+    @Retention(RetentionPolicy.SOURCE)
+    protected @interface MOVE_VALUES {}
+
     private static final String TAG = RaceFragment.class.getName();
+
     protected ManagedRace managedRace;
     protected AppPreferences preferences;
 
     protected ArrayList<ImageView> mDots;
     protected ArrayList<View> mPanels;
     protected int mActivePage = 0;
+
+    protected final static int MOVE_DOWN = -1;
+    protected final static int MOVE_NONE = 0;
+    protected final static int MOVE_UP = 1;
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -149,7 +161,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
 
-    protected void viewPanel(int direction) {
+    protected void viewPanel(@MOVE_VALUES int direction) {
         if (mDots.size() == 0) {
             return;
         }

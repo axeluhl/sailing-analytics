@@ -188,7 +188,7 @@ public class TrackingListFragment extends BaseFragment
         Util.addAll(getRace().getCompetitors(), mCompetitorData);
         Collections.sort(mCompetitorData, new NaturalNamedComparator());
         mCompetitorAdapter.notifyDataSetChanged();
-        viewPanel(0);
+        viewPanel(MOVE_NONE);
     }
 
     @Override
@@ -403,11 +403,11 @@ public class TrackingListFragment extends BaseFragment
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.nav_prev:
-                viewPanel(-1);
+                viewPanel(MOVE_DOWN);
                 break;
 
             case R.id.nav_next:
-                viewPanel(1);
+                viewPanel(MOVE_UP);
                 break;
         }
         mConfirm.setEnabled(mActivePage != 0);
