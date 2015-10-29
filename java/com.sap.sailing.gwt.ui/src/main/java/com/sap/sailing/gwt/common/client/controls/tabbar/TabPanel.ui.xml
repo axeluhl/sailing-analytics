@@ -38,7 +38,7 @@
 	</ui:style>
 	<g:FlowPanel>
 		<g:HTMLPanel addStyleNames="{style.header}">
-			<div class="{res.mediaCss.grid}">
+			<div ui:field="breadcrumbsContainer" class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<c:BreadcrumbPane ui:field="breadcrumbs"
 						addStyleNames="{style.breadcrumb}" />
