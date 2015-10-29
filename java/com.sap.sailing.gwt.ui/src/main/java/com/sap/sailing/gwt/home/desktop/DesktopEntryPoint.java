@@ -22,7 +22,7 @@ import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.gwt.resources.Highcharts;
 
-public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
+public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, DesktopClientFactory> {
     @Override
     public void doOnModuleLoad() {
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());

@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 
-public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages> {
+public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, MobileApplicationClientFactory> {
 
     @Override
     public void doOnModuleLoad() {
