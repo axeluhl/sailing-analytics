@@ -78,5 +78,4 @@ public abstract class SessionActivity extends BaseActivity {
         ExLog.i(this, TAG, "Do logout now!");
         super.onReset(); // resets the data manager and fades the activity
     }
-
 }
