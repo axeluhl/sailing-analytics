@@ -97,9 +97,9 @@
     <string name="retry">Wiederholen</string>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-    <string name="positionings">Ergebnisliste</string>
-    <string name="set_positionings">Ergebnisliste füllen</string>
-    <string name="confirm_positionings">Ergebnisliste bestätigen</string>
+    <string name="tracking_list">Ergebnisliste</string>
+    <string name="set_tracking_list">Ergebnisliste füllen</string>
+    <string name="confirm_tracking_list">Ergebnisliste bestätigen</string>
     <string name="availableFinishingCompetitors">Segler</string>
     <string name="choose_blue_flag_finishing">Rennen beenden</string>
     <string name="drag_handle_description">Cursor</string>

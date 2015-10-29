@@ -9,6 +9,7 @@
     <item name="race_main" type="layout">@layout/race_main_small</item>
     <item name="race_panel_flags" type="layout">@layout/race_panel_flags_hor</item>
     <item name="race_panel_setup" type="layout">@layout/race_panel_setup_hor</item>
+    <item name="race_tracking_list" type="layout">@layout/race_tracking_list_small</item>
     <item name="race_schedule_course_marks" type="layout">@layout/race_schedule_course_marks_small</item>
     <item name="race_time_picker" type="layout">@layout/race_time_picker_small</item>
     <item name="toolbar_racing_activity" type="layout">@layout/toolbar</item>

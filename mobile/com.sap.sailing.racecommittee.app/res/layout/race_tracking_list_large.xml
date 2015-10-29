@@ -18,19 +18,19 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/default_margin_half"
+            android:layout_marginLeft="@dimen/default_margin_half"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/positionings"
+            android:text="@string/availableFinishingCompetitors"
             android:textAppearance="?textNormal"/>
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/default_margin_half"
+            android:layout_marginRight="@dimen/default_margin_half"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/availableFinishingCompetitors"
+            android:text="@string/tracking_list"
             android:textAppearance="?textNormal"/>
     </LinearLayout>
 
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/confirm_positionings"/>
+            android:text="@string/confirm_tracking_list"/>
     </LinearLayout>
 
     <LinearLayout
@@ -66,17 +66,17 @@
         android:orientation="horizontal">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/list_positioning_chosen"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/default_margin_half"
-            android:layout_weight="1"/>
-
-        <android.support.v7.widget.RecyclerView
             android:id="@+id/list_positioning_all"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/default_margin_half"
+            android:layout_weight="1"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list_positioning_chosen"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/default_margin_half"
             android:layout_weight="1"/>
     </LinearLayout>
 </RelativeLayout>

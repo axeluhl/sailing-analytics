@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <item name="race_positioning" type="layout">@layout/race_tracking_list_small</item>
 
 </resources>

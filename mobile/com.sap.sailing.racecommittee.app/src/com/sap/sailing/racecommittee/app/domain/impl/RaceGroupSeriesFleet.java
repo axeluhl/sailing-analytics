@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import android.text.TextUtils;
+
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;

@@ -19,10 +19,10 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PositioningFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
 
@@ -180,7 +180,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(PositioningFragment.newInstance(getRecentArguments()), R.id.finished_content);
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
                         break;
 
                     default:

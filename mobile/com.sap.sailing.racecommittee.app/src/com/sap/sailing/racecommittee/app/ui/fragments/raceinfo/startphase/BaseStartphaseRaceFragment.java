@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,17 +19,11 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.MorePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType>
     implements View.OnClickListener {
 
-    private ArrayList<ImageView> mDots;
-    private ArrayList<View> mPanels;
     private RaceStateListener mStateListener;
-
-    private int mActivePage = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -133,42 +126,6 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
                 viewPanel(0);
             }
         }
-    }
-
-    private void viewPanel(int direction) {
-        // find next active page (with overflow)
-        mActivePage += direction;
-        if (mActivePage < 0) {
-            mActivePage = mDots.size() - 1;
-        }
-        if (mActivePage == mDots.size()) {
-            mActivePage = 0;
-        }
-
-        // ignore invisible dots
-        if (mDots.get(mActivePage).getVisibility() == View.GONE) {
-            viewPanel(direction);
-        }
-
-        // tint all dots gray
-        for (ImageView mDot : mDots) {
-            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
-            Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
-            mDot.setImageDrawable(drawable);
-        }
-
-        // tint current dot black
-        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
-        Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
-        mDots.get(mActivePage).setImageDrawable(drawable);
-
-        // hide all panels
-        for (View view : mPanels) {
-            view.setVisibility(View.GONE);
-        }
-
-        // show current panel
-        mPanels.get(mActivePage).setVisibility(View.VISIBLE);
     }
 
     private class RaceStateListener extends BaseRaceStateChangedListener {

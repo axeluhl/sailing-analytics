@@ -1,9 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
@@ -14,6 +19,8 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
@@ -25,6 +32,10 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     private static final String TAG = RaceFragment.class.getName();
     protected ManagedRace managedRace;
     protected AppPreferences preferences;
+
+    protected ArrayList<ImageView> mDots;
+    protected ArrayList<View> mPanels;
+    protected int mActivePage = 0;
 
     public static Bundle createArguments(ManagedRace race) {
         Bundle arguments = new Bundle();
@@ -135,5 +146,46 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             frame = fallbackFrame;
         }
         return frame;
+    }
+
+
+    protected void viewPanel(int direction) {
+        if (mDots.size() == 0) {
+            return;
+        }
+
+        // find next active page (with overflow)
+        mActivePage += direction;
+        if (mActivePage < 0) {
+            mActivePage = mDots.size() - 1;
+        }
+        if (mActivePage == mDots.size()) {
+            mActivePage = 0;
+        }
+
+        // ignore invisible dots
+        if (mDots.get(mActivePage).getVisibility() == View.GONE) {
+            viewPanel(direction);
+        }
+
+        // tint all dots gray
+        for (ImageView mDot : mDots) {
+            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+            mDot.setImageDrawable(drawable);
+        }
+
+        // tint current dot black
+        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+        mDots.get(mActivePage).setImageDrawable(drawable);
+
+        // hide all panels
+        for (View view : mPanels) {
+            view.setVisibility(View.GONE);
+        }
+
+        // show current panel
+        mPanels.get(mActivePage).setVisibility(View.VISIBLE);
     }
 }

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -25,6 +26,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropM
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
@@ -44,14 +46,13 @@ import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class PositioningFragment extends BaseFragment
-    implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents {
+public class TrackingListFragment extends BaseFragment
+    implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener {
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
     private RecyclerView mFinishView;
-    private RecyclerView mCompetitorView;
     private Button mConfirm;
 
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
@@ -61,19 +62,58 @@ public class PositioningFragment extends BaseFragment
     private ArrayList<Competitor> mCompetitorData;
     private long mId = 0;
 
-    public PositioningFragment() {
+    public TrackingListFragment() {
         mCompetitorData = new ArrayList<>();
     }
 
-    public static PositioningFragment newInstance(Bundle args) {
-        PositioningFragment fragment = new PositioningFragment();
+    public static TrackingListFragment newInstance(Bundle args) {
+        TrackingListFragment fragment = new TrackingListFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_positioning, container, false);
+        View layout = inflater.inflate(R.layout.race_tracking_list, container, false);
+
+        mDots = new ArrayList<>();
+        mPanels = new ArrayList<>();
+
+        ImageView dot;
+        dot = ViewHelper.get(layout, R.id.panel_1);
+        if (dot != null) {
+            mDots.add(dot);
+        }
+        dot = ViewHelper.get(layout, R.id.panel_2);
+        if (dot != null) {
+            mDots.add(dot);
+        }
+        dot = ViewHelper.get(layout, R.id.panel_3);
+        if (dot != null) {
+            mDots.add(dot);
+        }
+
+        ImageView btnPrev = ViewHelper.get(layout, R.id.nav_prev);
+        if (btnPrev != null) {
+            btnPrev.setOnClickListener(this);
+        }
+
+        ImageView btnNext = ViewHelper.get(layout, R.id.nav_next);
+        if (btnNext != null) {
+            btnNext.setOnClickListener(this);
+        }
+
+        View home = ViewHelper.get(layout, R.id.header_text);
+        if (home != null) {
+            home.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                }
+            });
+        }
+
         return layout;
     }
 
@@ -85,6 +125,18 @@ public class PositioningFragment extends BaseFragment
         loadCompetitors();
 
         if (getView() != null) {
+            RecyclerView competitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
+            if (competitorView != null) {
+                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+                mCompetitorAdapter = new CompetitorAdapter(getActivity(), mCompetitorData);
+                mCompetitorAdapter.setListener(this);
+
+                competitorView.setLayoutManager(layoutManager);
+                competitorView.setAdapter(mCompetitorAdapter);
+
+                mPanels.add(competitorView);
+            }
+
             mFinishView = (RecyclerView) getView().findViewById(R.id.list_positioning_chosen);
             if (mFinishView != null) {
                 mGuardManager = new RecyclerViewTouchActionGuardManager();
@@ -116,20 +168,12 @@ public class PositioningFragment extends BaseFragment
                 mGuardManager.attachRecyclerView(mFinishView);
                 mDragDropManager.attachRecyclerView(mFinishView);
                 mSwipeManager.attachRecyclerView(mFinishView);
-            }
-
-            mCompetitorView = (RecyclerView) getView().findViewById(R.id.list_positioning_all);
-            if (mCompetitorView != null) {
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                mCompetitorAdapter = new CompetitorAdapter(getActivity(), mCompetitorData);
-                mCompetitorAdapter.setListener(this);
-
-                mCompetitorView.setLayoutManager(layoutManager);
-                mCompetitorView.setAdapter(mCompetitorAdapter);
+                mPanels.add(mFinishView);
             }
 
             mConfirm = (Button) getView().findViewById(R.id.confirm);
             if (mConfirm != null) {
+                mConfirm.setEnabled(mDots.size() == 0);
                 mConfirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -144,6 +188,7 @@ public class PositioningFragment extends BaseFragment
         Util.addAll(getRace().getCompetitors(), mCompetitorData);
         Collections.sort(mCompetitorData, new NaturalNamedComparator());
         mCompetitorAdapter.notifyDataSetChanged();
+        viewPanel(0);
     }
 
     @Override
@@ -183,6 +228,7 @@ public class PositioningFragment extends BaseFragment
         super.onDestroy();
     }
 
+
     private void loadCompetitors() {
         // invalidate all competitors of this race
         ReadonlyDataManager dataManager = OnlineDataManager.create(getActivity());
@@ -203,7 +249,9 @@ public class PositioningFragment extends BaseFragment
 
                 @Override
                 public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
-                    onLoadCompetitorsSucceeded(data);
+                    if (isAdded()) {
+                        onLoadCompetitorsSucceeded(data);
+                    }
                 }
 
             }));
@@ -346,8 +394,22 @@ public class PositioningFragment extends BaseFragment
     private CompetitorResults getCompetitorResults() {
         CompetitorResults result = new CompetitorResultsImpl();
         for (CompetitorsWithIdImpl item : mFinishedData) {
-            result.add(new Util.Triple<Serializable, String, MaxPointsReason>(item.getKey(), item.getText(), item.getReason()));
+            result.add(new Util.Triple<>(item.getKey(), item.getText(), item.getReason()));
         }
         return result;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.nav_prev:
+                viewPanel(-1);
+                break;
+
+            case R.id.nav_next:
+                viewPanel(1);
+                break;
+        }
+        mConfirm.setEnabled(mActivePage != 0);
     }
 }

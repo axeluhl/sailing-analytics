@@ -50,7 +50,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_positioning_draggable_item, parent, false);
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_tracking_list_draggable_item, parent, false);
         return new ViewHolder(layout);
     }
 
@@ -217,13 +217,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         public ViewHolder(View itemView) {
             super(itemView);
 
-            itemView.setOnLongClickListener(this);
-
             container = ViewHelper.get(itemView, R.id.container);
             dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
-            position = ViewHelper.get(itemView, R.id.position);
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
+            position = ViewHelper.get(itemView, R.id.position);
+            if (position != null) {
+                position.setOnLongClickListener(this);
+            }
         }
 
         @Override
