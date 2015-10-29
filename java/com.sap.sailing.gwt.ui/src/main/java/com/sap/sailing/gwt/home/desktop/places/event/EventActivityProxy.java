@@ -35,11 +35,11 @@ public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFa
             public void onSuccess() {
                 if (place instanceof AbstractEventRegattaPlace) {
                     super.onSuccess(new EventRegattaActivity((AbstractEventRegattaPlace) place, event, clientFactory,
-                            homePlacesNavigator));
+                            homePlacesNavigator, getNavigationPathDisplay()));
                 }
                 if (place instanceof AbstractMultiregattaEventPlace) {
                     super.onSuccess(new EventMultiregattaActivity((AbstractMultiregattaEventPlace) place, event,
-                            clientFactory, homePlacesNavigator));
+                            clientFactory, homePlacesNavigator, getNavigationPathDisplay()));
                 }
             }
         });

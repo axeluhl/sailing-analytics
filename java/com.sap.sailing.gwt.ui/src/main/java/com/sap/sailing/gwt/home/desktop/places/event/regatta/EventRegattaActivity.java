@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -16,8 +19,11 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.PlaceCallback;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -31,7 +37,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
         super(place, eventDTO, clientFactory, homePlacesNavigator);
         if (this.ctx.getRegattaAnalyticsManager() == null) {
             ctx.withRegattaAnalyticsManager(new RegattaAnalyticsDataManager(
@@ -41,6 +47,24 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
                     clientFactory.getErrorReporter(),
                     userAgent));
         }
+        
+        initNavigationPath(navigationPathDisplay);
+    }
+    
+    protected void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
+        StringMessages i18n = StringMessages.INSTANCE;
+        List<NavigationItem> navigationItems = new ArrayList<>();
+        navigationItems.add(new NavigationItem(i18n.home(), getHomeNavigation()));
+        navigationItems.add(new NavigationItem(i18n.events(), getEventsNavigation()));
+        if(getEventDTO().getType() == EventType.SERIES_EVENT) {
+            navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getCurrentEventSeriesNavigation()));
+        }
+        navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getCurrentEventNavigation()));
+        
+        if(showRegattaMetadata()) {
+            navigationItems.add(new NavigationItem(getRegattaMetadata().getDisplayName(), getCurrentRegattaOverviewNavigation()));
+        }
+        navigationPathDisplay.showNavigationPath(navigationItems.toArray(new NavigationItem[navigationItems.size()]));
     }
 
     @Override

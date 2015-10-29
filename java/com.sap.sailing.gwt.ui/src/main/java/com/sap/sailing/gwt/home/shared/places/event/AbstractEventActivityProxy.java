@@ -16,13 +16,16 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
-public abstract class AbstractEventActivityProxy<C extends ClientFactory & ClientFactoryWithDispatch> extends AbstractActivityProxy {
+public abstract class AbstractEventActivityProxy<C extends ClientFactory & ClientFactoryWithDispatch> extends AbstractActivityProxy implements ProvidesNavigationPath {
     
     private final C clientFactory;
     private AbstractEventPlace place;
+    private NavigationPathDisplay navigationPathDisplay;
     
     public AbstractEventActivityProxy(C clientFactory, AbstractEventPlace place) {
         this.clientFactory = clientFactory;
@@ -41,6 +44,15 @@ public abstract class AbstractEventActivityProxy<C extends ClientFactory & Clien
                 afterEventLoad(clientFactory, event, verifyAndAdjustPlace(event));
             }
         });
+    }
+    
+    @Override
+    public void setNavigationPathDisplay(NavigationPathDisplay navigationPathDisplay) {
+        this.navigationPathDisplay = navigationPathDisplay;
+    }
+    
+    protected NavigationPathDisplay getNavigationPathDisplay() {
+        return navigationPathDisplay;
     }
     
     /**
