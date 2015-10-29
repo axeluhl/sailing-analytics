@@ -20,6 +20,12 @@
 				<div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
 				<img src="images/mobile/arrow-grey-right.png" alt="" class="{local_res.css.sectionheader_item_arrow}"
 					style="display:none;" ui:field="actionArrowUi"></img>
+				<select dir="rtl" class="{local_res.css.sectionheader_item_select}" style="display:none;" ui:field="filterSelectUi">
+					<option selected="selected">All Classes</option>
+					<option>Championship Classes</option>
+					<option>International Classes</option>
+					<option>Olympic Classes</option>
+				</select>
 			</div>
 		</a>
 	</div>

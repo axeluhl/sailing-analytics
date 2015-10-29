@@ -8,7 +8,7 @@
 	<g:FlowPanel>
 		<mp:section.MobileSection ui:field="itemContainerUi">
 			<mp:header>
-				<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.regattas}" />
+				<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.regattas}" ui:field="sectionHeaderUi"/>
 			</mp:header>
 			<mp:content>
 				<mp:section.MobileSection addStyleNames="{local_res.css.regattastatus_content}" ui:field="regattaContainerUi"/>

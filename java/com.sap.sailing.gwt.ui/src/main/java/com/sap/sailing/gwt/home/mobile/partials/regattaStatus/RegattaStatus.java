@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RegattasAndLiveRacesDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
@@ -27,6 +28,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     interface RegattaStatusUiBinder extends UiBinder<Widget, RegattaStatus> {
     }
 
+    @UiField SectionHeaderContent sectionHeaderUi;
     @UiField MobileSection regattaContainerUi;
     @UiField MobileSection collapsableContainerUi;
     @UiField(provided = true) ToggleButton toggleButtonUi;
@@ -50,6 +52,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     
     @Override
     public void setData(RegattasAndLiveRacesDTO data) {
+//        sectionHeaderUi.initFilterSelectUi();
         regattaContainerUi.clearContent();
         collapsableContainerUi.clearContent();
         if (data.hasRegattasWithRaces()) {

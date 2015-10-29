@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -38,6 +39,7 @@ public class SectionHeaderContent extends Widget {
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
     @UiField ImageElement actionArrowUi;
+    @UiField SelectElement filterSelectUi;
 
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
@@ -119,6 +121,11 @@ public class SectionHeaderContent extends Widget {
     private void setClassName(Element element, String className, boolean set) {
         if (set) element.addClassName(className);
         else element.removeClassName(className);
+    }
+    
+    public void initFilterSelectUi() {
+        headerRightUi.getStyle().clearDisplay();
+        filterSelectUi.getStyle().clearDisplay();
     }
     
 }
