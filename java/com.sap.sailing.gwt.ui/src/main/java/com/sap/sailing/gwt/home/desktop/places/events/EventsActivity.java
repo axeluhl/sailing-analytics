@@ -6,18 +6,32 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.communication.event.GetEventListViewAction;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EventsActivity extends AbstractActivity {
 
     private final EventsClientFactory clientFactory;
     private final EventsPlace place;
+    private final DesktopPlacesNavigator homePlacesNavigator;
 
-    public EventsActivity(EventsPlace place, EventsClientFactory clientFactory) {
+    public EventsActivity(EventsPlace place, EventsClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
         this.clientFactory = clientFactory;
         this.place = place;
+        this.homePlacesNavigator = homePlacesNavigator;
+        
+        initNavigationPath(navigationPathDisplay);
+    }
+    
+    private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
+        StringMessages i18n = StringMessages.INSTANCE;
+        navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), homePlacesNavigator.getHomeNavigation()),
+                new NavigationItem(i18n.events(), homePlacesNavigator.getEventsNavigation()));
     }
 
     @Override

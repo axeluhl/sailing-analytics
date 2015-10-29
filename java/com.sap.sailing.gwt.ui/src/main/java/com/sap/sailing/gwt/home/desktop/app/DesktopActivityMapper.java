@@ -58,7 +58,7 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof AbstractSeriesPlace) {
             return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
-            return new EventsActivityProxy((EventsPlace) place, clientFactory);
+            return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof SponsoringPlace) {
