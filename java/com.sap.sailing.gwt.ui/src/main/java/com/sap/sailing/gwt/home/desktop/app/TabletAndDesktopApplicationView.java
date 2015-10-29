@@ -80,7 +80,8 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
             for (NavigationItem navigationPathDisplay : navigationPath) {
                 breadcrumbsUi.addBreadcrumbItem(navigationPathDisplay.getDisplayName(), navigationPathDisplay.getTargetUrl(), navigationPathDisplay);
             }
-            breadcrumbWrapperUi.getStyle().clearDisplay();
+            // TODO breadcrumbs are currently deactivated due to styling problems
+//            breadcrumbWrapperUi.getStyle().clearDisplay();
         }
 
         @Override
