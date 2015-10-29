@@ -15,13 +15,16 @@ import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -45,7 +48,8 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
     private final EventSeriesViewDTO series;
 
-    public SeriesActivity(AbstractSeriesTabPlace place, EventSeriesViewDTO series, SeriesClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
+    public SeriesActivity(AbstractSeriesTabPlace place, EventSeriesViewDTO series, SeriesClientFactory clientFactory,
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
         this.currentPlace = place;
         this.series = series;
         this.ctx = new SeriesContext(place.getCtx());
@@ -61,6 +65,15 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
                     userAgent));
 
         }
+        
+        initNavigationPath(navigationPathDisplay);
+    }
+    
+    private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
+        StringMessages i18n = StringMessages.INSTANCE;
+        navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
+                new NavigationItem(i18n.events(), getEventsNavigation()),
+                new NavigationItem(getSeriesDTO().getDisplayName(),  getCurrentEventSeriesNavigation()));
     }
     
     @Override

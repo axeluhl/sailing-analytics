@@ -11,17 +11,20 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEvents
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityProxyCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
-public class SeriesActivityProxy extends AbstractActivityProxy {
+public class SeriesActivityProxy extends AbstractActivityProxy implements ProvidesNavigationPath {
 
     private AbstractSeriesPlace place;
     private SeriesContext ctx;
     private SeriesClientFactory clientFactory;
     private final DesktopPlacesNavigator homePlacesNavigator;
+    private NavigationPathDisplay navigationPathDisplay;
 
     public SeriesActivityProxy(AbstractSeriesPlace place, SeriesClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator) {
@@ -29,6 +32,11 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
         this.ctx = place.getCtx();
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
+    }
+    
+    @Override
+    public void setNavigationPathDisplay(NavigationPathDisplay navigationPathDisplay) {
+        this.navigationPathDisplay = navigationPathDisplay;
     }
 
     @Override
@@ -52,7 +60,7 @@ public class SeriesActivityProxy extends AbstractActivityProxy {
                 }
                 place = verifyAndAdjustPlace();
                 super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
-                        homePlacesNavigator));
+                        homePlacesNavigator, navigationPathDisplay));
             }
         });
     }
