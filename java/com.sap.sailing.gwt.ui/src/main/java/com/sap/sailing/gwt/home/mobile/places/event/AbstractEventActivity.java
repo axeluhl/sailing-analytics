@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
@@ -34,8 +37,10 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
@@ -208,10 +213,25 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<?> getSeriesEventRacesNavigation(UUID eventId) {
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(eventId.toString(), null), null, false);
     }
-
-    public String getRaceViewerURL(String regattaName, String trackedRaceName) {
-        return null; // TODO No mobile "RaceViewer implemented yet
+    
+    @Override
+    public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
+        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName,
+                raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
     }
+    
+    private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, String regattaName, String trackedRaceName) {
+        Map<String, String> linkParams = new HashMap<String, String>();
+        linkParams.put("eventId", getCtx().getEventId());
+        linkParams.put("leaderboardName", leaderboardName);
+        linkParams.put("raceName", trackedRaceName);
+        linkParams.put("regattaName", regattaName);
+        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_MODE, "simple");
+        // TODO this must only be forwarded if there is a logged-on user
+        // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
+        return linkParams;
+    }
+
     
     public String getRegattaId() {
         String regattaId = place.getRegattaId();
