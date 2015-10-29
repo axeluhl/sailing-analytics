@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionFleetRace;
 
 public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleetRace {
@@ -69,7 +70,7 @@ public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleet
     
     @Override
     protected boolean isUntrackedRace(RaceTrackingState trackingState) {
-        return true;
+        return super.isUntrackedRace(trackingState) || !ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE;
     }
     
 }

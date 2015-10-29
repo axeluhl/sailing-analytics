@@ -62,7 +62,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
 
         @Override
         protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-            return null; // TODO No mobile "RaceViewer implemented yet;
+            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE ? currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier) : null;
         }
     }
     
