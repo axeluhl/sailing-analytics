@@ -15,7 +15,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
 public abstract class AbstractApplicationClientFactory extends
-        SecureClientFactoryImpl implements DesktopClientFactory {
+        SecureClientFactoryImpl<ApplicationTopLevelView> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final DesktopPlacesNavigator navigator;
