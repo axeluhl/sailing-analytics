@@ -68,6 +68,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
         return errorReporter;
     }
     
+    @Override
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return navigationPathDisplay;
     }

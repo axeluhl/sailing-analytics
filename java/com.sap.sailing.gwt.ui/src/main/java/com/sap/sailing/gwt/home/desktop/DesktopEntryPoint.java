@@ -59,6 +59,7 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
     @Override
     protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, DesktopClientFactory clientFactory) {
         SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, clientFactory.getEventBus());
+        sailingActivityManager.setNavigationPathDisplay(clientFactory.getNavigationPathDisplay());
         return sailingActivityManager;
     }
 }

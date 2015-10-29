@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.start.StartClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 
@@ -16,4 +17,5 @@ public interface DesktopClientFactory extends AboutUsClientFactory, ContactClien
     EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory, SearchResultClientFactory,
  WhatsNewClientFactory, SeriesClientFactory, ErrorClientFactory {
     DesktopPlacesNavigator getHomePlacesNavigator();
+    ResettableNavigationPathDisplay getNavigationPathDisplay();
 }

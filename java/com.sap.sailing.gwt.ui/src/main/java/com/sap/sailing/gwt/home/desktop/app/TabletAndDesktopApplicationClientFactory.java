@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
@@ -41,6 +42,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
+    }
+    
+    @Override
+    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+        return getTopLevelView().getNavigationPathDisplay();
     }
 
     @Override

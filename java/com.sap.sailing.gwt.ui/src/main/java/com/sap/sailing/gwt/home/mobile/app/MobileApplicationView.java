@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -67,5 +68,11 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
     @Override
     public ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+
+    @Override
+    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
