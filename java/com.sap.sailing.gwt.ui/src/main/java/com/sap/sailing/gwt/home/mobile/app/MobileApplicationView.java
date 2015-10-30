@@ -72,7 +72,6 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
 
     @Override
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
-        // TODO Auto-generated method stub
-        return null;
+        return headerPanel.getNavigationPathDisplay();
     }
 }

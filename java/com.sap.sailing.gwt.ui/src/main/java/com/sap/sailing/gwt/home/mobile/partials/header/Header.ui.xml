@@ -9,6 +9,11 @@
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" 
 		type="com.sap.sailing.gwt.home.mobile.partials.header.HeaderResources" />
+  <ui:style>
+    .dropdownListExt {
+      border-top: 1px solid gray;
+    }
+  </ui:style>
   <g:HTMLPanel>
     <div class="{res.mediaCss.grid}">
       <header class="{local_res.css.header} {res.mediaCss.small12} {res.mediaCss.columns}">
@@ -21,6 +26,7 @@
           <img ui:field="dropdownTriggerUi" src="images/mobile/navigation-icon.svg" class="{local_res.css.header_navigation_icon}"></img>
           <nav ui:field="dropdownContainerUi" class="{local_res.css.header_navigation_nav}" style="display: none;">
             <g:FlowPanel tag="ul" ui:field="dropdownListUi" addStyleNames="{local_res.css.header_navigation_nav_list}" />
+            <g:FlowPanel tag="ul" ui:field="dropdownListExtUi" addStyleNames="{local_res.css.header_navigation_nav_list} {style.dropdownListExt}" />
           </nav>
         </div>
         <div ui:field="searchUi" class="{local_res.css.header_search}">
