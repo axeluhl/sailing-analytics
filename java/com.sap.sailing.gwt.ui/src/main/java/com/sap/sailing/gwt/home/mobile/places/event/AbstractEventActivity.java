@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
+import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
@@ -213,6 +214,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId) {
         EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
+    }
+    
+    public PlaceNavigation<?> getLatesNewsNavigation() {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(null).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new LatestNewsPlace(ctx), null, false);
     }
     
     @Override

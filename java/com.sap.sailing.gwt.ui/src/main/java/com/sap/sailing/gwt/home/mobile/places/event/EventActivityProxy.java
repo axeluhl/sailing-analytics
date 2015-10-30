@@ -41,7 +41,7 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
                 } else if (place instanceof MiniLeaderboardPlace) {
                     super.onSuccess(new MiniLeaderboardActivity((MiniLeaderboardPlace) place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof LatestNewsPlace) {
-                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) place, event, clientFactory));
+                    super.onSuccess(new LatestNewsActivity((LatestNewsPlace) place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof RegattaMediaPlace || place instanceof MultiregattaMediaPlace) {
                     super.onSuccess(new MediaActivity(place, event, clientFactory));
                 }
