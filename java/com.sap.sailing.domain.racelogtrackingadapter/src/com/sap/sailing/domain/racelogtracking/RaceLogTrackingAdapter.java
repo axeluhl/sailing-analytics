@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -114,9 +113,8 @@ public interface RaceLogTrackingAdapter {
             String emails, Locale locale) throws MailException;
 
     /**
-     * Duplicate the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
-     * {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also
-     * inserts the necessary {@link RaceLogDefineMarkEvent}s into the {@code to} race logs.
+     * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
+     * {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated. 
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service);

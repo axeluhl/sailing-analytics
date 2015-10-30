@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
+@Deprecated //see bug2851
 public class RaceLogDeviceMarkMappingEventImpl extends AbstractRaceLogDeviceMappingEventImpl<Mark>
 implements RaceLogDeviceMarkMappingEvent {
     private static final long serialVersionUID = -7223543830755457196L;

@@ -209,11 +209,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
         }
 
-        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /*
-                                                                                                            * only
-                                                                                                            * unrevoked
-                                                                                                            */true,
-                RaceLogDeviceMarkMappingEvent.class).analyze();
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
@@ -223,14 +218,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
                         newCourse.addWaypoint(i++, oldWaypoint);
-                    }
-                    for (Mark mark : marks) {
-                        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(now,
-                                service.getServerAuthor(), toRaceLog.getCurrentPassId(), mark);
-                        toRaceLog.add(event);
-                    }
-                    for (RaceLogEvent raceLogDeviceMarkMappingEvent : raceLogDeviceMarkMappingEvents) {
-                        toRaceLog.add(raceLogDeviceMarkMappingEvent);
                     }
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
