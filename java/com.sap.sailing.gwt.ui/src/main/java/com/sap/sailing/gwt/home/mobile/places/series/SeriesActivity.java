@@ -13,6 +13,8 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
@@ -21,8 +23,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
     private EventSeriesViewDTO series;
+    private NavigationPathDisplay navigationPathDisplay;
     
-    public SeriesActivity(AbstractSeriesPlace place, MobileApplicationClientFactory clientFactory) {
+    public SeriesActivity(AbstractSeriesPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+        this.navigationPathDisplay = navigationPathDisplay;
         this.clientFactory = clientFactory;
         this.place = place;
     }
@@ -45,6 +49,12 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
         final SeriesView view = new SeriesViewImpl(this);
         view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
+        
+        initNavigationPath();
+    }
+    
+    private void initNavigationPath() {
+        navigationPathDisplay.showNavigationPath(new NavigationItem(series.getDisplayName(), clientFactory.getNavigator().getSeriesNavigation(place, null, false)));
     }
     
     @Override
