@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
@@ -99,22 +100,24 @@ public class Header extends Composite {
         @Override
         public void showNavigationPath(NavigationItem... navigationPath) {
             dropdownListExtUi.clear();
-            for (final NavigationItem navigationItem : navigationPath) {
-                HeaderNavigationItem headerNavItem = new HeaderNavigationItem(navigationItem.getDisplayName(), navigationItem.getTargetUrl());
-                headerNavItem.addClickHandler(new ClickHandler() {
-                    
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
-                            event.preventDefault();
-                            navigationItem.run();
-                            dropdownHandler.setVisible(false);
+            if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_MOBILE) {
+                for (final NavigationItem navigationItem : navigationPath) {
+                    HeaderNavigationItem headerNavItem = new HeaderNavigationItem(navigationItem.getDisplayName(), navigationItem.getTargetUrl());
+                    headerNavItem.addClickHandler(new ClickHandler() {
+                        
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
+                                event.preventDefault();
+                                navigationItem.run();
+                                dropdownHandler.setVisible(false);
+                            }
                         }
-                    }
-                });
-                dropdownListExtUi.add(headerNavItem);
+                    });
+                    dropdownListExtUi.add(headerNavItem);
+                }
+                dropdownListExtUi.getElement().getStyle().clearDisplay();
             }
-            dropdownListExtUi.getElement().getStyle().clearDisplay();
         }
 
         @Override
