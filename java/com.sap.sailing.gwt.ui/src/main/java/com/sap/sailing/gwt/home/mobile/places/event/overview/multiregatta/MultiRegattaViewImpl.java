@@ -23,7 +23,7 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
     private RegattaStatus regattaStatusUi;
     
     public MultiRegattaViewImpl(EventViewBase.Presenter presenter) {
-        super(presenter, false);
+        super(presenter, false, false);
         FlowPanel container = new FlowPanel();
         this.setupOverviewStage(container);
         this.setupRegattaStatusList(container);

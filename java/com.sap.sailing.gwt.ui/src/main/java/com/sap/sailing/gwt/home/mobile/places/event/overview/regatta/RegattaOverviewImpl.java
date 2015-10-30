@@ -27,7 +27,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private RegattaLiveRaces liveRacesUi;
 
     public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
-        super(presenter, presenter.isMultiRegattaEvent());
+        super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
         this.setupProgress(container);
         this.setupLiveRaces(container);

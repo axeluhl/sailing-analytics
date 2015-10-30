@@ -22,8 +22,8 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
     private Impressions impressionsUi;
     private StatisticsBox statisticsBoxUi;
 
-    public AbstractEventOverview(EventViewBase.Presenter presenter, boolean showRegattaName) {
-        super(presenter, showRegattaName, false);
+    public AbstractEventOverview(EventViewBase.Presenter presenter, boolean showRegattaName, boolean enableLogoNavigation) {
+        super(presenter, showRegattaName, enableLogoNavigation);
     }
 
     protected void setupOverviewStage(Panel container) {
