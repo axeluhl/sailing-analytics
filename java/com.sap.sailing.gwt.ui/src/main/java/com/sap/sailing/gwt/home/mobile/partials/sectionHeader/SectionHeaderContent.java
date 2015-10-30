@@ -132,6 +132,7 @@ public class SectionHeaderContent extends Composite {
         filterSelectContainerUi.setVisible(true);
         filterSelectContainerUi.setWidget(selectionFilter);
         selectionFilter.addStyleName(local_res.css().sectionheader_item_select());
+        selectionFilter.getElement().setAttribute("dir", "rtl");
     }
     
 }

@@ -1,35 +1,61 @@
 package com.sap.sailing.gwt.home.shared.partials.filter;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.sap.sse.common.filter.Filter;
 
 public abstract class AbstractSelectionFilter<T, C> extends AbstractFilterWidget<T, C> {
     
+    private final ValueListBox<C> valueListBox = new ValueListBox<>(new AbstractRenderer<C>() {
+        @Override
+        public String render(C object) {
+            return getFilterItemLabel(object);
+        }
+    });
+    
+    protected AbstractSelectionFilter() {
+        valueListBox.addValueChangeHandler(new ValueChangeHandler<C>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<C> event) {
+                valueListBox.getElement().blur();
+                notifyValueChangeHandlers();
+            }
+        });
+        initWidget(valueListBox);
+    }
+    
     @Override
     public void setSelectableValues(Collection<C> selectableValues) {
-        addFilterItem(null);
-        for (C value : selectableValues) {
-            addFilterItem(value);
+        List<C> acceptableValues = new ArrayList<>(selectableValues);
+        acceptableValues.add(0, null);
+        C previouslySelectedValue = valueListBox.getValue();
+        valueListBox.setValue(null);
+        valueListBox.setAcceptableValues(acceptableValues);
+        if (selectableValues.contains(previouslySelectedValue)) {
+            valueListBox.setValue(previouslySelectedValue);
         }
     }
     
     @Override
     public Filter<T> getFilter() {
-        return new SelectionFilter() ;
+        return new SelectionFilter();
     }
-    
-    protected abstract void addFilterItem(C value);
     
     protected abstract C getFilterCriteria(T object);
     
-    protected abstract C getSelectedValue();
+    protected abstract String getFilterItemLabel(C item);
     
     private class SelectionFilter implements Filter<T> {
         @Override
         public boolean matches(T object) {
-            C selectedValue = getSelectedValue();
-            return selectedValue == null || selectedValue.equals(getFilterCriteria(object));
+            C selectedFilterItem = valueListBox.getValue();
+            return selectedFilterItem == null || selectedFilterItem.equals(getFilterCriteria(object));
         }
 
         @Override
