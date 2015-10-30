@@ -23,7 +23,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
     private EventSeriesViewDTO series;
-    private NavigationPathDisplay navigationPathDisplay;
+    private final NavigationPathDisplay navigationPathDisplay;
     
     public SeriesActivity(AbstractSeriesPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
         this.navigationPathDisplay = navigationPathDisplay;
