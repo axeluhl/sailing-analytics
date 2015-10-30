@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderbo
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
@@ -270,5 +271,18 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public boolean isMultiRegattaEvent() {
         return getEventDTO().getType() == EventType.MULTI_REGATTA;
+    }
+    
+    protected List<NavigationItem> getNavigationPathToRegattaLevel() {
+        List<NavigationItem> navigationItems = new ArrayList<>();
+        if(getEventDTO().getType() == EventType.SERIES_EVENT) {
+            navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getSeriesNavigationForCurrentEvent()));
+        }
+        navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getEventNavigation()));
+        
+        if(getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            navigationItems.add(new NavigationItem(getRegatta().getDisplayName(), getRegattaOverviewNavigation(getRegattaId())));
+        }
+        return navigationItems;
     }
 }
