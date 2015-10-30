@@ -486,9 +486,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     List<String> getDeserializableDeviceIdentifierTypes();
     
-    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName, DeviceMappingDTO mapping,
-            Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException;
-    
     /**
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
@@ -588,7 +585,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
 
-    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint) throws TransformationException;
+    void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException;
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;

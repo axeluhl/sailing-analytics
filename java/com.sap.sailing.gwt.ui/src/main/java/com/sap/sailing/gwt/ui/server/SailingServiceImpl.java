@@ -52,6 +52,7 @@ import java.util.zip.GZIPInputStream;
 import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
+import org.eclipse.jetty.util.log.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -161,6 +162,7 @@ import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RaceLogEventNotFoundException;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -5270,15 +5272,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
     }
-    
-    @Override
-    public void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
-            DeviceMappingDTO mappingDTO, Date closingTimePoint) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        List<AbstractLog<?, ?>> logHierarchy = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
-        closeOpenEndedDeviceMapping(logHierarchy, mappingDTO, closingTimePoint);
-    }
 
-    private void closeOpenEndedDeviceMapping(List<AbstractLog<?, ?>> logHierarchy, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException {
+    private void closeOpenEndedDeviceMapping(List<AbstractLog<?, ?>> logHierarchy, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, RaceLogEventNotFoundException {
+        boolean successfullyClosed = false;
         for (AbstractLog<?, ?> abstractLog : logHierarchy) {
             //check if abstractLog is the correct log for the closingEvent
             final AbstractLogEvent<?> event;
@@ -5289,6 +5285,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 abstractLog.unlockAfterRead();
             }
             if (event != null) {
+                successfullyClosed = true;
                 DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
                 if (abstractLog instanceof RegattaLog) {
                     RegattaLog regattaLog = (RegattaLog) abstractLog;
@@ -5308,6 +5305,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }
             }
+        }
+        
+        if (!successfullyClosed){
+            throw new RaceLogEventNotFoundException();
         }
     }
     
@@ -5766,12 +5767,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException {
-        List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
-        closeOpenEndedDeviceMapping(logs, mappingDTO, closingTimePoint);
+    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        
+        List<AbstractLog<?, ?>> logList = new ArrayList<>();
+        logList.add(regattaLog);
+        try {
+            closeOpenEndedDeviceMapping(logList, mappingDTO, closingTimePoint);
+        } catch (RaceLogEventNotFoundException e) {
+            logger.warning("Device Mapping Event couldn't be found on RegattaLog, checking in RaceLog (deprecated)");
+            
+            List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
+            try {
+                closeOpenEndedDeviceMapping(logs, mappingDTO, closingTimePoint);
+            } catch (RaceLogEventNotFoundException e1) {
+                logger.warning("Device Mapping Event could also not be found in RaceLogs");
+            }
+        }
+        
     }
-    
-    
+
     /**
      * Gets all the logs corresponding to a leaderboard. This includes all the RaceLogs of the leaderBoard's raceColumns
      * @param leaderboardName

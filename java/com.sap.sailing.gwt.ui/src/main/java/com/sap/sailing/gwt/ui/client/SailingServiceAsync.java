@@ -646,9 +646,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<DeviceMappingDTO>> callback);
 
-    void closeOpenEndedDeviceMapping(String leaderboardName, String raceColumnName, String fleetName,
-            DeviceMappingDTO mapping, Date closingTimePoint, AsyncCallback<Void> callback);
-
     void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds, AsyncCallback<Void> callback);
 
