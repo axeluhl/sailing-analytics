@@ -45,7 +45,7 @@ public class ExperimentalFeatures {
     /**
      * Using {@link com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay} to generically render navigation menu extensions.
      */
-    public static final boolean USE_NAVIGATION_PATH_DISPLAY_ON_MOBILE = false;
+    public static final boolean USE_NAVIGATION_PATH_DISPLAY_ON_MOBILE = true;
     /**
      * Enables/disables the link to the race board on mobile races view (competition format), in case of a tracked race
      */
