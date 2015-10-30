@@ -273,13 +273,17 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return getEventDTO().getType() == EventType.MULTI_REGATTA;
     }
     
-    protected List<NavigationItem> getNavigationPathToRegattaLevel() {
+    protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
         if(getEventDTO().getType() == EventType.SERIES_EVENT) {
             navigationItems.add(new NavigationItem(getEventDTO().getSeriesName(), getSeriesNavigationForCurrentEvent()));
         }
         navigationItems.add(new NavigationItem(getEventDTO().getLocationOrDisplayName(), getEventNavigation()));
-        
+        return navigationItems;
+    }
+    
+    protected List<NavigationItem> getNavigationPathToRegattaLevel() {
+        List<NavigationItem> navigationItems = getNavigationPathToEventLevel();
         if(getEventDTO().getType() == EventType.MULTI_REGATTA) {
             navigationItems.add(new NavigationItem(getRegatta().getDisplayName(), getRegattaOverviewNavigation(getRegattaId())));
         }
