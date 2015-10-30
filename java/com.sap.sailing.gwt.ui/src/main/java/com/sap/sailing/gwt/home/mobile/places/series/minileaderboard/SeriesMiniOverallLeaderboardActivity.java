@@ -12,16 +12,21 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity implements SeriesMiniOverallLeaderboardView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final SeriesMiniOverallLeaderboardPlace place;
     private EventSeriesViewDTO series;
+    private final NavigationPathDisplay navigationPathDisplay;
 
-    public SeriesMiniOverallLeaderboardActivity(SeriesMiniOverallLeaderboardPlace place, MobileApplicationClientFactory clientFactory) {
+    public SeriesMiniOverallLeaderboardActivity(SeriesMiniOverallLeaderboardPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+        this.navigationPathDisplay = navigationPathDisplay;
         this.clientFactory = clientFactory;
         this.place = place;
     }
@@ -45,6 +50,13 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
         final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this);
         view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
+        
+        initNavigationPath();
+    }
+    
+    private void initNavigationPath() {
+        navigationPathDisplay.showNavigationPath(new NavigationItem(series.getDisplayName(), clientFactory.getNavigator().getSeriesNavigation(new SeriesDefaultPlace(getCtx()), null, false)),
+                new NavigationItem(StringMessages.INSTANCE.overallStandings(), clientFactory.getNavigator().getSeriesNavigation(place, null, false)));
     }
 
     @Override
