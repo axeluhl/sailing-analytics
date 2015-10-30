@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
     private final MobileApplicationClientFactory clientFactory;
-    private final PLACE place;
+    protected final PLACE place;
     protected final EventViewDTO eventDTO;
     private AcceptsOneWidget panel;
     
