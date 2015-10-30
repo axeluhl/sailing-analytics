@@ -25,9 +25,9 @@ public class SearchResultActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(searchResultPlace.getTitle());
         final SearchResultView view = clientFactory.createSearchResultView();
-        panel.setWidget(view);
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
+            view.setSearchText(searchText);
             GetSearchServerNamesAction action = new GetSearchServerNamesAction();
             searchOnServer(panel, view, new GetSearchResultsAction(searchText));
             clientFactory.getDispatch().execute(action, new ActivityCallback<StringsResult>(clientFactory, panel) {
@@ -39,6 +39,7 @@ public class SearchResultActivity extends AbstractActivity {
                 }
             });
         }
+        panel.setWidget(view);
     }
     
     private void searchOnServer(AcceptsOneWidget panel, final SearchResultView view, GetSearchResultsAction action) {

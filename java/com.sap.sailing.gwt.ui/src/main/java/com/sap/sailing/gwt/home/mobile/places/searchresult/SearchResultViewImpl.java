@@ -9,11 +9,16 @@ import com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResult;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 
 public class SearchResultViewImpl extends Composite implements SearchResultView {
-    
+
     private final SearchResult searchResultUi;
 
     public SearchResultViewImpl(MobilePlacesNavigator navigator) {
         initWidget(searchResultUi = new SearchResult(navigator));
+    }
+    
+    @Override
+    public void setSearchText(String searchText) {
+        searchResultUi.setSearchText(searchText);
     }
 
     @Override

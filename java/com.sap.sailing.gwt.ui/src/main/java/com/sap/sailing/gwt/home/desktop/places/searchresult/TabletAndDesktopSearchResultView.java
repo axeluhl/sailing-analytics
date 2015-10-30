@@ -24,6 +24,11 @@ public class TabletAndDesktopSearchResultView extends Composite implements Searc
         searchResult = new SearchResult(navigator);
         initWidget(uiBinder.createAndBindUi(this));
     }
+
+    @Override
+    public void setSearchText(String searchText) {
+        searchResult.setSearchText(searchText);
+    }
     
     @Override
     public void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems) {

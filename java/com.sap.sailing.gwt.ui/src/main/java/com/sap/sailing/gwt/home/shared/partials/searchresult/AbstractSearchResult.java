@@ -44,14 +44,25 @@ public abstract class AbstractSearchResult extends Composite {
     private void search(AbstractPlaceNavigator navigator) {
         navigator.getSearchResultNavigation(getSearchTextInputUi().getValue()).goToPlace();
     }
+    
+    public void setSearchText(String searchText) {
+        getSearchTextInputUi().setValue(searchText);
+    }
 
     public void updateSearchResult(String searchText, Collection<SearchResultDTO> searchResultItems) {
-        getSearchTextInputUi().setValue(searchText);
         for (SearchResultDTO searchResult : searchResultItems) {
             addSearchResultItem(searchResult);
             resultsCount++;
         }
         getSearchResultAmountUi().setInnerText(StringMessages.INSTANCE.resultsFoundForSearch(resultsCount, searchText));
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        if (getSearchTextInputUi().getValue().isEmpty()) {
+            getSearchTextInputUi().setFocus(true);
+        }
     }
     
     protected abstract TextBox getSearchTextInputUi();
