@@ -17,8 +17,9 @@ import com.sap.sailing.gwt.home.mobile.partials.section.IsMobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 
-public class RegattaStatusRegatta extends Composite implements IsMobileSection {
+public class RegattaStatusRegatta extends Composite implements IsMobileSection, RegattaListItem {
 
     private static RegattaStatusRegattaUiBinder uiBinder = GWT.create(RegattaStatusRegattaUiBinder.class);
 
@@ -59,6 +60,11 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection {
             }
         }
         return BoatClassImageResources.INSTANCE.genericBoatClass();
+    }
+
+    @Override
+    public void doFilter(boolean filter) {
+        setVisible(!filter);
     }
 
 }

@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.home.communication.event.GetFinishedRacesAction;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
@@ -269,20 +270,20 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
     }
 
-    private class RegattaRacesTabViewFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO> {
-        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO>>> handlersByTab = new HashMap<>();
+    private class RegattaRacesTabViewFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>>> handlersByTab = new HashMap<>();
         
-        private RegattaRacesTabViewFilterPresenter(FilterWidget<SimpleRaceMetadataDTO> filterWidget) {
+        private RegattaRacesTabViewFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget) {
             super(filterWidget);
         }
         
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
             return handlersByTab.get(currentlySelectedTab);
         }
         
-        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO> handler) {
-            List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> list = handlersByTab.get(assosiatedTab);
+        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> handler) {
+            List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> list = handlersByTab.get(assosiatedTab);
             if (list == null) this.handlersByTab.put(assosiatedTab, list = new ArrayList<>());
             list.add(handler);
             super.addHandler(handler);

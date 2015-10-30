@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
@@ -66,18 +67,18 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         }
     }
     
-    private class RacesViewImplFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO> {
-        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> valueChangeHandler;
+    private class RacesViewImplFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+        private final List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> valueChangeHandler;
 
-        public RacesViewImplFilterPresenter(FilterWidget<SimpleRaceMetadataDTO> filterWidget,
-                FilterValueChangeHandler<SimpleRaceMetadataDTO> valueChangeHandler) {
+        public RacesViewImplFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget,
+                FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> valueChangeHandler) {
             super(filterWidget);
             this.valueChangeHandler = Arrays.asList(valueChangeHandler);
             super.addHandler(valueChangeHandler);
         }
 
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
             return valueChangeHandler;
         }
     }

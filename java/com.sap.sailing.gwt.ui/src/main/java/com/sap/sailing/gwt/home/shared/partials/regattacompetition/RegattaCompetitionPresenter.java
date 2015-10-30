@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
@@ -18,7 +22,8 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 
 public abstract class RegattaCompetitionPresenter implements
-        RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>, FilterValueChangeHandler<SimpleRaceMetadataDTO> {
+        RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>, 
+        FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
 
     private final RegattaCompetitionView view;
     private Filter<SimpleRaceMetadataDTO> latestRacesByCompetitorFilter;
@@ -65,17 +70,16 @@ public abstract class RegattaCompetitionPresenter implements
     }
     
     @Override
-    public boolean hasFilterableValues() {
+    public Collection<SimpleCompetitorDTO> getFilterableValues() {
+        Set<SimpleCompetitorDTO> filterableValues = new HashSet<>();
         for (Map<RegattaCompetitionFleetView, Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO>> series : structure.values()) {
             for (Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO> fleet : series.values()) {
                 for (SimpleRaceMetadataDTO raceMetadata : fleet.values()) {
-                    if (!raceMetadata.getCompetitors().isEmpty()) {
-                        return true;
-                    }
+                    filterableValues.addAll(raceMetadata.getCompetitors());
                 }
             }
         }
-        return false;
+        return filterableValues;
     }
     
     private void applyFilter(RegattaCompetitionSeriesView seriesView, Filter<SimpleRaceMetadataDTO> filter) {

@@ -1,12 +1,14 @@
 package com.sap.sailing.gwt.home.shared.partials.filter;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 
-public abstract class FilterPresenter<T> {
+public abstract class FilterPresenter<T, C> {
     private final Filter<T> alwaysMatchingFilter = new Filter<T>() {
         @Override
         public boolean matches(T object) {
@@ -18,27 +20,28 @@ public abstract class FilterPresenter<T> {
             return "alwaysMatchingFilter";
         }
     };
-    private final FilterWidget<T> filterWidget;
+    private final FilterWidget<T, C> filterWidget;
 
-    public FilterPresenter(FilterWidget<T> filterWidget) {
+    public FilterPresenter(FilterWidget<T, C> filterWidget) {
         this.filterWidget = filterWidget;
         this.filterWidget.asWidget().setVisible(false);
     }
 
-    protected abstract List<FilterValueChangeHandler<T>> getCurrentValueChangeHandlers();
+    protected abstract List<FilterValueChangeHandler<T, C>> getCurrentValueChangeHandlers();
 
-    protected void addHandler(FilterValueChangeHandler<T> handler) {
+    protected void addHandler(FilterValueChangeHandler<T, C> handler) {
         this.filterWidget.addFilterValueChangeHandler(handler);
     }
 
     public void update() {
-        boolean haveFilterableValues = false;
-        for (FilterValueChangeHandler<T> valueChangeHandler : getCurrentValueChangeHandlers()) {
-            haveFilterableValues |= valueChangeHandler.hasFilterableValues();
+        Set<C> filterableValues = new TreeSet<>();
+        for (FilterValueChangeHandler<T, C> valueChangeHandler : getCurrentValueChangeHandlers()) {
+            filterableValues.addAll(valueChangeHandler.getFilterableValues());
         }
-        this.filterWidget.asWidget().setVisible(haveFilterableValues);
-        Filter<T> filter = haveFilterableValues ? this.filterWidget.getFilter() : alwaysMatchingFilter;
-        for (FilterValueChangeHandler<T> valueChangeHandler : getCurrentValueChangeHandlers()) {
+        this.filterWidget.asWidget().setVisible(!filterableValues.isEmpty());
+        this.filterWidget.setSelectableValues(filterableValues);
+        Filter<T> filter = filterableValues.isEmpty() ? alwaysMatchingFilter : this.filterWidget.getFilter();
+        for (FilterValueChangeHandler<T, C> valueChangeHandler : getCurrentValueChangeHandlers()) {
             valueChangeHandler.onFilterValueChanged(filter);
         }
     }

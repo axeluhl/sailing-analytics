@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.regattaStatus;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -18,9 +20,11 @@ import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.Toggle
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
+import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 
-public class RegattaStatus extends Composite implements RefreshableWidget<RegattasAndLiveRacesDTO> {
+public class RegattaStatus extends Composite implements RefreshableWidget<RegattasAndLiveRacesDTO>, RegattaListView {
 
     private static final String TOGGLEHIDDEN_STYLE = RegattaStatusResources.INSTANCE.css().togglecontainerhidden();
     private static RegattaStatusUiBinder uiBinder = GWT.create(RegattaStatusUiBinder.class);
@@ -34,6 +38,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     @UiField(provided = true) ToggleButton toggleButtonUi;
     private final Presenter presenter;
 //    private CollapseAnimation animation;
+    private final Map<RegattaListItem, RegattaMetadataDTO> stucture = new HashMap<>();
     
     public RegattaStatus(Presenter presenter) {
         this.presenter = presenter;
@@ -50,9 +55,13 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
 //        this.animation = new CollapseAnimation(collapsableContainerUi.getElement().getFirstChildElement(), false);
     }
     
+    public void setFilterSectionWidget(AbstractSelectionFilter<RegattaMetadataDTO, ?> filterWidget) {
+        sectionHeaderUi.initFilterSelectUi(filterWidget);
+    }
+    
     @Override
     public void setData(RegattasAndLiveRacesDTO data) {
-//        sectionHeaderUi.initFilterSelectUi();
+        stucture.clear();
         regattaContainerUi.clearContent();
         collapsableContainerUi.clearContent();
         if (data.hasRegattasWithRaces()) {
@@ -72,7 +81,13 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
                 presenter.getRegattaOverviewNavigation(regatta.getId()) : presenter.getRegattaMiniLeaderboardNavigation(regatta.getId());
         RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
         container.addContent(regattaWidget);
+        stucture.put(regattaWidget, regatta);
         return regattaWidget;
+    }
+
+    @Override
+    public Map<RegattaListItem, RegattaMetadataDTO> getItemMap() {
+        return stucture;
     }
     
 }

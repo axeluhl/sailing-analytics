@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.filter;
 
+import java.util.Collection;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -11,11 +13,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.filter.Filter;
 
-public abstract class AbstractTextBoxFilter<T> extends AbstractFilterWidget<T> {
+public abstract class AbstractTextBoxFilter<T, C> extends AbstractFilterWidget<T, C> {
 
     public final TextBoxFilterUiBinder uiBinder = GWT.create(TextBoxFilterUiBinder.class);
     
-    public interface TextBoxFilterUiBinder extends UiBinder<Widget, AbstractTextBoxFilter<?>>{
+    public interface TextBoxFilterUiBinder extends UiBinder<Widget, AbstractTextBoxFilter<?, ?>>{
     }
 
     @UiField TextBox textBoxUi;
@@ -46,6 +48,11 @@ public abstract class AbstractTextBoxFilter<T> extends AbstractFilterWidget<T> {
     @Override
     public final Filter<T> getFilter() {
         return getFilter(textBoxUi.getValue().trim());
+    }
+    
+    @Override
+    public void setSelectableValues(Collection<C> selectableValues) {
+        // Nothing to do in a free text filter
     }
 
     protected abstract Filter<T> getFilter(String searchString);

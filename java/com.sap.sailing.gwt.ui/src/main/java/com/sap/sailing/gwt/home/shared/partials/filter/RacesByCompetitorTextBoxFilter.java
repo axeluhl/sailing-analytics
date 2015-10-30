@@ -11,7 +11,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
 
-public class RacesByCompetitorTextBoxFilter extends AbstractTextBoxFilter<SimpleRaceMetadataDTO> {
+public class RacesByCompetitorTextBoxFilter extends AbstractTextBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
     
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
