@@ -14,8 +14,8 @@ import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
-import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -52,7 +52,7 @@ public class RegattaStatusRace extends Composite {
     
     private void initRaceFlagInfo(FlagStateDTO value) {
         if (value != null) {
-            raceFlagContainerUi.setInnerSafeHtml(SailingFlagsBuilder.render(value, 0.40, FlagsMeaningExplanator
+            raceFlagContainerUi.setInnerSafeHtml(HomeSailingFlagsBuilder.render(value, 0.40, FlagsMeaningExplanator
                     .getFlagsMeaning(I18N, value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
         }
     }

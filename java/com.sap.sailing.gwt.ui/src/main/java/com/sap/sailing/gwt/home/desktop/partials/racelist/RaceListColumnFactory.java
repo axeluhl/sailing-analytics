@@ -40,8 +40,8 @@ import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
-import com.sap.sailing.gwt.regattaoverview.client.SailingFlagsBuilder;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -226,7 +226,7 @@ public class RaceListColumnFactory {
             @Override
             public void render(Context context, FlagStateDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    sb.append(SailingFlagsBuilder.render(value, 0.55, FlagsMeaningExplanator.getFlagsMeaning(I18N,
+                    sb.append(HomeSailingFlagsBuilder.render(value, 0.55, FlagsMeaningExplanator.getFlagsMeaning(I18N,
                             value.getLastUpperFlag(), value.getLastLowerFlag(), value.isLastFlagsAreDisplayed())));
                 }
             }

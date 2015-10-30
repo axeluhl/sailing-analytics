@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 
 public class SailingFlagsBuilder {
     
@@ -47,12 +46,6 @@ public class SailingFlagsBuilder {
 
         contentBuilder.append(getArrowBackgroundImage(isDisplayed, isDisplayedChanged, scales));
         return imageTemplate.cell(tooltip, contentBuilder.toSafeHtml());
-    }
-
-    public static SafeHtml render(FlagStateDTO flagState, double scale, String tooltip) {
-        return render(flagState.getLastUpperFlag(), flagState.getLastLowerFlag(), flagState.isLastFlagsAreDisplayed(),
-                flagState.isLastFlagsDisplayedStateChanged(), scale, tooltip);
-        // return render(Flags.AP, Flags.ALPHA, true, true, scale, tooltip);
     }
 
     private static SafeHtml getFlagBackgroundImage(Flags flag, boolean displayed, boolean displayedChanged,
