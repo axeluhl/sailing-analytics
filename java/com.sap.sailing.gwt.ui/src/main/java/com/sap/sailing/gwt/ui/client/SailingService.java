@@ -478,8 +478,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     /**
      * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
+     * @throws DoesNotHaveRegattaLogException 
      */
-    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, Position position);
+    void pingMark(String leaderboardName, MarkDTO mark, Position position) throws DoesNotHaveRegattaLogException;
     
     List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName)
             throws TransformationException;

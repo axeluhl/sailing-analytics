@@ -15,13 +15,14 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.server.RacingEventService;
 
-public class PingMarkViaRaceLogTest {
+public class PingMarkViaRegattaLogTest {
     private SailingServiceImplMock sailingService;
     private RacingEventService service;
     private final String columnName = "column";
@@ -34,7 +35,7 @@ public class PingMarkViaRaceLogTest {
     }
     
     @Test
-    public void testPinging() {
+    public void testPinging() throws DoesNotHaveRegattaLogException {
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
@@ -47,6 +48,6 @@ public class PingMarkViaRaceLogTest {
         MarkDTO mark = new MarkDTO("mark", "mark");
         Position position = new DegreePosition(30, 40);
         
-        sailingService.pingMarkViaRaceLogTracking(leaderboard.getName(), columnName, fleet.getName(), mark, position);
+        sailingService.pingMark(leaderboard.getName(), mark, position);
     }
 }

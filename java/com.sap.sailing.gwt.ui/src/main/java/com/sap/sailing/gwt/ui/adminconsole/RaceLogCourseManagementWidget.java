@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Set;
-
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -98,8 +96,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                             new DataEntryDialog.DialogCallback<Position>() {
                                 @Override
                                 public void ok(Position position) {
-                                    sailingService.pingMarkViaRaceLogTracking(leaderboardName, raceColumnName,
-                                            fleetName, markDTO, position, new AsyncCallback<Void>() {
+                                    sailingService.pingMark(leaderboardName, markDTO, position, new AsyncCallback<Void>() {
 
                                                 @Override
                                                 public void onSuccess(Void result) {

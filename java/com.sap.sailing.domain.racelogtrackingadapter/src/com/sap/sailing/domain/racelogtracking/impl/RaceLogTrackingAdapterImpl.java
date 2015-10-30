@@ -255,15 +255,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             logger.log(Level.WARNING, "Could not ping mark " + mark);
         }
     }
-
-    @Override
-    public void pingMark(RaceLog raceLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
-        pingMark(raceLog, mark, gpsFix, service,
-                (DeviceIdentifier dev, TimePoint timePoint) -> RaceLogEventFactory.INSTANCE
-                        .createDeviceMarkMappingEvent(timePoint, service.getServerAuthor(), dev, mark,
-                                raceLog.getCurrentPassId(), timePoint, timePoint), new PingDeviceIdentifierImpl());
-    }
-
+    
     @Override
     public void pingMark(RegattaLog regattaLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
         pingMark(regattaLog, mark, gpsFix, service,

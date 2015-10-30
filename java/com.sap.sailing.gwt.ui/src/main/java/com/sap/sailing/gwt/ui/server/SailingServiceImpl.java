@@ -5081,15 +5081,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName,
-            MarkDTO markDTO, Position positionDTO) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+    public void pingMark(String leaderboardName,
+            MarkDTO markDTO, Position positionDTO) throws DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         Mark mark = convertToMark(markDTO, true);
         TimePoint time = MillisecondsTimePoint.now();
         Position position = positionDTO;
         GPSFix fix = new GPSFixImpl(position, time);
         
-        getRaceLogTrackingAdapter().pingMark(raceLog, mark, fix, getService());
+        getRaceLogTrackingAdapter().pingMark(regattaLog, mark, fix, getService());
     }
     
     @Override

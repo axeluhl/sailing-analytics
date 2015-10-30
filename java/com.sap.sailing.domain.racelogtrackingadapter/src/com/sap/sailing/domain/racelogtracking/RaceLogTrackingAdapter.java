@@ -75,11 +75,6 @@ public interface RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException;
 
     /**
-     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
-     */
-    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-
-    /**
      * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
      */
     void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);

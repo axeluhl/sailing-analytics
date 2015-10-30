@@ -632,7 +632,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
 
-    void pingMarkViaRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+    void pingMark(String leaderboardName, MarkDTO mark,
             Position position, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
