@@ -1,11 +1,9 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,12 +20,15 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
+import com.sap.sailing.server.gateway.serialization.NotJsonSerializableException;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -259,8 +260,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
                     jsonResult.put("resultType", result.getResultType().getSimpleName());
                     jsonResult.put("results", resultValuesToJSON(result.getResultType(), result.getResults()));
                     response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
-                } catch (NotSerializableException e) {
-                    response = getNotSerializableErrorResponse(result.getResultType());
+                } catch (NotJsonSerializableException e) {
+                    response = getNotSerializableErrorResponse(e.getNotSerializableClass());
                 }
             }
         }
@@ -268,7 +269,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONArray resultValuesToJSON(Class<?> resultType, Map<GroupKey, ?> resultValues) throws NotSerializableException {
+    private JSONArray resultValuesToJSON(Class<?> resultType, Map<GroupKey, ?> resultValues) throws NotJsonSerializableException {
         // TODO see Bug 3334
         if (Number.class.isAssignableFrom(resultType)) {
             return numericalResultValuesToJSON((Map<GroupKey, Number>) resultValues);
@@ -276,10 +277,10 @@ public class DataMiningResource extends AbstractSailingServerResource {
         if (Distance.class.isAssignableFrom(resultType)) {
             return distanceResultValuesToJSON((Map<GroupKey, Distance>) resultValues);
         }
-        throw new NotSerializableException(resultType.getName());
+        throw new NotJsonSerializableException(resultType);
     }
 
-    private JSONArray numericalResultValuesToJSON(Map<GroupKey, Number> resultValues) {
+    private JSONArray numericalResultValuesToJSON(Map<GroupKey, Number> resultValues) throws NotJsonSerializableException {
         JSONArray jsonResultValues = new JSONArray();
         for (GroupKey groupKey : resultValues.keySet()) {
             JSONObject jsonResultEntry = new JSONObject();
@@ -290,7 +291,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return jsonResultValues;
     }
     
-    private JSONArray distanceResultValuesToJSON(Map<GroupKey, Distance> resultValues) {
+    private JSONArray distanceResultValuesToJSON(Map<GroupKey, Distance> resultValues) throws NotJsonSerializableException {
         DistanceJsonSerializer distanceSerializer = new DistanceJsonSerializer();
         
         JSONArray jsonResultValues = new JSONArray();
@@ -303,18 +304,23 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return jsonResultValues;
     }
 
-    private JSONArray groupKeyToJSON(GroupKey groupKey) {
+    private JSONArray groupKeyToJSON(GroupKey groupKey) throws NotJsonSerializableException {
         // TODO Convert the concrete key values and not just the string represantation
         JSONArray jsonResultEntryGroupKeys = new JSONArray();
-        List<GroupKey> resultEntryGroupKeys = new ArrayList<>();
-        resultEntryGroupKeys.add(groupKey.getMainKey());
-        if (groupKey.hasSubKeys()) {
-            resultEntryGroupKeys.addAll(groupKey.getSubKeys());
-        }
-        for (GroupKey resultEntryGroupKey : resultEntryGroupKeys) {
-            jsonResultEntryGroupKeys.add(resultEntryGroupKey.asString());
+        if (groupKey instanceof GenericGroupKey<?>) {
+            jsonResultEntryGroupKeys.add(simpleGroupKeyToJSON(groupKey));
+        } else if (groupKey instanceof CompoundGroupKey) {
+            for (GroupKey key : groupKey.getKeys()) {
+                jsonResultEntryGroupKeys.add(groupKeyToJSON(key));
+            }
+        } else {
+            throw new NotJsonSerializableException(groupKey.getClass());
         }
         return jsonResultEntryGroupKeys;
+    }
+
+    private Object simpleGroupKeyToJSON(GroupKey groupKey) {
+        return groupKey.asString();
     }
     
 }
