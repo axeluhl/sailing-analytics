@@ -33,7 +33,7 @@ public class EventActivityProxy extends AbstractEventActivityProxy<MobileApplica
             @Override
             public void onSuccess() {
                 if (place instanceof MultiregattaOverviewPlace || place instanceof MultiregattaRegattasPlace) {
-                    super.onSuccess(new MultiRegattaActivity(place, event, clientFactory));
+                    super.onSuccess(new MultiRegattaActivity(place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof RegattaOverviewPlace) {
                     super.onSuccess(new RegattaActivity((RegattaOverviewPlace) place, event, getNavigationPathDisplay(), clientFactory));
                 } else if (place instanceof RegattaRacesPlace) {
