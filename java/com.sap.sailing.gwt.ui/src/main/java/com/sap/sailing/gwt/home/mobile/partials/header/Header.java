@@ -28,6 +28,7 @@ public class Header extends Composite {
     // @UiField TextBox searchText;
     // @UiField Button searchButton;
     
+    @UiField HeaderResources local_res;
     @UiField ImageElement dropdownTriggerUi;
     @UiField Element dropdownContainerUi;
     @UiField FlowPanel dropdownListUi;
@@ -46,9 +47,8 @@ public class Header extends Composite {
     private DropdownHandler dropdownHandler;
     
     public Header(final MobilePlacesNavigator placeNavigator) {
-        HeaderResources.INSTANCE.css().ensureInjected();
-
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
         
         dropdownListExtUi.getElement().getStyle().setDisplay(Display.NONE);
         navigationPathDisplay = new DropdownNavigationPathDisplay();
@@ -103,6 +103,7 @@ public class Header extends Composite {
             if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_MOBILE) {
                 for (final NavigationItem navigationItem : navigationPath) {
                     HeaderNavigationItem headerNavItem = new HeaderNavigationItem(navigationItem.getDisplayName(), navigationItem.getTargetUrl());
+                    headerNavItem.addStyleName(local_res.css().header_navigation_nav_sublist_item());
                     headerNavItem.addClickHandler(new ClickHandler() {
                         
                         @Override
