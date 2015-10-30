@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -14,21 +13,25 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 
-public class SectionHeaderContent extends Widget {
+public class SectionHeaderContent extends Composite {
     
     protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
-    interface MyBinder extends UiBinder<Element, SectionHeaderContent> {
+    interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
     }
 
+    @UiField SectionHeaderResources local_res;
     @UiField AnchorElement headerMainUi;
     @UiField DivElement headerLeftUi; 
     @UiField DivElement titleAndLabelContainerUi;
@@ -39,11 +42,12 @@ public class SectionHeaderContent extends Widget {
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
     @UiField ImageElement actionArrowUi;
-    @UiField SelectElement filterSelectUi;
+    @UiField SimplePanel filterSelectContainerUi;
 
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
-        setElement(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
+        filterSelectContainerUi.setVisible(false);
     }
     
     public void setSectionTitle(String sectionHeaderTitle) {
@@ -123,9 +127,11 @@ public class SectionHeaderContent extends Widget {
         else element.removeClassName(className);
     }
     
-    public void initFilterSelectUi() {
+    public void initFilterSelectUi(AbstractSelectionFilter<?, ?> selectionFilter) {
         headerRightUi.getStyle().clearDisplay();
-        filterSelectUi.getStyle().clearDisplay();
+        filterSelectContainerUi.setVisible(true);
+        filterSelectContainerUi.setWidget(selectionFilter);
+        selectionFilter.addStyleName(local_res.css().sectionheader_item_select());
     }
     
 }
