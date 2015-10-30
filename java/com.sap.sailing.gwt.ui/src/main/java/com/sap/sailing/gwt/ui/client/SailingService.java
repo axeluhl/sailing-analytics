@@ -579,7 +579,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 
-    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName);
+    Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException;
 

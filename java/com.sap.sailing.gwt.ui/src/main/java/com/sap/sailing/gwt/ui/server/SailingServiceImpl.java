@@ -4963,14 +4963,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * Also finds the last position of the marks, if set by pinging them
      */
-    private Collection<MarkDTO> convertToMarkDTOs(LeaderboardThatHasRegattaLike leaderboard, RaceLog raceLog, Iterable<Mark> marks) {
-        List<MarkDTO> dtos = new ArrayList<MarkDTO>();
+    private MarkDTO convertToMarkDTO(LeaderboardThatHasRegattaLike leaderboard, Mark mark) {
         final TimePoint now = MillisecondsTimePoint.now();
-        for (Mark mark : marks) {
-            final Position lastPos = getService().getMarkPosition(mark, leaderboard, now, raceLog);
-            dtos.add(convertToMarkDTO(mark, lastPos));
-        }
-        return dtos;
+        final Position lastPos = getService().getMarkPosition(mark, leaderboard, now, null);
+        return convertToMarkDTO(mark, lastPos);
     }
     
     @Override
@@ -5724,38 +5720,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * Gets all Marks defined in the RaceLogs of the RaceColumns corresponding to the leaderboard leaderboardName
+     * Gets all Marks defined in the RegattaLog and the trackedRace
+     * @throws DoesNotHaveRegattaLogException 
      */
     @Override
-    public Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard == null) {
-            // TODO: implement proper Exception Handling
-            return null;
+    public Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+        Leaderboard l = getService().getLeaderboardByName(leaderboardName);
+        if (! (l instanceof HasRegattaLike)) {
+            throw new DoesNotHaveRegattaLogException();
         }
-        
-        if (!(leaderboard instanceof IsRegattaLike)){
-            return null; 
-        }
+        LeaderboardThatHasRegattaLike leaderboard = (LeaderboardThatHasRegattaLike) l;
+        RegattaLog regattaLog = ((HasRegattaLike) l).getRegattaLike().getRegattaLog();
         
         Set<MarkDTO> markDTOs = new HashSet<>();
         
-        Map<Serializable, Mark> marksById = new HashMap<>();
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); //might not yet be attached
-                
-                if (trackedRace != null) {
-                    for (Mark markFromTrackedRace : trackedRace.getMarks()) {
-                        marksById.put(markFromTrackedRace.getId(), markFromTrackedRace);
-                    }
-                }
-                Util.addAll(convertToMarkDTOs(
-                                (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName),
-                                raceLog, marksById.values()), markDTOs);
-            }
+        List<RegattaLogEvent> markEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
+        for (RegattaLogEvent regattaLogEvent : markEvents) {
+            RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) regattaLogEvent;
+            markDTOs.add(convertToMarkDTO(leaderboard, defineMarkEvent.getMark()));
         }
+        
         return markDTOs;
     }
 
