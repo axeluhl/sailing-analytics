@@ -174,6 +174,7 @@ public class CreateAndTrackWithRaceLogTest {
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
         raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(0), t(10)));
         addFixes0(dev1);
+        raceLog.add(factory.createUseCompetitorsFromRaceLogEvent(t(), author, UUID.randomUUID(), 0));
         raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
 
         // start tracking
