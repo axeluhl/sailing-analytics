@@ -23,7 +23,7 @@ public class RaceLogUseCompetitorsFromRaceLogEventDeserializer extends BaseRaceL
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return factory.createUseCompetitorsFromRaceLogEvent(timePoint, author, id, competitors, passId);
+        return factory.createUseCompetitorsFromRaceLogEvent(timePoint, author, id, passId);
     }
 
 }
