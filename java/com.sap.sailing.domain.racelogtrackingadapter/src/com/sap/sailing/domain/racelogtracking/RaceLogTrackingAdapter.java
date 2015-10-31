@@ -7,6 +7,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -15,6 +17,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
@@ -82,8 +85,12 @@ public interface RaceLogTrackingAdapter {
     /**
      * If not yet registered, register the competitors in {@code competitors}, and unregister all already registered
      * competitors not in {@code competitors}.
+     *
+     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     *             if no {@link RaceLogUseCompetitorsFromRaceLogEvent} is present in the RaceLog
      */
-    void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors);
+    void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors)
+            throws CompetitorRegistrationOnRaceLogDisabledException;
 
     /**
      * If not yet registered, register the competitors in {@code competitors}, and unregister all already registered
@@ -108,15 +115,16 @@ public interface RaceLogTrackingAdapter {
             String emails, Locale locale) throws MailException;
 
     /**
-     * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
-     * {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated. 
+     * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
+     * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service);
 
     /**
-     * Duplicate the competitor registrations from the {@code from} race log to the {@code to} race logs.
+     * Duplicate the competitor registrations from the {@code from} race log to the {@code to} race logs. If a RaceLog
+     * is not set to use the CompetitorRegistrations on itself via {@link RaceLogUseCompetitorsFromRaceLogEvent},
+     * the RaceLog is set to use its own by adding a {@link RaceLogUseCompetitorsFromRaceLogEventImpl}
      */
-    void copyCompetitors(RaceLog from, Set<RaceLog> to, 
-            RacingEventService service);
+    void copyCompetitors(RaceLog from, Set<RaceLog> to, RacingEventService service);
 }

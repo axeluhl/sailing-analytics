@@ -52,7 +52,6 @@ import java.util.zip.GZIPInputStream;
 import javax.servlet.ServletContext;
 
 import org.apache.http.client.ClientProtocolException;
-import org.eclipse.jetty.util.log.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -80,9 +79,9 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -93,9 +92,9 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCo
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -211,6 +210,7 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -248,7 +248,6 @@ import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
-import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -2309,7 +2308,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
                 boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
-                boolean competitorRegistrationsExist = raceLog == null ? false : !new RegisteredCompetitorsAnalyzer<>(raceLog).analyze().isEmpty();
+                boolean competitorRegistrationsExist;
+                try {
+                    competitorRegistrationsExist = raceLog == null ? false : ! new RegisteredCompetitorsFinder(raceLog, getRegattaLogInternal(leaderboard.getName())).analyze().isEmpty();
+                } catch (DoesNotHaveRegattaLogException e) {
+                    competitorRegistrationsExist = false;
+                }
                 RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, raceLogTrackingState);
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
@@ -4927,7 +4931,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<CompetitorDTO> competitorDTOs) {
+            Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Set<Competitor> competitors = new HashSet<Competitor>();
         for (CompetitorDTO dto : competitorDTOs) {
@@ -5744,13 +5748,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
-            return convertToCompetitorDTOs(
-                    new RegisteredCompetitorsAnalyzer<>(
-                            getRegattaLogInternal(leaderboardName)).analyze());
-    }
-
-    @Override
     public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         
@@ -5801,10 +5798,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         
-        List<RegattaLogEvent> markEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class)
+        List<RegattaLogEvent> comeptitorRegistrationEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class)
                 .analyze();
         
-        if (markEvents.isEmpty()){
+        if (comeptitorRegistrationEvents.isEmpty()){
             return false;
         } else {
             return true;
@@ -5831,24 +5828,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsFromLogHierarchy(String leaderboardName) {
-        List<AbstractLog<?,?>> logHierarchy = getLogHierarchy(leaderboardName);
-
-        Collection<CompetitorDTO> competitorRegistrations = new ArrayList<CompetitorDTO>();
-
-        for (AbstractLog<?, ?> abstractLog : logHierarchy) {
-            competitorRegistrations.addAll(convertToCompetitorDTOs(
-                    new RegisteredCompetitorsAnalyzer<>(
-                            abstractLog).analyze()));
-        }
-
-        return competitorRegistrations;
+    public Collection<CompetitorDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
+            String fleetName) throws DoesNotHaveRegattaLogException {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        return convertToCompetitorDTOs(new RegisteredCompetitorsFinder(raceLog, regattaLog).analyze());
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName,
-            String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        return convertToCompetitorDTOs(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        
+        return convertToCompetitorDTOs(new CompetitorsInLogAnalyzer<>(regattaLog).analyze());
     }
 }

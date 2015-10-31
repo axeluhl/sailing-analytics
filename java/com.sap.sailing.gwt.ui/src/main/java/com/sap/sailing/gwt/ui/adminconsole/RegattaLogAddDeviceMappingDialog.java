@@ -94,7 +94,7 @@ public class RegattaLogAddDeviceMappingDialog extends AbstractLogAddDeviceMappin
 
     @Override
     protected void loadCompetitorsAndMarks() {
-        sailingService.getCompetitorRegistrationsFromLogHierarchy(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

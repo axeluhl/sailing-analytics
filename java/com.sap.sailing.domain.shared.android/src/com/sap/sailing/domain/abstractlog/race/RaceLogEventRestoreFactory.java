@@ -103,4 +103,6 @@ public interface RaceLogEventRestoreFactory extends RaceLogEventFactory {
     RaceLogDependentStartTimeEvent createDependentStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, List<Competitor> involvedBoats, int passId,
             SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference, RaceLogRaceStatus nextStatus);
+
+    RaceLogEvent createUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author,  TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, Integer passId);
 }

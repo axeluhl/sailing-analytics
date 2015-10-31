@@ -18,8 +18,10 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -106,7 +108,8 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         flexibleLeaderboard.addRaceColumn("R1", /* medalRace */ false);
         RaceLog raceLog = flexibleLeaderboard.getRacelog("R1", LeaderboardNameConstants.DEFAULT_FLEET_NAME);
         final int passId = 1;
-        final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);        
+        raceLog.add(RaceLogEventFactory.INSTANCE.createUseCompetitorsFromRaceLogEvent(MillisecondsTimePoint.now(), author, UUID.randomUUID(), passId));
         final Map<Competitor, RaceLogRegisterCompetitorEvent> competitorOnRaceLogRegistrationEvents = new HashMap<>();
         for (Competitor c : compLists[0]) {
             final RaceLogRegisterCompetitorEvent registerCompetitorEvent = RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), author, passId, c);
@@ -170,19 +173,28 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
             regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), MillisecondsTimePoint.now(), UUID.randomUUID(), c));
         }
         RaceLog raceLog = flexibleLeaderboard.getRacelog("R1", LeaderboardNameConstants.DEFAULT_FLEET_NAME);
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
+        int passId = 1;
+        raceLog.add(RaceLogEventFactory.INSTANCE.createUseCompetitorsFromRaceLogEvent(MillisecondsTimePoint.now(), author, UUID.randomUUID(), passId));
         for (Competitor c : compLists[1]) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
+            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), author, passId, c));
         }
+        //expected are all competitors, because the getAllCopmetitors method is called
+        //this includes competitors Registered in the RaceLogs, for which the RaceLog 
+        //is denoted with the RaceLogUseCompetitorsFromRaceLogEvent as well as the competitors in the RegattaLog 
         Set<Competitor> expected = new HashSet<>(compLists[0]);
         expected.addAll(compLists[1]);
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
         assertEquals(expected, actual);
         Set<Competitor> actualForRace = new HashSet<>();
+        
+        //For the race only the competitors registered on RaceLog as RaceLogUseCompetitorsFromRaceLogEvent is present
+        Set<Competitor> expectedForRace = new HashSet<>(compLists[1]);
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(
                 flexibleLeaderboard.getRaceColumnByName("R1"),
                 flexibleLeaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), actualForRace);
-        assertEquals(expected, actualForRace);
+        assertEquals(expectedForRace, actualForRace);
     }
 
     @Test
@@ -250,8 +262,11 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
     @Test
     public void testSimpleCompetitorListOnOneRaceLogInRegattaLeaderboard() {
         RaceLog raceLog = regattaLeaderboard.getRacelog("R1", "Yellow");
+        final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
+        int passId = 1;
+        raceLog.add(RaceLogEventFactory.INSTANCE.createUseCompetitorsFromRaceLogEvent(MillisecondsTimePoint.now(), author, UUID.randomUUID(), passId));
         for (Competitor c : compLists[0]) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
+            raceLog.add(RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), author, passId, c));
         }
         Set<Competitor> expected = new HashSet<>(compLists[0]);
         Set<Competitor> actual = new HashSet<>();
@@ -306,6 +321,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         }
         final RaceLog raceLog = regattaLeaderboard.getRacelog("R1", "Yellow");
         final int passId = 1;
+        raceLog.add(RaceLogEventFactory.INSTANCE.createUseCompetitorsFromRaceLogEvent(MillisecondsTimePoint.now(), author, UUID.randomUUID(), passId));
         final Map<Competitor, RaceLogRegisterCompetitorEvent> competitorOnRaceLogRegistrationEvents = new HashMap<>();
         for (Competitor c : compLists[passId]) {
             final RaceLogRegisterCompetitorEvent registerCompetitorEvent = RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(), author, passId, c);
@@ -324,14 +340,15 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         Util.addAll(regattaLeaderboard.getCompetitors(), actualWithoutSuppressed);
         assertEquals(expectedWithoutSuppressed, actualWithoutSuppressed);
         Set<Competitor> actualForRaceYellow = new HashSet<>();
+        Set<Competitor> expectedFoRaceYellow = new HashSet<>(compLists[passId]);
         Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(
                 regattaLeaderboard.getRaceColumnByName("R1"), regattaLeaderboard.getFleet("Yellow")), actualForRaceYellow);
-        assertEquals(expected, actualForRaceYellow);
+        assertEquals(expectedFoRaceYellow, actualForRaceYellow);
         actualForRaceYellow = new HashSet<>(); // try another time; cache should of course yield an equal result (although
         // we're not asserting here that the result actually comes from the cache)
         Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(
                 regattaLeaderboard.getRaceColumnByName("R1"), regattaLeaderboard.getFleet("Yellow")), actualForRaceYellow);
-        assertEquals(expected, actualForRaceYellow);
+        assertEquals(expectedFoRaceYellow, actualForRaceYellow);
         // But now it gets interesting: we're revoking a competitor registration on the race log and assert
         // that the competitor is gone from the list:
         final Competitor competitorToRevokeFromRaceLog = compLists[passId].get(2);
@@ -340,9 +357,9 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         // we're not asserting here that the result actually comes from the cache)
         Util.addAll(competitorProviderRegattaLeaderboard.getAllCompetitors(
                 regattaLeaderboard.getRaceColumnByName("R1"), regattaLeaderboard.getFleet("Yellow")), actualForRaceYellow);
-        expected.remove(competitorToRevokeFromRaceLog);
-        assertEquals(expected.size(), actualForRaceYellow.size());
-        assertEquals(expected, actualForRaceYellow);
+        expectedFoRaceYellow.remove(competitorToRevokeFromRaceLog);
+        assertEquals(expectedFoRaceYellow.size(), actualForRaceYellow.size());
+        assertEquals(expectedFoRaceYellow, actualForRaceYellow);
     }
 
 }

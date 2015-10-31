@@ -623,7 +623,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitors,
             AsyncCallback<Void> callback);
 
-    void getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+    void getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Collection<CompetitorDTO>> callback);
 
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
@@ -729,10 +729,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getMarksInRegattaLog(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 
     void getDeviceMappingsFromLogHierarchy(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
-
-    void getCompetitorRegistrationsInRegattaLog(String leaderboardName,
-            AsyncCallback<Collection<CompetitorDTO>> asyncCallback);
-
+    
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds, AsyncCallback<Void> callback);
 
     void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDto, Date closingTimePoint,
@@ -750,9 +747,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePoint, TimePoint>> callback);
 
-    void getCompetitorRegistrationsFromLogHierarchy(String leaderboardName,
-            AsyncCallback<Collection<CompetitorDTO>> setCompetitorsCallback);
-
     void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 
@@ -762,4 +756,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark, AsyncCallback<Void> asyncCallback);
 
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO, AsyncCallback<Void> callback);
+
+    void getCompetitorRegistrationsInRegattaLog(String leaderboardName,
+            AsyncCallback<Collection<CompetitorDTO>> setCompetitorsCallback);
 }

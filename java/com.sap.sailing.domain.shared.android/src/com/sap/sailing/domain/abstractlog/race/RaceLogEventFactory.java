@@ -14,6 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorM
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -148,5 +149,7 @@ public interface RaceLogEventFactory {
     RaceLogEndOfTrackingEvent createEndOfTrackingEvent(TimePoint endOfTracking, AbstractLogEventAuthor author,
             Serializable id, List<Competitor> competitors, Integer passId);
 
+    RaceLogUseCompetitorsFromRaceLogEvent createUseCompetitorsFromRaceLogEvent(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable id, Integer passId);
 
 }

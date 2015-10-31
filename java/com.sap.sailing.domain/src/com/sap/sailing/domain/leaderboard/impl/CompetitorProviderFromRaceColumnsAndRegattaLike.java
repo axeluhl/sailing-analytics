@@ -11,12 +11,14 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -29,30 +31,32 @@ import com.sap.sse.common.Util.Pair;
 
 /**
  * A caching provider of a competitor set, based on the tracked races and {@link RaceLog}s of the {@link RaceColumn}s of
- * a {@link HasRaceColumnsAndRegattaLike} and the {@link RegattaLog} of the same object. After an answer has been provided,
- * it is cached. The cache is invalidated when one of the following events occurs:
+ * a {@link HasRaceColumnsAndRegattaLike} and the {@link RegattaLog} of the same object. After an answer has been
+ * provided, it is cached. The cache is invalidated when one of the following events occurs:
  * <ul>
  * <li>a competitor is registered with or unregistered from a race log of any of the race columns or the regatta log</li>
  * <li>a race column is added or removed</li>
  * <li>a tracked race is linked to or unlinked from any of the race columns</li>
+ * <li>the racelog is marked as providing it's own competitors via the {@link RaceLogUseCompetitorsFromRaceLogEvent}</li>
  * </ul>
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class CompetitorProviderFromRaceColumnsAndRegattaLike {
-    private static final Logger logger = Logger.getLogger(CompetitorProviderFromRaceColumnsAndRegattaLike.class.getName());
-    
+    private static final Logger logger = Logger.getLogger(CompetitorProviderFromRaceColumnsAndRegattaLike.class
+            .getName());
+
     private final HasRaceColumnsAndRegattaLike provider;
 
     private final RegattaLogEventVisitor regattaLogCompetitorsCacheInvalidationListener;
 
     private final RaceLogEventVisitor raceLogCompetitorsCacheInvalidationListener;
-    
+
     private final RaceColumnListener raceColumnListener;
 
     private Iterable<Competitor> allCompetitorsCache;
-    
+
     private final ConcurrentHashMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
 
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
@@ -75,11 +79,13 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             @Override
             public void visit(RegattaLogRevokeEvent event) {
                 try {
-                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                    if (RegattaLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event
+                            .getRevokedEventType()))) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
-                    logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
+                    logger.log(Level.WARNING,
+                            "Problem occurred trying to resolve revoked event class " + event.getRevokedEventType(), e);
                 }
             }
         };
@@ -90,13 +96,20 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             }
 
             @Override
+            public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
+                invalidateAllCompetitorsCaches();
+            }
+
+            @Override
             public void visit(RaceLogRevokeEvent event) {
                 try {
-                    if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                    if (RaceLogRegisterCompetitorEvent.class
+                            .isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {
-                    logger.log(Level.WARNING, "Problem occurred trying to resolve revoked event class "+event.getRevokedEventType(), e);
+                    logger.log(Level.WARNING,
+                            "Problem occurred trying to resolve revoked event class " + event.getRevokedEventType(), e);
                 }
             }
         };
@@ -104,7 +117,8 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             private static final long serialVersionUID = -8678230058730043052L;
 
             @Override
-            public void defaultAction() {}
+            public void defaultAction() {
+            }
 
             /**
              * As the entire provider object is considered transient, its listeners are so, too.
@@ -135,7 +149,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             }
         };
     }
-    
+
     public Iterable<Competitor> getAllCompetitors() {
         if (allCompetitorsCache == null) {
             final Set<Competitor> result = new HashSet<>();
@@ -153,23 +167,25 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         }
         return allCompetitorsCache;
     }
-    
+
     /**
-     * Obtains competitors from the regatta log and adds those from the tracked race for the
-     * raceColumn/fleet combination or the race log, if no tracked race is attached for this
-     * combination. Does <em>not</em> eliminate suppressed competitors.
+     * Obtains competitors from the regatta log and adds those from the tracked race for the raceColumn/fleet
+     * combination or the race log, if no tracked race is attached for this combination. Does <em>not</em> eliminate
+     * suppressed competitors.
      */
     public Iterable<Competitor> getAllCompetitors(final RaceColumn raceColumn, final Fleet fleet) {
         Pair<RaceColumn, Fleet> key = new Pair<>(raceColumn, fleet);
         Iterable<Competitor> result = allCompetitorsCacheByRace.get(key);
         if (result == null) {
-            final Set<Competitor> resultSet = new HashSet<>();
+            final Set<Competitor> resultSet = new HashSet<>(); 
             Util.addAll(raceColumn.getAllCompetitors(fleet), resultSet);
-            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race log's listeners set
+            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race log's
+            // listeners set
             raceColumn.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
             provider.addRaceColumnListener(raceColumnListener);
             // consider {@link RegattaLog}
-            Set<Competitor> viaLog = getCompetitorsFromRegattaLogAndRegisterAsRegattaLogListener();
+            Set<Competitor> viaLog = getCompetitorsForRaceAndRegisterAsRegattaLogListener(raceColumn
+                    .getRaceLog(fleet));
             resultSet.addAll(viaLog);
             result = resultSet;
             allCompetitorsCacheByRace.put(key, result);
@@ -177,27 +193,42 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         return result;
     }
 
+    private Set<Competitor> getCompetitorsForRaceAndRegisterAsRegattaLogListener(RaceLog racelog) {
+        Set<Competitor> viaLog = new RegisteredCompetitorsFinder(racelog, provider.getRegattaLike().getRegattaLog())
+                .analyze();
+        // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's
+        // listeners set
+        provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
+        return viaLog;
+    }
+
     private Set<Competitor> getCompetitorsFromRegattaLogAndRegisterAsRegattaLogListener() {
-        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(provider.getRegattaLike().getRegattaLog()).analyze();
-        // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's listeners set
+        Set<Competitor> viaLog = new CompetitorsInLogAnalyzer<>(provider.getRegattaLike().getRegattaLog()).analyze();
+        // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's
+        // listeners set
         provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
         return viaLog;
     }
 
     private void invalidateAllCompetitorsCaches() {
         allCompetitorsCache = null;
-        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the regatta log's listeners set
+        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the regatta log's
+        // listeners set
         provider.getRegattaLike().getRegattaLog().removeListener(regattaLogCompetitorsCacheInvalidationListener);
         for (final RaceColumn rc : provider.getRaceColumns()) {
             for (final Fleet fleet : rc.getFleets()) {
-                // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race log's listeners set
+                // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race
+                // log's listeners set
                 rc.getRaceLog(fleet).removeListener(raceLogCompetitorsCacheInvalidationListener);
             }
         }
-        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race column listeners set
+        // note: adding listeners was idempotent; at most one occurrence of this listener exists in the race column
+        // listeners set
         provider.removeRaceColumnListener(raceColumnListener);
-        allCompetitorsCacheByRace.clear(); // this is a little coarse-grained; but given the typical access patterns it should be good enough.
-        // The change frequency of competitors lists on individual races is much lower than the access frequency to this structure.
+        allCompetitorsCacheByRace.clear(); // this is a little coarse-grained; but given the typical access patterns it
+                                           // should be good enough.
+        // The change frequency of competitors lists on individual races is much lower than the access frequency to this
+        // structure.
     }
 
 }

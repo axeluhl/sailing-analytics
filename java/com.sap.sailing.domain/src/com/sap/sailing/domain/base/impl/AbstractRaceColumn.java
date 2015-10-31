@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -231,7 +231,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 // race exists, its competitors set takes precedence over what's in the race log. Usually,
                 // the tracked race will have the same competitors as those in the race log, or more because
                 // those from the regatta log are added to the tracked race as well.
-                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+                Set<Competitor> viaRaceLog = new RaceLogRegisteredCompetitorsAnalyzer(getRaceLog(fleet)).analyze();
                 result.addAll(viaRaceLog);
             }
         }
@@ -249,7 +249,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+            Set<Competitor> viaRaceLog = new RaceLogRegisteredCompetitorsAnalyzer(getRaceLog(fleet)).analyze();
             result = viaRaceLog;
         }
         return result;

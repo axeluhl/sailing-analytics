@@ -15,13 +15,13 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectionReducer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
@@ -31,6 +31,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMapping
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -39,7 +40,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.DefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
@@ -62,6 +62,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -476,8 +477,18 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
         // check both the racelog and regattalog for registered competitors
-        Set<Competitor> competitors = new MultiLogAnalyzer<>(RegisteredCompetitorsAnalyzer.Factory.INSTANCE,
-                new SetReducer<Competitor>(), params.getLogHierarchy()).analyze();
+        
+        Set<Competitor> competitors;
+        try {
+            RegattaLog regattaLog = params.getRegattaLog();
+            competitors = new RegisteredCompetitorsFinder(raceLog, regattaLog).analyze();
+        } catch (DoesNotHaveRegattaLogException e) {
+            logger.warning(params.getLeaderboard().getName()+" doesn't have an attached RegattaLog");
+            competitors = new RaceLogRegisteredCompetitorsAnalyzer(raceLog).analyze();
+        }
+        
+         
+
         Serializable raceId = denoteEvent.getRaceId();
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();

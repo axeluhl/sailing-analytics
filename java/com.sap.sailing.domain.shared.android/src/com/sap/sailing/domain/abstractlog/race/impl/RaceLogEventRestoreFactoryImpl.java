@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
@@ -39,6 +40,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompet
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -197,5 +199,10 @@ public class RaceLogEventRestoreFactoryImpl extends RaceLogEventFactoryImpl impl
             int passId, SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference, RaceLogRaceStatus nextStatus) {
         return new RaceLogDependentStartTimeEventImpl(createdAt, author, logicalTimePoint, id, involvedBoats, passId,
                 dependentOnRace, startTimeDifference);
+    }
+
+    @Override
+    public RaceLogEvent createUseCompetitorsFromRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, List<Competitor> competitors, Integer passId) {
+        return new RaceLogUseCompetitorsFromRaceLogEventImpl(createdAt, author, logicalTimePoint, id, passId);
     }
 }

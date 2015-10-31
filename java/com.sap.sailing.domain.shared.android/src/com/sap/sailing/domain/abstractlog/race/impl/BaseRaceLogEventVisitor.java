@@ -28,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorM
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 /**
  * Base class implementing {@link RaceLogEventVisitor}. Every method is implemented as a no-op.
@@ -166,6 +167,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         
     }
 }

@@ -45,6 +45,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartPro
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTimeEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartTrackingEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSuppressedMarkPassingsEventSerializer;
+import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogWindFixEventSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 
@@ -91,7 +92,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
                 new RaceLogAdditionalScoringInformationEventDeserializer(competitorDeserializer),
                 new RaceLogFixedMarkPassingEventDeserializer(competitorDeserializer),
                 new RaceLogSuppressedMarkPassingsEventDeserializer(competitorDeserializer),
-                new RaceLogStartOfTrackingEventDeserializer(competitorDeserializer), new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer));
+                new RaceLogStartOfTrackingEventDeserializer(competitorDeserializer),
+                new RaceLogUseCompetitorsFromRaceLogEventDeserializer(competitorDeserializer),
+                new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer));
     }
 
     protected final JsonDeserializer<RaceLogEvent> flagEventDeserializer;
@@ -121,6 +124,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
     protected final JsonDeserializer<RaceLogEvent> suppressedMarkPassingsDeserializer;
     protected final JsonDeserializer<RaceLogEvent> startOfTrackingDeserializer;
     protected final JsonDeserializer<RaceLogEvent> endOfTrackingDeserializer;
+    protected final JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer;
 
     public RaceLogEventDeserializer(JsonDeserializer<RaceLogEvent> flagEventDeserializer,
             JsonDeserializer<RaceLogEvent> startTimeEventDeserializer,
@@ -147,7 +151,9 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
             JsonDeserializer<RaceLogEvent> additionalScoringInformationEventDeserializer,
             JsonDeserializer<RaceLogEvent> fixedMarkPassingEventDeserializer,
             JsonDeserializer<RaceLogEvent> suppressedMarkPassingsEventDeserializer,
-            JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer, JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer) {
+            JsonDeserializer<RaceLogEvent> startOfTrackingEventDeserializer,
+            JsonDeserializer<RaceLogEvent> useCompetitorsFromRaceLogDeserializer,
+            JsonDeserializer<RaceLogEvent> endOfTrackingEventDeserializer) {
         this.flagEventDeserializer = flagEventDeserializer;
         this.startTimeEventDeserializer = startTimeEventDeserializer;
         this.dependentStartTimeEventDeserializer = dependentStartTimeEventDeserializer;
@@ -175,6 +181,7 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         this.suppressedMarkPassingsDeserializer = suppressedMarkPassingsEventDeserializer;
         this.startOfTrackingDeserializer = startOfTrackingEventDeserializer;
         this.endOfTrackingDeserializer = endOfTrackingEventDeserializer;
+        this.useCompetitorsFromRaceLogDeserializer = useCompetitorsFromRaceLogDeserializer;
     }
 
     protected JsonDeserializer<RaceLogEvent> getDeserializer(JSONObject object) throws JsonDeserializationException {
@@ -233,6 +240,8 @@ public class RaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> 
         } else if (type.equalsIgnoreCase(RaceLogStartOfTrackingEventSerializer.VALUE_CLASS)){
             return startOfTrackingDeserializer;
         } else if (type.equals(RaceLogEndOfTrackingEventSerializer.VALUE_CLASS)){
+            return endOfTrackingDeserializer;
+        } else if (type.equals(RaceLogUseCompetitorsFromRaceLogEventSerializer.VALUE_CLASS)){
             return endOfTrackingDeserializer;
         }
 

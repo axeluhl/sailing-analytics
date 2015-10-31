@@ -29,6 +29,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorM
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisitor {
     protected abstract void notifyListenerAboutEventAdded(RaceLogEvent event);
@@ -159,6 +160,11 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
+        notifyListenerAboutEventAdded(event);
+    }
+    
+    @Override
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 }

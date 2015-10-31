@@ -39,6 +39,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorM
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompet
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -325,5 +327,11 @@ public class RaceLogEventFactoryImpl implements RaceLogEventFactory {
     public RaceLogEndOfTrackingEvent createEndOfTrackingEvent(TimePoint endOfTracking, AbstractLogEventAuthor author, Serializable id,
             List<Competitor> competitors, Integer passId) {
         return new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), author, endOfTracking, id, competitors, passId);
+    }
+
+    @Override
+    public RaceLogUseCompetitorsFromRaceLogEvent createUseCompetitorsFromRaceLogEvent(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, Integer passId) {
+        return new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), author, logicalTimePoint, id, passId);
     }
 }

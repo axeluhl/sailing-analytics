@@ -9,12 +9,14 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -96,6 +98,14 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
     public Leaderboard getLeaderboard() {
         return leaderboard;
+    }
+    
+    public RegattaLog getRegattaLog() throws DoesNotHaveRegattaLogException {
+        if (leaderboard instanceof HasRegattaLike) {
+            return (((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
+        } else {
+            throw new DoesNotHaveRegattaLogException();
+        }
     }
 
     public RacingEventService getService() {
