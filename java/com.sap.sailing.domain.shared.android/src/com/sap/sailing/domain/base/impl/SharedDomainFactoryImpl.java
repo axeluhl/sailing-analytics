@@ -282,26 +282,22 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
-        final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassName(name);
+        final BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
+        final String unifiedBoatClassName;
+        if (boatClassMasterdata != null) {
+            unifiedBoatClassName = boatClassMasterdata.getDisplayName();
+        } else {
+            unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassName(name);
+        }
+        BoatClass result;
         synchronized (boatClassCache) {
-            BoatClass result = boatClassCache.get(name);
-            if (result == null) {
-                result = boatClassCache.get(unifiedBoatClassName);
-            }
+            result = boatClassCache.get(unifiedBoatClassName);
             if (result == null && unifiedBoatClassName != null) {
-                BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
                 if (boatClassMasterdata != null) {
                     result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
-                    boatClassCache.put(name, result);
-                    boatClassCache.put(unifiedBoatClassName, result);
-                    boatClassCache.put(result.getName(), result);
-                    for (String alternativeName : boatClassMasterdata.getAlternativeNames()) {
-                        boatClassCache.put(alternativeName, result);
-                    }
+                } else {
+                    result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
                 }
-            }
-            if (result == null) {
-                result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
                 boatClassCache.put(unifiedBoatClassName, result);
             }
             return result;

@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
@@ -84,7 +86,6 @@ public enum BoatClassMasterdata {
     ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int.");
 
-
     private final String displayName;
     private final String[] alternativeNames;
     private final double hullLengthInMeter;
@@ -92,6 +93,8 @@ public enum BoatClassMasterdata {
     private final BoatHullType hullType;
     private final boolean typicallyStartsUpwind;
     private final boolean hasAdditionalDownwindSail;
+
+    private static Map<String, BoatClassMasterdata> fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata; 
 
     private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
             double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
@@ -102,6 +105,17 @@ public enum BoatClassMasterdata {
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = alternativeNames;
+        addToCache(this);
+    }
+
+    private void addToCache(BoatClassMasterdata boatClassMasterdata) {
+        if (fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata == null) {
+            fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata = new HashMap<>();
+        }
+        fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.put(unifyBoatClassName(getDisplayName()), this);
+        for (final String alternativeName : getAlternativeNames()) {
+            fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.put(unifyBoatClassName(alternativeName), this);
+        }
     }
 
     private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
@@ -113,22 +127,11 @@ public enum BoatClassMasterdata {
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = null;
+        addToCache(this);
     }
 
     public static BoatClassMasterdata resolveBoatClass(String boatClassName) {
-        String boatClassNameToResolve = unifyBoatClassName(boatClassName);
-        for (BoatClassMasterdata boatClass : values()) {
-            if (unifyBoatClassName(boatClass.displayName).equals(boatClassNameToResolve)) {
-                return boatClass;
-            } else if (boatClass.alternativeNames != null) {
-                for (String name : boatClass.alternativeNames) {
-                    if (unifyBoatClassName(name).equals(boatClassNameToResolve)) {
-                        return boatClass;
-                    }
-                }
-            }
-        }
-        return null;
+        return fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.get(unifyBoatClassName(boatClassName));
     }
 
     public static String unifyBoatClassName(String boatClassName) {
