@@ -111,7 +111,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     /**
      * Uses a transient competitor store
-     * @param raceLogResolver TODO
      */
     public SharedDomainFactoryImpl(RaceLogResolver raceLogResolver) {
         this(new TransientCompetitorStoreImpl(), raceLogResolver);
@@ -128,6 +127,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         boatClassCache = new HashMap<String, BoatClass>();
         this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
+        // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
         courseAreaCache = new HashMap<Serializable, CourseArea>();
         configurationMatcherCache = new HashMap<Serializable, DeviceConfigurationMatcher>();
@@ -310,6 +310,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     
     @Override
     public BoatClass getOrCreateBoatClass(String name) {
+        // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
         return getOrCreateBoatClass(name, name == null || /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
     }
     
