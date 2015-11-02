@@ -24,8 +24,8 @@
                 android:id="@+id/abandon_flags_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="?lock_outline_black"
                 android:layout_centerInParent="true"
+                android:src="?lock_outline_black"
                 android:visibility="gone"
                 tools:visibility="visible"/>
         </RelativeLayout>

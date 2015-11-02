@@ -76,7 +76,7 @@
         <item name="hearing">@drawable/ic_hearing_white</item>
         <item name="link_24dp">@drawable/ic_link_white_24dp</item>
         <item name="lock_outline">@drawable/ic_lock_outline_white</item>
-        <item name="lock_outline_alpha">@drawable/ic_lock_outline_white_alpha</item>
+        <item name="lock_outline_alpha">@drawable/ic_lock_outline_white_more_alpha</item>
         <item name="lock_outline_black">@drawable/ic_lock_outline_black_alpha</item>
         <item name="keyboard_control_36dp">@drawable/ic_keyboard_control_white_36dp</item>
         <item name="marker">@drawable/marker_dark</item>

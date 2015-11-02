@@ -171,6 +171,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:textAppearance="?textPanelCaption"
+                    android:gravity="center"
                     tools:text="4 + 3 = 7 Minuten"/>
 
                 <ImageView

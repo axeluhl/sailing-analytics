@@ -12,7 +12,8 @@
 
         <RelativeLayout
             android:layout_width="@dimen/side_button_imageSize"
-            android:layout_height="@dimen/side_button_imageSize">
+            android:layout_height="@dimen/side_button_imageSize"
+            android:layout_gravity="center_horizontal">
 
             <ImageView
                 android:layout_width="match_parent"
