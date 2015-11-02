@@ -37,7 +37,7 @@ public abstract class AbstractSelectionFilter<T, C> extends AbstractFilterWidget
         C previouslySelectedValue = valueListBox.getValue();
         valueListBox.setValue(null);
         valueListBox.setAcceptableValues(acceptableValues);
-        if (selectableValues.contains(previouslySelectedValue)) {
+        if (previouslySelectedValue != null && selectableValues.contains(previouslySelectedValue)) {
             valueListBox.setValue(previouslySelectedValue);
         }
     }
