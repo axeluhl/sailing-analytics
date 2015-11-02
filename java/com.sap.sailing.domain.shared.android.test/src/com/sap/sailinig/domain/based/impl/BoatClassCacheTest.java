@@ -44,4 +44,23 @@ public class BoatClassCacheTest {
         final BoatClass laserByUnifiedDisplayName = sharedDomainFactory.getOrCreateBoatClass(unifiedDisplayName);
         assertSame(laserByAlternativeName, laserByUnifiedDisplayName);
     }
+
+    @Test
+    public void testQueryingBoatClassByDisplayNameFirstThenCanonicalizedDisplayName() {
+        final BoatClassMasterdata laserMasterData = BoatClassMasterdata.LASER_INT;
+        final BoatClass laserByDisplayName = sharedDomainFactory.getOrCreateBoatClass(laserMasterData.getDisplayName());
+        final String unifiedDisplayName = BoatClassMasterdata.unifyBoatClassName(laserMasterData.getDisplayName());
+        final BoatClass laserByUnifiedDisplayName = sharedDomainFactory.getOrCreateBoatClass(unifiedDisplayName);
+        assertSame(laserByDisplayName, laserByUnifiedDisplayName);
+    }
+
+    @Test
+    public void testQueryingBoatClassByAlternativeNameFirstThenCanonicalizedAlternativeName() {
+        final BoatClassMasterdata laserMasterData = BoatClassMasterdata.LASER_INT;
+        final String laserAlternativeName = laserMasterData.getAlternativeNames()[0];
+        final BoatClass laserByAlternativeName = sharedDomainFactory.getOrCreateBoatClass(laserAlternativeName);
+        final String unifiedAlternativeName = BoatClassMasterdata.unifyBoatClassName(laserAlternativeName);
+        final BoatClass laserByUnifiedAlternativeName = sharedDomainFactory.getOrCreateBoatClass(unifiedAlternativeName);
+        assertSame(laserByAlternativeName, laserByUnifiedAlternativeName);
+    }
 }
