@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -26,8 +27,7 @@ public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDes
             throws JsonDeserializationException {
         long startTime = (Long) object.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME);
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
-        return factory.createStartTimeEvent(event.getCreatedAt(), author, event.getLogicalTimePoint(), event.getId(), event.getInvolvedBoats(), 
-                event.getPassId(), new MillisecondsTimePoint(startTime), event.getNextStatus());
+        return new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), event.getPassId(), new MillisecondsTimePoint(startTime));
     }
 
 }

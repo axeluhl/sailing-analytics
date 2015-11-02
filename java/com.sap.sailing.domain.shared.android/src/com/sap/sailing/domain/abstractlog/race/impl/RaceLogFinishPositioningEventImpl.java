@@ -9,18 +9,25 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl implements RaceLogFinishPositioningEvent {
+public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl implements
+        RaceLogFinishPositioningEvent {
 
     private static final long serialVersionUID = -8168584588697908309L;
-    
+
     private final CompetitorResults positionedCompetitors;
 
-    public RaceLogFinishPositioningEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogFinishPositioningEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CompetitorResults positionedCompetitors) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
         this.positionedCompetitors = positionedCompetitors;
     }
-    
+
+    public RaceLogFinishPositioningEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+            CompetitorResults positionedCompetitors) {
+        super(pTimePoint, author, pPassId);
+        this.positionedCompetitors = positionedCompetitors;
+    }
+
     @Override
     public CompetitorResults getPositionedCompetitorsIDsNamesMaxPointsReasons() {
         return positionedCompetitors;

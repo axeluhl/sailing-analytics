@@ -12,9 +12,13 @@ import com.sap.sse.common.TimePoint;
 public class RaceLogPassChangeEventImpl extends RaceLogEventImpl implements RaceLogPassChangeEvent {
     private static final long serialVersionUID = -3737606977320640630L;
 
-    public RaceLogPassChangeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogPassChangeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+    }
+
+    public RaceLogPassChangeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId) {
+        super(pTimePoint, author, pPassId);
     }
 
     @Override

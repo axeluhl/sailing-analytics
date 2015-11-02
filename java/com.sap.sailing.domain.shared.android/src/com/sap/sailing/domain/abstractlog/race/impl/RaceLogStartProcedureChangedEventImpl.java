@@ -17,10 +17,15 @@ public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl impl
 
     private final RacingProcedureType startProcedureType;
 
-    public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, RacingProcedureType startProcedureType) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, RacingProcedureType startProcedureType) {
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        this.startProcedureType = startProcedureType;
+    }
 
+    public RaceLogStartProcedureChangedEventImpl(TimePoint pTimePoint,
+            AbstractLogEventAuthor author, int pPassId, RacingProcedureType startProcedureType) {
+        super(pTimePoint, author, pPassId);
         this.startProcedureType = startProcedureType;
     }
 

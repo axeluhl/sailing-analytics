@@ -14,9 +14,15 @@ public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implement
     
     private final TimePoint protestStartTime;
     
-    public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, TimePoint protestStartTime) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        this.protestStartTime = protestStartTime;
+    }
+    
+    public RaceLogProtestStartTimeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author,
+            int pPassId, TimePoint protestStartTime) {
+        super(pTimePoint, author, pPassId);
         this.protestStartTime = protestStartTime;
     }
 

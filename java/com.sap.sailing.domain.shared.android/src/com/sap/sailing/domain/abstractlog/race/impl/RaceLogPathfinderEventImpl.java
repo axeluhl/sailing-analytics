@@ -10,13 +10,19 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogPathfinderEventImpl extends RaceLogEventImpl implements RaceLogPathfinderEvent {
-   
+
     private static final long serialVersionUID = -1654474931330970804L;
     private final String pathfinderId;
 
-    public RaceLogPathfinderEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, String pathfinderId) {
-        super(createdAt, author, pTimePoint, pId, pCompetitors, pPassId);
+    public RaceLogPathfinderEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, List<Competitor> pCompetitors, int pPassId, String pathfinderId) {
+        super(createdAt, pTimePoint, author, pId, pCompetitors, pPassId);
+        this.pathfinderId = pathfinderId;
+    }
+
+    public RaceLogPathfinderEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+            String pathfinderId) {
+        super(pTimePoint, author, pPassId);
         this.pathfinderId = pathfinderId;
     }
 

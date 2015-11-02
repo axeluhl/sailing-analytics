@@ -12,12 +12,19 @@ import com.sap.sse.common.TimePoint;
 
 public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implements RaceLogCourseDesignChangedEvent {
     private static final long serialVersionUID = 1565936170747420547L;
-   
+
     private final CourseBase courseDesign;
 
-    public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CourseBase courseDesign) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId,
+            CourseBase courseDesign) {
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        this.courseDesign = courseDesign;
+    }
+
+    public RaceLogCourseDesignChangedEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+            CourseBase courseDesign) {
+        super(pTimePoint, author, pPassId);
         this.courseDesign = courseDesign;
     }
 

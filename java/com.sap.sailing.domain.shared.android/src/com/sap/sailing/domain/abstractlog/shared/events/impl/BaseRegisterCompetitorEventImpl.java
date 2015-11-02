@@ -17,13 +17,28 @@ public abstract class BaseRegisterCompetitorEventImpl<VisitorT> extends Abstract
      * @throws IllegalArgumentException
      *             if {@code competitor} is null
      */
-    public BaseRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, Competitor competitor) throws IllegalArgumentException {
-        super(createdAt, author, logicalTimePoint, pId);
+    public BaseRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, Competitor competitor) throws IllegalArgumentException {
+        super(createdAt, logicalTimePoint, author, pId);
+        checkCompetitor(competitor);
+        this.competitor = competitor;
+    }
+
+    /**
+     * @throws IllegalArgumentException
+     *             if {@code competitor} is null
+     */
+    public BaseRegisterCompetitorEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Competitor competitor) throws IllegalArgumentException {
+        super(logicalTimePoint, author);
+        checkCompetitor(competitor);
+        this.competitor = competitor;
+    }
+
+    private static void checkCompetitor(Competitor competitor) throws IllegalArgumentException {
         if (competitor == null) {
             throw new IllegalArgumentException("Competitor may not be null");
         }
-        this.competitor = competitor;
     }
 
     @Override

@@ -10,13 +10,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChang
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogFinishPositioningListChangedEventImpl extends RaceLogFinishPositioningEventImpl implements RaceLogFinishPositioningListChangedEvent {
-   
+public class RaceLogFinishPositioningListChangedEventImpl extends RaceLogFinishPositioningEventImpl implements
+        RaceLogFinishPositioningListChangedEvent {
+
     private static final long serialVersionUID = -8167472925561954739L;
-    
-    public RaceLogFinishPositioningListChangedEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> competitors, int pPassId, CompetitorResults positionedCompetitors) {
-        super(createdAt, author, pTimePoint, pId, competitors, pPassId, positionedCompetitors);
+
+    public RaceLogFinishPositioningListChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, List<Competitor> competitors, int pPassId,
+            CompetitorResults positionedCompetitors) {
+        super(createdAt, pTimePoint, author, pId, competitors, pPassId, positionedCompetitors);
+    }
+
+    public RaceLogFinishPositioningListChangedEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author,
+            int pPassId, CompetitorResults positionedCompetitors) {
+        super(pTimePoint, author, pPassId, positionedCompetitors);
     }
 
     @Override

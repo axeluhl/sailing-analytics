@@ -16,9 +16,16 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
     private final Wind windFix;
     private final boolean isMagnetic;
     
-    public RaceLogWindFixEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
+    public RaceLogWindFixEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Wind windFix, boolean isMagnetic) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        this.windFix = windFix;
+        this.isMagnetic = isMagnetic;
+    }
+    
+    public RaceLogWindFixEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author,
+            int pPassId, Wind windFix, boolean isMagnetic) {
+        super(pTimePoint, author, pPassId);
         this.windFix = windFix;
         this.isMagnetic = isMagnetic;
     }

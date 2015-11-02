@@ -9,15 +9,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implements
-RaceLogCourseAreaChangedEvent {
+public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implements RaceLogCourseAreaChangedEvent {
     private static final long serialVersionUID = -3943108136024977860L;
 
     private final Serializable courseAreaId;
 
-    public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
+        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        this.courseAreaId = courseAreaId;
+    }
+
+    public RaceLogCourseAreaChangeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+            Serializable courseAreaId) {
+        super(pTimePoint, author, pPassId);
         this.courseAreaId = courseAreaId;
     }
 

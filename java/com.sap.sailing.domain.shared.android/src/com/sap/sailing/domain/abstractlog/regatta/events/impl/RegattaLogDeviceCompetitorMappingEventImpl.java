@@ -10,11 +10,19 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
-public class RegattaLogDeviceCompetitorMappingEventImpl extends AbstractDeviceMappingEventImpl<RegattaLogEventVisitor, Competitor>
-implements RegattaLogDeviceCompetitorMappingEvent {
-    public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
+public class RegattaLogDeviceCompetitorMappingEventImpl extends
+        AbstractDeviceMappingEventImpl<RegattaLogEventVisitor, Competitor> implements
+        RegattaLogDeviceCompetitorMappingEvent {
+    public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
         super(createdAt, author, logicalTimePoint, pId, mappedTo, device, from, to);
+    }
+
+    public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Competitor mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
+        super(author, logicalTimePoint, mappedTo, device, from, to);
     }
 
     private static final long serialVersionUID = -1494030544804758753L;

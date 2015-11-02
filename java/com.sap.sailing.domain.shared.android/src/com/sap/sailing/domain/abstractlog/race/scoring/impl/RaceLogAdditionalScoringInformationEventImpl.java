@@ -16,9 +16,15 @@ public class RaceLogAdditionalScoringInformationEventImpl extends RaceLogEventIm
     
     private final AdditionalScoringInformationType informationType;
     
-    public RaceLogAdditionalScoringInformationEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    public RaceLogAdditionalScoringInformationEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> competitors, int pPassId, AdditionalScoringInformationType informationType) {
-        super(createdAt, author, logicalTimePoint, pId, competitors, pPassId);
+        super(createdAt, logicalTimePoint, author, pId, competitors, pPassId);
+        this.informationType = informationType;
+    }
+    
+    public RaceLogAdditionalScoringInformationEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            int pPassId, AdditionalScoringInformationType informationType) {
+        super(logicalTimePoint, author, pPassId);
         this.informationType = informationType;
     }
 

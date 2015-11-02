@@ -21,7 +21,17 @@ DeviceMappingEvent<VisitorT, ItemType> {
     public AbstractDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, ItemType mappedTo,
             DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(createdAt, author, logicalTimePoint, id);
+        super(createdAt, logicalTimePoint, author, id);
+        this.mappedTo = mappedTo;
+        this.device = device;
+        this.from = from;
+        this.to = to;
+    }
+
+    public AbstractDeviceMappingEventImpl(AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, ItemType mappedTo,
+            DeviceIdentifier device, TimePoint from, TimePoint to) {
+        super(logicalTimePoint, author);
         this.mappedTo = mappedTo;
         this.device = device;
         this.from = from;

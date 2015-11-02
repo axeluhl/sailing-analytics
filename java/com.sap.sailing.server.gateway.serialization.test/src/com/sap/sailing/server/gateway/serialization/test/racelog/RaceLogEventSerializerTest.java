@@ -11,8 +11,27 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -52,7 +71,6 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> startOfTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> endOfTrackingEventSerializer;
 
-    private RaceLogEventFactory factory;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
     @SuppressWarnings("unchecked")
@@ -97,14 +115,12 @@ public class RaceLogEventSerializerTest {
                 closeOpenEndedDeviceMappingEventSerializer, fixedMarkPassingEventSerializer,
                 suppressedMarkPassingsSerializer, additionalScoringInformationSerializer,
                 dependentStartTimeEventSerializer, startOfTrackingEventSerializer, endOfTrackingEventSerializer);
-
-        factory = RaceLogEventFactory.INSTANCE;
     }
 
     @Test
     public void testChoosesFlagEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createFlagEvent(null, author, 0, null, null, false);
+        RaceLogEvent event = new RaceLogFlagEventImpl(null, author, 0, null, null, false);
         serializer.serialize(event);
         verify(flagEventSerializer).serialize(event);
     }
@@ -112,7 +128,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createStartTimeEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogStartTimeEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(startTimeSerializer).serialize(event);
     }
@@ -120,7 +136,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesRaceStatusSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRaceStatusEvent(null, author, 0, RaceLogRaceStatus.SCHEDULED);
+        RaceLogEvent event = new RaceLogRaceStatusEventImpl(null, author, 0, RaceLogRaceStatus.SCHEDULED);
         serializer.serialize(event);
         verify(raceStatusSerializer).serialize(event);
     }
@@ -128,7 +144,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesCourseAreaChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createCourseAreaChangedEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogCourseAreaChangeEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(courseAreaChangedEventSerializer).serialize(event);
     }
@@ -136,7 +152,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesPassChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createPassChangeEvent(null, author, 0);
+        RaceLogEvent event = new RaceLogPassChangeEventImpl(null, author, 0);
         serializer.serialize(event);
         verify(passChangedSerializer).serialize(event);
     }
@@ -144,7 +160,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesCourseDesignChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createCourseDesignChangedEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(courseDesignChangedEventSerializer).serialize(event);
     }
@@ -152,7 +168,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesFinishPositioningListChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createFinishPositioningListChangedEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogFinishPositioningListChangedEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(finishPositioningListChangedEventSerializer).serialize(event);
     }
@@ -160,7 +176,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesFinishPositioningConfirmedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createFinishPositioningConfirmedEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogFinishPositioningConfirmedEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(finishPositioningConfirmedEventSerializer).serialize(event);
     }
@@ -168,7 +184,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesPathfinderSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createPathfinderEvent(null, author, 0, "GER 20");
+        RaceLogEvent event = new RaceLogPathfinderEventImpl(null, author, 0, "GER 20");
         serializer.serialize(event);
         verify(pathfinderEventSerializer).serialize(event);
     }
@@ -176,7 +192,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesGateLineOpeningTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createGateLineOpeningTimeEvent(null, author, 0, 2l, 1l);
+        RaceLogEvent event = new RaceLogGateLineOpeningTimeEventImpl(null, author, 0, 2l, 1l);
         serializer.serialize(event);
         verify(gateLineOpeningTimeEventSerializer).serialize(event);
     }
@@ -184,7 +200,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testStartProcedureTypeChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createStartProcedureChangedEvent(null, author, 0, RacingProcedureType.ESS);
+        RaceLogEvent event = new RaceLogStartProcedureChangedEventImpl(null, author, 0, RacingProcedureType.ESS);
         serializer.serialize(event);
         verify(startProcedureTypeChangedEventSerializer).serialize(event);
     }
@@ -192,7 +208,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testProtestStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createProtestStartTimeEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(protestStartTimeEventSerializer).serialize(event);
     }
@@ -200,7 +216,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testWindFixSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createWindFixEvent(null, author, 0, null, /* isMagnetic */ false);
+        RaceLogEvent event = new RaceLogWindFixEventImpl(null, author, 0, null, /* isMagnetic */ false);
         serializer.serialize(event);
         verify(windFixEventSerializer).serialize(event);
     }
@@ -208,7 +224,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testDeviceCompetitorMappingSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createDeviceCompetitorMappingEvent(null, author, null, null, 0, null, null);
+        RaceLogEvent event = new RaceLogDeviceCompetitorMappingEventImpl(null, author, 0, null, null, null, null);
         serializer.serialize(event);
         verify(deviceCompetitorMappingEventSerializer).serialize(event);
     }
@@ -216,7 +232,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testDeviceMarkMappingSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createDeviceMarkMappingEvent(null, author, null, null, 0, null, null);
+        RaceLogEvent event = new RaceLogDeviceMarkMappingEventImpl(null, author, 0, null, null, null, null);
         serializer.serialize(event);
         verify(deviceMarkMappingEventSerializer).serialize(event);
     }
@@ -224,7 +240,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testDenoteForTrackingSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createDenoteForTrackingEvent(null, author, 0, "", null, null);
+        RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(null, author, 0, "", null, null);
         serializer.serialize(event);
         verify(denoteForTrackingEventSerializer).serialize(event);
     }
@@ -232,7 +248,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testCreateRaceSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createStartTrackingEvent(null, author, 0);
+        RaceLogEvent event = new RaceLogStartTrackingEventImpl(null, author, 0);
         serializer.serialize(event);
         verify(startTrackingEventSerializer).serialize(event);
     }
@@ -240,8 +256,8 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRevokeEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = RaceLogEventRestoreFactory.INSTANCE.createRevokeEvent(MillisecondsTimePoint.now(), author,
-                MillisecondsTimePoint.now(), 0, 0, UUID.randomUUID(), "type", "short info", "reason");
+        RaceLogEvent event = new RaceLogRevokeEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(),
+                author, 0, 0, UUID.randomUUID(), "type", "short info", "reason");
         serializer.serialize(event);
         verify(revokeEventSerializer).serialize(event);
     }
@@ -249,7 +265,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testRegisterCompetitorEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createRegisterCompetitorEvent(null, author, 0,
+        RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0,
             DomainFactory.INSTANCE
                 .getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
                         null));
@@ -260,7 +276,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testDefineMarkEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createDefineMarkEvent(null, author, 0, null);
+        RaceLogEvent event = new RaceLogDefineMarkEventImpl(null, author, 0, null);
         serializer.serialize(event);
         verify(defineMarkEventSerializer).serialize(event);
     }
@@ -268,7 +284,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testCloseOpenEndedDeviceMappingEventSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = factory.createCloseOpenEndedDeviceMappingEvent(null, author, 0, null, null);
+        RaceLogEvent event = new RaceLogCloseOpenEndedDeviceMappingEventImpl(null, author, 0, null, null);
         serializer.serialize(event);
         verify(closeOpenEndedDeviceMappingEventSerializer).serialize(event);
     }

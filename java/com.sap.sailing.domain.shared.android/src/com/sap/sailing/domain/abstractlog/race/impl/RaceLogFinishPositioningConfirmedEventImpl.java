@@ -10,13 +10,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogFinishPositioningConfirmedEventImpl extends RaceLogFinishPositioningEventImpl implements RaceLogFinishPositioningConfirmedEvent {
-   
+public class RaceLogFinishPositioningConfirmedEventImpl extends RaceLogFinishPositioningEventImpl implements
+        RaceLogFinishPositioningConfirmedEvent {
+
     private static final long serialVersionUID = 5028181339200048499L;
-    
-    public RaceLogFinishPositioningConfirmedEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pCompetitors, int pPassId, CompetitorResults positionedCompetitors) {
-        super(createdAt, author, pTimePoint, pId, pCompetitors, pPassId, positionedCompetitors);
+
+    public RaceLogFinishPositioningConfirmedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pCompetitors, int pPassId,
+            CompetitorResults positionedCompetitors) {
+        super(createdAt, pTimePoint, author, pId, pCompetitors, pPassId, positionedCompetitors);
+    }
+
+    public RaceLogFinishPositioningConfirmedEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+            CompetitorResults positionedCompetitors) {
+        super(pTimePoint, author, pPassId, positionedCompetitors);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.sap.sailing.domain.abstractlog.impl;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent<VisitorT> {
 
@@ -15,12 +17,22 @@ public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent
     private final Serializable id;
     private final AbstractLogEventAuthor author;
 
-    public AbstractLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    /**
+     * Restore existing event.
+     */
+    public AbstractLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId) {
         this.createdAt = createdAt;
         this.author = author;
         this.logicalTimePoint = logicalTimePoint;
         this.id = pId;
+    }
+    
+    /**
+     * Create new event.
+     */
+    public AbstractLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author) {
+        this(MillisecondsTimePoint.now(), logicalTimePoint, author, UUID.randomUUID());
     }
 
     @Override

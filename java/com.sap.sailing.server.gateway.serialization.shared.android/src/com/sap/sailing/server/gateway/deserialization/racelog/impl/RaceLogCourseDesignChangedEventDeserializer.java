@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -31,7 +32,7 @@ public class RaceLogCourseDesignChangedEventDeserializer extends BaseRaceLogEven
         JSONObject jsonCourseDesign = (JSONObject) object.get(RaceLogCourseDesignChangedEventSerializer.FIELD_COURSE_DESIGN);
         CourseBase courseData = courseDataDeserializer.deserialize(jsonCourseDesign);
 
-        return factory.createCourseDesignChangedEvent(createdAt, author, timePoint, id, competitors, passId, courseData);
+        return new RaceLogCourseDesignChangedEventImpl(createdAt, timePoint, author, id, competitors, passId, courseData);
     }
 
 }

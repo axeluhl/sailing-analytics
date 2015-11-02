@@ -9,17 +9,30 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogSuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements RaceLogSuppressedMarkPassingsEvent {
+public class RaceLogSuppressedMarkPassingsEventImpl extends RaceLogEventImpl implements
+        RaceLogSuppressedMarkPassingsEvent {
 
     private static final long serialVersionUID = 3665678555023150888L;
 
     private final Integer indexOfFirstSuppressedWaypoint;
 
-    public RaceLogSuppressedMarkPassingsEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId,
-            List<Competitor> pInvolvedBoats, int pPassId, Integer indexOfFirstSuppressedWaypoint) {
-        super(createdAt, author, logicalTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogSuppressedMarkPassingsEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId,
+            Integer indexOfFirstSuppressedWaypoint) {
+        super(createdAt, logicalTimePoint, author, pId, pInvolvedBoats, pPassId);
         this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
+    }
 
+    public RaceLogSuppressedMarkPassingsEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Competitor competitor, int pPassId, Integer indexOfFirstSuppressedWaypoint) {
+        super(logicalTimePoint, author, competitor, pPassId);
+        this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
+    }
+
+    public RaceLogSuppressedMarkPassingsEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            int pPassId, Integer indexOfFirstSuppressedWaypoint) {
+        super(logicalTimePoint, author, pPassId);
+        this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
     }
 
     @Override
@@ -34,6 +47,6 @@ public class RaceLogSuppressedMarkPassingsEventImpl extends RaceLogEventImpl imp
 
     @Override
     public String getShortInfo() {
-        return getInvolvedBoats().get(0).getName()+" at mark "+getZeroBasedIndexOfFirstSuppressedWaypoint();
+        return getInvolvedBoats().get(0).getName() + " at mark " + getZeroBasedIndexOfFirstSuppressedWaypoint();
     }
 }

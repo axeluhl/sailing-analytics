@@ -8,16 +8,22 @@ import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMapp
 import com.sap.sse.common.TimePoint;
 
 public abstract class BaseCloseOpenEndedDeviceMappingEventImpl<VisitorT> extends AbstractLogEventImpl<VisitorT>
-implements CloseOpenEndedDeviceMappingEvent<VisitorT> {
+        implements CloseOpenEndedDeviceMappingEvent<VisitorT> {
     private static final long serialVersionUID = -2401732623610224918L;
-    
+
     private final Serializable deviceMappingEventId;
     private final TimePoint closingTimePoint;
 
-    public BaseCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, Serializable deviceMappingEventId,
-            TimePoint closingTimePoint) {
-        super(createdAt, author, logicalTimePoint, pId);
+    public BaseCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
+        super(createdAt, logicalTimePoint, author, pId);
+        this.deviceMappingEventId = deviceMappingEventId;
+        this.closingTimePoint = closingTimePoint;
+    }
+
+    public BaseCloseOpenEndedDeviceMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable deviceMappingEventId, TimePoint closingTimePoint) {
+        super(logicalTimePoint, author);
         this.deviceMappingEventId = deviceMappingEventId;
         this.closingTimePoint = closingTimePoint;
     }

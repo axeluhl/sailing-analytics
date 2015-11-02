@@ -1213,11 +1213,11 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
         RaceLog raceLogForRace2 = leaderboardHighPoint10Or8AndLastBreaksTie.getRaceColumnByName("R2").getRaceLog(leaderboardHighPoint10Or8AndLastBreaksTie.getFleet(null));
-        raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, new LogEventAuthorImpl("Plopp", 1), later, "12345678", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.UNKNOWN));
+        raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, later, new LogEventAuthorImpl("Plopp", 1), "12345678", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.UNKNOWN));
         assertEquals(new Double(20), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));
-        raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, new LogEventAuthorImpl("Plopp", 1), later.plus(Duration.ONE_MINUTE), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+        raceLogForRace2.add(new RaceLogAdditionalScoringInformationEventImpl(now, later.plus(Duration.ONE_MINUTE), new LogEventAuthorImpl("Plopp", 1), "123456789873773762", Collections.<Competitor>emptyList(), 0, AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
         assertEquals(new Double(18), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[0], later));
         assertEquals(new Double(16), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[1], later));
         assertEquals(new Double(2), leaderboardHighPoint10Or8AndLastBreaksTie.getTotalPoints(competitors[9], later));

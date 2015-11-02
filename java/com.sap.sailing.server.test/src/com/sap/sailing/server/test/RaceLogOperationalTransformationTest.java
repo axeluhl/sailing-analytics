@@ -3,7 +3,6 @@ package com.sap.sailing.server.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -17,7 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogEventWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogStartTimeEventWithTransformationSupport;
 import com.sap.sse.common.TimePoint;
@@ -96,7 +94,7 @@ public class RaceLogOperationalTransformationTest {
     public void testSimpleApply() {
         Calendar c = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
         final MillisecondsTimePoint startTime = new MillisecondsTimePoint(c.getTime());
-        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(), author, startTime, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */ 1, startTime);
+        RaceLogStartTimeEvent startTimeEvent = new RaceLogStartTimeEventImpl(startTime, author, /* pass ID */ 1, startTime);
         RaceLogStartTimeEventWithTransformationSupport e = new RaceLogStartTimeEventWithTransformationSupport(startTimeEvent);
         server.apply(e);
         serverLatch.countDown();
@@ -140,7 +138,7 @@ public class RaceLogOperationalTransformationTest {
         final TimePoint createdAt = MillisecondsTimePoint.now();
         {
             RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
-                    author, startTimeServer, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */1,
+                    startTimeServer, author, UUID.randomUUID(), /* pass ID */1,
                     startTimeServer);
             RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventServer);
@@ -150,7 +148,7 @@ public class RaceLogOperationalTransformationTest {
             Calendar cClient1 = new GregorianCalendar(2013, 6, 7, 13, 59, 33);
             final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
             RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(createdAt,
-                    author, startTimeClient1, UUID.randomUUID(), Collections.<Competitor> emptyList(), /* pass ID */1,
+                    startTimeClient1, author, UUID.randomUUID(), /* pass ID */1,
                     startTimeClient1);
             final RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventClient1);

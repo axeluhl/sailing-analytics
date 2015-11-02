@@ -19,10 +19,17 @@ extends AbstractDeviceMappingEventImpl<RaceLogEventVisitor, ItemT> implements Ra
     private static final long serialVersionUID = -5114645637316367845L;
     private final RaceLogEventData raceLogEventData;
     
-    public AbstractRaceLogDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, int passId, ItemT mappedTo, DeviceIdentifier device,
+    public AbstractRaceLogDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, int passId, ItemT mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
         super(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+    }
+    
+    public AbstractRaceLogDeviceMappingEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId, ItemT mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
+        super(author, logicalTimePoint, mappedTo, device, from, to);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
     
