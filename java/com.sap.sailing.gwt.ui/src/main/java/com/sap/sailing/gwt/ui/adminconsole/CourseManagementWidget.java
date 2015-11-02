@@ -23,6 +23,7 @@ import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
@@ -73,6 +74,13 @@ public abstract class CourseManagementWidget implements IsWidget {
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
+        
+        marks.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                markSelectionChanged();
+            }
+        });
         
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());
@@ -156,6 +164,9 @@ public abstract class CourseManagementWidget implements IsWidget {
         controlPointsBtnsPanel.add(addControlPoint);
     }
     
+    protected void markSelectionChanged() {
+    }
+
     private void removeWaypoint(WaypointDTO waypoint) {
         waypoints.getDataProvider().getList().remove(waypoint);
     }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Set;
+
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -17,6 +20,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     protected final String leaderboardName;
     protected final String raceColumnName;
     protected final String fleetName;
+    private Button removeMark; 
 
     public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
@@ -27,7 +31,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
 
-        Button addMark = new Button(stringMessages.add(stringMessages.mark()));
+        Button addMark = new Button(stringMessages.addMarkToRegatta());
         addMark.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -35,18 +39,17 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         new DataEntryDialog.DialogCallback<MarkDTO>() {
                             @Override
                             public void ok(MarkDTO mark) {
-                                sailingService.addMarkToRegattaLog(leaderboardName, mark,
-                                        new AsyncCallback<Void>() {
-                                            @Override
-                                            public void onSuccess(Void result) {
-                                                refresh();
-                                            }
+                                sailingService.addMarkToRegattaLog(leaderboardName, mark, new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        refresh();
+                                    }
 
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                errorReporter.reportError("Could not add mark: " + caught.getMessage());
-                                            }
-                                        });
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Could not add mark: " + caught.getMessage());
+                                    }
+                                });
                             }
 
                             @Override
@@ -57,16 +60,15 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         });
         marksBtnsPanel.add(addMark);
 
-        /* TODO: implement the functionality as described in bug2851
-        Button removeMark = new Button(stringMessages.remove(stringMessages.mark()));
+        removeMark = new Button(stringMessages.remove(stringMessages.mark()));
         removeMark.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
 
-                for (MarkDTO markToRemove : marksToRemove) {
-                    sailingService.revokeMarkDefinitionEventInRegattaLog(leaderboardName,
-                            markToRemove, new AsyncCallback<Void>() {
+                for (final MarkDTO markToRemove : marksToRemove) {
+                    sailingService.revokeMarkDefinitionEventInRegattaLog(leaderboardName, markToRemove,
+                            new AsyncCallback<Void>() {
 
                                 @Override
                                 public void onSuccess(Void result) {
@@ -75,17 +77,16 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Removing mark failed: "+caught.getMessage());
                                 }
                             });
                 }
             }
         });
-        
+
         removeMark.setEnabled(false);
-        removeMark.setTitle("Is used in x races");
         marksBtnsPanel.add(removeMark);
-        */
-        
+
         ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn = new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
                 new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
         actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
@@ -96,7 +97,8 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                             new DataEntryDialog.DialogCallback<Position>() {
                                 @Override
                                 public void ok(Position position) {
-                                    sailingService.pingMark(leaderboardName, markDTO, position, new AsyncCallback<Void>() {
+                                    sailingService.pingMark(leaderboardName, markDTO, position,
+                                            new AsyncCallback<Void>() {
 
                                                 @Override
                                                 public void onSuccess(Void result) {
@@ -120,6 +122,30 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         });
         marks.getTable().addColumn(actionColumn);
     }
+    
+    @Override
+    protected void markSelectionChanged() {
+        Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
+      
+        sailingService.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
+                new AsyncCallback<Pair<Boolean, String>>() {
+                    @Override
+                    public void onSuccess(Pair<Boolean, String>result) {
+                        if (result.getA()){
+                            removeMark.setEnabled(false);
+                            removeMark.setTitle("Removal deavticated, marks are used in races: "+result.getB());
+                        } else {
+                            removeMark.setEnabled(true);
+                            removeMark.setTitle("");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not load course: " + caught.getMessage());
+                    }
+                });
+    }
 
     @Override
     public void refresh() {
@@ -136,17 +162,16 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                     }
                 });
 
-        sailingService.getMarksInRegattaLog(leaderboardName,
-                new AsyncCallback<Iterable<MarkDTO>>() {
-                    @Override
-                    public void onSuccess(Iterable<MarkDTO> result) {
-                        marks.refresh(result);
-                    }
+        sailingService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
+            @Override
+            public void onSuccess(Iterable<MarkDTO> result) {
+                marks.refresh(result);
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load marks: " + caught.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load marks: " + caught.getMessage());
+            }
+        });
     }
 }

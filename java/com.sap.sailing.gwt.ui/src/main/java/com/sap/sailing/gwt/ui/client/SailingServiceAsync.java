@@ -768,4 +768,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> asyncCallback);
+
+    void checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName, String fleetName,
+            Set<MarkDTO> marksToRemove, AsyncCallback<Pair<Boolean, String>> asyncCallback);
 }

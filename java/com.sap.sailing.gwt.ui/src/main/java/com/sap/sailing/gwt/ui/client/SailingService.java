@@ -626,4 +626,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException;
 
     void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName);
+
+    Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
+            String fleetName, Set<MarkDTO> marksToRemove);
 }
