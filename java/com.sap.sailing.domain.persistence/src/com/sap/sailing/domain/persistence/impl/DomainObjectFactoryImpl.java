@@ -74,6 +74,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFro
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
@@ -81,6 +82,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -1681,12 +1683,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent.class.getSimpleName())) {
             return loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(createdAt, author, logicalTimePoint, id, dbObject);
+        } else if (eventClass.equals(RegattaLogDefineMarkEvent.class.getSimpleName())) {
+            return loadRegattaLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, dbObject);
         } else if (eventClass.equals(RegattaLogRevokeEvent.class.getSimpleName())) {
             return loadRegattaLogRevokeEvent(createdAt, author, logicalTimePoint, id, dbObject);
         }
         throw new IllegalStateException(String.format("Unknown RegattaLogEvent type %s", eventClass));
     }
-    
+
     private Competitor getCompetitorByID(DBObject dbObject) {
         Serializable competitorId = (Serializable) dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name());
         Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
@@ -1718,6 +1722,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String reason = (String) dbObject.get(FieldNames.REGATTA_LOG_REVOKED_REASON.name());
         return new RegattaLogRevokeEventImpl(createdAt, author, logicalTimePoint, id,
                 revokedEventId, revokedEventType, revokedEventShortInfo, reason);
+    }
+    
+    private RegattaLogEvent loadRegattaLogDefineMarkEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
+            Mark mark = loadMark((DBObject) dbObject.get(FieldNames.REGATTA_LOG_MARK.name()));
+            return new RegattaLogDefineMarkEventImpl(createdAt, author, logicalTimePoint, id, mark);
     }
 
     private RegattaLogRegisterCompetitorEvent loadRegattaLogRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
