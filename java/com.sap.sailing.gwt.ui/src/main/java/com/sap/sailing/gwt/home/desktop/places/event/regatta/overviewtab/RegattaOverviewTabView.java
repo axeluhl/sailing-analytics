@@ -21,8 +21,8 @@ import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaLi
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
@@ -55,11 +55,10 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @Override
     public TabView.State getState() {
-        if(ExperimentalFeatures.SHOW_SINGLE_REGATTA_OVERVIEW) {
-            return currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA ? TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE
-                    : TabView.State.VISIBLE;
+        if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            return ExperimentalFeatures.SHOW_MULTIREGATTAEVENT_REGATTA_OVERVIEW ? State.VISIBLE : State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
         } else {
-            return TabView.State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
+            return ExperimentalFeatures.SHOW_SINGLE_REGATTA_OVERVIEW ? State.VISIBLE : State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
         }
     }
 
@@ -80,7 +79,11 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
             }
         }, new GetRegattaWithProgressAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId()));
 
-        stageUi.setupRefresh(refreshManager);
+        if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+            stageUi.removeFromParent();
+        } else {
+            stageUi.setupRefresh(refreshManager);
+        }
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO()
                 .getId(), currentPresenter.getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId(), 5));
