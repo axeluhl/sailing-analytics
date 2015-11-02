@@ -42,7 +42,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
             this.setupUpdateBox(container);
             this.setupImpressions(container);
         }
-        this.setupStatisticsBox(container);
+        this.setupStatisticsBox(container, presenter.isMultiRegattaEvent());
         setViewContent(container);
     }
     

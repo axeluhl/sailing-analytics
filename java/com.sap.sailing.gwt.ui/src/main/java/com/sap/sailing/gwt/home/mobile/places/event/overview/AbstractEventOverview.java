@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.GetEventOverviewStageAction;
 import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
@@ -46,9 +47,10 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
         container.add(impressionsUi);
     }
     
-    protected void setupStatisticsBox(Panel container) {
-        statisticsBoxUi = new StatisticsBox(isMultiRegattaEvent());
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(getEventId()));
+    protected void setupStatisticsBox(Panel container, boolean forRegattaOnly) {
+        statisticsBoxUi = new StatisticsBox(!forRegattaOnly);
+        refreshManager.add(statisticsBoxUi, forRegattaOnly ? new GetRegattaStatisticsAction(getEventId(),
+                getRegattaId()) : new GetEventStatisticsAction(getEventId()));
         container.add(statisticsBoxUi);
     }
     
