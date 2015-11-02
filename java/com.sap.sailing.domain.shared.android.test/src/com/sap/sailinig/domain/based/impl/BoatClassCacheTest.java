@@ -1,5 +1,6 @@
 package com.sap.sailinig.domain.based.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
@@ -62,5 +63,13 @@ public class BoatClassCacheTest {
         final String unifiedAlternativeName = BoatClassMasterdata.unifyBoatClassName(laserAlternativeName);
         final BoatClass laserByUnifiedAlternativeName = sharedDomainFactory.getOrCreateBoatClass(unifiedAlternativeName);
         assertSame(laserByAlternativeName, laserByUnifiedAlternativeName);
+    }
+    
+    @Test
+    public void testEssMayHaveNonUpwindStart() {
+        for (final String boatClassName : new String[] { "extreme40", "ess", "ess40" }) {
+            final BoatClass ess40 = sharedDomainFactory.getOrCreateBoatClass(boatClassName);
+            assertFalse("Boat class "+boatClassName+" expected to allow for non-upwind starts", ess40.typicallyStartsUpwind());
+        }
     }
 }
