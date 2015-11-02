@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogGateLineOpeningTimeEventImpl extends RaceLogEventImpl implements RaceLogGateLineOpeningTimeEvent {
@@ -15,16 +13,15 @@ public class RaceLogGateLineOpeningTimeEventImpl extends RaceLogEventImpl implem
     private final GateLineOpeningTimes gateLineOpeningTimes;
 
     public RaceLogGateLineOpeningTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pCompetitors, int pPassId,
+            AbstractLogEventAuthor author, Serializable pId, int pPassId,
             long gateLaunchStopTime, long golfDownTime) {
-        super(createdAt, pTimePoint, author, pId, pCompetitors, pPassId);
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.gateLineOpeningTimes = new GateLineOpeningTimes(gateLaunchStopTime, golfDownTime);
     }
 
-    public RaceLogGateLineOpeningTimeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogGateLineOpeningTimeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             long gateLaunchStopTime, long golfDownTime) {
-        super(pTimePoint, author, pPassId);
-        this.gateLineOpeningTimes = new GateLineOpeningTimes(gateLaunchStopTime, golfDownTime);
+        this(now(), logicalTimePoint, author, randId(), pPassId, gateLaunchStopTime, golfDownTime);
     }
 
     @Override

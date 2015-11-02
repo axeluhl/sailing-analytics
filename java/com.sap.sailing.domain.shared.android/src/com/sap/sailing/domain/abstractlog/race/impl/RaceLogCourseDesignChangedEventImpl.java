@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sse.common.TimePoint;
 
@@ -16,16 +14,15 @@ public class RaceLogCourseDesignChangedEventImpl extends RaceLogEventImpl implem
     private final CourseBase courseDesign;
 
     public RaceLogCourseDesignChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId,
+            AbstractLogEventAuthor author, Serializable pId, int pPassId,
             CourseBase courseDesign) {
-        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.courseDesign = courseDesign;
     }
 
-    public RaceLogCourseDesignChangedEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogCourseDesignChangedEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             CourseBase courseDesign) {
-        super(pTimePoint, author, pPassId);
-        this.courseDesign = courseDesign;
+        this(now(), logicalTimePoint, author, randId(), pPassId, courseDesign);
     }
 
     @Override

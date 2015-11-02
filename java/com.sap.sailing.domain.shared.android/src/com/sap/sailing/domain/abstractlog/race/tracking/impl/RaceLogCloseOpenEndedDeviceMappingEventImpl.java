@@ -27,8 +27,7 @@ public class RaceLogCloseOpenEndedDeviceMappingEventImpl extends
 
     public RaceLogCloseOpenEndedDeviceMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
-        super(logicalTimePoint, author, deviceMappingEventId, closingTimePoint);
-        this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+        this(now(), logicalTimePoint, author, randId(), passId, deviceMappingEventId, closingTimePoint);
     }
 
     @Override

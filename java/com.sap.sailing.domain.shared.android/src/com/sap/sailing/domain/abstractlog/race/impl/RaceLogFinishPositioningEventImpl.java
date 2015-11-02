@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl implements
@@ -17,15 +15,14 @@ public abstract class RaceLogFinishPositioningEventImpl extends RaceLogEventImpl
     private final CompetitorResults positionedCompetitors;
 
     public RaceLogFinishPositioningEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, CompetitorResults positionedCompetitors) {
-        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+            Serializable pId, int pPassId, CompetitorResults positionedCompetitors) {
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.positionedCompetitors = positionedCompetitors;
     }
 
-    public RaceLogFinishPositioningEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogFinishPositioningEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             CompetitorResults positionedCompetitors) {
-        super(pTimePoint, author, pPassId);
-        this.positionedCompetitors = positionedCompetitors;
+        this(now(), logicalTimePoint, author, randId(), pPassId, positionedCompetitors);
     }
 
     @Override

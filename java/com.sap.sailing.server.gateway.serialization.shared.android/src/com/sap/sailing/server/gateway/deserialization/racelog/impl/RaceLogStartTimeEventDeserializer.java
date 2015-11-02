@@ -27,7 +27,7 @@ public class RaceLogStartTimeEventDeserializer extends RaceLogRaceStatusEventDes
             throws JsonDeserializationException {
         long startTime = (Long) object.get(RaceLogStartTimeEventSerializer.FIELD_START_TIME);
         RaceLogRaceStatusEvent event = (RaceLogRaceStatusEvent) super.deserialize(object, id, createdAt, author, timePoint, passId, competitors);
-        return new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), event.getPassId(), new MillisecondsTimePoint(startTime));
+        return new RaceLogStartTimeEventImpl(event.getCreatedAt(), event.getLogicalTimePoint(), author, event.getId(), event.getPassId(), new MillisecondsTimePoint(startTime), null);
     }
 
 }

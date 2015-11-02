@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.TimePoint;
 
@@ -17,17 +15,15 @@ public class RaceLogWindFixEventImpl extends RaceLogEventImpl implements RaceLog
     private final boolean isMagnetic;
     
     public RaceLogWindFixEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Wind windFix, boolean isMagnetic) {
-        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+            Serializable pId, int pPassId, Wind windFix, boolean isMagnetic) {
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.windFix = windFix;
         this.isMagnetic = isMagnetic;
     }
     
-    public RaceLogWindFixEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author,
+    public RaceLogWindFixEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             int pPassId, Wind windFix, boolean isMagnetic) {
-        super(pTimePoint, author, pPassId);
-        this.windFix = windFix;
-        this.isMagnetic = isMagnetic;
+        this(now(), logicalTimePoint, author, randId(), pPassId, windFix, isMagnetic);
     }
 
     @Override

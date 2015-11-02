@@ -33,7 +33,7 @@ public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRace
         JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningConfirmedEventSerializer.FIELD_POSITIONED_COMPETITORS);
         CompetitorResults positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
 
-        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, timePoint, author, id, competitors, passId, positionedCompetitors);
+        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, timePoint, author, id, passId, positionedCompetitors);
     }
     
     private CompetitorResults deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {

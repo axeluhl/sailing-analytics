@@ -27,10 +27,7 @@ public class RaceLogDenoteForTrackingEventImpl extends RaceLogEventImpl implemen
 
     public RaceLogDenoteForTrackingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             String raceName, BoatClass boatClass, Serializable raceId) {
-        super(logicalTimePoint, author, pPassId);
-        this.raceName = raceName;
-        this.boatClass = boatClass;
-        this.raceId = raceId;
+        this(now(), logicalTimePoint, author, randId(), pPassId, raceName, boatClass, raceId);
     }
 
     @Override

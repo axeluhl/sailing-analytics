@@ -23,9 +23,7 @@ public abstract class BaseCloseOpenEndedDeviceMappingEventImpl<VisitorT> extends
 
     public BaseCloseOpenEndedDeviceMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable deviceMappingEventId, TimePoint closingTimePoint) {
-        super(logicalTimePoint, author);
-        this.deviceMappingEventId = deviceMappingEventId;
-        this.closingTimePoint = closingTimePoint;
+        this(now(), logicalTimePoint, author, randId(), deviceMappingEventId, closingTimePoint);
     }
 
     @Override

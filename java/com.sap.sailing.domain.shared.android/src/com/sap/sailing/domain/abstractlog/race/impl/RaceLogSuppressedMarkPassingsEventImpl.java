@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -25,14 +26,8 @@ public class RaceLogSuppressedMarkPassingsEventImpl extends RaceLogEventImpl imp
 
     public RaceLogSuppressedMarkPassingsEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Competitor competitor, int pPassId, Integer indexOfFirstSuppressedWaypoint) {
-        super(logicalTimePoint, author, competitor, pPassId);
-        this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
-    }
-
-    public RaceLogSuppressedMarkPassingsEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            int pPassId, Integer indexOfFirstSuppressedWaypoint) {
-        super(logicalTimePoint, author, pPassId);
-        this.indexOfFirstSuppressedWaypoint = indexOfFirstSuppressedWaypoint;
+        this(now(), logicalTimePoint, author, randId(), Collections.singletonList(competitor), pPassId,
+                indexOfFirstSuppressedWaypoint);
     }
 
     @Override

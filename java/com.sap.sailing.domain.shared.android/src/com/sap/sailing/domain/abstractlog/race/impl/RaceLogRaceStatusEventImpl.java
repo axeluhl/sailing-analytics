@@ -19,10 +19,9 @@ public class RaceLogRaceStatusEventImpl extends RaceLogEventImpl implements Race
         this.nextStatus = nextStatus;
     }
 
-    public RaceLogRaceStatusEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogRaceStatusEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             RaceLogRaceStatus nextStatus) {
-        super(pTimePoint, author, pPassId);
-        this.nextStatus = nextStatus;
+        this(now(), logicalTimePoint, author, randId(), pPassId, nextStatus);
     }
 
     @Override

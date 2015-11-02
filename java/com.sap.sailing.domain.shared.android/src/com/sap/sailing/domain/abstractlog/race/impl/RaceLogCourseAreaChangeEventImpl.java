@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implements RaceLogCourseAreaChangedEvent {
@@ -15,15 +13,14 @@ public class RaceLogCourseAreaChangeEventImpl extends RaceLogEventImpl implement
     private final Serializable courseAreaId;
 
     public RaceLogCourseAreaChangeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Serializable courseAreaId) {
-        super(createdAt, pTimePoint, author, pId, pInvolvedBoats, pPassId);
+            Serializable pId, int pPassId, Serializable courseAreaId) {
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.courseAreaId = courseAreaId;
     }
 
-    public RaceLogCourseAreaChangeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogCourseAreaChangeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             Serializable courseAreaId) {
-        super(pTimePoint, author, pPassId);
-        this.courseAreaId = courseAreaId;
+        this(now(), logicalTimePoint, author, randId(), pPassId, courseAreaId);
     }
 
     @Override

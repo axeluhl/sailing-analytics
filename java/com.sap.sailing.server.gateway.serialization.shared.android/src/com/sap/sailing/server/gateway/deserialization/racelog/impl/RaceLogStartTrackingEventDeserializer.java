@@ -21,6 +21,6 @@ public class RaceLogStartTrackingEventDeserializer extends BaseRaceLogEventDeser
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return new RaceLogStartTrackingEventImpl(createdAt, timePoint, author, id, competitors, passId);
+        return new RaceLogStartTrackingEventImpl(createdAt, timePoint, author, id, passId);
     }
 }

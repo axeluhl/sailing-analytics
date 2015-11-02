@@ -18,6 +18,12 @@ implements RegattaLogCloseOpenEndedDeviceMappingEvent {
         super(createdAt, logicalTimePoint, author, id, deviceMappingEventId, closingTimePoint);
     }
     
+    public RegattaLogCloseOpenEndedDeviceMappingEventImpl(AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable deviceMappingEventId,
+            TimePoint closingTimePoint) {
+        super(logicalTimePoint, author, deviceMappingEventId, closingTimePoint);
+    }
+    
     @Override
     public void accept(RegattaLogEventVisitor visitor) {
         visitor.visit(this);

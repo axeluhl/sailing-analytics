@@ -18,8 +18,8 @@ DeviceMappingEvent<VisitorT, ItemType> {
     private final TimePoint from;
     private final TimePoint to;
 
-    public AbstractDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, ItemType mappedTo,
+    public AbstractDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, ItemType mappedTo,
             DeviceIdentifier device, TimePoint from, TimePoint to) {
         super(createdAt, logicalTimePoint, author, id);
         this.mappedTo = mappedTo;
@@ -28,14 +28,10 @@ DeviceMappingEvent<VisitorT, ItemType> {
         this.to = to;
     }
 
-    public AbstractDeviceMappingEventImpl(AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, ItemType mappedTo,
+    public AbstractDeviceMappingEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, ItemType mappedTo,
             DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(logicalTimePoint, author);
-        this.mappedTo = mappedTo;
-        this.device = device;
-        this.from = from;
-        this.to = to;
+        this(now(), logicalTimePoint, author, randId(), mappedTo, device, from, to);
     }
 
     public ItemType getMappedTo() {

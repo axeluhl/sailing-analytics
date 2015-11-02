@@ -26,11 +26,9 @@ public class RaceLogDependentStartTimeEventImpl extends RaceLogRaceStatusEventIm
         this.startTimeDifference = startTimeDifference;
     }
 
-    public RaceLogDependentStartTimeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogDependentStartTimeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             SimpleRaceLogIdentifier dependentOnRace, Duration startTimeDifference) {
-        super(pTimePoint, author, pPassId, RaceLogRaceStatus.SCHEDULED);
-        this.dependentOnRace = dependentOnRace;
-        this.startTimeDifference = startTimeDifference;
+        this(now(), logicalTimePoint, author, randId(), pPassId, dependentOnRace, startTimeDifference, RaceLogRaceStatus.SCHEDULED);
     }
 
     @Override

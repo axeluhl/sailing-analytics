@@ -259,12 +259,12 @@ public class MasterDataImportTest {
         TimePoint logTimePoint = new MillisecondsTimePoint(1372489200000L);
         TimePoint logTimePoint2 = new MillisecondsTimePoint(1372489201000L);
         RaceLogStartTimeEvent logEvent = new RaceLogStartTimeEventImpl(logTimePoint, logTimePoint, author, 1,
-                0, logTimePoint);
+                0, logTimePoint, null);
         raceColumn.getRaceLog(testFleet1).add(logEvent);
         Position p = new DegreePosition(3, 3);
         Wind wind = new WindImpl(p, logTimePoint2, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(12)));
         RaceLogWindFixEvent windEvent = new RaceLogWindFixEventImpl(logTimePoint2, logTimePoint2, author,
-                UUID.randomUUID(), new ArrayList<Competitor>(), 2, wind, /* isMagnetic */false);
+                UUID.randomUUID(), 2, wind, /* isMagnetic */false);
         raceColumn.getRaceLog(testFleet1).add(windEvent);
         storedLogUUIDs.add(logEvent.getId());
         storedLogUUIDs.add(windEvent.getId());
@@ -413,7 +413,7 @@ public class MasterDataImportTest {
         TimePoint logTimePoint5 = new MillisecondsTimePoint(1372489310000L);
         UUID postImportEventId = UUID.randomUUID();
         RaceLogStartTimeEventImpl postImportLogEvent = new RaceLogStartTimeEventImpl(logTimePoint5, logTimePoint5,
-                author, postImportEventId, 3, logTimePoint5);
+                author, postImportEventId, 3, logTimePoint5, null);
         raceColumnOnTarget.getRaceLog(fleet1OnTarget).add(postImportLogEvent);
 
         // Check for regatta log event

@@ -22,15 +22,14 @@ extends AbstractDeviceMappingEventImpl<RaceLogEventVisitor, ItemT> implements Ra
     public AbstractRaceLogDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, int passId, ItemT mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        super(createdAt, author, logicalTimePoint, id, mappedTo, device, from, to);
+        super(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
     
     public AbstractRaceLogDeviceMappingEventImpl(TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, int passId, ItemT mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        super(author, logicalTimePoint, mappedTo, device, from, to);
-        this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+        this(now(), logicalTimePoint, author, randId(), passId, mappedTo, device, from, to);
     }
     
     @Override

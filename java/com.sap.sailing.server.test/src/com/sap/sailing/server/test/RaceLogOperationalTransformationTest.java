@@ -139,7 +139,7 @@ public class RaceLogOperationalTransformationTest {
         {
             RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeServer, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeServer);
+                    startTimeServer, null);
             RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventServer);
             server.apply(eServer);
@@ -149,7 +149,7 @@ public class RaceLogOperationalTransformationTest {
             final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
             RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeClient1, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeClient1);
+                    startTimeClient1, null);
             final RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventClient1);
             client1.apply(eClient1); // this call won't block because server calls apply(Peer, O, int) which first waits for the latch before synchronizing

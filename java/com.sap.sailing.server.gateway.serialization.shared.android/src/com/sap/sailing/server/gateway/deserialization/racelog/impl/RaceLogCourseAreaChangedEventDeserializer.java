@@ -25,7 +25,7 @@ public class RaceLogCourseAreaChangedEventDeserializer extends BaseRaceLogEventD
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         Serializable courseAreaId = (Serializable) object.get(RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID);
-        return new RaceLogCourseAreaChangeEventImpl(createdAt, timePoint, author, id, competitors, 
+        return new RaceLogCourseAreaChangeEventImpl(createdAt, timePoint, author, id, 
                 passId, Helpers.tryUuidConversion(courseAreaId));
     }
 

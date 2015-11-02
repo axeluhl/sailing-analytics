@@ -1,13 +1,11 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogFinishPositioningConfirmedEventImpl extends RaceLogFinishPositioningEventImpl implements
@@ -16,9 +14,9 @@ public class RaceLogFinishPositioningConfirmedEventImpl extends RaceLogFinishPos
     private static final long serialVersionUID = 5028181339200048499L;
 
     public RaceLogFinishPositioningConfirmedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
-            AbstractLogEventAuthor author, Serializable pId, List<Competitor> pCompetitors, int pPassId,
+            AbstractLogEventAuthor author, Serializable pId, int pPassId,
             CompetitorResults positionedCompetitors) {
-        super(createdAt, pTimePoint, author, pId, pCompetitors, pPassId, positionedCompetitors);
+        super(createdAt, pTimePoint, author, pId, pPassId, positionedCompetitors);
     }
 
     public RaceLogFinishPositioningConfirmedEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,

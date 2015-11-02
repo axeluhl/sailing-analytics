@@ -102,7 +102,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreEventWithoutAuthorLoadsCompatibilityAuthor() {
         RaceLogFlagEvent expectedEvent = new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), expectedEventTime, null,
-                expectedId, expectedInvolvedBoats, expectedPassId, Flags.NONE, Flags.NONE, true);
+                expectedId, expectedPassId, Flags.NONE, Flags.NONE, true);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogFlagEvent actualEvent = loadEvent(dbObject);
@@ -120,7 +120,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         boolean isDisplayed = true;
 
         RaceLogFlagEvent expectedEvent = new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), expectedEventTime,
-                author, expectedId, expectedInvolvedBoats, expectedPassId, upperFlag, lowerFlag, isDisplayed);
+                author, expectedId, expectedPassId, upperFlag, lowerFlag, isDisplayed);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogFlagEvent actualEvent = loadEvent(dbObject);
@@ -136,7 +136,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
         Serializable courseAreaId = UUID.randomUUID();
 
         RaceLogCourseAreaChangedEvent expectedEvent = new RaceLogCourseAreaChangeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedInvolvedBoats, expectedPassId, courseAreaId);
+                expectedEventTime, author, expectedId, expectedPassId, courseAreaId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogCourseAreaChangedEvent actualEvent = loadEvent(dbObject);
@@ -148,7 +148,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     @Test
     public void testStoreAndLoadPassChangeEvent() {
         RaceLogPassChangeEvent expectedEvent = new RaceLogPassChangeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedInvolvedBoats, expectedPassId);
+                expectedEventTime, author, expectedId, expectedPassId);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogPassChangeEvent actualEvent = loadEvent(dbObject);
@@ -173,7 +173,7 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     public void testStoreAndLoadStartTimeEvent() {
         TimePoint startTime = new MillisecondsTimePoint(1337);
         RaceLogStartTimeEvent expectedEvent = new RaceLogStartTimeEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedPassId, startTime);
+                expectedEventTime, author, expectedId, expectedPassId, startTime, null);
 
         DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
         RaceLogStartTimeEvent actualEvent = loadEvent(dbObject);

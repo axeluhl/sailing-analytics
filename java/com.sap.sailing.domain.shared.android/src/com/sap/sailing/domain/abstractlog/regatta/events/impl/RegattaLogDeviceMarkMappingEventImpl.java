@@ -16,12 +16,12 @@ implements RegattaLogDeviceMarkMappingEvent {
 
     public RegattaLogDeviceMarkMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(createdAt, author, logicalTimePoint, pId, mappedTo, device, from, to);
+        super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, to);
     }
 
     public RegattaLogDeviceMarkMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Mark mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(author, logicalTimePoint, mappedTo, device, from, to);
+        super(logicalTimePoint, author, mappedTo, device, from, to);
     }
 
     @Override

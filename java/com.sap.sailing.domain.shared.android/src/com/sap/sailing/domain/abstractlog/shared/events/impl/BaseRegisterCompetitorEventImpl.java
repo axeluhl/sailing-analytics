@@ -30,9 +30,7 @@ public abstract class BaseRegisterCompetitorEventImpl<VisitorT> extends Abstract
      */
     public BaseRegisterCompetitorEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Competitor competitor) throws IllegalArgumentException {
-        super(logicalTimePoint, author);
-        checkCompetitor(competitor);
-        this.competitor = competitor;
+        this(now(), logicalTimePoint, author, randId(), competitor);
     }
 
     private static void checkCompetitor(Competitor competitor) throws IllegalArgumentException {

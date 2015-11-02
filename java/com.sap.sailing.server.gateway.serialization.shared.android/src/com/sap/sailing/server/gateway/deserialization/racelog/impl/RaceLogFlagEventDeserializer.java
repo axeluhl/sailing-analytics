@@ -27,7 +27,7 @@ public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
         Flags lowerFlag = Flags.valueOf(object.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG).toString());
         boolean isDisplayed = (Boolean) object.get(RaceLogFlagEventSerializer.FIELD_DISPLAYED);
 
-        return new RaceLogFlagEventImpl(createdAt, timePoint, author, id, competitors, passId, upperFlag, lowerFlag, isDisplayed);
+        return new RaceLogFlagEventImpl(createdAt, timePoint, author, id, passId, upperFlag, lowerFlag, isDisplayed);
     }
 
 }

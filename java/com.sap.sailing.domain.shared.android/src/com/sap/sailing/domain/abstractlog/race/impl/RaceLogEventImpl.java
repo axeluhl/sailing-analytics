@@ -17,25 +17,22 @@ public abstract class RaceLogEventImpl extends AbstractLogEventImpl<RaceLogEvent
     private final RaceLogEventData raceLogEventData;
 
     public RaceLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, int pPassId) {
-        super(createdAt, logicalTimePoint, author, pId);
-        this.raceLogEventData = new RaceLogEventDataImpl(Collections.<Competitor>emptyList(), pPassId);
-    }
-
-    public RaceLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
         super(createdAt, logicalTimePoint, author, pId);
         this.raceLogEventData = new RaceLogEventDataImpl(pInvolvedBoats, pPassId);
     }
 
+    public RaceLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, int pPassId) {
+        this(createdAt, logicalTimePoint, author, pId, Collections.<Competitor>emptyList(), pPassId);
+    }
+
     public RaceLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Competitor competitor, int pPassId) {
-        super(logicalTimePoint, author);
-        this.raceLogEventData = new RaceLogEventDataImpl(Collections.singletonList(competitor), pPassId);
+        this(now(), logicalTimePoint, author, randId(), Collections.singletonList(competitor), pPassId);
     }
 
     public RaceLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        super(logicalTimePoint, author);
-        this.raceLogEventData = new RaceLogEventDataImpl(Collections.<Competitor>emptyList(), pPassId);
+        this(now(), logicalTimePoint, author, randId(), Collections.<Competitor>emptyList(), pPassId);
     }
     
     @Override

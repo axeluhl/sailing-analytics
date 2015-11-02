@@ -100,7 +100,7 @@ public class DependentRaceStateTest {
                 new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), null));
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000)));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
 
         verify(listenerC, times(3)).onStartTimeChanged(stateC);
         verify(listenerB, times(2)).onStartTimeChanged(stateB);
@@ -122,7 +122,7 @@ public class DependentRaceStateTest {
             }
         });
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, now));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, now, null));
         assertEquals(now.plus(delta), bTime[0]);
     }
 
@@ -135,9 +135,9 @@ public class DependentRaceStateTest {
                 new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), null));
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000)));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
 
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000)));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000), null));
 
         verify(listenerA, times(1)).onStartTimeChanged(stateA);
         verify(listenerB, times(3)).onStartTimeChanged(stateB);

@@ -31,7 +31,7 @@ public class RaceLogGateLineOpeningTimeEventDeserializer extends BaseRaceLogEven
         if (object.containsKey(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_GOLF_DOWN_TIME)) {
             golfDownTime = (Number) object.get(RaceLogGateLineOpeningTimeEventSerializer.FIELD_GATE_GOLF_DOWN_TIME);
         }
-        return new RaceLogGateLineOpeningTimeEventImpl(createdAt, timePoint, author, id, competitors, passId,
+        return new RaceLogGateLineOpeningTimeEventImpl(createdAt, timePoint, author, id, passId,
                 gateLaunchTime.longValue(), golfDownTime.longValue());
     }
 }

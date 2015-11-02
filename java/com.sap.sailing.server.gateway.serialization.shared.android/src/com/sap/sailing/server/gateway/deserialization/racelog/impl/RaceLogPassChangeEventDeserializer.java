@@ -20,7 +20,7 @@ public class RaceLogPassChangeEventDeserializer extends BaseRaceLogEventDeserial
 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors) {
-        return new RaceLogPassChangeEventImpl(createdAt, timePoint, author, id, competitors, passId);
+        return new RaceLogPassChangeEventImpl(createdAt, timePoint, author, id, passId);
     }
 
 }

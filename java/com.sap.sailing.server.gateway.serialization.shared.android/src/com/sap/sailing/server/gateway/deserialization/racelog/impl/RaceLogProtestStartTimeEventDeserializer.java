@@ -25,7 +25,7 @@ public class RaceLogProtestStartTimeEventDeserializer extends BaseRaceLogEventDe
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         Long protestStartTime = (Long) object.get(RaceLogProtestStartTimeEventSerializer.FIELD_PROTEST_START_TIME);
-        return new RaceLogProtestStartTimeEventImpl(createdAt, timePoint, author, id, competitors,
+        return new RaceLogProtestStartTimeEventImpl(createdAt, timePoint, author, id,
                 passId, new MillisecondsTimePoint(protestStartTime));
     }
 

@@ -14,15 +14,14 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
     private final TimePoint startTime;
 
     public RaceLogStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, int pPassId, TimePoint pStartTime) {
-        super(createdAt, pTimePoint, author, pId, pPassId, RaceLogRaceStatus.SCHEDULED);
+            Serializable pId, int pPassId, TimePoint pStartTime, RaceLogRaceStatus nextStatus) {
+        super(createdAt, pTimePoint, author, pId, pPassId, nextStatus);
         this.startTime = pStartTime;
     }
 
-    public RaceLogStartTimeEventImpl(TimePoint pTimePoint, AbstractLogEventAuthor author, int pPassId,
+    public RaceLogStartTimeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
             TimePoint pStartTime) {
-        super(pTimePoint, author, pPassId, RaceLogRaceStatus.SCHEDULED);
-        this.startTime = pStartTime;
+        this(now(), logicalTimePoint, author, randId(), pPassId, pStartTime, RaceLogRaceStatus.SCHEDULED);
     }
 
     @Override

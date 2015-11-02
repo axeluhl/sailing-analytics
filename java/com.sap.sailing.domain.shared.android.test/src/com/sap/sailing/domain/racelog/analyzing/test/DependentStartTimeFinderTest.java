@@ -98,7 +98,7 @@ public class DependentStartTimeFinderTest {
         assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000)));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
 
         finder = new StartTimeFinder(raceLogResolver, raceLogB);
         result = finder.analyze();
@@ -111,7 +111,7 @@ public class DependentStartTimeFinderTest {
         assertEquals(5000, result.getStartTimeDiff().asMillis());
 
         // Test correct behaviour, when middle element changes
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(15000)));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(15000), null));
         finder = new StartTimeFinder(raceLogResolver, raceLogA);
         result = finder.analyze();
         assertEquals(5000, result.getStartTime().asMillis());
@@ -157,7 +157,7 @@ public class DependentStartTimeFinderTest {
 
         // Check that all resolve correctly after changing some element in cycle
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000)));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
 
         // now A -> C -> B
         finder = new StartTimeFinder(raceLogResolver, raceLogA);

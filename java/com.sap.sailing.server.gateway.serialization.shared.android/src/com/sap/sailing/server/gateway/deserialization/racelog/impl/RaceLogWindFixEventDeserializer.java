@@ -31,7 +31,7 @@ public class RaceLogWindFixEventDeserializer extends BaseRaceLogEventDeserialize
         final JSONObject windJsonObject = Helpers.getNestedObjectSafe(object, RaceLogWindFixEventSerializer.FIELD_WIND);
         final Wind wind = windDeserializer.deserialize(windJsonObject);
         final Boolean isMagnetic = (Boolean) object.get(RaceLogWindFixEventSerializer.FIELD_MAGNETIC);
-        return new RaceLogWindFixEventImpl(createdAt, timePoint, author, id, competitors, passId, wind, isMagnetic == null ? true : isMagnetic);
+        return new RaceLogWindFixEventImpl(createdAt, timePoint, author, id, passId, wind, isMagnetic == null ? true : isMagnetic);
     }
 
 }

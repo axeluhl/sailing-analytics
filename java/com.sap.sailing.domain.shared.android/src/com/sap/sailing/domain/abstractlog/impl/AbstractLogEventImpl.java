@@ -17,9 +17,6 @@ public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent
     private final Serializable id;
     private final AbstractLogEventAuthor author;
 
-    /**
-     * Restore existing event.
-     */
     public AbstractLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId) {
         this.createdAt = createdAt;
@@ -29,10 +26,17 @@ public abstract class AbstractLogEventImpl<VisitorT> implements AbstractLogEvent
     }
     
     /**
-     * Create new event.
+     * To be used by constructors creating new events as the value for {@link #createdAt}.
      */
-    public AbstractLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author) {
-        this(MillisecondsTimePoint.now(), logicalTimePoint, author, UUID.randomUUID());
+    protected static final TimePoint now() {
+        return MillisecondsTimePoint.now();
+    }
+    
+    /**
+     * To be used by constructors creating new events as the value for {@link #id}.
+     */
+    protected static final Serializable randId() {
+        return UUID.randomUUID();
     }
 
     @Override

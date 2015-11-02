@@ -16,13 +16,13 @@ public class RegattaLogDeviceCompetitorMappingEventImpl extends
     public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        super(createdAt, author, logicalTimePoint, pId, mappedTo, device, from, to);
+        super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, to);
     }
 
     public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Competitor mappedTo, DeviceIdentifier device,
             TimePoint from, TimePoint to) {
-        super(author, logicalTimePoint, mappedTo, device, from, to);
+        super(logicalTimePoint, author, mappedTo, device, from, to);
     }
 
     private static final long serialVersionUID = -1494030544804758753L;

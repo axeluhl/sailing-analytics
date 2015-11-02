@@ -107,7 +107,7 @@ public class RaceStateTest {
         config.setESSConfiguration(mock(ESSConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, nowMock, author, "12", null, 0, RacingProcedureType.ESS));
+        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, nowMock, author, "12", 0, RacingProcedureType.ESS));
         state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
         
         assertEquals(RacingProcedureType.ESS, state.getRacingProcedure().getType());
@@ -134,7 +134,7 @@ public class RaceStateTest {
     public void testSetIndividualRecall() {
         assertFalse(state.getRacingProcedure().isIndividualRecallDisplayed());
         raceLog.add(new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID
-                .randomUUID(), null, /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
+                .randomUUID(), /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
         assertTrue(state.getRacingProcedure().isIndividualRecallDisplayed());
     }
 

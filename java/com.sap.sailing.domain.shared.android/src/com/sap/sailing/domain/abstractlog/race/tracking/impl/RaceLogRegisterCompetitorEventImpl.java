@@ -36,8 +36,7 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
     public RaceLogRegisterCompetitorEventImpl(TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, int passId, Competitor competitor)
             throws IllegalArgumentException {
-        super(logicalTimePoint, author, competitor);
-        this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+        this(now(), logicalTimePoint, author, randId(), passId, competitor);
     }
 
     @Override

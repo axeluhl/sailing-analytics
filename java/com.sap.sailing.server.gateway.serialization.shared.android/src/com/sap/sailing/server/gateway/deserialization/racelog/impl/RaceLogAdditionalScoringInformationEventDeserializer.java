@@ -25,6 +25,6 @@ public class RaceLogAdditionalScoringInformationEventDeserializer extends BaseRa
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         AdditionalScoringInformationType informationType = AdditionalScoringInformationType.valueOf((String)object.get(FIELD_TYPE));
-        return new RaceLogAdditionalScoringInformationEventImpl(createdAt, timePoint, author, id, competitors, passId, informationType);
+        return new RaceLogAdditionalScoringInformationEventImpl(createdAt, timePoint, author, id, passId, informationType);
     }
 }
