@@ -37,7 +37,7 @@ public class ExperimentalFeatures {
     /**
      * Provide textbox to filter races by competitor in desktop regatta races tab
      */
-    public static final boolean SHOW_RACES_BY_COMPETITOR_FILTER = false;
+    public static final boolean SHOW_RACES_BY_COMPETITOR_FILTER = true;
     /**
      * Using {@link com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay} to generically render the breadcrumbs in desktop UI (currently causes styling problems).
      */
@@ -53,5 +53,5 @@ public class ExperimentalFeatures {
     /**
      * Provide selection to filter regattas by boat category on mobile multiregatta event overview
      */
-    public static final boolean SHOW_BOAT_CATEGORY_FILTER_ON_MOBILE = false;
+    public static final boolean SHOW_BOAT_CATEGORY_FILTER_ON_MOBILE = true;
 }
