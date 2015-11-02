@@ -30,10 +30,12 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
     protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     protected final boolean filterByLeaderBoardInitially = false;
-    private final StringMessages stringMessages;
+    final StringMessages stringMessages;
     protected final SailingServiceAsync sailingService;
     final ErrorReporter errorReporter;
     private boolean editable;
+    private Button registerBtn;
+    private Button unregisterBtn;
 
     public AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
@@ -48,7 +50,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     @Override
     protected Widget getAdditionalWidget() {
         FlowPanel mainPanel = new FlowPanel();
-        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
         Button addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
@@ -73,8 +75,8 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
-        Button registerBtn = new Button("<");
-        Button unregisterBtn = new Button(">");
+        registerBtn = new Button("<");
+        unregisterBtn = new Button(">");
         registerBtn.setEnabled(editable);
         unregisterBtn.setEnabled(editable);
         movePanel.add(registerBtn);
@@ -98,13 +100,19 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         
         refreshCompetitors();
         
-        mainPanel.add(addCompetitorButton);
-        mainPanel.add(editCompetitorButton);
+        buttonPanel.add(addCompetitorButton);
+        buttonPanel.add(editCompetitorButton);        
+        mainPanel.add(buttonPanel);
+        
+        addAdditionalWidgets(mainPanel);
+
         mainPanel.add(competitorRegistrationPanel);
 
         return mainPanel;
     }
     
+    public abstract void addAdditionalWidgets(FlowPanel mainPanel);
+
     void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
         if (!toMove.isEmpty()) {
             List<CompetitorDTO> newFromList = new ArrayList<>();
@@ -196,6 +204,20 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     }
     
     protected abstract void setRegisteredCompetitors();
+    
+    public void deactivateRegistrationButtons(String tooltip){
+        registerBtn.setEnabled(false);
+        unregisterBtn.setEnabled(false);
+        registerBtn.setTitle(tooltip);
+        unregisterBtn.setTitle(tooltip);
+    }
+    
+    public void activateRegistrationButtons(){
+        registerBtn.setEnabled(true);
+        unregisterBtn.setEnabled(true);
+        registerBtn.setTitle("");
+        unregisterBtn.setTitle("");
+    }
 
     @Override
     protected Set<CompetitorDTO> getResult() {

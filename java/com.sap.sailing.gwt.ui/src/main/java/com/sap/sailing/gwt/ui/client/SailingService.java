@@ -620,4 +620,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException;
 
     Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
+
+    boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName, String fleetName);
+
+    void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException;
+
+    void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName);
 }

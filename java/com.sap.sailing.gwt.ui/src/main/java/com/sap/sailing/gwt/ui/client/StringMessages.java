@@ -1434,4 +1434,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String registerCompetitorsOnRace();
+    String doYouWantToRegisterCompetitorsDirectlyOnTheRace();
+    String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+    String warningDirectCompetitorRegistration();
+    String warningRegattaCompetitorRegistration();
+    String competitorRegistrationsOnRaceDisabled();
 }

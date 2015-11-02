@@ -79,9 +79,12 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleSta
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -5840,5 +5843,37 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         
         return convertToCompetitorDTOs(new CompetitorsInLogAnalyzer<>(regattaLog).analyze());
+    }
+
+    @Override
+    public boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName,
+            String fleetName) {
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        RaceLogUsesOwnCompetitorsAnalyzer analyzer = new RaceLogUsesOwnCompetitorsAnalyzer(raceLog);
+        return analyzer.analyze();
+    }
+
+    @Override
+    public void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException {
+        if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
+            RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+            
+            List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
+            List<UUID> eventIds = new ArrayList<>();
+            for (RaceLogEvent event : events) {
+                revokeEvent(false, event.getId(), raceLog);
+            }
+        }
+    }
+
+    @Override
+    public void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) {
+        if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
+            RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+            int passId = raceLog.getCurrentPassId();
+            RaceLogUseCompetitorsFromRaceLogEvent event = new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), 
+                    getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), passId);
+            raceLog.add(event);
+        }
     }
 }

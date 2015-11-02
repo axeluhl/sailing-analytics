@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,4 +38,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
                 });
     }
 
+    @Override
+    public void addAdditionalWidgets(FlowPanel mainPanel) {
+    }
 }
