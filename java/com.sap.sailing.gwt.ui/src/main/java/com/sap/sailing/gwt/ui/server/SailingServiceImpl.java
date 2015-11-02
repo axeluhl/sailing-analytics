@@ -5859,7 +5859,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
             
             List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
-            List<UUID> eventIds = new ArrayList<>();
             for (RaceLogEvent event : events) {
                 revokeEvent(false, event.getId(), raceLog);
             }
