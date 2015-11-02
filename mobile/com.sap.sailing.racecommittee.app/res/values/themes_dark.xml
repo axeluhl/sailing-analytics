@@ -51,6 +51,7 @@
         <item name="floatLabel">@style/AppTheme.Dark.Text.FloatLabel</item>
 
         <!-- drawable -->
+        <item name="access_time_18dp">@drawable/ic_access_time_white_18dp</item>
         <item name="access_time_24dp">@drawable/ic_access_time_white_24dp</item>
         <item name="access_time_36dp">@drawable/ic_access_time_white_36dp</item>
         <item name="arrow_down">@drawable/arrow_down_dark</item>

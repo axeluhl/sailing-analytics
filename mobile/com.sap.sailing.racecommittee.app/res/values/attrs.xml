@@ -38,6 +38,7 @@
     <attr name="floatLabel" format="reference"/>
 
     <!-- drawable -->
+    <attr name="access_time_18dp" format="reference"/>
     <attr name="access_time_24dp" format="reference"/>
     <attr name="access_time_36dp" format="reference"/>
     <attr name="arrow_down" format="reference"/>
