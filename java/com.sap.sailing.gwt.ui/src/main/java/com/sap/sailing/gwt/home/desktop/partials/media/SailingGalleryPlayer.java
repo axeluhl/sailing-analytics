@@ -86,7 +86,7 @@ public class SailingGalleryPlayer extends ResizeComposite {
 			    arrows : false,
 			    centerMode : false,
 			    speed : 500,
-			    autoplaySpeed : 1000,
+			    autoplaySpeed : 10000,
 			    pauseOnHover : true,
 			    variableWidth : false,
 			    adaptiveHeight : false,
