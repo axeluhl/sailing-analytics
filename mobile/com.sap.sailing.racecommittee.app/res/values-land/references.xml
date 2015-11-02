@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <item name="race_finished" type="layout">@layout/race_finished_large</item>
+    <item name="race_finished" type="layout">@layout/race_finished_xlarge</item>
     <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_ver</item>
     <item name="race_finished_desc" type="layout">@layout/race_finished_desc_ver</item>
-    <item name="race_list_header" type="layout">@layout/race_list_header_large</item>
+    <item name="race_list_header" type="layout">@layout/race_list_header_xlarge</item>
     <item name="race_list_list" type="layout">@layout/race_list_list_bottom</item>
-    <item name="race_main" type="layout">@layout/race_main_large</item>
+    <item name="race_main" type="layout">@layout/race_main_xlarge</item>
     <item name="race_panel_flags" type="layout">@layout/race_panel_flags_ver</item>
     <item name="race_panel_setup" type="layout">@layout/race_panel_setup_ver</item>
 
