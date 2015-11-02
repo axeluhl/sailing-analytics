@@ -290,8 +290,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         BoatClass result;
         synchronized (boatClassCache) {
             result = boatClassCache.get(unifiedBoatClassName);
-            if (result == null && unifiedBoatClassName != null) {
-                if (boatClassMasterdata != null) {
+            if (result == null) {
+                if (unifiedBoatClassName != null && boatClassMasterdata != null) {
                     result = new BoatClassImpl(boatClassMasterdata.getDisplayName(), boatClassMasterdata);
                 } else {
                     result = new BoatClassImpl(unifiedBoatClassName, typicallyStartsUpwind);
