@@ -62,5 +62,5 @@ public class ExperimentalFeatures {
     /**
      * Provide a button to toogle autoplay in mobile fullscreen image gallery viewer.
      */
-    public static final boolean SHOW_AUTOPLAY_IMAGES_ON_MOBILE = false;
+    public static final boolean SHOW_AUTOPLAY_IMAGES_ON_MOBILE = true;
 }
