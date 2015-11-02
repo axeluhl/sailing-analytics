@@ -5,9 +5,8 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,6 +104,10 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         }
     }
 
+    /**
+     * Holds the canonicalized boat class names which are known to maybe start other than with an upwind leg.
+     * The boat class name used here is obtained by using {@link BoatClassMasterdata#unifyBoatClassName(String)}.
+     */
     private final Set<String> mayStartWithNoUpwindLeg;
     
     private final RaceLogResolver raceLogResolver;
@@ -128,7 +131,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         this.competitorStore = competitorStore;
         waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
-        mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
+        mayStartWithNoUpwindLeg = Collections.singleton(BoatClassMasterdata.unifyBoatClassName(BoatClassMasterdata.EXTREME_40.getDisplayName()));
         courseAreaCache = new HashMap<Serializable, CourseArea>();
         configurationMatcherCache = new HashMap<Serializable, DeviceConfigurationMatcher>();
     }
@@ -283,12 +286,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     @Override
     public BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind) {
         final BoatClassMasterdata boatClassMasterdata = BoatClassMasterdata.resolveBoatClass(name);
-        final String unifiedBoatClassName;
-        if (boatClassMasterdata != null) {
-            unifiedBoatClassName = boatClassMasterdata.getDisplayName();
-        } else {
-            unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassName(name);
-        }
+        final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
         BoatClass result;
         synchronized (boatClassCache) {
             result = boatClassCache.get(unifiedBoatClassName);
@@ -305,9 +303,9 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
     
     @Override
-    public BoatClass getOrCreateBoatClass(String name) {
-        // FIXME ass also bug 3347: mapping to lower case should rather work through a common unification / canonicalization of boat class names
-        return getOrCreateBoatClass(name, name == null || /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
+    public BoatClass getOrCreateBoatClass(final String name) {
+        final String unifiedBoatClassName = BoatClassMasterdata.unifyBoatClassNameBasedOnExistingMasterdata(name);
+        return getOrCreateBoatClass(name, name == null || /* typicallyStartsUpwind */ !mayStartWithNoUpwindLeg.contains(unifiedBoatClassName));
     }
     
     @Override

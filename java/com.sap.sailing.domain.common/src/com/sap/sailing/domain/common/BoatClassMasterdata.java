@@ -134,8 +134,36 @@ public enum BoatClassMasterdata {
         return fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.get(unifyBoatClassName(boatClassName));
     }
 
+    /**
+     * Maps the <code>boatClassName</code> string by removing all whitespace and converting to all upper case.
+     * Example: "Laser Int." becomes "LASERINT."<p>
+     * 
+     * Note that the mapping is not related to the set of {@link BoatClassMasterdata} objects known and works the same
+     * regardless of whether <code>boatClassName</code> matches any of the existing {@link BoatClassMasterdata} literals,
+     * display names or alternative names.
+     */
     public static String unifyBoatClassName(String boatClassName) {
         return boatClassName == null ? null : boatClassName.toUpperCase().replaceAll("\\s+","");
+    }
+    
+    /**
+     * If any of the existing {@link BoatClassMasterdata} objects has a matching {@link #unifyBoatClassName(String)
+     * unified} display or alternative name, the unified display name of that object is returned. Otherwise, the
+     * {@link #unifyBoatClassName(String) unified} <code>boatClassName</code> value is returned. Example: "LASER" and
+     * "Laser" and "LSR" and "lsr" and "Laser Int." and "LASER INT ." and "LASERINT." will all be mapped to "LASERINT."
+     * based on the boat class masterdata object whose display name is "Laser Int.". In turn, "xyz" and "x y z" will be
+     * mapped to "XYZ" without any matching {@link BoatClassMasterdata} object existing, simply based on the string
+     * mapping described for {@link #unifyBoatClassName(String)}.
+     */
+    public static String unifyBoatClassNameBasedOnExistingMasterdata(String boatClassName) {
+        BoatClassMasterdata bcm = resolveBoatClass(boatClassName);
+        final String result;
+        if (bcm != null) {
+            result = unifyBoatClassName(bcm.getDisplayName());
+        } else {
+            result = unifyBoatClassName(boatClassName);
+        }
+        return result;
     }
     
     public Distance getHullLength() {
