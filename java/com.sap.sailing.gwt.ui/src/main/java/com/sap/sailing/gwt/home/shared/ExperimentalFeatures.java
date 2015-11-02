@@ -60,6 +60,10 @@ public class ExperimentalFeatures {
      */
     public static final boolean SHOW_BOAT_CATEGORY_FILTER_ON_MOBILE = true;
     /**
+     * Provide a button to toogle autoplay in desktop fullscreen image gallery viewer.
+     */
+    public static final boolean SHOW_AUTOPLAY_IMAGES_ON_DESKTOP = true;
+    /**
      * Provide a button to toogle autoplay in mobile fullscreen image gallery viewer.
      */
     public static final boolean SHOW_AUTOPLAY_IMAGES_ON_MOBILE = true;
