@@ -59,4 +59,8 @@ public class ExperimentalFeatures {
      * Provide selection to filter regattas by boat category on mobile multiregatta event overview
      */
     public static final boolean SHOW_BOAT_CATEGORY_FILTER_ON_MOBILE = true;
+    /**
+     * Provide a button to toogle autoplay in mobile fullscreen image gallery viewer.
+     */
+    public static final boolean SHOW_AUTOPLAY_IMAGES_ON_MOBILE = false;
 }
