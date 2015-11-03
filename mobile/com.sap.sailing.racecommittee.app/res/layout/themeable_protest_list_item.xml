@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CheckedTextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeightSmall"
     android:checkMark="?android:attr/listChoiceIndicatorMultiple"
     android:gravity="center_vertical"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-    android:textAppearance="?textXSmall"
-    />
+    android:textAppearance="?textXSmall"/>

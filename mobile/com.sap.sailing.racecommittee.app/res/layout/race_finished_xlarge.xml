@@ -22,4 +22,8 @@
         android:layout_toLeftOf="@id/finished_panel_desc"
         android:layout_toRightOf="@id/finished_panel_buttons"/>
 
+    <FrameLayout
+        android:id="@+id/protest_time_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>
