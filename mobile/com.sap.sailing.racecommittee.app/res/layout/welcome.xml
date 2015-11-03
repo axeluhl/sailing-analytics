@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/backdrop" />
+        android:src="@drawable/backdrop"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/constant_black_transparent" />
+        android:background="@color/constant_black_transparent"/>
 
     <TextView
         android:id="@+id/backdrop_title"
@@ -26,7 +26,7 @@
         android:layout_marginRight="@dimen/side_padding"
         android:text="@string/login_text"
         android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_32" />
+        android:textSize="@dimen/textSize_32"/>
 
     <ImageView
         android:id="@+id/imageView"
@@ -34,7 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/backdrop_title"
         android:layout_alignLeft="@+id/backdrop_title"
-        android:src="@drawable/sap_logo" />
+        android:layout_marginBottom="@dimen/side_padding"
+        android:src="@drawable/sap_logo"/>
 
     <FrameLayout
         android:id="@+id/protest_time_fragment"
