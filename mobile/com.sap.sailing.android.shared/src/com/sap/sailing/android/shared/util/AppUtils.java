@@ -10,7 +10,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -92,25 +91,21 @@ public class AppUtils {
     }
 
     /**
-     * Returns true, if device is identified as 7" tablet
+     * Returns true, if device is identified as 7" tablet or larger
      *
-     * @return true, if probably a 7" tablet
+     * @return true, if probably min 7" tablet
      */
     public boolean is7inch() {
-        int screenLayout = mContext.getResources().getConfiguration().screenLayout;
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
-            == Configuration.SCREENLAYOUT_SIZE_LARGE));
+        return (getSmallestWidth() >= 480);
     }
 
     /**
-     * Returns true, if device is identified as 10" tablet
+     * Returns true, if device is identified as 10" tablet or larger
      *
-     * @return true, if probably a 10" tablet
+     * @return true, if probably min 10" tablet
      */
     public boolean is10inch() {
-        int screenLayout = mContext.getResources().getConfiguration().screenLayout;
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && ((screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
-            == Configuration.SCREENLAYOUT_SIZE_XLARGE));
+        return (getSmallestWidth() >= 720);
     }
 
     /**
@@ -151,5 +146,9 @@ public class AppUtils {
 
     private int getDensity() {
         return mContext.getResources().getDisplayMetrics().densityDpi;
+    }
+
+    private int getSmallestWidth() {
+        return mContext.getResources().getConfiguration().smallestScreenWidthDp;
     }
 }
