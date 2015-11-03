@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogEventWithTransformationSupport;
 import com.sap.sailing.server.operationaltransformation.racelog.RaceLogStartTimeEventWithTransformationSupport;
 import com.sap.sse.common.TimePoint;
@@ -139,7 +140,7 @@ public class RaceLogOperationalTransformationTest {
         {
             RaceLogStartTimeEvent startTimeEventServer = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeServer, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeServer, null);
+                    startTimeServer, RaceLogRaceStatus.SCHEDULED);
             RaceLogStartTimeEventWithTransformationSupport eServer = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventServer);
             server.apply(eServer);
@@ -149,7 +150,7 @@ public class RaceLogOperationalTransformationTest {
             final MillisecondsTimePoint startTimeClient1 = new MillisecondsTimePoint(cClient1.getTime());
             RaceLogStartTimeEvent startTimeEventClient1 = new RaceLogStartTimeEventImpl(createdAt,
                     startTimeClient1, author, UUID.randomUUID(), /* pass ID */1,
-                    startTimeClient1, null);
+                    startTimeClient1, RaceLogRaceStatus.SCHEDULED);
             final RaceLogStartTimeEventWithTransformationSupport eClient1 = new RaceLogStartTimeEventWithTransformationSupport(
                     startTimeEventClient1);
             client1.apply(eClient1); // this call won't block because server calls apply(Peer, O, int) which first waits for the latch before synchronizing

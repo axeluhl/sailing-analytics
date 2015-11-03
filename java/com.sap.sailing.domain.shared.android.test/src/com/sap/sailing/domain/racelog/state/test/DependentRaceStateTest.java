@@ -26,6 +26,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.Racing
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -94,13 +95,13 @@ public class DependentRaceStateTest {
     @Test
     public void testCorrectAmountOfStartTimeChanges() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), null));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
 
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), null));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED));
 
         verify(listenerC, times(3)).onStartTimeChanged(stateC);
         verify(listenerB, times(2)).onStartTimeChanged(stateB);
@@ -110,8 +111,8 @@ public class DependentRaceStateTest {
     @Test
     public void testInitialRegistrationOfRaceState() {
         final MillisecondsDurationImpl delta = new MillisecondsDurationImpl(5000);
-        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), delta, null));
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), delta));
         final RaceState stateB2 = new RaceStateImpl(raceLogResolver, raceLogB, author, new RacingProcedureFactoryImpl(
                 author, configuration));
         final TimePoint[] bTime = new TimePoint[1];
@@ -122,22 +123,22 @@ public class DependentRaceStateTest {
             }
         });
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, now, null));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, 12, now));
         assertEquals(now.plus(delta), bTime[0]);
     }
 
     @Test
     public void testCorrectAmountOfStartTimeChanges2() {
         raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), null));
+                new SimpleRaceLogIdentifierImpl("B", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
 
         raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), null));
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), null));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000), RaceLogRaceStatus.SCHEDULED));
 
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000), null));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
 
         verify(listenerA, times(1)).onStartTimeChanged(stateA);
         verify(listenerB, times(3)).onStartTimeChanged(stateB);
