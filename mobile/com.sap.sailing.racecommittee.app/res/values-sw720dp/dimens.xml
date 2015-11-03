@@ -17,8 +17,6 @@
 
 	<dimen name="panel_text_padding">5dp</dimen>
 
-	<dimen name="logo_size">150dp</dimen>
-
 	<dimen name="textSize_14">14sp</dimen> <!-- XXSmall -->
 	<dimen name="textSize_18">18sp</dimen> <!-- XSmall -->
 	<dimen name="textSize_20">20sp</dimen>

@@ -30,8 +30,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="@dimen/logo_size"
-        android:layout_height="@dimen/logo_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_above="@+id/backdrop_title"
         android:layout_alignLeft="@+id/backdrop_title"
         android:src="@drawable/sap_logo" />
