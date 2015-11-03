@@ -127,7 +127,6 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
 
     private void openAddCompetitorDialog() {
-      
         new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(),
                 new DataEntryDialog.DialogCallback<CompetitorDTO>() {
                     @Override
@@ -148,7 +147,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                     @Override
                     public void cancel() {
                     }
-                },boatClass).show();
+                }, boatClass).show();
     }
     
     private void openEditCompetitorDialog() {
@@ -180,7 +179,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 @Override
                 public void cancel() {
                 }
-            },null).show();
+            }, /* boatClass */ null).show();
         }
     }
 

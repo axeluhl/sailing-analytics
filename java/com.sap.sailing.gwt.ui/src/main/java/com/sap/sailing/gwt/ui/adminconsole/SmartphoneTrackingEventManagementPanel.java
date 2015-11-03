@@ -60,7 +60,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
                 stringMessages, /* multiSelection */ true);
-        
         // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
         VerticalPanel importContent = new VerticalPanel();
@@ -105,13 +104,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
                 final String leaderboardName = leaderboardDTO.name;
-//                final String eventIdAsString = leaderboardDTO.
                 if (RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
-                    new RegattaLogCompetitorRegistrationDialog(searchBoatClass() ,sailingService, stringMessages, errorReporter, /*editable*/ true, 
+                    new RegattaLogCompetitorRegistrationDialog(searchBoatClass(), sailingService, stringMessages, errorReporter, /*editable*/ true, 
                             leaderboardName, new DialogCallback<Set<CompetitorDTO>>() {
-
                                 @Override
                                 public void ok(Set<CompetitorDTO> registeredCompetitors) {
                                     sailingService.setCompetitorRegistrationsInRegattaLog(leaderboardName, registeredCompetitors,
@@ -133,7 +130,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                 public void cancel() {
                                     
                                 }
-
                             }).show();
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
                     new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter,
@@ -237,7 +233,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, 
                             fleetName, new DialogCallback<List<com.sap.sse.common.Util.Pair<ControlPointDTO,PassingInstruction>>>() {
-
                         @Override
                         public void cancel() {
                         }
@@ -559,18 +554,21 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
 
     private String searchBoatClass() {
+        final String result;
         RegattaDTO regatta = null;
-        if (allRegattas != null)
+        if (allRegattas != null) {
             for (RegattaDTO i : allRegattas) {
-                if (getSelectedLeaderboard().regattaName != null)
+                if (getSelectedLeaderboard().regattaName != null) {
                     if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
                         regatta = i;
                         break;
                     }
+                }
             }
-
-        if (regatta != null)
-            return regatta.boatClass.getName();
+        }
+        if (regatta != null) {
+            result = regatta.boatClass.getName();
+        }
         else {
             sailingService.getCompetitorsOfLeaderboard(getSelectedLeaderboardName(),
                     new AsyncCallback<Iterable<CompetitorDTO>>() {
@@ -600,10 +598,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         boatClass = boatClassName;
                     }
                 }
-                return boatClass;
+                result = boatClass;
             } else {
-                return null;
+                result = null;
             }
         }
+        return result;
     }
 }
