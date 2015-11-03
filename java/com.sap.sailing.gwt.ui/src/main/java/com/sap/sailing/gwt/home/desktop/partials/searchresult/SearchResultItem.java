@@ -28,7 +28,6 @@ public class SearchResultItem extends Composite {
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     @UiField Anchor regattaLink;
-    @UiField SpanElement resultRegattaDetails;
     @UiField SpanElement resultEventDate;
     @UiField SpanElement resultEventVenue;
     @UiField Anchor eventOverviewLink;
@@ -45,16 +44,18 @@ public class SearchResultItem extends Composite {
         regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
         eventNavigation = placeNavigator.getEventNavigation(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
         String headlineLink = searchResult.getLeaderboardDisplayName();
-        if(headlineLink == null) {
-            headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult.getLeaderboardName();
+        if (headlineLink == null) {
+            headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult
+                    .getLeaderboardName();
         }
         regattaLink.setHref(regattaNavigation.getTargetUrl());
         regattaLink.setText(headlineLink);
         eventOverviewLink.setHref(eventNavigation.getTargetUrl());
         eventOverviewLink.setText(searchResult.getEvent().getName());
         resultEventVenue.setInnerText(searchResult.getEvent().venue.getName());
-        if(searchResult.getEvent().startDate != null) {
-            resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(searchResult.getEvent().startDate, searchResult.getEvent().endDate));
+        if (searchResult.getEvent().startDate != null) {
+            resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(
+                    searchResult.getEvent().startDate, searchResult.getEvent().endDate));
         } else {
             resultEventDate.setInnerText("Unknown date");
         }
