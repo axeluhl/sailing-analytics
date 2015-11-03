@@ -88,7 +88,7 @@
             android:layout_height="match_parent"
             android:background="?sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/buttonBar"
@@ -142,10 +142,10 @@
 
             <RelativeLayout
                 android:id="@+id/set_start_time"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_below="@id/buttonBar">
 
                 <Button
@@ -154,9 +154,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
+                    android:layout_marginRight="@dimen/default_margin_twice"
                     android:maxWidth="200dp"
-                    android:text="@string/race_set_time"
-                    android:layout_marginRight="@dimen/default_margin_twice"/>
+                    android:text="@string/race_set_time"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -207,7 +207,7 @@
             android:layout_height="match_parent"
             android:background="?sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/relative_input"
@@ -220,8 +220,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginBottom="@dimen/default_margin"
-                    android:layout_marginTop="@dimen/default_margin"
+                    android:layout_margin="@dimen/default_margin"
                     android:scaleX="@integer/picker_scale"
                     android:scaleY="@integer/picker_scale"/>
 
@@ -229,7 +228,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:padding="@dimen/default_padding"
+                    android:padding="@dimen/default_padding_half"
                     android:text="@string/minutes_after"
                     android:textAppearance="?textLarge"/>
 
