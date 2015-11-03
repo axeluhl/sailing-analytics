@@ -15,42 +15,45 @@ public class EventDatesFormatterUtil {
     private final static DateTimeFormat monthFormat = DateTimeFormat.getFormat("MMMM");
     private final static DateTimeFormat yearFormat = DateTimeFormat.getFormat("yyyy");
 
-    private final static int ONE_DAY = 24 * 60 * 60 * 1000; 
-
-    @SuppressWarnings("deprecation")
     public static String formatDateRangeWithYear(Date from, Date to) {
-        String result = "";
-        if(from.getMonth() == to.getMonth()) {
+        final String result;
+        final String fromMonth = monthFormat.format(from);
+        final String toMonth = monthFormat.format(to);
+        if (fromMonth.equals(toMonth)) {
             // same month
-            if(from.getDay() == to.getDay() && to.getTime() - to.getTime() <= ONE_DAY) {
+            final String fromDay = dayFormat.format(from);
+            final String toDay = dayFormat.format(to);
+            if (fromDay.equals(toDay)) {
                 // same day
-                result = monthFormat.format(from) + " " + dayFormat.format(from) + ", " + yearFormat.format(from);
+                result = fromMonth + " " + fromDay + ", " + yearFormat.format(from);
             } else {
-                result = monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to) + ", " + yearFormat.format(from);
+                result = fromMonth + " " + fromDay + " - " + toDay + ", "
+                        + yearFormat.format(from);
             }
         } else {
-            result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + ", " + yearFormat.format(from);
+            result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to) + ", "
+                    + yearFormat.format(from);
         }
-                
         return result;
     }
 
-    @SuppressWarnings("deprecation")
     public static String formatDateRangeWithoutYear(Date from, Date to) {
-        String result = "";
-        if(from.getMonth() == to.getMonth()) {
+        final String result;
+        final String fromMonth = monthFormat.format(from);
+        final String toMonth = monthFormat.format(to);
+        if (fromMonth.equals(toMonth)) {
             // same month
-            if(from.getDay() == to.getDay() && to.getTime() - to.getTime() <= ONE_DAY) {
+            final String fromDay = dayFormat.format(from);
+            final String toDay = dayFormat.format(to);
+            if (fromDay.equals(toDay)) {
                 // same day
-                result =  monthFormat.format(from) + " " + dayFormat.format(from);
+                result = fromMonth + " " + fromDay;
             } else {
-                result =  monthFormat.format(from) + " " + dayFormat.format(from) + " - " + dayFormat.format(to);
+                result = fromMonth + " " + fromDay + " - " + toDay;
             }
         } else {
             result = dayAndMonthFormat.format(from) + " - " + dayAndMonthFormat.format(to);
         }
-                
         return result;
     }
-
 }
