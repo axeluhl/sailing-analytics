@@ -96,7 +96,7 @@ public class AppUtils {
      * @return true, if probably min 7" tablet
      */
     public boolean is7inch() {
-        return (getSmallestWidth() >= 480);
+        return (getSmallestWidth() >= 600);
     }
 
     /**
