@@ -39,22 +39,17 @@ public class SearchResultItem extends Composite {
 
     public SearchResultItem(DesktopPlacesNavigator navigator, LeaderboardSearchResultDTO searchResult) {
         this.placeNavigator = navigator;
-        
         SearchResultResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
         EventBaseDTO event = searchResult.getEvent();
         regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
         eventNavigation = placeNavigator.getEventNavigation(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
-
         String headlineLink = searchResult.getLeaderboardDisplayName();
         if(headlineLink == null) {
             headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult.getLeaderboardName();
         }
-        
         regattaLink.setHref(regattaNavigation.getTargetUrl());
         regattaLink.setText(headlineLink);
-//        resultRegattaDetails.setInnerText("I have no idea yet what to show here...");
         eventOverviewLink.setHref(eventNavigation.getTargetUrl());
         eventOverviewLink.setText(searchResult.getEvent().getName());
         resultEventVenue.setInnerText(searchResult.getEvent().venue.getName());
