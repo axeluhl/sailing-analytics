@@ -25,6 +25,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -205,7 +206,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                     break;
 
                 case R.id.finish_custom:
-                    setFinishTime(getCustomFinishTime());
+                    setFinishTime(TimeUtils.getTime(mTimePicker));
                     break;
 
                 default:
@@ -223,15 +224,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 mCurrentTime.setText(mDateFormat.format(now.asMillis()));
                 mCurrentTime.setVisibility(View.VISIBLE);
             }
-        }
-
-        private TimePoint getCustomFinishTime() {
-            Calendar time = Calendar.getInstance();
-            time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-            time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-            time.set(Calendar.SECOND, 0);
-            time.set(Calendar.MILLISECOND, 0);
-            return new MillisecondsTimePoint(time.getTime());
         }
 
         private void setFinishTime() {

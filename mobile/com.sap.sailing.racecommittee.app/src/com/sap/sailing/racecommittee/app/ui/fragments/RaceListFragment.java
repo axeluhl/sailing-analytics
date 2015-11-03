@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -167,15 +169,15 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             }
             Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
             switch (getFilterMode()) {
-            case ALL:
-                mAllRacesButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mAllRacesButton, drawable);
-                break;
+                case ALL:
+                    mAllRacesButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mAllRacesButton, drawable);
+                    break;
 
-            default:
-                mCurrentRacesButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mCurrentRacesButton, drawable);
-                break;
+                default:
+                    mCurrentRacesButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mCurrentRacesButton, drawable);
+                    break;
             }
         }
     }
@@ -332,13 +334,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         switch (scrollState) {
-        case SCROLL_STATE_FLING:
-        case SCROLL_STATE_TOUCH_SCROLL:
-            mUpdateList = false;
-            break;
+            case SCROLL_STATE_FLING:
+            case SCROLL_STATE_TOUCH_SCROLL:
+                mUpdateList = false;
+                break;
 
-        default:
-            mUpdateList = true;
+            default:
+                mUpdateList = true;
         }
     }
 
@@ -477,7 +479,14 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                 if (!isRaceListDirty(races)) {
                     ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
-                    fragment.show(getFragmentManager(), null);
+                    View view = getActivity().findViewById(R.id.protest_time_fragment);
+                    if (AppUtils.with(getActivity()).isPort() && view != null) {
+                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                        transaction.replace(R.id.protest_time_fragment, fragment);
+                        transaction.commit();
+                    } else {
+                        fragment.show(getFragmentManager(), null);
+                    }
                 }
             }
         }
@@ -523,6 +532,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 String raceGroupName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                 if (raceGroupName != null) {
                     showProtestTimeDialog(raceGroupName);
+                    mDrawerLayout.closeDrawers();
                 } else {
                     ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
                 }

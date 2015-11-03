@@ -35,4 +35,9 @@
         android:layout_above="@+id/backdrop_title"
         android:layout_alignLeft="@+id/backdrop_title"
         android:src="@drawable/sap_logo" />
+
+    <FrameLayout
+        android:id="@+id/protest_time_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </RelativeLayout>

@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -13,26 +15,47 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.ViewParent;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TimePicker;
 
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ScreenHelper;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ProtestTimeDialogFragment extends AttachedDialogFragment {
+public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
-    private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
+    protected final static int MOVE_DOWN = -1;
+    protected final static int MOVE_NONE = 0;
+    protected final static int MOVE_UP = 1;
+    private static String ARGS_RACE_IDS = "args_race_ids";
+    protected ArrayList<ImageView> mDots;
+    protected ArrayList<View> mPanels;
+    protected int mActivePage = 0;
+    private List<ManagedRace> races;
+    private ListView mRacesList;
+    private TimePicker mTimePicker;
+    private View customView;
+    private Button mChoose;
+
+    public ProtestTimeDialogFragment() {
+        races = new ArrayList<>();
+    }
 
     public static ProtestTimeDialogFragment newInstance(List<ManagedRace> races) {
         ArrayList<String> raceIds = new ArrayList<>();
@@ -46,19 +69,88 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         return fragment;
     }
 
-    private List<ManagedRace> races;
-    private ListView racesList;
-    private TimePicker timePicker;
-    private View customView;
-
-    public ProtestTimeDialogFragment() {
-        races = new ArrayList<>();
+    private static boolean isFinishedToday(ManagedRace race) {
+        if (race.getStatus().equals(RaceLogRaceStatus.FINISHED)) {
+            FinishedTimeFinder analyzer = new FinishedTimeFinder(race.getRaceLog());
+            TimePoint finishedTime = analyzer.analyze();
+            if (finishedTime != null) {
+                Calendar finishedCalendar = Calendar.getInstance();
+                finishedCalendar.setTime(finishedTime.asDate());
+                Calendar now = Calendar.getInstance();
+                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR) && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now
+                    .get(Calendar.DAY_OF_YEAR);
+            }
+        }
+        return false;
     }
-    
+
     @Override
-    public void onStart() {
-        super.onStart();
-        forceWrapContent(customView);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View layout = super.onCreateView(inflater, container, savedInstanceState);
+        if (customView == null) {
+            layout = inflater.inflate(R.layout.protest_time_fragment, container, false);
+
+            mDots = new ArrayList<>();
+            mPanels = new ArrayList<>();
+
+            ImageView dot;
+            dot = ViewHelper.get(layout, R.id.panel_1);
+            if (dot != null) {
+                mDots.add(dot);
+            }
+            dot = ViewHelper.get(layout, R.id.panel_2);
+            if (dot != null) {
+                mDots.add(dot);
+            }
+            dot = ViewHelper.get(layout, R.id.panel_3);
+            if (dot != null) {
+                mDots.add(dot);
+            }
+
+            ImageView btnPrev = ViewHelper.get(layout, R.id.nav_prev);
+            if (btnPrev != null) {
+                btnPrev.setOnClickListener(this);
+            }
+
+            ImageView btnNext = ViewHelper.get(layout, R.id.nav_next);
+            if (btnNext != null) {
+                btnNext.setOnClickListener(this);
+            }
+
+            View home = ViewHelper.get(layout, R.id.header_text);
+            if (home != null) {
+                home.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
+                        BroadcastManager.getInstance(getActivity()).addIntent(intent);
+                    }
+                });
+            }
+
+            mPanels.add(ViewHelper.get(layout, R.id.protest_time_races_list));
+            mPanels.add(ViewHelper.get(layout, R.id.protest_time_time_layout));
+
+            getRacesFromArguments();
+
+            mRacesList = ViewHelper.get(layout, R.id.protest_time_races_list);
+            setupRacesList(mRacesList);
+            mTimePicker = ViewHelper.get(layout, R.id.protest_time_time_picker);
+            setupTimePicker(mTimePicker);
+
+            mChoose = ViewHelper.get(layout, R.id.choose);
+            if (mChoose != null) {
+                mChoose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setAndAnnounceProtestTime();
+                    }
+                });
+            }
+
+            viewPanel(MOVE_NONE);
+        }
+        return layout;
     }
 
     @Override
@@ -100,50 +192,22 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
     private View setupView() {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View view = inflater.inflate(R.layout.protest_time_view, null);
-        racesList = (ListView) view.findViewById(R.id.protest_time_races_list);
-        setupRacesList(racesList);
-        timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
-        setupTimePicker(timePicker);
+        View view = inflater.inflate(R.layout.protest_time_dialog, null);
+        mRacesList = (ListView) view.findViewById(R.id.protest_time_races_list);
+        setupRacesList(mRacesList);
+        mTimePicker = (TimePicker) view.findViewById(R.id.protest_time_time_picker);
+        setupTimePicker(mTimePicker);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             // TODO: @Samuel -> please check, why we did this, because I can't remember
-            ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
+            ViewGroup.LayoutParams layoutParams = mRacesList.getLayoutParams();
             layoutParams.height = 49 * races.size();
-            int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
+            int screenHeight = (int) (ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
             if (layoutParams.height > screenHeight) {
                 layoutParams.height = screenHeight;
             }
         }
         return view;
-    }
-    
-    protected void forceWrapContent(View v) {
-        // Start with the provided view
-        View current = v;
-
-        // Travel up the tree until fail, modifying the LayoutParams
-        do {
-            // Get the parent
-            ViewParent parent = current.getParent();    
-
-            // Check if the parent exists
-            if (parent != null) {
-                // Get the view
-                try {
-                    current = (View) parent;
-                } catch (ClassCastException e) {
-                    // This will happen when at the top view, it cannot be cast to a View
-                    break;
-                }
-
-                // Modify the layout
-                current.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
-            }
-        } while (current.getParent() != null);
-
-        // Request a layout to be re-done
-        current.requestLayout();
     }
 
     private void setupRacesList(ListView racesList) {
@@ -155,13 +219,11 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
                 racesList.setItemChecked(i++, isFinishedToday(race));
             }
         }
-        {
-            SparseBooleanArray checked = racesList.getCheckedItemPositions();
-            for (int i = 0; i < racesList.getCount(); i++) {
-                if (checked.get(i)) {
-                    racesList.setSelection(i);
-                    break;
-                }
+        SparseBooleanArray checked = racesList.getCheckedItemPositions();
+        for (int i = 0; i < racesList.getCount(); i++) {
+            if (checked.get(i)) {
+                racesList.setSelection(i);
+                break;
             }
         }
     }
@@ -172,12 +234,11 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         TimePoint recentFinishedTime = null;
         for (ManagedRace race : races) {
             TimePoint currentFinishedTime = race.getState().getFinishedTime();
-            if (currentFinishedTime != null
-                    && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
+            if (currentFinishedTime != null && (recentFinishedTime == null || recentFinishedTime.before(currentFinishedTime))) {
                 recentFinishedTime = currentFinishedTime;
             }
         }
-        Date suggestedDate = null;
+        Date suggestedDate;
         if (recentFinishedTime != null) {
             suggestedDate = recentFinishedTime.asDate();
         } else {
@@ -189,6 +250,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         int minutes = calendar.get(Calendar.MINUTE);
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
+
+        ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+            .getColor(getActivity(), R.attr.sap_yellow_1));
     }
 
     private void getRacesFromArguments() {
@@ -198,14 +262,16 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         }
         ReadonlyDataManager manager = DataManager.create(getActivity());
         ArrayList<String> raceIds = args.getStringArrayList(ARGS_RACE_IDS);
-        for (String id : raceIds) {
-            races.add(manager.getDataStore().getRace(id));
+        if (raceIds != null) {
+            for (String id : raceIds) {
+                races.add(manager.getDataStore().getRace(id));
+            }
         }
     }
 
     private void setAndAnnounceProtestTime() {
         List<ManagedRace> selectedRaces = getSelectedRaces();
-        TimePoint protestTime = getProtestTime();
+        TimePoint protestTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
             race.getState().setProtestTime(now, protestTime);
@@ -213,9 +279,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     private List<ManagedRace> getSelectedRaces() {
-        List<ManagedRace> result = new ArrayList<ManagedRace>();
-        SparseBooleanArray checked = racesList.getCheckedItemPositions();
-        for (int i = 0; i < racesList.getCount(); i++) {
+        List<ManagedRace> result = new ArrayList<>();
+        SparseBooleanArray checked = mRacesList.getCheckedItemPositions();
+        for (int i = 0; i < mRacesList.getCount(); i++) {
             if (checked.get(i)) {
                 result.add(races.get(i));
             }
@@ -223,31 +289,69 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         return result;
     }
 
-    private TimePoint getProtestTime() {
-        Calendar time = Calendar.getInstance();
-        time.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
-        time.set(Calendar.MINUTE, timePicker.getCurrentMinute());
-        time.set(Calendar.SECOND, 0);
-        time.set(Calendar.MILLISECOND, 0);
-        return new MillisecondsTimePoint(time.getTime());
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.nav_prev:
+                viewPanel(MOVE_DOWN);
+                break;
+
+            case R.id.nav_next:
+                viewPanel(MOVE_UP);
+                break;
+        }
+
     }
 
-    private static boolean isFinishedToday(ManagedRace race) {
-        if (race.getStatus().equals(RaceLogRaceStatus.FINISHED)) {
-            FinishedTimeFinder analyzer = new FinishedTimeFinder(race.getRaceLog());
-            TimePoint finishedTime = analyzer.analyze();
-            if (finishedTime != null) {
-                Calendar finishedCalendar = Calendar.getInstance();
-                finishedCalendar.setTime(finishedTime.asDate());
-                Calendar now = Calendar.getInstance();
-                return finishedCalendar.get(Calendar.YEAR) == now.get(Calendar.YEAR)
-                        && finishedCalendar.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR);
-            }
+    protected void viewPanel(int direction) {
+        if (mDots.size() == 0) {
+            return;
         }
-        return false;
+
+        // find next active page (with overflow)
+        mActivePage += direction;
+        if (mActivePage < 0) {
+            mActivePage = mDots.size() - 1;
+        }
+        if (mActivePage == mDots.size()) {
+            mActivePage = 0;
+        }
+
+        // ignore invisible dots
+        if (mDots.get(mActivePage).getVisibility() == View.GONE) {
+            viewPanel(direction);
+        }
+
+        // tint all dots gray
+        for (ImageView mDot : mDots) {
+            int tint = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
+            Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+            mDot.setImageDrawable(drawable);
+        }
+
+        // tint current dot black
+        int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
+        Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
+        mDots.get(mActivePage).setImageDrawable(drawable);
+
+        // hide all panels
+        for (View view : mPanels) {
+            view.setVisibility(View.GONE);
+        }
+
+        // show current panel
+        mPanels.get(mActivePage).setVisibility(View.VISIBLE);
+
+        if (mChoose != null) {
+            mChoose.setEnabled(mActivePage == mDots.size() - 1 && getSelectedRaces().size() != 0);
+        }
     }
 
     private static class ProtestTimeAdapter extends ArrayAdapter<ManagedRaceItem> {
+
+        public ProtestTimeAdapter(Context context, List<ManagedRace> objects) {
+            super(context, R.layout.themeable_protest_list_item, wrap(objects));
+        }
 
         private static List<ManagedRaceItem> wrap(List<ManagedRace> races) {
             List<ManagedRaceItem> wrapped = new ArrayList<ManagedRaceItem>();
@@ -255,10 +359,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
                 wrapped.add(new ManagedRaceItem(race));
             }
             return wrapped;
-        }
-
-        public ProtestTimeAdapter(Context context, List<ManagedRace> objects) {
-            super(context, R.layout.themeable_protest_list_item, wrap(objects));
         }
 
     }
@@ -277,7 +377,5 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         public String toString() {
             return String.format("%s - %s", group.getDisplayName(true), race.getRaceName());
         }
-
     }
-
 }

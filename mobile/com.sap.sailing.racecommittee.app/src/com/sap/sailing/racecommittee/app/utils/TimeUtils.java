@@ -10,6 +10,7 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sse.common.TimePoint;
@@ -198,5 +199,14 @@ public class TimeUtils {
             date.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             datePicker.getLayoutParams().width = date.getMeasuredWidth();
         }
+    }
+
+    public static TimePoint getTime(TimePicker timePicker) {
+        Calendar time = Calendar.getInstance();
+        time.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
+        time.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+        time.set(Calendar.SECOND, 0);
+        time.set(Calendar.MILLISECOND, 0);
+        return new MillisecondsTimePoint(time.getTime());
     }
 }

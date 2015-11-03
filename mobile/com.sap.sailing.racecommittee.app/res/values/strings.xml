@@ -76,7 +76,7 @@
     <string name="race_startphase_countdown_start">%1$s until %2$s starts&quot;</string>
     <string name="set_pathfinder">Pathfinder</string>
     <string name="set_pathfinder_title">Choose the pathfinder</string>
-    <string name="protest_dialog_title">Set the protest start time</string>
+    <string name="protest_dialog_title">Protest start time</string>
     <string name="finished_dialog_title">Set the time when the race finished</string>
     <string name="protest_start_time">Protest start time: %s</string>
     <string name="no_pathfinder_selected">No Pathfinder selected</string>

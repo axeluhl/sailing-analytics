@@ -204,6 +204,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+        filter.addAction(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -447,43 +448,57 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     public void processIntent(Intent intent) {
-        String action = intent.getAction();
+        Fragment content;
+        Fragment extra = null;
         Bundle args = new Bundle();
-        args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
-        Fragment contentFragment;
-        Fragment editFragment = null;
+
+        String action = intent.getAction();
+        if (mSelectedRace != null) {
+            args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
+        }
 
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
         if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
             if (findViewById(R.id.race_edit) != null) {
-                editFragment = getFragmentManager().findFragmentById(R.id.race_edit);
-                if (editFragment != null) {
-                    transaction.remove(editFragment);
+                extra = getFragmentManager().findFragmentById(R.id.race_edit);
+                if (extra != null) {
+                    transaction.remove(extra);
                 }
             }
-            if (editFragment == null && findViewById(R.id.race_content) != null) {
+            if (extra == null && findViewById(R.id.race_content) != null) {
                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
-                    contentFragment = RaceFlagViewerFragment.newInstance();
+                    content = RaceFlagViewerFragment.newInstance();
                 } else {
-                    contentFragment = RaceFinishingFragment.newInstance();
+                    content = RaceFinishingFragment.newInstance();
                 }
-                contentFragment.setArguments(args);
-                transaction.replace(R.id.race_content, contentFragment);
+                content.setArguments(args);
+                transaction.replace(R.id.race_content, content);
             }
         }
 
         if (AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
             if (findViewById(R.id.finished_edit) != null) {
-                editFragment = getFragmentManager().findFragmentById(R.id.finished_edit);
-                if (editFragment != null) {
-                    transaction.remove(editFragment);
+                extra = getFragmentManager().findFragmentById(R.id.finished_edit);
+                if (extra != null) {
+                    transaction.remove(extra);
                 }
             }
-            if (editFragment == null && findViewById(R.id.finished_content) != null) {
-                contentFragment = RaceSummaryFragment.newInstance(args);
-                transaction.replace(R.id.finished_content, contentFragment);
+            if (extra == null && findViewById(R.id.finished_content) != null) {
+                content = RaceSummaryFragment.newInstance(args);
+                transaction.replace(R.id.finished_content, content);
             }
         }
+
+        if (AppConstants.INTENT_ACTION_REMOVE_PROTEST.equals(action)) {
+            if (findViewById(R.id.protest_time_fragment) != null) {
+                extra = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
+                if (extra != null) {
+                    transaction.remove(extra);
+                }
+            }
+        }
+
         transaction.commit();
     }
 
