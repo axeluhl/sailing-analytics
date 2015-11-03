@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
+import com.sap.sse.common.Util;
 
 public class SearchResultItem extends Composite {
     interface SearchResultUiBinder extends UiBinder<Widget, SearchResultItem> {
@@ -40,9 +41,16 @@ public class SearchResultItem extends Composite {
         this.placeNavigator = navigator;
         SearchResultResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        EventBaseDTO event = searchResult.getEvent();
-        regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
-        eventNavigation = placeNavigator.getEventNavigation(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
+        Iterable<EventBaseDTO> events = searchResult.getEvents();
+        final EventBaseDTO event;
+        // TODO bug 3348: iterate over all events instead of just picking the first...
+        if (Util.isEmpty(events)) {
+            event = null;
+        } else {
+            event = events.iterator().next();
+        }
+        regattaNavigation = placeNavigator.getRegattaNavigation(event==null ? "" : event.id.toString(), searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
+        eventNavigation = placeNavigator.getEventNavigation(event==null?"":event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
         String headlineLink = searchResult.getLeaderboardDisplayName();
         if (headlineLink == null) {
             headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult
@@ -50,14 +58,16 @@ public class SearchResultItem extends Composite {
         }
         regattaLink.setHref(regattaNavigation.getTargetUrl());
         regattaLink.setText(headlineLink);
-        eventOverviewLink.setHref(eventNavigation.getTargetUrl());
-        eventOverviewLink.setText(searchResult.getEvent().getName());
-        resultEventVenue.setInnerText(searchResult.getEvent().venue.getName());
-        if (searchResult.getEvent().startDate != null) {
-            resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(
-                    searchResult.getEvent().startDate, searchResult.getEvent().endDate));
-        } else {
-            resultEventDate.setInnerText("Unknown date");
+        if (event != null) {
+            eventOverviewLink.setHref(eventNavigation.getTargetUrl());
+            eventOverviewLink.setText(event.getName());
+            resultEventVenue.setInnerText(event.venue.getName());
+            if (event.startDate != null) {
+                resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(
+                        event.startDate, event.endDate));
+            } else {
+                resultEventDate.setInnerText("Unknown date");
+            }
         }
     }
 

@@ -5493,15 +5493,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL,
             boolean isOnRemoteServer) {
-        ArrayList<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
-        for (LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
+        Collection<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
+        for (final LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
             LeaderboardGroupBaseDTO leaderboardGroupDTO = convertToLeaderboardGroupBaseDTO(lgb);
             leaderboardGroups.add(leaderboardGroupDTO);
         }
+        Collection<EventBaseDTO> events = new ArrayList<>();
+        for (final EventBase e : leaderboardSearchResult.getEvents()) {
+            events.add(convertToEventDTO(e));
+        }
         return new LeaderboardSearchResultDTO(baseURL.toString(), isOnRemoteServer, leaderboardSearchResult.getLeaderboard().getName(),
                 leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
-                leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
-                leaderboardGroups);
+                leaderboardSearchResult.getBoatClassName(), events, leaderboardGroups);
     }
 
     @Override

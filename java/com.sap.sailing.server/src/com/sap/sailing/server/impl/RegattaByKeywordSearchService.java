@@ -3,12 +3,12 @@ package com.sap.sailing.server.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.impl.LeaderboardSearchResultImpl;
@@ -34,8 +34,32 @@ import com.sap.sse.common.search.ResultImpl;
 public class RegattaByKeywordSearchService {
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
-        final Map<Leaderboard, Event> eventForLeaderboard = new HashMap<>();
+        final Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<>();
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
+        final Map<CourseArea, Event> eventForCourseArea = new HashMap<>();
+        final Map<Event, Set<String>> stringsForEvent = new HashMap<>();
+        final Map<LeaderboardGroup, Set<String>> stringsForLeaderboardGroup = new HashMap<>();
+        for (final Event event : racingEventService.getAllEvents()) {
+            final Set<String> s4e = new HashSet<>();
+            s4e.add(event.getName());
+            s4e.add(event.getVenue().getName());
+            stringsForEvent.put(event, s4e);
+            for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                Util.add(eventsForLeaderboardGroup, leaderboardGroup, event);
+            }
+            for (final CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                eventForCourseArea.put(courseArea, event);
+            }
+        }
+        for (final LeaderboardGroup leaderboardGroup : racingEventService.getLeaderboardGroups().values()) {
+            final Set<String> s4lg = new HashSet<>();
+            s4lg.add(leaderboardGroup.getName());
+            s4lg.add(leaderboardGroup.getDescription());
+            stringsForLeaderboardGroup.put(leaderboardGroup, s4lg);
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                Util.add(leaderboardGroupsForLeaderboard, leaderboard, leaderboardGroup);
+            }
+        }
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
             public Iterable<String> getStrings(Leaderboard leaderboard) {
@@ -51,58 +75,51 @@ public class RegattaByKeywordSearchService {
                         leaderboardStrings.add(competitorDisplayName);
                     }
                 }
-                final Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard = getLeaderboardGroupsHostingLeaderboard(
-                        leaderboard, racingEventService);
-                for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
-                    leaderboardStrings.add(leaderboardGroup.getName());
-                    leaderboardStrings.add(leaderboardGroup.getDescription());
-                    Set<LeaderboardGroup> leaderboardGroups = leaderboardGroupsForLeaderboard.get(leaderboard);
-                    if (leaderboardGroups == null) {
-                        leaderboardGroups = new HashSet<>();
-                        leaderboardGroupsForLeaderboard.put(leaderboard, leaderboardGroups);
+                final Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard = leaderboardGroupsForLeaderboard.get(leaderboard);
+                if (leaderboardGroupsHostingLeaderboard != null) {
+                    for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
+                        leaderboardStrings.addAll(stringsForLeaderboardGroup.get(leaderboardGroup));
+                        final Set<Event> eventsForLG = eventsForLeaderboardGroup.get(leaderboardGroup);
+                        if (eventsForLG != null) {
+                            for (final Event event : eventsForLG) {
+                                leaderboardStrings.addAll(stringsForEvent.get(event));
+                            }
+                        }
                     }
-                    leaderboardGroups.add(leaderboardGroup);
                 }
-                for (Event event : getEventsHostingLeaderboard(leaderboard, racingEventService, leaderboardGroupsHostingLeaderboard)) {
-                    leaderboardStrings.add(event.getName());
-                    leaderboardStrings.add(event.getVenue().getName());
-                    eventForLeaderboard.put(leaderboard, event);
+                final Event eventByDefaultCourseArea = eventForCourseArea.get(leaderboard.getDefaultCourseArea());
+                if (eventByDefaultCourseArea != null) {
+                    leaderboardStrings.addAll(stringsForEvent.get(eventByDefaultCourseArea));
                 }
+                // FIXME bug 3348: for event series the "containment" between event and leaderboard group works the other way: one leaderboard group hosts the leaderboards of a series of events
                 return leaderboardStrings;
             }
         };
         for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
-            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard, eventForLeaderboard.get(matchingLeaderboard), leaderboardGroupsForLeaderboard.get(matchingLeaderboard)));
+            result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard,
+                    getEventsForLeaderboard(matchingLeaderboard, leaderboardGroupsForLeaderboard,
+                            eventsForLeaderboardGroup, eventForCourseArea), leaderboardGroupsForLeaderboard
+                            .get(matchingLeaderboard)));
         }
         return result;
     }
 
-    private Iterable<LeaderboardGroup> getLeaderboardGroupsHostingLeaderboard(Leaderboard leaderboard, RacingEventService racingEventService) {
-        Set<LeaderboardGroup> result = new LinkedHashSet<>();
-        for (LeaderboardGroup leaderboardGroup : racingEventService.getLeaderboardGroups().values()) {
-            for (Leaderboard lgLeaderboard : leaderboardGroup.getLeaderboards()) {
-                if (lgLeaderboard == leaderboard) {
-                    result.add(leaderboardGroup);
+    private Set<Event> getEventsForLeaderboard(Leaderboard matchingLeaderboard,
+            Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard,
+            Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup, Map<CourseArea, Event> eventForCourseArea) {
+        final Set<Event> result = new HashSet<>();
+        final Set<LeaderboardGroup> lgs = leaderboardGroupsForLeaderboard.get(matchingLeaderboard);
+        if (lgs != null) {
+            for (final LeaderboardGroup lg : lgs) {
+                final Set<Event> eventsForLG = eventsForLeaderboardGroup.get(lg);
+                if (eventsForLG != null) {
+                    result.addAll(eventsForLG);
                 }
             }
         }
-        return result;
-    }
-
-    private Iterable<Event> getEventsHostingLeaderboard(Leaderboard leaderboard, RacingEventService racingEventService,
-            Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard) {
-        Set<Event> result = new LinkedHashSet<>();
-        for (Event event : racingEventService.getAllEvents()) {
-            if (Util.contains(event.getVenue().getCourseAreas(), leaderboard.getDefaultCourseArea())) {
-                result.add(event);
-            } else {
-                for (LeaderboardGroup leaderboardGroupHostingRegatta : leaderboardGroupsHostingLeaderboard) {
-                    if (Util.contains(event.getLeaderboardGroups(), leaderboardGroupHostingRegatta)) {
-                        result.add(event);
-                        break;
-                    }
-                }
-            }
+        final Event eventByCourseArea = eventForCourseArea.get(matchingLeaderboard.getDefaultCourseArea());
+        if (eventByCourseArea != null) {
+            result.add(eventByCourseArea);
         }
         return result;
     }

@@ -147,6 +147,19 @@ public class Util {
         }
         return addTo;
     }
+    
+    /**
+     * Adds <code>v</code> to the value set for key <code>k</code>. If no entry exists yet for <code>k</code>, the
+     * entry is created using a {@link HashSet} for the value set.
+     */
+    public static <K, V> void add(Map<K, Set<V>> map, K k, V v) {
+        Set<V> set = map.get(k);
+        if (set == null) {
+            set = new HashSet<>();
+            map.put(k, set);
+        }
+        set.add(v);
+    }
 
     /**
      * Removes all elements in <code>what</code> from <code>removeFrom</code> and returns <code>removeFrom</code> for chained use.

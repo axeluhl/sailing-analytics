@@ -76,7 +76,7 @@ public class SearchResult extends Composite {
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
         for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
-            if (singleSearchResult.getEvent() != null) {
+            if (singleSearchResult.getEvents() != null) {
                 SearchResultItem searchResultItem = new SearchResultItem(navigator, singleSearchResult);
                 searchResultItemPanel.add(searchResultItem);
                 searchResultItemComposites.add(searchResultItem);
