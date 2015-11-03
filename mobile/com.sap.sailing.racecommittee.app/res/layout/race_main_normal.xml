@@ -8,7 +8,7 @@
     <FrameLayout
         android:id="@+id/panels_top"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/side_button"
+        android:layout_height="@dimen/side_button_height"
         android:layout_alignParentTop="true">
 
         <FrameLayout
@@ -91,7 +91,7 @@
     <FrameLayout
         android:id="@+id/race_panel_flags"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/side_button"
+        android:layout_height="@dimen/side_button_height"
         android:layout_alignParentBottom="true"/>
 
     <FrameLayout

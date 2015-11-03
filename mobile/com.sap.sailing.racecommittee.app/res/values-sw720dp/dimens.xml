@@ -32,6 +32,7 @@
 	<dimen name="lock_margin">5dp</dimen>
 	<dimen name="race_flag_margin">100dp</dimen>
 
+	<dimen name="side_button_height">@dimen/side_button</dimen>
 	<dimen name="side_button_imageSize">100dp</dimen>
     <dimen name="side_button_lockSize">18dp</dimen>
 

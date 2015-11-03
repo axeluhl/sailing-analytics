@@ -5,6 +5,7 @@
     <dimen name="default_button_width">230dp</dimen>
 
     <dimen name="side_button">168dp</dimen>
+    <dimen name="side_button_height">100dp</dimen>
     <dimen name="side_button_large">200dp</dimen>
 
     <dimen name="checked_item_text">@dimen/textSize_26</dimen>
