@@ -2,9 +2,6 @@
 <resources>
 
     <style name="AppTheme.Light.Custom" parent="Theme.AppCompat.NoActionBar">
-        <item name="chevron_left">@drawable/ic_chevron_left_black_36dp</item>
-        <item name="chevron_right">@drawable/ic_chevron_right_black_36dp</item>
-
         <item name="flag_first_blue">@drawable/flag_first_blue_48dp_light</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_96dp_light</item>
@@ -13,7 +10,5 @@
         <item name="flags_postpone">@drawable/flags_postpone_96dp_light</item>
         <item name="flags_recall">@drawable/flags_recall_96dp_light</item>
     </style>
-
-    <style name="AppTheme.Light.Text.Header" parent="AppTheme.Light.Text.Normal"/>
 
 </resources>

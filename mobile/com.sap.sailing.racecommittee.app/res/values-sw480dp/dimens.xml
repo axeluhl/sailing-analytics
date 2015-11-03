@@ -4,4 +4,18 @@
     <dimen name="default_button_height">50dp</dimen>
     <dimen name="default_button_width">230dp</dimen>
 
+    <dimen name="side_button">168dp</dimen>
+    <dimen name="side_button_large">200dp</dimen>
+
+    <dimen name="checked_item_text">@dimen/textSize_26</dimen>
+    <dimen name="checked_item_small_text">@dimen/textSize_18</dimen>
+
+    <dimen name="panel_button_header_size">20sp</dimen>
+    <dimen name="panel_button_caption_size">18sp</dimen>
+
+    <!-- race state dependent -->
+    <!-- login -->
+    <dimen name="login_text_size_small">@dimen/textSize_22</dimen>
+    <dimen name="login_text_size">@dimen/textSize_26</dimen>
+
 </resources>
