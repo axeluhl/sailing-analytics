@@ -71,11 +71,14 @@ public interface ScoringScheme extends Serializable {
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
 
     /**
+     * @param o1 TODO
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
+     * @param o2 TODO
      * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
+     * @param timePoint TODO
      */
-    int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> competitor1Scores,
-            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter);
+    int compareByBetterScore(Competitor o1,
+            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
