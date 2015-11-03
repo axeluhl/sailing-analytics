@@ -9,7 +9,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sse.common.CountryCode;
 
-public class SimpleCompetitorDTO extends NamedDTO implements Serializable {
+public class SimpleCompetitorDTO extends NamedDTO implements Serializable, Comparable<SimpleCompetitorDTO> {
 
     private static final long serialVersionUID = -5743976446085202047L;
     
@@ -92,6 +92,12 @@ public class SimpleCompetitorDTO extends NamedDTO implements Serializable {
         } else if (!sailID.equals(other.sailID))
             return false;
         return true;
+    }
+    
+    @Override
+    public int compareTo(SimpleCompetitorDTO obj) {
+        int compareSailIds = this.sailID.compareTo(obj.sailID);
+        return compareSailIds == 0 ? this.getName().compareTo(obj.getName()): compareSailIds;
     }
     
 }

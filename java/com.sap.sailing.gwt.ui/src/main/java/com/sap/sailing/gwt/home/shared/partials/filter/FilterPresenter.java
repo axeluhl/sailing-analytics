@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 
-public abstract class FilterPresenter<T, C> {
+public abstract class FilterPresenter<T, C extends Comparable<C>> {
     private final Filter<T> alwaysMatchingFilter = new Filter<T>() {
         @Override
         public boolean matches(T object) {
