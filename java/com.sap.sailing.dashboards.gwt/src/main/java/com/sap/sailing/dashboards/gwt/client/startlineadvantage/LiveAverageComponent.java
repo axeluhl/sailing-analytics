@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.visualeffects.NumberTickingAnimation;
 import com.sap.sailing.dashboards.gwt.client.windchart.VerticalWindChartClickListener;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -74,8 +73,6 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
     LiveAverageComponentStyle style;
 
     private StringMessages stringConstants;
-    private NumberTickingAnimation liveTickingAnimation;
-    private NumberTickingAnimation averageTickingAnimation;
     
     public LiveAverageComponent() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -90,7 +87,6 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
      * */
     public LiveAverageComponent(String header, String unit) {
         stringConstants = StringMessages.INSTANCE;
-        initTickingAnimations();
         initWidget(uiBinder.createAndBindUi(this));
         liveAveragePanel.getElement().getStyle().setProperty("backgroundColor", "white");
         this.header.setInnerText(header);
@@ -104,31 +100,13 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
         this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
         this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
     }
-    
-    private void initTickingAnimations() {
-        liveTickingAnimation = new NumberTickingAnimation() {
-            
-            @Override
-            public void setValueInUI(String value) {
-                liveNumber.setInnerText(value);
-            }
-        };
-        
-        averageTickingAnimation = new NumberTickingAnimation() {
-            
-            @Override
-            public void setValueInUI(String value) {
-                averageNumber.setInnerText(value);
-            }
-        };
-    }
 
     public void setLiveValue(String liveValue) {
-        liveTickingAnimation.execute(liveValue);
+        liveNumber.setInnerText(liveValue);
     }
     
     public void setAverageValue(String averageValue) {
-        averageTickingAnimation.execute(averageValue);
+        averageNumber.setInnerText(averageValue);
     }
 
     @Override

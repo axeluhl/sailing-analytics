@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -77,8 +78,8 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
                         if (result != null) {
                             logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
                             startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
-                            advantageMaximumLiveAverage.setLiveValue("" + result.maximum);
-                            advantageMaximumLiveAverage.setAverageValue("" + result.average);
+                            advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(result.maximum));
+                            advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(result.average));
                         } else {
                             logger.log(Level.INFO, "StartlineAdvantagesWithMaxAndAverageDTO is null");
                         }
