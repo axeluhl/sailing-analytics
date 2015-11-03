@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -50,6 +52,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
     protected boolean regattaHasCompetitors = false;
+    
+    public static Iterable<CompetitorDTO> competitors = null;
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -105,7 +109,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 if (RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
                     denoteForRaceLogTracking(leaderboardDTO);
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS.equals(value)) {
-                    new RegattaLogCompetitorRegistrationDialog(sailingService, stringMessages, errorReporter, /*editable*/ true, 
+                    new RegattaLogCompetitorRegistrationDialog(searchBoatClass() ,sailingService, stringMessages, errorReporter, /*editable*/ true, 
                             leaderboardName, new DialogCallback<Set<CompetitorDTO>>() {
 
                                 @Override
@@ -148,6 +152,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     showRegattaLog();
                 }
             }
+
+            
         });
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(leaderboardNameColumn, stringMessages.name());
@@ -203,7 +209,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     removeDenotation(raceColumnDTOAndFleetDTO.getA(), raceColumnDTOAndFleetDTO.getB());
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COMPETITOR_REGISTRATIONS
                         .equals(value)) {
-                    new RaceLogCompetitorRegistrationDialog(sailingService, stringMessages, errorReporter, editable, leaderboardName, 
+                    new RaceLogCompetitorRegistrationDialog(searchBoatClass() , sailingService, stringMessages, errorReporter, editable, leaderboardName, 
                             raceColumnName, fleetName, new DialogCallback<Set<CompetitorDTO>>() {
 
                         @Override
@@ -227,6 +233,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         public void cancel() {
                         }
                     }).show();
+                    
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_DEFINE_COURSE.equals(value)) {
                     new RaceLogTrackingCourseDefinitionDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, 
                             fleetName, new DialogCallback<List<com.sap.sse.common.Util.Pair<ControlPointDTO,PassingInstruction>>>() {
@@ -549,5 +556,54 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             }
         }).show();
         
+    }
+
+    private String searchBoatClass() {
+        RegattaDTO regatta = null;
+        if (allRegattas != null)
+            for (RegattaDTO i : allRegattas) {
+                if (getSelectedLeaderboard().regattaName != null)
+                    if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
+                        regatta = i;
+                        break;
+                    }
+            }
+
+        if (regatta != null)
+            return regatta.boatClass.getName();
+        else {
+            sailingService.getCompetitorsOfLeaderboard(getSelectedLeaderboardName(),
+                    new AsyncCallback<Iterable<CompetitorDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            SmartphoneTrackingEventManagementPanel.competitors = null;
+                        }
+
+                        @Override
+                        public void onSuccess(Iterable<CompetitorDTO> result) {
+                            SmartphoneTrackingEventManagementPanel.competitors = result;
+                        }
+                    });
+
+            if (competitors != null) {
+                HashMap<String, Integer> countBoatsPerType = new HashMap<String, Integer>();
+                String boatClass = null;
+                int highestCount = 0;
+                for (CompetitorDTO comp : competitors) {
+                    String boatClassName = comp.getBoatClass().getName();
+                    Integer boatClassCount = countBoatsPerType.get(boatClassName);
+                    if (boatClassCount == null)
+                        boatClassCount = 0;
+                    boatClassCount++;
+                    if (boatClassCount > highestCount) {
+                        highestCount = boatClassCount;
+                        boatClass = boatClassName;
+                    }
+                }
+                return boatClass;
+            } else {
+                return null;
+            }
+        }
     }
 }

@@ -207,7 +207,7 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void cancel() {
             }
-        }).show();
+        },null).show();
     }
     
     private String getLocaleInfo() {
