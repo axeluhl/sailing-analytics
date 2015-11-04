@@ -19,10 +19,12 @@
 	<g:HTMLPanel addStyleNames="{style.mainContent}">
 		<div class="{res.mainCss.wrapper}">
 			<dp:header.Header ui:field="headerPanel" />
-			<div ui:field="breadcrumbWrapperUi" class="{res.mediaCss.grid}" style="display: none;">
-				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-					<c:BreadcrumbPane ui:field="breadcrumbsUi"
-						addStyleNames="{style.breadcrumb}" />
+			<div ui:field="breadcrumbWrapperUi" style="display: none;">
+				<div class="{res.mediaCss.grid}">
+					<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+						<c:BreadcrumbPane ui:field="breadcrumbsUi"
+							addStyleNames="{style.breadcrumb}" />
+					</div>
 				</div>
 			</div>
 			<g:SimplePanel ui:field="mainContentPanel" />

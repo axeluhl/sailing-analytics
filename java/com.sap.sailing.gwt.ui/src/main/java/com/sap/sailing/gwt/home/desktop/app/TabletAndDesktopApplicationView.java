@@ -46,7 +46,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @UiField
     DivElement breadcrumbWrapperUi;
     
-    private final ResettableNavigationPathDisplay navigationPathDisplay;
+    private final DesktopResettableNavigationPathDisplay navigationPathDisplay;
 
     public TabletAndDesktopApplicationView(DesktopPlacesNavigator navigator, EventBus eventBus) {
         headerPanel = new Header(navigator, eventBus);
@@ -74,7 +74,16 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
         return navigationPathDisplay;
     }
     
-    private class BreadcrumbNavigationPathDisplay implements ResettableNavigationPathDisplay {
+    private class BreadcrumbNavigationPathDisplay implements DesktopResettableNavigationPathDisplay {
+        @Override
+        public void setWithHeader(boolean withHeader) {
+            if(withHeader) {
+                breadcrumbWrapperUi.getStyle().setBackgroundColor("#f2f2f2");
+            } else {
+                breadcrumbWrapperUi.getStyle().clearBackgroundColor();;
+            }
+        }
+        
         @Override
         public void showNavigationPath(NavigationItem... navigationPath) {
             breadcrumbsUi.clear();
