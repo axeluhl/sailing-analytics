@@ -115,13 +115,13 @@ public class SailingGalleryPlayer extends ResizeComposite {
     }-*/;
 
     private native void _slickPlay() /*-{
-	$wnd.$('.mainSlider').slick('slickPlay').slick('slickNext').slick(
+	$wnd.$('.subSlider').slick('slickPlay').slick('slickNext').slick(
 		'setOption', 'autoplay', true); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
     }-*/;
 
     private native void _slickPause() /*-{
-	$wnd.$('.mainSlider').slick('slickPause').slick('setOption',
-		'autoplay', false); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+	$wnd.$('.subSlider').slick('slickPause').slick('setOption', 'autoplay',
+		false); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
     }-*/;
 
     public void toggleAutoplay() {
@@ -133,6 +133,11 @@ public class SailingGalleryPlayer extends ResizeComposite {
         }
     }
 
+    @Override
+    protected void onUnload() {
+        if (isAutoplaying())
+            toggleAutoplay();
+    }
     public boolean isAutoplaying() {
         return autoplay;
     }

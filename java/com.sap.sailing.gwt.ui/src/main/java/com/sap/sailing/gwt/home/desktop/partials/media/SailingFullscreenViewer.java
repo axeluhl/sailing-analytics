@@ -33,6 +33,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
 
     public void show(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         showContent(player = new SailingGalleryPlayer(selected, images));
+        autoRefreshControl.setStyleName(IS_AUTOPLAYING_STYLE, player.isAutoplaying());
     }
     
     private void toggleAutoplay() {
