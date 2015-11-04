@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.AbstractMultiregattaEventPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaActivity;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
@@ -17,7 +18,7 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 
-public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFactory> {
+public class EventActivityProxy extends AbstractEventActivityProxy<EventClientFactory> implements WithHeader {
 
     private DesktopPlacesNavigator homePlacesNavigator;
 
