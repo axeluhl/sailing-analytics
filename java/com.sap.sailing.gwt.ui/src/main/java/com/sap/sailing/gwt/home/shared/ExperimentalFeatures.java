@@ -46,7 +46,7 @@ public class ExperimentalFeatures {
     /**
      * Using {@link com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay} to generically render the breadcrumbs in desktop UI (currently causes styling problems).
      */
-    public static final boolean USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP = false;
+    public static final boolean USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP = true;
     /**
      * Using {@link com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay} to generically render navigation menu extensions.
      */
