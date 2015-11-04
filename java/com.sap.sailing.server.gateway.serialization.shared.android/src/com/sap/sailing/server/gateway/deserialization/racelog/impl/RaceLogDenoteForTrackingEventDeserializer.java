@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -31,6 +32,6 @@ public class RaceLogDenoteForTrackingEventDeserializer extends BaseRaceLogEventD
     			(String) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_BOAT_CLASS));
     	Serializable raceId = (Serializable) object.get(RaceLogDenoteForTrackingEventSerializer.FIELD_RACE_ID);
         
-        return factory.createDenoteForTrackingEvent(createdAt, author, timePoint, id, passId, raceName, boatClass, raceId);
+        return new RaceLogDenoteForTrackingEventImpl(createdAt, timePoint, author, id, passId, raceName, boatClass, raceId);
     }
 }

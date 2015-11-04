@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
@@ -57,7 +58,7 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
         ListResult<SearchResultDTO> resultList = new ListResult<>();
         for (T hit : result.getHits()) {
             // TODO: for now filter all results where we no event is defined
-            if (hit.getEvent() != null) {
+            if (!Util.isEmpty(hit.getEvents())) {
                 resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer));
             }
         }

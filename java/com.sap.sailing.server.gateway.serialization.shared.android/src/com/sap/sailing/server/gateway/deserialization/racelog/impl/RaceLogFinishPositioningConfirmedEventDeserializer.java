@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -32,7 +33,7 @@ public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRace
         JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningConfirmedEventSerializer.FIELD_POSITIONED_COMPETITORS);
         CompetitorResults positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
 
-        return factory.createFinishPositioningConfirmedEvent(createdAt, author, timePoint, id, competitors, passId, positionedCompetitors);
+        return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, timePoint, author, id, passId, positionedCompetitors);
     }
     
     private CompetitorResults deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {
