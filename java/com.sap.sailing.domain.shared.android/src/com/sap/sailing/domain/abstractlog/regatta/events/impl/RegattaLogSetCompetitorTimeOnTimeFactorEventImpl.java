@@ -12,9 +12,9 @@ public class RegattaLogSetCompetitorTimeOnTimeFactorEventImpl extends RegattaLog
     private static final long serialVersionUID = -7891407213804859604L;
     private final Double timeOnTimeFactor;
     
-    public RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, Competitor competitor, Double timeOnTimeFactor) {
-        super(createdAt, author, logicalTimePoint, pId, competitor);
+    public RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, Competitor competitor, Double timeOnTimeFactor) {
+        super(createdAt, logicalTimePoint, author, pId, competitor);
         this.timeOnTimeFactor = timeOnTimeFactor;
     }
 

@@ -29,13 +29,16 @@ import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
@@ -103,7 +106,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
         RegattaIdentifier regatta = ((RegattaLeaderboard) leaderboard).getRegatta().getRegattaIdentifier();
         if (raceLogTrackingState != RaceLogTrackingState.TRACKING) {
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createStartTrackingEvent(MillisecondsTimePoint.now(),
+            RaceLogEvent event = new RaceLogStartTrackingEventImpl(MillisecondsTimePoint.now(),
                     service.getServerAuthor(), raceLog.getCurrentPassId());
             raceLog.add(event);
         }
@@ -159,7 +162,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
         }
 
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDenoteForTrackingEvent(MillisecondsTimePoint.now(),
+        RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
                 service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
         raceLog.add(event);
     }
@@ -221,8 +224,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
                         newCourse.addWaypoint(i++, oldWaypoint);
                     }
+
                     int passId = toRaceLog.getCurrentPassId();
-                    RaceLogEvent newCourseEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now,
+                    RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
                             service.getServerAuthor(), passId, newCourse);
                     toRaceLog.add(newCourseEvent);
                 }
@@ -264,12 +268,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             logger.log(Level.WARNING, "Could not ping mark " + mark);
         }
     }
-    
+
     @Override
     public void pingMark(RegattaLog regattaLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
         pingMark(regattaLog, mark, gpsFix, service,
                 (DeviceIdentifier dev, TimePoint timePoint) -> new RegattaLogDeviceMarkMappingEventImpl(timePoint,
-                        service.getServerAuthor(), timePoint, UUID.randomUUID(), mark, dev, timePoint, timePoint),
+                        timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, dev, timePoint, timePoint),
                 new PingDeviceIdentifierImpl());
     }
 
@@ -330,7 +334,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     service.getServerAuthor(),
                     raceLog,
                     competitors,
-                    c -> RaceLogEventFactory.INSTANCE.createRegisterCompetitorEvent(MillisecondsTimePoint.now(),
+                    c -> new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(),
                             service.getServerAuthor(), raceLog.getCurrentPassId(), c));
         } else {
             logger.warning("Not performing competitor registration on RaceLog as no RaceLogUseCompetitorsFromRaceLogEvent "
@@ -342,8 +346,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors) {
         registerCompetitors(service.getServerAuthor(), regattaLog, competitors,
-                c -> new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(),
-                        MillisecondsTimePoint.now(), UUID.randomUUID(), c));
+                c -> new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(),
+                        MillisecondsTimePoint.now(), service.getServerAuthor(), UUID.randomUUID(), c));
     }
 
     private MailService getMailService() {

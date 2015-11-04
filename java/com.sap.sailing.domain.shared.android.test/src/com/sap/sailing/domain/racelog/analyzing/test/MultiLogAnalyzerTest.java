@@ -65,12 +65,12 @@ public class MultiLogAnalyzerTest {
         DeviceIdentifier d1 = createDevice();
         DeviceIdentifier d2 = createDevice();
         
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), 0, 0, c1, d1, t(0), t(10)));
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, now(), 1, 0, c1, d2, t(30), t(40)));
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), 2, c2, d2, t(10), t(20)));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), now(), author, 0, 0, c1, d1, t(0), t(10)));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), now(), author, 1, 0, c1, d2, t(30), t(40)));
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 2, c2, d2, t(10), t(20)));
         
         // and one for same item (competitor) in other log
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), author, now(), 3, c1, d1, t(10),
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 3, c1, d1, t(10),
                 t(20)));
 
         Map<WithID, List<DeviceMapping<WithID>>> result = new MultiLogAnalyzer<>(

@@ -13,18 +13,24 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;
 
 @Deprecated //bug2851
-public class RaceLogCloseOpenEndedDeviceMappingEventImpl extends BaseCloseOpenEndedDeviceMappingEventImpl<RaceLogEventVisitor>
-implements RaceLogCloseOpenEndedDeviceMappingEvent {
+public class RaceLogCloseOpenEndedDeviceMappingEventImpl extends
+        BaseCloseOpenEndedDeviceMappingEventImpl<RaceLogEventVisitor> implements
+        RaceLogCloseOpenEndedDeviceMappingEvent {
     private static final long serialVersionUID = -5114645637316367845L;
     private final RaceLogEventData raceLogEventData;
-    
-    public RaceLogCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, int passId, Serializable deviceMappingEventId,
+
+    public RaceLogCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, int passId, Serializable deviceMappingEventId,
             TimePoint closingTimePoint) {
-        super(createdAt, author, logicalTimePoint, id, deviceMappingEventId, closingTimePoint);
+        super(createdAt, logicalTimePoint, author, id, deviceMappingEventId, closingTimePoint);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
-    
+
+    public RaceLogCloseOpenEndedDeviceMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            int passId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
+        this(now(), logicalTimePoint, author, randId(), passId, deviceMappingEventId, closingTimePoint);
+    }
+
     @Override
     public int getPassId() {
         return raceLogEventData.getPassId();

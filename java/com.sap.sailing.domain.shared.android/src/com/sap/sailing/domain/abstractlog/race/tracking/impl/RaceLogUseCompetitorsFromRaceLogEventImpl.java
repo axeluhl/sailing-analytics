@@ -15,7 +15,7 @@ public class RaceLogUseCompetitorsFromRaceLogEventImpl extends RaceLogEventImpl 
     public RaceLogUseCompetitorsFromRaceLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, int passId)
             throws IllegalArgumentException {
-        super(createdAt, author, logicalTimePoint, id, null, passId);
+        super(createdAt, logicalTimePoint, author, id, null, passId);
     }
 
     @Override

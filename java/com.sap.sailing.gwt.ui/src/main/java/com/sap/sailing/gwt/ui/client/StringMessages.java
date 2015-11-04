@@ -413,6 +413,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
+    String scoringSchemeLowPointForLeagueOverallLeaderboard();
+    String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();

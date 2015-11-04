@@ -17,7 +17,7 @@ DefineMarkEvent<VisitorT> {
     
     public AbstractDefineMarkEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, Mark mark) {
-        super(createdAt, author, logicalTimePoint, pId);
+        super(createdAt, logicalTimePoint, author, pId);
         this.mark = mark;
     }
 
