@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.filter.Filter;
@@ -22,6 +23,7 @@ public abstract class AbstractTextBoxFilter<T, C> extends AbstractFilterWidget<T
 
     @UiField TextBox textBoxUi;
     @UiField Button clearButtonUi;
+    @UiField FlowPanel filterContainerUi;
     
     protected AbstractTextBoxFilter(String placeholderText) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -40,7 +42,7 @@ public abstract class AbstractTextBoxFilter<T, C> extends AbstractFilterWidget<T
         update();
     }
     
-    private void update() {
+    protected void update() {
         clearButtonUi.setEnabled(!textBoxUi.getValue().isEmpty());
         notifyValueChangeHandlers();
     }

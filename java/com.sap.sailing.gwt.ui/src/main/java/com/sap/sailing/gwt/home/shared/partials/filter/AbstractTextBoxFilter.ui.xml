@@ -10,7 +10,7 @@
 		    font-weight: 600;
 		    position: relative;
 		}
-		.textinput {
+		.container > input {
 			display: inline-block;
 		    padding: .333333333333333em 3.066666666666667em .333333333333333em .666666666666667em;
 		    line-height: 1.333333333333333em;
@@ -18,7 +18,7 @@
 		    background-color: #f2f2f2;
 		    border: .066666666666667em solid #dedede
 		}
-		.clearbutton {
+		.container > button {
 		    position: absolute;
 		    top: .066666666666667em;
 		    bottom: .066666666666667em;
@@ -30,7 +30,7 @@
 		}
 	</ui:style>
 	<g:FlowPanel addStyleNames="{style.container}" ui:field="filterContainerUi">
-		<g:TextBox addStyleNames="{style.textinput}" ui:field="textBoxUi"/>
-		<g:Button addStyleNames="{style.clearbutton}" ui:field="clearButtonUi">&#10060;</g:Button>	
+		<g:TextBox ui:field="textBoxUi"/>
+		<g:Button ui:field="clearButtonUi">&#10060;</g:Button>	
 	</g:FlowPanel>
 </ui:UiBinder> 

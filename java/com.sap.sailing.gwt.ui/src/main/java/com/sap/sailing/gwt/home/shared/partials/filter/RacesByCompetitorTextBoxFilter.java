@@ -11,12 +11,12 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
 
-public class RacesByCompetitorTextBoxFilter extends AbstractTextBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
     
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
     public RacesByCompetitorTextBoxFilter() {
-        super(StringMessages.INSTANCE.competitorsFilter());
+        super(StringMessages.INSTANCE.competitorsFilter(), " -");
     }
     
     @Override
@@ -28,13 +28,18 @@ public class RacesByCompetitorTextBoxFilter extends AbstractTextBoxFilter<Simple
         return filter;
     }
     
+    @Override
+    protected String createSuggestionString(SimpleCompetitorDTO value) {
+        return value.getSailID() + " - " + value.getName();
+    }
+    
     private class RacesByCompetitorFilter implements Filter<SimpleRaceMetadataDTO> {
 
         private final List<String> keywords = new ArrayList<>();
         private final AbstractListFilter<SimpleCompetitorDTO> listFilter = new AbstractListFilter<SimpleCompetitorDTO>() {
             @Override
             public Iterable<String> getStrings(SimpleCompetitorDTO t) {
-                return Arrays.asList(t.getName(), t.getSailID());
+                return Arrays.asList(t.getName(), t.getSailID(), createSuggestionString(t));
             }
         };
         
