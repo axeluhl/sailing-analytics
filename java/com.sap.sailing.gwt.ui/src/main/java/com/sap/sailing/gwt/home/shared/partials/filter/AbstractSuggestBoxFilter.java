@@ -10,15 +10,14 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
-public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextBoxFilter<T, C> {
+public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
 
     private final MultiWordSuggestOracle suggestOracle;
     private final SuggestBox suggestBox;
     
     protected AbstractSuggestBoxFilter(String placeholderText, String whitespaceCharacters) {
-        super(placeholderText);
         suggestOracle = new MultiWordSuggestOracle(whitespaceCharacters);
-        filterContainerUi.insert(suggestBox = new SuggestBox(suggestOracle, textBoxUi), 0);
+        initWidgets(suggestBox = new SuggestBox(suggestOracle), placeholderText);
         suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {

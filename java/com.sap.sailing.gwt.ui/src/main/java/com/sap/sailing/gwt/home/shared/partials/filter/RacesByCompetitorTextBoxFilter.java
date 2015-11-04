@@ -16,7 +16,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
     public RacesByCompetitorTextBoxFilter() {
-        super(StringMessages.INSTANCE.competitorsFilter(), " -");
+        super(StringMessages.INSTANCE.competitorsFilter(), " -/");
     }
     
     @Override
