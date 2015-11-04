@@ -1,5 +1,7 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import org.json.simple.JSONObject;
+
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
@@ -12,7 +14,6 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
-import org.json.simple.JSONObject;
 
 public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<RegattaConfiguration> {
     
