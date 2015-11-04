@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.app.MobileActivityMapper;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.SailingActivityManager;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
@@ -56,7 +57,7 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
     
     @Override
     protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, MobileApplicationClientFactory clientFactory) {
-        SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, clientFactory.getEventBus());
+        SailingActivityManager<ResettableNavigationPathDisplay> sailingActivityManager = new SailingActivityManager<>(activityMapperRegistry, clientFactory.getEventBus());
         sailingActivityManager.setNavigationPathDisplay(clientFactory.getNavigationPathDisplay());
         return sailingActivityManager;
     }

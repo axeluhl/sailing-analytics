@@ -6,6 +6,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
+import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
@@ -23,7 +24,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
  * @author pgtaboada
  *
  */
-public class MobileApplicationClientFactory extends SecureClientFactoryImpl<MobileApplicationView> implements ErrorAndBusyClientFactory, SearchResultClientFactory {
+public class MobileApplicationClientFactory extends SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements ErrorAndBusyClientFactory, SearchResultClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
 

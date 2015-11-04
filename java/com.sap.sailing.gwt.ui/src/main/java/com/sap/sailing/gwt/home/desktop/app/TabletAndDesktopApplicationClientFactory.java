@@ -18,14 +18,13 @@ import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
-import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 
 
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory implements DesktopClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
@@ -45,7 +44,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     @Override
-    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+    public DesktopResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
 

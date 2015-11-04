@@ -5,17 +5,21 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.mvp.CustomActivityManager;
 
-public class SailingActivityManager extends CustomActivityManager {
+public class SailingActivityManager<NPD extends ResettableNavigationPathDisplay> extends CustomActivityManager {
 
-    private ResettableNavigationPathDisplay navigationPathDisplay;
+    private NPD navigationPathDisplay;
     private Activity currentActivity;
 
     public SailingActivityManager(ActivityMapper mapper, EventBus eventBus) {
         super(mapper, eventBus);
     }
     
-    public void setNavigationPathDisplay(ResettableNavigationPathDisplay navigationPathDisplay) {
+    public void setNavigationPathDisplay(NPD navigationPathDisplay) {
         this.navigationPathDisplay = navigationPathDisplay;
+    }
+    
+    protected NPD getNavigationPathDisplay() {
+        return navigationPathDisplay;
     }
 
     @Override
@@ -27,10 +31,14 @@ public class SailingActivityManager extends CustomActivityManager {
             if(activity instanceof ProvidesNavigationPath) {
                 ProvidesNavigationPath providesNavigationPath = (ProvidesNavigationPath) activity;
                 providesNavigationPath.setNavigationPathDisplay(new NavigationPathDisplayDelegate(activity, navigationPathDisplay));
+                afterNavigationPathIsSetToActivity(activity);
             }
         }
     }
     
+    protected void afterNavigationPathIsSetToActivity(Activity activity) {
+    }
+
     private class NavigationPathDisplayDelegate implements NavigationPathDisplay {
         
         private final Activity associatedActivity;

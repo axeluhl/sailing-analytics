@@ -7,11 +7,11 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.desktop.app.DesktopActivityManager;
 import com.sap.sailing.gwt.home.desktop.app.DesktopActivityMapper;
 import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.SailingActivityManager;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
@@ -58,7 +58,7 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
     
     @Override
     protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, DesktopClientFactory clientFactory) {
-        SailingActivityManager sailingActivityManager = new SailingActivityManager(activityMapperRegistry, clientFactory.getEventBus());
+        DesktopActivityManager sailingActivityManager = new DesktopActivityManager(activityMapperRegistry, clientFactory.getEventBus());
         sailingActivityManager.setNavigationPathDisplay(clientFactory.getNavigationPathDisplay());
         return sailingActivityManager;
     }

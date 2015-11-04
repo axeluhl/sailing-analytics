@@ -14,13 +14,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AbstractApplicationClientFactory extends
-        SecureClientFactoryImpl<ApplicationTopLevelView> implements DesktopClientFactory {
+public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>> extends
+        SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final DesktopPlacesNavigator navigator;
 
-    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
+    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus,
             PlaceController placeController, final DesktopPlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;

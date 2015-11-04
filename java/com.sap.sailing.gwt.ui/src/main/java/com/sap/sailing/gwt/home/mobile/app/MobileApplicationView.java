@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link MobileApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class MobileApplicationView extends Composite implements ApplicationTopLevelView {
+public class MobileApplicationView extends Composite implements ApplicationTopLevelView<ResettableNavigationPathDisplay> {
     interface MyBinder extends UiBinder<Widget, MobileApplicationView> {
     }
 

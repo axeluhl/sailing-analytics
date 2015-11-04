@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.desktop.partials.footer.Footer;
 import com.sap.sailing.gwt.home.desktop.partials.header.Header;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -23,7 +22,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link TabletAndDesktopApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class TabletAndDesktopApplicationView extends Composite implements ApplicationTopLevelView {
+public class TabletAndDesktopApplicationView extends Composite implements ApplicationTopLevelView<DesktopResettableNavigationPathDisplay> {
     interface TabletAndDesktopApplicationViewUiBinder extends UiBinder<Widget, TabletAndDesktopApplicationView> {
     }
 
@@ -70,7 +69,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     }
     
     @Override
-    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+    public DesktopResettableNavigationPathDisplay getNavigationPathDisplay() {
         return navigationPathDisplay;
     }
     
@@ -99,6 +98,7 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
         public void reset() {
             breadcrumbsUi.clear();
             breadcrumbWrapperUi.getStyle().setDisplay(Display.NONE);
+            breadcrumbWrapperUi.getStyle().clearBackgroundColor();
         }
         
     }
