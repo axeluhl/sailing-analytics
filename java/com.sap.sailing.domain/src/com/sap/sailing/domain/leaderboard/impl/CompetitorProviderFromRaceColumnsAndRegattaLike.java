@@ -12,7 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
@@ -194,7 +194,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     }
 
     private Set<Competitor> getCompetitorsForRaceAndRegisterAsRegattaLogListener(RaceLog racelog) {
-        Set<Competitor> viaLog = new RegisteredCompetitorsFinder(racelog, provider.getRegattaLike().getRegattaLog())
+        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer(racelog, provider.getRegattaLike().getRegattaLog())
                 .analyze();
         // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's
         // listeners set

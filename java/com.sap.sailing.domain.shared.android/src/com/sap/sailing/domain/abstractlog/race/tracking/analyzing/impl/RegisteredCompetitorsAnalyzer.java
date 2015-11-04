@@ -12,10 +12,18 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 
-public class RegisteredCompetitorsFinder extends RaceLogAnalyzer<Set<Competitor>> {
+/**
+ * Used to find competitors of a race. Checks whether the competitors for the given race are registered on the RaceLog
+ * via {@link RaceLogUsesOwnCompetitorsAnalyzer} or on the RegattaLog and fetches the competitors appropriately.
+ * 
+ * @author D056848
+ *
+ */
+
+public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competitor>> {
     private RegattaLog regattaLog;
 
-    public RegisteredCompetitorsFinder(RaceLog raceLog, RegattaLog regattaLog) {
+    public RegisteredCompetitorsAnalyzer(RaceLog raceLog, RegattaLog regattaLog) {
         super(raceLog);
         this.regattaLog = regattaLog;
     }

@@ -8,14 +8,14 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 
 /**
  * This class searches for RegisterCompetitorEvents in the given log.
  * 
- * TLDR: It's likely, that you shouldn't use this, but you might want to use {@link RegisteredCompetitorsFinder} or {@link RaceLogRegisteredCompetitorsAnalyzer}
+ * TLDR: It's likely, that you shouldn't use this, but you might want to use {@link RegisteredCompetitorsAnalyzer} or {@link RaceLogRegisteredCompetitorsAnalyzer}
  * 
  * Note that solemnly analyzing a certain race or RegattaLog my not lead the correct registered competitors for the race
  * corresponding to the RaceLog/the races corresponding to the RegattaLog.

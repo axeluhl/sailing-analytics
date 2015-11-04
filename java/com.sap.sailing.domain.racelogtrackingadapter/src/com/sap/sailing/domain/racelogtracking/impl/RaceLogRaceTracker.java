@@ -31,7 +31,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMapping
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
@@ -481,7 +481,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         Set<Competitor> competitors;
         try {
             RegattaLog regattaLog = params.getRegattaLog();
-            competitors = new RegisteredCompetitorsFinder(raceLog, regattaLog).analyze();
+            competitors = new RegisteredCompetitorsAnalyzer(raceLog, regattaLog).analyze();
         } catch (DoesNotHaveRegattaLogException e) {
             logger.warning(params.getLeaderboard().getName()+" doesn't have an attached RegattaLog");
             competitors = new RaceLogRegisteredCompetitorsAnalyzer(raceLog).analyze();

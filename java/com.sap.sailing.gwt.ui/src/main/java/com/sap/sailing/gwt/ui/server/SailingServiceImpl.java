@@ -83,7 +83,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFro
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -2313,7 +2313,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
                 boolean competitorRegistrationsExist;
                 try {
-                    competitorRegistrationsExist = raceLog == null ? false : ! new RegisteredCompetitorsFinder(raceLog, getRegattaLogInternal(leaderboard.getName())).analyze().isEmpty();
+                    competitorRegistrationsExist = raceLog == null ? false : ! new RegisteredCompetitorsAnalyzer(raceLog, getRegattaLogInternal(leaderboard.getName())).analyze().isEmpty();
                 } catch (DoesNotHaveRegattaLogException e) {
                     competitorRegistrationsExist = false;
                 }
@@ -5835,7 +5835,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) throws DoesNotHaveRegattaLogException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        return convertToCompetitorDTOs(new RegisteredCompetitorsFinder(raceLog, regattaLog).analyze());
+        return convertToCompetitorDTOs(new RegisteredCompetitorsAnalyzer(raceLog, regattaLog).analyze());
     }
 
     @Override
