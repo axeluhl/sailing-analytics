@@ -39,7 +39,13 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
                 events.add(event);
             }
         } else {
-            events = Collections.emptySet();
+            // for backward compatibility try the FIELD_EVENT approach:
+            JSONObject deprecatedEventJson = (JSONObject) object.get("event");
+            if (deprecatedEventJson == null) {
+                events = Collections.emptySet();
+            } else {
+                events = Collections.singleton(eventDeserializer.deserialize(deprecatedEventJson));
+            }
         }
         JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
         String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
