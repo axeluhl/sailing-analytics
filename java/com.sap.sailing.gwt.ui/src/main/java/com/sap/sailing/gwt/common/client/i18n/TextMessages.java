@@ -187,6 +187,7 @@ public interface TextMessages extends Messages {
     String solutionsPostHeadline();
     String solutionsTrainingHeadline();
     String solutionsSimulatorHeadline();
+
     String sapInSailing();
     String contentSapInSailing1();
     String contentSapInSailing2();
@@ -209,10 +210,13 @@ public interface TextMessages extends Messages {
     String sapSailingAnalytics();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
-    String readMore();
+
+    String sapSailingAnalyticsReadMore();
     String sapSailingRaceManager();
     String contentSapSailingRaceManager();
-    String i18nDeSolutionsStartMore();
+
+    String sapSailingRaceManagerReadMore();
+
     String postRaceAnalytics();
     String contentPostRaceAnalytics1();
     String contentPostRaceAnalytics2();
@@ -221,6 +225,7 @@ public interface TextMessages extends Messages {
 
     String strategySimulator();
     String contentStrategySimulator();
-    String i18nDeSolutionsLearnMore();
+
+    String strategySimulatorReadMore();
 
 }

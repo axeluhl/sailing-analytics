@@ -105,7 +105,7 @@
 							</p>
 							<g:Anchor ui:field="sailingAnalyticsDetailsAnchor"
 								styleName="{res.mainCss.button}">
-								<ui:text from='{i18n.readMore}' />
+								<ui:text from='{i18n.sapSailingAnalyticsReadMore}' />
 							</g:Anchor>
 						</div>
 					</div>
@@ -124,7 +124,7 @@
 								</p>
 								<g:Anchor ui:field="raceCommitteeAppDetailsAnchor"
 									styleName="{res.mainCss.button}">
-									<ui:text from='{i18n.i18nDeSolutionsStartMore}' />
+									<ui:text from='{i18n.sapSailingRaceManagerReadMore}' />
 								</g:Anchor>
 							</div>
 						</div>
@@ -181,7 +181,7 @@
 							</p>
 							<g:Anchor ui:field="simulatorAppDetailsAnchor"
 								styleName="{res.mainCss.button}">
-								<ui:text from='{i18n.i18nDeSolutionsLearnMore}' />
+								<ui:text from='{i18n.strategySimulatorReadMore}' />
 							</g:Anchor>
 						</div>
 					</div>
