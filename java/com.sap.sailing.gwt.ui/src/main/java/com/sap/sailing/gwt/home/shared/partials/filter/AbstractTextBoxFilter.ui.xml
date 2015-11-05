@@ -25,12 +25,12 @@
 		    right: .066666666666667em;
 			border-radius: 0;
 			display: inline-block;
-		    padding: .333333333333333em .666666666666667em;
+		    padding: .333333333333333em .75em;
 		    line-height: 1.333333333333333em;
 		}
 	</ui:style>
 	<g:FlowPanel addStyleNames="{style.container}" ui:field="filterContainerUi">
 		<g:TextBox addStyleNames="{style.textinput}" ui:field="textBoxUi"/>
-		<g:Button addStyleNames="{style.clearbutton}" ui:field="clearButtonUi">&#10060;</g:Button>	
+		<g:Button addStyleNames="{style.clearbutton}" ui:field="clearButtonUi">X</g:Button>	
 	</g:FlowPanel>
 </ui:UiBinder> 
