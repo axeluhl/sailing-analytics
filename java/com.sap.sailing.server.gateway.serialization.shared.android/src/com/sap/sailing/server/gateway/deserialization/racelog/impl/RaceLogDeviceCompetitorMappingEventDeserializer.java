@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -25,8 +26,8 @@ public class RaceLogDeviceCompetitorMappingEventDeserializer extends
 			DeviceIdentifier device, Serializable id, TimePoint createdAt,
 			AbstractLogEventAuthor author, TimePoint timePoint, int passId) throws JsonDeserializationException {
 		Competitor mappedTo = competitorDeserializer.deserialize(itemObject);
-		return factory.createDeviceCompetitorMappingEvent(createdAt, author, timePoint, id, device,
-				mappedTo, passId, from, to);
+		return new RaceLogDeviceCompetitorMappingEventImpl(createdAt, timePoint, author, id, passId,
+				mappedTo, device, from, to);
 	}
 
 }

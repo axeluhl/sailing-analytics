@@ -32,7 +32,7 @@ public class SearchResultDTO implements DTO {
         this.leaderboardName = hit.getLeaderboard().getName();
         this.displayName = hit.getLeaderboard().getDisplayName() != null ? hit.getLeaderboard().getDisplayName() :
             (hit.getRegattaName() != null ? hit.getRegattaName() : leaderboardName);
-        EventBase event = hit.getEvent();
+        EventBase event = hit.getEvents().iterator().next();
         if (event != null) {
             this.eventId = (UUID) event.getId();
             this.eventName = event.getName();
