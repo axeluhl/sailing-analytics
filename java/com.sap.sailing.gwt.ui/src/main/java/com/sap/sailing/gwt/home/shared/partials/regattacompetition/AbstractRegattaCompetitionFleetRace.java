@@ -1,14 +1,24 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
+import static com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat.HOUR24_MINUTE;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter;
+import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
+
+import java.util.Date;
+
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractRegattaCompetitionFleetRace extends UIObject implements RegattaCompetitionRaceView {
     
@@ -23,9 +33,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
         }
         setupRaceState(race.getTrackingState(), race.getViewState());
         getRaceNameUiElement().setInnerText(race.getRaceName());
-        if (race.getStart() != null) {
-            getRaceDateUiElement().setInnerText(DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter.render(race.getStart())); 
-        }
+        setupRaceStart(race.getStart());
         setElement(anchorUiElement);
     }
     
@@ -43,6 +51,16 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
             else getRaceStateUiElement().setInnerText(viewState.getLabel());
         }
         setStyleName(anchorUiElement, getRaceUntrackedStyleName(), isUntrackedRace);
+    }
+    
+    private final DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(getFormat(HOUR24_MINUTE));
+    private void setupRaceStart(Date startDate) {
+        if (startDate != null) {
+            TimePoint range = now().plus(Duration.ONE_HOUR.times(16)), start = new MillisecondsTimePoint(startDate);
+            boolean showTime = start.after(now()) && start.before(range);
+            DateTimeFormatRenderer renderer = showTime ? defaultTimeFormatter : weekdayMonthAbbrDayDateFormatter;
+            getRaceDateUiElement().setInnerText(renderer.render(startDate));
+        }
     }
 
     protected abstract AnchorElement getMainUiElement();
