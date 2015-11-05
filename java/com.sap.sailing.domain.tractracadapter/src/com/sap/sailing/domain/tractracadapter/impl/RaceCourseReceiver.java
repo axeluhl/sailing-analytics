@@ -157,7 +157,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
-            List<Pair<Competitor, Boat>> competitorBoats = getDomainFactory().getBoatsInfoForCompetitors(tractracRace, competitorsAndDominantBoatClass.getB());
+            Map<Competitor, Boat> competitorBoats = getDomainFactory().getBoatsInfoForCompetitors(tractracRace, competitorsAndDominantBoatClass.getB());
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
                     competitorsAndDominantBoatClass.getB(), competitorBoats, course, sidelines, windStore, delayToLiveInMillis,

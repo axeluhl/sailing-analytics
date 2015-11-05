@@ -197,7 +197,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Competitor> competitors = createCompetitorList(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, /* competitorsAndTheirBoats */ Collections.emptySet(), race.getRaceID());
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, /* competitorsAndTheirBoats */ Collections.emptyMap(), race.getRaceID());
         regatta.addRace(result);
         return result;
     }

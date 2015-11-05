@@ -505,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Iterable<Pair<Competitor, Boat>> competitorBoats, Course course,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -570,15 +570,15 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public List<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
-        final List<Util.Pair<Competitor, Boat>> competitorBoatInfos = new ArrayList<>();
+    public Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
+        final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
             if (existingCompetitor != null && competitorBoatInfo != null) {
                 Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
                         competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
-                competitorBoatInfos.add(new Util.Pair<Competitor, Boat>(existingCompetitor, boatOfCompetitor));
+                competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
             }
         }
         return competitorBoatInfos;

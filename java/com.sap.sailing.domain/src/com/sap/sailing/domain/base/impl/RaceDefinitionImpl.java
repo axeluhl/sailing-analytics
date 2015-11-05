@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Boat;
@@ -13,7 +14,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
@@ -26,20 +26,20 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Serializable id;
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors) {
-        this(name, course, boatClass, competitors, Collections.emptyList());
+        this(name, course, boatClass, competitors, Collections.emptyMap());
     }
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors,
-            Iterable<Pair<Competitor, Boat>> competitorsAndTheirBoats) {
+            Map<Competitor, Boat> competitorsAndTheirBoats) {
         this(name, course, boatClass, competitors, competitorsAndTheirBoats, /* use name as default ID */ name);
     }
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, Serializable id) {
-        this(name, course, boatClass, competitors, /* per-race boats for competitors */ Collections.emptyList(), id);
+        this(name, course, boatClass, competitors, /* per-race boats for competitors */ Collections.emptyMap(), id);
     }
     
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors, 
-            Iterable<Pair<Competitor, Boat>> competitorsAndTheirBoats, Serializable id) {
+            Map<Competitor, Boat> competitorsAndTheirBoats, Serializable id) {
         super(name);
         assert name != null;
         this.course = course;
@@ -53,10 +53,10 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
                 throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
             }
         }
-        for (Pair<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats) {
-            Competitor competitor = competitorsById.get(competitorAndBoat.getA().getId());
-            if (competitor != null && competitorAndBoat.getB() != null) {
-                competitorBoats.put(competitor.getId(), competitorAndBoat.getB());
+        for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
+            Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId());
+            if (competitor != null && competitorAndBoat.getValue() != null) {
+                competitorBoats.put(competitor.getId(), competitorAndBoat.getValue());
             }
         }
         this.boatClass = boatClass;

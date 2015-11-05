@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
@@ -45,7 +46,6 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
@@ -203,7 +203,7 @@ public interface DomainFactory {
      * @param raceLogResolver TODO
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Iterable<Pair<Competitor, Boat>> competitorBoats,
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
             Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
@@ -258,7 +258,7 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    List<Util.Pair<Competitor, Boat>> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
+    Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
 
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     
