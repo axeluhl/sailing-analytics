@@ -413,6 +413,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
+    String scoringSchemeLowPointForLeagueOverallLeaderboard();
+    String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1425,4 +1427,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String useClassGetNameTooltip();
     String useStringLiterals();
     String useStringLiteralsTooltip();
+    String addGalleryPhoto();
+    String addStageImage();
+    String addTeaserImage();
+    String addEventLogo();
+    String noImagesDefinedYet();
+    String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String couldNotRetrieveImageSizeYet();
+    @Override
+    String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
 }
