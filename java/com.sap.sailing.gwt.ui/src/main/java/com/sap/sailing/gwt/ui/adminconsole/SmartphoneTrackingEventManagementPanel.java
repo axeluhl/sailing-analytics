@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -595,8 +596,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     new AsyncCallback<Iterable<CompetitorDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // FIXME logging
-                            errorReporter.reportError("Error while searching BoatClass: " + caught.getMessage());
+                            GWT.log("Error while searching BoatClass.");
                             showWithBoatClass.showWithBoatClass(null);
                         }
 
@@ -604,20 +604,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         public void onSuccess(Iterable<CompetitorDTO> result) {
                             String boatClass = null;
                             if (result != null) {
-                                HashMap<String, Integer> countBoatsPerType = new HashMap<String, Integer>();                                
-                                int highestCount = 0;
+                                ArrayList<String> boatClassen = new ArrayList<String>();
                                 for (CompetitorDTO comp : result) {
-                                    String boatClassName = comp.getBoatClass().getName();
-                                    Integer boatClassCount = countBoatsPerType.get(boatClassName);
-                                    if (boatClassCount == null)
-                                        boatClassCount = 0;
-                                    boatClassCount++;
-                                    countBoatsPerType.put(boatClassName, boatClassCount);
-                                    if (boatClassCount > highestCount) {
-                                        highestCount = boatClassCount;
-                                        boatClass = boatClassName;
-                                    }
+                                    boatClassen.add(comp.getBoatClass().getName());
                                 }
+
+                                boatClass = Util.getDominantObjekt(boatClassen);
                             }
                             showWithBoatClass.showWithBoatClass(boatClass);
                         }
@@ -625,5 +617,5 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }
     }
     
-
+    
 }

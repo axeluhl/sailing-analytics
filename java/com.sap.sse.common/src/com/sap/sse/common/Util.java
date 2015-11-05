@@ -3,6 +3,7 @@ package com.sap.sse.common;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -401,6 +402,39 @@ public class Util {
         boolean result = false;
         if (timePoint != null && a != null && b != null) {
             result = timePoint.after(a) && timePoint.before(b);
+        }
+        return result;
+    }
+    
+    /**
+     * Searches the dominant object in a <code> Iterable&LTT&GT </code> collection.
+     * 
+     * @param objects
+     *            The <code> Iterable&LTT&GT </code> collection which should be analyzed.
+     * @return <code> T </code> Returns the dominant object. If the collection have two objects with the highest count,
+     *         you will get one of them returned. If the collection is <code> null </code> or empty, the method will
+     *         return <code> null </code>.
+     */
+    
+    public static <T> T getDominantObjekt(Iterable<T> objects) {
+        T result = null;
+        if (objects != null) {
+            if (objects.iterator().hasNext()) {
+                HashMap<T, Integer> countPerObject = new HashMap<T, Integer>();
+                int highestCount = 0;
+                for (T it : objects) {
+                    Integer objectCount = countPerObject.get(it);
+                    if (objectCount == null) {
+                        objectCount = 0;
+                    }
+                    objectCount++;
+                    countPerObject.put(it, objectCount);
+                    if (objectCount > highestCount) {
+                        highestCount = objectCount;
+                        result = it;
+                    }
+                }
+            }
         }
         return result;
     }
