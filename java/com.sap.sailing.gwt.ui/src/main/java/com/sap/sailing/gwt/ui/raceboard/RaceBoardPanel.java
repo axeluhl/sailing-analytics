@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GWT;
@@ -156,13 +155,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
-        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl();
+        final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-        for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
-            if (competitorAndBoat.getValue() != null) {
-                colorProvider.setColor(competitorAndBoat.getKey(), selectedRaceIdentifier, competitorAndBoat.getValue().getColor());
-            }
-        }
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
