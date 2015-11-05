@@ -10,10 +10,16 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogDeviceCompetitorMappingEventImpl extends AbstractRaceLogDeviceMappingEventImpl<Competitor>
-implements RaceLogDeviceCompetitorMappingEvent {
-    public RaceLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable pId, int pPassId, Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
-        super(createdAt, author, logicalTimePoint, pId, pPassId, mappedTo, device, from, to);
+        implements RaceLogDeviceCompetitorMappingEvent {
+    public RaceLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, int pPassId, Competitor mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
+        super(createdAt, logicalTimePoint, author, pId, pPassId, mappedTo, device, from, to);
+    }
+
+    public RaceLogDeviceCompetitorMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            int pPassId, Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
+        super(logicalTimePoint, author, pPassId, mappedTo, device, from, to);
     }
 
     private static final long serialVersionUID = -1494030544804758753L;

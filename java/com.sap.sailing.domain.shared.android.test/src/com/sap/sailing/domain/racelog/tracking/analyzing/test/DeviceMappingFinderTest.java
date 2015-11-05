@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -41,14 +43,14 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     }
     
     private Serializable addMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Long from, Long to, Competitor item) {
-        RaceLogEvent mapping = factory.createDeviceCompetitorMappingEvent(t(), author, t(), UUID.randomUUID(), device, item, 0,
+        RaceLogEvent mapping = new RaceLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), 0, item, device,
                 t(from), t(to));
         log.add(mapping);
         return mapping.getId();
     }
     
     private void closeMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long millis) {
-        RaceLogEvent mapping = factory.createCloseOpenEndedDeviceMappingEvent(t(), author, t(), UUID.randomUUID(), 0, mappingId,
+        RaceLogEvent mapping = new RaceLogCloseOpenEndedDeviceMappingEventImpl(t(), t(), author, UUID.randomUUID(), 0, mappingId,
                 new MillisecondsTimePoint(millis));
         log.add(mapping);
     }

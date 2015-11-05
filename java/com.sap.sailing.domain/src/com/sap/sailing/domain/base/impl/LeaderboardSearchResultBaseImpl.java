@@ -19,17 +19,17 @@ public class LeaderboardSearchResultBaseImpl implements LeaderboardSearchResultB
     private final LeaderboardBase leaderboard;
     private final String regattaName;
     private final Iterable<? extends LeaderboardGroupBase> leaderboardGroups;
-    private final EventBase event;
+    private final Iterable<? extends EventBase> events;
     private final String boatClassName;
     
     public LeaderboardSearchResultBaseImpl(LeaderboardBase leaderboard, String regattaName,
-            String boatClassName, Iterable<? extends LeaderboardGroupBase> leaderboardGroups, EventBase event) {
+            String boatClassName, Iterable<? extends LeaderboardGroupBase> leaderboardGroups, Iterable<? extends EventBase> events) {
         super();
         this.leaderboard = leaderboard;
         this.regattaName = regattaName;
         this.boatClassName = boatClassName;
         this.leaderboardGroups = leaderboardGroups;
-        this.event = event;
+        this.events = events;
     }
 
     @Override
@@ -53,8 +53,8 @@ public class LeaderboardSearchResultBaseImpl implements LeaderboardSearchResultB
     }
 
     @Override
-    public EventBase getEvent() {
-        return event;
+    public Iterable<? extends EventBase> getEvents() {
+        return events;
     }
 
 }

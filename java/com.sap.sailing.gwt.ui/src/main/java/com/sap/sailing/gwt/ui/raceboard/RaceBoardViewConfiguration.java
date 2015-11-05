@@ -85,8 +85,8 @@ public class RaceBoardViewConfiguration {
     }
 
     public boolean isAutoSelectMedia() {
-		return autoSelectMedia;
-	}
+        return autoSelectMedia;
+    }
 
     public String getDefaultMedia() {
         return defaultMedia;

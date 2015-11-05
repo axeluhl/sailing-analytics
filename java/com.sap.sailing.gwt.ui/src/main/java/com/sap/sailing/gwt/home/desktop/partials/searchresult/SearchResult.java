@@ -60,7 +60,6 @@ public class SearchResult extends Composite {
                 }
             }
         });
-
     }
 
     @UiHandler("searchButton1")
@@ -69,25 +68,21 @@ public class SearchResult extends Composite {
         doSearch(searchText);
     }
 
-
     private void doSearch(String searchText) {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText);
         navigator.goToPlace(searchResultNavigation);
     }
 
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
-
-
         for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
-            if (singleSearchResult.getEvent() != null) {
+            if (singleSearchResult.getEvents() != null) {
                 SearchResultItem searchResultItem = new SearchResultItem(navigator, singleSearchResult);
                 searchResultItemPanel.add(searchResultItem);
                 searchResultItemComposites.add(searchResultItem);
                 resultCounter++;
             }
         }
-
         searchResultCount.setInnerText(String.valueOf(resultCounter));
     }
 
@@ -97,13 +92,10 @@ public class SearchResult extends Composite {
             return;
         }
         searchAmountUi.getStyle().setVisibility(Visibility.VISIBLE);
-
         searchResultItemPanel.clear();
         searchResultItemComposites.clear();
-        
         searchResultFor.setInnerText(searchText);
         searchText1.setText(searchText);
-        
         resultCounter = 0;
     }
 }

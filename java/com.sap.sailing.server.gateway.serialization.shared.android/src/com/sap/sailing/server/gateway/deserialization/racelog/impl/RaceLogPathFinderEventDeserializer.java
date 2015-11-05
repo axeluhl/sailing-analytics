@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -24,7 +25,7 @@ public class RaceLogPathFinderEventDeserializer extends BaseRaceLogEventDeserial
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint,
             int passId, List<Competitor> competitors) throws JsonDeserializationException {
         String pathfinderId = object.get(RaceLogPathfinderEventSerializer.FIELD_PATHFINDER_ID).toString();
-        return factory.createPathfinderEvent(createdAt, author, timePoint, id, competitors, passId, pathfinderId);
+        return new RaceLogPathfinderEventImpl(createdAt, timePoint, author, id, passId, pathfinderId);
     }
 
 }
