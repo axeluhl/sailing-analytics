@@ -6,8 +6,7 @@
     <g:HTMLPanel>
         <div class="{local_res.css.searchresult_content_item}">
             <g:Anchor ui:field="regattaLink" styleName="{local_res.css.searchresult_content_item_headline}" />
-          <div class="{local_res.css.searchresult_content_item_description}"><span ui:field="resultRegattaDetails" />
-				<!-- <a href="http://" class="{local_res.css.searchresult_content_item_description_morelink}">More</a>-->
+          <div class="{local_res.css.searchresult_content_item_description}">
           </div>
           <div class="{local_res.css.searchresult_content_item_footer}">
               <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.searchresult_content_item_footer_link}" />
