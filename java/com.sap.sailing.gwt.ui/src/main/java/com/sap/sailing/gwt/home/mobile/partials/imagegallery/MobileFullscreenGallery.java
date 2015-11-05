@@ -77,6 +77,7 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     @Override
     public void show(SailingImageDTO selectedImage, Collection<SailingImageDTO> imageList) {
         contentUi.setWidget(playerUi = new MobileGalleryPlayer(selectedImage, imageList));
+        autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
         contentUi.getWidget().getElement().addClassName(style.content());
         mainPanel.onResize();
         popup.showPopupPanel();
