@@ -19,8 +19,8 @@ import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -61,7 +61,7 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, true);
         MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();
-        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
+        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.all(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, true);
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());

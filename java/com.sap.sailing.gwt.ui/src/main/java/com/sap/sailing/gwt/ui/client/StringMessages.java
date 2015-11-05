@@ -1366,7 +1366,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String durationPlain();
     String finishedRaces();
     String selectCompetitor();
-    String allBoatClasses();
+    String all();
     String points();
     String numberOfRacesShort();
     String courseGeometry();

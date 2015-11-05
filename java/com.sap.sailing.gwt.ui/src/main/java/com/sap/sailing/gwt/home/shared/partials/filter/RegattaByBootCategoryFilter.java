@@ -12,7 +12,7 @@ public class RegattaByBootCategoryFilter extends AbstractSelectionFilter<Regatta
     
     @Override
     protected String getFilterItemLabel(String item) {
-        return item == null ? StringMessages.INSTANCE.allBoatClasses() : item;
+        return item == null ? StringMessages.INSTANCE.all() : item;
     }
     
 }
