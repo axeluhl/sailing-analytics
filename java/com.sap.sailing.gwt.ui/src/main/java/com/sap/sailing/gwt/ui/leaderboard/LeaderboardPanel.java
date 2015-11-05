@@ -2318,12 +2318,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
                 columnToCollapseAndExpandAgain.toggleExpansion();
             }
-            
-            // here we need to add the competitor colors for the preselected race column or so
-            if(preSelectedRace != null) {
-               // leaderboard.
-            }
-           
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
             if (!initialCompetitorFilterHasBeenApplied) {
                 applyTop30FilterIfCompetitorSizeGreaterEqual40(leaderboard);
