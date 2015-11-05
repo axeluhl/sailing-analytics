@@ -314,7 +314,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 
                 @Override
                 public void onFailure(Throwable caught) {
-                    // do nothing?
+                    errorReporter.reportError("Error while loading data for raceboard: " + caught.getMessage());
                 }
             });
             
