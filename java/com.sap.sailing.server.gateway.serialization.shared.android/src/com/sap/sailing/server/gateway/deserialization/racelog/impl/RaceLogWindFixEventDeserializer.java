@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -30,7 +31,7 @@ public class RaceLogWindFixEventDeserializer extends BaseRaceLogEventDeserialize
         final JSONObject windJsonObject = Helpers.getNestedObjectSafe(object, RaceLogWindFixEventSerializer.FIELD_WIND);
         final Wind wind = windDeserializer.deserialize(windJsonObject);
         final Boolean isMagnetic = (Boolean) object.get(RaceLogWindFixEventSerializer.FIELD_MAGNETIC);
-        return factory.createWindFixEvent(createdAt, author, timePoint, id, competitors, passId, wind, isMagnetic == null ? true : isMagnetic);
+        return new RaceLogWindFixEventImpl(createdAt, timePoint, author, id, passId, wind, isMagnetic == null ? true : isMagnetic);
     }
 
 }
