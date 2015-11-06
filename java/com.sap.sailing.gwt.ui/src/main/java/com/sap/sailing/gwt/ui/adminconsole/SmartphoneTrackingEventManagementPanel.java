@@ -580,7 +580,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         if (getSelectedLeaderboard().regattaName != null) {
         if (allRegattas != null) {
             for (RegattaDTO i : allRegattas) {
-                
                     if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
                         regatta = i;
                         break;
@@ -616,6 +615,4 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     });
         }
     }
-    
-    
 }
