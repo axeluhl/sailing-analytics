@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.place.player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -290,11 +289,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 @Override
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clear();
-                    Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats = new HashMap<>();
-                    for (CompetitorDTO competitor : result.getCompetitors()) {
-                        competitorsAndTheirBoats.put(competitor, result.getCompetitorAndTheirBoats().get(competitor));
-                    }
-                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace, competitorsAndTheirBoats);
+                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace, result.getCompetitorAndTheirBoats());
                     raceBoardPanel.setSize("100%", "100%");
                     if (showWindChart) {
                         raceBoardPanel.setWindChartVisible(true);
