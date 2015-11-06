@@ -26,7 +26,7 @@
     <!-- redefine in child poms -->
     <additional-deployment-version-file></additional-deployment-version-file>
     <app-version></app-version>
-    <android.support.version>22.0.0</android.support.version>
+    <android.support.version>22.1.1</android.support.version>
     <play.services.version>7.5.0</play.services.version>
 
     <sign.keystore>../android-keystore/STG-debug.jks</sign.keystore>
