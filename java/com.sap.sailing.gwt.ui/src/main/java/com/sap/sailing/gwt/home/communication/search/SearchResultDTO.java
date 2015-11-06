@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.home.communication.search;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.UUID;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
@@ -16,7 +15,7 @@ public class SearchResultDTO implements DTO {
     private String leaderboardName;
     private String baseUrl;
     private boolean isOnRemoteServer;
-    private ArrayList<EventInfoDTO> events = new ArrayList<>();
+    private TreeSet<SearchResultEventInfoDTO> events = new TreeSet<>();
     
     @SuppressWarnings("unused")
     private SearchResultDTO() {
@@ -27,11 +26,11 @@ public class SearchResultDTO implements DTO {
         this.leaderboardName = hit.getLeaderboard().getName();
         this.displayName = hit.getLeaderboard().getDisplayName() != null ? hit.getLeaderboard().getDisplayName() :
             (hit.getRegattaName() != null ? hit.getRegattaName() : leaderboardName);
-        for (EventBase event : hit.getEvents()) {
-            events.add(new EventInfoDTO(event));
-        }
         this.baseUrl = baseUrl.toString();
         this.isOnRemoteServer = isOnRemoteServer;
+        for (EventBase event : hit.getEvents()) {
+            events.add(new SearchResultEventInfoDTO(event));
+        }
     }
 
     public String getDisplayName() {
@@ -50,44 +49,8 @@ public class SearchResultDTO implements DTO {
         return isOnRemoteServer;
     }
     
-    public ArrayList<EventInfoDTO> getEvents() {
+    public Set<SearchResultEventInfoDTO> getEvents() {
         return events;
     }
     
-    public class EventInfoDTO implements DTO {
-        private UUID id;
-        private String name;
-        private String venueName;
-        private Date startDate;
-        private Date endDate;
-        
-        @GwtIncompatible
-        public EventInfoDTO(EventBase event) {
-            this.id = (UUID) event.getId();
-            this.name = event.getName();
-            this.venueName = event.getVenue() != null ? event.getVenue().getName() : null;
-            this.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
-            this.endDate = event.getEndDate() != null ? event.getEndDate().asDate() : null;
-        }
-
-        public UUID getId() {
-            return id;
-        }
-        
-        public String getName() {
-            return name;
-        }
-
-        public String getVenueName() {
-            return venueName;
-        }
-
-        public Date getStartDate() {
-            return startDate;
-        }
-
-        public Date getEndDate() {
-            return endDate;
-        }
-    }
 }
