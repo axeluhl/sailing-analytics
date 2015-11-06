@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
+import com.sap.sse.common.Util;
 
 public class SearchResult extends Composite {
     interface SearchResultUiBinder extends UiBinder<Widget, SearchResult> {
@@ -76,7 +77,7 @@ public class SearchResult extends Composite {
     public void updateSearchResult(String searchText, Iterable<LeaderboardSearchResultDTO> searchResultItems) {
         for (LeaderboardSearchResultDTO singleSearchResult : searchResultItems) {
             // for now filter all results where we no event is defined
-            if (singleSearchResult.getEvents() != null) {
+            if (singleSearchResult.getEvents() != null && !Util.isEmpty(singleSearchResult.getEvents())) {
                 SearchResultItem searchResultItem = new SearchResultItem(navigator, singleSearchResult);
                 searchResultItemPanel.add(searchResultItem);
                 searchResultItemComposites.add(searchResultItem);
