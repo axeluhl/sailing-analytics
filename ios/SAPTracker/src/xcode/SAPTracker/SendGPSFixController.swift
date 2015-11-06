@@ -81,7 +81,7 @@ class SendGPSFixController: NSObject {
         if APIManager.sharedManager.networkAvailable {
             APIManager.sharedManager.postGPSFixes(DeviceUDIDManager.UDID, gpsFixes: gpsFixes,
                 success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
-                    println("sent GPS fixes")
+                    print("sent GPS fixes")
                     for gpsFix in gpsFixes {
                         DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
                     }
@@ -89,7 +89,7 @@ class SendGPSFixController: NSObject {
                     NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
                 },
                 failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
-                    println("error sending GPS fixes")
+                    print("error sending GPS fixes")
             })
         }
     }

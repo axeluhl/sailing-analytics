@@ -8,7 +8,7 @@
 
 import Foundation
 
-class SettingsViewController: UITableViewController, UITableViewDelegate {
+class SettingsViewController: UITableViewController {
     
     @IBOutlet weak var batterySavingSwitch: UISwitch!
     

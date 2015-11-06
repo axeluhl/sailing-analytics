@@ -1196,7 +1196,7 @@
 		7F83F14819F154F000C53328 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = com.sap.sailing;
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
@@ -1677,6 +1677,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1764,6 +1765,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
@@ -1784,6 +1786,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
@@ -1807,6 +1810,7 @@
 				INFOPLIST_FILE = SAPTrackerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SAPTracker.app/SAPTracker";
@@ -1825,6 +1829,7 @@
 				INFOPLIST_FILE = SAPTrackerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SAPTracker.app/SAPTracker";

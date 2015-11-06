@@ -53,7 +53,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         dateFormatter = NSDateFormatter()
         dateFormatter.timeStyle = NSDateFormatterStyle.ShortStyle
         dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
-        super.init(coder: aDecoder)
+        super.init(coder: aDecoder)!
     }
     
     override func viewDidLoad() {
@@ -240,7 +240,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.sourceType = sourceType;
-        imagePickerController.mediaTypes = [kUTTypeImage];
+        imagePickerController.mediaTypes = [kUTTypeImage as String];
         imagePickerController.allowsEditing = false
         presentViewController(imagePickerController, animated: true, completion: nil)
     }

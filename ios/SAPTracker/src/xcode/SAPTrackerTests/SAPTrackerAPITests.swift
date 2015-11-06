@@ -25,10 +25,14 @@ class SAPTrackerAPITests: XCTestCase {
     func testParseEvent() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("event1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
-        
-        // check values
-        checkEventDictionary(dictionary)
+        do {
+            let dictionary = try NSJSONSerialization.JSONObjectWithData(data!, options:NSJSONReadingOptions.MutableContainers) as! [String: AnyObject]
+            
+            // check values
+            checkEventDictionary(dictionary)
+        } catch {
+            print(error)
+        }
     }
     
     func testGetEvent() {
@@ -108,10 +112,14 @@ class SAPTrackerAPITests: XCTestCase {
     func testParseLeaderBoard() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("leaderboard1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
-        
-        // check values
-        checkLeaderBoardDictionary(dictionary)
+        do {
+            let dictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.MutableContainers) as! [String: AnyObject]
+            
+            // check values
+            checkLeaderBoardDictionary(dictionary)
+        } catch {
+            print(error)
+        }
     }
     
     func testGetLeaderBoard() {
@@ -163,16 +171,20 @@ class SAPTrackerAPITests: XCTestCase {
         // delete test object
         DataManager.sharedManager.managedObjectContext!.deleteObject(leaderBoard)
     }
-   
+    
     // MARK: - Competitor
     
     func testParseCompetitor() {
         // read JSON from resources
         let data = NSData(contentsOfURL: bundle.URLForResource("competitor1", withExtension: "json")!)
-        let dictionary = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: nil) as! [String: AnyObject]
+        do {
+            let dictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.MutableContainers) as! [String: AnyObject]
         
-        // check values
-        checkCompetitorDictionary(dictionary)
+            // check values
+            checkCompetitorDictionary(dictionary)
+        } catch {
+            print(error)
+        }
     }
     
     func testGetCompetitor() {
@@ -209,7 +221,7 @@ class SAPTrackerAPITests: XCTestCase {
         let entity = NSEntityDescription.entityForName("Competitor", inManagedObjectContext: DataManager.sharedManager.managedObjectContext!)
         
         // create (temporary) event object
-        var competitor = Competitor(entity: entity!, insertIntoManagedObjectContext: DataManager.sharedManager.managedObjectContext!)
+        let competitor = Competitor(entity: entity!, insertIntoManagedObjectContext: DataManager.sharedManager.managedObjectContext!)
         
         // read dictionary into object
         competitor.initWithDictionary(dictionary)
@@ -227,7 +239,7 @@ class SAPTrackerAPITests: XCTestCase {
     
     func testParseUrl() {
         let url = "comsapsailingtracker://95.85.58.11:8000?event_id=35dc9389-b59d-4ebd-8f6b-432065642f40&leaderboard_name=505%20Worlds%202013&competitor_id=92d06f15-1d61-fc2d-4e64-dae37577d3d2"
-        var qrcodeData = QRCodeData()
+        let qrcodeData = QRCodeData()
         XCTAssertTrue(qrcodeData.parseString(url), "cannot parse QR code URL "+url)
     }
     
