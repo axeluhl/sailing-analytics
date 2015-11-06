@@ -5,16 +5,18 @@ import static com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil.form
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO.EventInfoDTO;
 
 public abstract class AbstractSearchResultItem extends Widget {
 
     protected final void init(Element element, SearchResultDTO item) {
         setElement(element);
         getResultTitleUi().setInnerText(item.getDisplayName());
-        getEventNameUi().setInnerText(item.getEventName());
-        getEventVenueUi().setInnerText(item.getEventVenueName());
-        if (item.getEventStartDate() != null && item.getEventEndDate() != null) {
-            getEventDateUi().setInnerText(formatDateRangeWithYear(item.getEventStartDate(), item.getEventEndDate()));
+        EventInfoDTO event = item.getEvents().get(0);
+        getEventNameUi().setInnerText(event.getName());
+        getEventVenueUi().setInnerText(event.getVenueName());
+        if (event.getStartDate() != null && event.getEndDate() != null) {
+            getEventDateUi().setInnerText(formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
         }
     }
     
