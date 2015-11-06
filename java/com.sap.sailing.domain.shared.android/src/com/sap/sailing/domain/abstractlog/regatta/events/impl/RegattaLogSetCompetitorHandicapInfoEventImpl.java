@@ -15,9 +15,9 @@ public abstract class RegattaLogSetCompetitorHandicapInfoEventImpl extends Abstr
 
     private final Competitor competitor;
 
-    protected RegattaLogSetCompetitorHandicapInfoEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable pId, Competitor competitor) {
-        super(createdAt, author, logicalTimePoint, pId);
+    protected RegattaLogSetCompetitorHandicapInfoEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, Competitor competitor) {
+        super(createdAt, logicalTimePoint, author, pId);
         this.competitor = competitor;
     }
 

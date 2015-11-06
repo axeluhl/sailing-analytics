@@ -27,13 +27,13 @@ public class QRCodeData {
     public func parseString(urlString: String) -> Bool {
         let url = NSURL(string: urlString)
         
-        if (url == nil || url!.scheme == nil || url!.host == nil) {
+        if (url == nil || url!.host == nil) {
             return false
         }
         
         // TODO: add a flag http / https
         if url!.scheme != "comsapsailingtracker" {
-            serverUrl = url!.scheme!
+            serverUrl = url!.scheme
         } else {
             serverUrl = "http"
         }

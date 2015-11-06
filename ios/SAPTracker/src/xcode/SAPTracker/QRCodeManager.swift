@@ -48,21 +48,21 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     }
 
     class func setUpCaptureSession(delegate: AVCaptureMetadataOutputObjectsDelegate?) -> (session: AVCaptureSession!, output: AVCaptureMetadataOutput!) {
-        var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
-        
-        var writeError : NSError? = nil
-        var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
-        
-        var output = AVCaptureMetadataOutput()
-        output.setMetadataObjectsDelegate(delegate, queue: dispatch_get_main_queue())
-        
+        let device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+        let output = AVCaptureMetadataOutput()
         let session = AVCaptureSession()
-        session.canSetSessionPreset(AVCaptureSessionPresetHigh)
-        if session.canAddInput(input) {
-            session.addInput(input)
-        }
-        if session.canAddOutput(output) {
-            session.addOutput(output)
+        do {
+            let input = try AVCaptureDeviceInput(device: device);
+            output.setMetadataObjectsDelegate(delegate, queue: dispatch_get_main_queue())
+            session.canSetSessionPreset(AVCaptureSessionPresetHigh)
+            if session.canAddInput(input) {
+                session.addInput(input)
+            }
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+            }
+        } catch {
+            print(error)
         }
         return (session, output)
     }

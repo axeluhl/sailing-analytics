@@ -15,8 +15,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -133,8 +133,8 @@ public class WindByRaceLogTest {
                 new KnotSpeedWithBearingImpl(15, new DegreeBearingImpl(234)));
         Wind wind2 = new WindImpl(new DegreePosition(49, 3), timeMinus2,
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
-        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, author, 0, wind2, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent1 = new RaceLogWindFixEventImpl(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent2 = new RaceLogWindFixEventImpl(timeMinus2, author, 0, wind2, /* isMagnetic */ false);
         raceLog.add(windEvent1);
         raceLog.add(windEvent2);
         
@@ -163,7 +163,7 @@ public class WindByRaceLogTest {
         
         Wind wind1 = new WindImpl(new DegreePosition(50, 4), timeMinus3,
                 new KnotSpeedWithBearingImpl(15, new DegreeBearingImpl(234)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent1 = new RaceLogWindFixEventImpl(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
         raceLog.add(windEvent1);
         
         WindSource source = new WindSourceImpl(WindSourceType.RACECOMMITTEE);
@@ -192,9 +192,9 @@ public class WindByRaceLogTest {
                 new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         Wind wind3 = new WindImpl(new DegreePosition(48, 1), timeMinus2,
                 new KnotSpeedWithBearingImpl(18, new DegreeBearingImpl(270)));
-        RaceLogWindFixEvent windEvent1 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
-        RaceLogWindFixEvent windEvent2 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus2, author, 0, wind2, /* isMagnetic */ false);
-        RaceLogWindFixEvent windEvent3 = RaceLogEventFactory.INSTANCE.createWindFixEvent(timeMinus1, author, 0, wind3, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent1 = new RaceLogWindFixEventImpl(timeMinus3, author, 0, wind1, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent2 = new RaceLogWindFixEventImpl(timeMinus2, author, 0, wind2, /* isMagnetic */ false);
+        RaceLogWindFixEvent windEvent3 = new RaceLogWindFixEventImpl(timeMinus1, author, 0, wind3, /* isMagnetic */ false);
         raceLog.add(windEvent1);
         raceLog.add(windEvent2);
         

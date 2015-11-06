@@ -29,7 +29,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // set up data source for list
         fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
-        fetchedResultsController!.performFetch(nil)
+        do {
+            try fetchedResultsController!.performFetch()
+        } catch {
+            print(error)
+        }
         
         // register for open custom URL events
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
