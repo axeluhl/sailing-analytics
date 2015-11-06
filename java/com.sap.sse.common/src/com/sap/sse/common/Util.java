@@ -420,16 +420,16 @@ public class Util {
     }
     
     /**
-     * Searches the dominant object in a <code> Iterable&LTT&GT </code> collection.
+     * Searches the dominant object in an <code>Iterable&lt;T&gt;</code> collection.
      * 
      * @param objects
-     *            The <code> Iterable&LTT&GT </code> collection which should be analyzed.
-     * @return <code> T </code> Returns the dominant object. If the collection have two objects with the highest count,
-     *         you will get one of them returned. If the collection is <code> null </code> or empty, the method will
-     *         return <code> null </code>.
+     *            The <code>Iterable&lt;T&gt;</code> collection which should be analyzed. Objects are compared
+     *            by their definition of {@link Object#equals(Object)}.
+     * @return <code>T</code> Returns the dominant object. If the collection have two objects with the highest count,
+     *         you will get one of them returned. If the collection is <code>null</code> or empty, the method will
+     *         return <code>null</code>.
      */
-    
-    public static <T> T getDominantObjekt(Iterable<T> objects) {
+    public static <T> T getDominantObject(Iterable<T> objects) {
         T result = null;
         if (objects != null) {
             if (objects.iterator().hasNext()) {

@@ -609,7 +609,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                     boatClassen.add(comp.getBoatClass().getName());
                                 }
 
-                                boatClass = Util.getDominantObjekt(boatClassen);
+                                boatClass = Util.getDominantObject(boatClassen);
                             }
                             showWithBoatClass.showWithBoatClass(boatClass);
                         }

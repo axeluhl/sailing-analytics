@@ -604,7 +604,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 boatClasses.add(boatClass);
             }
 
-            return Util.getDominantObjekt(boatClasses);
+            return Util.getDominantObject(boatClasses);
         }
     }
 
