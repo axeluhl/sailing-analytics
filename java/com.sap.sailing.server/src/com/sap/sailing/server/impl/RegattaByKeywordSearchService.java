@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +80,11 @@ public class RegattaByKeywordSearchService {
                 if (leaderboardGroupsHostingLeaderboard != null) {
                     for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
                         leaderboardStrings.addAll(stringsForLeaderboardGroup.get(leaderboardGroup));
-                        final Set<Event> eventsForLG = eventsForLeaderboardGroup.get(leaderboardGroup);
+                        final Set<Event> eventsForLG = filterEventsForLeaderboard(leaderboard, leaderboardGroup, eventsForLeaderboardGroup.get(leaderboardGroup));
+                        
+                        if(leaderboardGroup.hasOverallLeaderboard() && leaderboard.getDefaultCourseArea() != null) {
+                            
+                        }
                         if (eventsForLG != null) {
                             for (final Event event : eventsForLG) {
                                 leaderboardStrings.addAll(stringsForEvent.get(event));
@@ -91,7 +96,6 @@ public class RegattaByKeywordSearchService {
                 if (eventByDefaultCourseArea != null) {
                     leaderboardStrings.addAll(stringsForEvent.get(eventByDefaultCourseArea));
                 }
-                // FIXME bug 3348: for event series the "containment" between event and leaderboard group works the other way: one leaderboard group hosts the leaderboards of a series of events
                 return leaderboardStrings;
             }
         };
@@ -103,6 +107,20 @@ public class RegattaByKeywordSearchService {
         }
         return result;
     }
+    
+    private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
+        if(leaderboardGroup.hasOverallLeaderboard()) {
+            CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+            if(defaultCourseArea != null) {
+                for (Event event : events) {
+                    if(Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
+                        return Collections.singleton(event);
+                    }
+                }
+            }
+        }
+        return events;
+    }
 
     private Set<Event> getEventsForLeaderboard(Leaderboard matchingLeaderboard,
             Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard,
@@ -111,7 +129,7 @@ public class RegattaByKeywordSearchService {
         final Set<LeaderboardGroup> lgs = leaderboardGroupsForLeaderboard.get(matchingLeaderboard);
         if (lgs != null) {
             for (final LeaderboardGroup lg : lgs) {
-                final Set<Event> eventsForLG = eventsForLeaderboardGroup.get(lg);
+                final Set<Event> eventsForLG = filterEventsForLeaderboard(matchingLeaderboard, lg, eventsForLeaderboardGroup.get(lg));
                 if (eventsForLG != null) {
                     result.addAll(eventsForLG);
                 }
