@@ -14,10 +14,10 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -107,7 +107,7 @@ public class RaceLogRevocationTest {
     
     @Test
     public void sameEventRevokedByTwoClientsBeforeSync() throws NotRevokableException {
-        RaceLogDenoteForTrackingEvent event = RaceLogEventFactory.INSTANCE.createDenoteForTrackingEvent(
+        RaceLogDenoteForTrackingEvent event = new RaceLogDenoteForTrackingEventImpl(
                 now(), serverAuthor, 0, "race", null, null);
         serverRaceLog.add(event);
         
