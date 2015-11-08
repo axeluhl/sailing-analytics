@@ -30,7 +30,7 @@ public class RaceLogEventImplTest {
 
         public TestRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
                 Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
-            super(createdAt, author, logicalTimePoint, pId, pInvolvedBoats, pPassId);
+            super(createdAt, logicalTimePoint, author, pId, pInvolvedBoats, pPassId);
         }
 
         @Override
