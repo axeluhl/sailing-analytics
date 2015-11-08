@@ -573,7 +573,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }).show();
         
     }
-
     private void searchBoatClass(final ShowWithBoatClass showWithBoatClass) {
         final String result;
         RegattaDTO regatta = null;
@@ -599,7 +598,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             GWT.log("Error while searching BoatClass.");
                             showWithBoatClass.showWithBoatClass(null);
                         }
-
                         @Override
                         public void onSuccess(Iterable<CompetitorDTO> result) {
                             String boatClass = null;
@@ -609,7 +607,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                                     boatClassen.add(comp.getBoatClass().getName());
                                 }
 
-                                boatClass = Util.getDominantObjekt(boatClassen);
+                                boatClass = Util.getDominantObject(boatClassen);
                             }
                             showWithBoatClass.showWithBoatClass(boatClass);
                         }

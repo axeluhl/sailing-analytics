@@ -416,7 +416,7 @@ public class Util {
      *         return <code> null </code>.
      */
     
-    public static <T> T getDominantObjekt(Iterable<T> objects) {
+    public static <T> T getDominantObject(Iterable<T> objects) {
         T result = null;
         if (objects != null) {
             if (objects.iterator().hasNext()) {
