@@ -22,7 +22,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     protected Filter<SimpleRaceMetadataDTO> getFilter(String searchValue) {
         this.filter.keywords.clear();
         if (searchValue != null && !searchValue.isEmpty()) {
-            this.filter.keywords.add(searchValue);
+            this.filter.keywords.add(searchValue.trim());
         }
         return filter;
     }
@@ -39,7 +39,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     
     @Override
     protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
-        return Arrays.asList(value.getName(), value.getSailID(), createSuggestionDisplayString(value));
+        return Arrays.asList(value.getName(), value.getSailID());
     }
     
     private class RacesByCompetitorFilter implements Filter<SimpleRaceMetadataDTO> {

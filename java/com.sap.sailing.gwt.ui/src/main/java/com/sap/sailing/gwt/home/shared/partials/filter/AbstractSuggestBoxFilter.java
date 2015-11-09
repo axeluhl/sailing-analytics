@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.filter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +71,7 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         @Override
         public void requestSuggestions(Request request, Callback callback) {
-            Iterable<String> queryTokens = Arrays.asList(request.getQuery().split("\\s+"));
+            Iterable<String> queryTokens = Collections.singleton(request.getQuery().trim());
             setSuggestions(request, callback, suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList), queryTokens);
         }
         
