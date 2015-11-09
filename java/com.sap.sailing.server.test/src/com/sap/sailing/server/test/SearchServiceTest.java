@@ -267,11 +267,11 @@ public class SearchServiceTest {
         final LeaderboardSearchResult firstMatch = iterator.next();
         Regatta firstFoundRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch29er, firstFoundRegatta);
-        assertSame(pfingstbusch, firstMatch.getEvent());
+        assertSame(pfingstbusch, firstMatch.getEvents().iterator().next());
         final LeaderboardSearchResult secondMatch = iterator.next();
         Regatta secondFoundRegatta = secondMatch.getRegatta();
         assertSame(pfingstbusch470, secondFoundRegatta);
-        assertSame(pfingstbusch, secondMatch.getEvent());
+        assertSame(pfingstbusch, secondMatch.getEvents().iterator().next());
     }
 
     @Test
@@ -282,11 +282,11 @@ public class SearchServiceTest {
         final LeaderboardSearchResult firstMatch = iter.next();
         Regatta earlierStartRegatta = firstMatch.getRegatta();
         assertSame(pfingstbusch470, earlierStartRegatta);
-        assertSame(pfingstbusch, firstMatch.getEvent());
+        assertSame(pfingstbusch, firstMatch.getEvents().iterator().next());
         final LeaderboardSearchResult secondMatch = iter.next();
         Regatta laterStartRegatta = secondMatch.getRegatta();
         assertSame(aalRegatta, laterStartRegatta);
-        assertSame(aalEvent, secondMatch.getEvent());
+        assertSame(aalEvent, secondMatch.getEvents().iterator().next());
     }
 
     @Test
@@ -303,11 +303,11 @@ public class SearchServiceTest {
         final LeaderboardSearchResult expected = searchResults.getHits().iterator().next();
         LeaderboardSearchResultBase deserialized = deserializer.deserialize(serializer.serialize(expected));
         assertEquals("Pfingstbusch (470)", deserialized.getRegattaName());
-        assertEquals(expected.getEvent().getName(), deserialized.getEvent().getName());
-        assertEquals(expected.getEvent().getId(), deserialized.getEvent().getId());
-        assertEquals(expected.getEvent().getStartDate(), deserialized.getEvent().getStartDate());
-        assertEquals(expected.getEvent().getEndDate(), deserialized.getEvent().getEndDate());
-        assertEquals(expected.getEvent().getVenue().getName(), deserialized.getEvent().getVenue().getName());
+        assertEquals(expected.getEvents().iterator().next().getName(), deserialized.getEvents().iterator().next().getName());
+        assertEquals(expected.getEvents().iterator().next().getId(), deserialized.getEvents().iterator().next().getId());
+        assertEquals(expected.getEvents().iterator().next().getStartDate(), deserialized.getEvents().iterator().next().getStartDate());
+        assertEquals(expected.getEvents().iterator().next().getEndDate(), deserialized.getEvents().iterator().next().getEndDate());
+        assertEquals(expected.getEvents().iterator().next().getVenue().getName(), deserialized.getEvents().iterator().next().getVenue().getName());
         Iterator<LeaderboardGroup> expectedLGs = expected.getLeaderboardGroups().iterator();
         Iterator<? extends LeaderboardGroupBase> deserializedLGs = deserialized.getLeaderboardGroups().iterator();
         while (expectedLGs.hasNext()) {

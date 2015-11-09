@@ -41,4 +41,5 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     public ErrorView createErrorView(String errorMessage, Throwable errorReason) {
         return null;
     }
+
 }
