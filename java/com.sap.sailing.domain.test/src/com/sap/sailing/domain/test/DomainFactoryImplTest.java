@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,7 +11,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
 public class DomainFactoryImplTest {
-    DomainFactoryImpl domainFactory;
+    private DomainFactoryImpl domainFactory;
     
     @Before
     public void setUp() {
@@ -25,19 +26,19 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestEmptyCollection() {
-        ArrayList<String> emptyList = new ArrayList<String>();
+        List<String> emptyList = new ArrayList<String>();
         Assert.assertEquals(null, domainFactory.getDominantBoatClass(emptyList));
     }
     @Test
     public void testGetDominantBoatClass_TestWithOneObject() {
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add("LSR");
         Assert.assertEquals("Laser Int.", domainFactory.getDominantBoatClass(list).getDisplayName());
     }
     
     @Test
     public void testGetDominantBoatClass_TestWithTheSameCount() {
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add("LSR");
         list.add("18.Footer");
         String result = domainFactory.getDominantBoatClass(list).getDisplayName();
@@ -48,7 +49,7 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestWithMoreThanOneObject() {
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add("LSR");
         list.add("18.Footer");
         list.add("LSR");
@@ -58,7 +59,7 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestWithSynonymNames() {
-        ArrayList<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add("LSR");
         list.add("18.Footer");
         list.add("18.Footer");

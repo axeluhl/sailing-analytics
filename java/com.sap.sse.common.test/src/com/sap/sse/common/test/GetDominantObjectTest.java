@@ -1,41 +1,42 @@
 package com.sap.sse.common.test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.sap.sse.common.Util;
 
-public class GetDominantObjektTest {
+public class GetDominantObjectTest {
 
     @Test
     public void testNullCollection() {
-        Assert.assertArrayEquals(null, Util.getDominantObjekt(null));               
+        Assert.assertArrayEquals(null, Util.getDominantObject(null));               
     }
     
     @Test
     public void testEmptyCollection() {
         Iterable<String> objects = new ArrayList<String>();
-        Assert.assertEquals(null, Util.getDominantObjekt(objects));
+        Assert.assertEquals(null, Util.getDominantObject(objects));
     }
     
     @Test
     public void testCollectionWithOneObject() {
-        ArrayList<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<String>();
         String dominant = "Test";
         objectCollection.add(dominant);
-        Assert.assertEquals(dominant, Util.getDominantObjekt(objectCollection));
+        Assert.assertEquals(dominant, Util.getDominantObject(objectCollection));
     }
     
     @Test
     public void testCollectionWithTheSameCount() {
-        ArrayList<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<String>();
         String dominant = "Test";
         String dominantTwo = "Test2";
         objectCollection.add(dominant);
         objectCollection.add(dominantTwo);
-        String result = Util.getDominantObjekt(objectCollection);
+        String result = Util.getDominantObject(objectCollection);
         if(!(result == dominant || result == dominantTwo)) {
             Assert.assertEquals(dominant, result);
         }            
@@ -43,11 +44,11 @@ public class GetDominantObjektTest {
     
     @Test
     public void testCollectionWithMoreThenOneObject() {
-        ArrayList<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<String>();
         String dominant = "Test";
         objectCollection.add("not Dominant");
         objectCollection.add(dominant);
         objectCollection.add(dominant);
-        Assert.assertEquals(dominant, Util.getDominantObjekt(objectCollection));
+        Assert.assertEquals(dominant, Util.getDominantObject(objectCollection));
     }
 }
