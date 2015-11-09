@@ -41,7 +41,6 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
      *            The <code>boatClass</code> parameter describes the default shown boat class for new competitors. The <code>boatClass</code> parameter is <code>null</code>,
      *            if you want to edit a competitor or there is no boat class for the new competitor.
      */
-
     public AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
             DialogCallback<Set<CompetitorDTO>> callback, String boatClass) {
