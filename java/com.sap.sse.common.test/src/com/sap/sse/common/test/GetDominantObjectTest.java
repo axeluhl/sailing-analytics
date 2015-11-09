@@ -17,13 +17,13 @@ public class GetDominantObjectTest {
     
     @Test
     public void testEmptyCollection() {
-        Iterable<String> objects = new ArrayList<String>();
+        Iterable<String> objects = new ArrayList<>();
         Assert.assertEquals(null, Util.getDominantObject(objects));
     }
     
     @Test
     public void testCollectionWithOneObject() {
-        List<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<>();
         String dominant = "Test";
         objectCollection.add(dominant);
         Assert.assertEquals(dominant, Util.getDominantObject(objectCollection));
@@ -31,7 +31,7 @@ public class GetDominantObjectTest {
     
     @Test
     public void testCollectionWithTheSameCount() {
-        List<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<>();
         String dominant = "Test";
         String dominantTwo = "Test2";
         objectCollection.add(dominant);
@@ -44,7 +44,7 @@ public class GetDominantObjectTest {
     
     @Test
     public void testCollectionWithMoreThenOneObject() {
-        List<String> objectCollection = new ArrayList<String>();
+        List<String> objectCollection = new ArrayList<>();
         String dominant = "Test";
         objectCollection.add("not Dominant");
         objectCollection.add(dominant);

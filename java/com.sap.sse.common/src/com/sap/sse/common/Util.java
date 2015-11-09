@@ -433,7 +433,7 @@ public class Util {
         T result = null;
         if (objects != null) {
             if (objects.iterator().hasNext()) {
-                HashMap<T, Integer> countPerObject = new HashMap<T, Integer>();
+                HashMap<T, Integer> countPerObject = new HashMap<>();
                 int highestCount = 0;
                 for (T it : objects) {
                     Integer objectCount = countPerObject.get(it);

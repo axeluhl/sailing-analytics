@@ -598,7 +598,7 @@ public class DomainFactoryImpl implements DomainFactory {
             return null;
             
         } else {
-            Collection<BoatClass> boatClasses = new ArrayList<BoatClass>();
+            Collection<BoatClass> boatClasses = new ArrayList<>();
             for (String competitorClassName : competitorClassNames) {
                 BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
                 boatClasses.add(boatClass);

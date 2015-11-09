@@ -26,19 +26,19 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestEmptyCollection() {
-        List<String> emptyList = new ArrayList<String>();
+        List<String> emptyList = new ArrayList<>();
         Assert.assertEquals(null, domainFactory.getDominantBoatClass(emptyList));
     }
     @Test
     public void testGetDominantBoatClass_TestWithOneObject() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("LSR");
         Assert.assertEquals("Laser Int.", domainFactory.getDominantBoatClass(list).getDisplayName());
     }
     
     @Test
     public void testGetDominantBoatClass_TestWithTheSameCount() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("LSR");
         list.add("18.Footer");
         String result = domainFactory.getDominantBoatClass(list).getDisplayName();
@@ -49,7 +49,7 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestWithMoreThanOneObject() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("LSR");
         list.add("18.Footer");
         list.add("LSR");
@@ -59,7 +59,7 @@ public class DomainFactoryImplTest {
     
     @Test
     public void testGetDominantBoatClass_TestWithSynonymNames() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add("LSR");
         list.add("18.Footer");
         list.add("18.Footer");

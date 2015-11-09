@@ -602,7 +602,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         public void onSuccess(Iterable<CompetitorDTO> result) {
                             String boatClass = null;
                             if (result != null) {
-                                ArrayList<String> boatClassen = new ArrayList<String>();
+                                List<String> boatClassen = new ArrayList<>();
                                 for (CompetitorDTO comp : result) {
                                     boatClassen.add(comp.getBoatClass().getName());
                                 }
