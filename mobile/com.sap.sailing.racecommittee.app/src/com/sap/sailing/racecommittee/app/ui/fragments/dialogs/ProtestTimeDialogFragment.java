@@ -51,6 +51,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private ListView mRacesList;
     private TimePicker mTimePicker;
     private View customView;
+    private View mHome;
     private Button mChoose;
 
     public ProtestTimeDialogFragment() {
@@ -117,9 +118,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 btnNext.setOnClickListener(this);
             }
 
-            View home = ViewHelper.get(layout, R.id.header_text);
-            if (home != null) {
-                home.setOnClickListener(new View.OnClickListener() {
+            mHome = ViewHelper.get(layout, R.id.header_text);
+            if (mHome != null) {
+                mHome.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
@@ -275,6 +276,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
             race.getState().setProtestTime(now, protestTime);
+        }
+        if (mHome != null) {
+            mHome.callOnClick();
         }
     }
 
