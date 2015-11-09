@@ -6,11 +6,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
+import com.google.gwt.user.client.ui.SuggestBox.SuggestionCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 
 public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
@@ -26,7 +33,7 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
     };
     
     protected AbstractSuggestBoxFilter(String placeholderText) {
-        initWidgets(suggestBox = new SuggestBox(suggestOracle), placeholderText);
+        initWidgets(suggestBox = new SuggestBox(suggestOracle, new TextBox(), new CustomSuggestionDisplay()), placeholderText);
         suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
@@ -47,6 +54,15 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
     
     protected abstract Iterable<String> getMatchingStrings(C value);
     
+    private class CustomSuggestionDisplay extends DefaultSuggestionDisplay {
+        @Override
+        protected void showSuggestions(SuggestBox suggestBox, Collection<? extends Suggestion> suggestions,
+                boolean isDisplayStringHTML, boolean isAutoSelectEnabled, SuggestionCallback callback) {
+            super.showSuggestions(suggestBox, suggestions, isDisplayStringHTML, isAutoSelectEnabled, callback);
+            getPopupPanel().getElement().getStyle().setProperty("maxWidth", suggestBox.getOffsetWidth(), Unit.PX);
+        }
+    }
+    
     private class ContainsSuggestOracle extends SuggestOracle {
         
         @Override
@@ -62,10 +78,19 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects, Iterable<String> queryTokens) {
             List<Suggestion> suggestions = new ArrayList<>();
+            List<String> normalizedQueryTokens = new ArrayList<>();
+            for (String token : queryTokens) {
+                normalizedQueryTokens.add(token.toLowerCase());
+            }
+            int count = 0;
             for (C match : suggestionObjects) {
-                suggestions.add(new SimpleSuggestion(match, queryTokens));
+                suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
+                if (++count >= request.getLimit()) {
+                    break;
+                }
             }
             Response response = new Response(suggestions);
+            response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
             callback.onSuggestionsReady(request, response);
         }
         
@@ -88,27 +113,32 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
 
         @Override
         public String getDisplayString() {
-            StringBuilder displayString = new StringBuilder(createSuggestionDisplayString(suggestObject));
+            String displayString = createSuggestionDisplayString(suggestObject);
+            String normalizedString = displayString.toLowerCase();
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
             int cursor = 0;
             while(true) {
                 int index = displayString.length();
                 String matchToken = null;
                 for (String token : queryTokens) {
-                    int matchIndex = displayString.indexOf(token, cursor);
+                    int matchIndex = normalizedString.indexOf(token, cursor);
                     if (matchIndex >= 0 && matchIndex < index) {
                         index = matchIndex;
                         matchToken = token;
                     }
                 }
                 if (matchToken != null) {
-                    displayString.insert(index, STRONG_TAG_OPEN);
-                    displayString.insert(index + STRONG_TAG_OPEN.length() + matchToken.length(), STRONG_TAG_CLOSE);
-                    cursor = index + STRONG_TAG_OPEN.length() + STRONG_TAG_CLOSE.length();
+                    builder.appendEscaped(displayString.substring(cursor, index));
+                    builder.append(SafeHtmlUtils.fromTrustedString(STRONG_TAG_OPEN));
+                    builder.appendEscaped(displayString.substring(index, index + matchToken.length()));
+                    builder.append(SafeHtmlUtils.fromTrustedString(STRONG_TAG_CLOSE));
+                    cursor = index + matchToken.length();
                 } else {
+                    builder.appendEscaped(displayString.substring(cursor));
                     break;
                 }
             }
-            return displayString.toString();
+            return builder.toSafeHtml().asString();
         }
 
         @Override

@@ -13,6 +13,7 @@
     border: .066666666666667rem solid #dedede;
     padding: 0 .666666666666667rem;
     line-height: 2em;
+    white-space: normal !important;
 }
 .gwt-SuggestBoxPopup .item-selected {
 	background-color: #efaa00;
