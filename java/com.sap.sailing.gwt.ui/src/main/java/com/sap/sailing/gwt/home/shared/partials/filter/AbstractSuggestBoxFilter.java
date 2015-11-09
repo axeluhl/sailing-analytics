@@ -22,7 +22,6 @@ import com.sap.sse.common.filter.AbstractListFilter;
 public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
 
     private final ContainsSuggestOracle suggestOracle = new ContainsSuggestOracle();
-    private final SuggestBox suggestBox;
     private final List<C> suggestionObjectList = new ArrayList<>();
     protected final AbstractListFilter<C> suggestionMatchingFilter = new AbstractListFilter<C>() {
         @Override
@@ -32,7 +31,8 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
     };
     
     protected AbstractSuggestBoxFilter(String placeholderText) {
-        initWidgets(suggestBox = new SuggestBox(suggestOracle, new TextBox(), new CustomSuggestionDisplay()), placeholderText);
+        final SuggestBox suggestBox = new SuggestBox(suggestOracle, new TextBox(), new CustomSuggestionDisplay());
+        initWidgets(suggestBox, placeholderText);
         suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
@@ -47,9 +47,9 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         suggestionObjectList.addAll(selectableValues);
     }
     
-    protected abstract String createSuggestionDisplayString(C value);
+    protected abstract String createSuggestionKeyString(C value);
     
-    protected abstract String createSuggestionReplacementString(C value);
+    protected abstract String createSuggestionAdditionalDisplayString(C value);
     
     protected abstract Iterable<String> getMatchingStrings(C value);
     
@@ -114,10 +114,10 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         @Override
         public String getDisplayString() {
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
-            appendHighlighted(builder, createSuggestionReplacementString(suggestObject));
+            appendHighlighted(builder, createSuggestionKeyString(suggestObject));
             builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
             builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
-            appendHighlighted(builder, createSuggestionDisplayString(suggestObject));
+            appendHighlighted(builder, createSuggestionAdditionalDisplayString(suggestObject));
             builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
             return builder.toSafeHtml().asString();
         }
@@ -150,7 +150,7 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
 
         @Override
         public String getReplacementString() {
-            return createSuggestionReplacementString(suggestObject);
+            return createSuggestionKeyString(suggestObject);
         }
     }
 }

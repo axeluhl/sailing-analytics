@@ -28,12 +28,12 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     }
     
     @Override
-    protected String createSuggestionDisplayString(SimpleCompetitorDTO value) {
+    protected String createSuggestionAdditionalDisplayString(SimpleCompetitorDTO value) {
         return value.getName();
     }
     
     @Override
-    protected String createSuggestionReplacementString(SimpleCompetitorDTO value) {
+    protected String createSuggestionKeyString(SimpleCompetitorDTO value) {
         return value.getSailID();
     }
     
