@@ -164,6 +164,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         String showOnlyCurrentlyRunningRaces = "&" + PARAM_ONLY_RUNNING_RACES + "=" + (settings.isShowOnlyCurrentlyRunningRaces() ? "true" : "false");
         String showOnlyRacesOfSameDay = "&" + PARAM_ONLY_RACES_OF_SAME_DAY + "=" + (settings.isShowOnlyRacesOfSameDay() ? "true" : "false");
+        String ignoreLocalSettings = "&" + PARAM_IGNORE_LOCAL_SETTINGS + "=true";
 
         StringBuilder visibleCourseAreas = new StringBuilder();
         if (isSetVisibleCourseAreasInUrl) {
@@ -188,6 +189,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
                 + visibleRegattas.toString()
                 + showOnlyCurrentlyRunningRaces
                 + showOnlyRacesOfSameDay
+                + ignoreLocalSettings
                 + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
         return link;
     }

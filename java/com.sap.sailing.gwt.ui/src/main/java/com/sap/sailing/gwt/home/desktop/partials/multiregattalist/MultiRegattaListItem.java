@@ -5,10 +5,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.regattaheader.RegattaHeader;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 public class MultiRegattaListItem extends Composite {
 
@@ -29,7 +29,7 @@ public class MultiRegattaListItem extends Composite {
     }
 
     public MultiRegattaListItem(RegattaWithProgressDTO regattaWithProgress, Presenter presenter) {
-        this(regattaWithProgress, presenter.getCtx().getEventDTO().isRunning());
+        this(regattaWithProgress, presenter.getEventDTO().isRunning());
         regattaHeaderUi.setRegattaNavigation(presenter.getRegattaNavigation(regattaWithProgress.getId()));
         PlaceNavigation<?> leaderboardNavigation = presenter.getRegattaLeaderboardNavigation(regattaWithProgress.getId());
         regattaStepsUi.setLeaderboardNavigation(regattaWithProgress.getState(), leaderboardNavigation);

@@ -1,14 +1,14 @@
 package com.sap.sailing.gwt.home.shared.refresh;
 
-import com.sap.sailing.gwt.ui.shared.dispatch.Action;
+import com.sap.sailing.gwt.home.communication.SailingAction;
 
-public interface ActionProvider<A extends Action<?>> {
+public interface ActionProvider<A extends SailingAction<?>> {
     
     A getAction();
     
     boolean isActive();
     
-    public abstract class AbstractActionProvider<A extends Action<?>> implements ActionProvider<A> {
+    public abstract class AbstractActionProvider<A extends SailingAction<?>> implements ActionProvider<A> {
         private final A action;
         
         public AbstractActionProvider(A action) {
@@ -21,7 +21,7 @@ public interface ActionProvider<A extends Action<?>> {
         }
     }
 
-    public class DefaultActionProvider<A extends Action<?>> extends AbstractActionProvider<A> {
+    public class DefaultActionProvider<A extends SailingAction<?>> extends AbstractActionProvider<A> {
 
         public DefaultActionProvider(A action) {
             super(action);
