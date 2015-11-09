@@ -102,6 +102,7 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
     private class SimpleSuggestion implements Suggestion {
         
         private static final String STRONG_TAG_OPEN = "<strong>", STRONG_TAG_CLOSE = "</strong>";
+        private static final String ITALIC_TAG_OPEN = "<em>", ITALIC_TAG_CLOSE = "</em>";
         private final C suggestObject;
         private final Iterable<String> queryTokens;
         
@@ -112,9 +113,17 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
 
         @Override
         public String getDisplayString() {
-            String displayString = createSuggestionDisplayString(suggestObject);
-            String normalizedString = displayString.toLowerCase();
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            appendHighlighted(builder, createSuggestionReplacementString(suggestObject));
+            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
+            builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
+            appendHighlighted(builder, createSuggestionDisplayString(suggestObject));
+            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
+            return builder.toSafeHtml().asString();
+        }
+        
+        private void appendHighlighted(SafeHtmlBuilder builder, String displayString) {
+            String normalizedString = displayString.toLowerCase();
             int cursor = 0;
             while(true) {
                 int index = displayString.length();
@@ -137,7 +146,6 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
                     break;
                 }
             }
-            return builder.toSafeHtml().asString();
         }
 
         @Override
