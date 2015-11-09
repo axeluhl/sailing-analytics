@@ -13,11 +13,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.dispatch.client.SortedSetResult;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 public class MultiRegattaList extends Composite implements RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
 

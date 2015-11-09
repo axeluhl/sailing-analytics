@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 import com.sap.sailing.server.RacingEventService;
 
 public class EventListDataCalculator implements EventVisitor {
