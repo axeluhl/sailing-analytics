@@ -81,10 +81,6 @@ public class RegattaByKeywordSearchService {
                     for (LeaderboardGroup leaderboardGroup : leaderboardGroupsHostingLeaderboard) {
                         leaderboardStrings.addAll(stringsForLeaderboardGroup.get(leaderboardGroup));
                         final Set<Event> eventsForLG = filterEventsForLeaderboard(leaderboard, leaderboardGroup, eventsForLeaderboardGroup.get(leaderboardGroup));
-                        
-                        if(leaderboardGroup.hasOverallLeaderboard() && leaderboard.getDefaultCourseArea() != null) {
-                            
-                        }
                         if (eventsForLG != null) {
                             for (final Event event : eventsForLG) {
                                 leaderboardStrings.addAll(stringsForEvent.get(event));
@@ -109,11 +105,11 @@ public class RegattaByKeywordSearchService {
     }
     
     private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
-        if(leaderboardGroup.hasOverallLeaderboard()) {
+        if (leaderboardGroup.hasOverallLeaderboard()) {
             CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
-            if(defaultCourseArea != null) {
+            if (defaultCourseArea != null) {
                 for (Event event : events) {
-                    if(Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
+                    if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
                         return Collections.singleton(event);
                     }
                 }
