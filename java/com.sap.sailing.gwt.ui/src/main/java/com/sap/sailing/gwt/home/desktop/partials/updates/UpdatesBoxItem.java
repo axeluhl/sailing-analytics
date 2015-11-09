@@ -15,12 +15,12 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.communication.event.news.AbstractRaceNewsEntryDTO;
+import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.AbstractRaceNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.LeaderboardNewsEntryDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 import com.sap.sailing.gwt.ui.shared.util.ConditionalDateTimeFormatter;
 
 public class UpdatesBoxItem extends Widget {

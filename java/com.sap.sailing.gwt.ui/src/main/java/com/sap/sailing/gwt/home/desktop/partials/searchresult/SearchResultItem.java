@@ -1,84 +1,55 @@
 package com.sap.sailing.gwt.home.desktop.partials.searchresult;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
+import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
-import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
+import com.sap.sailing.gwt.home.shared.partials.searchresult.AbstractSearchResultItem;
 
-public class SearchResultItem extends Composite {
-    interface SearchResultUiBinder extends UiBinder<Widget, SearchResultItem> {
-    }
+public class SearchResultItem extends AbstractSearchResultItem {
     
     private static SearchResultUiBinder uiBinder = GWT.create(SearchResultUiBinder.class);
 
-    private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
-
-    @UiField Anchor regattaLink;
-    @UiField SpanElement resultRegattaDetails;
-    @UiField SpanElement resultEventDate;
-    @UiField SpanElement resultEventVenue;
-    @UiField Anchor eventOverviewLink;
-    
-    private final DesktopPlacesNavigator placeNavigator;
-    private final PlaceNavigation<AbstractEventRegattaPlace> regattaNavigation;
-    private final PlaceNavigation<EventDefaultPlace> eventNavigation;
-
-    public SearchResultItem(DesktopPlacesNavigator navigator, LeaderboardSearchResultDTO searchResult) {
-        this.placeNavigator = navigator;
-        
-        SearchResultResources.INSTANCE.css().ensureInjected();
-        initWidget(uiBinder.createAndBindUi(this));
-
-        EventBaseDTO event = searchResult.getEvent();
-        regattaNavigation = placeNavigator.getRegattaNavigation(event.id.toString(), searchResult.getLeaderboardName(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
-        eventNavigation = placeNavigator.getEventNavigation(event.id.toString(), searchResult.getBaseURL(), searchResult.isOnRemoteServer());
-
-        String headlineLink = searchResult.getLeaderboardDisplayName();
-        if(headlineLink == null) {
-            headlineLink = searchResult.getRegattaName() != null ? searchResult.getRegattaName() : searchResult.getLeaderboardName();
-        }
-        
-        regattaLink.setHref(regattaNavigation.getTargetUrl());
-        regattaLink.setText(headlineLink);
-//        resultRegattaDetails.setInnerText("I have no idea yet what to show here...");
-        eventOverviewLink.setHref(eventNavigation.getTargetUrl());
-        eventOverviewLink.setText(searchResult.getEvent().getName());
-        resultEventVenue.setInnerText(searchResult.getEvent().venue.getName());
-        if(searchResult.getEvent().startDate != null) {
-            resultEventDate.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(searchResult.getEvent().startDate, searchResult.getEvent().endDate));
-        } else {
-            resultEventDate.setInnerText("Unknown date");
-        }
-    }
-
-    @UiHandler("regattaLink")
-    public void goToRegatta(ClickEvent e) {
-        handleClickEvent(e, regattaNavigation);
-    }
-
-    @UiHandler("eventOverviewLink")
-    public void goToEventPlace(ClickEvent e) {
-        handleClickEvent(e, eventNavigation);
+    interface SearchResultUiBinder extends UiBinder<Element, SearchResultItem> {
     }
     
-    private void handleClickEvent(ClickEvent e, PlaceNavigation<?> placeNavigation) {
-        if (HYPERLINK_IMPL.handleAsClick((Event) e.getNativeEvent())) {
-            placeNavigator.goToPlace(placeNavigation);
-            e.preventDefault();
-         }
+    @UiField AnchorElement resultTitleUi;
+    @UiField SpanElement resultDescriptionUi;
+    @UiField AnchorElement eventNameUi;
+    @UiField SpanElement eventVenueUi;
+    @UiField SpanElement eventDateUi;
+    
+    SearchResultItem(DesktopPlacesNavigator navigator, SearchResultDTO item) {
+        init(uiBinder.createAndBindUi(this), item);
+        String eventId = String.valueOf(item.getEventId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
+        PlaceNavigation<?> regattaNavigation = navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
+        regattaNavigation.configureAnchorElement(resultTitleUi);
+        PlaceNavigation<?> eventNavigation = navigator.getEventNavigation(eventId, baseUrl, item.isOnRemoteServer());
+        eventNavigation.configureAnchorElement(eventNameUi);
+    }
+
+    @Override
+    protected Element getResultTitleUi() {
+        return resultTitleUi;
+    }
+
+    @Override
+    protected Element getEventNameUi() {
+        return eventNameUi;
+    }
+
+    @Override
+    protected Element getEventVenueUi() {
+        return eventVenueUi;
+    }
+
+    @Override
+    protected Element getEventDateUi() {
+        return eventDateUi;
     }
 }

@@ -50,8 +50,17 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final DoubleBox timeOnTimeFactor;
     private final DoubleBox timeOnDistanceAllowanceInSecondsPerNauticalMile;
     
+    /**
+     * The class creates the UI-dialog to type in the Data about a competitor.
+     * 
+     * @param competitorToEdit
+     *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
+     * @param boatClass
+     *            The boat class is the default shown boat class for new competitors. Set <code>null</code> if your competitor is
+     *            already initialized or you don´t want a default boat class.
+     */
     public CompetitorEditDialog(final StringMessages stringMessages, CompetitorDTO competitorToEdit,
-            DialogCallback<CompetitorDTO> callback) {
+            DialogCallback<CompetitorDTO> callback, String boatClass) {
         super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages
                 .cancel(), new Validator<CompetitorDTO>() {
                     @Override
@@ -74,7 +83,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 }, /* animationEnabled */true, callback);
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
-        
+                
         this.boatClassName = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* includeAlternativeNames */ true));
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
@@ -84,6 +93,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         if (competitorToEdit.getBoatClass() != null) {
             boatClassName.setValue(competitorToEdit.getBoatClass().getName());
             boatClassName.setEnabled(false);
+        } else {
+            boatClassName.setValue(boatClass); // widgets have to accept null values here
         }
         this.name = createTextBox(competitorToEdit.getName());
         this.email = createTextBox(competitorToEdit.getEmail());

@@ -9,6 +9,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.dispatch.client.SortedSetResult;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForEventAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaListViewAction;
+import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.eventstage.EventOverviewStage;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
@@ -17,16 +22,12 @@ import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilte
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventStatisticsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaListViewAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -66,17 +67,17 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         stageUi = new EventOverviewStage(currentPresenter);
         liveRacesListUi = new LiveRacesList(currentPresenter, true);
         MultiregattaOverviewRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaOverviewRegattasTabViewRegattaFilterList();
-        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
+        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.all(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, false);
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
+        RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         stageUi.setupRefresh(refreshManager);
-        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getEventDTO().getId()));
         
-        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
-        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getEventDTO().getId()));
+        refreshManager.add(statisticsBoxUi, new GetEventStatisticsAction(currentPresenter.getEventDTO().getId()));
     }
 
     @Override

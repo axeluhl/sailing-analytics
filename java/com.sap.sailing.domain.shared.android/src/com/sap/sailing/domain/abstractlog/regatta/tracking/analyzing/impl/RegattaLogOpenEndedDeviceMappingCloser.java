@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -12,7 +11,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpe
 import com.sap.sailing.domain.abstractlog.shared.analyzing.OpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaLogOpenEndedDeviceMappingCloser extends
         OpenEndedDeviceMappingCloser<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor, RegattaLogCloseOpenEndedDeviceMappingEvent> {
@@ -25,7 +23,7 @@ public class RegattaLogOpenEndedDeviceMappingCloser extends
     @Override
     protected RegattaLogCloseOpenEndedDeviceMappingEvent createCloseEvent(TimePoint logicalTimePoint,
             Serializable eventToCloseId) {
-        return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(MillisecondsTimePoint.now(), author,
-                logicalTimePoint, UUID.randomUUID(), eventToCloseId, closingTimePoint);
+        return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(author,
+                logicalTimePoint, eventToCloseId, closingTimePoint);
     }
 }
