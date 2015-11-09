@@ -105,17 +105,23 @@ public class RegattaByKeywordSearchService {
     }
     
     private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
+        final Set<Event> result;
         if (leaderboardGroup.hasOverallLeaderboard()) {
             CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+            Set<Event> preResult = null;
             if (defaultCourseArea != null) {
                 for (Event event : events) {
                     if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
-                        return Collections.singleton(event);
+                        preResult = Collections.singleton(event);
+                        break;
                     }
                 }
             }
+            result = preResult;
+        } else {
+            result = events;
         }
-        return events;
+        return result;
     }
 
     private Set<Event> getEventsForLeaderboard(Leaderboard matchingLeaderboard,
