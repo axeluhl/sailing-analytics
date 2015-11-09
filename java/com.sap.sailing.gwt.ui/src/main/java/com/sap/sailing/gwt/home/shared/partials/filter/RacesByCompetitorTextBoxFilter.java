@@ -8,7 +8,6 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
 
 public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
@@ -16,7 +15,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
     public RacesByCompetitorTextBoxFilter() {
-        super(StringMessages.INSTANCE.competitorsFilter(), " -/");
+        super(StringMessages.INSTANCE.competitorsFilter());
     }
     
     @Override
@@ -29,23 +28,27 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
     }
     
     @Override
-    protected String createSuggestionString(SimpleCompetitorDTO value) {
+    protected String createSuggestionDisplayString(SimpleCompetitorDTO value) {
         return value.getSailID() + " - " + value.getName();
+    }
+    
+    @Override
+    protected String createSuggestionReplacementString(SimpleCompetitorDTO value) {
+        return value.getSailID();
+    }
+    
+    @Override
+    protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
+        return Arrays.asList(value.getName(), value.getSailID(), createSuggestionDisplayString(value));
     }
     
     private class RacesByCompetitorFilter implements Filter<SimpleRaceMetadataDTO> {
 
         private final List<String> keywords = new ArrayList<>();
-        private final AbstractListFilter<SimpleCompetitorDTO> listFilter = new AbstractListFilter<SimpleCompetitorDTO>() {
-            @Override
-            public Iterable<String> getStrings(SimpleCompetitorDTO t) {
-                return Arrays.asList(t.getName(), t.getSailID(), createSuggestionString(t));
-            }
-        };
         
         @Override
         public boolean matches(SimpleRaceMetadataDTO object) {
-            return keywords.isEmpty() || !Util.isEmpty(listFilter.applyFilter(keywords, object.getCompetitors()));
+            return keywords.isEmpty() || !Util.isEmpty(suggestionMatchingFilter.applyFilter(keywords, object.getCompetitors()));
         }
 
         @Override
