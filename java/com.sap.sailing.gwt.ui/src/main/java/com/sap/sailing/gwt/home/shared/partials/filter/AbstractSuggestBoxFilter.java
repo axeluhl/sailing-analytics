@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.partials.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -50,37 +51,64 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         @Override
         public void requestDefaultSuggestions(Request request, Callback callback) {
-            setSuggestions(request, callback, suggestionObjectList);
+            setSuggestions(request, callback, suggestionObjectList, Collections.<String>emptyList());
         }
         
         @Override
         public void requestSuggestions(Request request, Callback callback) {
-            Iterable<String> queryTokens = Arrays.asList(request.getQuery().split("\\s"));
-            setSuggestions(request, callback, suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList));
+            Iterable<String> queryTokens = Arrays.asList(request.getQuery().split("\\s+"));
+            setSuggestions(request, callback, suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList), queryTokens);
         }
         
-        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects) {
+        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects, Iterable<String> queryTokens) {
             List<Suggestion> suggestions = new ArrayList<>();
             for (C match : suggestionObjects) {
-                suggestions.add(new SimpleSuggestion(match));
+                suggestions.add(new SimpleSuggestion(match, queryTokens));
             }
             Response response = new Response(suggestions);
             callback.onSuggestionsReady(request, response);
         }
         
+        @Override
+        public boolean isDisplayStringHTML() {
+          return true;
+        }
     }
     
     private class SimpleSuggestion implements Suggestion {
         
+        private static final String STRONG_TAG_OPEN = "<strong>", STRONG_TAG_CLOSE = "</strong>";
         private final C suggestObject;
+        private final Iterable<String> queryTokens;
         
-        private SimpleSuggestion(C suggestObject) {
+        private SimpleSuggestion(C suggestObject, Iterable<String> queryTokens) {
             this.suggestObject = suggestObject;
+            this.queryTokens = queryTokens;
         }
 
         @Override
         public String getDisplayString() {
-            return createSuggestionDisplayString(suggestObject);
+            StringBuilder displayString = new StringBuilder(createSuggestionDisplayString(suggestObject));
+            int cursor = 0;
+            while(true) {
+                int index = displayString.length();
+                String matchToken = null;
+                for (String token : queryTokens) {
+                    int matchIndex = displayString.indexOf(token, cursor);
+                    if (matchIndex >= 0 && matchIndex < index) {
+                        index = matchIndex;
+                        matchToken = token;
+                    }
+                }
+                if (matchToken != null) {
+                    displayString.insert(index, STRONG_TAG_OPEN);
+                    displayString.insert(index + STRONG_TAG_OPEN.length() + matchToken.length(), STRONG_TAG_CLOSE);
+                    cursor = index + STRONG_TAG_OPEN.length() + STRONG_TAG_CLOSE.length();
+                } else {
+                    break;
+                }
+            }
+            return displayString.toString();
         }
 
         @Override
