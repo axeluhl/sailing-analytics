@@ -56,13 +56,13 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(RegattaCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String regattaId = myPlace.getRegattaId();
+        String regattaId = currentPresenter.getRegattaId();
 
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;

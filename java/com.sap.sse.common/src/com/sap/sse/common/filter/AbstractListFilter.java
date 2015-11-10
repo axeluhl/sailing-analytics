@@ -28,7 +28,6 @@ public abstract class AbstractListFilter<T> {
      */
     public abstract Iterable<String> getStrings(T t);
     
-    
     /**
      * Constructs a list based on the contents of {@link #all} and the current search phrase {@link #text}. 
      */

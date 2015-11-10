@@ -11,18 +11,18 @@ import com.sap.sse.gwt.client.mvp.TopLevelView;
  * @author Frank
  *
  */
-public abstract class SecureClientFactoryImpl extends ClientFactoryImpl implements WithSecurity {
+public abstract class SecureClientFactoryImpl<TLV extends TopLevelView> extends ClientFactoryImpl<TLV> implements WithSecurity {
     private WithSecurity securityProvider;
 
-    public SecureClientFactoryImpl(TopLevelView root) {
+    public SecureClientFactoryImpl(TLV root) {
         this(root, new SimpleEventBus());
     }
     
-    protected SecureClientFactoryImpl(TopLevelView root, EventBus eventBus) {
+    protected SecureClientFactoryImpl(TLV root, EventBus eventBus) {
         this(root, eventBus, new PlaceController(eventBus));
     }
     
-    protected SecureClientFactoryImpl(TopLevelView root, EventBus eventBus, PlaceController placeController) {
+    protected SecureClientFactoryImpl(TLV root, EventBus eventBus, PlaceController placeController) {
         super(root, eventBus, placeController);
         
         securityProvider = new DefaultWithSecurityImpl();

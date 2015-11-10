@@ -17,7 +17,6 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,7 +63,6 @@ import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
@@ -72,7 +70,12 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -83,6 +86,9 @@ import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -104,8 +110,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.LeaderboardSearchResult;
-import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -301,7 +305,6 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.LeaderboardSearchResultDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -444,8 +447,6 @@ import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.media.VideoDescriptorImpl;
-import com.sap.sse.common.search.KeywordQuery;
-import com.sap.sse.common.search.Result;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -4729,14 +4730,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
         // TODO If new is null and current is not, current should be revoked.
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createStartOfTrackingEvent(
-                    dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
-                    .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+            raceLog.add(new RaceLogStartOfTrackingEventImpl(
+                    dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
+                    raceLog.getCurrentPassId()));
         }
         if (!Util.equalsWithNull(dto.newEndOfTracking, dto.currentEndOfTracking)) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createEndOfTrackingEvent(
-                    dto.newEndOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority), UUID
-                    .randomUUID(), new ArrayList<Competitor>(), raceLog.getCurrentPassId()));
+            raceLog.add(new RaceLogEndOfTrackingEventImpl(
+                    dto.newEndOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
+                    raceLog.getCurrentPassId()));
         }
     }
 
@@ -4973,7 +4974,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addMarkToRaceLog(String leaderboardName, String raceColumnName, String fleetName, MarkDTO markDTO) {
         Mark mark = convertToMark(markDTO, false);
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createDefineMarkEvent(MillisecondsTimePoint.now(),
+        RaceLogEvent event = new RaceLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), mark);
         raceLog.add(event);
     }
@@ -4993,7 +4994,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         if (eventToRevoke != null){
-            RaceLogEvent event = RaceLogEventFactory.INSTANCE.createRevokeEvent(getService().getServerAuthor(), raceLog.getCurrentPassId(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
+            RaceLogEvent event = new RaceLogRevokeEventImpl(getService().getServerAuthor(), raceLog.getCurrentPassId(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
             raceLog.add(event);
         } else {
             logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RaceLog.");
@@ -5059,7 +5060,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throw new RuntimeException(e);
         }
         
-        RaceLogEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(),
+        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course);
         raceLog.add(event);
     }
@@ -5264,13 +5265,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
-            event = RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), mark, raceLog.getCurrentPassId(), from, to);
+            event = new RaceLogDeviceMarkMappingEventImpl(now, getService().getServerAuthor(),
+                    raceLog.getCurrentPassId(), mark, mapping.getDevice(), from, to);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now, getService().getServerAuthor(),
-                    mapping.getDevice(), competitor, raceLog.getCurrentPassId(), from, to);
+            event = new RaceLogDeviceCompetitorMappingEventImpl(now, getService().getServerAuthor(),
+                    raceLog.getCurrentPassId(), competitor, mapping.getDevice(), from, to);
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -5288,12 +5289,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
-            event = new RegattaLogDeviceMarkMappingEventImpl(now, getService().getServerAuthor(), now, UUID.randomUUID(), 
+            event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, getService().getServerAuthor(), now, UUID.randomUUID(), 
+            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     competitor, mapping.getDevice(), from, to);                  
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
@@ -5466,45 +5467,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<String> getSearchServerNames() {
-        List<String> result = new ArrayList<>();
-        for (RemoteSailingServerReference remoteServerRef : getService().getLiveRemoteServerReferences()) {
-            result.add(remoteServerRef.getName());
-        }
-        return result;
-    }
-
-    @Override
-    public Iterable<LeaderboardSearchResultDTO> search(String serverNameOrNullForMain, KeywordQuery query) throws MalformedURLException {
-        final List<LeaderboardSearchResultDTO> result = new ArrayList<>();
-        if (serverNameOrNullForMain == null) {
-            Result<LeaderboardSearchResult> searchResult = getService().search(query);
-            for (LeaderboardSearchResult hit : searchResult.getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, getRequestBaseURL(), false));
-            }
-        } else {
-            RemoteSailingServerReference remoteRef = getService().getRemoteServerReferenceByName(serverNameOrNullForMain);
-            for (LeaderboardSearchResultBase hit : getService().searchRemotely(serverNameOrNullForMain, query).getHits()) {
-                result.add(createLeaderboardSearchResultDTO(hit, remoteRef.getURL(), true));
-            }
-        }
-        return result;
-    }
-
-    private LeaderboardSearchResultDTO createLeaderboardSearchResultDTO(LeaderboardSearchResultBase leaderboardSearchResult, URL baseURL,
-            boolean isOnRemoteServer) {
-        ArrayList<LeaderboardGroupBaseDTO> leaderboardGroups = new ArrayList<>();
-        for (LeaderboardGroupBase lgb : leaderboardSearchResult.getLeaderboardGroups()) {
-            LeaderboardGroupBaseDTO leaderboardGroupDTO = convertToLeaderboardGroupBaseDTO(lgb);
-            leaderboardGroups.add(leaderboardGroupDTO);
-        }
-        return new LeaderboardSearchResultDTO(baseURL.toString(), isOnRemoteServer, leaderboardSearchResult.getLeaderboard().getName(),
-                leaderboardSearchResult.getLeaderboard().getDisplayName(), leaderboardSearchResult.getRegattaName(),
-                leaderboardSearchResult.getBoatClassName(), convertToEventDTO(leaderboardSearchResult.getEvent()),
-                leaderboardGroups);
-    }
-
-    @Override
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
         if (newStartTimeReceived != null) {
             RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(
@@ -5574,8 +5536,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         if (dateOfMarkPassing != null) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createFixedMarkPassingEvent(MillisecondsTimePoint.now(), getService()
-                    .getServerAuthor(), UUID.randomUUID(), Arrays.asList(competitor), raceLog.getCurrentPassId(),
+            raceLog.add(new RaceLogFixedMarkPassingEventImpl(MillisecondsTimePoint.now(), getService()
+                    .getServerAuthor(), competitor, raceLog.getCurrentPassId(),
                     new MillisecondsTimePoint(dateOfMarkPassing), indexOfWaypoint));
         }
     }
@@ -5622,8 +5584,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         if (create) {
-            raceLog.add(RaceLogEventFactory.INSTANCE.createSuppressedMarkPassingsEvent(MillisecondsTimePoint.now(), getService()
-                    .getServerAuthor(), UUID.randomUUID(), Arrays.asList(competitor), raceLog.getCurrentPassId(),
+            raceLog.add(new RaceLogSuppressedMarkPassingsEventImpl(MillisecondsTimePoint.now(), getService()
+                    .getServerAuthor(), competitor, raceLog.getCurrentPassId(),
                     newZeroBasedIndexOfSuppressedMarkPassing));
         }
     }

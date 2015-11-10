@@ -10,9 +10,10 @@ import org.junit.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -50,9 +51,9 @@ public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievin
         Fleet blueFleet = qualification.getFleetByName(blueFleetName);
         RaceLog yellowLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(yellowFleet);
         RaceLog blueLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(blueFleet);
-        RaceLogProtestStartTimeEvent expectedEventYellow = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
         yellowLog.add(expectedEventYellow);
-        RaceLogStartTimeEvent expectedEventBlue = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogStartTimeEvent expectedEventBlue = new RaceLogStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
         blueLog.add(expectedEventBlue);
         // these events are now expected to be stored persistently in the race log store
         //getLastError() is now deprecated - seems to run fine without (at least locally)
