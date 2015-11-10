@@ -18,7 +18,6 @@
 			<!-- deactivate with parameter '-P !with-mobile'-->
 			<id>with-mobile</id>
 			<activation>
-				<!-- default is to build mobile only -->
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
@@ -38,19 +37,19 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
-
+	
 	<repositories>
 		<repository>
 			<id>equinox-sdk-3.9</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/luna/</url>
 		</repository>
-<!--
+<!--		
 		<repository>
 			<id>sap-nexus</id>
 			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
 		</repository>
--->
+--> 
 		<repository>
 			<id>sailing-server-maven</id>
 			<url>http://maven.sapsailing.com/maven</url>
@@ -60,7 +59,7 @@
 			<id>central</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
-
+ 
 		<repository>
 			<id>uni-luebeck</id>
 			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>

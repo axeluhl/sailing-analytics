@@ -61,8 +61,7 @@
       <!-- deactivate with parameter '-P !with-test'-->
       <id>with-not-android-relevant</id>
       <activation>
-        <!-- default is to build mobile only -->
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
         <module>com.sap.sse</module>
