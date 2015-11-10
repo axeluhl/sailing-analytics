@@ -201,6 +201,10 @@ public class LeaderboardContext {
     public String getLeaderboardName() {
         return leaderboard.getName();
     }
+    
+    public String getLeaderboardGroupName() {
+        return leaderboardGroup.getName();
+    }
 
     public RegattaMetadataDTO asRegattaMetadataDTO() {
         RegattaMetadataDTO regattaDTO = new RegattaMetadataDTO();

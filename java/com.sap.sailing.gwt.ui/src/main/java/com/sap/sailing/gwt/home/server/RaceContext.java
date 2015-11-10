@@ -470,6 +470,7 @@ public class RaceContext {
     }
     
     private void fillSimpleRaceMetadata(SimpleRaceMetadataDTO dto) {
+        dto.setLeaderboardGroupName(leaderboardContext.getLeaderboardGroupName());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
