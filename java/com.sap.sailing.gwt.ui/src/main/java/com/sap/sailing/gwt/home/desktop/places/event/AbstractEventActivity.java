@@ -10,7 +10,6 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -36,7 +35,6 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -126,12 +124,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     protected EventContext contextForRegatta(String regattaId) {
         return new EventContext(ctx).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
-    }
-
-    @Override
-    public String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race) {
-        RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-        return getRaceViewerURL(leaderboard.name, raceIdentifier);
     }
     
     public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
