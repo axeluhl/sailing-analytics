@@ -6,30 +6,8 @@
 
 	<groupId>com.sap.sailing</groupId>
 	<artifactId>workspace</artifactId>
-	<version>1.1.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-
-	<build>
-	  <!-- To define the plugin version in your parent POM -->
-	  <pluginManagement>
-	    <plugins>
-	      <plugin>
-		<groupId>org.eclipse.tycho</groupId>
-		<artifactId>tycho-versions-plugin</artifactId>
-		<version>0.21.0</version>
-	      </plugin>
-	    </plugins>
-	  </pluginManagement>
-	  <!-- To use the plugin goals in your POM or parent POM -->
-	  <plugins>
-	    <plugin>
-	      <groupId>org.eclipse.tycho</groupId>
-	      <artifactId>tycho-versions-plugin</artifactId>
-	      <version>0.21.0</version>
-	    </plugin>
-	  </plugins>
-	</build>
-
 
 	<modules>
 		<module>java</module>

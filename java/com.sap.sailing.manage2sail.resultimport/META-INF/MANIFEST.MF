@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Manage2Sail Result import
 Bundle-SymbolicName: com.sap.sailing.manage2sail.resultimport
-Bundle-Version: 1.1.0
+Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.manage2sail.resultimport.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
