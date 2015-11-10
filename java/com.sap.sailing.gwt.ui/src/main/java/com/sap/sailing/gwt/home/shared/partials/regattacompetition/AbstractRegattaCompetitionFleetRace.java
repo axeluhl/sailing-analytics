@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
-import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
-import static com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat.HOUR24_MINUTE;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter;
 import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
 
@@ -53,12 +52,11 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
         setStyleName(anchorUiElement, getRaceUntrackedStyleName(), isUntrackedRace);
     }
     
-    private final DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(getFormat(HOUR24_MINUTE));
     private void setupRaceStart(Date startDate) {
         if (startDate != null) {
             TimePoint range = now().plus(Duration.ONE_HOUR.times(16)), start = new MillisecondsTimePoint(startDate);
             boolean showTime = start.after(now()) && start.before(range);
-            DateTimeFormatRenderer renderer = showTime ? defaultTimeFormatter : weekdayMonthAbbrDayDateFormatter;
+            DateTimeFormatRenderer renderer = showTime ? shortTimeFormatter : weekdayMonthAbbrDayDateFormatter;
             getRaceDateUiElement().setInnerText(renderer.render(startDate));
         }
     }
