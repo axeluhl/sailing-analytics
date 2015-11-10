@@ -20,15 +20,15 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
         this(null, Collections.<CompetitorDTO, BoatDTO> emptyMap());
     }
 
-    public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
+    public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
+            Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
         this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
         this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
-
-        if(raceIdentifier != null) {
+        if (raceIdentifier != null) {
             for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
                 if (competitorAndBoat.getValue() != null) {
                     Map<CompetitorDTO, Color> raceColors = competitorsBoatColorsPerRace.get(raceIdentifier);
-                    if(raceColors == null) {
+                    if (raceColors == null) {
                         raceColors = new HashMap<CompetitorDTO, Color>();
                         competitorsBoatColorsPerRace.put(raceIdentifier, raceColors);
                     }
