@@ -53,8 +53,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         
         String getRegattaOverviewLink();
 
-        String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier);
-
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
         PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaName);
@@ -72,6 +70,9 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         EventViewDTO getEventDTO();
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+
+        String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
+                RegattaAndRaceIdentifier raceIdentifier);
     }
     
     public interface PlaceCallback {
