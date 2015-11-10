@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -270,6 +271,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
     private void setAndAnnounceProtestTime() {
         List<ManagedRace> selectedRaces = getSelectedRaces();
         TimePoint protestTime = TimeUtils.getTime(mTimePicker);
@@ -278,7 +280,11 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             race.getState().setProtestTime(now, protestTime);
         }
         if (mHome != null) {
-            mHome.callOnClick();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                mHome.callOnClick();
+            } else {
+                mHome.performClick();
+            }
         }
     }
 
