@@ -52,12 +52,12 @@
                 <data
                     android:host="*"
                     android:scheme="http"
-                    android:pathPattern=".*tracking/checkin.*"/>
+                    android:pathPattern="/tracking/checkin.*"/>
 
                 <data
                     android:host="*"
-                    android:scheme="http"
-                    android:pathPattern=".*tracking/checkin.*"/>
+                    android:scheme="https"
+                    android:pathPattern="/tracking/checkin.*"/>
             </intent-filter>
         </activity>
         <activity
