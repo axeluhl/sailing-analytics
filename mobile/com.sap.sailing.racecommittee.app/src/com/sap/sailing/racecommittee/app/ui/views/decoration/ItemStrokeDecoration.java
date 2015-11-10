@@ -2,21 +2,32 @@ package com.sap.sailing.racecommittee.app.ui.views.decoration;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-public class ItemStrokeDecoration extends PaddingItemDecoration {
+public class ItemStrokeDecoration extends RecyclerView.ItemDecoration {
 
+    private int mPadding;
+    private int mPaddingDouble;
     private Paint mLinePaint;
 
     public ItemStrokeDecoration(int padding, float strokeWidth, int color) {
-        super(padding);
+        mPadding = padding;
+        mPaddingDouble = padding * 2;
 
         mLinePaint = new Paint();
         mLinePaint.setStrokeWidth(strokeWidth);
         mLinePaint.setColor(color);
         mLinePaint.setAntiAlias(true);
         mLinePaint.setStyle(Paint.Style.STROKE);
+    }
+
+    @Override
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+        super.getItemOffsets(outRect, view, parent, state);
+
+        outRect.set(mPaddingDouble, mPaddingDouble, mPaddingDouble, mPaddingDouble);
     }
 
     @Override

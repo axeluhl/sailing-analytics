@@ -207,10 +207,11 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mMarkGrid = (RecyclerView) layout.findViewById(R.id.assets);
         if (mMarkGrid != null) {
             GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
+            int padding = getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line);
+            int strokeWidth = getActivity().getResources().getDimensionPixelSize(R.dimen.thin_line);
+            int color = ThemeHelper.getColor(getActivity(), R.attr.sap_gray_white_20);
             mMarkGrid.setLayoutManager(layoutManager);
-            mMarkGrid
-                .addItemDecoration(new ItemStrokeDecoration(getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line), getActivity()
-                    .getResources().getDimensionPixelSize(R.dimen.thin_line), ThemeHelper.getColor(getActivity(), R.attr.sap_gray_white_20)));
+            mMarkGrid.addItemDecoration(new ItemStrokeDecoration(padding, strokeWidth, color));
 
             mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()));
             mMarkAdapter.setListener(this);
