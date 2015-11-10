@@ -209,6 +209,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             mListView.setAdapter(mAdapter);
             mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             mListView.setOnItemClickListener(this);
+            filterChanged();
         }
     }
 
@@ -243,7 +244,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 @Override
                 public void onClick(View v) {
                     setFilterMode(FilterMode.ACTIVE);
-                    filterChanged();
                 }
             });
         }
@@ -256,7 +256,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 @Override
                 public void onClick(View v) {
                     setFilterMode(FilterMode.ALL);
-                    filterChanged();
                 }
             });
         }
