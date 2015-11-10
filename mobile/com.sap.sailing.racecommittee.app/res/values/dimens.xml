@@ -106,4 +106,7 @@
     <!-- photo -->
     <dimen name="photo_shutter_size">45dp</dimen>
 
+    <!-- time panel -->
+    <dimen name="current_time_left_margin">15dp</dimen>
+
 </resources>

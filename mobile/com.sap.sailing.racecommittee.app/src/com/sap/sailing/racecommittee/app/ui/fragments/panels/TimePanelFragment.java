@@ -48,7 +48,6 @@ public class TimePanelFragment extends BasePanelFragment {
     private TextView mCurrentTime;
     private TextView mHeaderTime;
     private TextView mTimeStart;
-    private TextView mTimeFinish;
     private ImageView mLinkIcon;
     private Boolean mLinkedRace = null;
 
@@ -76,7 +75,6 @@ public class TimePanelFragment extends BasePanelFragment {
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);
-        mTimeFinish = ViewHelper.get(layout, R.id.time_finish);
         mHeaderTime = ViewHelper.get(layout, R.id.timer_text);
         mTimeStart = ViewHelper.get(layout, R.id.time_start);
         mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
@@ -137,9 +135,6 @@ public class TimePanelFragment extends BasePanelFragment {
                 }
             }
 
-            if (mTimeFinish != null) {
-                mTimeFinish.setVisibility(View.VISIBLE);
-            }
 
             if (mHeaderTime != null && startTime != null) {
                 String time;
