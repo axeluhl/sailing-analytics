@@ -244,7 +244,7 @@ public class SetupPanelFragment extends BasePanelFragment {
     private void uncheckMarker(View view) {
         if (isAdded() && view != null) {
             if (!view.equals(mStartProcedure)) {
-                resetFragment(mStartProcedureLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), StartProcedureFragment.class);
+                resetFragment(mStartProcedureLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartProcedureFragment.class);
                 setMarkerLevel(mStartProcedure, R.id.start_procedure_marker, LEVEL_NORMAL);
             }
 
@@ -262,12 +262,12 @@ public class SetupPanelFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mCourse)) {
-                resetFragment(mCourseLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), CourseFragment.class);
+                resetFragment(mCourseLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
                 setMarkerLevel(mCourse, R.id.course_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mWind)) {
-                resetFragment(mWindLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content), WindFragment.class);
+                resetFragment(mWindLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), WindFragment.class);
                 setMarkerLevel(mWind, R.id.wind_marker, LEVEL_NORMAL);
             }
         }

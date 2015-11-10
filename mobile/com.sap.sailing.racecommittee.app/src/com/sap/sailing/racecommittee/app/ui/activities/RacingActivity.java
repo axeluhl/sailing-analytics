@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.common.Wind;
@@ -451,6 +452,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         Fragment content;
         Fragment extra = null;
         Bundle args = new Bundle();
+        View view;
 
         String action = intent.getAction();
         if (mSelectedRace != null) {
@@ -460,7 +462,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
         if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
-            if (findViewById(R.id.race_edit) != null) {
+            view = findViewById(R.id.race_edit);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
                 extra = getFragmentManager().findFragmentById(R.id.race_edit);
                 if (extra != null) {
                     transaction.remove(extra);
@@ -478,7 +482,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
 
         if (AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
-            if (findViewById(R.id.finished_edit) != null) {
+            view = findViewById(R.id.finished_edit);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
                 extra = getFragmentManager().findFragmentById(R.id.finished_edit);
                 if (extra != null) {
                     transaction.remove(extra);
@@ -491,7 +497,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
 
         if (AppConstants.INTENT_ACTION_REMOVE_PROTEST.equals(action)) {
-            if (findViewById(R.id.protest_time_fragment) != null) {
+            view = findViewById(R.id.protest_time_fragment);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
                 extra = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
                 if (extra != null) {
                     transaction.remove(extra);

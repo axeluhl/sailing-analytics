@@ -67,7 +67,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     public void showMore(MoreFlag flag) {
         switch (flag.flag) {
             case BLUE:
-                replaceFragment(FinishTimeFragment.newInstance(0), getFrameId(getActivity(), R.id.race_edit, R.id.race_content));
+                replaceFragment(FinishTimeFragment.newInstance(0), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, true));
                 break;
 
             default:

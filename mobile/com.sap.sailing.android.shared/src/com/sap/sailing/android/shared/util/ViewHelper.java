@@ -2,6 +2,7 @@ package com.sap.sailing.android.shared.util;
 
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class ViewHelper {
 
@@ -22,8 +23,22 @@ public class ViewHelper {
         return (T) childView;
     }
 
-    public static void disableSave(View view){
+    public static void disableSave(View view) {
         view.setSaveFromParentEnabled(false);
         view.setSaveEnabled(false);
+    }
+
+    public static void setSiblingsVisibility(View view, int visibility) {
+        ViewGroup parent = (ViewGroup) view.getParent();
+        if (parent != null) {
+            int max = parent.getChildCount();
+            View child;
+            for (int i = 0; i < max; i++) {
+                child = parent.getChildAt(i);
+                if (!child.equals(view)) {
+                    child.setVisibility(visibility);
+                }
+            }
+        }
     }
 }

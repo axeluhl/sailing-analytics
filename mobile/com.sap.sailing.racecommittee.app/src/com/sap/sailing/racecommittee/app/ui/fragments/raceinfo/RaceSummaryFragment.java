@@ -57,7 +57,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                        .newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -68,7 +68,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                        .newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -79,7 +79,7 @@ public class RaceSummaryFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content));
+                        .newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }

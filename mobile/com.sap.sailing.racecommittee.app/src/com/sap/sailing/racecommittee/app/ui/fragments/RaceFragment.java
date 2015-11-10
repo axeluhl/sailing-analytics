@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -150,16 +151,19 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return courseName;
     }
 
-    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame) {
+    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame, boolean changeVisibility) {
         int frame = 0;
-        if (activity.findViewById(defaultFrame) != null) {
+        View view = activity.findViewById(defaultFrame);
+        if (view != null) {
+            if (changeVisibility) {
+                ViewHelper.setSiblingsVisibility(view, View.GONE);
+            }
             frame = defaultFrame;
         } else if (activity.findViewById(fallbackFrame) != null) {
             frame = fallbackFrame;
         }
         return frame;
     }
-
 
     protected void viewPanel(@MOVE_VALUES int direction) {
         if (mDots.size() == 0) {
