@@ -17,14 +17,14 @@ import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRaceTickerStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewRegattaTickerStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
 import com.sap.sailing.gwt.home.desktop.partials.stage.StageResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRaceTickerStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewRegattaTickerStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
 
 public class Countdown extends Composite {
 

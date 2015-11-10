@@ -25,10 +25,9 @@
   </repositories>
 
   <dependencies>
-    <!-- The following dependency needs re-declaration with the desired version because
-         gwt-maps-api declares it with no version specifier which may be resolved to an
-         incorrect version.
-      -->
+		<!-- The following dependency needs re-declaration with the desired version 
+			because gwt-maps-api declares it with no version specifier which may be resolved 
+			to an incorrect version. -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -164,16 +163,13 @@
                 <module>com.sap.sailing.gwt.ui.Simulator</module>
                 <module>com.sap.sailing.gwt.regattaoverview.RegattaOverview</module>
               </modules>
-              <!-- uncomment the following for PRETTY-printed, non-obfuscated output format
-              <style>PRETTY</style>
-              -->
+							<!-- uncomment the following for PRETTY-printed, non-obfuscated output 
+								format <style>PRETTY</style> -->
               <gen>${basedir}/.generated</gen>
               <webappDirectory>${basedir}</webappDirectory>
               <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
               <!-- Uncomment the following to obtain details split-point reports
-              <compileReport>true</compileReport>
-              <detailedSoyc>true</detailedSoyc>
-              -->
+								<compileReport>true</compileReport> <detailedSoyc>true</detailedSoyc> -->
             </configuration>
             <goals>
               <goal>compile</goal>
