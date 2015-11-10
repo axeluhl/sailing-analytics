@@ -90,7 +90,6 @@ public class RaceContext {
     private TimePoint finishTime;
     private boolean finishTimeCalculated = false;
     private RaceViewState raceViewState;
-    private List<Competitor> competitors;
 
     public RaceContext(RacingEventService service, Event event, LeaderboardContext leaderboardContext, 
             RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
@@ -442,7 +441,7 @@ public class RaceContext {
             if(finishTime == null) {
                 finishTime = HomeServiceUtil.getLiveTimePoint();
             }
-            competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
+            List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
             if (competitors == null || competitors.isEmpty()) {
                 return null;
             }
