@@ -104,6 +104,25 @@ public class RegattaByKeywordSearchService {
         return result;
     }
     
+    /**
+     * For leaderboards that are part of a series, there used to be search results that linked to the leaderboard in
+     * combination with one random event of that series. It was the wrong event for all leaderboards except one of a
+     * series. In bug3348 a change was made to show all events associated to a leaderboard in the search results. This
+     * lead to an "explosion of results" as there were potentially n results referencing n events instead of each result
+     * only referencing the associated event.
+     * 
+     * This filters the events to be associated to a leaderboard. If the leaderboardGroup has a OverallLeaderboard (in
+     * case of a series), there is a special matching to find the right event. If a leaderboard has a defaultCourseArea,
+     * the event hosting this CourseArea is the right one. If this reference isn't given or the CourseArea doesn't
+     * belong to an event of the series, the fallback behavior is causing all events to be returned.
+     * 
+     * This doesn't affect any leaderboard's event set if the leaderboard isn't part of a series.
+     * 
+     * @param leaderboard the leaderboard to get the matching events for
+     * @param leaderboardGroup the LeaderboardGroup hosting the leaderboard
+     * @param events all events hosting the LeaderboardGroup
+     * @return the best matching events for the given Leaderboard/LeaderboardGroup
+     */
     private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
         final Set<Event> result;
         if (leaderboardGroup.hasOverallLeaderboard()) {
