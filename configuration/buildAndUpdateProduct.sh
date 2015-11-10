@@ -714,9 +714,11 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
+    extra="$extra -P with-not-android-relevant,!with-mobile"
+
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
     echo "Maven version used: `mvn --version`"
-    mvn $extra -P with-not-android-relevant,!with-mobile -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
     # now get the exit status from mvn, and not that of tee which is what $? contains now
     MVN_EXIT_CODE=${PIPESTATUS[0]}
     echo "Maven exit code is $MVN_EXIT_CODE"
