@@ -11,6 +11,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
@@ -52,7 +53,8 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
     
     private void setupRaceStart(Date startDate) {
         if (startDate != null) {
-            boolean showTime = CalendarUtil.isSameDate(now().asDate(), startDate);
+//            boolean showTime = CalendarUtil.isSameDate(now().asDate(), startDate);
+            boolean showTime = DateUtil.isSameDayOfMonth(now().asDate(), startDate);
             DateTimeFormatRenderer renderer = showTime ? shortTimeFormatter : weekdayMonthAbbrDayDateFormatter;
             getRaceDateUiElement().setInnerText(renderer.render(startDate));
         }
