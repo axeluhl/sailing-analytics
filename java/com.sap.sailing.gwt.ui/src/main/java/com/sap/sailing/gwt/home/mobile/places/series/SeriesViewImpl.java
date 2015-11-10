@@ -8,19 +8,20 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.event.GetSeriesStatisticsAction;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniOverallLeaderbordAction;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.mobile.partials.minileaderboard.MinileaderboardBox;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecentYearEvent;
 import com.sap.sailing.gwt.home.mobile.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBox;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
+import com.sap.sailing.gwt.home.shared.refresh.LifecycleRefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniOverallLeaderbordAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetSeriesStatisticsAction;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 public class SeriesViewImpl extends Composite implements SeriesView {
     private static final StringMessages MSG = StringMessages.INSTANCE;
@@ -40,8 +41,8 @@ public class SeriesViewImpl extends Composite implements SeriesView {
 
     public SeriesViewImpl(SeriesView.Presenter presenter) {
         this.currentPresenter = presenter;
-        this.refreshManager = new RefreshManager(this, currentPresenter.getDispatch());
-        EventSeriesViewDTO series = currentPresenter.getCtx().getSeriesDTO();
+        this.refreshManager = new LifecycleRefreshManager(this, currentPresenter.getDispatch());
+        EventSeriesViewDTO series = currentPresenter.getSeriesDTO();
         eventHeaderUi = new SeriesHeader(series);
         this.setupStatisticsBox(series);
         leaderboardUi = new MinileaderboardBox(true);

@@ -593,24 +593,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getDominantBoatClass(List<String> competitorClassNames) {
-        Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
-        BoatClass dominantBoatClass = null;
-        int numberOfCompetitorsInDominantBoatClass = 0;
-        for (String competitorClassName : competitorClassNames) {
-            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
-            Integer boatClassCount = countsPerBoatClass.get(boatClass);
-            if (boatClassCount == null) {
-                boatClassCount = 0;
+    public BoatClass getDominantBoatClass(Iterable<String> competitorClassNames) {
+        if (competitorClassNames == null) {
+            return null;
+            
+        } else {
+            Collection<BoatClass> boatClasses = new ArrayList<>();
+            for (String competitorClassName : competitorClassNames) {
+                BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
+                boatClasses.add(boatClass);
             }
-            boatClassCount = boatClassCount + 1;
-            countsPerBoatClass.put(boatClass, boatClassCount);
-            if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
-                numberOfCompetitorsInDominantBoatClass = boatClassCount;
-                dominantBoatClass = boatClass;
-            }
+
+            return Util.getDominantObject(boatClasses);
         }
-        return dominantBoatClass;
     }
 
     @Override

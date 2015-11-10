@@ -5,8 +5,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewVideoStageDTO;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoWithLowerThird;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 
 public class Video extends Composite {
 
