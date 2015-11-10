@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
@@ -69,6 +70,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         String getRegattaId();
         
         EventViewDTO getEventDTO();
+
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
     }
     
     public interface PlaceCallback {

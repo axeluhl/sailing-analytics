@@ -516,8 +516,7 @@ public class RaceListColumnFactory {
                 } else {
                     String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
                     String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
-                    String raceViewerURL = presenter.getRaceViewerURL(data.getLeaderboardName(), data.getRegattaAndRaceIdentifier());
-                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
+                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, presenter.getRaceViewerURL(data)));
                 }
             }
 
