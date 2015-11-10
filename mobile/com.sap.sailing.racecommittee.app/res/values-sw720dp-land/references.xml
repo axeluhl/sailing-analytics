@@ -2,6 +2,5 @@
 <resources>
 
     <item name="race_schedule_course_marks" type="layout">@layout/race_schedule_course_marks_xlarge</item>
-    <item name="wind_view" type="layout">@layout/wind_view_xlarge</item>
 
 </resources>

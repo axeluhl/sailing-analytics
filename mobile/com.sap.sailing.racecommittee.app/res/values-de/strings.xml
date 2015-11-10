@@ -452,5 +452,6 @@
     <string name="prev_course">Vorheriger Kurs</string>
     <string name="new_course">Neuer Kurs</string>
     <string name="layout_course">Kurs Layout</string>
+    <string name="wind_degree">°</string>
 
 </resources>

@@ -457,7 +457,7 @@
     <string name="wind_map_button_show">Wind Map</string>
     <string name="wind_map_button_hide">Hide</string>
     <string name="wind_latitude">Latitude:</string>
-    <string name="wind_longitude">Longitude_</string>
+    <string name="wind_longitude">Longitude:</string>
     <string name="wind_accuracy">Accuracy:</string>
     <string name="dependent_races_absolute">Absolute Start Time</string>
     <string name="dependent_races_relative">Relative Start Time</string>
@@ -476,5 +476,6 @@
     <string name="prev_course">Previous Course</string>
     <string name="new_course">New Course</string>
     <string name="layout_course">Course Layout</string>
+    <string name="wind_degree">°</string>
 
 </resources>
