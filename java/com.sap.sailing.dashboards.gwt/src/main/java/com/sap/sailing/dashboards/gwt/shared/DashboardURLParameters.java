@@ -12,17 +12,17 @@ public enum DashboardURLParameters {
     EVENT_ID("eventId"),
     LEADERBOARD_NAME("leaderboardName");
     
-    private String name;
+    private String key;
 
-    private DashboardURLParameters(String name) {
-        this.name = name;
+    private DashboardURLParameters(String key) {
+        this.key = key;
     }
 
-    public String getName() {
-        return name;
+    public String getKey() {
+        return key;
     }
     
     public String getValue() {
-        return Window.Location.getParameter(getName());
+        return Window.Location.getParameter(getKey());
     }
 }
