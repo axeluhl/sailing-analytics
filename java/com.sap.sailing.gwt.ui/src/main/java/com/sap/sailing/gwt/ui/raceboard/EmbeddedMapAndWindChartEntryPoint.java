@@ -169,7 +169,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                     timePanelSettings.setRefreshInterval(refreshInterval);
                     timePanel.updateSettings(timePanelSettings);
                     raceMapResources.combinedWindPanelStyle().ensureInjected();
-                    final CompetitorSelectionProvider competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
+                    final CompetitorSelectionProvider competitorSelection;
+                    if (showCompetitors) {
+                        competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+                    } else {
+                        competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
+                    }
                     final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                             competitorSelection, getStringMessages(), showMapControls, showViewStreamlets, showViewStreamletColors,
                             showViewSimulation, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ false) {
