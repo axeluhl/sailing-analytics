@@ -41,10 +41,9 @@
 
 	<profiles>
 		<profile>
-			<!-- deactivate with parameter '-P !with-mobile' -->
 			<id>with-mobile</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<plugins>
