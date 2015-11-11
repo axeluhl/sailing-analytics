@@ -207,7 +207,7 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void cancel() {
             }
-        }).show();
+        }, /* boat class to be used from CompetitorDTO */ null).show();
     }
     
     private String getLocaleInfo() {

@@ -21,7 +21,6 @@ public class HeaderNavigationItem extends Widget implements HasClickHandlers {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
-
     
     public HeaderNavigationItem(String linkText, String link) {
         setElement(uiBinder.createAndBindUi(this));

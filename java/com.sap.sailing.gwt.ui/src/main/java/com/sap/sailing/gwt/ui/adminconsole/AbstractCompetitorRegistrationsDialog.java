@@ -34,15 +34,22 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     protected final SailingServiceAsync sailingService;
     final ErrorReporter errorReporter;
     private boolean editable;
-
+    private String boatClass;
+    
+    /**
+     * @param boatClass
+     *            The <code>boatClass</code> parameter describes the default shown boat class for new competitors. The <code>boatClass</code> parameter is <code>null</code>,
+     *            if you want to edit a competitor or there is no boat class for the new competitor.
+     */
     public AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            DialogCallback<Set<CompetitorDTO>> callback) {
+            DialogCallback<Set<CompetitorDTO>> callback, String boatClass) {
         super(stringMessages.registerCompetitors(), /*messsage*/ null, stringMessages.save(), stringMessages.cancel(), /*validator*/ null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter  = errorReporter;
         this.editable = editable;
+        this.boatClass = boatClass;
     }
     
     @Override
@@ -145,7 +152,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                     @Override
                     public void cancel() {
                     }
-                }).show();
+                }, boatClass).show();
     }
     
     private void openEditCompetitorDialog() {
@@ -177,7 +184,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 @Override
                 public void cancel() {
                 }
-            }).show();
+            }, /* boatClass */ null).show();
         }
     }
 

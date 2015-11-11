@@ -12,7 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.common.Util;
 
 public class SailingGalleryPlayer extends ResizeComposite {
@@ -25,6 +25,7 @@ public class SailingGalleryPlayer extends ResizeComposite {
     @UiField DivElement mainSliderUi;
     @UiField DivElement subSliderUi;
 
+    private boolean autoplay;
     private int selectedIdx;
 
     public SailingGalleryPlayer(SailingImageDTO selected, Collection<SailingImageDTO> images) {
@@ -65,8 +66,8 @@ public class SailingGalleryPlayer extends ResizeComposite {
     }
 
     native void refreshSlider() /*-{
-      $wnd.$('.mainSlider').slick('setOption', null, null, true);
-      $wnd.$('.subSlider').slick('setOption', null, null, true);
+	$wnd.$('.mainSlider').slick('setOption', null, null, true);
+	$wnd.$('.subSlider').slick('setOption', null, null, true);
     }-*/;
 
     /**
@@ -75,30 +76,69 @@ public class SailingGalleryPlayer extends ResizeComposite {
      * @param uniqueId
      */
     native void _onLoad() /*-{
-      $wnd.$('.mainSlider').slick({
-          lazyLoad : 'ondemand',
-          slidesToShow : 1,
-          slidesToScroll : 1,
-          arrows : false,
-          centerMode : false,
-          variableWidth : false,
-          adaptiveHeight : false,
-          asNavFor : '.subSlider',
-          initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
-      });
-      $wnd.$('.subSlider').slick({
-          lazyLoad : 'ondemand',
-          infinite : true,
-          slidesToShow : 1,
-          slidesToScroll : 1,
-          swipeToSlide : true,
-          centerMode : true,
-          asNavFor : '.mainSlider',
-          arrows : false,
-          variableWidth : true,
-          focusOnSelect : true,
-          draggable : false,
-          initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
-      });
+	$wnd
+		.$('.mainSlider')
+		.slick(
+			{
+			    lazyLoad : 'ondemand',
+			    slidesToShow : 1,
+			    slidesToScroll : 1,
+			    arrows : false,
+			    centerMode : false,
+			    speed : 500,
+			    autoplaySpeed : 10000,
+			    pauseOnHover : true,
+			    variableWidth : false,
+			    adaptiveHeight : false,
+			    asNavFor : '.subSlider',
+			    initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
+			});
+	$wnd
+		.$('.subSlider')
+		.slick(
+			{
+			    lazyLoad : 'ondemand',
+			    infinite : true,
+			    slidesToShow : 1,
+			    slidesToScroll : 1,
+
+			    speed : 500,
+			    swipeToSlide : true,
+			    centerMode : true,
+			    asNavFor : '.mainSlider',
+			    arrows : false,
+			    variableWidth : true,
+			    focusOnSelect : true,
+			    draggable : false,
+			    initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
+			});
     }-*/;
+
+    private native void _slickPlay() /*-{
+	$wnd.$('.subSlider').slick('slickPlay').slick('slickNext').slick(
+		'setOption', 'autoplay', true); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+    }-*/;
+
+    private native void _slickPause() /*-{
+	$wnd.$('.subSlider').slick('slickPause').slick('setOption', 'autoplay',
+		false); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+    }-*/;
+
+    public void toggleAutoplay() {
+        autoplay = !autoplay;
+        if (autoplay) {
+            _slickPlay();
+        } else {
+            _slickPause();
+        }
+    }
+
+    @Override
+    protected void onUnload() {
+        if (isAutoplaying())
+            toggleAutoplay();
+    }
+    public boolean isAutoplaying() {
+        return autoplay;
+    }
 }

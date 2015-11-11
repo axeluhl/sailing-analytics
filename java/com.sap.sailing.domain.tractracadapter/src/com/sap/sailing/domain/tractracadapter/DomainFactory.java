@@ -280,7 +280,7 @@ public interface DomainFactory {
 
     MetadataParser getMetadataParser();
 
-    BoatClass getDominantBoatClass(List<String> competitorClassNames);
+    BoatClass getDominantBoatClass(Iterable<String> competitorClassNames);
 
     List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
 
