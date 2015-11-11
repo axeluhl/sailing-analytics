@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
@@ -17,11 +15,15 @@ public class RaceLogStartProcedureChangedEventImpl extends RaceLogEventImpl impl
 
     private final RacingProcedureType startProcedureType;
 
-    public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, RacingProcedureType startProcedureType) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
-
+    public RaceLogStartProcedureChangedEventImpl(TimePoint createdAt, TimePoint pTimePoint,
+            AbstractLogEventAuthor author, Serializable pId, int pPassId, RacingProcedureType startProcedureType) {
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.startProcedureType = startProcedureType;
+    }
+
+    public RaceLogStartProcedureChangedEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int pPassId, RacingProcedureType startProcedureType) {
+        this(now(), logicalTimePoint, author, randId(), pPassId, startProcedureType);
     }
 
     @Override

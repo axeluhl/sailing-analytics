@@ -42,7 +42,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         return null;
     }
 
-    Leaderboard getLeaderboard() {
+    public Leaderboard getLeaderboard() {
         return leaderboard;
     }
     

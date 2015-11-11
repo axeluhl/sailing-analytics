@@ -48,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)
         var homeViewController = rootViewController.viewControllers[0] as! HomeViewController
-        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": url.absoluteString!])
+        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": url.absoluteString])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         return true
     }
