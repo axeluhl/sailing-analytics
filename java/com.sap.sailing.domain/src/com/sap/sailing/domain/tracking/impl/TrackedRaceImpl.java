@@ -963,32 +963,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public boolean isLive(TimePoint at) {
-        final Date startOfLivePeriod;
-        final Date endOfLivePeriod;
+        final TimePoint startOfLivePeriod;
+        final TimePoint endOfLivePeriod;
         if (!hasGPSData() || !hasWindData()) {
             startOfLivePeriod = null;
             endOfLivePeriod = null;
         } else {
             if (getStartOfRace() == null) {
-                startOfLivePeriod = getStartOfTracking().asDate();
+                startOfLivePeriod = getStartOfTracking();
             } else {
-                startOfLivePeriod = new Date(getStartOfRace().asMillis() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+                startOfLivePeriod = getStartOfRace().minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
             }
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
-                    endOfLivePeriod = new Date(getTimePointOfNewestEvent().asMillis()
-                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                    endOfLivePeriod = getTimePointOfNewestEvent().plus(
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
                 } else {
                     endOfLivePeriod = null;
                 }
             } else {
-                endOfLivePeriod = new Date(getEndOfRace().asMillis() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                endOfLivePeriod = getEndOfRace().plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
             }
         }
     
         // if an empty timepoint is given then take the start of the race
         if (at == null) {
-            at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
+            at = startOfLivePeriod.plus(1);
         }
         
         // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
@@ -996,8 +996,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final boolean result =
                 startOfLivePeriod != null &&
                 endOfLivePeriod != null &&
-                startOfLivePeriod.getTime() <= at.asMillis() &&
-                at.asMillis() <= endOfLivePeriod.getTime();
+                !startOfLivePeriod.after(at) &&
+                !at.after(endOfLivePeriod);
         return result;
     }
 
