@@ -11,6 +11,9 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public interface RibDashboardService extends RemoteService {
+    
+    RegattaAndRaceIdentifier getIDFromRaceThatIsLive(String leaderboardName);
+    
     RibDashboardRaceInfoDTO getLiveRaceInfo(String leaderboardName) throws NoWindException;
     
     RegattaAndRaceIdentifier getIDFromRaceThatTakesWindFixesNow(String leaderboardName);

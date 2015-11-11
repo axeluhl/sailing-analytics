@@ -15,7 +15,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -32,6 +31,7 @@ import com.sap.sailing.dashboards.gwt.client.notifications.BottomNotificationTyp
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionListener;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
+import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -112,9 +112,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private CompetitorSelectionPopup competitorSelectionPopup;
     private SettingsButtonWithSelectionIndicationLabel settingsButtonWithSelectionIndicationLabel;
 
-    private String leaderboardName;
-
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
     private static final int SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
     private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 83;
@@ -128,7 +125,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         this.sailingServiceAsync = sailingServiceAsync;
         pageChangeListener = new ArrayList<StartlineAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
-        this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -177,7 +173,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
         logger.log(Level.INFO, "Loading startanalysis for competitor id " + competitorIdAsString);
         ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
-                competitorIdAsString, leaderboardName, new AsyncCallback<List<StartAnalysisDTO>>() {
+                competitorIdAsString, DashboardURLParameters.LEADERBOARD_NAME.getValue(), new AsyncCallback<List<StartAnalysisDTO>>() {
                     @Override
                     public void onSuccess(List<StartAnalysisDTO> result) {
                         logger.log(Level.INFO, "Received startanalysis list");
@@ -247,7 +243,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     private void loadCompetitorsAndShowCompetitorSelectionPopup() {
         logger.log(Level.INFO, "Requesting Competitors in Leaderboard");
-        ribDashboardServiceAsync.getCompetitorsInLeaderboard(leaderboardName, new AsyncCallback<List<CompetitorDTO>>() {
+        ribDashboardServiceAsync.getCompetitorsInLeaderboard(DashboardURLParameters.LEADERBOARD_NAME.getValue(), new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onSuccess(List<CompetitorDTO> result) {
                 logger.log(Level.INFO, "Received competitors for leaderboard name");

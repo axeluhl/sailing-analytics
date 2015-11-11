@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatTakesWindFixesNowAction;
+import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -29,13 +29,11 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     private List<NumberOfWindBotsChangeListener> numberOfWindBotsChangeListeners;
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
     private List<String> windBotIDsInLiveRace;
-    private String leaderboardName;
 
     private final Set<String> windSourceTypeNames;
     private final int WIND_CHART_RESOLUTION_IN_MILLISECONDS = 5000;
     private final int ONE_HOUR_IN_MILLISECONDS = 1000*60*60;
     private final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
-    private static final String PARAM_LEADERBOARD_NAME = "leaderboardName";
     private boolean didInitialLoading;
     
     private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
@@ -49,7 +47,6 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
         windBotDataRetrieverListeners = new ArrayList<WindBotDataRetrieverListener>(); 
         windBotIDsInLiveRace = new ArrayList<String>();
         windSourceTypeNames = new HashSet<>();
-        this.leaderboardName = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
     }
 
@@ -146,7 +143,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     public void timeChanged(Date newTime, Date oldTime) {
         final Date finalNewTime = newTime;
         final Date finaloldTime = oldTime;
-        GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, leaderboardName);
+        GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, DashboardURLParameters.LEADERBOARD_NAME.getValue());
         logger.log(Level.INFO, "Executing GetIDFromRaceThatTakesWindFixesNowAction");
         asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override

@@ -89,6 +89,16 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
         this.averageStartLineAdvantageByGeometry = new MovingAverage(400);
     }
     
+    @Override
+    public RegattaAndRaceIdentifier getIDFromRaceThatIsLive(String leaderboardName) {
+        RegattaAndRaceIdentifier result = null;
+        TrackedRace trackedRaceThatIsLive = getLiveRaceFromLeaderboardName(leaderboardName);
+        if(trackedRaceThatIsLive != null) {
+            result = trackedRaceThatIsLive.getRaceIdentifier();
+        }
+        return result;
+    }
+    
     protected RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }
@@ -149,7 +159,6 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
 
     private void fillLiveRaceInfoDTOWithRaceData(RibDashboardRaceInfoDTO lRInfo, TimePoint now) {
         if (runningRace != null) {
-            lRInfo.idOfLastTrackedRace = runningRace.getRaceIdentifier();
             List<Competitor> competitors = runningRace.getCompetitorsFromBestToWorst(now);
             List<String> competitorNames = new ArrayList<String>();
             for (Competitor competitor : competitors) {
@@ -176,14 +185,13 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
 
     private TrackedRace getLiveRaceFromLeaderboardName(String leaderboardName) {
         TrackedRace result = null;
-        Leaderboard lb = getRacingEventService().getLeaderboardByName(leaderboardName);
-        if (lb != null) {
-            for (RaceColumn column : lb.getRaceColumns()) {
+        Leaderboard leaderboard = getRacingEventService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            for (RaceColumn column : leaderboard.getRaceColumns()) {
                 for (Fleet fleet : column.getFleets()) {
                     TrackedRace race = column.getTrackedRace(fleet);
                     if (race != null && race.isLive(MillisecondsTimePoint.now())) {
                         result = race;
-                        notifyLiveTrackedRaceListenerAboutLiveTrackedRaceChange(race);
                     }
                 }
             }

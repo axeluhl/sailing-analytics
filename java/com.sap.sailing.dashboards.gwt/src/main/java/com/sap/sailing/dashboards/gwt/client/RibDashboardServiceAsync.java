@@ -11,6 +11,8 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public interface RibDashboardServiceAsync {
 
+    void getIDFromRaceThatIsLive(String leaderboardName, AsyncCallback<RegattaAndRaceIdentifier> callback);
+    
     void getLiveRaceInfo(String leaderboardName, AsyncCallback<RibDashboardRaceInfoDTO> callback);
 
     void getStartAnalysisListForCompetitorIDAndLeaderboardName(String competitorIdAsString, String leaderboardName, AsyncCallback<List<StartAnalysisDTO>> callback);

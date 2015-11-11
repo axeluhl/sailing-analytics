@@ -1,6 +1,7 @@
 package com.sap.sailing.dashboards.gwt.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,7 +11,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -19,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
-import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.WrongDeviceOrientationNotification;
@@ -27,9 +27,13 @@ import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAnalysisComp
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvantageByGeometryComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
-import com.sap.sailing.dashboards.gwt.shared.dto.RibDashboardRaceInfoDTO;
+import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -38,8 +42,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * @author Alexander Ries
  * 
  */
-public class RibDashboardPanel extends Composite implements RibDashboardDataRetrieverListener,
-        NumberOfWindBotsChangeListener {
+public class RibDashboardPanel extends Composite implements NumberOfWindBotsChangeListener {
 
     interface RootUiBinder extends UiBinder<Widget, RibDashboardPanel> {
     }
@@ -87,12 +90,12 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
 
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
-    private final String EVENT_ID_PARAMETER = "eventId";
+    private RibDashboardServiceAsync ribDashboardService;
     private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
+        this.ribDashboardService = ribDashboardService;
         windBotComponents = new ArrayList<WindBotComponent>();
-        ribDashboardDataRetriever.addDataObserver(this);
         startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
         startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
         startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(ribDashboardDataRetriever);
@@ -102,6 +105,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
         windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        startUpdatingRaceLabelIn20SecondInterval();
         loadAndAddEventLogo(sailingServiceAsync);
         initAndAddWrongOrientationNotification();
     }
@@ -114,7 +118,7 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
     }
     
     private void loadAndAddEventLogo(SailingServiceAsync sailingServiceAsync){
-        String eventId = Window.Location.getParameter(EVENT_ID_PARAMETER);
+        String eventId = DashboardURLParameters.EVENT_ID.getValue();
         if (eventId != null) {
             EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
             if (eventLogo != null) {
@@ -170,14 +174,40 @@ public class RibDashboardPanel extends Composite implements RibDashboardDataRetr
         }
     }
     
-    @Override
-    public void updateUIWithNewLiveRaceInfo(RibDashboardRaceInfoDTO liveRaceInfoDTO) {
-        if (liveRaceInfoDTO != null && liveRaceInfoDTO.idOfLastTrackedRace != null) {
-            logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
-            this.header.getElement().setInnerText(liveRaceInfoDTO.idOfLastTrackedRace.getRaceName());
-        }
-    }
+    private void startUpdatingRaceLabelIn20SecondInterval() {
+        Timer timer = new Timer(PlayModes.Live);
+        timer.setRefreshInterval(20000);
+        timer.addTimeListener( new TimeListener() {
+            
+            @Override
+            public void timeChanged(Date newTime, Date oldTime) {
+                String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
+                if (leaderboardNameParameterValue != null) {
+                    ribDashboardService.getIDFromRaceThatIsLive(leaderboardNameParameterValue,
+                            new AsyncCallback<RegattaAndRaceIdentifier>() {
+                                @Override
+                                public void onSuccess(RegattaAndRaceIdentifier result) {
+                                    if (result != null) {
+                                        logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
+                                        setHeaderText(result.getRaceName());
+                                    }
+                                }
 
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    logger.log(Level.INFO, "Failed to received RegattaAndRaceIdentifier from race that is live, " + caught.getMessage());
+                                }
+                            });
+                }
+            }
+        });
+        timer.play();
+    }
+    
+    private void setHeaderText(String raceName) {
+        this.header.getElement().setInnerText(raceName);
+    }
+    
     @Override
     public void numberOfWindBotsReceivedChanged(List<String> windBotIDs,
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
