@@ -5,10 +5,7 @@
   font-size: 1rem;
 }
 .solutions_nav {
-  position: absolute;
- 
-  right: 0;
-  left: 0;
+  padding-top: 1.333333333333333em;
   border-bottom: 1px solid #f2f2f2;
   background: #fff;
   z-index: 10;
@@ -23,13 +20,15 @@
      -moz-transition: 0.2s border ease;
           transition: 0.2s border ease;
   margin-right: 1em;
+  border-bottom: 4px solid transparent;
+  margin-bottom: -1px
 }
 .solutions_nav_link:hover,
-.solutions_nav_linkactive {
+.solutions_nav_linkactive,
+.solutions_nav_link:focus {
   text-decoration: none;
 	color: #666;
-	border-bottom: 4px solid #efaa00;
-	margin-bottom: -1px
+	border-bottom-color: #efaa00;
 }
 .solutions_nav_link:last-child {
   margin-right: 0;
@@ -66,18 +65,28 @@
   height: 100%;
   padding: 3.333333333333333em 0;
 }
+.solutions_content:first-child .gridalternator {
+  padding: 0.333333333333333em 0 3.333333333333333em;
+}
 @media (min-width: 45em) {
   .solutions_content .gridalternator {
     padding: 5em 0;
+  }
+  .solutions_content:first-child .gridalternator {
+    padding: 0.666666666666667em 0 5em;
   }
 }
 @media (min-width: 61em) {
   .solutions_content .gridalternator {
     padding: 6.666666666666667em 0;
   }
+  .solutions_content:first-child .gridalternator {
+    padding: 2em 0 6.666666666666667em;
+  }
 }
 .solutions_contentsapinsailing {
   width: 100%;
+  font-size: 1rem;
 }
 .solutions_contentsapinsailing_body {
   margin: auto;
@@ -85,7 +94,7 @@
   max-width: 88em;
   background-repeat: no-repeat;
   background-position: right center;
-  background-size: contain;
+  background-size: 40%;
   background-image: url("images/home/solutions-sap-in-sailing.jpg");
 }
 .solutions_contentsapinsailing_body .gridalternator {
@@ -102,14 +111,15 @@
   }
 }
 .solutions_contentsap {
-  max-width: 88em;
-  margin: auto;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 100%;
-  background-image: url("images/home/solutions-sap.png");
+  font-size: 1rem;
+  width: 100%;
 }
 .solutions_contentsap .gridalternator {
+  margin: auto;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 100%;
+  background-image: url("images/home/solutions-sap.png");
   padding: 4em 0 4.333333333333333em;
 }
 @media (min-width: 45em) {
@@ -188,7 +198,7 @@
   height: 100%;
   max-width: 80em;
   background-repeat: no-repeat;
-  background-image: url("images/home/	-training.png");
+  background-image: url("images/home/solutions-training.png");
   background-size: 100% auto;
   background-position: center 13.333333333333334em;
 }
