@@ -60,6 +60,7 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     }
     
     private String leaderboardName;
+    private String leaderboardGroupName;
     private RegattaAndRaceIdentifier regattaAndRaceIdentifier;
     private String raceName;
     private Date start;
@@ -87,6 +88,14 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
 
     public String getRaceName() {
         return raceName;
+    }
+    
+    public String getLeaderboardGroupName() {
+        return leaderboardGroupName;
+    }
+    
+    public void setLeaderboardGroupName(String leaderboardGroupName) {
+        this.leaderboardGroupName = leaderboardGroupName;
     }
     
     public Date getStart() {
