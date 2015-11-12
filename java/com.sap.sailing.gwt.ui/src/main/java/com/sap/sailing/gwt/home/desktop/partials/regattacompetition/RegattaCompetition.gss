@@ -166,6 +166,7 @@
 }
 .fleet_races_raceplanned {
   background-color: #999;
+  font-style: italic;
 }
 .fleet_races_raceplanned:hover {
   background-color: #8a8a8a;

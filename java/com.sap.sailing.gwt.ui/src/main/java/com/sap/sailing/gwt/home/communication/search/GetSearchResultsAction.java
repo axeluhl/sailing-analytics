@@ -58,7 +58,7 @@ public class GetSearchResultsAction implements SailingAction<ListResult<SearchRe
         ListResult<SearchResultDTO> resultList = new ListResult<>();
         for (T hit : result.getHits()) {
             // TODO: for now filter all results where we no event is defined
-            if (!Util.isEmpty(hit.getEvents())) {
+            if (hit.getEvents() != null && !Util.isEmpty(hit.getEvents())) {
                 resultList.addValue(new SearchResultDTO(hit, baseUrl, isOnRemoteServer));
             }
         }

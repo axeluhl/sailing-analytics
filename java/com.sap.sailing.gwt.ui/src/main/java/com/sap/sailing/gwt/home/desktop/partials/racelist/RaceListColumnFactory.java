@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import static com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
 
 import java.util.Date;
 
@@ -515,8 +516,7 @@ public class RaceListColumnFactory {
                 } else {
                     String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
                     String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
-                    String raceViewerURL = presenter.getRaceViewerURL(data.getLeaderboardName(), data.getRegattaAndRaceIdentifier());
-                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, raceViewerURL));
+                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, presenter.getRaceViewerURL(data)));
                 }
             }
 
@@ -582,12 +582,11 @@ public class RaceListColumnFactory {
         
         private static class StartTimeCell extends AbstractCell<Date> {
             private static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.MONTH_NUM_DAY);
-            private static final DateTimeFormat TIME_FORMAT = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
             private boolean showTimeOnly = true;
             @Override
             public void render(Context context, Date value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    sb.appendEscaped((showTimeOnly ? "" : DATE_FORMAT.format(value) + " ") + TIME_FORMAT.format(value));
+                    sb.appendEscaped((showTimeOnly ? "" : DATE_FORMAT.format(value) + " ") + shortTimeFormatter.render(value));
                 }
             }
         }
