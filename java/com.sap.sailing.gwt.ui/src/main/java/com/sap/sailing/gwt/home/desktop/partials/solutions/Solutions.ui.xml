@@ -149,22 +149,21 @@
 				</div>
 				<div ui:field="trainingDiaryDiv"
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contenttraining}">
-					<div class="{local_res.css.parallax}">
-						<div class="{local_res.css.background}"></div>
-					</div>
 					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
-						<div class="{res.mediaCss.small5} {res.mediaCss.columns}">
-							<h2>
-								<ui:text from='{i18n.i18nDeSolutionsTrainingHeadline}' />
-							</h2>
-							<p>
-								<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
-							</p>
-							<a
-								href="https://itunes.apple.com/de/app/stg-trainingstagebuch/id779563635?l=en&amp;mt=8"
-								target="_blank" class="{local_res.css.solutions_content_linkappstore}">
-								<img src="images/home/appstore.png"></img>
-							</a>
+						<div class="{res.mediaCss.small12} {res.mediaCss.column}">
+							<div class="{local_res.css.solutions_contenttraining_body}">
+								<h2>
+									<ui:text from='{i18n.i18nDeSolutionsTrainingHeadline}' />
+								</h2>
+								<p>
+									<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
+								</p>
+								<a
+									href="https://itunes.apple.com/de/app/stg-trainingstagebuch/id779563635?l=en&amp;mt=8"
+									target="_blank" class="{local_res.css.solutions_content_linkappstore}">
+									<img src="images/home/appstore.png"></img>
+								</a>
+							</div>
 						</div>
 					</div>
 				</div>

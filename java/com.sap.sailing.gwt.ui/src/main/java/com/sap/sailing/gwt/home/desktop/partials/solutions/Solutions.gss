@@ -177,16 +177,25 @@
 .solutions_contenttraining {
   font-size: 1rem;
 }
-.solutions_contenttraining .gridalternator {
+.solutions_contenttraining_body {
+  margin: auto;
+  padding: 4em 50% 4.333333333333333em 0;
+  max-width: 88em;
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-training.png");
+  background-size: 45%;
+  background-position: center right;
+}
+.solutions_contenttraining_body .gridalternator {
   padding-top: 5em;
 }
 @media (min-width: 45em) {
-  .solutions_contenttraining .gridalternator {
+  .solutions_contenttraining_body .gridalternator {
     padding-top: 6.666666666666667em;
   }
 }
 @media (min-width: 61em) {
-  .solutions_contenttraining .gridalternator {
+  .solutions_contenttraining_body .gridalternator {
     padding-top: 8.333333333333334em;
   }
 }

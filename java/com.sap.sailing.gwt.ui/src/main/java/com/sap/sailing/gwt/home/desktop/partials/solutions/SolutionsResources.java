@@ -20,19 +20,14 @@ public interface SolutionsResources extends ClientBundle {
         String solutions_content();
         String parallax();
         String gridalternator();
-
         String solutions_contentsapinsailing();
-
         String solutions_contentsapinsailing_body();
         String solutions_contentsap();
-
         String solutions_contentsapsailingracemanager();
-
         String solutions_contentsapsailingracemanager_body();
-
         String solutions_contentpost();
-
         String solutions_contenttraining();
+        String solutions_contenttraining_body();
         String background();
         String noparallax();
         String solutions_contentsimulator();
