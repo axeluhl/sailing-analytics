@@ -10,12 +10,12 @@ import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sse.gwt.client.async.AsyncAction;
 
-public class GetStartlineAdvantagesAction implements AsyncAction<StartlineAdvantagesWithMaxAndAverageDTO> {
+public class GetStartlineAdvantagesByWindAction implements AsyncAction<StartlineAdvantagesWithMaxAndAverageDTO> {
 
     private final RibDashboardServiceAsync ribDashboardService;
     private final String leaderboardName;
 
-    public GetStartlineAdvantagesAction(RibDashboardServiceAsync ribDashboardService, String leaderboardName) {
+    public GetStartlineAdvantagesByWindAction(RibDashboardServiceAsync ribDashboardService, String leaderboardName) {
         this.ribDashboardService = ribDashboardService;
         this.leaderboardName = leaderboardName;
     }

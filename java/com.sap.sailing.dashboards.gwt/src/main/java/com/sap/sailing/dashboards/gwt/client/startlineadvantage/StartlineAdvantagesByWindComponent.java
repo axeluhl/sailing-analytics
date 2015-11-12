@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
-import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesAction;
+import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesByWindAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -67,7 +67,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     }
     
     private void loadData() {
-        GetStartlineAdvantagesAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesAction(ribDashboardService, "");
+        GetStartlineAdvantagesByWindAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesByWindAction(ribDashboardService, "");
         logger.log(Level.INFO, "Executing GetStartlineAdvantagesAction");
         asyncActionsExecutor.execute(getRibDashboardRaceInfoAction,
                 new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
