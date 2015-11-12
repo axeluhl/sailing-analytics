@@ -8,7 +8,7 @@
     >
     <ui:with 
         field="res" 
-        type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+        type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style>
         .headerWrapper {
             background-color: #f2f2f2;

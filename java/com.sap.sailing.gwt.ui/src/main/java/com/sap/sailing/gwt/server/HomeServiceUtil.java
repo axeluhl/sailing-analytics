@@ -9,9 +9,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,14 +29,16 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sailing.gwt.dispatch.client.exceptions.ServerDispatchException;
+import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
+import com.sap.sailing.gwt.home.communication.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
-import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
-import com.sap.sailing.gwt.ui.shared.start.StageEventType;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -133,6 +135,15 @@ public final class HomeServiceUtil {
         return event.findImageWithTag(MediaTagConstants.TEASER);
     }
     
+    public static ImageDescriptor getFeaturedImage(EventBase event) {
+        return event.findImageWithTag(MediaTagConstants.FEATURED);
+    }
+    
+    public static String getFeaturedImageUrlAsString(EventBase event) {
+        ImageDescriptor image = getFeaturedImage(event);
+        return image == null ? null : image.getURL().toString();
+    }
+    
     public static String getStageImageURLAsString(final EventBase event) {
         ImageDescriptor image = getStageImage(event);
         return image == null ? null : image.getURL().toString();
@@ -159,7 +170,9 @@ public final class HomeServiceUtil {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                acceptedImages.add(candidateImageUrl);
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                    acceptedImages.add(candidateImageUrl);
+                }
             }
         }
         return acceptedImages;
@@ -170,15 +183,21 @@ public final class HomeServiceUtil {
     }
     
     public static int calculateRaceCount(Leaderboard sl) {
-        int count=0;
+        int nonCarryForwardRacesCount = 0;
         for (RaceColumn column : sl.getRaceColumns()) {
-            count += Util.size(column.getFleets());
+            if (!column.isCarryForward()) {
+                nonCarryForwardRacesCount += Util.size(column.getFleets());
+            }
         }
-        return count;
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateRaceColumnCount(Leaderboard sl) {
-        return Util.size(sl.getRaceColumns());
+        int nonCarryForwardRacesCount = 0;
+        for (RaceColumn rc : sl.getRaceColumns()) {
+            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
+        }
+        return nonCarryForwardRacesCount;
     }
     
     public static int calculateTrackedRaceCount(Leaderboard sl) {
@@ -411,12 +430,9 @@ public final class HomeServiceUtil {
         }
         Event event = (Event) eventBase;
         for (Leaderboard leaderboard : event.getLeaderboardGroups().iterator().next().getLeaderboards()) {
-            if(leaderboard instanceof RegattaLeaderboard) {
-                if(!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                    continue;
-                }
+            if(HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
             }
-            return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName();
         }
         return null;
     }
@@ -477,7 +493,8 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request, EventVisitor... visitors) throws MalformedURLException {
+    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request,
+            EventVisitor... visitors) throws DispatchException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
             if(event.isPublic()) {
@@ -509,14 +526,23 @@ public final class HomeServiceUtil {
      * to <code>http://sapsailing.com</code>.
      * @throws MalformedURLException 
      */
-    private static URL getRequestBaseURL(HttpServletRequest request) throws MalformedURLException {
-        final URL url = new URL(request.getRequestURL().toString());
-        final URL baseURL = getBaseURL(url);
-        return baseURL;
+    public static URL getRequestBaseURL(HttpServletRequest request) throws DispatchException {
+        URL url;
+        try {
+            url = new URL(request.getRequestURL().toString());
+            final URL baseURL = getBaseURL(url);
+            return baseURL;
+        } catch (MalformedURLException e) {
+            throw new ServerDispatchException(e);
+        }
     }
 
-    private static URL getBaseURL(URL url) throws MalformedURLException {
-        return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */ "");
+    private static URL getBaseURL(URL url) throws DispatchException {
+        try {
+            return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */"");
+        } catch (MalformedURLException e) {
+            throw new ServerDispatchException(e);
+        }
     }
 
     public static boolean hasRegattaData(EventBase event) {

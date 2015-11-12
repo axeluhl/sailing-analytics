@@ -4,24 +4,29 @@ import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.dispatch.DispatchSystem;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
+    private EventSeriesViewDTO series;
+    private final NavigationPathDisplay navigationPathDisplay;
     
-    public SeriesActivity(AbstractSeriesPlace place, MobileApplicationClientFactory clientFactory) {
+    public SeriesActivity(AbstractSeriesPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+        this.navigationPathDisplay = navigationPathDisplay;
         this.clientFactory = clientFactory;
         this.place = place;
     }
@@ -29,34 +34,27 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        if (ctx.getSeriesDTO() != null) {
-            initUi(panel, eventBus);
-        } else {
-            final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-            clientFactory.getHomeService().getEventSeriesViewById(seriesUUID, new AsyncCallback<EventSeriesViewDTO>() {
-                @Override
-                public void onSuccess(final EventSeriesViewDTO event) {
-                    ctx.updateContext(event);
-                    initUi(panel, eventBus);
-                }
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO @FM: extract text?
-                    ErrorPlace errorPlace = new ErrorPlace(
-                            "Error while loading the series with service getEventSeriesViewById()");
-                    // TODO @FM: reload sinnvoll hier?
-                    errorPlace.setComingFrom(place);
-                    clientFactory.getPlaceController().goTo(errorPlace);
-                }
-            });
-        }
+        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+                new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
+                    @Override
+                    public void onSuccess(EventSeriesViewDTO series) {
+                        SeriesActivity.this.series = series;
+                        initUi(panel, eventBus, series);
+                    }
+                });
     }
     
-    private void initUi(final AcceptsOneWidget panel, EventBus eventBus) {
+    private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this);
-        EventSeriesViewDTO series = getCtx().getSeriesDTO();
         view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
         panel.setWidget(view.asWidget());
+        
+        initNavigationPath();
+    }
+    
+    private void initNavigationPath() {
+        navigationPathDisplay.showNavigationPath(new NavigationItem(series.getDisplayName(), clientFactory.getNavigator().getSeriesNavigation(place, null, false)));
     }
     
     @Override
@@ -64,7 +62,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
         return place.getCtx();
     }
 
-    public DispatchSystem getDispatch() {
+    public SailingDispatchSystem getDispatch() {
         return clientFactory.getDispatch();
     }
     
@@ -86,5 +84,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public PlaceNavigation<?> getEventNavigation(String eventId) {
         return clientFactory.getNavigator().getEventNavigation(eventId, null, false);
+    }
+    
+    @Override
+    public EventSeriesViewDTO getSeriesDTO() {
+        return series;
     }
 }

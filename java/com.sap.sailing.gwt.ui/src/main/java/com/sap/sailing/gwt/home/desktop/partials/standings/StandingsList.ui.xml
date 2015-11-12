@@ -26,7 +26,7 @@
       <div class="{local_res.css.standings_list_content}">
         <div class="{res.mediaCss.small12}">
           <div class="{local_res.css.regattalistitem_table}">
-              <div ui:field="noResultsUi" class="{style.noResults}" style="display: none;"><ui:text from="{i18n.noResults}" /></div>
+          	  <div ui:field="noResultsUi" class="{style.noResults}" style="display: none;"><ui:text from="{i18n.noResults}" /></div>
               <div ui:field="scoreInformationUi" class="{style.scoreInformation}" style="display: none;"><ui:text from="{i18n.noResults}" /></div>
               <div ui:field="itemContainerUi" style="display: table; width: 100%;" />
           </div>

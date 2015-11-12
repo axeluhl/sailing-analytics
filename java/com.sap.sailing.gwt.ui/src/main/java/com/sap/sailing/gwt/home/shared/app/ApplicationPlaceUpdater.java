@@ -1,24 +1,24 @@
 package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesContext;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.regattastab.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeriesCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 
 /**
  * Helper class to support converting old places to new ones.
@@ -98,7 +98,7 @@ public class ApplicationPlaceUpdater {
 
     private Place getRealSeriesPlace(SeriesPlace place) {
         String seriesId = place.getEventUuidAsString();
-        SeriesContext context = new SeriesContext().withId(seriesId);
+        SeriesContext context = new SeriesContext(seriesId);
 
         // TODO evaluate additional parameters
 

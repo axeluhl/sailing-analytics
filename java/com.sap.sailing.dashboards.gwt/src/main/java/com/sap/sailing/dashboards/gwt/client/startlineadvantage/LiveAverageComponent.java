@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * The purpose of the class is to display a live and an average value of a continuously updating data source.
- * {@link StartLineAdvantageComponent} extends from it and the class {@link WindBotComponent} uses it to display wind
+ * {@link StartLineAdvantageByGeometryComponent} extends from it and the class {@link WindBotComponent} uses it to display wind
  * data.
  * 
  * @author Alexander Ries (D062114)

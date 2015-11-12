@@ -2,35 +2,35 @@ package com.sap.sailing.gwt.home.shared.app;
 
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.place.shared.WithTokenizers;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event.multiregatta.tabs.MultiregattaRegattasPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaMediaPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.RegattaRacesPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesCompetitorAnalyticsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesLeaderboardsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.EventSeriesOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesEventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.tabs.SeriesMediaPlace;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
-import com.sap.sailing.gwt.home.mobile.places.minileaderboard.MiniLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.overviewtab.MultiregattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.regattastab.MultiregattaRegattasPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab.RegattaCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeriesCompetitorAnalyticsPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
+import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
         EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class,
@@ -50,17 +50,15 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
         RegattaMediaPlace.Tokenizer.class,
         // Fake series places:
         SeriesDefaultPlace.Tokenizer.class,
-        RegattaOverviewPlace.Tokenizer.class,
         SeriesEventsPlace.Tokenizer.class,
         EventSeriesCompetitorAnalyticsPlace.Tokenizer.class,
         EventSeriesOverallLeaderboardPlace.Tokenizer.class,
         EventSeriesLeaderboardsPlace.Tokenizer.class,
-        SeriesMediaPlace.Tokenizer.class,
         // Mobile only places:
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
-        SeriesMiniOverallLeaderboardPlace.Tokenizer.class
-
+        SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
+        ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }

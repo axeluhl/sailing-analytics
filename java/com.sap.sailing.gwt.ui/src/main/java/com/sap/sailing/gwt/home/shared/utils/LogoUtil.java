@@ -2,9 +2,9 @@ package com.sap.sailing.gwt.home.shared.utils;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.sap.sailing.gwt.home.client.place.event.partials.header.EventHeaderResources;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.general.HasLogo;
+import com.sap.sailing.gwt.home.communication.event.HasLogo;
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeaderResources;
 
 /**
  * Utility class to set logo url on UI elements using a default logo as fallback if no logo is provided.

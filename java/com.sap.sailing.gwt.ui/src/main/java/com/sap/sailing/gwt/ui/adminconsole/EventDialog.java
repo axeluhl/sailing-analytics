@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -117,7 +118,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
@@ -144,10 +145,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                        leaderboardGroupNames, "Select a leaderboard group..."));
+                        leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         
-        imagesListComposite = new ImagesListComposite(stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
     }
 
@@ -196,8 +197,6 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
 
         Grid formGrid = new Grid(8, 2);
-        panel.add(formGrid);
-
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
@@ -216,12 +215,13 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
-        tabPanel.setHeight("250px");
+        tabPanel.setHeight("500px");
         panel.add(tabPanel);
+        tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
         tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
         tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
-        tabPanel.add(new ScrollPanel(imagesListComposite), "Images");
-        tabPanel.add(new ScrollPanel(videosListComposite), "Videos");
+        tabPanel.add(new ScrollPanel(imagesListComposite), stringMessages.images());
+        tabPanel.add(new ScrollPanel(videosListComposite), stringMessages.videos());
         return panel;
     }
 

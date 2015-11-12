@@ -1,5 +1,5 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar">
+	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar" xmlns:b="urn:import:com.sap.sse.gwt.client.controls.busyindicator">
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
@@ -38,7 +38,7 @@
 	</ui:style>
 	<g:FlowPanel>
 		<g:HTMLPanel addStyleNames="{style.header}">
-			<div class="{res.mediaCss.grid}">
+			<div ui:field="breadcrumbsContainer" class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<c:BreadcrumbPane ui:field="breadcrumbs"
 						addStyleNames="{style.breadcrumb}" />

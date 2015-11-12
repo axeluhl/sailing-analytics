@@ -3,24 +3,24 @@ package com.sap.sailing.gwt.home.mobile.app;
 import java.util.List;
 
 import com.google.gwt.place.shared.PlaceController;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventContext;
-import com.sap.sailing.gwt.home.client.place.event.EventDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.SeriesDefaultPlace;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
-import com.sap.sailing.gwt.home.mobile.places.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.event.EventContext;
+import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -82,7 +82,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
 
-    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
+    public PlaceNavigation<?> getRegattaOverviewNavigation(String eventId, String leaderboardName, String baseUrl,
+            boolean isOnRemoteServer) {
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
     }
 }

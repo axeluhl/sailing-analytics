@@ -6,15 +6,18 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.partials.message.Message;
-import com.sap.sailing.gwt.home.client.place.event.partials.video.Video;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
-import com.sap.sailing.gwt.home.mobile.partials.countdown.Countdown;
-import com.sap.sailing.gwt.home.mobile.places.event.EventView;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageContentDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewVideoStageDTO;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown;
+import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown.CountdownNavigationProvider;
+import com.sap.sailing.gwt.home.shared.partials.message.Message;
+import com.sap.sailing.gwt.home.shared.partials.video.Video;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 
 public class EventOverviewStage extends Composite implements RefreshableWidget<EventOverviewStageDTO> {
     
@@ -26,11 +29,11 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     @UiField SimplePanel stage;
     @UiField Message message;
     
+    private final EventViewBase.Presenter presenter;
+    private final StageCountdownNavigationProvider countdownNavigationProvider = new StageCountdownNavigationProvider();
     private Widget lastContent;
-
-    private final EventView.Presenter presenter;
     
-    public EventOverviewStage(EventView.Presenter presenter) {
+    public EventOverviewStage(EventViewBase.Presenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -49,7 +52,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
             } 
         } else if (data instanceof EventOverviewTickerStageDTO) {
             if (!(lastContent instanceof Countdown)) {
-                lastContent = new Countdown(presenter);
+                lastContent = new Countdown(countdownNavigationProvider);
             }
             ((Countdown) lastContent).setData((EventOverviewTickerStageDTO) data);
         } else {
@@ -58,4 +61,11 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
         stage.setWidget(lastContent);
     }
 
+    private class StageCountdownNavigationProvider implements CountdownNavigationProvider {
+        @Override
+        public PlaceNavigation<?> getRegattaNavigation(String regattaName) {
+            return ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE 
+                    ? presenter.getRegattaOverviewNavigation(regattaName) : null;
+        }
+    }
 }

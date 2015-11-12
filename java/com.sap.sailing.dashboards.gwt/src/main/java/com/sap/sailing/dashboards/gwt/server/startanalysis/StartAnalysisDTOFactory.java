@@ -32,7 +32,6 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
-    private static int MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS = 3;
     private static int DEFAULT_GATE_START_INTERVALL_IN_MILLISECONDS = 5*60*1000;
     private static int ONE_MINUTE_INTERVALL_IN_MILLISECONDS = 60*1000;
 
@@ -42,17 +41,14 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         baseDomainFactory = racingEventService.getBaseDomainFactory();
     }
 
-    public StartAnalysisDTO createStartAnalysisForCompetitorAndTrackedRace(Competitor competitor,
-            TrackedRace trackedRace) {
+    public StartAnalysisDTO createStartAnalysisForCompetitorAndTrackedRace(Competitor competitor, TrackedRace trackedRace) {
         StartAnalysisDTO startAnalysisDTO = new StartAnalysisDTO();
         addStaticDataToStartAnalysisDTOFrom(startAnalysisDTO, trackedRace);
         List<StartAnalysisCompetitorDTO> competitors = new ArrayList<StartAnalysisCompetitorDTO>();
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
-        List<MarkPassing> markPassingsInOrder = convertMarkpPassingsIteratorToList(trackedRace.getMarkPassingsInOrder(
-                secondWaypoint).iterator());
-
+        List<MarkPassing> markPassingsInOrder = convertMarkpPassingsIteratorToList(trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator());
         boolean isCompetitorOneOfFirstThree = false;
-        for (int i = 0; i < MINIMUM_NUMBER_COMPETITORS_FOR_STARTANALYSIS; i++) {
+        for (int i = 0; i < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK; i++) {
             competitors.add(createStartAnalysisCompetitorDTO(trackedRace, i + 1, markPassingsInOrder.get(i).getCompetitor()));
             if (markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
                 isCompetitorOneOfFirstThree = true;
@@ -60,17 +56,14 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         }
 
         if (!isCompetitorOneOfFirstThree) {
-            int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor,
-                    trackedRace);
-            competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint,
-                    competitor));
+            int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
+            competitors.add(createStartAnalysisCompetitorDTO(trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
-
         startAnalysisDTO.competitor = baseDomainFactory.getCompetitorStore().convertToCompetitorDTO(competitor);
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
-        
-        if (trackedRace.isGateStart()) {
-            logger.log(Level.INFO, "IS GATESTART");
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
+            logger.log(Level.INFO, "Creating startanalysis for gate start");
             startAnalysisDTO.racingProcedureType = RacingProcedureType.GateStart;
             long timePointOfGolfDownTime = trackedRace.getGateStartGolfDownTime();
             startAnalysisDTO.timeOfStartInMilliSeconds = trackedRace.getStartOfRace().asMillis();
@@ -80,12 +73,13 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
                 startAnalysisDTO.tailLenghtInMilliseconds = timePointOfGolfDownTime-trackedRace.getStartOfRace().asMillis();
             }
         } else {
+            logger.log(Level.INFO, "Creating startanalysis for ess start");
             startAnalysisDTO.racingProcedureType = RacingProcedureType.ESS;
             startAnalysisDTO.timeOfStartInMilliSeconds = trackedRace.getStartOfRace().asMillis();
             startAnalysisDTO.tailLenghtInMilliseconds = ONE_MINUTE_INTERVALL_IN_MILLISECONDS;
         }
         startAnalysisDTO.regattaAndRaceIdentifier = trackedRace.getRaceIdentifier();
-        logger.log(Level.INFO, "Created StartAnalysis For Competitor " + competitor.getName() + " and "+ trackedRace.getRace().getName());
+        logger.log(Level.INFO, "Created startanalysis for competitor " + competitor.getName() + " and "+ trackedRace.getRace().getName());
         return startAnalysisDTO;
     }
 
@@ -109,8 +103,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         return 0;
     }
 
-    private StartAnalysisDTO addStaticDataToStartAnalysisDTOFrom(StartAnalysisDTO startAnalysisDTO,
-            TrackedRace trackedRace) {
+    private StartAnalysisDTO addStaticDataToStartAnalysisDTOFrom(StartAnalysisDTO startAnalysisDTO, TrackedRace trackedRace) {
         startAnalysisDTO.raceName = trackedRace.getRace().getName();
         startAnalysisDTO.startAnalysisWindLineInfoDTO = createStartAnalysisWindAndLineData(trackedRace);
         return startAnalysisDTO;
@@ -129,7 +122,8 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
         tableentry.rankAtFirstMark = rank;
         tableentry.teamName = competitor.getName();
         tableentry.speedAtStartTime = trackedRace.getSpeed(competitor, 1).getKnots();
-        if (trackedRace.isGateStart()) {
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
             tableentry.distanceToLineAtStartTime = trackedRace.getDistanceFromStarboardSideOfStartLineWhenPassingStart(
                     competitor).getMeters();
         } else {
@@ -177,7 +171,7 @@ public class StartAnalysisDTOFactory extends AbstractStartAnalysisCreationValida
                 return StartlineAdvantageType.WIND;
             }
         } catch (NoWindException e) {
-            e.printStackTrace();
+            logger.log(Level.INFO, "", e);
             return null;
         }
     }

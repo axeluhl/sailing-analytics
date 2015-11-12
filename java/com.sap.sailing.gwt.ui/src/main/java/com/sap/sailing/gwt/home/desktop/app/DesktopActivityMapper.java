@@ -3,30 +3,30 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsActivityProxy;
-import com.sap.sailing.gwt.home.client.place.aboutus.AboutUsPlace;
-import com.sap.sailing.gwt.home.client.place.contact.ContactActivityProxy;
-import com.sap.sailing.gwt.home.client.place.contact.ContactPlace;
-import com.sap.sailing.gwt.home.client.place.error.ErrorActivityProxy;
-import com.sap.sailing.gwt.home.client.place.error.ErrorPlace;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.client.place.event.EventActivityProxy;
-import com.sap.sailing.gwt.home.client.place.events.EventsActivityProxy;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.fakeseries.AbstractSeriesPlace;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultActivityProxy;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsActivityProxy;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringActivityProxy;
-import com.sap.sailing.gwt.home.client.place.sponsoring.SponsoringPlace;
-import com.sap.sailing.gwt.home.client.place.start.StartActivityProxy;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewActivityProxy;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.error.ErrorActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.event.EventActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.events.EventsActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
+import com.sap.sailing.gwt.home.desktop.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
-import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
@@ -40,9 +40,9 @@ public class DesktopActivityMapper implements ActivityMapper {
     @Override
     public Activity getActivity(Place rawPlace) {
         Place place = placeUpdater.getRealPlace(rawPlace);
-        if (SwitchingEntryPoint.isMobile() //
+        if (DeviceDetector.isMobile() //
                 && !SwitchingEntryPoint.viewIsLockedToDesktop()
-                && place instanceof HasMobileVersion) {
+                && SwitchingEntryPoint.hasMobileVersion(place)) {
             SwitchingEntryPoint.reloadApp();
             return null;
         }
@@ -56,9 +56,9 @@ public class DesktopActivityMapper implements ActivityMapper {
             AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof AbstractSeriesPlace) {
-            return new com.sap.sailing.gwt.home.client.place.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
+            return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
-            return new EventsActivityProxy((EventsPlace) place, clientFactory);
+            return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof SponsoringPlace) {

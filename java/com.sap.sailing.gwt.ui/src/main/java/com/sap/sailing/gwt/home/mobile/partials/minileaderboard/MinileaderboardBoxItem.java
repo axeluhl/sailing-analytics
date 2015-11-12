@@ -7,10 +7,10 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
 
 public class MinileaderboardBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

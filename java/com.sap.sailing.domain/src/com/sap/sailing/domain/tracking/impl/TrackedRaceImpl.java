@@ -614,6 +614,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
+        attachedRegattaLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
         // The short time wind cache needs to be there before operations such as maneuver recalculation try to access it
@@ -787,12 +788,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public TimePoint getStartOfRace() {
         if (startTime == null) {
             for (RaceLog raceLog : attachedRaceLogs.values()) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
+                }
                 startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (startTime != null) {
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
+                    }
                     break;
                 }
             }
             if (startTime == null) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("No start time found in race logs for race "+getRace().getName());
+                }
                 startTime = getStartTimeReceived();
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
@@ -811,8 +821,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                                }
                             } else {
                                 startTime = startTimeReceived;
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+startTime);
+                                }
                             }
                         }
                     } else {
@@ -820,6 +836,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         if (markPassingsForFirstWaypointInOrder != null) {
                             startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
                                     getRace().getCompetitors());
+                            if (startTime != null && logger.isLoggable(Level.FINEST)) {
+                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                            }
                         }
                     }
                 }
@@ -944,32 +963,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public boolean isLive(TimePoint at) {
-        final Date startOfLivePeriod;
-        final Date endOfLivePeriod;
+        final TimePoint startOfLivePeriod;
+        final TimePoint endOfLivePeriod;
         if (!hasGPSData() || !hasWindData()) {
             startOfLivePeriod = null;
             endOfLivePeriod = null;
         } else {
             if (getStartOfRace() == null) {
-                startOfLivePeriod = getStartOfTracking().asDate();
+                startOfLivePeriod = getStartOfTracking();
             } else {
-                startOfLivePeriod = new Date(getStartOfRace().asMillis() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+                startOfLivePeriod = getStartOfRace().minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
             }
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
-                    endOfLivePeriod = new Date(getTimePointOfNewestEvent().asMillis()
-                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                    endOfLivePeriod = getTimePointOfNewestEvent().plus(
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
                 } else {
                     endOfLivePeriod = null;
                 }
             } else {
-                endOfLivePeriod = new Date(getEndOfRace().asMillis() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                endOfLivePeriod = getEndOfRace().plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
             }
         }
     
         // if an empty timepoint is given then take the start of the race
         if (at == null) {
-            at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
+            at = startOfLivePeriod.plus(1);
         }
         
         // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
@@ -977,8 +996,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final boolean result =
                 startOfLivePeriod != null &&
                 endOfLivePeriod != null &&
-                startOfLivePeriod.getTime() <= at.asMillis() &&
-                at.asMillis() <= endOfLivePeriod.getTime();
+                !startOfLivePeriod.after(at) &&
+                !at.after(endOfLivePeriod);
         return result;
     }
 
@@ -1238,10 +1257,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public int getRank(Competitor competitor, TimePoint timePoint) {
         int result;
-        if (getMarkPassings(competitor).isEmpty()) {
+        final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        if (markPassings.isEmpty()) {
             result = 0;
         } else {
-            result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+            final boolean hasMarkPassingAtOrBeforeTimePoint;
+            lockForRead(markPassings);
+            try {
+                hasMarkPassingAtOrBeforeTimePoint = markPassings.floor(new DummyMarkPassingWithTimePointOnly(timePoint)) == null;
+            } finally {
+                unlockAfterRead(markPassings);
+            }
+            if (hasMarkPassingAtOrBeforeTimePoint) {
+                // no mark passing at or before timePoint; competitor has not started / participated yet
+                result = 0;
+            } else {
+                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+            }
         }
         return result;
     }
@@ -1570,10 +1602,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * two is not <code>null</code>.
      */
     @Override
-    public boolean takesWindFix(Wind wind) {
+    public boolean takesWindFixWithTimePoint(TimePoint timePoint) {
         final Set<TrackedRace> visited = new HashSet<>();
         visited.add(this);
-        return takesWindFixRecursively(wind, visited);
+        return takesWindFixWithTimePointRecursively(timePoint, visited);
     }
     
     /**
@@ -1582,7 +1614,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            {@link RaceExecutionOrderProvider}
      */
     @Override
-    public boolean takesWindFixRecursively(Wind wind, Set<TrackedRace> visited) {
+    public boolean takesWindFixWithTimePointRecursively(TimePoint windFixTimePoint, Set<TrackedRace> visited) {
         final boolean result;
         final TimePoint earliestStartTimePoint = Util.getEarliestOfTimePoints(getStartOfRace(), getStartOfTracking());
         final TimePoint latestEndTimePoint = Util.getLatestOfTimePoints(getEndOfRace(), getEndOfTracking());
@@ -1590,21 +1622,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             // first check if the fix meets the criteria set by the latestEndTimePoint: either the latestEndTimePoint is null, meaning an
             // open interval which will continue to accept late wind fixes, or the fix time point is before the latestEndTimePoint plus a grace
             // interval:
-            if (latestEndTimePoint == null || wind.getTimePoint().minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(latestEndTimePoint)) {
+            if (latestEndTimePoint == null || windFixTimePoint.minus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).before(latestEndTimePoint)) {
                 // then check, if fix is accepted anyway because it's after earliestStartTimePoint.minus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS)
                 // and before latestEndTimePoint.plus(IS_LIVE_GRACE_PERIOD_IN_MILLIS) or latestEndTimePoint is null. In this case, no expensive
                 // recursive check whether previous races take the fix are required.
-                if (wind.getTimePoint().plus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(earliestStartTimePoint)) {
+                if (windFixTimePoint.plus(TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).after(earliestStartTimePoint)) {
                     result = true;
                 } else {
                     // if the fix is older than even the extended lead interval would accept, don't accept the fix:
-                    if (wind.getTimePoint().plus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).before(earliestStartTimePoint)) {
+                    if (windFixTimePoint.plus(EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS).before(earliestStartTimePoint)) {
                         result = false;
                     } else {
                         // the fix is in the critical interval between EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS and
                         // TIME_BEFORE_START_TO_TRACK_WIND_MILLIS before the earliestStartTimePoint; the fix shall only be accepted
                         // if no previous race exists that accepts it
-                        result = noPreviousRaceTakesWind(wind, visited);
+                        result = noPreviousRaceTakesWindFixWithTimePoint(windFixTimePoint, visited);
                     }
                 }
             } else {
@@ -1616,11 +1648,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
     
-    private boolean noPreviousRaceTakesWind(Wind wind, Set<TrackedRace> visited) {
+    private boolean noPreviousRaceTakesWindFixWithTimePoint(TimePoint timePoint, Set<TrackedRace> visited) {
         final boolean result;
         Set<TrackedRace> previousRacesInExecutionOrder = getPreviousRacesFromAttachedRaceExecutionOrderProviders();
         if (previousRacesInExecutionOrder == null || !previousRacesInExecutionOrder.stream().filter(tr ->
-                        visited.add(tr) && tr.takesWindFixRecursively(wind, visited)).findAny().isPresent()) {
+                        visited.add(tr) && tr.takesWindFixWithTimePointRecursively(timePoint, visited)).findAny().isPresent()) {
             result = true;
         } else {
             result = false;
@@ -3175,8 +3207,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            final TimePoint startOfTimeWindowToLoad = getStartOfTracking();
-            final TimePoint endOfTimeWindowToLoad = getEndOfTracking();
+            final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
+            final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
@@ -3235,6 +3267,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         try {
                             gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
                                     log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
+                            if (getOrCreateTrack(mark).getFirstRawFix() == null) {
+                                logger.fine("Loading mark positions from outside of start/end of tracking interval ("+
+                                        startOfTimeWindowToLoad+".."+endOfTimeWindowToLoad+
+                                        ") because no fixes were found in that interval");
+                                // got an empty track for the mark; try again without constraining the mapping interval
+                                // by start/end of tracking to at least attempt to get fixes at all in case there were any
+                                // within the device mapping interval specified
+                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
+                                        log, mark, /* startOfTimeWindowToLoad */ null, /* endOfTimeWindowToLoad */ null);
+                            }
                         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                             logger.log(Level.WARNING, "Could not load track for " + mark, e);
                         }
@@ -3277,6 +3319,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRaceLog(final RaceLog raceLog) {
         loadFixesForLog(raceLog, attachedRaceLogs, /* wait for fixes to load */ false);
+        try {
+            // The log is attached to the tracked race by a background thread; this method wants
+            // to guarantee that the log is at least really attached to the TrackedRace before returning:
+            waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+        }
     }
 
     @Override
@@ -3322,6 +3371,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
         loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
+        try {
+            // The log is attached to the tracked race by a background thread; this method wants
+            // to guarantee that the log is at least really attached to the TrackedRace before returning:
+            waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+        }
     }
 
     @Override

@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -39,7 +40,8 @@ import com.sap.sse.gwt.client.media.ImageDTO;
  */
 public class ImagesListComposite extends Composite {
     private final StringMessages stringMessages;
-
+    private final SailingServiceAsync sailingService;
+    
     private CellTable<ImageDTO> imageTable;
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
     private ListDataProvider<ImageDTO> imageListDataProvider;
@@ -64,7 +66,8 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(final StringMessages stringMessages) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages) {
+        this.sailingService = sailingService;
         this.stringMessages = stringMessages;
 
         mainPanel = new SimplePanel();
@@ -75,7 +78,7 @@ public class ImagesListComposite extends Composite {
         imagesControlsPanel.setSpacing(5);
         panel.add(imagesControlsPanel);
 
-        Button addPhotoBtn = new Button("Add gallery photo");
+        Button addPhotoBtn = new Button(stringMessages.addGalleryPhoto());
         addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -84,7 +87,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addPhotoBtn);
 
-        Button addStateImageBtn = new Button("Add stage image");
+        Button addStateImageBtn = new Button(stringMessages.addStageImage());
         addStateImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -93,7 +96,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addStateImageBtn);
 
-        Button addEventTeaseImageBtn = new Button("Add teaser image");
+        Button addEventTeaseImageBtn = new Button(stringMessages.addTeaserImage());
         addEventTeaseImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -102,7 +105,7 @@ public class ImagesListComposite extends Composite {
         });
         imagesControlsPanel.add(addEventTeaseImageBtn);
 
-        Button addLogoImageBtn = new Button("Add event logo");
+        Button addLogoImageBtn = new Button(stringMessages.addEventLogo());
         addLogoImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -125,7 +128,7 @@ public class ImagesListComposite extends Composite {
 
         panel.add(imageTable);
 
-        noImagesLabel = new Label("No images defined yet.");
+        noImagesLabel = new Label(stringMessages.noImagesDefinedYet());
         noImagesLabel.ensureDebugId("NoImagesLabel");
         noImagesLabel.setWordWrap(false);
         panel.add(noImagesLabel);
@@ -259,7 +262,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
-        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, stringMessages, new DialogCallback<ImageDTO>() {
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
             @Override
             public void cancel() {
             }
@@ -274,7 +277,7 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openEditImageDialog(final ImageDTO selectedImage) {
-        ImageEditDialog dialog = new ImageEditDialog(selectedImage, stringMessages, new DialogCallback<ImageDTO>() {
+        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages, new DialogCallback<ImageDTO>() {
             @Override
             public void cancel() {
             }

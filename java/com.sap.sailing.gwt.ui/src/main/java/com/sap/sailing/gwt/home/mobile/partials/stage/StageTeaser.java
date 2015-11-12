@@ -12,55 +12,48 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.mobile.partials.countdown.CountdownTicker;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
+import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.carousel.LazyLoadable;
 
 public abstract class StageTeaser extends Composite implements LazyLoadable {
-    @UiField
-    DivElement bandCount;
-    @UiField
-    SpanElement subtitle;
-    @UiField
-    SpanElement title;
-    @UiField(provided = true)
-    CountdownTicker countdownTickerUi;
-    @UiField
-    HTMLPanel stageTeaserBandsPanel;
-    @UiField
-    DivElement teaserImage;
+    
+    @UiField DivElement bandCount;
+    @UiField SpanElement subtitle;
+    @UiField SpanElement title;
+    @UiField(provided = true) CountdownTimer countdownTimerUi;
+    @UiField HTMLPanel stageTeaserBandsPanel;
+    @UiField DivElement teaserImage;
 
     interface StageTeaserUiBinder extends UiBinder<Widget, StageTeaser> {
     }
 
     private static StageTeaserUiBinder uiBinder = GWT.create(StageTeaserUiBinder.class);
-    private final EventStageDTO event;
+    private final EventLinkAndMetadataDTO event;
 
     @Override
     public void doInitializeLazyComponents() {
-        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : StageResources.INSTANCE
+        String stageImageUrl = event.getThumbnailImageURL() != null ? event.getThumbnailImageURL() : StageResources.INSTANCE
                 .defaultStageEventTeaserImage().getSafeUri().asString();
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
-
     }
 
     protected void handleUserAction() {
-
     }
 
-    public StageTeaser(EventStageDTO event) {
+    public StageTeaser(EventLinkAndMetadataDTO event) {
         this.event = event;
         StageResources.INSTANCE.css().ensureInjected();
 
         TimePoint eventStart = new MillisecondsTimePoint(event.getStartDate());
-        countdownTickerUi = new CountdownTicker(eventStart.asDate());
+        countdownTimerUi = new CountdownTimer(eventStart.asDate(), false);
         initWidget(uiBinder.createAndBindUi(this));
         
         if(MillisecondsTimePoint.now().after(eventStart)) {
-            countdownTickerUi.removeFromParent();
+            countdownTimerUi.removeFromParent();
         }
 
         addDomHandler(new ClickHandler() {
@@ -76,10 +69,8 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
                     return;
                 }
                 handleUserAction();
-
             }
         }, ClickEvent.getType());
     }
-
 
 }
