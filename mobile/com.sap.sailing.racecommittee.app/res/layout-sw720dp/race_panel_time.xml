@@ -24,37 +24,36 @@
         android:layout_alignParentBottom="true"
         android:src="?marker"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/default_margin"
+        android:layout_above="@id/time_marker"
+        android:layout_centerHorizontal="true"
         android:baselineAligned="false"
-        android:orientation="horizontal">
+        android:layout_marginBottom="@dimen/side_padding">
+
 
         <RelativeLayout
-            android:layout_width="0dp"
+            android:id="@+id/start_time_container"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1">
+            android:layout_centerVertical="true">
 
             <TextView
                 android:id="@+id/time_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:textAppearance="?textSmall"
+                android:layout_toRightOf="@+id/linked_locked_area"
                 tools:text="@string/time_start"/>
 
             <LinearLayout
+                android:id="@+id/linked_locked_area"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/default_margin_half"
-                android:layout_toLeftOf="@+id/time_start"
-                android:layout_toStartOf="@+id/time_start"
+                android:layout_marginRight="6dp"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -77,10 +76,11 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1">
+            android:layout_toRightOf="@+id/start_time_container"
+            android:layout_marginLeft="@dimen/current_time_left_margin"
+            android:layout_centerVertical="true">
 
             <TextView
                 android:id="@+id/current_time"
@@ -97,22 +97,5 @@
                 tools:visibility="visible"/>
         </RelativeLayout>
 
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/time_finish"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:text="@string/time_finish"
-                android:textAppearance="?textSmall"
-                android:visibility="invisible"
-                tools:visibility="visible"/>
-        </RelativeLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>
