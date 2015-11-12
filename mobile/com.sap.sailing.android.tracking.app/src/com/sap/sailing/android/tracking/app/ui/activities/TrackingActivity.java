@@ -208,7 +208,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onResume();
 
         timer = new TimerRunnable();
-        timer.start();
+        Thread thread = new Thread(timer);
+        thread.start();
 
         if (mPagerAdapter == null) {
             mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -404,15 +405,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     private class TimerRunnable implements Runnable {
 
-        public Thread t;
-        public volatile boolean running = true;
+        private boolean running;
 
-        public void start() {
+        TimerRunnable() {
             running = true;
-            if (t == null) {
-                t = new Thread(this);
-                t.start();
-            }
         }
 
         @Override
