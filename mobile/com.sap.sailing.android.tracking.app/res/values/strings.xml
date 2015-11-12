@@ -50,6 +50,7 @@
     <string name="error_while_receiving_server_data">Error while receiving server data</string>
     <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
     <string name="warning">Warning</string>
+    <string name="enable_gps">GPS is turned off. Tracking requires GPS positions. Do you want to turn on GPS in the location settings?</string>
     <string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
     <string name="knots">%sKn</string>
     <string name="preferences">Preferences</string>

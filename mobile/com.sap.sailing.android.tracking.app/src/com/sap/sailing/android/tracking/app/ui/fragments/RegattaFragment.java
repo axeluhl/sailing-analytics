@@ -3,11 +3,13 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -158,8 +160,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             if (showingThankYouNote) {
                 RegattaActivity regattaActivity = (RegattaActivity) getActivity();
                 regattaActivity.checkout();
-            } else {
+            } else if(isGPSEnabled()){
                 startTrackingActivity();
+            } else {
+                showNoGPSError();
             }
             break;
         case R.id.add_photo_button:
@@ -174,6 +178,27 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         default:
             break;
         }
+    }
+
+    private void showNoGPSError() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.warning));
+        builder.setMessage(getString(R.string.enable_gps));
+        builder.setNegativeButton(getString(R.string.no), null);
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
+        });
+        builder.show();
+    }
+
+    private boolean isGPSEnabled() {
+        LocationManager service = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        return service.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
     public void setChangePhotoButtonHidden(boolean hidden) {
@@ -225,7 +250,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             RegattaActivity activity = (RegattaActivity) getActivity();
 
             if (requestCode == CAMERA_REQUEST_CODE) {
-                File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+                File photoFile = activity.getImageFile(CAMERA_TEMP_FILE);
                 Bitmap photo;
                 try {
                     photo = decodeUri(Uri.fromFile(photoFile));
@@ -239,7 +264,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
                     }
                 } finally {
-                    ((RegattaActivity) getActivity()).deleteFile(CAMERA_TEMP_FILE);
+                    activity.deleteFile(CAMERA_TEMP_FILE);
                 }
             } else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
                 Uri selectedImage = data.getData();
