@@ -388,10 +388,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * Update UI with a string containing the time since tracking started, e.g. 01:22:45
      */
     public void updateTimer() {
-        long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-        TextView textView = (TextView) findViewById(R.id.tracking_time_label);
-        if (textView != null) {
-            textView.setText(getTimeFormatString(diff));
+        long trackingTimerStarted = prefs.getTrackingTimerStarted();
+        if (trackingTimerStarted > 0) {
+            long diff = System.currentTimeMillis() - trackingTimerStarted;
+            TextView textView = (TextView) findViewById(R.id.tracking_time_label);
+            if (textView != null) {
+                textView.setText(getTimeFormatString(diff));
+            }
         }
     }
 
