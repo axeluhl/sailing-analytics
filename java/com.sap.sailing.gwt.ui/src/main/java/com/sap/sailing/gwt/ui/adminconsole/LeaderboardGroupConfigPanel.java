@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -480,8 +481,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                leaderboardGroupsRefresher.fillLeaderboardGroups();
                 leaderboardsRefresher.fillLeaderboards();
+                leaderboardGroupsRefresher.fillLeaderboardGroups();
             }
         });
         leaderboardGroupsControlsPanel.add(refreshButton);
@@ -591,6 +592,19 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             Util.addAll(groups, availableLeaderboardGroups);
         }
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
+        
+        UUID id = getSelectedGroup().getId();
+        if (id != null) {
+            groupsSelectionModel.clear();
+            for (LeaderboardGroupDTO leaderboardGroup : availableLeaderboardGroups) {
+                if (id.equals(leaderboardGroup.getId())) {
+                    groupsSelectionModel.setSelected(leaderboardGroup, true);
+                } else {
+                    groupsSelectionModel.setSelected(leaderboardGroup, false);
+                }
+            }
+            groupSelectionChanged();
+        }
     }
 
     @Override
@@ -812,12 +826,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             groupDetailsSelectionModel.clear();
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
+            groupDetailsProvider.refresh();
 
             // Tell leaderboards filter panel to use all available leaderboards except the leaderboards of the group from the list
             leaderboardsSelectionModel.clear();
             ArrayList<StrippedLeaderboardDTO> allLeaderboardsExceptThoseOfSelectedLeaderboardGroup = new ArrayList<>(availableLeaderboards);
             allLeaderboardsExceptThoseOfSelectedLeaderboardGroup.removeAll(selectedGroup.leaderboards);
             leaderboardsFilterablePanel.updateAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
+            leaderboardsProvider.getList().clear();
+            leaderboardsProvider.getList().addAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
+            leaderboardsProvider.refresh();
         }
     }
 
