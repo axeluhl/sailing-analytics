@@ -5,8 +5,9 @@
 
 	<parent>
 		<groupId>com.sap.sailing</groupId>
-		<artifactId>mobile</artifactId>
+		<artifactId>com.sap.sailing.android.app-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../com.sap.sailing.android.app-parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>com.sap.sailing</groupId>
