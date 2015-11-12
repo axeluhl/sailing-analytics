@@ -5,12 +5,12 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab.RegattaRacesPlace;
@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
@@ -54,10 +53,6 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         
         String getRegattaOverviewLink();
 
-        String getRaceViewerURL(StrippedLeaderboardDTO leaderboard, RaceDTO race);
-        
-        String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier);
-
         PlaceNavigation<RegattaRacesPlace> getRegattaRacesNavigation(String regattaName);
         PlaceNavigation<AbstractEventRegattaPlace> getRegattaNavigation(String regattaName);
         PlaceNavigation<RegattaLeaderboardPlace> getRegattaLeaderboardNavigation(String regattaName);
@@ -73,6 +68,11 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         String getRegattaId();
         
         EventViewDTO getEventDTO();
+
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+
+        String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
+                RegattaAndRaceIdentifier raceIdentifier);
     }
     
     public interface PlaceCallback {

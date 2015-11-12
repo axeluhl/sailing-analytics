@@ -18,8 +18,10 @@ public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
     private RaceCompetitorNewsEntryDTO() {
     }
     
-    public RaceCompetitorNewsEntryDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp, String competitorName, Type type) {
-        super(leaderboardName, regattaAndRaceIdentifier, raceTitle, boatClass, timestamp);
+    public RaceCompetitorNewsEntryDTO(String leaderboardName, String leaderboardGroupName,
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp,
+            String competitorName, Type type) {
+        super(leaderboardName, leaderboardGroupName, regattaAndRaceIdentifier, raceTitle, boatClass, timestamp);
         this.competitorName = competitorName;
         this.type = type;
     }

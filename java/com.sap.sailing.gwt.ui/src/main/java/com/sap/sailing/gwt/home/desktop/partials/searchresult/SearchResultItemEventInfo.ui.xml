@@ -3,10 +3,9 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.searchresult.SearchResultResources" />
-    <div class="{local_res.css.searchresult_content_item}" ui:field="eventInfoContainerUi">
-		<a ui:field="resultTitleUi" class="{local_res.css.searchresult_content_item_headline}" />
-		<div class="{local_res.css.searchresult_content_item_description}"><span ui:field="resultDescriptionUi" />
-			<!-- <a href="http://" class="{local_res.css.searchresult_content_item_description_morelink}">More</a>-->
-		</div>
+	<div class="{local_res.css.searchresult_content_item_footer}">
+		<a ui:field="eventNameUi" class="{local_res.css.searchresult_content_item_footer_link}" />
+		<span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="eventVenueUi" />
+		<span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="eventDateUi" />
 	</div>
 </ui:UiBinder>
