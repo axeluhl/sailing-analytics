@@ -37,14 +37,16 @@ public class StopTrackingButtonFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SIS_TRACKING_TIMER, timerView.getText().toString());
+        if (timerView != null) {
+            outState.putString(SIS_TRACKING_TIMER, timerView.getText().toString());
+        }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && timerView!= null) {
             timerView.setText(savedInstanceState.getString(SIS_TRACKING_TIMER));
         }
     }
