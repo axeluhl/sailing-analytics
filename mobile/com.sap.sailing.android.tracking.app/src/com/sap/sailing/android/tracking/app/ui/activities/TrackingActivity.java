@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -41,7 +42,8 @@ import com.viewpagerindicator.CirclePageIndicator;
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 
     TrackingService trackingService;
-    boolean trackingServiceBound;
+    private boolean trackingServiceBound;
+    private boolean gpsReceived;
 
     MessageSendingService messageSendingService;
     boolean messageSendingServiceBound;
@@ -393,10 +395,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     public void updateTimer() {
         long trackingTimerStarted = prefs.getTrackingTimerStarted();
         if (trackingTimerStarted > 0) {
+            hideWaitForGPSText();
             long diff = System.currentTimeMillis() - trackingTimerStarted;
             TextView textView = (TextView) findViewById(R.id.tracking_time_label);
             if (textView != null) {
                 textView.setText(getTimeFormatString(diff));
+            }
+        }
+    }
+
+    private void hideWaitForGPSText() {
+        if (!gpsReceived) {
+            View waitForGPSLabel = findViewById(R.id.wait_for_gps);
+            if (waitForGPSLabel != null) {
+                waitForGPSLabel.setVisibility(View.GONE);
+                gpsReceived = true;
             }
         }
     }
