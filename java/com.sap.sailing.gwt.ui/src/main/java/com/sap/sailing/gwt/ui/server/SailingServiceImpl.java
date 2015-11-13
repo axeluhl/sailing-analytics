@@ -1611,7 +1611,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         boolean isValidLeaderboard = leaderboard != null; 
         boolean isValidLeaderboardGroup = false;
-        if(leaderboardGroup != null) {
+        if (leaderboardGroup != null) {
             for(Leaderboard leaderboardInGroup: leaderboardGroup.getLeaderboards()) {
                 if(leaderboardInGroup.getName().equals(leaderboard.getName())) {
                     isValidLeaderboardGroup = true;
@@ -1620,10 +1620,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         boolean isValidEvent = event != null;
-        if(event != null && leaderboardGroup != null) {
+        if (event != null && leaderboardGroup != null) {
             isValidEvent = false;
-            for(LeaderboardGroup leaderboardGroupInEvent: event.getLeaderboardGroups()) {
-                if(leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())) {
+            for (LeaderboardGroup leaderboardGroupInEvent: event.getLeaderboardGroups()) {
+                if (leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())) {
                     isValidEvent = true;
                     break;
                 }
