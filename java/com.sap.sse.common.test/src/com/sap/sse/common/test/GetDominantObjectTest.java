@@ -12,7 +12,7 @@ public class GetDominantObjectTest {
 
     @Test
     public void testNullCollection() {
-        Assert.assertArrayEquals(null, Util.getDominantObject(null));               
+        Assert.assertNull(Util.getDominantObject(null));               
     }
     
     @Test
