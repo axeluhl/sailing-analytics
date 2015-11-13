@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -17,6 +18,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
+    private static final Logger logger = Logger.getLogger(RaceDefinitionImpl.class.getName());
+    
     private static final long serialVersionUID = -1900955198751393727L;
     private final Course course;
     private final LinkedHashMap<Serializable, Competitor> competitorsById;
@@ -54,9 +57,12 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
             }
         }
         for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
-            Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId());
+            Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId()); // only assign boat if competitor is part of race
             if (competitor != null && competitorAndBoat.getValue() != null) {
                 competitorBoats.put(competitor.getId(), competitorAndBoat.getValue());
+            } else {
+                logger.warning("Trying to set boat "+competitorAndBoat.getValue()+" for competitor "+competitorAndBoat.getKey()+
+                        " which is not part of race "+getName()+"'s set of competitors");
             }
         }
         this.boatClass = boatClass;

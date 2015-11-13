@@ -62,6 +62,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     private String fleetName;
     
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+    
     private static final int DEFAULT_WIND_CHART_HEIGHT = 200;
 
     @Override
@@ -73,7 +74,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         fleetName = Window.Location.getParameter(PARAM_FLEET_NAME);
         if (regattaLikeName == null || regattaLikeName.isEmpty() || raceColumnName == null || raceColumnName.isEmpty() ||
                 fleetName == null || fleetName.isEmpty()) {
-            createErrorPage("This page requires a valid regatta, race column and fleet name to identify the race to show.");
+            createErrorPage(getStringMessages().requiresValidRegatta());
             return;
         }
         
@@ -88,7 +89,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             @Override
             public void onSuccess(final RegattaAndRaceIdentifier selectedRaceIdentifier) {
                 if (selectedRaceIdentifier == null) {
-                    createErrorPage("Could not obtain a race with name " + raceColumnName + " for fleet "+fleetName+" for a regatta with name " + regattaLikeName);
+                    createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, /* technicalErrorMessage */ ""));
                 } else {
                     sailingService.getCompetitorBoats(selectedRaceIdentifier, new AsyncCallback<Map<CompetitorDTO, BoatDTO>>() {
                         @Override
@@ -98,7 +99,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            reportError("Error trying to create the embedded map: " + caught.getMessage());
+                            reportError(getStringMessages().errorTryingToCreatedEmbeddedMap(caught.getMessage()));
                         }
                     });
                 }
@@ -106,8 +107,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             
             @Override
             public void onFailure(Throwable caught) {
-                createErrorPage("Could not obtain a race with name " + raceColumnName + " for fleet "+fleetName+" for a regatta with name " + regattaLikeName+
-                        ": "+caught.getMessage());
+                createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName, fleetName, caught.getMessage()));
             }
         });
     }
