@@ -2,9 +2,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -20,8 +18,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.BoatDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -142,13 +138,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
             return;
         }
-        
-        
-        Map<CompetitorDTO, BoatDTO> allCompetitorsAndTheirBoats = new HashMap<>();
-        for(CompetitorDTO competitor: raceboardData.getCompetitors()) {
-            allCompetitorsAndTheirBoats.put(competitor, raceboardData.getCompetitorAndTheirBoats().get(competitor));
-        }
-        
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
@@ -158,7 +147,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor,
-                allCompetitorsAndTheirBoats, timer, raceSelectionModel, leaderboardName, leaderboardGroupName, eventId, 
+                raceboardData.getCompetitorAndTheirBoats(), timer, raceSelectionModel, leaderboardName, leaderboardGroupName, eventId, 
                 raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
 
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);

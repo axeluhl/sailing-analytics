@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
@@ -352,6 +353,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
 
+    void getCompetitorBoats(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Map<CompetitorDTO, BoatDTO>> callback);
+    
     void getRaceboardData(String regattaName, String raceName, String leaderboardName, 
             String leaderboardGroupName, UUID eventId, AsyncCallback<RaceboardDataDTO> callback);
 
