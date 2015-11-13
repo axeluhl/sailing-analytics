@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.mobile.places.event;
 import java.util.Collection;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.NewsItemLinkProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaLeaderboardNavigationProvider;
 import com.sap.sailing.gwt.home.mobile.places.RegattaOverviewNavigationProvider;
@@ -44,9 +44,9 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getEventNavigation();
         
         PlaceNavigation<?> getMediaPageNavigation();
-
-        String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier);
         
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+
         String getRegattaId();
         
         RegattaMetadataDTO getRegatta();

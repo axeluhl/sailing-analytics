@@ -1,14 +1,21 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter;
+import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
+
+import java.util.Date;
+
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 
 public abstract class AbstractRegattaCompetitionFleetRace extends UIObject implements RegattaCompetitionRaceView {
     
@@ -23,9 +30,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
         }
         setupRaceState(race.getTrackingState(), race.getViewState());
         getRaceNameUiElement().setInnerText(race.getRaceName());
-        if (race.getStart() != null) {
-            getRaceDateUiElement().setInnerText(DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter.render(race.getStart())); 
-        }
+        setupRaceStart(race.getStart());
         setElement(anchorUiElement);
     }
     
@@ -43,6 +48,14 @@ public abstract class AbstractRegattaCompetitionFleetRace extends UIObject imple
             else getRaceStateUiElement().setInnerText(viewState.getLabel());
         }
         setStyleName(anchorUiElement, getRaceUntrackedStyleName(), isUntrackedRace);
+    }
+    
+    private void setupRaceStart(Date startDate) {
+        if (startDate != null) {
+            boolean showTime = DateUtil.isSameDayOfMonth(now().asDate(), startDate);
+            DateTimeFormatRenderer renderer = showTime ? shortTimeFormatter : weekdayMonthAbbrDayDateFormatter;
+            getRaceDateUiElement().setInnerText(renderer.render(startDate));
+        }
     }
 
     protected abstract AnchorElement getMainUiElement();

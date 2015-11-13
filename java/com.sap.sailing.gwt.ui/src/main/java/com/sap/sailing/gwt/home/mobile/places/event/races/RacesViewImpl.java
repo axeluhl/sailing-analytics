@@ -8,7 +8,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -60,10 +59,10 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         public MobileRegattaCompetitionPresenter() {
             super(regattaCompetitionUi);
         }
-
+        
         @Override
-        protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE ? currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier) : null;
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
+            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE ? currentPresenter.getRaceViewerURL(raceMetadata) : null;
         }
     }
     
