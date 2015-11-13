@@ -32,7 +32,11 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
                         raceColors = new HashMap<CompetitorDTO, Color>();
                         competitorsBoatColorsPerRace.put(raceIdentifier, raceColors);
                     }
-                    raceColors.put(competitorAndBoat.getKey(), competitorAndBoat.getValue().getColor());
+                    Color boatColor = competitorAndBoat.getValue().getColor();
+                    if (boatColor != null) {
+                        raceColors.put(competitorAndBoat.getKey(), boatColor);
+                        addBlockedColor(boatColor);
+                    }
                 }
             }
         }
