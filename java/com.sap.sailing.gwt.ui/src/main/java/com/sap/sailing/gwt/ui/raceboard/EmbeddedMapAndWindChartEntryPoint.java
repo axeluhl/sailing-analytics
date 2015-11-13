@@ -164,9 +164,9 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorBoats);
         final CompetitorSelectionProvider competitorSelection;
         if (showCompetitors) {
-            competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+            competitorSelection = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
         } else {
-            competitorSelection = createEmptyFilterCompetitorModel(); // show no competitors
+            competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
         }
         final RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, getStringMessages(), showMapControls, showViewStreamlets, showViewStreamletColors,
