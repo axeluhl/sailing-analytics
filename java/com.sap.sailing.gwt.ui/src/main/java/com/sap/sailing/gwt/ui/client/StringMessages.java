@@ -1438,4 +1438,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String selectALeaderboardGroup();
+    @Override
+    String pleaseSelect();
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
@@ -50,7 +49,7 @@ public abstract class RegattaCompetitionPresenter implements
                 fleetMap.put(fleetView, raceMap);
                 for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
                     boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
-                    String raceViewerUrl = tracked ? getRaceViewerURL(race.getLeaderboardName(), race.getRegattaAndRaceIdentifier()) : null;
+                    String raceViewerUrl = tracked ? getRaceViewerURL(race) : null;
                     RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, raceViewerUrl);
                     raceMap.put(raceView, race);
                 }
@@ -101,6 +100,6 @@ public abstract class RegattaCompetitionPresenter implements
         seriesView.doFilter(unfilteredFleetCount == 0);
     }
     
-    protected abstract String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier);
+    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
 
 }

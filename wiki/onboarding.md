@@ -68,6 +68,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 4. Run the Race Analysis Suite
   * Start the MongoDB
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the run dropdown
+  * Run "Security UI sdm" in the run dropdown
   * Run "SailingGWT" in the run dropdown 
 5. Within the Race Analysis Suite
   * Default Login: user "admin", password "admin"

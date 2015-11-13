@@ -90,7 +90,6 @@ public class RaceContext {
     private TimePoint finishTime;
     private boolean finishTimeCalculated = false;
     private RaceViewState raceViewState;
-    private List<Competitor> competitors;
 
     public RaceContext(RacingEventService service, Event event, LeaderboardContext leaderboardContext, 
             RaceColumn raceColumn, Fleet fleet, RaceLogResolver raceLogResolver) {
@@ -442,7 +441,7 @@ public class RaceContext {
             if(finishTime == null) {
                 finishTime = HomeServiceUtil.getLiveTimePoint();
             }
-            competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
+            List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
             if (competitors == null || competitors.isEmpty()) {
                 return null;
             }
@@ -470,6 +469,7 @@ public class RaceContext {
     }
     
     private void fillSimpleRaceMetadata(SimpleRaceMetadataDTO dto) {
+        dto.setLeaderboardGroupName(leaderboardContext.getLeaderboardGroupName());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
@@ -648,9 +648,6 @@ public class RaceContext {
     }
     
     private boolean isCompetitorInFleet(Competitor competitor) {
-        if (trackedRace == null) {
-            return false;
-        }
         Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
         return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
     }

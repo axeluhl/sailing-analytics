@@ -112,8 +112,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
         BufferedReader reader = request.getReader();
         StringBuilder requestBody = new StringBuilder();
-        String line = "";
-        // TODO: we are remove line feeds here, intented?
+        String line;
+        // TODO: we are removing line feeds here, intended?
         while ((line = reader.readLine()) != null) {
             requestBody.append(line);
         }

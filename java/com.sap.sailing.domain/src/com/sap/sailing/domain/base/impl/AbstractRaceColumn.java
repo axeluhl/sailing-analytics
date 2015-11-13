@@ -221,7 +221,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
+        final Set<Competitor> result = new HashSet<>();
         for (Fleet fleet : getFleets()) {
             TrackedRace trackedRace = getTrackedRace(fleet);
             if (trackedRace != null) {
@@ -241,7 +241,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
         final Iterable<Competitor> result;
-        TrackedRace trackedRace = getTrackedRace(fleet);
+        final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
             result = trackedRace.getRace().getCompetitors();
         } else {

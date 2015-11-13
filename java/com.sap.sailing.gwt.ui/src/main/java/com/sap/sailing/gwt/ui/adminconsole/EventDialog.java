@@ -145,7 +145,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                        leaderboardGroupNames, "Select a leaderboard group..."));
+                        leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
