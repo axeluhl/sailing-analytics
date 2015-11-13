@@ -149,6 +149,9 @@ public class Solutions extends Composite {
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
         switch (navigationTab) {
+            case SapInSailing:
+                sapInSailingDiv.scrollIntoView();
+                break;
             case SailingAnalytics:
                 sailingAnalyticsDiv.scrollIntoView();
                 break;
