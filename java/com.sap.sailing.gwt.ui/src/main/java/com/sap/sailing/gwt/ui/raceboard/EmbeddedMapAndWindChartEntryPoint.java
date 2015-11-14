@@ -107,7 +107,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            reportError(getStringMessages().errorTryingToCreatedEmbeddedMap(caught.getMessage()));
+                            reportError(getStringMessages().errorTryingToCreateEmbeddedMap(caught.getMessage()));
                         }
                     });
                 }
