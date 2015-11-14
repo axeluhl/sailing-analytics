@@ -157,7 +157,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     public boolean isLive(FleetDTO fleet, long serverTimePointAsMillis) {
         boolean result = false;
         final RaceDTO raceDTO = racesPerFleet.get(fleet);
-        if(raceDTO != null) {
+        if (raceDTO != null) {
             result = raceDTO.isLive(serverTimePointAsMillis);
         }
         return result;
@@ -169,7 +169,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     public boolean hasLiveRaces(long serverTimePointAsMillis) {
         boolean result = false;
-        for(FleetDTO fleet: fleets) {
+        for (FleetDTO fleet: fleets) {
             result |= isLive(fleet, serverTimePointAsMillis);
         }
         return result;
