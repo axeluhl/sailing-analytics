@@ -3,16 +3,15 @@ package com.sap.sailing.server.gateway.serialization.test.racelog;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.UUID;
-
 import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -61,8 +60,8 @@ public class TrackingTimesEventSerializerTest {
 
     @Test
     public void testNullStartOfTrackingTimeAttributeDeserialization() throws JsonDeserializationException {
-        final RaceLogStartOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createStartOfTrackingEvent(/* startOfTracking */null,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogStartOfTrackingEvent event = new RaceLogStartOfTrackingEventImpl(/* startOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
         RaceLogEvent deserialized = createStartOfTrackingEventDeserializer().deserialize(json);
         assertNull(deserialized.getLogicalTimePoint());
@@ -70,8 +69,8 @@ public class TrackingTimesEventSerializerTest {
     
     @Test
     public void testNullEndOfTrackingTimeAttributeDeserialization() throws JsonDeserializationException {
-        final RaceLogEndOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createEndOfTrackingEvent(/* endOfTracking */null,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogEndOfTrackingEvent event = new RaceLogEndOfTrackingEventImpl(/* endOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
         RaceLogEvent deserialized = createEndOfTrackingEventDeserializer().deserialize(json);
         assertNull(deserialized.getLogicalTimePoint());
@@ -79,16 +78,16 @@ public class TrackingTimesEventSerializerTest {
     
     @Test
     public void testNullStartOfTrackingTimeAttribute() {
-        final RaceLogStartOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createStartOfTrackingEvent(/* startOfTracking */null,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogStartOfTrackingEvent event = new RaceLogStartOfTrackingEventImpl(/* startOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
         assertNull(json.get(RaceLogStartOfTrackingEventSerializer.FIELD_TIMESTAMP));
     }
 
     @Test
     public void testNullEndOfTrackingTimeAttribute() {
-        final RaceLogEndOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createEndOfTrackingEvent(/* endOfTracking */null,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogEndOfTrackingEvent event = new RaceLogEndOfTrackingEventImpl(/* endOfTracking */null,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createEndOfTrackingEventSerializer().serialize(event);
         assertNull(json.get(RaceLogEndOfTrackingEventSerializer.FIELD_TIMESTAMP));
     }
@@ -96,8 +95,8 @@ public class TrackingTimesEventSerializerTest {
     @Test
     public void testNonNullStartOfTrackingTimeAttribute() {
         final TimePoint now = MillisecondsTimePoint.now();
-        final RaceLogStartOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createStartOfTrackingEvent(/* startOfTracking */now,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogStartOfTrackingEvent event = new RaceLogStartOfTrackingEventImpl(/* startOfTracking */now,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createStartOfTrackingEventSerializer().serialize(event);
         assertEquals(now.asMillis(), json.get(RaceLogStartOfTrackingEventSerializer.FIELD_TIMESTAMP));
     }
@@ -105,8 +104,8 @@ public class TrackingTimesEventSerializerTest {
     @Test
     public void testNonNullEndOfTrackingTimeAttribute() {
         final TimePoint now = MillisecondsTimePoint.now();
-        final RaceLogEndOfTrackingEvent event = RaceLogEventRestoreFactory.INSTANCE.createEndOfTrackingEvent(/* endOfTracking */now,
-                new LogEventAuthorImpl("Axel", 0), UUID.randomUUID(), /* competitors */null, /* passId */1);
+        final RaceLogEndOfTrackingEvent event = new RaceLogEndOfTrackingEventImpl(/* endOfTracking */now,
+                new LogEventAuthorImpl("Axel", 0), /* passId */1);
         JSONObject json = createEndOfTrackingEventSerializer().serialize(event);
         assertEquals(now.asMillis(), json.get(RaceLogEndOfTrackingEventSerializer.FIELD_TIMESTAMP));
     }

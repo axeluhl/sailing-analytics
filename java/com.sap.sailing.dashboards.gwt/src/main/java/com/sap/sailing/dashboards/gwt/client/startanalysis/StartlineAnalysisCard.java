@@ -21,6 +21,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
+import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -65,7 +67,8 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
     private SailingServiceAsync sailingServiceAsync;
     private StringMessages stringMessages;
     private final CompetitorSelectionModel competitorSelectionModel;
-
+    private final CompetitorColorProvider colorProvider; 
+    
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
     private final double GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 210;
     private final int TABLE_MARGIN_IN_PT = 10;
@@ -78,7 +81,8 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         stringMessages = StringMessages.INSTANCE;
         resources.combinedWindPanelStyle().ensureInjected();
         this.sailingServiceAsync = sailingServiceAsync;
-        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true);
+        colorProvider = new CompetitorColorProviderImpl();
+        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true, colorProvider);
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
                 raceMap);
         initWidget(uiBinder.createAndBindUi(this));
@@ -146,7 +150,7 @@ public class StartlineAnalysisCard extends Composite implements HasWidgets, Star
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel,
+        raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, false, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
                 resources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));

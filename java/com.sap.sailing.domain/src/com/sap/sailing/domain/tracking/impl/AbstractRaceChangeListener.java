@@ -113,5 +113,4 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         defaultAction();
     }
-    
 }

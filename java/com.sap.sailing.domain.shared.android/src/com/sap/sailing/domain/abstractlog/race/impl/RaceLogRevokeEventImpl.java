@@ -21,10 +21,10 @@ public class RaceLogRevokeEventImpl extends RevokeEventImpl<RaceLogEventVisitor>
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
     
-    public RaceLogRevokeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    public RaceLogRevokeEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, int passId, Serializable revokedEventId, String revokedEventType, String revokedEventShortInfo,
             String reason) {
-        super(createdAt, author, logicalTimePoint, pId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
+        super(createdAt, logicalTimePoint, author, pId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
     }
 

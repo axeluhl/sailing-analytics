@@ -2,10 +2,10 @@ package com.sap.sailing.gwt.home.mobile.places.event.latestnews;
 
 import java.util.List;
 
+import com.sap.sailing.gwt.home.communication.event.news.GetEventOverviewNewsAction;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.mobile.partials.updatesBox.UpdatesBox;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetEventOverviewNewsAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class LatestNewsViewImpl extends AbstractEventView<LatestNewsView.Presenter> implements LatestNewsView {
 

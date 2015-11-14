@@ -1742,6 +1742,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         private RegattaAndRaceIdentifier getRaceIdentifier() {
             return trackedRace.getRaceIdentifier();
         }
+
     }
 
     /**
@@ -3166,7 +3167,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     logger.info("Searching remote server " + remoteRef + " for " + query);
                     URLConnection urlConnection = eventsURL.openConnection();
                     urlConnection.connect();
-                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();

@@ -10,7 +10,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,17 +35,20 @@ public class Solutions extends Composite {
     @UiField Anchor trainingDiaryAnchor;
     @UiField Anchor simulatorAnchor;
 
+    @UiField DivElement sapInSailingDiv;
     @UiField DivElement sailingAnalyticsDiv;
     @UiField DivElement raceDiv;
     @UiField DivElement postRaceDiv;
     @UiField DivElement trainingDiaryDiv;
     @UiField DivElement simulatorDiv;
 
+    @UiField
+    Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
-    @UiField Anchor simulatorStartAnchor;
     @UiField Anchor simulatorAppDetailsAnchor;
 
+    private final PlaceNavigation<SolutionsPlace> sapInSailingNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
     private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation; 
@@ -75,14 +77,15 @@ public class Solutions extends Composite {
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
         raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
         simulatorAppDetailsAnchor.setHref(simulatorAppDetailsNavigation.getTargetUrl());
-        simulatorStartAnchor.setHref(placesNavigator.getSimulatorURL());
 
+        sapInSailingNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommiteeApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         trainingDiaryNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.TrainingDiary);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
 
+        sapInSailingAnchor.setHref(sapInSailingNavigation.getTargetUrl());
         sailingAnalyticsAnchor.setHref(sailingAnalyticsNavigation.getTargetUrl());
         raceAnchor.setHref(raceCommitteeAppNavigation.getTargetUrl());
         postRaceAnchor.setHref(postRaceAnalyticsNavigation.getTargetUrl());
@@ -99,6 +102,11 @@ public class Solutions extends Composite {
         });
     }
 
+    @UiHandler("sapInSailingAnchor")
+    public void scrollTosapInSailingAnchor(ClickEvent e) {
+        scrollToView(SolutionsNavigationTabs.SapInSailing);
+        handleClickEventWithLocalNavigation(e, sapInSailingNavigation);
+    }
     @UiHandler("sailingAnalyticsAnchor")
     public void scrollToSailingAnalytics(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.SailingAnalytics);
@@ -141,8 +149,11 @@ public class Solutions extends Composite {
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
         switch (navigationTab) {
+            case SapInSailing:
+                sapInSailingDiv.scrollIntoView();
+                break;
             case SailingAnalytics:
-                Window.scrollTo(0, 0);
+                sailingAnalyticsDiv.scrollIntoView();
                 break;
             case RaceCommiteeApp:
                 raceDiv.scrollIntoView();
