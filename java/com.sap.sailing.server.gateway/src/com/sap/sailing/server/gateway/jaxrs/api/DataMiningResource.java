@@ -1,11 +1,14 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +47,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
     private static final String AVG_SPEED_PER_COMPETITOR_LEG_TYPE = "AvgSpeed_Per_Competitor-LegType";
     private static final String SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE = "SumDistance_Per_Competitor-LegType";
     private static final String SUM_MANEUVERS_PER_COMPETITOR = "SumManeuvers_Per_Competitor";
+    
+    private static final Function<Distance, Number> distanceMetersExtractor = (distance) -> distance.getMeters();
 
     public DataMiningServer getDataMiningServer() {
         @SuppressWarnings("unchecked")
@@ -117,7 +122,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, null, null, "kn", 2);
         }
         return response;
     }
@@ -141,7 +146,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, null, "kn", 2);
         }
         return response;
     }
@@ -160,7 +165,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, null, distanceMetersExtractor, "m", 2);
         }
         return response;
     }
@@ -184,7 +189,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, distanceMetersExtractor, "m", 2);
         }
         return response;
     }
@@ -203,7 +208,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, null, null, null, 0);
         }
         return response;
     }
@@ -227,7 +232,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
             race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, null, null, 0);
         }
         return response;
     }
@@ -238,7 +244,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return dataMiningServer.getPredefinedQueryDefinitionDTO(queryIdentifier);
     }
     
-    private Response runQuery(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
+    private <ResultType> Response runQuery(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO, String regattaName, String raceName,
+                              Function<ResultType, Number> numberExtractor, String resultUnit, int resultPlaces) {
         Response response;
         DataMiningServer dataMiningServer = getDataMiningServer();
         
@@ -248,7 +255,9 @@ public class DataMiningResource extends AbstractSailingServerResource {
             response = getBadQueryDefinitionErrorResponse(queryDefinitionDTO);
         } else {
             DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-            QueryResult<?> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+            Date requestTime = new Date();
+            @SuppressWarnings("unchecked")
+            QueryResult<ResultType> result = (QueryResult<ResultType>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
             
             if (result == null || result.isEmpty()) {
                 response = getNoDataFoundErrorResponse();
@@ -256,9 +265,18 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 try {
                     JSONObject jsonResult = new JSONObject();
                     jsonResult.put("state", result.getState());
-                    jsonResult.put("signifier", result.getResultSignifier());
-                    jsonResult.put("resultType", result.getResultType().getSimpleName());
-                    jsonResult.put("results", resultValuesToJSON(result.getResultType(), result.getResults()));
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+                    jsonResult.put("requestTime", dateFormat.format(requestTime));
+                    jsonResult.put("calculationDuration", roundDouble(result.getCalculationTimeInSeconds(), 2) + " - s");
+                    jsonResult.put("description", result.getResultSignifier());
+                    if (regattaName != null && !regattaName.isEmpty()) {
+                        jsonResult.put("regatta", regattaName);
+                    }
+                    if (raceName != null && !raceName.isEmpty()) {
+                        jsonResult.put("race", raceName);
+                    }
+                    jsonResult.put("resultUnit", resultUnit != null && !resultUnit.isEmpty() ? resultUnit : "None");
+                    jsonResult.put("results", resultValuesToJSON(result, numberExtractor, resultUnit, resultPlaces));
                     response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
                 } catch (NotJsonSerializableException e) {
                     response = getNotSerializableErrorResponse(e.getNotSerializableClass());
@@ -268,37 +286,21 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return response;
     }
 
-    @SuppressWarnings("unchecked")
-    private JSONArray resultValuesToJSON(Class<?> resultType, Map<GroupKey, ?> resultValues) throws NotJsonSerializableException {
-        // TODO see Bug 3334
-        if (Number.class.isAssignableFrom(resultType)) {
-            return numericalResultValuesToJSON((Map<GroupKey, Number>) resultValues);
+    private <ResultType> JSONArray resultValuesToJSON(QueryResult<ResultType> result, Function<ResultType, Number> numberExtractor,
+                                                      String unit, int places) throws NotJsonSerializableException {
+        if (!Number.class.isAssignableFrom(result.getResultType()) && numberExtractor == null) {
+            throw new NotJsonSerializableException(result.getResultType());
         }
-        if (Distance.class.isAssignableFrom(resultType)) {
-            return distanceResultValuesToJSON((Map<GroupKey, Distance>) resultValues);
-        }
-        throw new NotJsonSerializableException(resultType);
-    }
-
-    private JSONArray numericalResultValuesToJSON(Map<GroupKey, Number> resultValues) throws NotJsonSerializableException {
-        JSONArray jsonResultValues = new JSONArray();
-        for (GroupKey groupKey : resultValues.keySet()) {
-            JSONObject jsonResultEntry = new JSONObject();
-            jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
-            jsonResultEntry.put("value", resultValues.get(groupKey));
-            jsonResultValues.add(jsonResultEntry);
-        }
-        return jsonResultValues;
-    }
-    
-    private JSONArray distanceResultValuesToJSON(Map<GroupKey, Distance> resultValues) throws NotJsonSerializableException {
-        DistanceJsonSerializer distanceSerializer = new DistanceJsonSerializer();
         
+        // TODO see Bug 3334
+        String valueSuffix = unit != null && !unit.isEmpty() ? " - " + unit : "";
+        Map<GroupKey, ResultType> values = result.getResults();
         JSONArray jsonResultValues = new JSONArray();
-        for (GroupKey groupKey : resultValues.keySet()) {
+        for (GroupKey groupKey : values.keySet()) {
             JSONObject jsonResultEntry = new JSONObject();
             jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
-            jsonResultEntry.put("value", distanceSerializer.serialize(resultValues.get(groupKey)));
+            Number value = numberExtractor != null ? numberExtractor.apply(values.get(groupKey)) : (Number) values.get(groupKey);
+            jsonResultEntry.put("value", roundDouble(value.doubleValue(), places) + valueSuffix);
             jsonResultValues.add(jsonResultEntry);
         }
         return jsonResultValues;
