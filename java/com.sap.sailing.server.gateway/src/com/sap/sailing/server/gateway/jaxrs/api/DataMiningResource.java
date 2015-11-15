@@ -1,9 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -255,7 +253,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
             response = getBadQueryDefinitionErrorResponse(queryDefinitionDTO);
         } else {
             DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-            Date requestTime = new Date();
+            long requestTimepoint = System.currentTimeMillis();
             @SuppressWarnings("unchecked")
             QueryResult<ResultType> result = (QueryResult<ResultType>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
             
@@ -265,9 +263,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 try {
                     JSONObject jsonResult = new JSONObject();
                     jsonResult.put("state", result.getState());
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-                    jsonResult.put("requestTime", dateFormat.format(requestTime));
-                    jsonResult.put("calculationDuration", roundDouble(result.getCalculationTimeInSeconds(), 2) + " - s");
+                    jsonResult.put("requestTimepoint", requestTimepoint);
+                    jsonResult.put("calculationDuration-s", roundDouble(result.getCalculationTimeInSeconds(), 2));
                     jsonResult.put("description", result.getResultSignifier());
                     if (regattaName != null && !regattaName.isEmpty()) {
                         jsonResult.put("regatta", regattaName);
@@ -276,7 +273,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
                         jsonResult.put("race", raceName);
                     }
                     jsonResult.put("resultUnit", resultUnit != null && !resultUnit.isEmpty() ? resultUnit : "None");
-                    jsonResult.put("results", resultValuesToJSON(result, numberExtractor, resultUnit, resultPlaces));
+                    jsonResult.put("results", resultValuesToJSON(result, numberExtractor, resultPlaces));
                     response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
                 } catch (NotJsonSerializableException e) {
                     response = getNotSerializableErrorResponse(e.getNotSerializableClass());
@@ -287,20 +284,19 @@ public class DataMiningResource extends AbstractSailingServerResource {
     }
 
     private <ResultType> JSONArray resultValuesToJSON(QueryResult<ResultType> result, Function<ResultType, Number> numberExtractor,
-                                                      String unit, int places) throws NotJsonSerializableException {
+                                                      int places) throws NotJsonSerializableException {
         if (!Number.class.isAssignableFrom(result.getResultType()) && numberExtractor == null) {
             throw new NotJsonSerializableException(result.getResultType());
         }
         
         // TODO see Bug 3334
-        String valueSuffix = unit != null && !unit.isEmpty() ? " - " + unit : "";
         Map<GroupKey, ResultType> values = result.getResults();
         JSONArray jsonResultValues = new JSONArray();
         for (GroupKey groupKey : values.keySet()) {
             JSONObject jsonResultEntry = new JSONObject();
             jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
             Number value = numberExtractor != null ? numberExtractor.apply(values.get(groupKey)) : (Number) values.get(groupKey);
-            jsonResultEntry.put("value", roundDouble(value.doubleValue(), places) + valueSuffix);
+            jsonResultEntry.put("value", roundDouble(value.doubleValue(), places));
             jsonResultValues.add(jsonResultEntry);
         }
         return jsonResultValues;
