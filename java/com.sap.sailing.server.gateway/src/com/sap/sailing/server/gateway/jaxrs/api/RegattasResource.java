@@ -952,9 +952,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 Course course = trackedRace.getRace().getCourse();
                 Waypoint lastWaypoint = course.getLastWaypoint();
 
-                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
-                        : trackedRace.getTimePointOfNewestEvent();
-                // if(trackedRace.isLive(timePoint)) {
+                TimePoint timePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
                 final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
@@ -1034,7 +1032,6 @@ public class RegattasResource extends AbstractSailingServerResource {
                     jsonCompetitors.add(jsonCompetitorInLeg);
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-
                 String json = jsonLiveData.toJSONString();
                 return Response.ok(json, MediaType.APPLICATION_JSON).build();
             }

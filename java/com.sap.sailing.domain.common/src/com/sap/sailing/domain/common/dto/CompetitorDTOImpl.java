@@ -21,9 +21,9 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String threeLetterIocCountryCode;
     private Color color;
     private String email;
-    private String sailID;
     private String idAsString;
     private BoatClassDTO boatClass;
+    private BoatDTO boat;
     private String imageURL;
     private String flagImageURL;
     private Double timeOnTimeFactor;
@@ -32,17 +32,18 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     public CompetitorDTOImpl() {}
     
     public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
-            String countryName, String sailID, String idAsString, String imageURL, String flagImageURL, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
+            String countryName, String idAsString, String imageURL, String flagImageURL, 
+            BoatDTO boat, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         super(name);
         this.color = color;
         this.email = email;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
-        this.sailID = sailID;
         this.idAsString = idAsString;
         this.imageURL = imageURL;
         this.flagImageURL = flagImageURL;
+        this.boat = boat;
         this.boatClass = boatClass;
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
@@ -53,8 +54,8 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
+        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
-        result = prime * result + ((sailID == null) ? 0 : sailID.hashCode());
         result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
@@ -79,15 +80,15 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
                 return false;
         } else if (!boatClass.equals(other.boatClass))
             return false;
+        if (boat == null) {
+            if (other.boat != null)
+                return false;
+        } else if (!boat.equals(other.boat))
+            return false;
         if (idAsString == null) {
             if (other.idAsString != null)
                 return false;
         } else if (!idAsString.equals(other.idAsString))
-            return false;
-        if (sailID == null) {
-            if (other.sailID != null)
-                return false;
-        } else if (!sailID.equals(other.sailID))
             return false;
         if (threeLetterIocCountryCode == null) {
             if (other.threeLetterIocCountryCode != null)
@@ -144,7 +145,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
 
     @Override
     public String getSailID() {
-        return sailID;
+        return boat.getSailId();
     }
     
     @Override
@@ -197,5 +198,10 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public Duration getTimeOnDistanceAllowancePerNauticalMile() {
         return timeOnDistanceAllowancePerNauticalMile;
+    }
+
+    @Override
+    public BoatDTO getBoat() {
+        return boat;
     }
 }

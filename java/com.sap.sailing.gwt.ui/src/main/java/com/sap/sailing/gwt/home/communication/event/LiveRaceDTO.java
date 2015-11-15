@@ -1,0 +1,38 @@
+package com.sap.sailing.gwt.home.communication.event;
+
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
+import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
+
+public class LiveRaceDTO extends RaceMetadataDTO<SimpleWindDTO> {
+    
+    private FlagStateDTO flagState;
+    
+    private RaceProgressDTO progress;
+
+    @SuppressWarnings("unused")
+    private LiveRaceDTO() {
+    }
+    
+    public LiveRaceDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceName) {
+        super(leaderboardName, regattaAndRaceIdentifier, raceName);
+    }
+
+    public FlagStateDTO getFlagState() {
+        return flagState;
+    }
+
+    public void setFlagState(FlagStateDTO flagState) {
+        this.flagState = flagState;
+    }
+
+    public RaceProgressDTO getProgress() {
+        return progress;
+    }
+
+    public void setProgress(RaceProgressDTO progress) {
+        this.progress = progress;
+    }
+}

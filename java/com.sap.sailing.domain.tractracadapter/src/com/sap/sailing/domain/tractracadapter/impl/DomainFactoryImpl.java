@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -78,6 +79,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -503,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -511,7 +513,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, competitorBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
@@ -566,9 +568,25 @@ public class DomainFactoryImpl implements DomainFactory {
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
+
+    @Override
+    public Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
+        final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
+        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
+            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            if (existingCompetitor != null && competitorBoatInfo != null) {
+                Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
+                        competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
+                competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
+            }
+        }
+        return competitorBoatInfos;
+    }
+
     
     @Override
-    public com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
+    public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
@@ -578,7 +596,7 @@ public class DomainFactoryImpl implements DomainFactory {
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
+        Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
                 competitors, dominantBoatClass);
         return competitorsAndDominantBoatClass;
     }
@@ -593,24 +611,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getDominantBoatClass(List<String> competitorClassNames) {
-        Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
-        BoatClass dominantBoatClass = null;
-        int numberOfCompetitorsInDominantBoatClass = 0;
-        for (String competitorClassName : competitorClassNames) {
-            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
-            Integer boatClassCount = countsPerBoatClass.get(boatClass);
-            if (boatClassCount == null) {
-                boatClassCount = 0;
+    public BoatClass getDominantBoatClass(Iterable<String> competitorClassNames) {
+        if (competitorClassNames == null) {
+            return null;
+            
+        } else {
+            Collection<BoatClass> boatClasses = new ArrayList<>();
+            for (String competitorClassName : competitorClassNames) {
+                BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
+                boatClasses.add(boatClass);
             }
-            boatClassCount = boatClassCount + 1;
-            countsPerBoatClass.put(boatClass, boatClassCount);
-            if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
-                numberOfCompetitorsInDominantBoatClass = boatClassCount;
-                dominantBoatClass = boatClass;
-            }
+
+            return Util.getDominantObject(boatClasses);
         }
-        return dominantBoatClass;
     }
 
     @Override

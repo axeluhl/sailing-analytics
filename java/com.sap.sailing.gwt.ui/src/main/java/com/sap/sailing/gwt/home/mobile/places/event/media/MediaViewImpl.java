@@ -7,11 +7,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGallery;
 import com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGallery;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
-import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 
 public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implements MediaView {
 
@@ -25,7 +25,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
     @UiField ImageGallery imageGalleryUi;
 
     public MediaViewImpl(MediaView.Presenter presenter) {
-        super(presenter, false, true);
+        super(presenter, false, true, false);
         setViewContent(uiBinder.createAndBindUi(this));
     }
     

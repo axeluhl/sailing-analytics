@@ -19,6 +19,7 @@ public class Solutions extends Composite {
     
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
+    @UiField DivElement sapInSailingDiv;
     @UiField DivElement sapSailingAnalyticsUi;
     @UiField DivElement raceCommitteeAppUi;
     @UiField DivElement postRaceAnalyticsUi;
@@ -29,7 +30,8 @@ public class Solutions extends Composite {
         SolutionsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        initAnimation(sapSailingAnalyticsUi, true);
+        initAnimation(sapInSailingDiv, true);
+        initAnimation(sapSailingAnalyticsUi, false);
         initAnimation(raceCommitteeAppUi, false);
         initAnimation(postRaceAnalyticsUi, false);
         initAnimation(stgTrainingDiaryUi, false);

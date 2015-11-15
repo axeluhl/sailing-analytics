@@ -179,21 +179,53 @@ public interface TextMessages extends Messages {
     String sharingTwitter();
     String socialFooterShare();
     String socialFooterTitle();
-    String solutionsSAPNav();
+    
+
+    String solutionsSISHeadline();
     String solutionsSAPHeadline();
+    String solutionsRaceHeadline();
+    String solutionsPostHeadline();
+    String solutionsTrainingHeadline();
+    String solutionsSimulatorHeadline();
+
+    String sapInSailing();
+    String contentSapInSailing1();
+    String contentSapInSailing2();
+    String contentSapInSailing3();
+    String contentSapInSailing4();
+    String contentSapInSailing5();
+    String contentSapInSailing6();
+    String contentSapInSailing7();
+    String contentSapInSailing8();
+    String contentSapInSailing9();
+    String contentSapInSailing10();
+    String contentSapInSailing11();
+    String contentSapInSailing12();
     String solutionsSAPText1();
     String solutionsSAPText2();
-    String solutionsRaceNav();
-    String solutionsRaceHeadline();
     String solutionsRaceText();
-    String solutionsPostNav();
-    String solutionsPostHeadline();
     String solutionsPostText();
-    String solutionsTrainingNav();
-    String solutionsTrainingHeadline();
     String solutionsTrainingText();
-    String solutionsSimulatorNav();
-    String solutionsSimulatorHeadline();
     String solutionsSimulatorText();
+    String sapSailingAnalytics();
+    String contentSapSailingAnalytics1();
+    String contentSapSailingAnalytics2();
+
+    String sapSailingAnalyticsReadMore();
+    String sapSailingRaceManager();
+    String contentSapSailingRaceManager();
+
+    String sapSailingRaceManagerReadMore();
+
+    String postRaceAnalytics();
+    String contentPostRaceAnalytics1();
+    String contentPostRaceAnalytics2();
+    String i18nDeSolutionsTrainingHeadline();
+    String i18nDeSolutionsTrainingText();
+
+    String strategySimulator();
+    String contentStrategySimulator();
+
+    String strategySimulatorReadMore();
 
 }

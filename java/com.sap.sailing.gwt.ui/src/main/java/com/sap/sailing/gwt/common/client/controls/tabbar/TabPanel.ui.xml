@@ -35,14 +35,10 @@
 		float: right;
 		margin-left: 0.5em;
 	}
-	.busy {
-		width: 32px;
-		margin: 2em auto 10em;
-	}
 	</ui:style>
 	<g:FlowPanel>
 		<g:HTMLPanel addStyleNames="{style.header}">
-			<div class="{res.mediaCss.grid}">
+			<div ui:field="breadcrumbsContainer" class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<c:BreadcrumbPane ui:field="breadcrumbs"
 						addStyleNames="{style.breadcrumb}" />
@@ -58,8 +54,6 @@
 			</div>
 		</g:HTMLPanel>
 		<g:SimplePanel ui:field="tabContentPanelUi"
-			addStyleNames="{style.content}">
-			<b:SimpleBusyIndicator addStyleNames="{style.busy}" busy="true" />
-		</g:SimplePanel>
+			addStyleNames="{style.content}" />
 	</g:FlowPanel>
 </ui:UiBinder>
