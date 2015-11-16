@@ -115,6 +115,15 @@
                 </plugins>
             </build>
         </profile>
+      <profile>
+        <id>leandi</id>
+        <activation>
+          <property>
+            <name>leandi</name>
+            <value>true</value>
+          </property>
+        </activation>
+      </profile>
 	</profiles>
 
 	<properties>

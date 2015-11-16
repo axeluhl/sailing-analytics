@@ -362,12 +362,6 @@
       
       <profile>
         <id>leandi</id>
-        <activation>
-          <property>
-            <name>leandi</name>
-            <value>true</value>
-          </property>
-        </activation>
         <properties>
         </properties>
         <build>
