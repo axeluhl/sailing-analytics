@@ -260,7 +260,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             sb.append(prefs.getServerCompetiorTeamPath(competitor.id));
 
             HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(new URL(sb.toString()), this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
                     try {
@@ -629,7 +629,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         try {
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(),
                     this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(request,
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
                     new NetworkHelperSuccessListener() {
 
                         @Override

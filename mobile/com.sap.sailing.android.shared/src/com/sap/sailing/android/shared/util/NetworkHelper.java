@@ -34,7 +34,7 @@ public class NetworkHelper {
         super();
     }
 
-    public void executeHttpJsonRequestAsnchronously(HttpRequest request, NetworkHelperSuccessListener successListener,
+    public void executeHttpJsonRequestAsync(HttpRequest request, NetworkHelperSuccessListener successListener,
             NetworkHelperFailureListener failureListener) {
         NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);

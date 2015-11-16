@@ -131,7 +131,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
                     requestObject.toString(), getActivity());
             NetworkHelper.getInstance(getActivity())
-                    .executeHttpJsonRequestAsnchronously(request, new CheckinListener(checkinData.checkinDigest),
+                    .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest),
                             new CheckinErrorListener(checkinData.checkinDigest));
         } catch (JSONException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
