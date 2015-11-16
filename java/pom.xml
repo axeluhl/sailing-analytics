@@ -279,12 +279,8 @@
       <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>
           <artifactId>android-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <extensions>true</extensions>
           <configuration>
             <sourceDirectories>src</sourceDirectories>
-            <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-            <destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
             <classesJarExcludes>
               <classesJarExclude>*.jar</classesJarExclude>
               <classesJarExclude>generated-sources/**</classesJarExclude>
@@ -295,9 +291,6 @@
               <classesJarExclude>*.ap_</classesJarExclude>
               <classesJarExclude>local-artifacts.properties</classesJarExclude>
             </classesJarExcludes>
-            <sdk>
-              <platform>22</platform>
-            </sdk>
           </configuration>
           <executions>
             <execution>

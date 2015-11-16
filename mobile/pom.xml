@@ -92,27 +92,18 @@
         <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>
           <artifactId>android-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <extensions>true</extensions>
           <configuration>
             <resourceDirectory>res</resourceDirectory>
             <sourceDirectories>
               <sourceDirectory>${project.basedir}/src</sourceDirectory>
             </sourceDirectories>
-            <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-            <destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
             <assetsDirectory>${project.basedir}/assets</assetsDirectory>
             <failOnNonStandardStructure>false</failOnNonStandardStructure>
             <failOnConflictingLayouts>false</failOnConflictingLayouts>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
-            <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-            <destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
             <undeployBeforeDeploy>true</undeployBeforeDeploy>
             <extractDuplicates>true</extractDuplicates>
-            <sdk>
-              <platform>22</platform>
-            </sdk>
             <release>false</release>
             <outputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</outputApk>
 
@@ -397,89 +388,6 @@
           </pluginManagement>
         </build>
       </profile>
-      
-        <profile>
-            <id>install-android-sdk-windows</id>
-            <activation>
-                <!-- TODO activate on release build branch -->
-                <!-- <file>
-                    <missing>${basedir}/android-sdk-windows/platform-tools/adb.exe</missing>
-                </file> -->
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>install-android-sdk</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>unpack</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>com.google.download.android</groupId>
-                                            <artifactId>android-sdk-windows</artifactId>
-                                            <version>r21</version>
-                                            <type>zip</type>
-                                            <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}</outputDirectory>
-                                            <includes>**/*</includes>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.google.download.android</groupId>
-                                            <artifactId>platform-tools-windows</artifactId>
-                                            <version>r16</version>
-                                            <type>zip</type>
-                                            <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
-                                            <includes>**/*</includes>
-                                            
-                                        </artifactItem>
-                                        <artifactItem>
-                                            
-                                            <groupId>com.google.download.android</groupId>
-                                            <artifactId>android</artifactId>
-                                            <version>${sdk.version}</version>
-                                            <type>zip</type>
-                                            <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
-                                            <includes>**/*</includes>
-                                            
-                                        </artifactItem>
-                                        
-                                    </artifactItems>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>move_platform_dir</id>
-                                <phase>initialize</phase>
-                                
-                                <configuration>
-                                    <tasks>
-                                        <move file="${basedir}/android-sdk-windows/android-4.2" tofile="${basedir}/android-sdk-windows/platforms/android-${platform.version}"/>
-                                        
-                                    </tasks>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         
         <profile>
             <id>leandi-sign</id>
