@@ -1,19 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <item name="dependent_race_item" type="layout">@layout/dependent_race_item_normal</item>
     <item name="flag_list" type="layout">@layout/flag_list_normal</item>
+    <item name="finish_current_button" type="layout">@layout/finish_current_button_normal</item>
+    <item name="finish_custom_button" type="layout">@layout/finish_custom_button_normal</item>
+    <item name="flag_list_item" type="layout">@layout/flag_list_item_normal</item>
+    <item name="login_backdrop" type="layout">@layout/login_backdrop_normal</item>
+    <item name="login_listviews_button" type="layout">@layout/login_listviews_button_normal</item>
+    <item name="photo_list_button" type="layout">@layout/photo_list_button_normal</item>
+    <item name="photo_list_item" type="layout">@layout/photo_list_item_normal</item>
     <item name="race_finished" type="layout">@layout/race_finished_normal</item>
     <item name="race_finished_buttons" type="layout">@layout/race_finished_buttons_hor</item>
     <item name="race_finished_desc" type="layout">@layout/race_finished_desc_hor</item>
+    <item name="race_finishing_button" type="layout">@layout/race_finishing_button_normal</item>
+    <item name="race_individual_recall" type="layout">@layout/race_individual_recall_normal</item>
     <item name="race_list_header" type="layout">@layout/race_list_header_normal</item>
     <item name="race_list_list" type="layout">@layout/race_list_list_top</item>
     <item name="race_main" type="layout">@layout/race_main_normal</item>
     <item name="race_panel_flags" type="layout">@layout/race_panel_flags_hor</item>
     <item name="race_panel_setup" type="layout">@layout/race_panel_setup_hor</item>
+    <item name="race_panel_time" type="layout">@layout/race_panel_time_normal</item>
     <item name="race_tracking_list" type="layout">@layout/race_tracking_list_normal</item>
+    <item name="race_schedule_button" type="layout">@layout/race_schedule_button_normal</item>
     <item name="race_schedule_course_marks" type="layout">@layout/race_schedule_course_marks_normal</item>
+    <item name="race_schedule_procedure_pathfinder" type="layout">@layout/race_schedule_procedure_pathfinder_normal</item>
+    <item name="race_schedule_procedure_timing" type="layout">@layout/race_schedule_procedure_timing_normal</item>
+    <item name="race_schedule_start_time" type="layout">@layout/race_schedule_start_time_normal</item>
     <item name="race_time_picker" type="layout">@layout/race_time_picker_normal</item>
-    <item name="toolbar_racing_activity" type="layout">@layout/toolbar</item>
+    <item name="toolbar" type="layout">@layout/toolbar_normal</item>
     <item name="wind_view" type="layout">@layout/wind_view_normal</item>
 
 </resources>

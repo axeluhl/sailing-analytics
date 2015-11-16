@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <item name="dependent_race_item" type="layout">@layout/dependent_race_item_xlarge</item>
+    <item name="finish_current_button" type="layout">@layout/finish_current_button_xlarge</item>
+    <item name="finish_custom_button" type="layout">@layout/finish_custom_button_xlarge</item>
+    <item name="flag_list_item" type="layout">@layout/flag_list_item_xlarge</item>
+    <item name="login_backdrop" type="layout">@layout/login_backdrop_xlarge</item>
+    <item name="login_listviews_button" type="layout">@layout/login_listviews_button_xlarge</item>
+    <item name="photo_list_button" type="layout">@layout/photo_list_button_xlarge</item>
+    <item name="photo_list_item" type="layout">@layout/photo_list_item_xlarge</item>
+    <item name="race_finishing_button" type="layout">@layout/race_finishing_button_xlarge</item>
+    <item name="race_individual_recall" type="layout">@layout/race_individual_recall_xlarge</item>
+    <item name="race_panel_time" type="layout">@layout/race_panel_time_xlarge</item>
     <item name="race_positioning" type="layout">@layout/race_tracking_list_normal</item>
+    <item name="race_schedule_button" type="layout">@layout/race_schedule_button_xlarge</item>
+    <item name="race_schedule_procedure_pathfinder" type="layout">@layout/race_schedule_procedure_pathfinder_xlarge</item>
+    <item name="race_schedule_procedure_timing" type="layout">@layout/race_schedule_procedure_timing_xlarge</item>
+    <item name="toolbar" type="layout">@layout/toolbar_xlarge</item>
 
 </resources>
