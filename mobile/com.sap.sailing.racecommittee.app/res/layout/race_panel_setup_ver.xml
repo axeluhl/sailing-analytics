@@ -25,20 +25,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/start_procedure_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/start_procedure"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/start_procedure"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -60,10 +54,11 @@
                     android:id="@+id/start_procedure_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"/>
             </RelativeLayout>
         </RelativeLayout>
 
@@ -81,20 +76,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/course_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/course"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/course"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -114,10 +103,11 @@
                     android:id="@+id/course_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"/>
             </RelativeLayout>
         </RelativeLayout>
 
@@ -135,20 +125,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/wind_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/wind"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/wind"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -168,10 +152,11 @@
                     android:id="@+id/wind_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"/>
             </RelativeLayout>
         </RelativeLayout>
 
@@ -189,20 +174,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/start_procedure_more_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/start_procedure_more"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/start_procedure_more"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -220,10 +199,11 @@
                     android:id="@+id/start_procedure_more_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"/>
             </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>

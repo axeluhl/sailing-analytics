@@ -78,6 +78,7 @@
         <item name="create">@drawable/ic_create_light</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>
+        <item name="corner">@drawable/corner_light</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_light</item>
         <item name="course_triangle_64dp">@drawable/course_triangle_64dp_light</item>
         <item name="course_updown_48dp">@drawable/course_updown_48dp_light</item>
@@ -86,8 +87,6 @@
         <item name="hearing">@drawable/ic_hearing_black</item>
         <item name="link_24dp">@drawable/ic_link_black_24dp</item>
         <item name="lock_outline">@drawable/ic_lock_outline_black</item>
-        <item name="lock_outline_alpha">@drawable/ic_lock_outline_black_more_alpha</item>
-        <item name="lock_outline_black">@drawable/ic_lock_outline_black_alpha</item>
         <item name="keyboard_control_36dp">@drawable/ic_keyboard_control_black_36dp</item>
         <item name="marker">@drawable/marker_light</item>
         <item name="marker_race">@drawable/marker_race_light</item>

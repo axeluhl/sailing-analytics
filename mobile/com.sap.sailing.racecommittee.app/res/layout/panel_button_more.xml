@@ -4,38 +4,27 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:layout_width="@dimen/side_button_imageSize"
-            android:layout_height="@dimen/side_button_imageSize"
-            android:layout_gravity="center_horizontal">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/side_button_imageSize"
-                android:src="?attr/flags_more"/>
-
-            <ImageView
-                android:id="@+id/more_flags_lock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="?attr/lock_outline_black"
-                android:visibility="gone"
-                tools:visibility="visible"/>
-        </RelativeLayout>
+        android:layout_centerInParent="true">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal"
-            tools:ignore="UseCompoundDrawables">
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
+                android:layout_gravity="center_horizontal">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/side_button_imageSize"
+                    android:src="?attr/flags_more"/>
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -44,5 +33,15 @@
                 android:text="@string/flags_more"
                 android:textAppearance="?attr/textPanelCaption"/>
         </LinearLayout>
-    </LinearLayout>
+
+        <ImageView
+            android:id="@+id/more_flags_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:src="?attr/corner"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+    </RelativeLayout>
 </merge>

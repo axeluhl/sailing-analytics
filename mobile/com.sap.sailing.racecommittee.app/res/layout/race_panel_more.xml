@@ -26,19 +26,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/start_mode_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start_mode"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/start_mode"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -57,10 +52,11 @@
                     android:id="@+id/start_mode_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_black"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"/>
             </RelativeLayout>
 
             <ImageView
@@ -86,19 +82,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/gate_pathfinder_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gate_start_pathfinder"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/gate_start_pathfinder"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -117,10 +108,11 @@
                     android:id="@+id/gate_pathfinder_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"/>
             </RelativeLayout>
 
             <ImageView
@@ -146,19 +138,14 @@
                 android:layout_alignParentBottom="true"
                 android:src="?attr/marker"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/gate_timing_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gate_start_timing"
-                    android:textAppearance="?attr/textPanelHeader"/>
-            </LinearLayout>
+                android:layout_marginTop="@dimen/side_padding"
+                android:text="@string/gate_start_timing"
+                android:textAppearance="?attr/textPanelHeader"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -170,18 +157,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:textAppearance="?attr/textPanelCaption"
                     android:gravity="center"
+                    android:textAppearance="?attr/textPanelCaption"
                     tools:text="4 + 3 = 7 Minuten"/>
 
                 <ImageView
                     android:id="@+id/gate_timing_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="?attr/lock_outline_alpha"
+                    android:src="?attr/corner"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"/>
             </RelativeLayout>
 
             <ImageView

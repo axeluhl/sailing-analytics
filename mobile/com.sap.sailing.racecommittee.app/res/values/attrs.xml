@@ -58,6 +58,7 @@
     <attr name="create" format="reference"/>
     <attr name="compass_back" format="reference"/>
     <attr name="compass_needle" format="reference"/>
+    <attr name="corner" format="reference"/>
     <attr name="course_triangle_48dp" format="reference"/>
     <attr name="course_triangle_64dp" format="reference"/>
     <attr name="course_updown_48dp" format="reference"/>
@@ -66,8 +67,6 @@
     <attr name="hearing" format="reference"/>
     <attr name="link_24dp" format="reference"/>
     <attr name="lock_outline" format="reference"/>
-    <attr name="lock_outline_alpha" format="reference"/>
-    <attr name="lock_outline_black" format="reference"/>
     <attr name="keyboard_control_36dp" format="reference"/>
     <attr name="marker" format="reference"/>
     <attr name="marker_race" format="reference"/>
