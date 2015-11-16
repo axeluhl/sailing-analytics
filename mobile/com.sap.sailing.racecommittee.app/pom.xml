@@ -135,5 +135,21 @@
           </plugins>
         </build>
       </profile>
+      
+      <profile>
+        <id>leandi-sign</id>
+        <build>
+          <plugins>
+            <plugin>
+                <groupId>com.sap.prd.codesign</groupId>
+                <artifactId>com.sap.prd.codesign.maven-jarsigner-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
     </profiles>
 </project>
