@@ -71,6 +71,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     }
 
     @Override
+    public BoatDTO getBoat() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
     public Color getColor() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");

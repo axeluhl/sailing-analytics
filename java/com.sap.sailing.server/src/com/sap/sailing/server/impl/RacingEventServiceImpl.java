@@ -1742,6 +1742,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         private RegattaAndRaceIdentifier getRaceIdentifier() {
             return trackedRace.getRaceIdentifier();
         }
+
     }
 
     /**
