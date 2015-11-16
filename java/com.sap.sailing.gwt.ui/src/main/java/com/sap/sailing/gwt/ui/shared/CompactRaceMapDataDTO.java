@@ -24,6 +24,7 @@ import com.sap.sse.common.Util;
  */
 public class CompactRaceMapDataDTO implements IsSerializable {
     private Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
+
     private CoursePositionsDTO coursePositions;
     private List<SidelineDTO> courseSidelines;
     private List<CompactQuickRankDTO> quickRanks;

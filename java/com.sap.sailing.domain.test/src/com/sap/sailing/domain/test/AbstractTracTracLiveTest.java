@@ -165,7 +165,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     }
 
     public static URI getCourseDesignUpdateURI() throws URISyntaxException {
-        return new URI("http://tracms.traclive.dk/update_course");
+        return new URI("http://" + TracTracConnectionConstants.HOST_NAME + "/update_course");
     }
 
     public static String getTracTracUsername() {
