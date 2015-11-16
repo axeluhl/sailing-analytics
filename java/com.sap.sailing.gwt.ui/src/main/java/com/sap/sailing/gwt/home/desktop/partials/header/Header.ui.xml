@@ -24,7 +24,7 @@
 	  <g:Anchor ui:field="solutionsPageLink"
 	    styleName="{local_res.css.sitenavigation_link}" text="{i18n_ubi.solutions}" />
 	  <g:Anchor href="http://blog.sapsailing.com"
-	    styleName="{local_res.css.sitenavigation_link}" text="{i18n_ubi.blog}" />
+            styleName="{local_res.css.sitenavigation_link}" text="{i18n_ubi.blog}" />
           <!-- 
           <g:Anchor ui:field="sponsoringPageLink"
             styleName="{local_res.css.sitenavigation_link}" text="{i18n.sponsoring}" />
