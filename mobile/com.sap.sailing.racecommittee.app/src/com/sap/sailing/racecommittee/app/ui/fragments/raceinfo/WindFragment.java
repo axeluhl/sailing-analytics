@@ -153,6 +153,7 @@ public class WindFragment extends BaseFragment
         }
         mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
         if (mWindInputSpeed != null) {
+            mWindInputSpeed.setFilters(new InputFilter[] { new RangeInputFilter(0, MAX_KTS) });
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
