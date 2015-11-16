@@ -123,6 +123,10 @@
             <value>true</value>
           </property>
         </activation>
+        <properties>
+            <android.api.groupId>com.google.download.android</android.api.groupId>
+            <android.api.version>5.1.1</android.api.version>
+        </properties>
       </profile>
 	</profiles>
 
@@ -140,9 +144,6 @@
 		
 		<android.api.groupId>android</android.api.groupId>
 		<android.api.version>5.1.1_r2</android.api.version>
-		<!-- TODO for release build -->
-		<!-- <android.api.groupId>com.google.download.android</android.api.groupId> -->
-		<!-- <android.api.version>5.1.1</android.api.version> -->
 	</properties>
 	
 	<build>
