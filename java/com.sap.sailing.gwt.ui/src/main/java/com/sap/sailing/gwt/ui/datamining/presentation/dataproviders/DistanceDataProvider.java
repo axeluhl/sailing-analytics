@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.sap.sailing.datamining.shared.dto.DistanceDTO;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO> {
+public class DistanceDataProvider extends AbstractResultDataProvider<Distance> {
     
     private final List<String> dataKeys;
 
     public DistanceDataProvider() {
-        super(DistanceDTO.class);
+        super(Distance.class);
         dataKeys = new ArrayList<>();
         dataKeys.add("Geographical Miles");
         dataKeys.add("Sea Miles");
@@ -34,7 +34,7 @@ public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO
     }
 
     @Override
-    protected Number getData(DistanceDTO distance, String dataKey) {
+    protected Number getData(Distance distance, String dataKey) {
         switch (dataKey) {
         case "Geographical Miles":
             return distance.getGeographicalMiles();
@@ -47,9 +47,9 @@ public class DistanceDataProvider extends AbstractResultDataProvider<DistanceDTO
         case "Kilometers":
             return distance.getKilometers();
         case "Central Angle Degree":
-            return distance.getCentralAngleDegree();
+            return distance.getCentralAngleDeg();
         case "Central Angle Radian":
-            return distance.getCentralAngleRadian();
+            return distance.getCentralAngleRad();
         }
         throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
     }

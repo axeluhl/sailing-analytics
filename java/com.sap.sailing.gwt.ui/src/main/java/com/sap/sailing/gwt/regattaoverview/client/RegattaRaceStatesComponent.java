@@ -51,7 +51,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -67,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
@@ -225,7 +225,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
-        isAppending = collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
+        isAppending |= collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
                 repeatedInfoLabel, isAppending, new Command() {
                     @Override
                     public void execute() {
@@ -235,21 +235,21 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         // private boolean collectRepeatedInfos(String label, String info,
         // boolean canRemove, FlowPanel panel, boolean append,
         // final Command linkAction) {
-        isAppending = collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
+        isAppending |= collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending = collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
+        isAppending |= collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
                 isAppending, new Command() {
                     @Override
                     public void execute() {
                         raceCourseClicked(entryForRepeatedInfos);
                     }
                 });
-        isAppending = collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
+        isAppending |= collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
+        isAppending |= collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
+        isAppending |= collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();

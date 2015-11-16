@@ -9,5 +9,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: com.sap.sse.datamining.shared,
  com.sap.sailing.domain.common
-Export-Package: com.sap.sailing.datamining.shared,
- com.sap.sailing.datamining.shared.dto
+Export-Package: com.sap.sailing.datamining.shared

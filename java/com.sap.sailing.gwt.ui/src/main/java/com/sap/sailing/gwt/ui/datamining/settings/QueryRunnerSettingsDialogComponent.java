@@ -14,10 +14,9 @@ public class QueryRunnerSettingsDialogComponent implements SettingsDialogCompone
     private QueryRunnerSettings initialSettings;
     private StringMessages stringMessages;
     
-    private CheckBox runAutimaticallyBox;
+    private CheckBox runAutomaticallyBox;
 
     public QueryRunnerSettingsDialogComponent(QueryRunnerSettings initialSettings, StringMessages stringMessages) {
-        super();
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
     }
@@ -26,17 +25,17 @@ public class QueryRunnerSettingsDialogComponent implements SettingsDialogCompone
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         FlowPanel additionalWidget = new FlowPanel();
         
-        runAutimaticallyBox = dialog.createCheckbox(stringMessages.runAutomatically());
-        runAutimaticallyBox.setTitle(stringMessages.runAutomaticallyTooltip());
-        runAutimaticallyBox.setValue(initialSettings.isRunAutomatically());
-        additionalWidget.add(runAutimaticallyBox);
+        runAutomaticallyBox = dialog.createCheckbox(stringMessages.runAutomatically());
+        runAutomaticallyBox.setTitle(stringMessages.runAutomaticallyTooltip());
+        runAutomaticallyBox.setValue(initialSettings.isRunAutomatically());
+        additionalWidget.add(runAutomaticallyBox);
         
         return additionalWidget;
     }
 
     @Override
     public QueryRunnerSettings getResult() {
-        return new QueryRunnerSettings(runAutimaticallyBox.getValue());
+        return new QueryRunnerSettings(runAutomaticallyBox.getValue());
     }
 
     @Override

@@ -23,6 +23,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Theses (Bachelor, Master, ...)|wiki/theses]]
   * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
+  * [[Polars|wiki/Polars]]
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]

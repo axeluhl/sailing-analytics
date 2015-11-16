@@ -10,8 +10,8 @@ import com.sap.sse.common.TimePoint;
 
 public abstract class AbstractStartAnalysisCreationValidator {
     
-    private static int MINIMUM_MARKPASSIINGS_AT_FIRST_MARK = 3;
-    private static long MINIMUM_RACE_PROGRESSION_IN_MILLISECONDS = 6*60*1000;
+    protected static int MINIMUM_MARKPASSIINGS_AT_FIRST_MARK = 3;
+    protected static long MINIMUM_RACE_PROGRESSION_IN_MILLISECONDS = 6*60*1000;
     
     protected boolean threeCompetitorsPassedSecondWayPoint(TrackedRace trackedRace){
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
@@ -45,7 +45,8 @@ public abstract class AbstractStartAnalysisCreationValidator {
     }
     
     protected boolean raceProgressedFarEnough(Competitor competitor, TrackedRace trackedRace){
-        if(trackedRace.isGateStart()){
+        final Boolean isGateStart = trackedRace.isGateStart();
+        if(isGateStart == Boolean.TRUE){
             return gateStartGolfFlagIsDown(trackedRace);
         }else{
             return competitorPassedSecondWayPoint(competitor, trackedRace);

@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public class EventEditDialog extends EventDialog {
-    public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
-        super(new EventParameterValidator(stringMessages, otherExistingEvents), stringMessages, availableLeaderboardGroups, event.getLeaderboardGroups(), callback);
+    public EventEditDialog(EventDTO event, Collection<EventDTO> otherExistingEvents, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+            SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<EventDTO> callback) {
+        super(new EventParameterValidator(stringMessages, otherExistingEvents), sailingService, stringMessages, availableLeaderboardGroups, event.getLeaderboardGroups(), callback);
         nameEntryField = createTextBox(event.getName());
         nameEntryField.setVisibleLength(50);
         descriptionEntryField = createTextArea(event.getDescription());

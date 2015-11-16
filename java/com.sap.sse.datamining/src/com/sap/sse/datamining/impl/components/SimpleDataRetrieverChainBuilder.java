@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.FilterCriterion;
@@ -19,14 +20,15 @@ import com.sap.sse.datamining.components.Processor;
 public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetrieverChainBuilder<DataSourceType> {
     
     private final ExecutorService executor;
-    private final List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation;
+    private final List<DataRetrieverLevel<?, ?>> retrieverLevels;
 
     private final Map<Integer, FilterCriterion<?>> filters;
     private final Map<Integer, Collection<Processor<?, ?>>> receivers;
-    private int currentRetrieverTypeIndex;
+    private final Map<Integer, SerializableSettings> settings;
+    private int currentRetrieverLevelIndex;
 
     /**
-     * Creates a data retriever chain builder for the given list of {@link DataRetrieverTypeWithInformation}.</br>
+     * Creates a data retriever chain builder for the given list of {@link DataRetrieverLevel}.</br>
      * The list has to match the following conditions to build a valid data retriever chain:
      * <ul>
      *  <li>The first data retriever type has the <code>DataSourceType</code> as <code>InputType</code>.</li>
@@ -41,19 +43,19 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
      * that always creates a valid builder.
      * @param dataRetrieverTypesWithInformation
      */
-    SimpleDataRetrieverChainBuilder(ExecutorService executor,
-            List<DataRetrieverTypeWithInformation<?, ?>> dataRetrieverTypesWithInformation) {
+    SimpleDataRetrieverChainBuilder(ExecutorService executor, List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation) {
         this.executor = executor;
-        this.dataRetrieverTypesWithInformation = new ArrayList<>(dataRetrieverTypesWithInformation);
+        this.retrieverLevels = new ArrayList<>(dataRetrieverTypesWithInformation);
         
         filters = new HashMap<>();
         receivers = new HashMap<>();
-        currentRetrieverTypeIndex = -1;
+        settings = new HashMap<>();
+        currentRetrieverLevelIndex = -1;
     }
     
     @Override
     public boolean canStepFurther() {
-        return currentRetrieverTypeIndex + 1 < dataRetrieverTypesWithInformation.size();
+        return currentRetrieverLevelIndex + 1 < retrieverLevels.size();
     }
 
     @Override
@@ -62,7 +64,7 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
             throw new IllegalStateException("The builder can't step any further");
         }
         
-        currentRetrieverTypeIndex++;
+        currentRetrieverLevelIndex++;
         return this;
     }
 
@@ -77,7 +79,26 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                                                + "') isn't able to match the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
         }
 
-        filters.put(currentRetrieverTypeIndex, filter);
+        filters.put(currentRetrieverLevelIndex, filter);
+        return this;
+    }
+    
+    @Override
+    public <SettingsType extends SerializableSettings> DataRetrieverChainBuilder<DataSourceType> setSettings(SettingsType settings) {
+        if (!hasBeenInitialized()) {
+            throw new IllegalStateException("The builder hasn't been initialized");
+        }
+        if (getCurrentRetrieverLevel().getSettingsType() == null) {
+            throw new IllegalStateException("The current retrieval level " + getCurrentRetrieverLevel() + " has no settings.");
+        }
+        
+        if (!getCurrentRetrieverLevel().getSettingsType().isAssignableFrom(settings.getClass())) {
+            throw new IllegalArgumentException("The given settings (with type '" + settings.getClass().getSimpleName()
+                    + "') isn't applicable for the settings type of the current retriever Level '"
+                    + getCurrentRetrieverLevel().getSettingsType().getSimpleName() + "'");
+        }
+        
+        this.settings.put(currentRetrieverLevelIndex, settings);
         return this;
     }
 
@@ -92,10 +113,10 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                     + "') isn't able to process the current retrieved data type '" + getCurrentRetrievedDataType().getSimpleName() + "'");
         }
 
-        if (!receivers.containsKey(currentRetrieverTypeIndex)) {
-            receivers.put(currentRetrieverTypeIndex, new HashSet<Processor<?, ?>>());
+        if (!receivers.containsKey(currentRetrieverLevelIndex)) {
+            receivers.put(currentRetrieverLevelIndex, new HashSet<Processor<?, ?>>());
         }
-        receivers.get(currentRetrieverTypeIndex).add(resultReceiver);
+        receivers.get(currentRetrieverLevelIndex).add(resultReceiver);
         return this;
     }
 
@@ -105,12 +126,12 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
             throw new IllegalStateException("The builder hasn't been initialized");
         }
         
-        return dataRetrieverTypesWithInformation.get(currentRetrieverTypeIndex).getRetrievedDataType();
+        return retrieverLevels.get(currentRetrieverLevelIndex).getRetrievedDataType();
     }
     
     @Override
-    public int getCurrentRetrieverLevel() {
-        return currentRetrieverTypeIndex;
+    public DataRetrieverLevel<?, ?> getCurrentRetrieverLevel() {
+        return hasBeenInitialized() ? retrieverLevels.get(currentRetrieverLevelIndex) : null;
     }
 
     @SuppressWarnings("unchecked")
@@ -121,49 +142,59 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         }
         
         Processor<?, ?> firstRetriever = null;
-        for (int retrieverTypeIndex = currentRetrieverTypeIndex; retrieverTypeIndex >= 0; retrieverTypeIndex--) {
-            DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation = dataRetrieverTypesWithInformation.get(retrieverTypeIndex);
-            firstRetriever = createRetriever(dataRetrieverTypeWithInformation, firstRetriever, retrieverTypeIndex);
+        for (int retrieverLevelIndex = currentRetrieverLevelIndex; retrieverLevelIndex >= 0; retrieverLevelIndex--) {
+            DataRetrieverLevel<?, ?> retrieverLevel = retrieverLevels.get(retrieverLevelIndex);
+            firstRetriever = createRetriever(retrieverLevel, firstRetriever, retrieverLevelIndex);
         }
         
         return (Processor<DataSourceType, ?>) firstRetriever;
     }
 
-    private boolean hasBeenInitialized() {
-        return currentRetrieverTypeIndex >= 0;
+    public boolean hasBeenInitialized() {
+        return currentRetrieverLevelIndex >= 0;
     }
     
     @SuppressWarnings("unchecked")
-    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverTypeWithInformation<?, ?> dataRetrieverTypeWithInformation, Processor<?, ?> previousRetriever, int retrieverTypeIndex) {
-        Class<ResultType> retrievedDataType = (Class<ResultType>) dataRetrieverTypeWithInformation.getRetrievedDataType();
+    private <ResultType> Processor<?, ResultType> createRetriever(DataRetrieverLevel<?, ?> retrieverLevel, Processor<?, ?> previousRetriever, int retrieverLevelIndex) {
+        Class<ResultType> retrievedDataType = (Class<ResultType>) retrieverLevel.getRetrievedDataType();
         
-        Collection<?> storedResultReceivers = receivers.get(retrieverTypeIndex);
+        Collection<?> storedResultReceivers = receivers.get(retrieverLevelIndex);
         Collection<Processor<ResultType, ?>> resultReceivers = storedResultReceivers != null ? new ArrayList<Processor<ResultType, ?>>((Collection<Processor<ResultType, ?>>) storedResultReceivers) : new ArrayList<Processor<ResultType, ?>>();
         if (previousRetriever != null) {
             resultReceivers.add((Processor<ResultType, ?>) previousRetriever);
         }
         
-        FilterCriterion<ResultType> filter = (FilterCriterion<ResultType>) filters.get(retrieverTypeIndex);
+        FilterCriterion<ResultType> filter = (FilterCriterion<ResultType>) filters.get(retrieverLevelIndex);
         
-        Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) dataRetrieverTypeWithInformation.getRetrieverType();
-        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
+        Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) retrieverLevel.getRetrieverType();
+        Class<?> settingsType = retrieverLevel.getSettingsType();
+        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, settingsType, retrieverLevelIndex);
     }
 
     private <ResultType> Processor<?, ResultType> createRetriever(Class<Processor<?, ResultType>> retrieverType, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Class<?> settingsType, int retrieverLevelIndex) {
         Constructor<Processor<?, ResultType>> retrieverConstructor = null;
         try {
-            retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            if (settingsType == null) {
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+            } else {
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+            }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
                     + retrieverType.getSimpleName() + "'", e);
         }
         
-        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, retrieverTypeIndex);
+        SerializableSettings settings = null;
+        if (settingsType != null) {
+            SerializableSettings storedSettings = this.settings.get(retrieverLevelIndex);
+            settings = storedSettings != null ? storedSettings : retrieverLevels.get(retrieverLevelIndex).getDefaultSettings();
+        }
+        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, settingsType, retrieverLevelIndex);
     }
 
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, int retrieverTypeIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, SerializableSettings settings, Class<?> settingsType, int retrieverLevelIndex) {
         try {
             Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
             if (filter != null) {
@@ -178,7 +209,12 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
                 // Preventing IllegalAccessExceptions of public constructors due to weird package behaviour
                 retrieverConstructor.setAccessible(true);
             }
-            return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverTypeIndex);
+            
+            if (settingsType == null) {
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverLevelIndex);
+            } else {
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, settings, retrieverLevelIndex);
+            }
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {
             throw new UnsupportedOperationException("Couldn't create a data retriever instance with the constructor "

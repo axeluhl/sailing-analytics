@@ -1,11 +1,10 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.datamining.shared.dto.DistanceDTO;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Statistic;
-import com.sap.sse.datamining.shared.data.Unit;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasRaceOfCompetitorContext {
     
@@ -15,31 +14,34 @@ public interface HasRaceOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
-    @Statistic(messageKey="DistanceAtStart", resultUnit=Unit.None, resultDecimals=2, ordinal=0)
-    public DistanceDTO getDistanceToStartLineAtStart();
+    @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
+    public Distance getDistanceToStartLineAtStart();
 
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();
     
-    @Connector(messageKey="SpeedAtStart", ordinal=2)
-    public Speed getSpeedAtStart();
+    @Connector(messageKey="SpeedWhenStarting", ordinal=2)
+    public Speed getSpeedWhenStarting();
     
     @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
     public Speed getSpeedTenSecondsBeforeStart();
     
     @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=4)
     public Double getRankAtFirstMark();
-
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=5)
-    public Double getNumberOfTacks();
-
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=6)
-    public Double getNumberOfJibes();
-
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=7)
-    public Double getNumberOfPenaltyCircles();
     
-    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=8)
+    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=5)
+    public int getNumberOfManeuvers();
+
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=6)
+    public int getNumberOfTacks();
+
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=7)
+    public int getNumberOfJibes();
+
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=8)
+    public int getNumberOfPenaltyCircles();
+    
+    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=9)
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
 }

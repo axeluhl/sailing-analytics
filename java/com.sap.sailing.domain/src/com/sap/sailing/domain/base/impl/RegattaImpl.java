@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -111,6 +112,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * Defaults to <code>true</code>. See {@link Regatta#useStartTimeInference()}.
      */
     private boolean useStartTimeInference;
+    
+    private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
   
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
@@ -171,7 +174,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * @param series
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
-     * @param rankingMetricConstructor TODO
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent, ScoringScheme scoringScheme,
@@ -272,8 +274,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     
     /**
      * {@link RaceColumnListeners} may not be de-serialized (yet) when the regatta
-     * is de-serialized. Do avoid re-registering empty objects most probably leading
-     * to null pointer exception one need to initialize all listeners after
+     * is de-serialized. To avoid re-registering empty objects most probably leading
+     * to null pointer exception one needs to initialize all listeners after
      * all objects have been read.
      */
     public void initializeSeriesAfterDeserialize() {
@@ -363,24 +365,15 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
+        if (competitorsProvider == null) {
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        Util.addAll(competitorsProvider.getAllCompetitors(), result);
         for (RaceDefinition race : getAllRaces()) {
             for (Competitor c : race.getCompetitors()) {
                 result.add(c);
             }
         }
-        for (Series series : getSeries()) {
-            for (RaceColumn rc : series.getRaceColumns()) {
-                for (Fleet fleet : rc.getFleets()) {
-                    TrackedRace trackedRace = rc.getTrackedRace(fleet);
-                    if (trackedRace != null) {
-                        Util.addAll(trackedRace.getRace().getCompetitors(), result);
-                    }
-                }
-            }
-        }
-        //consider {@link RegattaLog}
-        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
-        result.addAll(viaLog);
         return result;
     }
 
@@ -699,5 +692,38 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public RaceColumn getRaceColumnByName(String raceColumnName) {
         return regattaLikeHelper.getRaceColumnByName(raceColumnName);
+    }
+
+    @Override
+    public IsRegattaLike getRegattaLike() {
+        return this;
+    }
+
+    @Override
+    public RaceLog getRacelog(String raceColumnName, String fleetName) {
+        final RaceLog result;
+        final RaceColumn raceColumn = getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            result = null;
+        } else {
+            final Fleet fleet = raceColumn.getFleetByName(fleetName);
+            if (fleet == null) {
+                result = null;
+            } else {
+                result = raceColumn.getRaceLog(fleet);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<? extends RaceColumn> getRaceColumns() {
+        final List<RaceColumnInSeries> result = new ArrayList<>();
+        for (final Series series : getSeries()) {
+            for (final RaceColumnInSeries rc : series.getRaceColumns()) {
+                result.add(rc);
+            }
+        }
+        return result;
     }
 }

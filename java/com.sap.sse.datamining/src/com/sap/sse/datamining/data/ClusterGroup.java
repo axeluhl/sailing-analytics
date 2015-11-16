@@ -1,9 +1,7 @@
 package com.sap.sse.datamining.data;
 
 import java.io.Serializable;
-import java.util.Locale;
 
-import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
  * Represents a collection of {@link Cluster Clusters} and provides a method to get the
@@ -17,8 +15,6 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  */
 public interface ClusterGroup<ElementType extends Serializable> extends Serializable {
 
-    public String getLocalizedName(Locale locale, ResourceBundleStringMessages stringMessages);
-    
     /**
      * @param value the element to get the {@link Cluster} for
      * @return The {@link Cluster}, that represents the given value or <code>null</code>,

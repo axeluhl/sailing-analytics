@@ -155,7 +155,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewSimulation(),
+                competitorSelectionModel, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
                 selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true);
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionModel, stringMessages, raceMap,
                 new LeaderboardFetcher() {
@@ -214,8 +214,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.getEntryWidget().setTitle(stringMessages.windChart());
         components.add(windChart);
-        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, asyncActionsExecutor, selectedRaceIdentifier,
-                stringMessages, competitorSelectionModel, errorReporter, timer);
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier, stringMessages,
+                competitorSelectionModel, errorReporter, timer);
         editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
         editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
         components.add(editMarkPassingPanel);

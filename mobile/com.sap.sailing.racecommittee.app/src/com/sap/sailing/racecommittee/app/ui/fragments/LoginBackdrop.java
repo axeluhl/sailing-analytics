@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -128,7 +128,7 @@ public class LoginBackdrop extends Fragment {
 
     private void refreshData() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
-        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
+        BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
     private void openInfo() {

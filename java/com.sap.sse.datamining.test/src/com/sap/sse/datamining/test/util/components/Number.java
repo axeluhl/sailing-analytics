@@ -2,7 +2,7 @@ package com.sap.sse.datamining.test.util.components;
 
 import java.io.Serializable;
 
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Dimension;
 
 /*
  * DON'T CHANGE THE METHOD/CLASS NAMES!

@@ -83,6 +83,7 @@ dependencies {
 
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
+	compile project(":java:com.sap.sse.common")
 
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])

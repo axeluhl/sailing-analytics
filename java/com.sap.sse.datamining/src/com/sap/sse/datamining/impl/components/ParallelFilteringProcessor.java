@@ -9,6 +9,16 @@ import com.sap.sse.datamining.components.FilterCriterion;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 
+/**
+ * Filters the given input elements by a {@link FilterCriterion}, so that only elements, that match the 
+ * filter criterion are forwarded to the result receivers.
+ * 
+ * @author Lennart Hensler (D054527)
+ *
+ * @param <InputType> The type of the data to filter.
+ * 
+ * @see com.sap.sse.datamining.impl.components com.sap.sse.datamining.impl.components for general information about Processors.
+ */
 public class ParallelFilteringProcessor<InputType> extends AbstractParallelProcessor<InputType, InputType> {
 
     private final FilterCriterion<InputType> filterCriterion;

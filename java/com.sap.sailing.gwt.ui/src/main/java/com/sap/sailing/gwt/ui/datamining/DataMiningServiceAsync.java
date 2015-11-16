@@ -1,17 +1,21 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.util.Collection;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
@@ -19,26 +23,32 @@ public interface DataMiningServiceAsync {
 
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
-    void getAllStatistics(String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
+    void getAllStatistics(String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
     void getStatisticsFor(DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition, String localeName,
-            AsyncCallback<Iterable<FunctionDTO>> asyncCallback);
+            AsyncCallback<HashSet<FunctionDTO>> asyncCallback);
 
     void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
-            AsyncCallback<Iterable<AggregationProcessorDefinitionDTO>> asyncCallback);
+            AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
-    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<Iterable<FunctionDTO>> callback);
-    void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
-            AsyncCallback<Iterable<FunctionDTO>> callback);
+    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
+    void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
+            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
+    public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
+            AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
     
-    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> asyncCallback);
+    void getDataRetrieverChainDefinitions(String localeInfoName, AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> asyncCallback);
     void getDataRetrieverChainDefinitionsFor(FunctionDTO statisticToCalculate, String localeInfoName,
-            AsyncCallback<Iterable<DataRetrieverChainDefinitionDTO>> callback);
+            AsyncCallback<ArrayList<DataRetrieverChainDefinitionDTO>> callback);
 
-    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, int retrieverLevel,
-            Iterable<FunctionDTO> dimensionDTOs, Map<Integer, Map<FunctionDTO, Collection<?>>> filterSelectionDTO,
-            String localeInfoName, AsyncCallback<QueryResultDTO<Set<Object>>> callback);
+    void getDimensionValuesFor(DataMiningSession session, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, DataRetrieverLevelDTO retrieverLevel,
+            HashSet<FunctionDTO> dimensionDTOs, HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings,
+            HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelectionDTO,
+            String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
     <ResultType> void runQuery(DataMiningSession session, StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+
+    void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
+    <ResultType> void runPredefinedQuery(DataMiningSession session, PredefinedQueryIdentifier identifier, String localeInfoName, AsyncCallback<QueryResultDTO<ResultType>> callback);
     
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining

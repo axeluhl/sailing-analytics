@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.Query.QueryType;
-import com.sap.sse.datamining.components.management.DataMiningQueryManager;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.AdditionalDimensionValuesQueryData;
 import com.sap.sse.datamining.impl.components.management.SingleQueryPerDimensionManager.Key;
@@ -17,7 +16,7 @@ public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key
     protected <ResultType> Iterable<Key> getKeysFor(DataMiningSession session, Query<ResultType> query) {
         AdditionalDimensionValuesQueryData additionalData = query.getAdditionalData(AdditionalDimensionValuesQueryData.class);
         if (additionalData == null) {
-            throw new IllegalArgumentException("This " + DataMiningQueryManager.class.getSimpleName()
+            throw new IllegalArgumentException("This " + this.getClass().getSimpleName()
                                                + " can only manage queries of the " + QueryType.class.getSimpleName()
                                                + " " + QueryType.DIMENSION_VALUES);
         }
@@ -37,6 +36,11 @@ public class SingleQueryPerDimensionManager extends SingleQueryPerKeyManager<Key
         public Key(DataMiningSession session, Function<?> dimension) {
             this.session = session;
             this.dimension = dimension;
+        }
+        
+        @Override
+        public String toString() {
+            return "[session: " + session + ", dimension: " + dimension + "]";
         }
 
         @Override
