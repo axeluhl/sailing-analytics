@@ -148,7 +148,10 @@ public class Solutions extends Composite {
     }
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
-        switch (navigationTab) {
+        if (navigationTab == null) {
+            sapInSailingDiv.scrollIntoView();
+        } else {
+            switch (navigationTab) {
             case SapInSailing:
                 sapInSailingDiv.scrollIntoView();
                 break;
@@ -167,6 +170,7 @@ public class Solutions extends Composite {
             case SailingSimulator:
                 simulatorDiv.scrollIntoView();
                 break;
+            }
         }
     }
     
