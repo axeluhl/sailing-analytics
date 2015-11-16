@@ -15,11 +15,11 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 /**
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable
@@ -47,7 +47,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final BetterCheckboxCell cell;
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
-    private final MultiSelectionModel<T> selectionModel;
+    private final RefreshableMultiSelectionModel<T> selectionModel;
     
     /**
      * @param selectedCheckboxCSSClass
@@ -86,7 +86,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
         return DefaultSelectionEventManager.createCustomManager(getSelectionEventTranslator());
     }
 
-    public MultiSelectionModel<T> getSelectionModel() {
+    public RefreshableMultiSelectionModel<T> getSelectionModel() {
         return selectionModel;
     }
 
@@ -96,8 +96,8 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
      * after selection changes.
      */
-    private MultiSelectionModel<T> createSelectionModel() {
-        return new MultiSelectionModel<T>() {
+    private RefreshableMultiSelectionModel<T> createSelectionModel() {
+        return new RefreshableMultiSelectionModel<T>() {
             @Override
             public void clear() {
                 super.clear();

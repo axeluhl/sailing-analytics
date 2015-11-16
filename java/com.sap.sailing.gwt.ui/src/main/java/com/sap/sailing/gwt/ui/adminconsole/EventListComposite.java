@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -32,7 +31,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventSelectionProvider;
@@ -50,6 +48,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.HasEqualIdentity;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -65,7 +65,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final StringMessages stringMessages;
 
     private CellTable<EventDTO> eventTable;
-    private MultiSelectionModel<EventDTO> eventSelectionModel;
+    private RefreshableMultiSelectionModel<EventDTO> eventSelectionModel;
     private ListDataProvider<EventDTO> eventListDataProvider;
     private List<EventDTO> allEvents;
     private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
@@ -146,7 +146,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventTable.setVisible(false);
 
         @SuppressWarnings("unchecked")
-        MultiSelectionModel<EventDTO> multiSelectionModel = (MultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
+        RefreshableMultiSelectionModel<EventDTO> multiSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
+        multiSelectionModel.setHasEqualIdentity(new HasEqualIdentity<EventDTO>() {
+            @Override
+            public boolean compare(EventDTO o1, EventDTO o2) {
+                return o1.id.equals(o2.id) ? true : false;
+            }
+        });
         eventSelectionModel = multiSelectionModel;
 
         eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -601,20 +607,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     eventTable.setVisible(true);
                     noEventsLabel.setVisible(false);
                 }
-                
-                Set<UUID> selectedEventUUIDs = new HashSet<>();
-                for (EventDTO selectedEvent : eventSelectionModel.getSelectedSet()) {
-                    selectedEventUUIDs.add(selectedEvent.id);
-                }
-                eventSelectionModel.clear();
+                eventSelectionModel.refreshSelectionModel(events);
                 allEvents.clear();
                 allEvents.addAll(events);
                 filterTextbox.updateAll(allEvents);
-                for (EventDTO e : allEvents) {
-                    if (selectedEventUUIDs.contains(e.id)) {
-                        eventSelectionModel.setSelected(e, true);
-                    }
-                }
             }
         });
     }
