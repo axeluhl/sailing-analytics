@@ -365,5 +365,256 @@
           </pluginManagement>
         </build>
       </profile>
+      
+      <profile>
+        <id>leandi</id>
+        <activation>
+          <property>
+            <name>leandi</name>
+            <value>true</value>
+          </property>
+        </activation>
+        <properties>
+        </properties>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                  <release>true</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      
+        <profile>
+            <id>install-android-sdk-windows</id>
+            <activation>
+                <property>
+                    <name>leandi</name>
+                    <value>true</value>
+                </property>
+                <file>
+                    <missing>${basedir}/android-sdk-windows/platform-tools/adb.exe</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-android-sdk</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.google.download.android</groupId>
+                                            <artifactId>android-sdk-windows</artifactId>
+                                            <version>r21</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${basedir}</outputDirectory>
+                                            <includes>**/*</includes>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.google.download.android</groupId>
+                                            <artifactId>platform-tools-windows</artifactId>
+                                            <version>r16</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
+                                            <includes>**/*</includes>
+                                            
+                                        </artifactItem>
+                                        <artifactItem>
+                                            
+                                            <groupId>com.google.download.android</groupId>
+                                            <artifactId>android</artifactId>
+                                            <version>${sdk.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
+                                            <includes>**/*</includes>
+                                            
+                                        </artifactItem>
+                                        
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>move_platform_dir</id>
+                                <phase>initialize</phase>
+                                
+                                <configuration>
+                                    <tasks>
+                                        <move file="${basedir}/android-sdk-windows/android-4.2" tofile="${basedir}/android-sdk-windows/platforms/android-${platform.version}"/>
+                                        
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>leandi-sign</id>
+            <activation>
+                <property>
+                    <name>codesign.sap.realcodesigning</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    
+                    <plugin>
+                        <groupId>com.sap.prd.codesign</groupId>
+                        <artifactId>com.sap.prd.codesign.maven-jarsigner-plugin
+                        </artifactId>
+                        <version>1.2</version>
+                        
+                        <configuration>
+                            <signingTech>ANDROID</signingTech>
+                            <archiveDirectory>${project.build.directory}</archiveDirectory>
+                            <processMainArtifact>false</processMainArtifact>
+                            <processAttachedArtifacts>false</processAttachedArtifacts>
+                            <removeExistingSignatures>true</removeExistingSignatures>
+                            <includes>
+                                <include>${project.build.finalName}-unaligned.apk</include>
+                            </includes>
+                        </configuration>
+                        
+                        <executions>
+                            
+                            <execution>
+                                <id>sign</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                            
+                        </executions>
+                        
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                        <artifactId>android-maven-plugin</artifactId>
+                        <version>3.6.0</version>
+                        
+                        <configuration>
+                            <sign>
+                                <debug>false</debug>
+                            </sign>
+                            <zipalign>
+                                <skip>false</skip>
+                                <verbose>true</verbose>
+                                <inputApk>${project.build.directory}/${project.artifactId}-1.apk
+                                </inputApk>
+                                <outputApk>${project.build.directory}/${project.build.finalName}.apk
+                                </outputApk>
+                            </zipalign>
+                        </configuration>
+                        
+                        <executions>
+                            <execution>
+                                <id>alignApk</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>zipalign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        
+                    </plugin>
+                    
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            
+                            <execution>
+                                <id>zip-apk</id>
+                                <phase>integration-test</phase>
+                                
+                                <configuration>
+                                    <tasks>
+                                        <zip
+                                            file="${project.build.directory}/${project.artifactId}-signed-aligned.zip">
+                                            <fileset dir="${project.build.directory}"
+                                            includes="${project.artifactId}-signed-aligned.apk" />
+                                        </zip>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-signed-aligned.zip
+                                            </file>
+                                            <type>zip </type>
+                                            <classifier>smp</classifier>
+                                        </artifact>
+                                        
+                                        <artifact>
+                                            <file>${project.build.directory}/AndroidMarketMetadata.zip
+                                            </file>
+                                            <type>zip </type>
+                                            <classifier>AndroidMetadata</classifier>
+                                        </artifact>
+                                        
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                            
+                            
+                        </executions>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
     </profiles>
   </project>
