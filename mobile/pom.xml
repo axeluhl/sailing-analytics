@@ -41,9 +41,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>android</groupId>
+        <groupId>${android.api.groupId}</groupId>
         <artifactId>android</artifactId>
-        <version>5.1.1_r2</version>
+        <version>${android.api.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>

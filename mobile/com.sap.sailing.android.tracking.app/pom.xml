@@ -22,7 +22,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>android</groupId>
+			<groupId>${android.api.groupId}</groupId>
 			<artifactId>android</artifactId>
 		</dependency>
 

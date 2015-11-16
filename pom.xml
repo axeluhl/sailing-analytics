@@ -57,7 +57,7 @@
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
                                             <artifactId>android-sdk-windows</artifactId>
-                                            <version>r21</version>
+                                            <version>${android.sdk.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
                                             <outputDirectory>${basedir}</outputDirectory>
@@ -66,14 +66,15 @@
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
                                             <artifactId>platform-tools-windows</artifactId>
-                                            <version>r16</version>
+                                            <version>${android.platform-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
                                             <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
                                             <includes>**/*</includes>
                                             
                                         </artifactItem>
-                                        <artifactItem>
+                                        <!-- FIXME: Do we need this part? Cant't find the artifact in nexus -> delete if the build works without. -->
+                                        <!-- <artifactItem>
                                             
                                             <groupId>com.google.download.android</groupId>
                                             <artifactId>android</artifactId>
@@ -83,7 +84,7 @@
                                             <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
                                             <includes>**/*</includes>
                                             
-                                        </artifactItem>
+                                        </artifactItem> -->
                                         
                                     </artifactItems>
                                 </configuration>
@@ -122,6 +123,17 @@
 		
 		<!-- TODO Set to true on release build branch -->
 		<leandi>false</leandi>
+		
+		<android.sdk.version>24.4</android.sdk.version>
+		<android.platform-tools.version>23.0.1</android.platform-tools.version>
+		<android.platform.version>22</android.platform.version>
+		
+		
+		<android.api.groupId>android</android.api.groupId>
+		<android.api.version>5.1.1_r2</android.api.version>
+		<!-- TODO for release build -->
+		<!-- <android.api.groupId>com.google.download.android</android.api.groupId> -->
+		<!-- <android.api.version>5.1.1</android.api.version> -->
 	</properties>
 	
 	<build>
@@ -137,7 +149,7 @@
             <androidManifestFile>AndroidManifest.xml</androidManifestFile>
             <destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
             <sdk>
-              <platform>22</platform>
+              <platform>${android.platform}</platform>
             </sdk>
           </configuration>
         </plugin>
