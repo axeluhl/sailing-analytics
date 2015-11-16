@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
     
     private String leaderboardName;
+    private String leaderboardGroupName;
     private RegattaAndRaceIdentifier regattaAndRaceIdentfier; 
     private String boatClass;
 
@@ -15,9 +16,11 @@ public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
     }
 
     @GwtIncompatible
-    public AbstractRaceNewsEntryDTO(String leaderboardName, RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp) {
+    public AbstractRaceNewsEntryDTO(String leaderboardName, String leaderboardGroupName,
+            RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp) {
         super(raceTitle, timestamp, null);
         this.leaderboardName = leaderboardName;
+        this.leaderboardGroupName = leaderboardGroupName;
         this.boatClass = boatClass;
     }
     
@@ -28,6 +31,10 @@ public abstract class AbstractRaceNewsEntryDTO extends NewsEntryDTO {
 
     public String getLeaderboardName() {
         return leaderboardName;
+    }
+    
+    public String getLeaderboardGroupName() {
+        return leaderboardGroupName;
     }
 
     public RegattaAndRaceIdentifier getRegattaAndRaceIdentfier() {

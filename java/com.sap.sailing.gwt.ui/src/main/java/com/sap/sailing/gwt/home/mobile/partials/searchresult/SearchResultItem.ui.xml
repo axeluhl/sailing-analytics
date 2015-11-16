@@ -6,13 +6,7 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResultResources" />
 	<a class="{local_res.css.searchresult_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 		<div class="{local_res.css.searchresult_item_headline}" ui:field="resultTitleUi"> </div>
-		<div class="{local_res.css.searchresult_item_event}">
-			<div class="{local_res.css.searchresult_item_event_link}" ui:field="eventNameUi"></div>
-			<div>
-				<span class="{local_res.css.searchresult_item_event_separator}" ui:field="eventVenueUi"></span>
-				<span ui:field="eventDateUi"></span>
-			</div>
-		</div>
+		<div ui:field="eventInfoContainerUi"></div>
 		<div class="{local_res.css.searchresult_item_arrow}"></div>
 	</a>
 </ui:UiBinder>
