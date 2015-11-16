@@ -36,7 +36,13 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
             makeLoggedCountableCalendarRequest();
         } else {
             final String paramNavTab = getParameter(PARAM_NAVIGATION_TAB);
-            navigationTab = paramNavTab != null ? SolutionsNavigationTabs.valueOf(paramNavTab) : null;
+            SolutionsNavigationTabs preliminaryNavTab;
+            try {
+                preliminaryNavTab = paramNavTab != null ? SolutionsNavigationTabs.valueOf(paramNavTab) : null;
+            } catch (IllegalArgumentException e) {
+                preliminaryNavTab = SolutionsNavigationTabs.SapInSailing;
+            }
+            navigationTab = preliminaryNavTab;
         }
     }
     
