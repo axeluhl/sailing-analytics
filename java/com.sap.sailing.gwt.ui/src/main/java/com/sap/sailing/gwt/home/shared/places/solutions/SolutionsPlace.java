@@ -41,7 +41,6 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
     }
     
     private void makeLoggedCountableCalendarRequest() {
-        GWT.debugger();
         final RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, CALENDAR_ACCESS_COUNT_URL);
         try {
             requestBuilder.sendRequest(/* requestData */ null, new RequestCallback() {
