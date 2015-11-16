@@ -281,6 +281,7 @@
           <artifactId>android-maven-plugin</artifactId>
           <configuration>
             <sourceDirectories>src</sourceDirectories>
+            <destinationManifestFile>AndroidManifest.xml</destinationManifestFile>
             <classesJarExcludes>
               <classesJarExclude>*.jar</classesJarExclude>
               <classesJarExclude>generated-sources/**</classesJarExclude>
