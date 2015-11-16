@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?sap_gray">
+    android:background="?attr/sap_gray">
 
     <TextView
         android:id="@+id/timer_text"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_margin"
         android:gravity="center"
-        android:textColor="?white"
+        android:textColor="?attr/white"
         android:textSize="@dimen/textSize_40"
         tools:text="@string/time"/>
 
@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:src="?marker"/>
+        android:src="?attr/marker"/>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:textAppearance="?textSmall"
+                android:textAppearance="?attr/textSmall"
                 android:layout_toRightOf="@+id/linked_locked_area"
                 tools:text="@string/time_start"/>
 
@@ -60,7 +60,7 @@
                     android:id="@+id/time_start_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="?lock_outline"
+                    android:src="?attr/lock_outline"
                     android:visibility="gone"
                     tools:visibility="visible"/>
 
@@ -69,7 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:src="?link_24dp"
+                    android:src="?attr/link_24dp"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </LinearLayout>
@@ -88,10 +88,10 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:layout_centerVertical="true"
-                android:drawableLeft="?access_time_24dp"
+                android:drawableLeft="?attr/access_time_24dp"
                 android:drawablePadding="6dp"
                 android:gravity="center"
-                android:textAppearance="?textSmall"
+                android:textAppearance="?attr/textSmall"
                 android:visibility="invisible"
                 tools:text="@string/time"
                 tools:visibility="visible"/>

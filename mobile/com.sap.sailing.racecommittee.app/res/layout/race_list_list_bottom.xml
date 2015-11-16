@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="?black"
+        android:background="?attr/black"
         android:orientation="horizontal">
 
         <Button
@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/races_current"
-            android:textColor="?sap_yellow_1"
+            android:textColor="?attr/sap_yellow_1"
             android:textSize="@dimen/textSize_20"
             android:textStyle="bold"/>
 
@@ -33,7 +33,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/races_all"
-            android:textColor="?sap_light_gray"
+            android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_20"
             android:textStyle="bold"/>
     </LinearLayout>

@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/finished_recording"
-            android:textAppearance="?textPanelHeader"/>
+            android:textAppearance="?attr/textPanelHeader"/>
 
         <ImageView
             android:id="@+id/voice_lock"
@@ -26,8 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/lock_margin"
             android:layout_marginRight="@dimen/lock_margin"
-            android:src="?lock_outline"
-            android:tint="?sap_light_gray"
+            android:src="?attr/lock_outline"
+            android:tint="?attr/sap_light_gray"
             android:visibility="gone"
             tools:visibility="visible"/>
     </LinearLayout>
@@ -42,9 +42,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:drawablePadding="@dimen/compound_padding"
-            android:drawableTop="?hearing"
+            android:drawableTop="?attr/hearing"
             android:gravity="center_horizontal"
             android:text="@string/finished_replay"
-            android:textAppearance="?textPanelCaption"/>
+            android:textAppearance="?attr/textPanelCaption"/>
     </RelativeLayout>
 </merge>

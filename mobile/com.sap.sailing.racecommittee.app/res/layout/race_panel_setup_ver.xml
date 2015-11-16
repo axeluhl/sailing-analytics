@@ -16,14 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?attr/sap_gray">
 
             <ImageView
                 android:id="@+id/start_procedure_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/start_procedure_header"
@@ -37,7 +37,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/start_procedure"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -53,7 +53,7 @@
                     android:gravity="center_horizontal"
                     android:paddingLeft="@dimen/default_padding_half"
                     android:paddingRight="@dimen/default_padding_half"
-                    android:textAppearance="?textPanelCaption"
+                    android:textAppearance="?attr/textPanelCaption"
                     tools:text="@string/start_procedure_line_start"/>
 
                 <ImageView
@@ -61,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -72,14 +72,14 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?attr/sap_gray">
 
             <ImageView
                 android:id="@+id/course_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/course_header"
@@ -93,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/course"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:gravity="center_horizontal"
-                    android:textAppearance="?textPanelCaption"
+                    android:textAppearance="?attr/textPanelCaption"
                     tools:text="012"/>
 
                 <ImageView
@@ -115,7 +115,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -126,14 +126,14 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?attr/sap_gray">
 
             <ImageView
                 android:id="@+id/wind_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/wind_header"
@@ -147,7 +147,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/wind"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -162,14 +162,14 @@
                     android:layout_centerInParent="true"
                     android:gravity="center"
                     android:text="@string/wind_no_data"
-                    android:textAppearance="?textPanelCaption"/>
+                    android:textAppearance="?attr/textPanelCaption"/>
 
                 <ImageView
                     android:id="@+id/wind_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -180,14 +180,14 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="?sap_gray">
+            android:background="?attr/sap_gray">
 
             <ImageView
                 android:id="@+id/start_procedure_more_marker"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/start_procedure_more_header"
@@ -201,7 +201,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/start_procedure_more"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -214,14 +214,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?keyboard_control_36dp"/>
+                    android:src="?attr/keyboard_control_36dp"/>
 
                 <ImageView
                     android:id="@+id/start_procedure_more_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -233,5 +233,5 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 </RelativeLayout>

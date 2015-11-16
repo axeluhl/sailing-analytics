@@ -13,7 +13,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/default_margin_half"
         android:padding="5dp"
-        tools:src="?flag_ap_hotel_96dp"/>
+        tools:src="?attr/flag_ap_hotel_96dp"/>
 
     <ImageView
         android:id="@+id/more_data"
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="?white"
+            android:textColor="?attr/white"
             android:textSize="@dimen/checked_item_text"
             tools:text="Xray"/>
 
@@ -66,7 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="?white"
+            android:textColor="?attr/white"
             android:textSize="@dimen/checked_item_small_text"
             tools:text="Individual Recall"/>
     </LinearLayout>
@@ -78,5 +78,5 @@
         android:layout_marginLeft="@dimen/default_margin_half"
         android:layout_marginRight="@dimen/side_padding"
         android:layout_toRightOf="@id/flag"
-        android:background="?sap_gray"/>
+        android:background="?attr/sap_gray"/>
 </RelativeLayout>

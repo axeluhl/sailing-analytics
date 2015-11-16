@@ -8,7 +8,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -24,13 +24,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"/>
+                android:src="?attr/chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_pathfinder"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?attr/textNormal"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/header"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?sap_gray_black_30">
+            android:background="?attr/sap_gray_black_30">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -68,38 +68,38 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        app:floatLabelTextAppearance="?floatLabel"
+                        app:floatLabelTextAppearance="?attr/floatLabel"
                         app:floatLabelPaddingLeft="9dp">
 
                         <EditText
                             android:id="@+id/pathfinder_nat"
-                            style="?editText"
+                            style="?attr/editText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:hint="@string/gate_start_nationality"
                             android:inputType="textCapCharacters"
-                            android:textAppearance="?textNormal"
-                            android:textColor="?white"/>
+                            android:textAppearance="?attr/textNormal"
+                            android:textColor="?attr/white"/>
                     </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
 
                     <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        app:floatLabelTextAppearance="?floatLabel"
+                        app:floatLabelTextAppearance="?attr/floatLabel"
                         app:floatLabelPaddingLeft="9dp">
 
                         <EditText
                             android:id="@+id/pathfinder_num"
-                            style="?editText"
+                            style="?attr/editText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:hint="@string/gate_start_number"
                             android:inputType="number"
-                            android:textAppearance="?textNormal"
-                            android:textColor="?white"/>
+                            android:textAppearance="?attr/textNormal"
+                            android:textColor="?attr/white"/>
                     </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
 
                     <RelativeLayout

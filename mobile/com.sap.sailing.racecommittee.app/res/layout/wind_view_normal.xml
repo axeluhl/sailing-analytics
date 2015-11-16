@@ -13,7 +13,7 @@
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray"
+        android:background="?attr/sap_gray"
         android:clickable="true">
 
         <TextView
@@ -25,7 +25,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/side_padding"
             android:text="@string/wind_off"
-            android:textAppearance="?textNormal"
+            android:textAppearance="?attr/textNormal"
             android:visibility="gone"
             tools:visibility="visible"/>
 
@@ -36,7 +36,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_toLeftOf="@id/wind_sensor"
-            android:src="?wind_off"
+            android:src="?attr/wind_off"
             android:visibility="gone"
             tools:visibility="visible"/>
 
@@ -48,7 +48,7 @@
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_toLeftOf="@id/wind_sensor"
             android:layout_toStartOf="@id/wind_sensor"
-            android:src="?wind_on"
+            android:src="?attr/wind_on"
             android:visibility="gone"/>
 
         <TextView
@@ -61,17 +61,17 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/side_padding"
             android:layout_toLeftOf="@id/wind_off"
-            android:drawableLeft="?chevron_left_24dp"
+            android:drawableLeft="?attr/chevron_left_24dp"
             android:orientation="horizontal"
             android:text="@string/wind"
-            android:textAppearance="?textHeader"/>
+            android:textAppearance="?attr/textHeader"/>
 
         <View
             android:id="@+id/line_top"
             android:layout_width="match_parent"
             android:layout_height="@dimen/unscheduled_header_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -79,7 +79,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header_layout"
-        android:background="?sap_gray_black_30"
+        android:background="?attr/sap_gray_black_30"
         android:orientation="vertical">
 
         <Button
@@ -116,7 +116,7 @@
                     android:layout_marginRight="@dimen/side_padding"
                     android:layout_row="0"
                     android:text="@string/wind_from"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -127,7 +127,7 @@
                     android:layout_marginRight="@dimen/side_padding"
                     android:layout_row="1"
                     android:text="@string/wind_speed"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -138,7 +138,7 @@
                     android:layout_marginRight="@dimen/side_padding"
                     android:layout_row="2"
                     android:text="@string/wind_latitude"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -149,7 +149,7 @@
                     android:layout_marginRight="@dimen/side_padding"
                     android:layout_row="3"
                     android:text="@string/wind_longitude"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -159,7 +159,7 @@
                     android:layout_marginRight="@dimen/side_padding"
                     android:layout_row="4"
                     android:text="@string/wind_accuracy"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -168,7 +168,7 @@
                     android:layout_marginLeft="@dimen/side_padding"
                     android:layout_row="0"
                     android:text="@string/wind_degree"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -177,7 +177,7 @@
                     android:layout_marginLeft="@dimen/side_padding"
                     android:layout_row="1"
                     android:text="@string/wind_kn"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <EditText
                     android:id="@+id/wind_input_direction"
@@ -186,7 +186,7 @@
                     android:layout_column="1"
                     android:layout_row="0"
                     android:inputType="number"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <EditText
                     android:id="@+id/wind_input_speed"
@@ -195,7 +195,7 @@
                     android:layout_column="1"
                     android:layout_row="1"
                     android:inputType="numberDecimal"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:id="@+id/latitude_value"
@@ -205,7 +205,7 @@
                     android:layout_marginBottom="@dimen/side_padding"
                     android:layout_row="2"
                     android:text="@string/not_available"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:id="@+id/longitude_value"
@@ -215,7 +215,7 @@
                     android:layout_marginBottom="@dimen/side_padding"
                     android:layout_row="3"
                     android:text="@string/not_available"
-                    android:textAppearance="?textSmall"/>
+                    android:textAppearance="?attr/textSmall"/>
 
                 <TextView
                     android:id="@+id/accuracy_value"
@@ -223,7 +223,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:layout_row="4"
-                    android:textAppearance="?textSmall"
+                    android:textAppearance="?attr/textSmall"
                     tools:text="ca 5m"/>
 
                 <TextView
@@ -232,7 +232,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:layout_row="5"
-                    android:textAppearance="?textSmall"
+                    android:textAppearance="?attr/textSmall"
                     tools:text="(since 0h 23' 12'')"/>
             </GridLayout>
         </RelativeLayout>

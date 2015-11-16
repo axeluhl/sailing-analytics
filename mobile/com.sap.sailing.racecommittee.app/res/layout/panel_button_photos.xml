@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/finished_list"
-            android:textAppearance="?textPanelHeader"
+            android:textAppearance="?attr/textPanelHeader"
             android:textSize="@dimen/textSize_18"/>
 
         <ImageView
@@ -27,8 +27,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:src="?lock_outline"
-            android:tint="?sap_light_gray"
+            android:src="?attr/lock_outline"
+            android:tint="?attr/sap_light_gray"
             android:visibility="gone"
             tools:visibility="visible"/>
     </LinearLayout>
@@ -43,9 +43,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:drawablePadding="@dimen/compound_padding"
-            android:drawableTop="?photo_camera"
+            android:drawableTop="?attr/photo_camera"
             android:gravity="center_horizontal"
             android:text="@string/finished_photos"
-            android:textAppearance="?textPanelCaption"/>
+            android:textAppearance="?attr/textPanelCaption"/>
     </RelativeLayout>
 </merge>

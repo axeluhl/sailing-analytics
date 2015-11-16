@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="?check_18dp"/>
+        android:src="?attr/check_18dp"/>
 
     <TextView
         android:id="@+id/start_procedure"
@@ -23,7 +23,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/checked"
-        android:textAppearance="?textNormal"
+        android:textAppearance="?attr/textNormal"
         android:textSize="@dimen/textSize_20"
         tools:text="Zulu"/>
 
@@ -31,5 +31,5 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_alignParentBottom="true"
-        android:background="?sap_gray"/>
+        android:background="?attr/sap_gray"/>
 </RelativeLayout>

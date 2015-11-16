@@ -38,7 +38,7 @@
             android:layout_toLeftOf="@id/delete_photo"
             android:paddingLeft="@dimen/default_padding"
             android:paddingRight="@dimen/default_padding"
-            android:textAppearance="?textSmall"
+            android:textAppearance="?attr/textSmall"
             android:textColor="@color/constant_white"
             tools:text="22.08.15 / 11:20:05"/>
     </RelativeLayout>

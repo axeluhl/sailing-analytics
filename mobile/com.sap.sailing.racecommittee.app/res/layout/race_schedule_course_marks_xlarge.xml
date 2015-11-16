@@ -30,7 +30,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/previous_course"
-                android:textAppearance="?textNormal"
+                android:textAppearance="?attr/textNormal"
                 android:textStyle="bold"/>
 
             <TextView
@@ -41,7 +41,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/make_new_course"
-                android:textAppearance="?textNormal"
+                android:textAppearance="?attr/textNormal"
                 android:textStyle="bold"/>
 
             <TextView
@@ -50,7 +50,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/course_design_assets"
-                android:textAppearance="?textNormal"
+                android:textAppearance="?attr/textNormal"
                 android:textStyle="bold"/>
         </LinearLayout>
 
@@ -67,7 +67,7 @@
 
             <Button
                 android:id="@+id/publishCourse"
-                style="?buttonSolidNormal"
+                style="?attr/buttonSolidNormal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
@@ -75,7 +75,7 @@
 
             <Button
                 android:id="@+id/unpublishCourse"
-                style="?buttonSolidNormal"
+                style="?attr/buttonSolidNormal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
@@ -83,7 +83,7 @@
 
             <Button
                 android:id="@+id/takeHistoryCourse"
-                style="?buttonSolidNormal"
+                style="?attr/buttonSolidNormal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/take_previous"/>

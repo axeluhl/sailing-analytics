@@ -11,7 +11,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"
+                android:src="?attr/chevron_left_24dp"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
@@ -37,7 +37,7 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/side_padding"
                 android:layout_marginRight="@dimen/side_padding"
-                android:src="?flag_first_blue"/>
+                android:src="?attr/flag_first_blue"/>
 
             <TextView
                 android:id="@+id/header_headline"
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/race_begin_finish_header"
-                android:textAppearance="?textHeader"/>
+                android:textAppearance="?attr/textHeader"/>
         </LinearLayout>
 
         <View
@@ -53,13 +53,13 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?sap_gray_black_30"
+        android:background="?attr/sap_gray_black_30"
         android:orientation="vertical">
 
         <LinearLayout
@@ -80,11 +80,11 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_centerVertical="true"
-                    android:drawableLeft="?access_time_36dp"
+                    android:drawableLeft="?attr/access_time_36dp"
                     android:drawablePadding="@dimen/default_padding_half"
-                    android:drawableStart="?access_time_36dp"
+                    android:drawableStart="?attr/access_time_36dp"
                     android:gravity="center"
-                    android:textColor="?white"
+                    android:textColor="?attr/white"
                     android:textSize="@dimen/textSize_40"
                     android:visibility="invisible"
                     tools:text="@string/time"/>

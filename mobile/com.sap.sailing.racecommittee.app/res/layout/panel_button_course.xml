@@ -18,13 +18,13 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="?flags_course"/>
+                android:src="?attr/flags_course"/>
 
             <ImageView
                 android:id="@+id/course_flags_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="?lock_outline_black"
+                android:src="?attr/lock_outline_black"
                 android:layout_centerInParent="true"
                 android:visibility="gone"
                 tools:visibility="visible"/>
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/flags_course"
-                android:textAppearance="?textPanelCaption"/>
+                android:textAppearance="?attr/textPanelCaption"/>
         </LinearLayout>
     </LinearLayout>
 </merge>

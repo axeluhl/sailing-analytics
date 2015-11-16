@@ -15,7 +15,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?sap_gray"
+            android:background="?attr/sap_gray"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/start_mode_header"
@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/start_mode"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_black"
+                    android:src="?attr/lock_outline_black"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -67,7 +67,7 @@
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:src="?black"/>
+                android:src="?attr/black"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -75,7 +75,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?sap_gray"
+            android:background="?attr/sap_gray"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -84,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/gate_pathfinder_header"
@@ -97,7 +97,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/gate_start_pathfinder"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -110,7 +110,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:textAppearance="?textPanelCaption"
+                    android:textAppearance="?attr/textPanelCaption"
                     tools:text="SAD123"/>
 
                 <ImageView
@@ -118,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -127,7 +127,7 @@
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:src="?black"/>
+                android:src="?attr/black"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -135,7 +135,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?sap_gray"
+            android:background="?attr/sap_gray"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -144,7 +144,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/thin_line"
                 android:layout_alignParentBottom="true"
-                android:src="?marker"/>
+                android:src="?attr/marker"/>
 
             <LinearLayout
                 android:id="@+id/gate_timing_header"
@@ -157,7 +157,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/gate_start_timing"
-                    android:textAppearance="?textPanelHeader"/>
+                    android:textAppearance="?attr/textPanelHeader"/>
             </LinearLayout>
 
             <RelativeLayout
@@ -170,7 +170,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:textAppearance="?textPanelCaption"
+                    android:textAppearance="?attr/textPanelCaption"
                     android:gravity="center"
                     tools:text="4 + 3 = 7 Minuten"/>
 
@@ -179,7 +179,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:src="?lock_outline_alpha"
+                    android:src="?attr/lock_outline_alpha"
                     android:visibility="gone"
                     tools:visibility="visible"/>
             </RelativeLayout>
@@ -188,7 +188,7 @@
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:src="?black"/>
+                android:src="?attr/black"/>
         </RelativeLayout>
     </LinearLayout>
 
@@ -196,5 +196,5 @@
         android:id="@+id/top_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 </RelativeLayout>

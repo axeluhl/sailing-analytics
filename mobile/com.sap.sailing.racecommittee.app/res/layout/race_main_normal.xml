@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_below="@id/panels_top"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <ImageView
             android:id="@+id/nav_prev"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:src="?button_prev"/>
+            android:src="?attr/button_prev"/>
 
         <ImageView
             android:id="@+id/nav_next"
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:src="?button_next"/>
+            android:src="?attr/button_next"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -85,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
     </RelativeLayout>
 
     <FrameLayout

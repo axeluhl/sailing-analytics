@@ -12,11 +12,11 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:contentDescription="@string/compass_view_compass"
-        android:src="?compass_back"/>
+        android:src="?attr/compass_back"/>
 
     <com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText
         android:id="@+id/compass_view_degree"
-        style="?textLarge"
+        style="?attr/textLarge"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="false"
@@ -24,7 +24,7 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:gravity="center_horizontal"
-        android:hint="?sap_light_gray"
+        android:hint="?attr/sap_light_gray"
         android:inputType="number"
         tools:text="300°"/>
 
@@ -35,6 +35,6 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:contentDescription="@string/compass_view_needle"
-        android:src="?compass_needle"/>
+        android:src="?attr/compass_needle"/>
 
 </RelativeLayout>

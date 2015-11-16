@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/race_flag_margin"
-            android:src="?arrow_up_normal"
+            android:src="?attr/arrow_up_normal"
             android:visibility="gone"
             tools:visibility="visible"/>
 
@@ -37,8 +37,8 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/side_padding"
             android:layout_marginTop="@dimen/side_padding"
-            android:textAppearance="?textSmall"
-            android:textColor="?white"
+            android:textAppearance="?attr/textSmall"
+            android:textColor="?attr/white"
             tools:text="@string/time_up" />
 
         <ImageView
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/race_flag_margin"
-            android:src="?arrow_down_normal"
+            android:src="?attr/arrow_down_normal"
             android:visibility="gone"
             tools:visibility="visible"/>
     </LinearLayout>
@@ -58,5 +58,5 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:background="?black" />
+        android:background="?attr/black" />
 </RelativeLayout>

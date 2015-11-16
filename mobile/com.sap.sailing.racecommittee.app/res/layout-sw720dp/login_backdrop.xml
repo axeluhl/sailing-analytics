@@ -47,7 +47,7 @@
 
         <ImageView
             android:id="@+id/settings_button"
-            style="?round"
+            style="?attr/round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
@@ -55,7 +55,7 @@
 
         <ImageView
             android:id="@+id/technical_info"
-            style="?round"
+            style="?attr/round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
@@ -63,7 +63,7 @@
 
         <ImageView
             android:id="@+id/refresh_data"
-            style="?round"
+            style="?attr/round"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="@dimen/default_margin_half"
@@ -90,5 +90,5 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignParentBottom="true"
-        android:background="?sap_yellow_1"/>
+        android:background="?attr/sap_yellow_1"/>
 </RelativeLayout>

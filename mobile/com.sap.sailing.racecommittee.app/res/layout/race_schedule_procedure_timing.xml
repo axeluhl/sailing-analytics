@@ -9,7 +9,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray"
+        android:background="?attr/sap_gray"
         android:clickable="true">
 
         <LinearLayout
@@ -25,14 +25,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"/>
+                android:src="?attr/chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/gate_start_timing"
-                android:textAppearance="?textHeader"/>
+                android:textAppearance="?attr/textHeader"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/unscheduled_header_line"
         android:layout_below="@id/header"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 
 
     <RelativeLayout
@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="center_vertical"
-        android:background="?sap_gray_black_30">
+        android:background="?attr/sap_gray_black_30">
 
         <Button
             android:id="@+id/set_gate_time"
@@ -67,7 +67,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/gate_button_layout"
         android:layout_below="@id/line_top"
-        android:background="?sap_gray_black_30">
+        android:background="?attr/sap_gray_black_30">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -92,7 +92,7 @@
                         android:layout_gravity="center_horizontal"
                         android:gravity="center_horizontal"
                         android:text="@string/time_launch"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <NumberPicker
                         android:id="@+id/time_launch"
@@ -123,7 +123,7 @@
                         android:layout_gravity="center_horizontal"
                         android:gravity="center_horizontal"
                         android:text="@string/time_golf"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -136,7 +136,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_margin="@dimen/side_padding"
                             android:text="+"
-                            android:textAppearance="?textLarge"/>
+                            android:textAppearance="?attr/textLarge"/>
 
                         <NumberPicker
                             android:id="@+id/time_golf"
@@ -150,7 +150,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_margin="@dimen/side_padding"
                             android:text="="
-                            android:textAppearance="?textLarge"/>
+                            android:textAppearance="?attr/textLarge"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -164,7 +164,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:text="@string/time_total"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -179,7 +179,7 @@
                             android:layout_alignParentLeft="true"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:textAppearance="?textLarge"
+                            android:textAppearance="?attr/textLarge"
                             tools:text="12"/>
                     </RelativeLayout>
                 </RelativeLayout>

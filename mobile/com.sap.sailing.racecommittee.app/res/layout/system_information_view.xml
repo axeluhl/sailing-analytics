@@ -9,7 +9,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?sap_gray_black_30">
+        android:background="?attr/sap_gray_black_30">
 
         <include
             android:id="@+id/toolbar_layout"
@@ -17,7 +17,7 @@
 
         <Button
             android:id="@+id/system_information_persistence_clear"
-            style="?buttonSolidSmall"
+            style="?attr/buttonSolidSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/application_information"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?attr/textNormal"/>
 
             <TextView
                 android:id="@+id/system_information_application_identifier_header"
@@ -45,13 +45,13 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:text="@string/application_identifier"
-                android:textAppearance="?textSmall"/>
+                android:textAppearance="?attr/textSmall"/>
 
             <TextView
                 android:id="@+id/system_information_application_identifier"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 tools:text="N10"/>
 
             <TextView
@@ -60,13 +60,13 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:text="@string/application_version"
-                android:textAppearance="?textSmall"/>
+                android:textAppearance="?attr/textSmall"/>
 
             <TextView
                 android:id="@+id/system_information_application_version"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 tools:text="7 - Laser.debug (Code 7)"/>
 
             <TextView
@@ -75,13 +75,13 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:text="@string/application_compile_information"
-                android:textAppearance="?textSmall"/>
+                android:textAppearance="?attr/textSmall"/>
 
             <TextView
                 android:id="@+id/system_information_application_compile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 tools:text="branch (UTC-Time)"/>
 
             <TextView
@@ -90,13 +90,13 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:text="@string/application_install_date"
-                android:textAppearance="?textSmall"/>
+                android:textAppearance="?attr/textSmall"/>
 
             <TextView
                 android:id="@+id/system_information_application_install"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 tools:text="01. January 2015 - 00:00"/>
 
             <TextView
@@ -105,14 +105,14 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
                 android:text="@string/persistence_information"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?attr/textNormal"/>
 
             <TextView
                 android:id="@+id/system_information_persistence_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 tools:text="No open\nLast send: never"/>
 
             <TextView
@@ -121,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:text="@string/persistence_waiting_events"
-                android:textAppearance="?textSmall"/>
+                android:textAppearance="?attr/textSmall"/>
 
             <ListView
                 android:id="@+id/system_information_persistence_waiting"

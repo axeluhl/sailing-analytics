@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/navigation_drawer_cell_height"
-    android:background="?sap_gray">
+    android:background="?attr/sap_gray">
 
     <ImageView
         android:id="@+id/protest_image"
@@ -20,14 +20,14 @@
         android:id="@+id/delimiter_line"
         android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
-        android:background="?black"
+        android:background="?attr/black"
         android:layout_toStartOf="@id/protest_image"/>
 
     <ImageView
         android:id="@+id/bottom_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
-        android:background="?black"
+        android:background="?attr/black"
         android:layout_alignParentBottom="true"/>
 
     <LinearLayout
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?textNormal"
+            android:textAppearance="?attr/textNormal"
             tools:text="Extreme 40"/>
 
         <TextView
@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?textSmall"
+            android:textAppearance="?attr/textSmall"
             tools:text="Day 1 - Yellow"/>
     </LinearLayout>
 </RelativeLayout>

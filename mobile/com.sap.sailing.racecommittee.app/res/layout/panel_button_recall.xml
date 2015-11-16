@@ -18,14 +18,14 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="?flags_recall"/>
+                android:src="?attr/flags_recall"/>
 
             <ImageView
                 android:id="@+id/recall_flags_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="?lock_outline_black"
+                android:src="?attr/lock_outline_black"
                 android:visibility="gone"
                 tools:visibility="visible"/>
         </RelativeLayout>
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/flags_recall"
-                android:textAppearance="?textPanelCaption"/>
+                android:textAppearance="?attr/textPanelCaption"/>
         </LinearLayout>
     </LinearLayout>
 </merge>

@@ -13,13 +13,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:background="?sap_gray_black_30">
+        android:background="?attr/sap_gray_black_30">
 
         <RelativeLayout
             android:id="@+id/selection"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?sap_gray_black_30"
+            android:background="?attr/sap_gray_black_30"
             android:visibility="gone">
 
             <android.support.v7.widget.RecyclerView
@@ -46,7 +46,7 @@
 
                 <Button
                     android:id="@+id/takeHistoryCourse"
-                    style="?button"
+                    style="?attr/button"
                     android:layout_width="@dimen/default_button_width"
                     android:layout_height="@dimen/default_button_height"
                     android:layout_gravity="center"
@@ -105,7 +105,7 @@
 
                     <Button
                         android:id="@+id/publishCourse"
-                        style="?button"
+                        style="?attr/button"
                         android:layout_width="@dimen/default_button_width"
                         android:layout_height="@dimen/default_button_height"
                         android:layout_marginBottom="@dimen/side_padding"
@@ -114,7 +114,7 @@
 
                     <Button
                         android:id="@+id/unpublishCourse"
-                        style="?button"
+                        style="?attr/button"
                         android:layout_width="@dimen/default_button_width"
                         android:layout_height="@dimen/default_button_height"
                         android:text="@string/unpublish"

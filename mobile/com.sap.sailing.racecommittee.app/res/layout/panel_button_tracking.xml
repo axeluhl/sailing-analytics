@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/finished_tracking"
-            android:textAppearance="?textPanelHeader"/>
+            android:textAppearance="?attr/textPanelHeader"/>
 
         <ImageView
             android:id="@+id/list_lock"
@@ -25,8 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:src="?lock_outline"
-            android:tint="?sap_light_gray"
+            android:src="?attr/lock_outline"
+            android:tint="?attr/sap_light_gray"
             android:visibility="gone"
             tools:visibility="visible"/>
     </LinearLayout>
@@ -41,9 +41,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:drawablePadding="@dimen/compound_padding"
-            android:drawableTop="?dns"
+            android:drawableTop="?attr/dns"
             android:gravity="center_horizontal"
             android:text="@string/finished_edit"
-            android:textAppearance="?textPanelCaption"/>
+            android:textAppearance="?attr/textPanelCaption"/>
     </RelativeLayout>
 </merge>

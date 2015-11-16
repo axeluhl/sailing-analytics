@@ -19,7 +19,7 @@
 
     <ImageView
         android:id="@+id/nav_button"
-        style="?round"
+        style="?attr/round"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"

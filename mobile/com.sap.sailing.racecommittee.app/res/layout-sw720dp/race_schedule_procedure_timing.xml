@@ -9,7 +9,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -25,13 +25,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"/>
+                android:src="?attr/chevron_left_24dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/gate_start_timing"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?attr/textNormal"/>
         </LinearLayout>
     </RelativeLayout>
 
@@ -40,13 +40,13 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thick_line"
         android:layout_below="@id/header"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/line_top"
-        android:background="?sap_gray_black_30">
+        android:background="?attr/sap_gray_black_30">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -71,7 +71,7 @@
                         android:layout_gravity="center_horizontal"
                         android:gravity="center_horizontal"
                         android:text="@string/time_launch"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <NumberPicker
                         android:id="@+id/time_launch"
@@ -106,7 +106,7 @@
                         android:layout_gravity="center_horizontal"
                         android:gravity="center_horizontal"
                         android:text="@string/time_golf"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -120,7 +120,7 @@
                             android:layout_marginLeft="@dimen/default_margin"
                             android:layout_marginRight="@dimen/default_margin_twice"
                             android:text="+"
-                            android:textAppearance="?textXLarge"/>
+                            android:textAppearance="?attr/textXLarge"/>
 
                         <NumberPicker
                             android:id="@+id/time_golf"
@@ -137,7 +137,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="@dimen/default_margin_twice"
                             android:text="="
-                            android:textAppearance="?textXLarge"/>
+                            android:textAppearance="?attr/textXLarge"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -151,7 +151,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
                         android:text="@string/time_total"
-                        android:textAppearance="?textSmall"/>
+                        android:textAppearance="?attr/textSmall"/>
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -164,7 +164,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
-                            android:textAppearance="?textXLarge"
+                            android:textAppearance="?attr/textXLarge"
                             tools:text="12"/>
                     </RelativeLayout>
 

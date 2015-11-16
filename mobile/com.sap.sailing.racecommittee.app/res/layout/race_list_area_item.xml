@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAppearance="?textXLarge"
+                android:textAppearance="?attr/textXLarge"
                 tools:text="13:36"/>
 
             <TextView
@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textAppearance="?textXSmall"/>
+                android:textAppearance="?attr/textXSmall"/>
 
             <TextView
                 android:id="@+id/race_finshed"
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textAppearance="?textXSmall"/>
+                android:textAppearance="?attr/textXSmall"/>
         </LinearLayout>
 
         <TextView
@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/race_unscheduled"
-            android:textColor="?sap_light_gray"
+            android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone"/>
 
@@ -78,7 +78,7 @@
             android:id="@+id/race_marker"
             android:layout_width="@dimen/obesity_line"
             android:layout_height="match_parent"
-            android:src="?marker_race"/>
+            android:src="?attr/marker_race"/>
 
         <LinearLayout
             android:id="@+id/additional_info"
@@ -94,7 +94,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="5dp"
-                android:src="?link_24dp"
+                android:src="?attr/link_24dp"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
@@ -121,8 +121,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:drawableLeft="?arrow_down"
-                    android:textAppearance="?textXSmall"
+                    android:drawableLeft="?attr/arrow_down"
+                    android:textAppearance="?attr/textXSmall"
                     tools:text="01:12"/>
             </LinearLayout>
         </LinearLayout>
@@ -143,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textAppearance="?textNormal"
+                android:textAppearance="?attr/textNormal"
                 tools:text="Race 3"/>
 
             <TextView
@@ -151,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textAppearance="?textXSmall"
+                android:textAppearance="?attr/textXSmall"
                 android:visibility="gone"
                 tools:text="5 minutes after ABC"
                 tools:visibility="visible"/>
@@ -162,5 +162,5 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 </RelativeLayout>

@@ -9,7 +9,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
@@ -25,14 +25,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"
+                android:src="?attr/chevron_left_24dp"
                 android:visibility="gone"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textAppearance="?textHeader"/>
+                android:textAppearance="?attr/textHeader"/>
         </LinearLayout>
 
         <View
@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thick_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
     </RelativeLayout>
 
     <LinearLayout
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="?black"
+        android:background="?attr/black"
         android:orientation="horizontal"
         android:visibility="gone"
         tools:visibility="visible">
@@ -61,7 +61,7 @@
             android:layout_weight="1"
             android:text="@string/dependent_races_absolute"
             android:textAllCaps="true"
-            android:textColor="?sap_yellow_1"
+            android:textColor="?attr/sap_yellow_1"
             android:textSize="@dimen/textSize_26"/>
 
         <Button
@@ -72,7 +72,7 @@
             android:layout_weight="1"
             android:text="@string/dependent_races_relative"
             android:textAllCaps="true"
-            android:textColor="?sap_light_gray"
+            android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_26"/>
     </LinearLayout>
 
@@ -86,7 +86,7 @@
             android:id="@+id/time_absolute"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?sap_gray_black_30"
+            android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
             tools:visibility="gone">
 
@@ -108,11 +108,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:background="?button_filled_bordered"
-                        android:drawableLeft="?chevron_left"
+                        android:background="?attr/button_filled_bordered"
+                        android:drawableLeft="?attr/chevron_left"
                         android:paddingRight="@dimen/default_padding_half"
-                        android:textAppearance="?textLarge"
-                        android:textColor="?white"
+                        android:textAppearance="?attr/textLarge"
+                        android:textColor="?attr/white"
                         tools:text="@string/race_start_time_in"/>
 
                     <TextView
@@ -122,7 +122,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="@dimen/default_margin"
                         android:layout_marginRight="@dimen/default_margin"
-                        android:textAppearance="?textXLarge"
+                        android:textAppearance="?attr/textXLarge"
                         android:visibility="visible"
                         tools:text="@string/race_start_time_in"/>
 
@@ -131,11 +131,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:background="?button_filled_bordered"
-                        android:drawableRight="?chevron_right"
+                        android:background="?attr/button_filled_bordered"
+                        android:drawableRight="?attr/chevron_right"
                         android:paddingLeft="@dimen/default_padding_half"
-                        android:textAppearance="?textLarge"
-                        android:textColor="?white"
+                        android:textAppearance="?attr/textLarge"
+                        android:textColor="?attr/white"
                         tools:text="@string/race_start_time_in"/>
                 </LinearLayout>
             </RelativeLayout>
@@ -191,7 +191,7 @@
 
             <TextView
                 android:id="@+id/debug_time"
-                style="?textSmall"
+                style="?attr/textSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -205,7 +205,7 @@
             android:id="@+id/time_relative"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?sap_gray_black_30"
+            android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -230,7 +230,7 @@
                     android:layout_gravity="center_vertical"
                     android:padding="@dimen/default_padding_half"
                     android:text="@string/minutes_after"
-                    android:textAppearance="?textLarge"/>
+                    android:textAppearance="?attr/textLarge"/>
 
                 <LinearLayout
                     android:layout_width="@dimen/unscheduled_spinner_width"
@@ -242,7 +242,7 @@
                         android:id="@+id/dependent_leaderboard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?spinner_background"
+                        android:background="?attr/spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"/>
 
@@ -251,7 +251,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?spinner_background"
+                        android:background="?attr/spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"
                         android:visibility="gone"
@@ -262,7 +262,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?spinner_background"
+                        android:background="?attr/spinner_background"
                         android:dropDownWidth="wrap_content"
                         android:spinnerMode="dropdown"/>
                 </LinearLayout>

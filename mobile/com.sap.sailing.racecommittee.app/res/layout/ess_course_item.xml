@@ -23,8 +23,8 @@
         android:gravity="center"
         android:paddingTop="@dimen/default_padding_half"
         android:singleLine="true"
-        android:textAppearance="?textXXSmall"
-        android:textColor="?white"
+        android:textAppearance="?attr/textXXSmall"
+        android:textColor="?attr/white"
         android:textIsSelectable="false"
         tools:text="Black Cylinder"/>
 

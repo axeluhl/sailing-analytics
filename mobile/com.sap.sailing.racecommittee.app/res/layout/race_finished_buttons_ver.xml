@@ -20,14 +20,14 @@
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <ImageView
             android:id="@+id/record_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker"/>
+            android:src="?attr/marker"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -42,14 +42,14 @@
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <ImageView
             android:id="@+id/photo_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker"/>
+            android:src="?attr/marker"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -64,13 +64,13 @@
             android:layout_width="@dimen/thin_line"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <ImageView
             android:id="@+id/list_marker"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:src="?marker"/>
+            android:src="?attr/marker"/>
     </RelativeLayout>
 </LinearLayout>

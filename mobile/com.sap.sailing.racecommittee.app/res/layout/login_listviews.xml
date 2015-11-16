@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?sap_gray">
+    android:background="?attr/sap_gray">
 
     <LinearLayout
         android:id="@+id/events"
@@ -24,7 +24,7 @@
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
                 android:text="@string/label_login_events"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size"/>
 
             <ImageView
@@ -34,7 +34,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
-                android:src="?arrow_drop_down_24dp"/>
+                android:src="?attr/arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_event"
@@ -45,7 +45,7 @@
                 android:layout_toRightOf="@+id/label_event"
                 android:gravity="right"
                 android:singleLine="true"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size_small"
                 tools:text="Test-Event"/>
         </RelativeLayout>
@@ -54,13 +54,13 @@
             android:id="@+id/event_line"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <FrameLayout
             android:id="@+id/event_fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="?sap_gray_black_30"/>
+            android:background="?attr/sap_gray_black_30"/>
     </LinearLayout>
 
     <LinearLayout
@@ -82,7 +82,7 @@
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
                 android:text="@string/label_login_course_area"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size"/>
 
             <ImageView
@@ -92,7 +92,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
-                android:src="?arrow_drop_down_24dp"/>
+                android:src="?attr/arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_area"
@@ -103,7 +103,7 @@
                 android:layout_toRightOf="@id/label_area"
                 android:gravity="right"
                 android:singleLine="true"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size_small"
                 tools:text="Selected Area"/>
         </RelativeLayout>
@@ -112,13 +112,13 @@
             android:id="@+id/area_line"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <FrameLayout
             android:id="@+id/area_fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="?sap_gray_black_30"/>
+            android:background="?attr/sap_gray_black_30"/>
     </LinearLayout>
 
     <LinearLayout
@@ -140,7 +140,7 @@
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
                 android:text="@string/label_login_position"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size"/>
 
             <ImageView
@@ -150,7 +150,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:padding="@dimen/side_padding"
-                android:src="?arrow_drop_down_24dp"/>
+                android:src="?attr/arrow_drop_down_24dp"/>
 
             <TextView
                 android:id="@+id/selected_position"
@@ -161,7 +161,7 @@
                 android:layout_toRightOf="@id/label_position"
                 android:gravity="right"
                 android:singleLine="true"
-                android:textColor="?white"
+                android:textColor="?attr/white"
                 android:textSize="@dimen/login_text_size_small"
                 tools:text="Viewer"/>
         </RelativeLayout>
@@ -170,13 +170,13 @@
             android:id="@+id/position_line"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?black"/>
+            android:background="?attr/black"/>
 
         <FrameLayout
             android:id="@+id/position_fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="?sap_gray_black_30"/>
+            android:background="?attr/sap_gray_black_30"/>
     </LinearLayout>
 
     <include layout="@layout/login_listviews_button"/>

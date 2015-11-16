@@ -14,7 +14,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/side_padding"
         android:layout_marginRight="@dimen/side_padding"
-        android:textColor="?white"
+        android:textColor="?attr/white"
         android:textSize="@dimen/management_text_normal"
         tools:text="@string/start_mode"/>
 
@@ -44,7 +44,7 @@
             android:layout_toLeftOf="@+id/item_icon"
             android:gravity="end"
             android:singleLine="true"
-            android:textColor="?white"
+            android:textColor="?attr/white"
             android:textSize="@dimen/management_text_small"
             tools:text="Papa"/>
 
@@ -63,5 +63,5 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 </RelativeLayout>

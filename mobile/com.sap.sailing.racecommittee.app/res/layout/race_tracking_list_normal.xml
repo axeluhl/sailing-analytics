@@ -10,7 +10,7 @@
         android:id="@+id/tracking_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray"
+        android:background="?attr/sap_gray"
         android:clickable="false">
 
         <LinearLayout
@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:src="?chevron_left_24dp"/>
+                android:src="?attr/chevron_left_24dp"/>
 
             <TextView
                 android:id="@+id/header_caption"
@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/tracking_list"
-                android:textAppearance="?textHeader"/>
+                android:textAppearance="?attr/textHeader"/>
         </LinearLayout>
 
         <View
@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/unscheduled_header_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -50,7 +50,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="?sap_gray_black_30"
+        android:background="?attr/sap_gray_black_30"
         android:clickable="false"
         android:gravity="center"
         android:orientation="horizontal">
@@ -63,7 +63,7 @@
 
         <Button
             android:id="@+id/confirm"
-            style="?button"
+            style="?attr/button"
             android:layout_width="@dimen/default_button_width"
             android:layout_height="@dimen/default_button_height"
             android:layout_centerInParent="true"
@@ -78,7 +78,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_bar"
         android:layout_below="@+id/tracking_header"
-        android:background="?sap_gray_black_30"
+        android:background="?attr/sap_gray_black_30"
         android:paddingTop="@dimen/side_padding">
 
         <RelativeLayout
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:src="?button_prev"/>
+                android:src="?attr/button_prev"/>
 
             <ImageView
                 android:id="@+id/nav_next"
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:src="?button_next"/>
+                android:src="?attr/button_next"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"

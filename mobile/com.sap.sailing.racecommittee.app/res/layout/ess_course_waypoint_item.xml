@@ -43,8 +43,8 @@
                     android:gravity="center"
                     android:padding="5dp"
                     android:singleLine="true"
-                    android:textAppearance="?textXXSmall"
-                    android:textColor="?white"
+                    android:textAppearance="?attr/textXXSmall"
+                    android:textColor="?attr/white"
                     android:textIsSelectable="false"
                     tools:text="Pin End"/>
             </LinearLayout>
@@ -58,8 +58,8 @@
                 android:background="@drawable/circle"
                 android:gravity="center"
                 android:singleLine="true"
-                android:textAppearance="?textSmall"
-                android:textColor="?white"
+                android:textAppearance="?attr/textSmall"
+                android:textColor="?attr/white"
                 android:textIsSelectable="false"
                 tools:text="G"/>
 
@@ -87,8 +87,8 @@
                     android:gravity="center"
                     android:padding="5dp"
                     android:singleLine="true"
-                    android:textAppearance="?textXXSmall"
-                    android:textColor="?white"
+                    android:textAppearance="?attr/textXXSmall"
+                    android:textColor="?attr/white"
                     android:textIsSelectable="false"
                     tools:text="Startboat"/>
             </LinearLayout>
@@ -111,6 +111,6 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?sap_gray_white_20"/>
+            android:background="?attr/sap_gray_white_20"/>
     </LinearLayout>
 </FrameLayout>
