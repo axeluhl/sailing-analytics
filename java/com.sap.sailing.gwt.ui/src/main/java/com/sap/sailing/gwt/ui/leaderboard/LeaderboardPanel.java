@@ -344,7 +344,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private Element elementToBlur;
     private boolean showSelectionCheckbox;
     
-    private List<LeaderboardUpdateListener> leaderboardUpdateListener;
+    private final List<LeaderboardUpdateListener> leaderboardUpdateListener;
 
     private boolean initialCompetitorFilterHasBeenApplied = false;
     private final boolean showCompetitorFilterStatus;
@@ -3197,7 +3197,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (timer != null) {
             timer.removeTimeListener(this);
         }
-        if(leaderboardUpdateListener != null) {
+        if (leaderboardUpdateListener != null) {
             leaderboardUpdateListener.clear();
         }
     }
