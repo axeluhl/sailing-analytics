@@ -34,8 +34,6 @@
     <sign.storepass>stg_debug</sign.storepass>
     <sign.keypass>stg_debug</sign.keypass>
     
-    <!-- TODO Set to true on release build branch -->
-    <leandi>false</leandi>
     <!-- Activates some configuration when set to true in app project child poms -->
     <app-project>false</app-project>
   </properties>
