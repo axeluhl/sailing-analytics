@@ -105,7 +105,11 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        // TODO pass this in as a parameter; bug 3345
+        boolean isScreenLargeEnoughToOfferChartSupport = true;
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        }
         timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();

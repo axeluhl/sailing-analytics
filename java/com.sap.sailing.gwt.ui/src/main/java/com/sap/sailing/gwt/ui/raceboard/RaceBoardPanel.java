@@ -207,23 +207,27 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider,
-                    timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
-        competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
-        competitorChart.setVisible(false);
-        components.add(competitorChart);
-        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
-                stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
-        windChart.setVisible(false);
-        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        windChart.getEntryWidget().setTitle(stringMessages.windChart());
-        components.add(windChart);
-        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
-                stringMessages, competitorSelectionProvider, errorReporter, timer);
-        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
-        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-        components.add(editMarkPassingPanel);
+        // TODO pass this in as a parameter; bug 3345
+        boolean isScreenLargeEnoughToOfferChartSupport = true;
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider,
+                        timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
+            competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
+            competitorChart.setVisible(false);
+            components.add(competitorChart);
+            windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
+                    stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
+            windChart.setVisible(false);
+            windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            windChart.getEntryWidget().setTitle(stringMessages.windChart());
+            components.add(windChart);
+            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
+                    stringMessages, competitorSelectionProvider, errorReporter, timer);
+            editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboardPanel.getLeaderboard());
+            editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+            components.add(editMarkPassingPanel);
+        }
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
@@ -238,8 +242,10 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             showLeaderboard = false;
         }
         setLeaderboardVisible(showLeaderboard);
-        setWindChartVisible(getConfiguration().isShowWindChart());
-        setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            setWindChartVisible(getConfiguration().isShowWindChart());
+            setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
             leaderboardPanel.setVisible(true);
@@ -345,7 +351,9 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
-        editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboard);
+        if (editMarkPassingPanel != null) {
+            editMarkPassingPanel.setLeaderboardNameAndColumn(leaderboard);
+        }
     }
 
     @Override
@@ -394,19 +402,6 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
                 }
             }
             regattaNameAnchor.setStyleName("RegattaName-Anchor");
-
-            // TODO: Strange behavior... check
-//            Window.addResizeHandler(new ResizeHandler() {
-//                @Override
-//                public void onResize(ResizeEvent event) {
-//                    int headerPanelWidth = raceMap.getRightHeaderPanel().getOffsetWidth() - 150; // 150px is the width of the sapLogo 
-//                    int raceNameAndFleetLabelWidth = raceInformationHeader.getOffsetWidth();
-//                    int regattaAnchorWidth = regattaNameAnchor.getOffsetWidth();
-//                    boolean overlap = raceNameAndFleetLabelWidth + regattaAnchorWidth > headerPanelWidth;  
-//                    raceInformationHeader.setVisible(!overlap);
-//                }
-//            });
-
             Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();

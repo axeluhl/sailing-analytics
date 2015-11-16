@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -84,12 +85,9 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
-        
         userService.addUserStatusEventHandler(this);
-
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
-
-            public void notifyStateChange(){
+            public void notifyStateChange() {
                 String caption;
                 String tooltip;
                 switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
@@ -124,7 +122,6 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                 mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
             }
-
         });
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
@@ -133,8 +130,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */
-                25);
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */ 25);
         this.mainPanel.add(splitLayoutPanel);
 
         // initialize components - they need to be added before other widgets to get the right width
@@ -158,7 +154,6 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                     "managemedia"));
         }
         onUserStatusChange(userService.getCurrentUser());
-
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
@@ -208,14 +203,12 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         final MediaManagementControl multiSelectionControl = new MediaManagementControl(mediaPlayerManager,
                 result, stringMessages);
         result.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                     multiSelectionControl.show();
             }
         });
-
-        // hide button initially as we defer showing the button to the asynchroneous
+        // hide button initially as we defer showing the button to the asynchronous
         // task that gets launched by the media service to get video tracks
         result.setVisible(false);
         return result;
@@ -291,15 +284,19 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
 
     @Override
     public void onUserStatusChange(UserDTO user) {
-        Button toggleButton = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel).getToggleButton();
-        if (user != null
-                && (user.hasRole(DefaultRoles.ADMIN.getRolename()) || user.hasRole(Roles.eventmanager.getRolename()))) {
-            toggleButton.setVisible(true);
-            forceLayout();
-        } else {
-            markPassingsPanel.setVisible(false);
-            toggleButton.setVisible(false);
-            forceLayout();
+        final Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
+        if (associatedSplitter != null) { // if the panel is not present, the splitter may not be found
+            final Button toggleButton = associatedSplitter.getToggleButton();
+            if (user != null
+                    && (user.hasRole(DefaultRoles.ADMIN.getRolename()) ||
+                        user.hasRole(Roles.eventmanager.getRolename()))) {
+                toggleButton.setVisible(true);
+                forceLayout();
+            } else {
+                markPassingsPanel.setVisible(false);
+                toggleButton.setVisible(false);
+                forceLayout();
+            }
         }
     }
 }

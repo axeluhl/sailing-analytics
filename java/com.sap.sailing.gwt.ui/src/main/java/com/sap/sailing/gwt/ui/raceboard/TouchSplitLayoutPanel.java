@@ -613,7 +613,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastVerticalSplitter != null) {
             Panel panel = createToggleButtonPanel(allVerticalSplitters,
                     "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton",
-                    cm, additionalVerticalButtonsAndStyles);
+                    cm, additionalVerticalButtonsAndStyles); // TODO additional buttons will only be displayed if at least one vertical splitter is... on purpose?
             lastVerticalSplitter.addToogleButtons(panel);
             lastVerticalSplitter.setVisible(true);
             lastVerticalSplitter.setDraggerVisible(false);
@@ -621,7 +621,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         ensureVerticalToggleButtonPosition();
         if (lastHorizontalSplitter != null) {
             Panel horizontalButtonsPanel = createToggleButtonPanel(allHorizontalSplitters,
-                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, null);
+                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);
             panelForHorizontalButtons.add(horizontalButtonsPanel);
             lastHorizontalSplitter.setVisible(false);
             lastHorizontalSplitter.setDraggerVisible(false);
