@@ -394,13 +394,10 @@
         <profile>
             <id>install-android-sdk-windows</id>
             <activation>
-                <property>
-                    <name>leandi</name>
-                    <value>true</value>
-                </property>
-                <file>
+                <!-- TODO activate on release build branch -->
+                <!-- <file>
                     <missing>${basedir}/android-sdk-windows/platform-tools/adb.exe</missing>
-                </file>
+                </file> -->
             </activation>
             <build>
                 <plugins>
