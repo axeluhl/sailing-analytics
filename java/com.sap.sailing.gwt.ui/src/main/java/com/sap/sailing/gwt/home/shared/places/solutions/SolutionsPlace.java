@@ -53,8 +53,6 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     // nothing to do; it's just to make calendar-based access server-countable
-                    String text = response.getText();
-                    GWT.log("Received "+text);
                 }
 
                 @Override
