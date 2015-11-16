@@ -32,6 +32,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -276,6 +277,13 @@ public class LoginActivity extends BaseActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
+        String[] addresses = NetworkHelper.getInstance(this).getLocalIpAddress();
+        if (addresses != null) {
+            int len = addresses.length;
+            for (int i = 0; i < len; i++) {
+                ExLog.i(this, TAG, "IP-Addresses: " + addresses[i]);
+            }
+        }
 
         // This is required to reactivate the loader manager after configuration change (screen rotation)
         getLoaderManager();
@@ -485,6 +493,17 @@ public class LoginActivity extends BaseActivity
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
+    private void resetData() {
+        setupDataManager();
+
+        addEventListFragment();
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.area_fragment, new Fragment());
+        transaction.replace(R.id.position_fragment, new Fragment());
+        transaction.commit();
+    }
+
     private class BackdropClick implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -498,17 +517,6 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             resetData();
         }
-    }
-
-    private void resetData() {
-        setupDataManager();
-
-        addEventListFragment();
-
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.area_fragment, new Fragment());
-        transaction.replace(R.id.position_fragment, new Fragment());
-        transaction.commit();
     }
 
     private class AnimatorSetListener implements Animator.AnimatorListener {
