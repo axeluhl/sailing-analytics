@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab.MultiregattaMediaPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab.RegattaMediaPlace;
@@ -227,15 +228,24 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName,
+    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
+        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
+                    raceMetadata.getRegattaAndRaceIdentifier());
+    }
+    
+    private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier) {
+        return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, leaderboardGroupName,
                 raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
     }
     
-    private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, String regattaName, String trackedRaceName) {
+    private Map<String, String> createRaceBoardLinkParameters(String leaderboardName, 
+            String leaderboardGroupName, String regattaName, String trackedRaceName) {
         Map<String, String> linkParams = new HashMap<String, String>();
         linkParams.put("eventId", getCtx().getEventId());
         linkParams.put("leaderboardName", leaderboardName);
+        if (leaderboardGroupName != null) {
+            linkParams.put("leaderboardGroupName", leaderboardGroupName);
+        }
         linkParams.put("raceName", trackedRaceName);
         linkParams.put("regattaName", regattaName);
         linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_MODE, "simple");

@@ -277,7 +277,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * {@link RaceColumnDTO#getRaceIdentifier(String) race identifier} matches the value of this attribute will be
      * added.
      */
-    private final RaceIdentifier preSelectedRace;
+    private final RegattaAndRaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
     
@@ -619,7 +619,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
+            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor,
+                    LeaderboardPanel.this.preSelectedRace).getAsHtml();
             String competitorColorBarStyle;
             if (LeaderboardPanel.this.isEmbedded && preSelectedRace != null) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";

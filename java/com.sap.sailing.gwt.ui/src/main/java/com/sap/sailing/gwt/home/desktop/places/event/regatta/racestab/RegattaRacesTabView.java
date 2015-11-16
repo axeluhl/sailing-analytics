@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
@@ -263,10 +262,10 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         public DesktopRegattaCompetitionPresenter() {
             super(compFormatContainerUi);
         }
-
+        
         @Override
-        protected String getRaceViewerURL(String leaderboardName, RegattaAndRaceIdentifier raceIdentifier) {
-            return currentPresenter.getRaceViewerURL(leaderboardName, raceIdentifier);
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
+            return currentPresenter.getRaceViewerURL(raceMetadata);
         }
     }
 

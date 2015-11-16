@@ -27,27 +27,20 @@
 	<script src="com.sap.sailing.gwt.home.Home/com.sap.sailing.gwt.home.Home.nocache.js"></script>
 	<style type="text/css">
 	.loading {
-		margin: 0px;
-		padding-top: 20px;
-		position: absolute; top: 0;
-		height: 100%;
-		width: 100%;
-			
-	}
-	.loading >.sapsailing {
-		margin-top: 100px;
-		margin-left: 40px;
-		width: 100%;
+		position: absolute;
+		top: 80px;
+		bottom: 0;
+		left: 0;
+		right: 0;
 		font-size: 120%;
-		color:#008fcc;
+	}
+	.loading > .sapsailing {
+		margin: 40px;
+		color: #008fcc;
 		font-weight: bold;
 	}
-	.loading >.waitmessage {
-		margin-top: 60px;
-		margin-bottom: 70px;
-		margin-left: 40px;
-		width: 100%;
-		font-size: 120%;
+	.loading > .waitmessage {
+		margin: 60px 40px;
 	}
 	
 	.signal {
@@ -109,7 +102,7 @@
 	<div id="loading" class="loading">
 		<p class="sapsailing">SAP Sailing Analytics</p>
 		<p class="waitmessage">Loading, please wait...</p>
-		<div class="signal" />
+		<div class="signal"></div>
 	</div>
 </body>
 </html>
