@@ -77,8 +77,8 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     private final Comparator<GroupKey> ascendingByGroupAverageComparator = new Comparator<GroupKey>() {
         @Override
         public int compare(GroupKey key1, GroupKey key2) {
-            GroupKey mainKey1 = key1.getMainKey();
-            GroupKey mainKey2 = key2.getMainKey();
+            GroupKey mainKey1 = GroupKey.Util.getMainKey(key1);
+            GroupKey mainKey2 = GroupKey.Util.getMainKey(key2);
             return Double.compare(averagePerMainKey.get(mainKey1), averagePerMainKey.get(mainKey2));
         }
         public String toString() {
@@ -97,8 +97,8 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     private final Comparator<GroupKey> ascendingByGroupMedianComparator = new Comparator<GroupKey>() {
         @Override
         public int compare(GroupKey key1, GroupKey key2) {
-            GroupKey mainKey1 = key1.getMainKey();
-            GroupKey mainKey2 = key2.getMainKey();
+            GroupKey mainKey1 = GroupKey.Util.getMainKey(key1);
+            GroupKey mainKey2 = GroupKey.Util.getMainKey(key2);
             return Double.compare(medianPerMainKey.get(mainKey1), medianPerMainKey.get(mainKey2));
         }
         public String toString() {
@@ -244,7 +244,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         
         Map<GroupKey, List<Number>> valuesPerMainKey = new HashMap<>();
         for (Entry<GroupKey, ? extends Number> resultEntry : currentResultValues.entrySet()) {
-            GroupKey mainKey = resultEntry.getKey().getMainKey();
+            GroupKey mainKey = GroupKey.Util.getMainKey(resultEntry.getKey());
             Number value = resultEntry.getValue();
             
             if (!isCurrentResultSimple()) {
@@ -313,7 +313,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     private List<GroupKey> getSortedMainKeys() {
         Collection<GroupKey> mainKeySet = new HashSet<>();
         for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-            mainKeySet.add(groupKey.getMainKey());
+            mainKeySet.add(GroupKey.Util.getMainKey(groupKey));
         }
         List<GroupKey> sortedKeys = new ArrayList<>(mainKeySet);
         Collections.sort(sortedKeys, getKeyComparator());
@@ -340,13 +340,8 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     
     private GroupKey groupKeyToSeriesKey(GroupKey groupKey) {
         if (groupKey.hasSubKeys()) {
-            List<GroupKey> subKeys = groupKey.getSubKeys();
-            GroupKey subMainKey = subKeys.get(0);
-            List<GroupKey> subSubKeys = new ArrayList<>();
-            for (int i = 1; i < subKeys.size(); i++) {
-                subSubKeys.add(subKeys.get(i));
-            }
-            return subSubKeys.isEmpty() ? subMainKey : new CompoundGroupKey(subMainKey, subSubKeys);
+            List<? extends GroupKey> subKeys = GroupKey.Util.getSubKeys(groupKey);
+            return subKeys.size() == 1 ? subKeys.get(0) : new CompoundGroupKey(subKeys);
         } else {
             return simpleResultSeriesKey;
         }

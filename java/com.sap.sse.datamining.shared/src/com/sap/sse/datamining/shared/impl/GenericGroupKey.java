@@ -31,15 +31,10 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     public boolean hasSubKeys() {
         return false;
     }
-    
-    @Override
-    public GroupKey getMainKey() {
-        return this;
-    }
 
     @Override
-    public List<GroupKey> getSubKeys() {
-        return Collections.emptyList();
+    public List<? extends GroupKey> getKeys() {
+        return Collections.singletonList(this);
     }
     
     @Override
