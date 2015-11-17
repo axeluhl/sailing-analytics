@@ -1,5 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,7 +22,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -24,12 +34,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
+import com.sap.sailing.android.tracking.app.utils.LocationHelper;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -158,8 +163,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             if (showingThankYouNote) {
                 RegattaActivity regattaActivity = (RegattaActivity) getActivity();
                 regattaActivity.checkout();
-            } else {
+            } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
+            } else {
+                showNoGPSError();
             }
             break;
         case R.id.add_photo_button:
@@ -174,6 +181,20 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         default:
             break;
         }
+    }
+
+    private void showNoGPSError() {
+        new AlertDialog.Builder(getActivity())
+            .setCancelable(true).setTitle(getString(R.string.warning))
+            .setMessage(getString(R.string.enable_gps))
+            .setNegativeButton(getString(R.string.no), null)
+            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    LocationHelper.openLocationSettings(getActivity());
+                }
+            })
+            .show();
     }
 
     public void setChangePhotoButtonHidden(boolean hidden) {
@@ -225,7 +246,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             RegattaActivity activity = (RegattaActivity) getActivity();
 
             if (requestCode == CAMERA_REQUEST_CODE) {
-                File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+                File photoFile = activity.getImageFile(CAMERA_TEMP_FILE);
                 Bitmap photo;
                 try {
                     photo = decodeUri(Uri.fromFile(photoFile));
@@ -239,7 +260,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
                     }
                 } finally {
-                    ((RegattaActivity) getActivity()).deleteFile(CAMERA_TEMP_FILE);
+                    activity.deleteFile(CAMERA_TEMP_FILE);
                 }
             } else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
                 Uri selectedImage = data.getData();

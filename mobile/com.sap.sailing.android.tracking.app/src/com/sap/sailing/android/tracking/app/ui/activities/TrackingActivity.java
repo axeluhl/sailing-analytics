@@ -219,7 +219,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
         boolean gpsEnabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (gpsEnabled == false) {
+        if (!gpsEnabled) {
             showErrorPopup(R.string.warning, R.string.gps_turned_off);
         }
     }
