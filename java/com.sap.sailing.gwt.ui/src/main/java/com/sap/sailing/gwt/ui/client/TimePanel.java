@@ -89,7 +89,13 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private static ClientResources resources = GWT.create(ClientResources.class);
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
+    /**
+     * @param isScreenLargeEnoughToOfferChartSupport
+     *            if <code>true</code>, the right padding will be set such that the time panel lines up with charts such
+     *            as the competitor chart or the wind chart shown above it
+     */
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -105,8 +111,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        // TODO pass this in as a parameter; bug 3345
-        boolean isScreenLargeEnoughToOfferChartSupport = true;
         if (isScreenLargeEnoughToOfferChartSupport) {
             timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
         }

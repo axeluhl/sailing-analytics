@@ -170,10 +170,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
-        
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                competitorsAndTheirBoats, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
-                errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */false);
+                competitorsAndTheirBoats, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */ null, raceboardViewConfig,
+                errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
+                /* isScreenLargeEnoughToOfferChartSupport */ true);
         return raceBoardPanel;
     }
     

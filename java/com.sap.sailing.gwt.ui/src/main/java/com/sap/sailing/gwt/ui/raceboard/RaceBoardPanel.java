@@ -123,13 +123,17 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
      *            context of an event; may be <code>null</code>.
+     * @param isScreenLargeEnoughToOfferChartSupport
+     *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
+     *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
+     *            the charts are created.
      */
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, UUID eventId, RaceBoardViewConfiguration raceboardViewConfiguration,
             ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -176,7 +180,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, showMapControls, raceMap, userService); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, showMapControls, isScreenLargeEnoughToOfferChartSupport, raceMap, userService); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
@@ -190,7 +194,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             }
         }
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardViewConfiguration.isCanReplayDuringLiveRaces());
+                raceboardViewConfiguration.isCanReplayDuringLiveRaces(), isScreenLargeEnoughToOfferChartSupport);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
@@ -198,17 +202,20 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     }
     
     /**
-     * @param event an optional event; may be <code>null</code> or else can be used to show some context information in
-     * the {@link GlobalNavigationPanel}.
+     * @param event
+     *            an optional event; may be <code>null</code> or else can be used to show some context information in
+     *            the {@link GlobalNavigationPanel}.
+     * @param isScreenLargeEnoughToOfferChartSupport
+     *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
+     *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
+     *            the charts are created.
      */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event, FlowPanel mainPanel,
-            boolean showMapControls, RaceMap raceMap, UserService userService) {
+            boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, RaceMap raceMap, UserService userService) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
-        // TODO pass this in as a parameter; bug 3345
-        boolean isScreenLargeEnoughToOfferChartSupport = true;
         if (isScreenLargeEnoughToOfferChartSupport) {
             competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider,
                         timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
@@ -238,7 +245,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             mainPanel.add(componentViewer.getViewerWidget());
         }
         boolean showLeaderboard = getConfiguration().isShowLeaderboard();
-        if (Document.get().getClientWidth() <= 1024) {
+        if (Document.get().getClientWidth() < 1024) {
             showLeaderboard = false;
         }
         setLeaderboardVisible(showLeaderboard);
