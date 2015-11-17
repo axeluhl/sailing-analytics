@@ -1,5 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -24,7 +25,7 @@ public class PingHelper {
         try {
             JSONObject fixJson = new JSONObject();
 
-            fixJson.put("timestamp", location.getTime());
+            fixJson.put("timestamp", new Date().getTime());
             fixJson.put("longitude", location.getLongitude());
             fixJson.put("latitude", location.getLatitude());
 
