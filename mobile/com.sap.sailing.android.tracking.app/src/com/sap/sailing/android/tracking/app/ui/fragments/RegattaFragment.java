@@ -1,15 +1,19 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +22,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -26,12 +34,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
+import com.sap.sailing.android.tracking.app.utils.LocationHelper;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -160,7 +163,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             if (showingThankYouNote) {
                 RegattaActivity regattaActivity = (RegattaActivity) getActivity();
                 regattaActivity.checkout();
-            } else if(isGPSEnabled()){
+            } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
             } else {
                 showNoGPSError();
@@ -181,24 +184,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void showNoGPSError() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true);
-        builder.setTitle(getString(R.string.warning));
-        builder.setMessage(getString(R.string.enable_gps));
-        builder.setNegativeButton(getString(R.string.no), null);
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            }
-        });
-        builder.show();
-    }
-
-    private boolean isGPSEnabled() {
-        LocationManager service = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        return service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        new AlertDialog.Builder(getActivity())
+            .setCancelable(true).setTitle(getString(R.string.warning))
+            .setMessage(getString(R.string.enable_gps))
+            .setNegativeButton(getString(R.string.no), null)
+            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    LocationHelper.openLocationSettings(getActivity());
+                }
+            })
+            .show();
     }
 
     public void setChangePhotoButtonHidden(boolean hidden) {
