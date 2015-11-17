@@ -2,6 +2,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -194,13 +195,14 @@ public class WaypointPositionAndDistanceCache {
         if (map != null) {
             final SortedMap<TimePoint, Position> tailMap = map.tailMap(roundToResolution(affectedTimeRange.from()));
             synchronized (map) {
-                for (Entry<TimePoint, Position> e : tailMap.entrySet()) {
+                for (Iterator<Entry<TimePoint, Position>> i=tailMap.entrySet().iterator(); i.hasNext(); ) {
+                    final Entry<TimePoint, Position> e = i.next();
                     final TimePoint timePoint = e.getKey();
                     if (timePoint.after(affectedTimeRange.to())) {
                         break;
                     }
                     assert timePoint.equals(roundToResolution(timePoint));
-                    map.remove(timePoint);
+                    i.remove();
                     synchronized (waypoints) {
                         for (Waypoint otherWaypoint : waypoints) {
                             ControlPoint otherControlPoint = otherWaypoint.getControlPoint();
