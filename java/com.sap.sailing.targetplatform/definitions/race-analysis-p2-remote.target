@@ -82,9 +82,9 @@
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
 <plugin id="com.sun.mail.javax.mail"/>
-<plugin id="jackson-core-lgpl"/>
+<plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
-<plugin id="jackson-mapper-lgpl"/>
+<plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
