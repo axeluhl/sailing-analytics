@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.WaypointPositionAndDistanceCache;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
@@ -125,6 +126,34 @@ public class WaypointPositionAndDistanceCacheTest {
         trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(2, 0), now.plus(1 /* ms */))); // affects the cache interval
         assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
         assertEquals(5, recalculations); // one for each waypoint, one for the distance; second request recalculates except start/finish position
+    }
+
+    /**
+     * A white-box text for bug 3364: when multiple cache entries exist in the map, invalidating a cache entry can cause a
+     * ConcurrentModificationException.
+     */
+    @Test
+    public void testInvalidateByNewMarkPositionWithMultipleMarkPositionsInCache() {
+        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
+        trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.divide(10)))),
+                now.plus(timeRangeResolution.divide(10)))); // does not affect the cache interval
+        trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.times(2)))),
+                now.plus(timeRangeResolution.times(2))));
+        trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.times(3)))),
+                now.plus(timeRangeResolution.times(3))));
+        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
+        assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution)).getNauticalMiles(), 0.01);
+        assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.times(2).divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution.times(2))).getNauticalMiles(), 0.01);
+        trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.divide(5)))),
+                now.plus(timeRangeResolution.divide(5)))); // cause cache invalidation with several entries in the map
+        recalculations = 0;
+        assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.times(2).divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution.times(2))).getNauticalMiles(), 0.01);
+        assertEquals(1, recalculations);
+        
     }
 
     @Test
