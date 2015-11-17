@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -41,7 +42,8 @@ import com.viewpagerindicator.CirclePageIndicator;
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 
     TrackingService trackingService;
-    boolean trackingServiceBound;
+    private boolean trackingServiceBound;
+    private boolean gpsReceived;
 
     MessageSendingService messageSendingService;
     boolean messageSendingServiceBound;
@@ -75,9 +77,12 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onCreate(savedInstanceState);
 
         prefs = new AppPreferences(this);
-
-        checkinDigest = getIntent().getExtras().getString(
-                getString(R.string.tracking_activity_checkin_digest_parameter));
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            checkinDigest = extras.getString(getString(R.string.tracking_activity_checkin_digest_parameter));
+        } else {
+            checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        }
         lastSpeedIndicatorText = getString(R.string.initial_hyphen);
 
         setContentView(R.layout.fragment_hud_container);
@@ -208,7 +213,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onResume();
 
         timer = new TimerRunnable();
-        timer.start();
+        Thread thread = new Thread(timer);
+        thread.start();
 
         if (mPagerAdapter == null) {
             mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -387,10 +393,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * Update UI with a string containing the time since tracking started, e.g. 01:22:45
      */
     public void updateTimer() {
-        long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-        TextView textView = (TextView) findViewById(R.id.tracking_time_label);
-        if (textView != null) {
-            textView.setText(getTimeFormatString(diff));
+        long trackingTimerStarted = prefs.getTrackingTimerStarted();
+        if (trackingTimerStarted > 0) {
+            hideWaitForGPSText();
+            long diff = System.currentTimeMillis() - trackingTimerStarted;
+            TextView textView = (TextView) findViewById(R.id.tracking_time_label);
+            if (textView != null) {
+                textView.setText(getTimeFormatString(diff));
+            }
+        }
+    }
+
+    private void hideWaitForGPSText() {
+        if (!gpsReceived) {
+            View waitForGPSLabel = findViewById(R.id.wait_for_gps);
+            if (waitForGPSLabel != null) {
+                waitForGPSLabel.setVisibility(View.GONE);
+                gpsReceived = true;
+            }
         }
     }
 
@@ -404,15 +424,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     private class TimerRunnable implements Runnable {
 
-        public Thread t;
-        public volatile boolean running = true;
+        private boolean running;
 
-        public void start() {
+        TimerRunnable() {
             running = true;
-            if (t == null) {
-                t = new Thread(this);
-                t.start();
-            }
         }
 
         @Override

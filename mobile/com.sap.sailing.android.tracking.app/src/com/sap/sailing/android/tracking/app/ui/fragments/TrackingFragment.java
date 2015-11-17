@@ -43,9 +43,6 @@ public class TrackingFragment extends BaseFragment {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
 
         prefs = new AppPreferences(getActivity());
-        if (prefs.getTrackingTimerStarted() == 0) {
-            prefs.setTrackingTimerStarted(System.currentTimeMillis());
-        }
 
         return view;
     }
