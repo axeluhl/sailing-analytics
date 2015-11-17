@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sse.gwt.client.celltable.HasEqualIdentity;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
-public class RegattaSelectionModel implements RegattaSelectionProvider {
+public class RegattaSelectionModel implements RegattaSelectionProvider, RefreshableSelectionModel<RegattaIdentifier> {
     private final List<RegattaIdentifier> selection;
     
     private final List<RegattaIdentifier> allRegattas;
@@ -90,5 +92,70 @@ public class RegattaSelectionModel implements RegattaSelectionProvider {
     @Override
     public boolean hasMultiSelection() {
         return hasMultiSelection;
+    }
+
+    /**
+     * Returns an instance of <code>HasEqualIdentity&ltRegattaIdentifier&gt</code>. The compare
+     * method works the same way as <code>o1.eqauls(o2)</code>.
+     */
+    @Override
+    public HasEqualIdentity<RegattaIdentifier> getHasEqualIdentity() {
+        return new HasEqualIdentity<RegattaIdentifier>() {
+            @Override
+            public boolean compare(RegattaIdentifier o1, RegattaIdentifier o2) {
+                return o1.equals(o2);
+            }
+        };
+    }
+
+    /**
+     * This method will have no impact on the object, because the only logical way to
+     * compare <code>RegattaIdentifier</code> objects is to use the equals method.
+     */
+    @Override
+    public void setHasEqualIdentity(HasEqualIdentity<RegattaIdentifier> comp) {
+        //TODO
+    }
+
+    @Override
+    public Set<RegattaIdentifier> getSelectedSet() {
+        Iterable<RegattaIdentifier> selected = getSelectedRegattas();
+        Set<RegattaIdentifier> result = new HashSet<>();
+        for (RegattaIdentifier it : selected) {
+            result.add(it);
+        }
+        return result;
+    }
+
+    @Override
+    public void clear() {
+        setAllRegattas(new ArrayList<RegattaIdentifier>());
+    }
+
+    @Override
+    public void setSelected(RegattaIdentifier item, boolean selected) {
+        if (selected) {
+            List<RegattaIdentifier> all = getAllRegattas();
+            List<RegattaIdentifier> selection = getSelectedRegattas();
+            all.add(item);
+            selection.add(item);
+            setAllRegattas(all);
+            setSelection(selection);
+        } else {
+            List<RegattaIdentifier> all = getAllRegattas();
+            all.add(item);
+            setAllRegattas(all);
+        }
+    }
+
+    @Override
+    public void refreshSelectionModel(Iterable<RegattaIdentifier> newObjects) {
+        if(newObjects != null) {
+            List<RegattaIdentifier> all = new ArrayList<>();
+            for(RegattaIdentifier it : newObjects) {
+                all.add(it);
+            }
+            setAllRegattas(all);
+        }
     }
 }
