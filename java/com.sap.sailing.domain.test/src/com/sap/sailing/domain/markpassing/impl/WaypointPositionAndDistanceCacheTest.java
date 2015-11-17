@@ -148,8 +148,8 @@ public class WaypointPositionAndDistanceCacheTest {
         assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution)).getNauticalMiles(), 0.01);
         assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.times(2).divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution.times(2))).getNauticalMiles(), 0.01);
         trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
-                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.divide(5)))),
-                now.plus(timeRangeResolution.divide(5)))); // cause cache invalidation with several entries in the map
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.minus(1)))),
+                now.plus(timeRangeResolution.minus(1)))); // cause cache invalidation with several entries in the map
         recalculations = 0;
         assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution)).getNauticalMiles(), 0.01);
         assertEquals(2, recalculations); // distance calculation also requires position calculation, therefore 2, not 1
