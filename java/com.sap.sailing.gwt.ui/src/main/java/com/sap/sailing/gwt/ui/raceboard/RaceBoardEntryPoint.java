@@ -98,7 +98,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
-                checkUrlParameters(result, canReplayWhileLiveIsPossible, showMapControls, Document.get().getClientHeight() >= 768);
+                checkUrlParameters(result, canReplayWhileLiveIsPossible, showMapControls,
+                        /* isScreenLargeEnoughToOfferChartSupport */ Document.get().getClientHeight() >= 600);
             }
             
             @Override
