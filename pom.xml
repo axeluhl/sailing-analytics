@@ -92,7 +92,8 @@
                         </executions>
                     </plugin>
                     
-                    <plugin>
+                    <!-- FIXME: Do we need this part? -> delete if the build works without. -->
+                    <!-- <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
@@ -111,7 +112,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin> -->
                 </plugins>
             </build>
         </profile>
