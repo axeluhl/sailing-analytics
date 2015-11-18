@@ -33,9 +33,6 @@
     <sign.alias>stg_debug</sign.alias>
     <sign.storepass>stg_debug</sign.storepass>
     <sign.keypass>stg_debug</sign.keypass>
-    
-    <!-- Activates some configuration when set to true in app project child poms -->
-    <app-project>false</app-project>
   </properties>
 
   <dependencyManagement>
@@ -271,6 +268,31 @@
       </profile>
       
       <profile>
+        <!-- activate with parameter '-P non-leandi-release'-->
+        <id>leandi-release</id>
+        <activation>
+          <property>
+            <name>ldi.releaseBuild</name>
+            <value>true</value>
+          </property>
+        </activation>
+
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                  <release>true</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      
+      <profile>
         <id>non-leandi</id>
         <activation>
           <property>
@@ -355,8 +377,11 @@
       
       <profile>
         <id>leandi</id>
-        <properties>
-        </properties>
+        <activation>
+          <property>
+            <name>ldi.releaseBuild</name>
+          </property>
+        </activation>
         <build>
           <pluginManagement>
             <plugins>
@@ -364,7 +389,6 @@
                 <groupId>com.simpligility.maven.plugins</groupId>
                 <artifactId>android-maven-plugin</artifactId>
                 <configuration>
-                  <release>true</release>
                     <sdk>
                         <path>${basedir}/android-sdk-windows</path>
                         <platform>${platform.version}</platform>
@@ -379,11 +403,10 @@
         <profile>
             <id>leandi-sign</id>
             <activation>
-                <!-- TODO: activate on release build branch -->
-                <!-- <property>
-                    <name>app-project</name>
+                <property>
+                    <name>codesign.sap.realcodesigning</name>
                     <value>true</value>
-                </property> -->
+                </property>
             </activation>
             <build>
               <pluginManagement>
