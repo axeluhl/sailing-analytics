@@ -14,10 +14,10 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
 
     private String leaderboardName;
 
-    public RegattaLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public RegattaLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable, String leaderboardName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        super(sailingService, stringMessages, errorReporter, editable, callback);
+        super(sailingService, stringMessages, errorReporter, editable, callback, boatClass);
         this.leaderboardName = leaderboardName;
     }
 

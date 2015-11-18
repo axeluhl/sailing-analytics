@@ -22,14 +22,16 @@
 		</div>
 		  
 		<div class="{res.mediaCss.grid}">
-			<div class="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.letItScroll}">
-				<table class="{local_res.css.regattaleaderboard_table}">
-					<tr>
-						<td>
-							<g:HTMLPanel ui:field="oldLeaderboardPanel"></g:HTMLPanel>
-						</td>
-					</tr>
-				</table>
+			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+				<div class="{local_res.css.letItScroll}">
+					<table class="{local_res.css.regattaleaderboard_table}">
+						<tr>
+							<td>
+								<g:HTMLPanel ui:field="oldLeaderboardPanel"></g:HTMLPanel>
+							</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 		</div>
 	</g:HTMLPanel>

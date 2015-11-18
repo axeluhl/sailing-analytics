@@ -19,8 +19,7 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public AbstractSeriesPlace(String eventUuidAsString) {
-        this.ctx = new SeriesContext();
-        ctx.withId(eventUuidAsString);
+        this.ctx = new SeriesContext(eventUuidAsString);
     }
 
     public String getTitle(String eventName) {
@@ -34,7 +33,7 @@ public abstract class AbstractSeriesPlace extends Place {
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
         protected PLACE getPlaceFromParameters(Map<String, String> parameters) {
-            return getRealPlace(new SeriesContext().withId(parameters.get(PARAM_EVENTID)));
+            return getRealPlace(new SeriesContext(parameters.get(PARAM_EVENTID)));
         }
         
         protected Map<String, String> getParameters(PLACE place) {

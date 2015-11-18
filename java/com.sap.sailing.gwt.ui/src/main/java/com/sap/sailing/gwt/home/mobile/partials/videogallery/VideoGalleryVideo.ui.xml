@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
   		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials"> 
   	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.videogallery.VideoGalleryResources" />
 	<g:HTMLPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {local_res.css.videogallery_video}">
 		<div class="{local_res.css.video}">

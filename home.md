@@ -32,6 +32,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
+  * [[Log File Analysis|wiki/log-file-analysis]]
 * Information for Developers
   * [[OnBoarding Information|wiki/onboarding]]
   * [[Cook Book|wiki/cook-book]]

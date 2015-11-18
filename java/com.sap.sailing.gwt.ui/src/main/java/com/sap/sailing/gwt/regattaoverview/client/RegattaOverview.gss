@@ -163,7 +163,7 @@ body {
 	background-position: center center;
 }
 .refreshButton_live {
-  background-color: #f0ab00;
+  background-color: red;
 }
 .refreshButton_playing {
   background-color: #f0ab00;

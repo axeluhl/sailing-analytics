@@ -3,6 +3,7 @@ package com.sap.sse.common;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -146,6 +147,19 @@ public class Util {
             }
         }
         return addTo;
+    }
+    
+    /**
+     * Adds <code>v</code> to the value set for key <code>k</code>. If no entry exists yet for <code>k</code>, the
+     * entry is created using a {@link HashSet} for the value set.
+     */
+    public static <K, V> void add(Map<K, Set<V>> map, K k, V v) {
+        Set<V> set = map.get(k);
+        if (set == null) {
+            set = new HashSet<>();
+            map.put(k, set);
+        }
+        set.add(v);
     }
 
     /**
@@ -401,6 +415,39 @@ public class Util {
         boolean result = false;
         if (timePoint != null && a != null && b != null) {
             result = timePoint.after(a) && timePoint.before(b);
+        }
+        return result;
+    }
+    
+    /**
+     * Searches the dominant object in an <code>Iterable&lt;T&gt;</code> collection.
+     * 
+     * @param objects
+     *            The <code>Iterable&lt;T&gt;</code> collection which should be analyzed. Objects are compared
+     *            by their definition of {@link Object#equals(Object)}.
+     * @return <code>T</code> Returns the dominant object. If the collection have two objects with the highest count,
+     *         you will get one of them returned. If the collection is <code>null</code> or empty, the method will
+     *         return <code>null</code>.
+     */
+    public static <T> T getDominantObject(Iterable<T> objects) {
+        T result = null;
+        if (objects != null) {
+            if (objects.iterator().hasNext()) {
+                HashMap<T, Integer> countPerObject = new HashMap<>();
+                int highestCount = 0;
+                for (T it : objects) {
+                    Integer objectCount = countPerObject.get(it);
+                    if (objectCount == null) {
+                        objectCount = 0;
+                    }
+                    objectCount++;
+                    countPerObject.put(it, objectCount);
+                    if (objectCount > highestCount) {
+                        highestCount = objectCount;
+                        result = it;
+                    }
+                }
+            }
         }
         return result;
     }

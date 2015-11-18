@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.home.mobile.app;
 import java.util.List;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
@@ -20,7 +21,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -82,7 +82,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
 
-    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
+    public PlaceNavigation<?> getRegattaOverviewNavigation(String eventId, String leaderboardName, String baseUrl,
+            boolean isOnRemoteServer) {
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
     }
 }

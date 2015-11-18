@@ -1366,7 +1366,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String durationPlain();
     String finishedRaces();
     String selectCompetitor();
-    String allBoatClasses();
+    String all();
     String points();
     String numberOfRacesShort();
     String courseGeometry();
@@ -1417,6 +1417,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String groupAverageDescending();
     String groupMedianAscending();
     String groupMedianDescending();
+    String resultsFoundForSearch(@PluralCount(DefaultRule_1_0n.class) int amount, String searchText);
     String runPredefinedQuery();
     String selectPredefinedQuery();
     String predefinedQueryRunner();
@@ -1427,6 +1428,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String useClassGetNameTooltip();
     String useStringLiterals();
     String useStringLiteralsTooltip();
+    String errorLoadingDataWithTryAgain();
     String addGalleryPhoto();
     String addStageImage();
     String addTeaserImage();
@@ -1443,4 +1445,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String warningRegattaCompetitorRegistration();
     String competitorRegistrationsOnRaceDisabled();
     String addMarkToRegatta();
+    String selectALeaderboardGroup();
+    @Override
+    String pleaseSelect();
+    String requiresValidRegatta();
+    String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
+    String errorTryingToCreateEmbeddedMap(String message);
 }

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard.OldMultiLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
@@ -23,7 +24,6 @@ import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
@@ -55,13 +55,13 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(final EventSeriesLeaderboardsPlace myPlace, final AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String leaderboardName = myPlace.getCtx().getSeriesDTO().getLeaderboardId();
+        String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         
         if (leaderboardName != null && !leaderboardName.isEmpty()) {          
             EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
@@ -81,7 +81,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
 
             leaderboard.setMultiLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             leaderboardPanel.addLeaderboardUpdateListener(this);
-            if (currentPresenter.getCtx().getSeriesDTO().getState() != EventSeriesState.RUNNING) {
+            if (currentPresenter.getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 // TODO: this.leaderboard.hideRefresh();
             } else {
                 // TODO: start autorefresh?

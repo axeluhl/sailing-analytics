@@ -8,13 +8,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.RecentEventTeaser;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesTabView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -46,7 +46,7 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     public void start(SeriesEventsPlace myPlace, AcceptsOneWidget contentArea) {
         initWidget(ourUiBinder.createAndBindUi(this));
 
-        for (EventMetadataDTO eventOfSeries : currentPresenter.getCtx().getSeriesDTO().getEvents()) {
+        for (EventMetadataDTO eventOfSeries : currentPresenter.getSeriesDTO().getEvents()) {
             if(eventOfSeries.getState() == EventState.PLANNED) {
                 continue;
             }
