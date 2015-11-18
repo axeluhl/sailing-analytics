@@ -70,12 +70,27 @@ Content can be synced from there to a local directory using the following comman
 
 ``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
+## Automatic Log File Rotation to /var/log/old
+
+ - describe how logrotate is used and automatically configured during instance start-up and where the logs go
+
 ## Analysis Tools
 
 ### goaccess
+
+ - mention specific parameters and .goaccess config file required to parse our format
 
 ### apachetop
 
 ### AWStats
 
+ - specific log collection approach configured in /etc/awstats/*.conf script
+
+ - extension for per-virtual-host hit count
+
+ - configuration of central apache to present results (awstats.sapsailing.com)
+
 ### Custom Scripts
+
+ - unique_ips_per_referrer
+ - convertELBLogToApacheFormat
