@@ -168,10 +168,13 @@ public class WaypointPositionAndDistanceCacheTest {
 
     @Test
     public void testNewMarkPositionNotAffectingEntry() {
-        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
         trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
                 new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution))),
-                now.plus(timeRangeResolution))); // does not affect the cache interval
+                now.plus(timeRangeResolution)));
+        assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
+        trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
+                new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.times(2)))),
+                now.plus(timeRangeResolution.times(2)))); // only affects back to now.plus(timeRangeResolution) but not all the way back to now
         assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
         assertEquals(60, cache.getApproximateDistance(windwardWaypoint, start, now).getNauticalMiles(), 0.01);
         assertEquals(3, recalculations); // one for the position of each waypoint, one for the distance; second / third request from cache
