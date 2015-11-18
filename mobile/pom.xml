@@ -401,7 +401,7 @@
       </profile>
         
         <profile>
-            <id>leandi-sign</id>
+            <id>leandi-realsign</id>
             <activation>
                 <property>
                     <name>codesign.sap.realcodesigning</name>
