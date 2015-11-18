@@ -1,6 +1,6 @@
 # Log File Analysis
 
-[__TOC__]
+[[_TOC_]]
 
 ## Log File Types
 
@@ -48,11 +48,27 @@ For load-balanced set-ups we have an Amazon Elastic Load Balancer (ELB) dispatch
 
 In addition to this, the Apache servers on these load-balanced instances perform the same URL rewriting and reverse proxying using the same set of macros that the central Apache server uses.
 
-**However**, one key problem of these decentralized Apache log files is that the client IP address only identifies the load balancer instance, not the original client itself. With this, any type of analysis that tries to count the number of visitors will deliver skewed results. Counting the plain number of hits, though, is OK, as is the identification of the most-frequently used referrer URLs which can, e.g., help to identify popular leaderboards and races.
+**However**, one key problem of these decentralized Apache log files is that the client IP address only identifies the load balancer or reverse proxy instance, not the original client itself. With this, any type of analysis that tries to count the number of visitors will deliver skewed results. Counting the plain number of hits, though, is OK, as is the identification of the most-frequently used referrer URLs which can, e.g., help to identify popular leaderboards and races.
+
+Still, in order to provide the true client IP in the log files, we use the `X-Forwarded-For` HTTP header field which contains the comma-separated list of "hops" through which the request was reverse-proxied so far. The following combination of Apache `httpd.conf` entries make this work:
+
+<pre>
+  SetEnvIf X-Forwarded-For "^([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*).*$" original_client_ip=$1
+  LogFormat "%v %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+  LogFormat "%v %{original_client_ip}e %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" first_forwarded_for_ip
+  CustomLog logs/access_log combined env=!original_client_ip
+  CustomLog logs/access_log first_forwarded_for_ip env=original_client_ip
+</pre>
+
+This uses the SetEnvIf module, tries to match an IP address at the start of the `X-Forwarded-For` header field, and if found, assigns it to the `original_client_ip` variable. This variable, in turn, decides which of the two `CustomLog` directives is applied to the request. If the variable is set, instead of using the regular `%h` field for the client IP, the variable value is logged by `%{original_client_ip}`.
 
 ### Amazon EC2 Elastic Load Balancer (ELB) Logs
 
+An Amazon ELB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available. It seems a good idea to always capture these logs for archiving purposes. They end up on an S3 bucket, and by default we use `sapsailing-access-logs`.
 
+Content can be synced from there to a local directory using the following command:
+
+``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
 ## Analysis Tools
 
