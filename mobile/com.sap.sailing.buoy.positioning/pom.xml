@@ -92,6 +92,11 @@
     <profiles>
       <profile>
         <id>non-leandi</id>
+        <activation>
+          <property>
+            <name>!ldi.releaseBuild</name>
+          </property>
+        </activation>
         <build>
           <plugins>
             <plugin>
@@ -115,6 +120,13 @@
       
       <profile>
         <id>leandi-sign</id>
+            <activation>
+                <!-- TODO: activate on release build branch -->
+                <!-- <property>
+                    <name>app-project</name>
+                    <value>true</value>
+                </property> -->
+            </activation>
         <build>
           <plugins>
             <plugin>

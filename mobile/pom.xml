@@ -183,7 +183,7 @@
                 <alias>${sign.alias}</alias>
                 <storepass>${sign.storepass}</storepass>
                 <keypass>${sign.keypass}</keypass>
-                <!--<verbose>true</verbose>-->
+                <verbose>true</verbose>
                 <arguments>
                   <argument>-sigalg</argument><argument>MD5withRSA</argument>
                   <argument>-digestalg</argument><argument>SHA1</argument>
@@ -274,16 +274,9 @@
         <id>non-leandi</id>
         <activation>
           <property>
-            <name>leandi</name>
-            <value>false</value>
+            <name>!ldi.releaseBuild</name>
           </property>
         </activation>
-        <properties>
-          <sign.keystore>../android-keystore/STG.jks</sign.keystore>
-          <sign.alias></sign.alias>
-          <sign.storepass></sign.storepass>
-          <sign.keypass></sign.keypass>
-        </properties>
         <build>
           <pluginManagement>
             <plugins>

@@ -119,8 +119,7 @@
         <id>leandi</id>
         <activation>
           <property>
-            <name>leandi</name>
-            <value>true</value>
+            <name>ldi.releaseBuild</name>
           </property>
         </activation>
         <properties>
@@ -133,9 +132,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		
-		<!-- TODO Set to true on release build branch -->
-		<leandi>false</leandi>
 		
 		<android.sdk.version>24.4</android.sdk.version>
 		<android.platform-tools.version>23.0.1</android.platform-tools.version>
