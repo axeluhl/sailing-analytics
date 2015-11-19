@@ -331,7 +331,7 @@
             android:layout_height="100dp"
             android:layout_below="@+id/white_bar"
             android:text="@string/show_event"
-            android:background="@drawable/rounded_btn_red"
+            android:background="@drawable/rounded_btn_blue"
             tools:text="Show Event"/>
 
         <LinearLayout

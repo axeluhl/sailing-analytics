@@ -312,7 +312,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:text="@string/show_event"
-                    android:background="@drawable/rounded_btn_red"
+                    android:background="@drawable/rounded_btn_blue"
                     tools:text="Show Event"/>
             </RelativeLayout>
         </ScrollView>
