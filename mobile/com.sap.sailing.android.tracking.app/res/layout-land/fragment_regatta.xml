@@ -342,7 +342,7 @@
         android:layout_width="fill_parent"
         android:layout_height="@dimen/regatta_button_height"
         android:layout_above="@id/bottomLayout"
-        android:background="@color/gray">
+        android:background="@color/black">
 
         <View
             android:id="@+id/white_bar"
