@@ -101,7 +101,7 @@
                                 
                                 <configuration>
                                     <tasks>
-                                        <move file="${basedir}/android-sdk-windows/android-{android.api.version}"
+                                        <move file="${basedir}/android-sdk-windows/android-${android.api.version}"
                                             tofile="${basedir}/android-sdk-windows/platforms/android-${android.platform.version}"/>
                                         
                                     </tasks>
