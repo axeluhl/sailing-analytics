@@ -321,7 +321,6 @@ public class SimulatorMainPanel extends SimplePanel {
         fullTimePanel = this.createTimePanel();
 
         final Button toggleButton = timePanel.getAdvancedToggleButton();
-        toggleButton.setVisible(false); // delete this line to enable/ diable time panel open/ close toggle
         toggleButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
