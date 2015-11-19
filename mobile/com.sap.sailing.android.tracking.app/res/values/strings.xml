@@ -47,6 +47,7 @@
     <string name="speed_over_ground">Speed over Ground</string>
     <string name="none">None</string>
     <string name="show_leaderboard">Leader board</string>
+    <string name="show_event">Event</string>
     <string name="error_while_receiving_server_data">Error while receiving server data</string>
     <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
     <string name="warning">Warning</string>

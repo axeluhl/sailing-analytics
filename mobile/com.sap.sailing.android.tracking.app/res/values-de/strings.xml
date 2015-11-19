@@ -64,6 +64,7 @@
     <string name="speed_over_ground">Speed over Ground</string>
     <string name="none">Keine</string>
     <string name="show_leaderboard">Leaderboard</string>
+    <string name="show_event">Zum Event</string>
     <string name="desc_regatta_user_image">Benutzerdefiniertes Bild für Regatta</string>
     <string name="desc_add_photo_button">Foto hinzufügen Button</string>
     <string name="error_while_receiving_server_data">Fehler beim Empfang vom Server</string>

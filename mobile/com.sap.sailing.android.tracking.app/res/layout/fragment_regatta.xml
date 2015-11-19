@@ -312,7 +312,7 @@
     <RelativeLayout
         android:id="@+id/start_tracking_box"
         android:layout_width="fill_parent"
-        android:layout_height="100dp"
+        android:layout_height="200dp"
         android:layout_above="@id/bottomLayout"
         android:background="@color/gray">
 
@@ -325,16 +325,25 @@
             android:layout_alignParentTop="true"
             android:background="@color/white_transparent"/>
 
+        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+            android:id="@+id/show_event_button"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_below="@+id/white_bar"
+            android:text="@string/show_event"
+            android:background="@drawable/rounded_btn_red"
+            tools:text="Show Event"/>
+
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@id/white_bar"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_below="@id/show_event_button"
             android:orientation="horizontal">
 
             <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                 android:id="@+id/show_leaderboards_button"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
@@ -348,7 +357,7 @@
             <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                 android:id="@+id/start_tracking"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
