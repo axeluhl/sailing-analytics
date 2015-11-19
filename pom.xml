@@ -151,7 +151,7 @@
 		
 		<ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
 		<ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
-		<ldi.download.android.platform.version>22_r2</ldi.download.android.platform.version>
+		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
 		
 		<android.platform.version>22</android.platform.version>
 		<android.api.groupId>android</android.api.groupId>
