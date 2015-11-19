@@ -127,6 +127,21 @@
             <android.api.groupId>com.google.download.android</android.api.groupId>
             <android.api.version>5.1.1</android.api.version>
         </properties>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                    <sdk>
+                        <path>${basedir}/android-sdk-windows</path>
+                    </sdk>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
       </profile>
 	</profiles>
 

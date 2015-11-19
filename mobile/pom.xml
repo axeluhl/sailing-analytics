@@ -375,31 +375,6 @@
         </build>
       </profile>
       
-      <profile>
-        <id>leandi</id>
-        <activation>
-          <property>
-            <name>ldi.releaseBuild</name>
-          </property>
-        </activation>
-        <build>
-          <pluginManagement>
-            <plugins>
-              <plugin>
-                <groupId>com.simpligility.maven.plugins</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-                <configuration>
-                    <sdk>
-                        <path>${basedir}/android-sdk-windows</path>
-                        <platform>${platform.version}</platform>
-                    </sdk>
-                </configuration>
-              </plugin>
-            </plugins>
-          </pluginManagement>
-        </build>
-      </profile>
-        
         <profile>
             <id>leandi-realsign</id>
             <activation>
