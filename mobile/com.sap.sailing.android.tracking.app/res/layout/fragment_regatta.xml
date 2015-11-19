@@ -325,31 +325,43 @@
             android:layout_alignParentTop="true"
             android:background="@color/white_transparent"/>
 
-        <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
-            android:id="@+id/show_event_button"
+        <RelativeLayout
+            android:id="@+id/show_event_area"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_below="@+id/white_bar"
-            android:text="@string/show_event"
-            android:background="@drawable/rounded_btn_blue"
-            tools:text="Show Event"/>
+            android:layout_height="@dimen/regatta_button_height"
+            android:layout_below="@+id/white_bar">
+
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+                android:id="@+id/show_event_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:padding="@dimen/regatta_button_padding"
+                android:text="@string/show_event"
+                android:background="@drawable/rounded_btn_blue"
+                tools:text="Show Event"/>
+
+        </RelativeLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_below="@id/show_event_button"
+            android:layout_height="@dimen/regatta_button_height"
+            android:layout_below="@id/show_event_area"
             android:orientation="horizontal">
 
             <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                 android:id="@+id/show_leaderboards_button"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
                 android:layout_weight="0.50"
                 android:background="@drawable/rounded_btn_yellow"
-                android:padding="10dp"
+                android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
                 android:textAllCaps="true"
                 android:textStyle="bold"/>
@@ -358,12 +370,12 @@
                 android:id="@+id/start_tracking"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
                 android:layout_weight="0.50"
                 android:background="@drawable/rounded_btn_green"
-                android:padding="10dp"
+                android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
                 android:textAllCaps="true"
                 android:textStyle="bold"/>
