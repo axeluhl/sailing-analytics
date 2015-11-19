@@ -877,5 +877,4 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default Iterable<Mark> getMarksFromRaceAndLogs() {
         return getMarks();
     }
-
 }

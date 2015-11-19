@@ -678,7 +678,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final boolean result;
         if (takesWindFixWithTimePoint(wind.getTimePoint())) {
             result = getOrCreateWindTrack(windSource).add(wind);
-            updated(/* time point */null); // wind events shouldn't advance race time
+            updated(wind.getTimePoint());
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);
         } else {
@@ -826,5 +826,4 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
-
 }

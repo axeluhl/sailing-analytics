@@ -388,7 +388,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         }
         lockForRead();
         try {
-            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
+            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
             final TimePoint start;
             if (fix.equals(fixesForPositionEstimation.getA())) {
                 if (getLastFixBefore(fix.getTimePoint()) == null) {
