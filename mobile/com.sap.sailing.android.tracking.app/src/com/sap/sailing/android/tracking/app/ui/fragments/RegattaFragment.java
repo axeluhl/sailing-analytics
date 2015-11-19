@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.EventActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -61,6 +62,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
         showLeaderboardButton.setOnClickListener(this);
+
+        Button showEventButton = (Button) view.findViewById(R.id.show_event_button);
+        showEventButton.setOnClickListener(this);
 
         Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
         changePhotoButton.setOnClickListener(this);
@@ -158,6 +162,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         switch (view.getId()) {
         case R.id.show_leaderboards_button:
             startLeaderboardActivity();
+            break;
+        case R.id.show_event_button:
+            startEventActivity();
             break;
         case R.id.start_tracking:
             if (showingThankYouNote) {
@@ -323,7 +330,14 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
 
-        getActivity().startActivity(intent);
+        startActivity(intent);
+    }
+
+    private void startEventActivity() {
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        Intent intent = new Intent(getActivity(), EventActivity.class);
+        intent.putExtra(EventActivity.EVENT, activity.event);
+        startActivity(intent);
     }
 
     private void startTrackingActivity() {

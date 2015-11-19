@@ -62,11 +62,19 @@
         </activity>
         <activity
             android:name=".ui.activities.LeaderboardWebViewActivity"
-            android:label="@string/title_activity_webview"
+            android:label="@string/title_activity_leaderboard"
             android:screenOrientation="unspecified">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activities.LeaderboardWebViewActivity"/>
+        </activity>
+        <activity
+            android:name=".ui.activities.EventActivity"
+            android:label="@string/title_activity_event"
+            android:screenOrientation="unspecified">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activities.EventActivity"/>
         </activity>
         <activity
             android:name=".ui.activities.RegattaActivity"

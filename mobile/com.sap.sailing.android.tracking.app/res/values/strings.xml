@@ -12,7 +12,8 @@
     <string name="tracker_started">SAP Sailing Tracker started</string>
     <string name="tracker_stopped">SAP Sailing Tracker stopped</string>
     <string name="title_activity_regatta">Regatta</string>
-    <string name="title_activity_webview">Leader board</string>
+    <string name="title_activity_leaderboard">Leader board</string>
+    <string name="title_activity_event">Event</string>
     <string name="title_activity_start">Setup GPS-Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
