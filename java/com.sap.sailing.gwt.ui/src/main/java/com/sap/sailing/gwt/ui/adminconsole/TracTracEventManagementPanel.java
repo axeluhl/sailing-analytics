@@ -359,7 +359,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceVisibilityColumn.setSortable(true);
         
         SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<TracTracRaceRecordDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
                     @Override
                     public Boolean getValue(TracTracRaceRecordDTO row) {
                         return racesTable.getSelectionModel().isSelected(row);

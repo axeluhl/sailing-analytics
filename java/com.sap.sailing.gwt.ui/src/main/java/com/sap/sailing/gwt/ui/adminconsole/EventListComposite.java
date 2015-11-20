@@ -147,12 +147,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
         @SuppressWarnings("unchecked")
         RefreshableMultiSelectionModel<EventDTO> multiSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
-        multiSelectionModel.setHasEqualIdentity(new EntityIdentityComparator<EventDTO>() {
-            @Override
-            public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
-                return dto1.id.equals(dto2.id) ? true : false;
-            }
-        });
         eventSelectionModel = multiSelectionModel;
 
         eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -205,7 +199,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.setWidth("100%");
 
         SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
-            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id) ? true : false;
+                    }
+                } /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
             @Override
             protected ListDataProvider<EventDTO> getListDataProvider() {
                 return eventListDataProvider;

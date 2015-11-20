@@ -267,7 +267,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             final CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources,
             ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler) {
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
             @Override
             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                 return leaderboardList;

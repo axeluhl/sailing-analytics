@@ -49,7 +49,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
             SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
                     tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
                         @Override
                         protected ListDataProvider<T> getListDataProvider() {
                             return dataProvider;

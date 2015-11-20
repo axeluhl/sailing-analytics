@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -29,35 +30,19 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
     }
 
     @Override
-    public void setHasEqualIdentity(EntityIdentityComparator<T> comp) {
-        this.comp = comp;
-    }
-
-    @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        Set<T> selectedSet = getSelectedSet();
-        EntityIdentityComparator<T> comp = getEntityIdentityComparator();
+        final Set<T> selectedSet = new HashSet<>(getSelectedSet());
+        final boolean isSelected = !selectedSet.isEmpty();
         clear();
-        if (comp != null) {
-            for (T it : newObjects) {
-                for (T selected : selectedSet) {
-                    if (comp.representSameEntity(selected, it)) {
-                        setSelected(it, true);
-                    } else {
-                        setSelected(it, false);
-                    }
+        for (final T it : newObjects) {
+            if (isSelected) {
+                for (final T selected : selectedSet) {
+                    setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
                 }
-            }
-        } else {
-            for (T it : newObjects) {
-                for (T selected : selectedSet) {
-                    if (selected.equals(it)) {
-                        setSelected(it, true);
-                    } else {
-                        setSelected(it, false);
-                    }
-                }
+            } else {
+                setSelected(it, false);
             }
         }
+        scheduleSelectionChangeEvent();
     }
 }

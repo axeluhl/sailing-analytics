@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.view.client.ProvidesKey;
@@ -29,20 +30,17 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     }
 
     @Override
-    public void setHasEqualIdentity(EntityIdentityComparator<T> comp) {
-        this.comp = comp;
-        // TODO remove
-    }
-
-    @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        final Set<T> selectedSet = getSelectedSet();
-        final EntityIdentityComparator<T> comp = getEntityIdentityComparator();
+        final Set<T> selectedSet = new HashSet<>(getSelectedSet());
+        final T selected = selectedSet.isEmpty() ? null : selectedSet.iterator().next();
         clear();
         for (final T it : newObjects) {
-            for (final T selected : selectedSet) {
+            if (selected != null) {
                 setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
+            } else {
+                setSelected(it, false);
             }
         }
+        scheduleSelectionChangeEvent();
     }
 }

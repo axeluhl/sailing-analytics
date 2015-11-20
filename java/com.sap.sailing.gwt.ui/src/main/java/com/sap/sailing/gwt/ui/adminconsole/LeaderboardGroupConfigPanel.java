@@ -192,7 +192,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
         SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
-                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
                             @Override
                             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                                 return leaderboardsProvider;
@@ -365,7 +365,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupDetailsProvider.addDataDisplay(groupDetailsTable);
         SelectionCheckboxColumn<StrippedLeaderboardDTO> groupDetailsTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
-                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
                             @Override
                             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                                 return groupDetailsProvider;

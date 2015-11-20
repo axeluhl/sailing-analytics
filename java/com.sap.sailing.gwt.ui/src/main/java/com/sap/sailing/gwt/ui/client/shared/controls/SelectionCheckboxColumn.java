@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 /**
@@ -56,18 +57,20 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      *            CSS class for the <code>&lt;div&gt;</code> element representing a deselected element
      * @param checkboxColumnCellCSSClass
      *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}.
      */
     protected SelectionCheckboxColumn(String selectedCheckboxCSSClass,
-            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
-        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
+            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
+        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass, entityIdentityComparator);
     }
 
-    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass) {
+    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
         super(checkboxCell, SortingOrder.DESCENDING);
         this.cell = checkboxCell;
         this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
         this.selectionEventTranslator = createSelectionEventTranslator();
-        this.selectionModel = createSelectionModel();
+        this.selectionModel = createSelectionModel(entityIdentityComparator);
     }
     
     /**
@@ -96,8 +99,8 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
      * after selection changes.
      */
-    private RefreshableMultiSelectionModel<T> createSelectionModel() {
-        return new RefreshableMultiSelectionModel<T>() {
+    private RefreshableMultiSelectionModel<T> createSelectionModel(final EntityIdentityComparator<T> entityIdentityComparator) {
+        return new RefreshableMultiSelectionModel<T>(entityIdentityComparator) {
             @Override
             public void clear() {
                 super.clear();

@@ -104,7 +104,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
             @Override
             protected ListDataProvider<RaceDTO> getListDataProvider() {
                 return raceList;

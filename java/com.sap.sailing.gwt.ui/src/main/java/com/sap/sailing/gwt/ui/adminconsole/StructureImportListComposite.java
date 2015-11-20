@@ -42,7 +42,7 @@ public class StructureImportListComposite extends RegattaListComposite implement
         
         this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableRes.cellTableStyle()
                 .cellTableCheckboxSelected(), tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;

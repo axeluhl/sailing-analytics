@@ -147,7 +147,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.setWidth("100%");
 
         SelectionCheckboxColumn<RegattaDTO> regattaSelectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
-            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;
