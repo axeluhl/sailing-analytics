@@ -12,7 +12,7 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
     private WebElement addButton;
     
     @FindBy(how = BySeleniumId.class, using = "CompetitorsTable")
-    private WebElement competitorsTabel;
+    private WebElement competitorsTable;
 
     public TrackedRacesCompetitorsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -26,6 +26,6 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
     }
     
     public TrackedRacesCompetitorTablePO getCompetitorTable() {
-        return new TrackedRacesCompetitorTablePO(this.driver, this.competitorsTabel);
+        return new TrackedRacesCompetitorTablePO(this.driver, this.competitorsTable);
     }
 }

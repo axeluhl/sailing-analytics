@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,32 +23,38 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
     
     @Test
     public void testOpenCreateCompetitorDialog() {
-        TrackedRacesCompetitorCreateDialogPO dialog;
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        TrackedRacesCompetitorsPanelPO competitorsPanel = adminConsole.goToTrackedRacesCompetitors();
-        dialog = competitorsPanel.pushAddButton();
+        final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
+        final TrackedRacesCompetitorCreateDialogPO dialog = competitorsPanel.pushAddButton(); // fails with an exception if the dialog is not found
         assertNotNull(dialog);
+    }
+
+    private TrackedRacesCompetitorsPanelPO goToCompetitorsPanel() {
+        final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        final TrackedRacesCompetitorsPanelPO competitorsPanel = adminConsole.goToTrackedRacesCompetitors();
+        return competitorsPanel;
     }
     
     @Test
     public void testCompetitorCreation() {
-        TrackedRacesCompetitorCreateDialogPO dialog;
-        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        TrackedRacesCompetitorsPanelPO competitorsPanel = adminConsole.goToTrackedRacesCompetitors();
-        dialog = competitorsPanel.pushAddButton();
-        String name = ""+System.currentTimeMillis();
+        final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
+        final TrackedRacesCompetitorCreateDialogPO dialog = competitorsPanel.pushAddButton();
+        final String name = ""+System.currentTimeMillis();
         dialog.setNameTextBox(name);
         String sailId = ""+System.currentTimeMillis();
         dialog.setSailIdTextBox(sailId);
-        dialog.setBoatClassNameSuggestBox("Laser Int.");
+        final String boatClassName = "Laser Int.";
+        dialog.setBoatClassNameSuggestBox(boatClassName);
         dialog.pressOk();
-        String result = null;
-        for(CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
+        boolean found = false;
+        for (final CompetitorEntry it : competitorsPanel.getCompetitorTable().getEntries()) {
             String itName = it.getName();
-            if(itName.equals(name)) {
-                result = it.getName();
+            if (itName.equals(name)) {
+                found = true;
+                // found a candidate:
+                assertEquals(sailId, it.getSailId());
+                assertEquals(boatClassName, it.getBoatClassName());
             }
         }
-        assertEquals(result,name);
+        assertTrue(found);
     }
 }

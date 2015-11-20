@@ -50,7 +50,6 @@ public class CompetitorPanel extends SimplePanel {
     public CompetitorPanel(final SailingServiceAsync sailingService, final String leaderboardName,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
-        this.ensureDebugId("CompetitorPanel");
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -190,7 +189,7 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
-        CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {

@@ -38,8 +38,4 @@ public class TrackedRacesCompetitorCreateDialogPO extends DataEntryDialogPO {
         this.boatClassNameSuggestBox.clear();
         this.boatClassNameSuggestBox.sendKeys(boatClassName);
     }
-
-    public void pushOkButton() {
-        this.okButton.click();       
-    }
 }
