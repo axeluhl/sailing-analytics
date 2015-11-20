@@ -33,6 +33,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceAndSessionIdent
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@SuppressWarnings("deprecation")
 public class AbstractGPSFixStoreTest {
     protected RacingEventService service;
     protected final  MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();

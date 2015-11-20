@@ -39,6 +39,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@SuppressWarnings("deprecation")
 public class RaceLogEventSerializerTest {
 
     private RaceLogEventSerializer serializer;

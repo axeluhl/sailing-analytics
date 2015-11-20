@@ -63,6 +63,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@SuppressWarnings("deprecation")
 public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
     protected MongoObjectFactoryImpl mongoFactory = (MongoObjectFactoryImpl) PersistenceFactory.INSTANCE
