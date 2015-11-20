@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -199,19 +198,11 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
-        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
-            @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                setRegisteredCompetitors();
-            }
-            
-            @Override
-            public void onFailure(Throwable reason) {
-            }
-        });
+        setRegisterableCompetitors();
     }
     
     protected abstract void setRegisteredCompetitors();
+    protected abstract void setRegisterableCompetitors();
     
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -40,5 +41,19 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
 
     @Override
     public void addAdditionalWidgets(FlowPanel mainPanel) {
+    }
+
+    @Override
+    protected void setRegisterableCompetitors() {
+        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                setRegisteredCompetitors();
+            }
+            
+            @Override
+            public void onFailure(Throwable reason) {
+            }
+        });
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -82,12 +83,11 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                 String message;
 
                 if (competitorRegistrationInRaceLogCheckBox.getValue()) {
-                    title = stringMessages.doYouWantToDisableCompetitorsRegistrationsOnTheRace();
-                    message = stringMessages.warningRegattaCompetitorRegistration();
-
-                } else {
                     title = stringMessages.doYouWantToRegisterCompetitorsDirectlyOnTheRace();
                     message = stringMessages.warningDirectCompetitorRegistration();
+                } else {
+                    title = stringMessages.doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+                    message = stringMessages.warningRegattaCompetitorRegistration();
                 }
 
                 new DataEntryDialog<Void>(title, message, stringMessages.ok(), stringMessages.cancel(), null, false,
@@ -146,4 +146,17 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         });
     }
 
+    @Override
+    protected void setRegisterableCompetitors() {
+        allCompetitorsTable.refreshCompetitorList(leaderboardName, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                setRegisteredCompetitors();
+            }
+            
+            @Override
+            public void onFailure(Throwable reason) {
+            }
+        });
+    }
 }
