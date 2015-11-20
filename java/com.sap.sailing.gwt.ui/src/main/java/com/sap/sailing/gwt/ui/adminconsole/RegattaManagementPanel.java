@@ -19,9 +19,6 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,6 +27,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -39,13 +38,13 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer, RegattaSelectionChangeListener {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer/*, RegattaSelectionChangeListener*/ {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
     private final RegattaRefresher regattaRefresher;
-    private RegattaSelectionProvider regattaSelectionProvider;
+    private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private Button removeRegattaButton;
 
     private RegattaListComposite regattaListComposite;
@@ -92,8 +91,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     //Creating a new Collection, because getSelectedRegattas returns an 
                     //unmodifiable collection, which can't be sent to the server.
                     Collection<RegattaIdentifier> regattas = new HashSet<RegattaIdentifier>();
-                    for (RegattaIdentifier regatta : regattaSelectionProvider.getSelectedRegattas()) {
-                        regattas.add(regatta);
+                    for (RegattaDTO regatta : refreshableRegattaMultiSelectionModel.getSelectedSet()) {
+                        regattas.add(regatta.getRegattaIdentifier());
                     }
                     removeRegattas(regattas);
                 }
@@ -102,10 +101,15 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         regattaManagementControlsPanel.add(removeRegattaButton);
         regattasContentPanel.add(regattaManagementControlsPanel);
 
-        regattaSelectionProvider = new RegattaSelectionModel(true);
-        regattaSelectionProvider.addRegattaSelectionChangeListener(this);
+        refreshableRegattaMultiSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<RegattaDTO>() {
+            @Override
+            public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+            }
+        });
+        //refreshableRegattaMultiSelectionModel.addRegattaSelectionChangeListener(this);
         
-        regattaListComposite = new RegattaListComposite(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        regattaListComposite = new RegattaListComposite(sailingService, refreshableRegattaMultiSelectionModel, regattaRefresher, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         regattasContentPanel.add(regattaListComposite);
         
@@ -222,7 +226,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         regattaListComposite.fillRegattas(regattas);
     }
 
-    @Override
+/*    @Override
     public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
         final RegattaIdentifier selectedRegatta;
         if (selectedRegattas.size() == 1) {
@@ -241,5 +245,5 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             regattaDetailsComposite.setVisible(false);
         }
         removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
-    }
+    }*/
 }

@@ -28,7 +28,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -42,6 +41,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -51,7 +52,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  *
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
-
+//TODO remove regattaSelectionModel
     protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
     protected final CellTable<RegattaDTO> regattaTable;
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
@@ -62,7 +63,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final Label noRegattasLabel;
 
     private final SailingServiceAsync sailingService;
-    protected final RegattaSelectionProvider regattaSelectionProvider;
+    protected final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
@@ -79,10 +80,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     public RegattaListComposite(final SailingServiceAsync sailingService,
-            final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
+            final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel, RegattaRefresher regattaRefresher,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
-        this.regattaSelectionProvider = regattaSelectionProvider;
+        this.refreshableRegattaMultiSelectionModel = refreshableRegattaMultiSelectionModel;
         this.regattaRefresher = regattaRefresher;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -125,12 +126,13 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
+/*                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
                 List<RegattaIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaIdentifier>();
                 for (RegattaDTO selectedRegatta : selectedRegattas) {
                     selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
                 }
-                RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);
+                RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);*/
+                refreshableRegattaMultiSelectionModel.refreshSelectionModel(getSelectedRegattas());
             }
         });
         panel.add(regattaTable);
@@ -147,7 +149,13 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.setWidth("100%");
 
         SelectionCheckboxColumn<RegattaDTO> regattaSelectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
-            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RegattaDTO>() {
+                    @Override
+                    public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                        return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                    }
+                } /* entityIdentityComparator to create a RefreshableSelectionModel */) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;
@@ -369,13 +377,14 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         }
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
-        List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
+        /*List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
         for (RegattaDTO regatta : regattas) {
             newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
-        }
+        }*/
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas);
-        regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
+        //regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
+        refreshableRegattaMultiSelectionModel.refreshSelectionModel(regattas);
     }
 
     public List<RegattaDTO> getAllRegattas() {

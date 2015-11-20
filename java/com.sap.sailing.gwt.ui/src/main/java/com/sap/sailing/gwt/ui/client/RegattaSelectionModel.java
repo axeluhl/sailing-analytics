@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+/*package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
@@ -62,11 +65,11 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
         }
     }
     
-    /**
+    *//**
      * Sets the universe of all regattas from which this selection model may select. An equal list will subsequently be
      * returned by {@link #getAllRegattas()}. Regattas from the {@link #getSelectedRegattas() selection} not in
      * <code>newAllRegattas</code> are removed from the selection. If this happens, the selection listeners are notified.
-     */
+     *//*
     @Override
     public void setAllRegattas(List<RegattaIdentifier> newAllRegattas, RegattaSelectionChangeListener... listenersNotToNotify) {
         allRegattas.clear();
@@ -94,10 +97,10 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
         return hasMultiSelection;
     }
 
-    /**
+    *//**
      * Returns an instance of <code>HasEqualIdentity&ltRegattaIdentifier&gt</code>. The compare
      * method works the same way as <code>o1.eqauls(o2)</code>.
-     */
+     *//*
     @Override
     public EntityIdentityComparator<RegattaIdentifier> getEntityIdentityComparator() {
         return new EntityIdentityComparator<RegattaIdentifier>() {
@@ -106,15 +109,6 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
                 return dto1.equals(dto2);
             }
         };
-    }
-
-    /**
-     * This method will have no impact on the object, because the only logical way to
-     * compare <code>RegattaIdentifier</code> objects is to use the equals method.
-     */
-    @Override
-    public void setHasEqualIdentity(EntityIdentityComparator<RegattaIdentifier> comp) {
-        //TODO remove
     }
 
     @Override
@@ -158,4 +152,29 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
             setAllRegattas(all);
         }
     }
+
+    @Override
+    public HandlerRegistration addSelectionChangeHandler(Handler handler) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isSelected(RegattaIdentifier object) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void fireEvent(GwtEvent<?> event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Object getKey(RegattaIdentifier item) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
+*/
