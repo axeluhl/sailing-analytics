@@ -7,7 +7,7 @@ public interface RefreshableSelectionModel<T> {
      * @return Returns an instance of <code>HasEqualIdentity&ltT&gt</code>, to compare objects from the type
      *         <code>&ltT&gt</code>.
      */
-    public HasEqualIdentity<T> getHasEqualIdentity();
+    public EntityIdentityComparator<T> getHasEqualIdentity();
 
     /**
      * Sets the <code>HasEqualIdentity&ltT&gt</code> field, to compare objects from the type <code>&ltT&gt</code>.
@@ -15,7 +15,7 @@ public interface RefreshableSelectionModel<T> {
      * @param comp
      *            When you set <code>null</code>, the <code>T.eqauls()</code> will be used.
      */
-    public void setHasEqualIdentity(HasEqualIdentity<T> comp);
+    public void setHasEqualIdentity(EntityIdentityComparator<T> comp);
 
     public Set<T> getSelectedSet();
 

@@ -48,7 +48,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.HasEqualIdentity;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -147,10 +147,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
         @SuppressWarnings("unchecked")
         RefreshableMultiSelectionModel<EventDTO> multiSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
-        multiSelectionModel.setHasEqualIdentity(new HasEqualIdentity<EventDTO>() {
+        multiSelectionModel.setHasEqualIdentity(new EntityIdentityComparator<EventDTO>() {
             @Override
-            public boolean compare(EventDTO o1, EventDTO o2) {
-                return o1.id.equals(o2.id) ? true : false;
+            public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                return dto1.id.equals(dto2.id) ? true : false;
             }
         });
         eventSelectionModel = multiSelectionModel;
@@ -380,19 +380,19 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDTO e1, EventDTO e2) {
+            public int representSameEntity(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.getName(), e2.getName());
             }
         });
         result.setComparator(venueNameColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDTO e1, EventDTO e2) {
+            public int representSameEntity(EventDTO e1, EventDTO e2) {
                 return new NaturalComparator().compare(e1.venue.getName(), e2.venue.getName());
             }
         });
         result.setComparator(startEndDateColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDTO e1, EventDTO e2) {
+            public int representSameEntity(EventDTO e1, EventDTO e2) {
                 int result;
                 if(e1.startDate != null && e2.startDate != null) {
                     result = e2.startDate.compareTo(e1.startDate);
@@ -408,7 +408,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         });
         result.setComparator(isPublicColumn, new Comparator<EventDTO>() {
             @Override
-            public int compare(EventDTO e1, EventDTO e2) {
+            public int representSameEntity(EventDTO e1, EventDTO e2) {
                 return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
             }
         });

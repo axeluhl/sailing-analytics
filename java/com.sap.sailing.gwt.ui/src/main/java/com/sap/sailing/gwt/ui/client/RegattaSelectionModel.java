@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sse.gwt.client.celltable.HasEqualIdentity;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class RegattaSelectionModel implements RegattaSelectionProvider, RefreshableSelectionModel<RegattaIdentifier> {
@@ -99,11 +99,11 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
      * method works the same way as <code>o1.eqauls(o2)</code>.
      */
     @Override
-    public HasEqualIdentity<RegattaIdentifier> getHasEqualIdentity() {
-        return new HasEqualIdentity<RegattaIdentifier>() {
+    public EntityIdentityComparator<RegattaIdentifier> getHasEqualIdentity() {
+        return new EntityIdentityComparator<RegattaIdentifier>() {
             @Override
-            public boolean compare(RegattaIdentifier o1, RegattaIdentifier o2) {
-                return o1.equals(o2);
+            public boolean representSameEntity(RegattaIdentifier dto1, RegattaIdentifier dto2) {
+                return dto1.equals(dto2);
             }
         };
     }
@@ -113,7 +113,7 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
      * compare <code>RegattaIdentifier</code> objects is to use the equals method.
      */
     @Override
-    public void setHasEqualIdentity(HasEqualIdentity<RegattaIdentifier> comp) {
+    public void setHasEqualIdentity(EntityIdentityComparator<RegattaIdentifier> comp) {
         //TODO
     }
 
