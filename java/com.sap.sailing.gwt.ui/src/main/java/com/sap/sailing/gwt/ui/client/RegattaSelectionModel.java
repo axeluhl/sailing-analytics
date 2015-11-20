@@ -99,7 +99,7 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
      * method works the same way as <code>o1.eqauls(o2)</code>.
      */
     @Override
-    public EntityIdentityComparator<RegattaIdentifier> getHasEqualIdentity() {
+    public EntityIdentityComparator<RegattaIdentifier> getEntityIdentityComparator() {
         return new EntityIdentityComparator<RegattaIdentifier>() {
             @Override
             public boolean representSameEntity(RegattaIdentifier dto1, RegattaIdentifier dto2) {
@@ -114,7 +114,7 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
      */
     @Override
     public void setHasEqualIdentity(EntityIdentityComparator<RegattaIdentifier> comp) {
-        //TODO
+        //TODO remove
     }
 
     @Override

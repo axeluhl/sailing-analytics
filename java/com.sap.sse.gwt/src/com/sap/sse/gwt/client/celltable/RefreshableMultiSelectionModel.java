@@ -24,7 +24,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
     }
 
     @Override
-    public EntityIdentityComparator<T> getHasEqualIdentity() {
+    public EntityIdentityComparator<T> getEntityIdentityComparator() {
         return comp;
     }
 
@@ -36,7 +36,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
         Set<T> selectedSet = getSelectedSet();
-        EntityIdentityComparator<T> comp = getHasEqualIdentity();
+        EntityIdentityComparator<T> comp = getEntityIdentityComparator();
         clear();
         if (comp != null) {
             for (T it : newObjects) {

@@ -225,7 +225,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     @Override
     public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
         final RegattaIdentifier selectedRegatta;
-        if (selectedRegattas.size() == 1 && selectedRegattas.iterator().hasNext()) {
+        if (selectedRegattas.size() == 1) {
             selectedRegatta = selectedRegattas.iterator().next();
             if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
                 for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {

@@ -24,39 +24,24 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     }
 
     @Override
-    public EntityIdentityComparator<T> getHasEqualIdentity() {
+    public EntityIdentityComparator<T> getEntityIdentityComparator() {
         return comp;
     }
 
     @Override
     public void setHasEqualIdentity(EntityIdentityComparator<T> comp) {
-        this.comp = comp;       
+        this.comp = comp;
+        // TODO remove
     }
 
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        Set<T> selectedSet = getSelectedSet();
-        EntityIdentityComparator<T> comp = getHasEqualIdentity();
+        final Set<T> selectedSet = getSelectedSet();
+        final EntityIdentityComparator<T> comp = getEntityIdentityComparator();
         clear();
-        if (comp != null) {
-            for (T it : newObjects) {
-                for (T selected : selectedSet) {
-                    if (comp.representSameEntity(selected, it)) {
-                        setSelected(it, true);
-                    } else {
-                        setSelected(it, false);
-                    }
-                }
-            }
-        } else {
-            for (T it : newObjects) {
-                for (T selected : selectedSet) {
-                    if (selected.equals(it)) {
-                        setSelected(it, true);
-                    } else {
-                        setSelected(it, false);
-                    }
-                }
+        for (final T it : newObjects) {
+            for (final T selected : selectedSet) {
+                setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
             }
         }
     }
