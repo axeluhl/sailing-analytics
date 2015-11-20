@@ -34,7 +34,7 @@ import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.tracking.app.utils.LocationHelper;
+import com.sap.sailing.android.shared.util.LocationHelper;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
