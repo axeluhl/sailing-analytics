@@ -102,7 +102,7 @@ public class RegattaSelectionModel implements RegattaSelectionProvider, Refresha
     public EntityIdentityComparator<RegattaIdentifier> getHasEqualIdentity() {
         return new EntityIdentityComparator<RegattaIdentifier>() {
             @Override
-            public boolean representSameEntity(RegattaIdentifier dto1, RegattaIdentifier dto2) {
+            public boolean compare(RegattaIdentifier dto1, RegattaIdentifier dto2) {
                 return dto1.equals(dto2);
             }
         };

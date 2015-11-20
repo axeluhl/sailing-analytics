@@ -41,7 +41,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
         if (comp != null) {
             for(T it : newObjects) {
                 for(T selected : selectedSet) {
-                    if(comp.representSameEntity(selected, it)) {
+                    if(comp.compare(selected, it)) {
                         setSelected(it, true);
                     } else {
                         setSelected(it, false);

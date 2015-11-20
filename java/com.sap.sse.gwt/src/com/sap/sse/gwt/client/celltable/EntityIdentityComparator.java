@@ -23,5 +23,5 @@ public interface EntityIdentityComparator<T> {
      * Compares the objects and returns <code>true</code> if the objects represent the same entity.
      * Note that this does not imply that they are also {@link #equals(Object) equal}.
      */
-    public boolean representSameEntity(T dto1, T dto2);
+    public boolean compare(T dto1, T dto2);
 }
