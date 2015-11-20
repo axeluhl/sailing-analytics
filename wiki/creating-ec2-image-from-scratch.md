@@ -84,7 +84,17 @@ Added the following two lines to `/etc/security/limits.conf`:
 
 This increases the maximum number of open files allowed from the default 1024 to a more appropriate 65k.
 
-Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server.
+Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/conf.d/000-macros.conf` and the skeletal `/etc/httpd/conf.d/001-events.conf` from an existing server. Make sure the following lines are in httpd.conf:
+
+<pre>
+  SetEnvIf X-Forwarded-For "^([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*).*$" original_client_ip=$1
+  LogFormat "%v %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+  LogFormat "%v %{original_client_ip}e %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" first_forwarded_for_ip
+  CustomLog logs/access_log combined env=!original_client_ip
+  CustomLog logs/access_log first_forwarded_for_ip env=original_client_ip
+</pre>
+
+They ensure that the original client IPs are logged also if the Apache server runs behind a reverse proxy or an ELB. See also [the section on log file analysis](/wiki/log-file-analysis#log-file-analysis_log-file-types_apache-log-files).
 
 Copied /etc/logrotate.conf from an existing SL instance so that `/var/log/logrotate-target` is used to rotate logs to.
 

@@ -81,6 +81,7 @@ public class CompetitorPanel extends SimplePanel {
         });
         buttonPanel.add(allowReloadButton);
         Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.ensureDebugId("AddCompetitorButton");
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -188,7 +189,7 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
-        new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
@@ -207,7 +208,9 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void cancel() {
             }
-        }, /* boat class to be used from CompetitorDTO */ null).show();
+        }, /* boat class to be used from CompetitorDTO */ null);
+        dialog.ensureDebugId("CompetitorEditDialog");
+        dialog.show();
     }
     
     private String getLocaleInfo() {

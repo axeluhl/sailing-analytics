@@ -61,8 +61,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
-    private String leaderboardName;
-    private RaceColumnDTO column;
+    private LeaderboardDTO leaderboard;
 
     private CompetitorDTO competitor;
     
@@ -166,7 +165,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         removeFixedMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.updateFixedMarkPassing(leaderboardName, column, column.getFleet(raceIdentifier),
+                final RaceColumnDTO column = getColumn();
+                sailingService.updateFixedMarkPassing(getLeaderboardName(), column, column.getFleet(raceIdentifier),
                                 waypointSelectionModel.getSelectedObject().getA(), null, competitor, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -184,7 +184,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         setTimeAsMarkPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.updateFixedMarkPassing(leaderboardName, column, column.getFleet(raceIdentifier),
+                final RaceColumnDTO column = getColumn();
+                sailingService.updateFixedMarkPassing(getLeaderboardName(), column, column.getFleet(raceIdentifier),
                                 waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
                                 new AsyncCallback<Void>() {
                     @Override
@@ -205,7 +206,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         suppressPassingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.updateSuppressedMarkPassings(leaderboardName, column,
+                final RaceColumnDTO column = getColumn();
+                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column,
                                 column.getFleet(raceIdentifier), waypointSelectionModel.getSelectedObject().getA(),
                                 competitor, new AsyncCallback<Void>() {
                     @Override
@@ -225,7 +227,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         removeSuppressedPassingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                sailingService.updateSuppressedMarkPassings(leaderboardName, column,
+                final RaceColumnDTO column = getColumn();
+                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column,
                                 column.getFleet(raceIdentifier), null, competitor,
                                 new AsyncCallback<Void>() {
                     @Override
@@ -311,7 +314,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 waypointList.getList().clear();
                 waypointList.getList().addAll(newMarkPassings);
                 // Get current edits
-                sailingService.getCompetitorRaceLogMarkPassingData(leaderboardName, column,
+                final RaceColumnDTO column = getColumn();
+                sailingService.getCompetitorRaceLogMarkPassingData(getLeaderboardName(), column,
                                 column.getFleet(raceIdentifier), competitor, new AsyncCallback<Map<Integer, Date>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -385,15 +389,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         refreshWaypoints();
     }
 
-    public void setLeaderboardNameAndColumn(LeaderboardDTO leaderboard) {
-        if (leaderboard != null) {
-            leaderboardName = leaderboard.name;
-            for (RaceColumnDTO columnDTO : leaderboard.getRaceList()) {
-                if (columnDTO.containsRace(raceIdentifier)) {
-                    column = columnDTO;
-                }
-            }
-        }
+    public void setLeaderboard(LeaderboardDTO leaderboard) {
+        this.leaderboard = leaderboard;
     }
 
     @Override
@@ -438,4 +435,20 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
     }
 
+    private String getLeaderboardName() {
+        return leaderboard.name;
+    }
+
+    private RaceColumnDTO getColumn() {
+        RaceColumnDTO result = null;
+        if (leaderboard != null) {
+            for (RaceColumnDTO columnDTO : leaderboard.getRaceList()) {
+                if (columnDTO.containsRace(raceIdentifier)) {
+                    result = columnDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }
