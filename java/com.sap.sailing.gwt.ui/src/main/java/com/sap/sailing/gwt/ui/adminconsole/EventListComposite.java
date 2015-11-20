@@ -149,7 +149,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         RefreshableMultiSelectionModel<EventDTO> multiSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         multiSelectionModel.setHasEqualIdentity(new EntityIdentityComparator<EventDTO>() {
             @Override
-            public boolean compare(EventDTO dto1, EventDTO dto2) {
+            public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
                 return dto1.id.equals(dto2.id) ? true : false;
             }
         });

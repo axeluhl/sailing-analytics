@@ -39,9 +39,9 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
         EntityIdentityComparator<T> comp = getHasEqualIdentity();
         clear();
         if (comp != null) {
-            for(T it : newObjects) {
-                for(T selected : selectedSet) {
-                    if(comp.compare(selected, it)) {
+            for (T it : newObjects) {
+                for (T selected : selectedSet) {
+                    if (comp.representSameEntity(selected, it)) {
                         setSelected(it, true);
                     } else {
                         setSelected(it, false);
@@ -49,9 +49,9 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                 }
             }
         } else {
-            for(T it : newObjects) {
-                for(T selected : selectedSet) {
-                    if(selected.equals(it)) {
+            for (T it : newObjects) {
+                for (T selected : selectedSet) {
+                    if (selected.equals(it)) {
                         setSelected(it, true);
                     } else {
                         setSelected(it, false);
