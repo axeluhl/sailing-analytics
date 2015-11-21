@@ -17,6 +17,7 @@ public interface TextMessages extends Messages {
     String contact();
     String sponsoring();
     String solutions();
+    String blog();
     String german();
     String english();
     String fullEventSchedule();
