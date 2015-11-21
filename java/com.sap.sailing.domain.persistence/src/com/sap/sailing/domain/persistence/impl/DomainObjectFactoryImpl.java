@@ -638,11 +638,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // deprecated style: a DBObject whose keys are the escaped competitor names
         // new style: a BasicDBList whose entries are DBObjects with COMPETITOR_ID and COMPETITOR_DISPLAY_NAME fields
         if (competitorDisplayNames != null) {
-            for (Object o : (BasicDBList) competitorDisplayNames) {
-                DBObject competitorDisplayName = (DBObject) o;
-                final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
-                final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
-                correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
+            if (competitorDisplayNames instanceof BasicDBList) {
+                for (Object o : (BasicDBList) competitorDisplayNames) {
+                    DBObject competitorDisplayName = (DBObject) o;
+                    final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
+                    final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+                    correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
+                }
+            } else {
+                logger.severe("Deprecated, now unreadable format of the "+FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name()
+                        +" field for leaderboard "+dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name())+
+                        ". You will have to update the competitor display names manually: "+
+                        competitorDisplayNames);
             }
         }
     }
