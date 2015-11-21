@@ -233,7 +233,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             components.add(windChart);
             editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
                     stringMessages, competitorSelectionProvider, errorReporter, timer);
-            editMarkPassingPanel.setLeaderboardN(aderboardPanel.getLeaderboard());
+            editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             components.add(editMarkPassingPanel);
         }
@@ -361,7 +361,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
-            editMarkPassingPanel.setLeaderboardNameaderboard);
+            editMarkPassingPanel.setLeaderboard(leaderboard);
         }
     }
 
