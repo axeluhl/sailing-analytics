@@ -264,6 +264,38 @@
     <properties>
       <p2-target>race-analysis-p2-empty</p2-target>
     </properties>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  
+  <profile>
+    <id>non-leandi</id>
+    <activation>
+      <property>
+        <name>!ldi.releaseBuild</name>
+      </property>
+    </activation>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-compiler-plugin</artifactId>
+          <configuration>
+            <useJDK>BREE</useJDK>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
   </profile>
 </profiles>
 
@@ -405,9 +437,6 @@
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>tycho-compiler-plugin</artifactId>
       <version>${tycho-version}</version>
-      <configuration>
-        <useJDK>BREE</useJDK>
-      </configuration>
     </plugin>
 
 
