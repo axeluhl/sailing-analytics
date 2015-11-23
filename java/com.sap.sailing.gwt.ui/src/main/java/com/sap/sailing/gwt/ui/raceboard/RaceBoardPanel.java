@@ -17,8 +17,10 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -79,7 +81,8 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeListener, LeaderboardUpdateListener, PopupPositionProvider {
+public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeListener,
+        LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UUID eventId;
@@ -150,7 +153,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
-        FlowPanel mainPanel = new FlowPanel();
+        FlowPanel mainPanel = new ResizableFlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
         raceInformationHeader = new FlowPanel();
@@ -436,6 +439,14 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         DateTimeFormat formatter = DateTimeFormat.getFormat("E d/M/y");
         raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
         return raceInformationLabel;
+    }
+    
+    @Override
+    public void onResize() {
+        Widget child = getWidget();
+        if (child != null && child instanceof RequiresResize) {
+            ((RequiresResize) child).onResize();
+        }
     }
 }
 

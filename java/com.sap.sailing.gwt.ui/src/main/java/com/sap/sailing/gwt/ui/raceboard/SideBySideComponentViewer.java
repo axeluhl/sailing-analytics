@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
@@ -44,7 +45,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class SideBySideComponentViewer implements ComponentViewer, UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
-    private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
+    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // works well for 505 and ESS
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -126,7 +127,14 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        this.mainPanel = new LayoutPanel();
+        this.mainPanel = new LayoutPanel() {
+            @Override
+            public void onResize() {
+                savedSplitPosition = Math.min(leftScrollPanel.getOffsetWidth(), Window.getClientWidth() - 40);
+                splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
+                super.onResize();
+            }
+        };
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
@@ -236,7 +244,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
                 if (leftScrollPanel.getOffsetWidth() > 0) {
-                    savedSplitPosition = leftScrollPanel.getOffsetWidth();
+                    savedSplitPosition = Math.min(savedSplitPosition, leftScrollPanel.getOffsetWidth());
                 }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
                         savedSplitPosition);

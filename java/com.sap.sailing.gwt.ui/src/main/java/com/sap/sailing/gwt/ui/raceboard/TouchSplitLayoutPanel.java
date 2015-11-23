@@ -842,6 +842,24 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
             }
         }
     }
+    
+    /**
+     * Sets the size of the given {@link Widget} if it is {@link Widget#isVisible() visible}. Otherwise, the given size
+     * will be persisted as the widgets {@link LayoutData#oldSize old size}.
+     * 
+     * @param widget the {@link Widget} to resize
+     * @param size the new size
+     */
+    public void setWidgetSize(Widget widget, int size) {
+        final Splitter splitter = getAssociatedSplitter(widget);
+        if (splitter != null) {
+            if (widget.isVisible()) {
+                splitter.setAssociatedWidgetSize(size, /* defer */false);
+            } else {
+                ((LayoutData) widget.getLayoutData()).oldSize = size;
+            }
+        }
+    }
 
     private void assertIsChild2(Widget widget) {
         assert (widget == null) || (widget.getParent() == this) : "The specified widget is not a child of this panel";
