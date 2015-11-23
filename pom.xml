@@ -87,17 +87,16 @@
                                             <version>${ldi.download.android.build-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
+                                            <outputDirectory>${basedir}/android-sdk-windows/build-tools</outputDirectory>
                                             <includes>**/*</includes>
                                         </artifactItem>
                                         <artifactItem>
-                                            
                                             <groupId>com.google.download.android</groupId>
                                             <artifactId>android</artifactId>
                                             <version>${ldi.download.android.platform.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
+                                            <outputDirectory>${basedir}/android-sdk-windows/platforms</outputDirectory>
                                             <includes>**/*</includes>
                                             
                                         </artifactItem>
@@ -118,9 +117,10 @@
                                 
                                 <configuration>
                                     <tasks>
-                                        <move file="${basedir}/android-sdk-windows/android-${android.api.version}"
+                                        <move file="${basedir}/android-sdk-windows/platforms/android-${android.api.version}"
                                             tofile="${basedir}/android-sdk-windows/platforms/android-${android.platform.version}"/>
-                                        
+                                        <move file="${basedir}/android-sdk-windows/build-tools/android-${ldi.android.build-tools.version}"
+                                            tofile="${basedir}/android-sdk-windows/build-tools/${ldi.download.android.build-tools.version}"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -169,7 +169,8 @@
 		<ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
 		<ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
 		<ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
-		<ldi.download.android.build-tools.version>23.0.1</ldi.download.android.build-tools.version>
+		<ldi.download.android.build-tools.version>22.0.1</ldi.download.android.build-tools.version>
+		<ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
 		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
 		
 		<android.platform.version>22</android.platform.version>
