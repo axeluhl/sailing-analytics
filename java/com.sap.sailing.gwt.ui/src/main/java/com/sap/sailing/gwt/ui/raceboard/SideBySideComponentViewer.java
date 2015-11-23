@@ -130,7 +130,8 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mainPanel = new LayoutPanel() {
             @Override
             public void onResize() {
-                savedSplitPosition = Math.min(leftScrollPanel.getOffsetWidth(), Window.getClientWidth() - 40);
+                int leftWidth = leftScrollPanel.getOffsetWidth();
+                savedSplitPosition = Math.min(leftWidth > 0 ? leftWidth : savedSplitPosition, Window.getClientWidth() - 40);
                 splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
                 super.onResize();
             }
