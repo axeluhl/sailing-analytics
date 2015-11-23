@@ -380,7 +380,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
                 fleetForRaceName = "";
             } else {
-                fleetForRaceName = " - "+fleetForRaceName;
+                fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetForRaceName;
             }
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
@@ -390,6 +390,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             raceInformationHeader.add(raceNameLabel);
             raceInformationHeader.add(raceAdditionalInformationLabel);
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
+            regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
                 // we don't use the EntryPointLinkFactory here, because of lacking support for Places
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
