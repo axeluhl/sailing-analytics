@@ -65,6 +65,15 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
+                                            <artifactId>android-sdk-tools</artifactId>
+                                            <version>${ldi.download.android.tools.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${basedir}</outputDirectory>
+                                            <includes>**/*</includes>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>com.google.download.android</groupId>
                                             <artifactId>platform-tools-windows</artifactId>
                                             <version>${ldi.download.android.platform-tools.version}</version>
                                             <type>zip</type>
@@ -150,6 +159,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		
 		<ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
+		<ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
 		<ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
 		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
 		
