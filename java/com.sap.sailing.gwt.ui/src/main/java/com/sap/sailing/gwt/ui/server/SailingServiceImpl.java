@@ -80,9 +80,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
@@ -5381,8 +5379,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 } else if (abstractLog instanceof RaceLog) {
                     RaceLog raceLog = (RaceLog) abstractLog;
-                    List<RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                            new RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
+                    @SuppressWarnings("deprecation")
+                    List<com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
+                            new com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
                             new MillisecondsTimePoint(closingTimePoint)).analyze();
                     for (RaceLogEvent closingEvent : closingEvents) {
                         raceLog.add(closingEvent);            

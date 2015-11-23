@@ -1,11 +1,8 @@
 package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -42,7 +39,8 @@ public interface RaceLogEventVisitor {
     
     public void visit(RaceLogDeviceCompetitorMappingEvent event);
     
-    public void visit(RaceLogDeviceMarkMappingEvent event);
+    @SuppressWarnings("deprecation")
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event);
     
     public void visit(RaceLogDenoteForTrackingEvent event);
     
@@ -50,9 +48,11 @@ public interface RaceLogEventVisitor {
     
     public void visit(RaceLogRegisterCompetitorEvent event);
     
-    public void visit(RaceLogDefineMarkEvent event);
+    @SuppressWarnings("deprecation")
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event);
     
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event);
+    @SuppressWarnings("deprecation")
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
     

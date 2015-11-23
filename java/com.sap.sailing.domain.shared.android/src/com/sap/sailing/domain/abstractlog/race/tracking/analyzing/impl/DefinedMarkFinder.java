@@ -9,7 +9,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.LogAnalyzer;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.base.Mark;
 
@@ -27,12 +26,13 @@ public class DefinedMarkFinder<LogT extends AbstractLog<EventT, VisitorT>, Event
         super(log);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Collection<Mark> performAnalysis() {
         List<Mark> result = new ArrayList<Mark>();
         for (AbstractLogEvent<?> event : getLog().getUnrevokedEvents()) {
-            if (event instanceof RaceLogDefineMarkEvent) {
-                RaceLogDefineMarkEvent dME = (RaceLogDefineMarkEvent) event;
+            if (event instanceof com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent) {
+                com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent dME = (com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent) event;
                 result.add(dME.getMark());
             } else if (event instanceof RegattaLogDefineMarkEvent) {
                 RegattaLogDefineMarkEvent dME = (RegattaLogDefineMarkEvent) event;

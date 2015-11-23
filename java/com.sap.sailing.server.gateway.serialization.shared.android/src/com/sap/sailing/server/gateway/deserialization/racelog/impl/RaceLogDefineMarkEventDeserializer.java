@@ -7,7 +7,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -24,11 +23,12 @@ public class RaceLogDefineMarkEventDeserializer extends BaseRaceLogEventDeserial
         this.markDeserializer = markDeserializer;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
     	Mark mark = markDeserializer.deserialize(Helpers.getNestedObjectSafe(object, RaceLogDefineMarkEventSerializer.FIELD_MARK));
         
-        return new RaceLogDefineMarkEventImpl(createdAt, author, timePoint, id, passId, mark);
+        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl(createdAt, author, timePoint, id, passId, mark);
     }
 }

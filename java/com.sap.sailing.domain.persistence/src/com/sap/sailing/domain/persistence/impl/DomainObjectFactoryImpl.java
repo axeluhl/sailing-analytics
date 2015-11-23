@@ -82,19 +82,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.impl.RaceLogAdditionalScoringInformationEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
@@ -1311,6 +1305,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    @SuppressWarnings("deprecation") /*TODO: remove deprecated RaceLogEvents when migrated*/ 
     public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
@@ -1362,7 +1357,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogWindFixEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
             return loadRaceLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogDeviceMarkMappingEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent.class.getSimpleName())) {
             return loadRaceLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogDenoteForTrackingEvent.class.getSimpleName())) {
             return loadRaceLogDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
@@ -1372,9 +1367,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogRevokeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {
             return loadRaceLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogDefineMarkEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent.class.getSimpleName())) {
             return loadRaceLogDefineMarkEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(RaceLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
+        } else if (eventClass.equals(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
             return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogAdditionalScoringInformationEvent.class.getSimpleName())) {
             return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
@@ -1418,6 +1413,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new RaceLogDeviceCompetitorMappingEventImpl(createdAt, logicalTimePoint, author, id, passId, mappedTo, device, from, to);
     }
 
+    @SuppressWarnings("deprecation")
     private RaceLogEvent loadRaceLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         DeviceIdentifier device = null;
@@ -1432,7 +1428,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
         TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
         TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
-        return new RaceLogDeviceMarkMappingEventImpl(createdAt, logicalTimePoint, author, id, passId, mappedTo, device, from, to);
+        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl(createdAt, logicalTimePoint, author, id, passId, mappedTo, device, from, to);
     }
 
     private RaceLogEvent loadRaceLogDenoteForTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
@@ -1466,17 +1462,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, comp);
     }
 
+    @SuppressWarnings("deprecation")
     private RaceLogEvent loadRaceLogDefineMarkEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Mark mark = loadMark((DBObject) dbObject.get(FieldNames.RACE_LOG_MARK.name()));
-        return new RaceLogDefineMarkEventImpl(createdAt, author, logicalTimePoint, id, passId, mark);
+        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl(createdAt, author, logicalTimePoint, id, passId, mark);
     }
 
+    @SuppressWarnings("deprecation")
     private RaceLogEvent loadRaceLogCloseOpenEndedDeviceMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) dbObject.get(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name()));
         TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
-        return new RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, logicalTimePoint, author, id, passId,
+        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, logicalTimePoint, author, id, passId,
                 deviceMappingEventId, closingTimePoint);
     }
 

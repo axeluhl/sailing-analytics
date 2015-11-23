@@ -7,7 +7,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -23,13 +22,14 @@ public class RaceLogCloseOpenEndedDeviceMappingEventDeserializer extends BaseRac
         super(competitorDeserializer);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
     	Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) object.get(FIELD_DEVICE_MAPPING_EVENT_ID));
     	TimePoint closingTimePoint = new MillisecondsTimePoint((Long) object.get(FIELD_CLOSING_TIMEPOINT_MILLIS));
         
-        return new RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, timePoint, author, id, passId,
+        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, timePoint, author, id, passId,
                 deviceMappingEventId, closingTimePoint);
     }
 }

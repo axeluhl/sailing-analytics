@@ -22,11 +22,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -98,8 +95,9 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
         notifyListenerAboutEventAdded(event);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void visit(RaceLogDeviceMarkMappingEvent event) {
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 
@@ -123,13 +121,15 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
         notifyListenerAboutEventAdded(event);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void visit(RaceLogDefineMarkEvent event) {
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event) {
         notifyListenerAboutEventAdded(event);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
+    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event) {
         notifyListenerAboutEventAdded(event);
     }
     

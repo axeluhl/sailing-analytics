@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
@@ -157,9 +156,10 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private boolean isMarkMappingEvent(DeviceMappingEvent<?, ?> mappingEvent) {
         boolean isMarkMappingEvent = false;
-        if (mappingEvent instanceof RaceLogDeviceMarkMappingEvent || mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
+        if (mappingEvent instanceof com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent || mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
             isMarkMappingEvent = true;
         }
         return isMarkMappingEvent;
