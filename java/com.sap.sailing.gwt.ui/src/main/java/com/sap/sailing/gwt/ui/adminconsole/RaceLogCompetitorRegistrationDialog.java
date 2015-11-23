@@ -18,8 +18,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable, String leaderboardName, String raceColumnName, String fleetName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, boatClass);
-        this.leaderboardName = leaderboardName;
+        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
     }
