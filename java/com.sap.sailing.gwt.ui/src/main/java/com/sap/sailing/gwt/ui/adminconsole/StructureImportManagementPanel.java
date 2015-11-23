@@ -29,14 +29,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -46,6 +43,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -103,8 +102,14 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(this.sailingService, new RegattaSelectionModel(
-                true), this.regattaRefresher, this, this.errorReporter, this.stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService,
+                new RefreshableMultiSelectionModel<RegattaDTO>(new EntityIdentityComparator<RegattaDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                        return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                    }
+                }), this.regattaRefresher, this, this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -112,6 +117,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         mainPanel.setWidth("100%");
 
         createUI(mainPanel);
+        /*
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -119,6 +125,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 updateImportRegattasButtonEnabledness();
             }
         });
+        */
         regattaStructureGrid = new FlexTable();
     }
 

@@ -7,7 +7,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -15,6 +14,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
@@ -26,23 +26,24 @@ public class StructureImportListComposite extends RegattaListComposite implement
     }
 
     public StructureImportListComposite(final SailingServiceAsync sailingService,
-            final RegattaSelectionProvider regattaSelectionProvider, RegattaRefresher regattaRefresher,
+            final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaSelectionModel, RegattaRefresher regattaRefresher,
             RegattaStructureProvider regattaStructureProvider, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
-        super(sailingService, regattaSelectionProvider, regattaRefresher, errorReporter, stringMessages);
+        super(sailingService, refreshableRegattaSelectionModel, regattaRefresher, errorReporter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
 
     // create Regatta Table in StructureImportManagementPanel
     @Override
-    protected CellTable<RegattaDTO> createRegattaTable() {
+    protected CellTable<RegattaDTO> createRegattaTable(RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaSelectionModel) {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
         
-        this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableRes.cellTableStyle()
-                .cellTableCheckboxSelected(), tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
+        this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(refreshableRegattaSelectionModel,
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;

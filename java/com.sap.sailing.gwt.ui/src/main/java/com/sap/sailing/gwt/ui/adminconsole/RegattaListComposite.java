@@ -10,7 +10,6 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -23,7 +22,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -41,7 +39,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -53,7 +50,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
 //TODO remove regattaSelectionModel
-    protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
+//    protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
     protected final CellTable<RegattaDTO> regattaTable;
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
@@ -100,7 +97,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(noRegattasLabel);
 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaTable = createRegattaTable();
+        regattaTable = createRegattaTable(this.refreshableRegattaMultiSelectionModel);
         regattaTable.ensureDebugId("RegattasCellTable");
         regattaTable.setVisible(false);
         
@@ -118,12 +115,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         panel.add(filterablePanelRegattas);
-
+/*
         @SuppressWarnings("unchecked")
         MultiSelectionModel<RegattaDTO> multiSelectionModel = (MultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaSelectionModel = multiSelectionModel;
-
-        regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+*/
+        this.refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
 /*                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
@@ -132,30 +129,25 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
                 }
                 RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);*/
-                refreshableRegattaMultiSelectionModel.refreshSelectionModel(getSelectedRegattas());
+                refreshableRegattaMultiSelectionModel.refreshSelectionModel(allRegattas);
             }
         });
         panel.add(regattaTable);
         initWidget(mainPanel);
     }
-    
+    /*
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
-        return regattaSelectionModel.addSelectionChangeHandler(handler);
+        return refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(handler);
     }
-
-    protected CellTable<RegattaDTO> createRegattaTable() {
+*/
+    protected CellTable<RegattaDTO> createRegattaTable(RefreshableMultiSelectionModel<RegattaDTO> selectionmodel) {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
-        SelectionCheckboxColumn<RegattaDTO> regattaSelectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
+        SelectionCheckboxColumn<RegattaDTO> regattaSelectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(selectionmodel, tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RegattaDTO>() {
-                    @Override
-                    public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
-                        return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
-                    }
-                } /* entityIdentityComparator to create a RefreshableSelectionModel */) {
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;
@@ -355,15 +347,18 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     protected List<RegattaDTO> getSelectedRegattas() {
+        /*
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         if (regattaListDataProvider != null) {
             for (RegattaDTO regatta : regattaListDataProvider.getList()) {
-                if (regattaSelectionModel.isSelected(regatta)) {
+                if (refreshableRegattaMultiSelectionModel.isSelected(regatta)) {
                     result.add(regatta);
                 }
             }
         }
         return result;
+        */
+        return new ArrayList<RegattaDTO>(refreshableRegattaMultiSelectionModel.getSelectedSet());
     }
 
     @Override

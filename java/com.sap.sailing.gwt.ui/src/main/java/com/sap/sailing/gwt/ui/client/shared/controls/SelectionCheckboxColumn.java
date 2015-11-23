@@ -60,11 +60,25 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param entityIdentityComparator
      *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}.
      */
-    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass,
-            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
-        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass, entityIdentityComparator);
+    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionmodel, String selectedCheckboxCSSClass,
+            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
+        this(selectionmodel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
+    }
+    
+    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String checkboxColumnCellCSSClass,
+            String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
+        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
+                entityIdentityComparator);
     }
 
+    private SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionModel, BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass) {
+        super(checkboxCell, SortingOrder.DESCENDING);
+        this.cell = checkboxCell;
+        this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
+        this.selectionEventTranslator = createSelectionEventTranslator();
+        this.selectionModel = selectionModel;
+    }
+    
     private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
         super(checkboxCell, SortingOrder.DESCENDING);
         this.cell = checkboxCell;
