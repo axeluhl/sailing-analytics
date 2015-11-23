@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -556,7 +556,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     for (Fleet fleet : raceColumn.getFleets()) {
                         RaceLog raceLog = raceColumn.getRaceLog(fleet);
                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-                        Util.addAll(new RaceLogDefinedMarkFinder(raceLog).analyze(), marks);
+                        Util.addAll(new DefinedMarkFinder<>(raceLog).analyze(), marks);
                         if (trackedRace != null) {
                             Util.addAll(trackedRace.getMarks(), marks);
                         }
@@ -605,7 +605,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
         Set<Mark> marks = new HashSet<>();
-        Util.addAll(new RaceLogDefinedMarkFinder(raceLog).analyze(), marks);
+        Util.addAll(new DefinedMarkFinder<>(raceLog).analyze(), marks);
         if (trackedRace != null) {
             Util.addAll(trackedRace.getMarks(), marks);
         }

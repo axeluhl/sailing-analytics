@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -69,7 +69,7 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
         } else {
             final List<Mark> marksList = new ArrayList<>();
             // no tracked race associated yet; grab the mark definitions from the race log:
-            for (Mark markDefinitionFromRaceLog : new RaceLogDefinedMarkFinder(raceColumn.getRaceLog(fleet)).analyze()) {
+            for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder<>(raceColumn.getRaceLog(fleet)).analyze()) {
                 marksList.add(markDefinitionFromRaceLog);
             }
             marks = marksList;
