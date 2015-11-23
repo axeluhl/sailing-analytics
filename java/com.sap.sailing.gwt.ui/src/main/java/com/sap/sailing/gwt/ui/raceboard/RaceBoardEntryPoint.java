@@ -158,15 +158,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }  
 
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
-        FlowPanel timeLineInnerBgPanel = new FlowPanel();
+        FlowPanel timeLineInnerBgPanel = new ResizableFlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
         timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
-        FlowPanel timeLineInnerPanel = new FlowPanel();
+        FlowPanel timeLineInnerPanel = new ResizableFlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
         
-        FlowPanel timelinePanel = new FlowPanel();
+        FlowPanel timelinePanel = new ResizableFlowPanel();
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
         
