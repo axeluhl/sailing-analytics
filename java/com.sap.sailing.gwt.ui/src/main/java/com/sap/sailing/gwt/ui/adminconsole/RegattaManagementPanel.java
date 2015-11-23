@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,6 +16,8 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
@@ -106,6 +109,30 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
                 return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
             }
+        });
+        refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                List<RegattaDTO> selectedRegattas = new ArrayList<>(refreshableRegattaMultiSelectionModel.getSelectedSet());
+                final RegattaIdentifier selectedRegatta;
+                if (selectedRegattas.size() == 1) {
+                    selectedRegatta = selectedRegattas.iterator().next().getRegattaIdentifier();
+                    if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
+                        for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
+                            if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
+                                regattaDetailsComposite.setRegatta(regattaDTO);
+                                regattaDetailsComposite.setVisible(true);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    regattaDetailsComposite.setRegatta(null);
+                    regattaDetailsComposite.setVisible(false);
+                }
+                removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
+            }            
         });
         //refreshableRegattaMultiSelectionModel.addRegattaSelectionChangeListener(this);
         
@@ -225,25 +252,4 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         regattaListComposite.fillRegattas(regattas);
     }
-
-/*    @Override
-    public void onRegattaSelectionChange(List<RegattaIdentifier> selectedRegattas) {
-        final RegattaIdentifier selectedRegatta;
-        if (selectedRegattas.size() == 1) {
-            selectedRegatta = selectedRegattas.iterator().next();
-            if (selectedRegatta != null && regattaListComposite.getAllRegattas() != null) {
-                for (RegattaDTO regattaDTO : regattaListComposite.getAllRegattas()) {
-                    if (regattaDTO.getRegattaIdentifier().equals(selectedRegatta)) {
-                        regattaDetailsComposite.setRegatta(regattaDTO);
-                        regattaDetailsComposite.setVisible(true);
-                        break;
-                    }
-                }
-            }
-        } else {
-            regattaDetailsComposite.setRegatta(null);
-            regattaDetailsComposite.setVisible(false);
-        }
-        removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
-    }*/
 }
