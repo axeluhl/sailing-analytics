@@ -29,6 +29,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
@@ -117,7 +119,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         mainPanel.setWidth("100%");
 
         createUI(mainPanel);
-        /*
+        
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -125,7 +127,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 updateImportRegattasButtonEnabledness();
             }
         });
-        */
+        
         regattaStructureGrid = new FlexTable();
     }
 

@@ -10,6 +10,7 @@ import java.util.List;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -49,7 +50,6 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  *
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
-//TODO remove regattaSelectionModel
 //    protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
     protected final CellTable<RegattaDTO> regattaTable;
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
@@ -135,11 +135,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(regattaTable);
         initWidget(mainPanel);
     }
-    /*
+    
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
         return refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(handler);
     }
-*/
+
     protected CellTable<RegattaDTO> createRegattaTable(RefreshableMultiSelectionModel<RegattaDTO> selectionmodel) {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
