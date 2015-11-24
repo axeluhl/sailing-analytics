@@ -2032,7 +2032,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     class TrackedRaceMarkPositionFinder implements MarkPositionFinder{
-
         private TrackedRace trackedRace;
 
         public TrackedRaceMarkPositionFinder(TrackedRace trackedRace) {
@@ -2043,13 +2042,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         public Position find(Mark mark, TimePoint at) {
             final TimePoint timePointToUse = trackedRace == null ? null :
                 at == null ? MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis()) : at;
-                if (timePointToUse == null){
-                    return null;
-                } else {
-                    return trackedRace.getOrCreateTrack(mark).getEstimatedPosition(timePointToUse, /* extrapolate */ false);
-                }
+            final Position result;
+            if (timePointToUse == null) {
+                result = null;
+            } else {
+                result = trackedRace.getOrCreateTrack(mark).getEstimatedPosition(timePointToUse, /* extrapolate */ false);
+            }
+            return result;
         }
-        
     }
     
     private interface MarkPositionFinder{
