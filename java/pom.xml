@@ -61,8 +61,7 @@
       <id>with-not-android-relevant</id>
       <activation>
         <property>
-          <name>mobile.build.is.default</name>
-          <value>false</value>
+          <name>!ldi.releaseBuild</name>
         </property>
       </activation>
       <modules>

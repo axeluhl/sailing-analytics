@@ -42,8 +42,7 @@
 			<id>with-mobile</id>
 			<activation>
 				<property>
-					<name>mobile.build.is.default</name>
-					<value>true</value>
+					<name>ldi.releaseBuild</name>
 				</property>
 			</activation>
 			<build>
