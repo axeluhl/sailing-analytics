@@ -1,8 +1,10 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media.impl;
 
 import java.net.URL;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public class VideoDescriptorImpl extends AbstractMediaDescriptor implements VideoDescriptor {
     private static final long serialVersionUID = 2651747912466590862L;

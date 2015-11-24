@@ -44,12 +44,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.MediaDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
     public interface EventVisitor {
