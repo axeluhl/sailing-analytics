@@ -671,31 +671,29 @@ img.openColumn {
 	margin-top: 5px;
 }
 
-@media (max-width: 600px) {
-	.RegattaRaceInformation-Header {
-		left: 110px;
-	}
-	.RegattaRaceInformation-Header .RaceName-Label {
-		display: block;
-		font-size: 16px;
-		padding: 2px 0;
-	}
-	.RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
-		display: block;
-		margin-top: 5px;
-	}
-	.RegattaAndRaceTime-Header {
-		top: 11px;
-	}
-	.RegattaAndRaceTime-Header .RegattaName-Anchor {
-		width: 115px;
-    	overflow: hidden;
-    	text-overflow: ellipsis;
-    	display: inline-block;
-    	white-space: nowrap;
-    	padding: 2px 0 2px 20px;
-		background-position: 4px -1px;
-	}
+.compactHeader .RegattaRaceInformation-Header {
+    left: 110px;
+}
+.compactHeader .RegattaRaceInformation-Header .RaceName-Label {
+    display: block;
+    font-size: 16px;
+    padding: 2px 0;
+}
+.compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
+    display: block;
+    margin-top: 5px;
+}
+.compactHeader .RegattaAndRaceTime-Header {
+    top: 11px;
+}
+.compactHeader .RegattaAndRaceTime-Header .RegattaName-Anchor {
+    width: 115px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    padding: 2px 0 2px 20px;
+    background-position: 4px -1px;
 }
 
 .VideoPopup-Close-Button {

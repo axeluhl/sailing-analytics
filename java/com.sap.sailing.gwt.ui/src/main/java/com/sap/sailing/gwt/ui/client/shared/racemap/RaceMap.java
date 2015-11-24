@@ -142,6 +142,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
+    private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    
     private MapWidget map;
     
     /**
@@ -2450,6 +2452,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             map.triggerResize();
             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
         }
+        boolean isCompactHeader = this.getOffsetWidth() <= 600;
+        getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
     }
 
     @Override
