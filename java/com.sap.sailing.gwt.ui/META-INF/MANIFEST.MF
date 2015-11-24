@@ -51,7 +51,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.news,
  com.sap.sailing.polars.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.polars.datamining,
- com.sap.sse.datamining.annotations;bundle-version="1.0.0"
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0",
+ com.sap.sse.shared.android
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="3.1.0",

@@ -1,4 +1,4 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +18,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.media.MimeType;
 
 public class MediaUtils {
     private static final Logger logger = Logger.getLogger(MediaUtils.class.getName());
