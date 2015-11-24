@@ -2052,7 +2052,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
     
-    private interface MarkPositionFinder{
+    private interface MarkPositionFinder {
         Position find(Mark mark, TimePoint at);
     }
     
