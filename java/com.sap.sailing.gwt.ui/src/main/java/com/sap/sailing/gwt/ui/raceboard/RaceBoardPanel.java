@@ -129,7 +129,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created.
+     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
      */
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
@@ -179,6 +179,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
 
+        // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
+        // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
         leaderboardPanel.setTitle(stringMessages.leaderboard());

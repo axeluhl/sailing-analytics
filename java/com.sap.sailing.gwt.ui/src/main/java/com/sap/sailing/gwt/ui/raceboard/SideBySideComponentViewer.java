@@ -45,7 +45,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class SideBySideComponentViewer implements ComponentViewer, UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
-    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // works well for 505 and ESS
+    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -131,6 +131,9 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
             @Override
             public void onResize() {
                 int leftWidth = leftScrollPanel.getOffsetWidth();
+                // The left scroll panel is potentially resized to ensure it is not too wide when the screen gets narrower,
+                // e.g. when resizing browser window or changing mobile device orientation. An offset of 40px is used, so
+                // the panels size slider and its toggle button is always accessable if it is open.
                 savedSplitPosition = Math.min(leftWidth > 0 ? leftWidth : savedSplitPosition, Window.getClientWidth() - 40);
                 splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
                 super.onResize();

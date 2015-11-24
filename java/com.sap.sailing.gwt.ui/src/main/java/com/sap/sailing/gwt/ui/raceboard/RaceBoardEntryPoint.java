@@ -98,8 +98,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
+                // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
+                // This decision is made once based on the initial screen height. Resizing the window afterwards will have
+                // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
+                boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
                 checkUrlParameters(result, canReplayWhileLiveIsPossible, showMapControls,
-                        /* isScreenLargeEnoughToOfferChartSupport */ Document.get().getClientHeight() >= 600);
+                        isScreenLargeEnoughToOfferChartSupport);
             }
             
             @Override
