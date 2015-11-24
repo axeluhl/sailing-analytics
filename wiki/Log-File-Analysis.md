@@ -64,15 +64,29 @@ This uses the SetEnvIf module, tries to match an IP address at the start of the 
 
 ### Amazon EC2 Elastic Load Balancer (ELB) Logs
 
-An Amazon ELB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available. It seems a good idea to always capture these logs for archiving purposes. They end up on an S3 bucket, and by default we use `sapsailing-access-logs`.
+An Amazon ELB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
+
+The format for these logs is
+
+<pre>
+timestamp elb client:port backend:port request_processing_time backend_processing_time response_processing_time elb_status_code backend_status_code received_bytes sent_bytes "request" "user_agent" ssl_cipher ssl_protocol
+</pre>
+
+It seems a good idea to always capture these logs for archiving purposes. They end up on an S3 bucket, and by default we use `sapsailing-access-logs`.
 
 Content can be synced from there to a local directory using the following command:
 
 ``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
+Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`.
+
 ## Automatic Log File Rotation to /var/log/old
 
- - describe how logrotate is used and automatically configured during instance start-up and where the logs go
+When an EC2 server is launched from its Amazon Machine Image (AMI), the /etc/init.d/sailing script is executed with the "start" parameter. This script is really just a link to `/home/sailing/code/configuration/sailing` which comes from the git version checked out to the workspace at `/home/sailing/code`. This script patches the file `/etc/logrotate.d/httpd` such that when log rotation happens, the existence of the directory `/var/log/old/$SERVER_NAME/$SERVER_IP` is ensured and the log files are copied there.
+
+This way, logs end up in a per server-name and per server-ip directory.
+
+The general log rotation rules (size, time, compression, etc.) is governed by `/etc/logrotate.conf`.
 
 ## Analysis Tools
 
