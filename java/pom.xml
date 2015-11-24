@@ -58,10 +58,12 @@
 
   <profiles>
     <profile>
-      <!-- deactivate with parameter '-P !with-test'-->
       <id>with-not-android-relevant</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>mobile.build.is.default</name>
+          <value>false</value>
+        </property>
       </activation>
       <modules>
         <module>com.sap.sse</module>

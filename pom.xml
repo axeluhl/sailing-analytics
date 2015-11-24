@@ -15,10 +15,12 @@
 
 	<profiles>
 		<profile>
-			<!-- deactivate with parameter '-P !with-mobile'-->
 			<id>with-mobile</id>
 			<activation>
-				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>mobile.build.is.default</name>
+					<value>true</value>
+				</property>
 			</activation>
 			<modules>
 				<module>mobile</module>
@@ -143,6 +145,7 @@
             <android.api.groupId>com.google.download.android</android.api.groupId>
             <android.api.version>5.1.1</android.api.version>
             <android.platform.version>22</android.platform.version>
+            <mobile.build.is.default>true</mobile.build.is.default>
         </properties>
         <build>
           <pluginManagement>
@@ -211,6 +214,8 @@
 		<android.platform.version>22</android.platform.version>
 		<android.api.groupId>android</android.api.groupId>
 		<android.api.version>5.1.1_r2</android.api.version>
+		
+		<mobile.build.is.default>false</mobile.build.is.default>
 	</properties>
 	
 	<build>
