@@ -7,7 +7,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> implements RefreshableSelectionModel<T> {
-    private EntityIdentityComparator<T> comp;
+    private final EntityIdentityComparator<T> comp;
     
     public RefreshableMultiSelectionModel() {
         super();
@@ -31,7 +31,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
 
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        final Set<T> selectedSet = new HashSet<>(getSelectedSet());
+        final Set<T> selectedSet = new HashSet<>(getSelectedSet()); // TODO Lukas: a copy doesn't seem required (anymore?) here; the result of getSelectedSet() is not referenced beyond the scope of this method
         final boolean isNotEmpty = !selectedSet.isEmpty();
         clear();
         if (isNotEmpty) {

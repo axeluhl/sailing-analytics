@@ -7,7 +7,7 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T> {
-    private EntityIdentityComparator<T> comp;
+    private final EntityIdentityComparator<T> comp;
     
     public RefreshableSingleSelectionModel() {
          super();
@@ -31,14 +31,14 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
 
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        final Set<T> selectedSet = new HashSet<>(getSelectedSet());
+        final Set<T> selectedSet = new HashSet<>(getSelectedSet()); // TODO Lukas: a copy doesn't seem required (anymore?) here; the result of getSelectedSet() is not referenced beyond the scope of this method
         final T selected = selectedSet.isEmpty() ? null : selectedSet.iterator().next();
         clear();
         for (final T it : newObjects) {
             if (selected != null) {
                 setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
             } else {
-                setSelected(it, false);
+                setSelected(it, false); // TODO Lukas: clear() already clears the selection
             }
         }
         scheduleSelectionChangeEvent();

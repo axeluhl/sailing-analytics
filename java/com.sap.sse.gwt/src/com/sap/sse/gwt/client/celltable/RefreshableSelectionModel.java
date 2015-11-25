@@ -5,10 +5,12 @@ import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
- * The Interface {@link RefreshableSelectionModel} unify the refresh behavior of SelectionModels e.g. of a
+ * The interface {@link RefreshableSelectionModel} unifies the refresh behavior of SelectionModels e.g. of a
  * {@link SingleSelectionModel}. To refresh this SelectionModel you can call the
  * {@link RefreshableSelectionModel#refreshSelectionModel(Iterable)} method and this method will refresh the
  * SelectionModel.
+ * 
+ * TODO Lukas, please enhance this comment to explain how this re-establishes the invariant of same elements in SetSelectionModel.getSelectedElements and DataProvider
  * 
  * @author D064976
  */
@@ -27,7 +29,7 @@ public interface RefreshableSelectionModel<T> extends SetSelectionModel<T> {
      * has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)} method to compare.
      * <p>
      * 
-     * If an selected object is not in the <code>newObjects</code> the object wouldn't be selected anymore.
+     * If a selected object is not contained in <code>newObjects</code> the object wouldn't be selected anymore.
      * <p>
      * 
      * When the selection is refreshed this method triggers a
