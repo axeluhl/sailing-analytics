@@ -32,17 +32,20 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
         final Set<T> selectedSet = new HashSet<>(getSelectedSet());
-        final boolean isSelected = !selectedSet.isEmpty();
+        final boolean isNotEmpty = !selectedSet.isEmpty();
         clear();
-        for (final T it : newObjects) {
-            if (isSelected) {
-                for (final T selected : selectedSet) {
-                    setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
+        if (isNotEmpty) {
+            for (T it : newObjects) {
+                boolean isSelected = false;
+                for (T selected : selectedSet) {
+                    isSelected = (comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
+                    if (isSelected) {
+                        break;
+                    }
                 }
-            } else {
-                setSelected(it, false);
+                setSelected(it, isSelected);
             }
+            scheduleSelectionChangeEvent();
         }
-        scheduleSelectionChangeEvent();
     }
 }
