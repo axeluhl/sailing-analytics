@@ -126,24 +126,12 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                     @Override
                     public void onSuccess(RaceCourseDTO result) {
                         updateWaypointsAndControlPoints(result);
+                        marks.refresh(result.getMarks());
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Could not load course: " + caught.getMessage());
-                    }
-                });
-
-        sailingService.getMarksInRaceLog(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<Iterable<MarkDTO>>() {
-                    @Override
-                    public void onSuccess(Iterable<MarkDTO> result) {
-                        marks.refresh(result);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load marks: " + caught.getMessage());
                     }
                 });
     }
