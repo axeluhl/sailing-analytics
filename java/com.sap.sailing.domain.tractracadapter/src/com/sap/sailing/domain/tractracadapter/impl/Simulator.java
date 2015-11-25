@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class Simulator {
@@ -34,7 +35,7 @@ public class Simulator {
     private DynamicTrackedRace trackedRace;
     private final WindStore windStore;
     private boolean stopped;
-    private Duration advanceInMillis = null;
+    private Duration advanceInMillis = Duration.NULL.minus(1);
     private Timer timer = new Timer("Timer for TracTrac Simulator");
     private Duration offsetToStart;
     
@@ -196,13 +197,13 @@ public class Simulator {
         if (isAdvanceInMillisSet()) {
             return advance(time);
         } else {
-            setAdvanceInMillis(MillisecondsTimePoint.now().until(time).plus(getOffsetToStart()));
+            setAdvanceInMillis(new MillisecondsDurationImpl(MillisecondsTimePoint.now().minus(time.asMillis()).plus(getOffsetToStart()).asMillis()));
             return advance(time);
         }
     }
 
     private boolean isAdvanceInMillisSet() {
-        return advanceInMillis != null;
+        return !advanceInMillis.equals(Duration.NULL.minus(1));
     }
 
     /**
