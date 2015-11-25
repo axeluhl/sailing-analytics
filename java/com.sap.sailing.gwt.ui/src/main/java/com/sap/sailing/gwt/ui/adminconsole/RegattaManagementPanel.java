@@ -41,7 +41,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer/*, RegattaSelectionChangeListener*/ {
+public class RegattaManagementPanel extends SimplePanel implements RegattasDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;

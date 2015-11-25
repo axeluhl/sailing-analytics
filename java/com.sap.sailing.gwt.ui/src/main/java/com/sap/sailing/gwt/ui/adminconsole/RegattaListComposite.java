@@ -50,7 +50,6 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  *
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
-//    protected final MultiSelectionModel<RegattaDTO> regattaSelectionModel;
     protected final CellTable<RegattaDTO> regattaTable;
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
     private List<RegattaDTO> allRegattas;
@@ -115,23 +114,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         panel.add(filterablePanelRegattas);
-/*
-        @SuppressWarnings("unchecked")
-        MultiSelectionModel<RegattaDTO> multiSelectionModel = (MultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
-        regattaSelectionModel = multiSelectionModel;
-*/
-        this.refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-/*                List<RegattaDTO> selectedRegattas = getSelectedRegattas();
-                List<RegattaIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaIdentifier>();
-                for (RegattaDTO selectedRegatta : selectedRegattas) {
-                    selectedRaceIdentifiers.add(selectedRegatta.getRegattaIdentifier());
-                }
-                RegattaListComposite.this.regattaSelectionProvider.setSelection(selectedRaceIdentifiers);*/
-                refreshableRegattaMultiSelectionModel.refreshSelectionModel(allRegattas);
-            }
-        });
+
         panel.add(regattaTable);
         initWidget(mainPanel);
     }
@@ -347,17 +330,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     protected List<RegattaDTO> getSelectedRegattas() {
-        /*
-        List<RegattaDTO> result = new ArrayList<RegattaDTO>();
-        if (regattaListDataProvider != null) {
-            for (RegattaDTO regatta : regattaListDataProvider.getList()) {
-                if (refreshableRegattaMultiSelectionModel.isSelected(regatta)) {
-                    result.add(regatta);
-                }
-            }
-        }
-        return result;
-        */
         return new ArrayList<RegattaDTO>(refreshableRegattaMultiSelectionModel.getSelectedSet());
     }
 
@@ -372,13 +344,10 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         }
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         Util.addAll(regattas, newAllRegattas);
-        /*List<RegattaIdentifier> newAllRegattaIdentifiers = new ArrayList<RegattaIdentifier>();
-        for (RegattaDTO regatta : regattas) {
-            newAllRegattaIdentifiers.add(regatta.getRegattaIdentifier());
-        }*/
+
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas);
-        //regattaSelectionProvider.setAllRegattas(newAllRegattaIdentifiers);
+
         refreshableRegattaMultiSelectionModel.refreshSelectionModel(regattas);
     }
 
