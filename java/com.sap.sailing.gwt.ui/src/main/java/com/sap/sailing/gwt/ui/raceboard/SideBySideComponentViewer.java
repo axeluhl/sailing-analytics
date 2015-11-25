@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -309,6 +310,20 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                 toggleButton.setVisible(false);
                 forceLayout();
             }
+        }
+    }
+    
+    /**
+     * Shows/hides the text on left components toggle button by modifying CSS <code>font-size</code> property.
+     * 
+     * @param visible <code>true</code> to show the button text, <code>false</code> to hide it
+     */
+    void setLeftComponentToogleButtonTextVisibility(final boolean visible) {
+        Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
+        if (leftScrollPanelSplitter != null) {
+            Style toggleButtonStyle = leftScrollPanelSplitter.getToggleButton().getElement().getStyle();
+            if (visible) toggleButtonStyle.clearFontSize();
+            else toggleButtonStyle.setFontSize(0, Unit.PX);
         }
     }
 }

@@ -2452,6 +2452,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             map.triggerResize();
             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
         }
+        // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
         getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
