@@ -101,6 +101,7 @@ public class LeaderboardContext {
                 result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
+            result.setTotalCompetitorCount(leaderboardDTO.competitors.size());
             return new ResultWithTTL<>(Duration.ONE_MINUTE.times(isLive ? 1 : 2), result);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);

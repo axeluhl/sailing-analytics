@@ -11,6 +11,7 @@ public class GetMiniLeaderboardDTO implements DTO {
     private String scoreCorrectionText;
     private Date lastScoreUpdate;
     private boolean live;
+    private int totalCompetitorCount;
 
     public GetMiniLeaderboardDTO() {
     }
@@ -46,7 +47,15 @@ public class GetMiniLeaderboardDTO implements DTO {
     public void setLive(boolean live) {
         this.live = live;
     }
-    
+
+    public int getTotalCompetitorCount() {
+        return totalCompetitorCount;
+    }
+
+    public void setTotalCompetitorCount(int totalCompetitorCount) {
+        this.totalCompetitorCount = totalCompetitorCount;
+    }
+
     public boolean hasDifferentRaceCounts() {
         HashSet<Integer> uniqueRaceCounts = new HashSet<>();
         for (MiniLeaderboardItemDTO item : items) {

@@ -30,10 +30,12 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+
+    private boolean isOverall;
     
     public MinileaderboardBox(boolean isOverall) {
+        this.isOverall = isOverall;
         initWidget(uiBinder.createAndBindUi(this));
-        headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
         headerUi.setInfoText(StringMessages.INSTANCE.details());
     }
     
@@ -44,6 +46,13 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     
     @Override
     public void setData(final GetMiniLeaderboardDTO data) {
+        String headerText = isOverall ? I18N.overallStandings() : I18N.results();
+        int itemCount = data.getItems().size();
+        if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
+            headerText += " (" + StringMessages.INSTANCE.topN(itemCount) + ")";
+        }
+        headerUi.setSectionTitle(headerText);
+        
         itemContainerUi.clearContent();
         
         if(data.getItems().isEmpty()) {

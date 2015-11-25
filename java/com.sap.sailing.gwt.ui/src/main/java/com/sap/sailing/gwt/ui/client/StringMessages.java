@@ -1444,4 +1444,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
+    String topN(int n);
 }
