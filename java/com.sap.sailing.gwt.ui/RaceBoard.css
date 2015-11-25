@@ -94,6 +94,14 @@ table {
 	padding-top: 10px;
 	padding-left: 10px;
 }
+.CombinedWindPanelParentDiv.indentsmall,
+.TrueNorthIndicatorPanelParentDiv.indentsmall {
+	padding-left: 30px;
+}
+.CombinedWindPanelParentDiv.indentbig,
+.TrueNorthIndicatorPanelParentDiv.indentbig {
+	padding-left: 45px;
+}
 
 .MapSimulationLegendParentDiv {
 	padding-bottom: 10px;

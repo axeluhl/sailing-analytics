@@ -536,9 +536,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   RaceMap.this.add(sapLogo);
               }
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
-              combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
               map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
-              trueNorthIndicatorPanel.getParent().addStyleName("TrueNorthIndicatorPanelParentDiv");
+              adjustLeftControlsIndent();
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
@@ -2456,6 +2455,21 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
         getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        
+        // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
+        if (combinedWindPanel.getParent() != null && trueNorthIndicatorPanel.getParent() != null) {
+            this.adjustLeftControlsIndent();
+        }
+    }
+    
+    private void adjustLeftControlsIndent() {
+        combinedWindPanel.getParent().setStyleName("CombinedWindPanelParentDiv");
+        trueNorthIndicatorPanel.getParent().setStyleName("TrueNorthIndicatorPanelParentDiv");
+        String leftControlsIndentStyle = getLeftControlsIndentStyle();
+        if (leftControlsIndentStyle != null) {
+            combinedWindPanel.getParent().addStyleName(leftControlsIndentStyle);
+            trueNorthIndicatorPanel.getParent().addStyleName(leftControlsIndentStyle);
+        }
     }
 
     @Override
@@ -2603,5 +2617,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
           }
         return mapOptions;
+    }
+
+    /**
+     * @return CSS style name to adjust the indent of left controls (combined wind and true north indicator).
+     */
+    protected String getLeftControlsIndentStyle() {
+        return null;
     }
 }

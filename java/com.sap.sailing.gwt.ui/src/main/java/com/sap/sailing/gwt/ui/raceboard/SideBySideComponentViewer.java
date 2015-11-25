@@ -314,16 +314,21 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     }
     
     /**
-     * Shows/hides the text on left components toggle button by modifying CSS <code>font-size</code> property.
+     * Shows/hides the text on left components toggle button by modifying CSS <code>font-size</code> property and adjust
+     * the dragger position by modifying CSS <code>margin-top</code> property. 
      * 
-     * @param visible <code>true</code> to show the button text, <code>false</code> to hide it
+     * @param visible
+     *            <code>true</code> to show the button text, <code>false</code> to hide it
      */
-    void setLeftComponentToogleButtonTextVisibility(final boolean visible) {
+    void setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(final boolean visible) {
         Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
         if (leftScrollPanelSplitter != null) {
             Style toggleButtonStyle = leftScrollPanelSplitter.getToggleButton().getElement().getStyle();
             if (visible) toggleButtonStyle.clearFontSize();
             else toggleButtonStyle.setFontSize(0, Unit.PX);
+            Style drapperStyle = leftScrollPanelSplitter.getDragger().getElement().getStyle();
+            if (visible) drapperStyle.clearMarginTop();
+            else drapperStyle.setMarginTop(-25, Unit.PX);
         }
     }
 }

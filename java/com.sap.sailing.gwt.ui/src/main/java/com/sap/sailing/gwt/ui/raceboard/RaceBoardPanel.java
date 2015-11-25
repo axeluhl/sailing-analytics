@@ -171,6 +171,8 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
                 selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true) {
+            private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
+            private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
             public void onResize() {
                 super.onResize();
@@ -178,9 +180,21 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
                     @Override
                     public void execute() {
                         // Show/hide the leaderboard panels toggle button text based on the race map height
-                        leaderboardAndMapViewer.setLeftComponentToogleButtonTextVisibility(raceMap.getOffsetHeight() > 400);
+                        leaderboardAndMapViewer.setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(raceMap.getOffsetHeight() > 400);
                     }
                 });
+            }
+            
+            @Override
+            protected String getLeftControlsIndentStyle() {
+                // Calculate style name for left control indent based on race map height an leaderboard panel visibility
+                if (raceMap.getOffsetHeight() <= 300) {
+                    return INDENT_BIG_CONTROL_STYLE;
+                }
+                if (leaderboardPanel.isVisible() && raceMap.getOffsetHeight() <= 500) {
+                    return INDENT_SMALL_CONTROL_STYLE;
+                }
+                return super.getLeftControlsIndentStyle();
             }
         };
         CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider, stringMessages, raceMap,
