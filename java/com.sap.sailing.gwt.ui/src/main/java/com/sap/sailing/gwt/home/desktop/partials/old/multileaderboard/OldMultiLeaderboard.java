@@ -3,7 +3,8 @@ package com.sap.sailing.gwt.home.desktop.partials.old.multileaderboard;
 import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.ParagraphElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -46,16 +47,19 @@ public class OldMultiLeaderboard extends Composite {
     @UiField Anchor settingsAnchor;
     @UiField Anchor autoRefreshAnchor;
     @UiField Anchor fullscreenAnchor;
-    @UiField ParagraphElement lastScoringUpdateTimeDiv;
-    @UiField ParagraphElement lastScoringUpdateTextDiv;
-    @UiField ParagraphElement lastScoringCommentDiv;
-    @UiField ParagraphElement scoringSchemeDiv;
+    @UiField DivElement lastScoringUpdateTimeDiv;
+    @UiField DivElement lastScoringUpdateTextDiv;
+    @UiField DivElement lastScoringCommentDiv;
+    @UiField DivElement scoringSchemeDiv;
+    @UiField DivElement busyIndicatorDiv;
     @UiField EventRegattaLeaderboardResources local_res;
 
     private MultiLeaderboardPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-    
+
+    private final DivElement emptyDivElement;
+
     public OldMultiLeaderboard() {
         this(null);
     }
@@ -69,6 +73,8 @@ public class OldMultiLeaderboard extends Composite {
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
+        emptyDivElement = Document.get().createDivElement();
+        emptyDivElement.setInnerHTML("&nbsp;");
     }
     
     private void setupFullscreenDelegate() {
@@ -168,6 +174,11 @@ public class OldMultiLeaderboard extends Composite {
     }
 
     public void updatedMultiLeaderboard(LeaderboardDTO leaderboard, boolean hasLiveRace) {
+        if(multiLeaderboardPanel.getSelectedLeaderboardPanel() != null) {
+            busyIndicatorDiv.removeAllChildren();
+            busyIndicatorDiv.appendChild(multiLeaderboardPanel.getSelectedLeaderboardPanel().getBusyIndicator().getElement());
+            busyIndicatorDiv.appendChild(emptyDivElement);
+        }
         if(leaderboard != null) {
             String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
             String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";

@@ -177,6 +177,10 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         });
     }
     
+    public LeaderboardPanel getSelectedLeaderboardPanel() {
+        return selectedLeaderboardPanel;
+    }
+    
     private void updateLeaderboardSelection() {
         if(leaderboardsTabPanel != null) {
             leaderboardsTabPanel.clear();

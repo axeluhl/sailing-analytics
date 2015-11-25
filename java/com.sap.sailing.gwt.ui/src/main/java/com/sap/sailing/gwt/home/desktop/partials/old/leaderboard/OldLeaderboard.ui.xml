@@ -5,10 +5,13 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
 	<g:HTMLPanel styleName=" {local_res.css.marginFix}">
 		<div class="{res.mediaCss.grid}">
-			<div class="{res.mediaCss.small7} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
+			<div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 				<div ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></div>
 				<div ui:field="hasLiveRaceDiv" class="{local_res.css.regattaleaderboard_meta_liverace}"></div>
 				<div ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></div>
+			</div>
+			<div class="{res.mediaCss.small1} {res.mediaCss.column}">
+				<div ui:field="busyIndicatorDiv">&nbsp;</div>
 			</div>
 			<div class="{res.mediaCss.small5} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
 				<div class="{local_res.css.regattaleaderboard_meta_update}">

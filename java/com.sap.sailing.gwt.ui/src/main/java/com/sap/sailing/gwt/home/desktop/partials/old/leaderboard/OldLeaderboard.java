@@ -52,6 +52,7 @@ public class OldLeaderboard extends Composite {
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
     @UiField DivElement hasLiveRaceDiv;
+    @UiField DivElement busyIndicatorDiv;
     @UiField EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
@@ -166,6 +167,7 @@ public class OldLeaderboard extends Composite {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         oldLeaderboardPanel.add(leaderboardPanel);
+        busyIndicatorDiv.appendChild(leaderboardPanel.getBusyIndicator().getElement());
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {

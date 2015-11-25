@@ -6,18 +6,21 @@
 	<g:HTMLPanel styleName=" {local_res.css.marginFix}">
 		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
-				<p ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></p>
-				<p ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></p>
+				<div ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></div>
+				<div ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></div>
 			</div>
-			<div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
+			<div class="{res.mediaCss.small1} {res.mediaCss.column}">
+				<div ui:field="busyIndicatorDiv">&nbsp;</div>
+			</div>
+			<div class="{res.mediaCss.small5} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
 				<div class="{local_res.css.regattaleaderboard_meta_update}">
-					<p ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></p>
-					<p ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></p>
+					<div ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></div>
+					<div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></div>
 				</div>
 				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
 				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
 				<g:Anchor ui:field="fullscreenAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button}"></g:Anchor>
-			</div>
+			</div> 
 		</div>
 		
 		<div class="{res.mediaCss.grid}">
