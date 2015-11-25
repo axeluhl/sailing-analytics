@@ -47,11 +47,15 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security.common,
  com.sap.sse.filestorage,
  org.apache.shiro.core;bundle-version="1.2.2",
- com.sap.sse.gwt.theme
+ com.sap.sse.gwt.theme,
+ com.sap.sailing.news,
+ com.sap.sailing.polars.datamining.shared,
+ com.sap.sailing.polars.datamining,
+ com.sap.sse.datamining.annotations,
+ com.sap.sse.shared.android
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.jms;version="1.1.0",
- javax.servlet;version="3.1.0",
+Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.apache.http.client;version="4.2.5",
@@ -65,7 +69,10 @@ Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-ajaxloader.jar,
  WEB-INF/lib/gwt-bootstrap-2.3.2.0.jar
 TrackLifecycle: true
-Export-Package: com.sap.sailing.gwt.ui.actions,
+Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.confidence.impl,
+ com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.impl,
+ com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.common.tracking.impl,
+ com.sap.sailing.gwt.ui.actions,
  com.sap.sailing.gwt.ui.client,
  com.sap.sailing.gwt.ui.client.shared.charts,
  com.sap.sailing.gwt.ui.client.shared.racemap,

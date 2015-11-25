@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
-import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -29,22 +29,43 @@ import com.sap.sse.common.TimePoint;
 public interface TrackedRegatta extends Serializable {
     Regatta getRegatta();
 
+    /**
+     * Callers must {@link #lockTrackedRacesForRead() acquire the read lock} before calling this method and hold on to the lock
+     * while iterating over the data structure returned. Example:
+     * <pre>
+     *     trackedRegatta.lockTrackedRacesForRead();
+     *     try {
+     *         for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+     *             // do something
+     *         }
+     *     } finally {
+     *         trackedRegatta.unlockTrackedRacesAfterRead();
+     *     }
+     * </pre>
+     * The method will throw an {@link IllegalArgumentException} if the caller fails to do so.
+     */
     Iterable<? extends TrackedRace> getTrackedRaces();
 
-    Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass);
+    void lockTrackedRacesForRead();
+    
+    void unlockTrackedRacesAfterRead();
+    
+    void lockTrackedRacesForWrite();
+
+    void unlockTrackedRacesAfterWrite();
 
     /**
      * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it
      * to this tracked regatta. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)}
      * will return the result of this method call.
-     * 
      * @param raceDefinitionSetToUpdate
      *            if not <code>null</code>, after creating the {@link TrackedRace}, the <code>raceDefinition</code> is
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition, DynamicTrackedRace) added} to that object.
+     * @param raceLogResolver TODO
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
     		GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver);
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
@@ -69,8 +90,10 @@ public interface TrackedRegatta extends Serializable {
      */
     void addRaceListener(RaceListener listener);
     
+    void removeRaceListener(RaceListener listener);
+
     int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     void removeTrackedRace(RaceDefinition raceDefinition);
-    
+
 }

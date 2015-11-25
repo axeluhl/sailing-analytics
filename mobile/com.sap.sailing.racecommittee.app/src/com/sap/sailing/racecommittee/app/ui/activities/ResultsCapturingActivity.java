@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -11,7 +10,9 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -59,9 +60,9 @@ public class ResultsCapturingActivity extends SessionActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupActionBar();
 
         setContentView(R.layout.results_capturing_view);
+        setupActionBar();
 
         currentImageIndex = 0;
         createAndAdvanceImageFile();
@@ -77,8 +78,8 @@ public class ResultsCapturingActivity extends SessionActivity {
             }
         });
 
-        String subjectValue = "Scores";
-        String bodyValue = "No text.";
+        String subjectValue = getString(R.string.scores);
+        String bodyValue = getString(R.string.no_text);
         Bundle arguments = getIntent().getExtras();
         if (arguments != null) {
             if (arguments.containsKey(ARGUMENTS_KEY_SUBJECT)) {
@@ -176,9 +177,27 @@ public class ResultsCapturingActivity extends SessionActivity {
         listView.setAdapter(photoList);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void setupActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setTitle(getString(R.string.results_capturing_title));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setTitle(getString(R.string.results_capturing_title));
+        }
     }
 
     private static File createFinisherImageFile(int index, Context context) {
@@ -189,14 +208,20 @@ public class ResultsCapturingActivity extends SessionActivity {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            FileOutputStream fos = null;
             try {
-                FileOutputStream fos = new FileOutputStream(currentImageFile);
+                fos = new FileOutputStream(currentImageFile);
                 fos.write(data);
                 fos.close();
                 photoList.add(Uri.fromFile(currentImageFile));
                 createAndAdvanceImageFile();
             } catch (Exception e) {
-                Toast.makeText(ResultsCapturingActivity.this, "Error writing image file.", Toast.LENGTH_LONG).show();
+                String toastText = getString(R.string.error_picture_callback);
+                Toast.makeText(ResultsCapturingActivity.this, toastText, Toast.LENGTH_LONG).show();
+            } finally {
+                if (fos != null) {
+                    safeClose(fos);
+                }
             }
         }
     };

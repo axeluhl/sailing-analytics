@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/race_content_header"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?sap_gray">
+
+    <TextView
+        android:id="@+id/timer_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_margin"
+        android:gravity="center"
+        android:textColor="?white"
+        android:textSize="@dimen/textSize_40"
+        tools:text="@string/time"/>
+
+    <ImageView
+        android:id="@+id/time_marker"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:layout_alignParentBottom="true"
+        android:src="?marker"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_margin"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/time_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:textAppearance="?textSmall"
+                tools:text="@string/time_start"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/default_margin_half"
+                android:layout_toLeftOf="@+id/time_start"
+                android:layout_toStartOf="@+id/time_start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/time_start_lock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="?lock_outline"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+                <ImageView
+                    android:id="@+id/linked_race"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="?link_24dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/current_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:drawableLeft="?access_time_36dp"
+                android:drawablePadding="@dimen/default_padding_half"
+                android:drawableStart="?access_time_36dp"
+                android:gravity="center"
+                android:textAppearance="?textSmall"
+                android:visibility="invisible"
+                tools:text="@string/time"
+                tools:visibility="visible"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/time_finish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:text="@string/time_finish"
+                android:textAppearance="?textSmall"
+                android:visibility="invisible"
+                tools:visibility="visible"/>
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

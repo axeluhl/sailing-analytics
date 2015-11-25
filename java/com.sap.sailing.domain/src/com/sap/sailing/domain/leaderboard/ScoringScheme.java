@@ -50,10 +50,11 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race.
+     * @param timePoint TODO
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher,
-            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
+    Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
+            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint);
     
     /**
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
@@ -70,11 +71,14 @@ public interface ScoringScheme extends Serializable {
             Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher);
 
     /**
+     * @param o1 TODO
      * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
+     * @param o2 TODO
      * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
+     * @param timePoint TODO
      */
-    int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> competitor1Scores,
-            List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter);
+    int compareByBetterScore(Competitor o1,
+            List<Util.Pair<RaceColumn, Double>> competitor1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> competitor2Scores, boolean nullScoresAreBetter, TimePoint timePoint);
 
     /**
      * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
@@ -94,9 +98,11 @@ public interface ScoringScheme extends Serializable {
      * Under certain circumstances, a scoring scheme may decide that the scores of a column are not (yet) to be used
      * for the leaderboard's total scores. This may, e.g., be the case if a column is split into more than one fleet and
      * those fleets are unordered. In that case, scores need to be available for all fleets before the column counts
-     * for the total scores.
+     * for the total scores. Another example is a scoring scheme that defines elimination rounds and awards no points
+     * to a competitor in a round from which the competitor got promoted to the next round. Such promotion columns
+     * then have no scores and don't count in the number of races starting from where discards are applied.<p>
      */
-    boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at);
+    boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at);
 
     /**
      * Some scoring schemes are applied to {@link LeaderboardGroupMetaLeaderboard} instances. These instances of a

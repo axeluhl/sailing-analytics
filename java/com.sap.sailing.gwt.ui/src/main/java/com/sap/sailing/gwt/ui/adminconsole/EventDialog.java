@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -21,6 +22,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -30,6 +32,8 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO> {
     protected StringMessages stringMessages;
@@ -41,14 +45,13 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
-    protected TextBox logoImageURLEntryField;
+    protected TextBox sailorsInfoWebsiteURLEntryField;
     protected StringListInlineEditorComposite courseAreaNameList;
-    protected StringListInlineEditorComposite imageURLList;
-    protected StringListInlineEditorComposite videoURLList;
-    protected StringListInlineEditorComposite sponsorImageURLList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
-    protected List<LeaderboardGroupDTO> availableLeaderboardGroups;
-    
+    protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
+    protected ImagesListComposite imagesListComposite; 
+    protected VideosListComposite videosListComposite; 
+
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -115,12 +118,15 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
-        this.availableLeaderboardGroups = availableLeaderboardGroups;
+        this.availableLeaderboardGroupsByName = new HashMap<>();
+        for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
+            availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
+        }
         getDialogBox().getWidget().setWidth("730px");
         final ValueChangeHandler<Iterable<String>> valueChangeHandler = new ValueChangeHandler<Iterable<String>>() {
             @Override
@@ -133,44 +139,33 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
-        final List<String> imageSuggestionURLs = Arrays.asList(new String[] { "http://", "https://", "http://www.", "https://www" });
-        imageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, stringMessages.enterImageURL(), 80));
-        imageURLList.addValueChangeHandler(valueChangeHandler);
-        List<String> videoURLSuggestions = new ArrayList<>(imageSuggestionURLs);
-        videoURLSuggestions.add("http://www.youtube.com/watch?v=");
-        videoURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                /* suggestValues */ videoURLSuggestions, stringMessages.enterVideoURL(), 80));
-        videoURLList.addValueChangeHandler(valueChangeHandler);
-        sponsorImageURLList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                /* suggestValues */ imageSuggestionURLs, stringMessages.enterSponsorImageURL(), 80));
-        sponsorImageURLList.addValueChangeHandler(valueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                        leaderboardGroupNames, "Select a leaderboard group..."));
+                        leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
+        
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
+        videosListComposite = new VideosListComposite(stringMessages);
     }
 
     @Override
     protected EventDTO getResult() {
         EventDTO result = new EventDTO();
         List<String> leaderboardGroupNames = leaderboardGroupList.getValue();
-        for(LeaderboardGroupDTO lg: availableLeaderboardGroups) {
-            if(leaderboardGroupNames.contains(lg.getName())) {
-                result.addLeaderboardGroup(lg);
+        for (final String lgName : leaderboardGroupNames) {
+            final LeaderboardGroupDTO lgDTO = availableLeaderboardGroupsByName.get(lgName);
+            if (lgDTO != null) {
+                result.addLeaderboardGroup(lgDTO);
             }                
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
-        result.setLogoImageURL(logoImageURLEntryField.getText().trim().isEmpty() ? null : logoImageURLEntryField.getText().trim());
+        result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURLEntryField.getText().trim().isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -182,14 +177,11 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
         }
-        for (String imageURL : imageURLList.getValue()) {
-            result.addImageURL(imageURL);
+        for(ImageDTO image: imagesListComposite.getAllImages()) {
+            result.addImage(image);
         }
-        for (String videoURL : videoURLList.getValue()) {
-            result.addVideoURL(videoURL);
-        }
-        for (String sponsorImageURL : sponsorImageURLList.getValue()) {
-            result.addSponsorImageURL(sponsorImageURL);
+        for(VideoDTO video: videosListComposite.getAllVideos()) {
+            result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
         return result;
@@ -205,8 +197,6 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
 
         Grid formGrid = new Grid(8, 2);
-        panel.add(formGrid);
-
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
@@ -221,17 +211,17 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(5, 1, isPublicCheckBox);
         formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventLogoImageURL() + ":"));
-        formGrid.setWidget(7, 1, logoImageURLEntryField);
+        formGrid.setWidget(7, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
+        formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
-        tabPanel.setHeight("250px");
+        tabPanel.setHeight("500px");
         panel.add(tabPanel);
+        tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
         tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
         tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
-        tabPanel.add(new ScrollPanel(imageURLList), stringMessages.imageURLs());
-        tabPanel.add(new ScrollPanel(videoURLList), stringMessages.videoURLs());
-        tabPanel.add(new ScrollPanel(sponsorImageURLList), stringMessages.sponsorImageURLs());
+        tabPanel.add(new ScrollPanel(imagesListComposite), stringMessages.images());
+        tabPanel.add(new ScrollPanel(videosListComposite), stringMessages.videos());
         return panel;
     }
 

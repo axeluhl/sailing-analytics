@@ -4,11 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +19,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
@@ -43,7 +47,6 @@ public class RaceStateTest {
     
     private RaceLog raceLog;
     private AbstractLogEventAuthor author;
-    private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
     private ConfigurationLoader<RegattaConfiguration> configuration;
     private RaceStateChangedListener listener;
@@ -55,13 +58,12 @@ public class RaceStateTest {
     public void setUp() {
         raceLog = new RaceLogImpl("test-log");
         author = new LogEventAuthorImpl("Test", 1);
-        factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
         configuration = new EmptyRegattaConfiguration();
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
     }
     
     @Test
@@ -91,7 +93,7 @@ public class RaceStateTest {
         config.setBasicConfiguration(mock(RacingProcedureConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
         
         assertEquals(RacingProcedureType.BASIC, state.getRacingProcedure().getType());
     }
@@ -105,8 +107,8 @@ public class RaceStateTest {
         config.setESSConfiguration(mock(ESSConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, author, nowMock, "12", null, 0, RacingProcedureType.ESS));
-        state = new RaceStateImpl(raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, nowMock, author, "12", 0, RacingProcedureType.ESS));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
         
         assertEquals(RacingProcedureType.ESS, state.getRacingProcedure().getType());
     }
@@ -124,7 +126,18 @@ public class RaceStateTest {
         verify(listener).onStatusChanged(state);
         verifyNoMoreInteractions(listener);
     }
-    
+
+    /**
+     * See bug 3086: make sure that race log change events cause an update of the RacingProcedure
+     */
+    @Test
+    public void testSetIndividualRecall() {
+        assertFalse(state.getRacingProcedure().isIndividualRecallDisplayed());
+        raceLog.add(new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID
+                .randomUUID(), /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
+        assertTrue(state.getRacingProcedure().isIndividualRecallDisplayed());
+    }
+
     @Test
     public void testAdvancePass() {
         state.addChangedListener(listener);

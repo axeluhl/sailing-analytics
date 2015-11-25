@@ -29,6 +29,7 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
 
     @Override
     public void doOnModuleLoad() {
+
         SailingServiceAsync sailingService = GWT.create(SailingService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.sailingServiceRemotePath);
         
@@ -40,9 +41,8 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
         applyMGWTSettings();
         RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService, sailingService, dataRetriever);
         RootLayoutPanel.get().add(ribDashboardPanel);
-        WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(sailingService);
+        WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(ribdashboardService, sailingService);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);
-        dataRetriever.addRaceSelectionChangeListener(windBotDataRetriever);
         Timer dashboardTimer = new Timer(PlayModes.Live);
         dashboardTimer.setRefreshInterval(DASHBOARD_RERFRESH_INTERVAL);
         dashboardTimer.addTimeListener(windBotDataRetriever);

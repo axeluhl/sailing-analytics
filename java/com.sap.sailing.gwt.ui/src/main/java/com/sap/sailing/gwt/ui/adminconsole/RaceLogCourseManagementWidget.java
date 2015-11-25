@@ -1,0 +1,138 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.Set;
+
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+public class RaceLogCourseManagementWidget extends CourseManagementWidget {
+    protected final String leaderboardName;
+    protected final String raceColumnName;
+    protected final String fleetName;
+
+    public RaceLogCourseManagementWidget(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, final String leaderboardName, final String raceColumnName,
+            final String fleetName) {
+        super(sailingService, errorReporter, stringMessages);
+
+        this.leaderboardName = leaderboardName;
+        this.raceColumnName = raceColumnName;
+        this.fleetName = fleetName;
+
+        Button addMark = new Button(stringMessages.add(stringMessages.mark()));
+        addMark.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new MarkEditDialog(stringMessages, new MarkDTO(null, null), true,
+                        new DataEntryDialog.DialogCallback<MarkDTO>() {
+                            @Override
+                            public void ok(MarkDTO mark) {
+                                sailingService.addMarkToRaceLog(leaderboardName, raceColumnName, fleetName, mark,
+                                        new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onSuccess(Void result) {
+                                                refresh();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter.reportError("Could not add mark: " + caught.getMessage());
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+            }
+        });
+        marksBtnsPanel.add(addMark);
+
+        Button removeMark = new Button(stringMessages.remove(stringMessages.mark()));
+        removeMark.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
+
+                for (MarkDTO markToRemove : marksToRemove) {
+                    sailingService.revokeMarkDefinitionEventInRaceLog(leaderboardName, raceColumnName, fleetName,
+                            markToRemove, new AsyncCallback<Void>() {
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    refresh();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                }
+                            });
+                }
+            }
+        });
+        marksBtnsPanel.add(removeMark);
+
+        ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell> actionColumn = new ImagesBarColumn<MarkDTO, RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell>(
+                new RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell(stringMessages));
+        actionColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
+            @Override
+            public void update(int index, final MarkDTO markDTO, String value) {
+                if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
+                    new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()), stringMessages,
+                            new DataEntryDialog.DialogCallback<Position>() {
+                                @Override
+                                public void ok(Position position) {
+                                    sailingService.pingMarkViaRaceLogTracking(leaderboardName, raceColumnName,
+                                            fleetName, markDTO, position, new AsyncCallback<Void>() {
+
+                                                @Override
+                                                public void onSuccess(Void result) {
+                                                    refresh();
+                                                }
+
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    errorReporter.reportError("Could not ping mark: "
+                                                            + caught.getMessage());
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void cancel() {
+                                }
+                            }).show();
+                }
+            }
+        });
+        marks.getTable().addColumn(actionColumn);
+    }
+
+    @Override
+    public void refresh() {
+        sailingService.getLastCourseDefinitionInRaceLog(leaderboardName, raceColumnName, fleetName,
+                new AsyncCallback<RaceCourseDTO>() {
+                    @Override
+                    public void onSuccess(RaceCourseDTO result) {
+                        updateWaypointsAndControlPoints(result);
+                        marks.refresh(result.getMarks());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Could not load course: " + caught.getMessage());
+                    }
+                });
+    }
+}

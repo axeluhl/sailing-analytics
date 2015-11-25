@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
@@ -56,7 +56,7 @@ public class RaceLogWindFixEventSerializerTest {
 
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, createWindFix());
+        event = new RaceLogWindFixEventImpl(now, author, 0, createWindFix(), /* isMagnetic */ false);
     }
 
     @Test

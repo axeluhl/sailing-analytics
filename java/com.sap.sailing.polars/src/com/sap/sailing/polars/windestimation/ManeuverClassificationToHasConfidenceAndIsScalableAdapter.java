@@ -10,13 +10,14 @@ import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImp
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
- * {@link ManeuverClassification}s need to be aggregated for different figures based on their confidence
- * of being a maneuver of a specific {@link ManeuverType type}. This can conveniently be done using a
- * {@link ConfidenceBasedAverager} and by adapting the {@link ManeuverClassification} objects to
- * what the averaged needs: a {@link HasConfidenceAndIsScalable} implementation.<p>
+ * {@link ManeuverClassification}s need to be aggregated for different figures based on their confidence of being a
+ * maneuver of a specific {@link ManeuverType type}. This can conveniently be done using a
+ * {@link ConfidenceBasedAverager} and by adapting the {@link ManeuverClassification} objects to what the averaged
+ * needs: a {@link HasConfidenceAndIsScalable} implementation.
+ * <p>
  * 
- * This abstract class only contributes determining the confidence based on the likelihood for the
- * maneuver to be of the type specified. Subclasses need to add the logic for extracting the 
+ * This abstract class only contributes determining the confidence based on the likelihood for the maneuver to be of the
+ * type specified. Subclasses need to add the logic for extracting the
  * 
  * @author Axel Uhl (D043530)
  *
@@ -42,7 +43,7 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
         this.mapper = mapper;
         this.polarService = polarService;
     }
-    
+
     @Override
     public HasConfidenceAndIsScalable<ValueType, BaseType, Void> apply(final ManeuverClassification t) {
         return new HasConfidenceAndIsScalable<ValueType, BaseType, Void>() {

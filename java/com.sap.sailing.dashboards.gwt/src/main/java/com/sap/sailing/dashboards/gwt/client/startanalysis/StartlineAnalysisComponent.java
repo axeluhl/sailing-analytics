@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -116,6 +118,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
     private static final int SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
     private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 83;
+    private static final Logger logger = Logger.getLogger(StartlineAnalysisComponent.class.getName());
 
     /**
      * Component that contains handles, displays and loads startanalysis cards.
@@ -172,11 +175,13 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     }
     
     private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
+        logger.log(Level.INFO, "Loading startanalysis for competitor id " + competitorIdAsString);
         ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
                 competitorIdAsString, leaderboardName, new AsyncCallback<List<StartAnalysisDTO>>() {
                     @Override
                     public void onSuccess(List<StartAnalysisDTO> result) {
-                        if (!result.isEmpty()) {
+                        logger.log(Level.INFO, "Received startanalysis list");
+                        if (result != null && !result.isEmpty()) {
                             
                             if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
                                 removeAllStartAnalysisCards();
@@ -185,14 +190,18 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
                             if (result.size() != starts.size()) {
                                 showNotificationForNewStartAnalysis();
                             }
+                            logger.log(Level.INFO, "Updating UI with startanalysis list");
                             addNewStartAnalysisCards(result);
                             settingsButtonWithSelectionIndicationLabel
                                     .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
+                        } else {
+                            logger.log(Level.INFO, "Received startanalysis list is null or empty");
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
                     }
                 });
     }
@@ -237,15 +246,26 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     }
 
     private void loadCompetitorsAndShowCompetitorSelectionPopup() {
+        logger.log(Level.INFO, "Requesting Competitors in Leaderboard");
         ribDashboardServiceAsync.getCompetitorsInLeaderboard(leaderboardName, new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onSuccess(List<CompetitorDTO> result) {
-                if (result != null && result.size() > 0 && !competitorSelectionPopup.isShown())
-                    competitorSelectionPopup.show(result);
+                logger.log(Level.INFO, "Received competitors for leaderboard name");
+                if (result != null && result.size() > 0) {
+                    if (!competitorSelectionPopup.isShown()) {
+                        logger.log(Level.INFO, "Showing CompetitorSelectionPopup with competitors");
+                        competitorSelectionPopup.show(result);
+                    } else {
+                        logger.log(Level.INFO, "CompetitorSelectionPopup aleady shown");
+                    }
+                } else {
+                    logger.log(Level.INFO, "Received competitors are null or empty");
+                }
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
             }
         });
     }
@@ -271,7 +291,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         if (displaysCards == true) {
             if (clickedLeft) {
                 if (page != 0) {
-                    currentScrollPosition = currentScrollPosition + SCROLL_OFFSET_STARTANALYSIS_CARDS;
+                    currentScrollPosition += SCROLL_OFFSET_STARTANALYSIS_CARDS;
                     page--;
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
@@ -323,7 +343,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     }
 
     private void addStartAnalysisCard(final StartAnalysisDTO startAnalysisDTO) {
-
+        logger.log(Level.INFO, "Adding Startanalysis Card");
         if (displaysCards == false) {
             displaysCards = true;
             header.getElement().setInnerHTML("Start " + startAnalysisDTO.raceName);

@@ -20,7 +20,8 @@ import java.net.URLConnection;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
+
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.junit.Rule;
 import org.junit.rules.Timeout;
@@ -73,10 +74,32 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
      */
     public void setUp() throws Exception {
         try {
+            Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = setUpWithoutStartingToReplicateYet();
+            result.getA().startToReplicateFrom(result.getB());
+        } catch (Exception e) {
+            tearDown();
+            throw e;
+        }
+    }
+
+    /**
+     * Sets up master and replica, starts the JMS message broker and registers the replica with the master. If you want
+     * to drop the DB in your particular test case first, override {@link #persistenceSetUp(boolean)}. If you don't want
+     * replication to start right away for your test, override this method, execute only
+     * {@link #basicSetUp(boolean, Replicable, Replicable)}, do what you need to do and then explicitly call
+     * {@link ReplicationServiceTestImpl#startToReplicateFrom(ReplicationMasterDescriptor)} or
+     * {@link ReplicationServiceTestImpl#startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor, boolean)}
+     * on the first component returned by {@link #basicSetUp(boolean, Replicable, Replicable)}.
+     * 
+     * @return callers may call <code>result.getA().startToReplicateFrom(result.getB())</code> on the result to actually
+     *         start replication, e.g., after having done more set-up on the master
+     */
+    protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> setUpWithoutStartingToReplicateYet() throws Exception {
+        try {
             Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = basicSetUp(
                     /* dropDB */true, /* master=null means create a new one */null,
                     /* replica=null means create a new one */null);
-            result.getA().startToReplicateFrom(result.getB());
+            return result;
         } catch (Exception e) {
             tearDown();
             throw e;
@@ -92,7 +115,9 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
     }
 
     /**
-     * Calls {@link #persistenceSetUp(boolean)} first. 
+     * Calls {@link #persistenceSetUp(boolean)} first. Doesn't {@link
+     * ReplicationServiceImpl#registerReplica(ReplicaDescriptor) register the replica} yet with the master.
+     * 
      * @param master
      *            if not <code>null</code>, the value will be used for {@link #master}; otherwise, a new racing event
      *            service will be created as master
@@ -123,7 +148,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
-        masterReplicator.registerReplica(replicaDescriptor);
+        
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
@@ -258,15 +283,16 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             } else if (request.contains("REGISTER")) {
                                 final String uuid = UUID.randomUUID().toString();
                                 registerReplicaUuidForMaster(uuid, masterDescriptor);
+                                masterReplicationService.registerReplica(replicaDescriptor);
                                 pw.print(uuid.getBytes());
                             } else if (request.contains("INITIAL_LOAD")) {
                                 Channel channel = masterReplicationService.createMasterChannel();
                                 RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                                         /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
                                 pw.println(ros.getQueueName());
-                                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(ros);
-                                master.serializeForInitialReplication(gzipOutputStream);
-                                gzipOutputStream.finish();
+                                final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(ros);
+                                master.serializeForInitialReplication(compressingOutputStream);
+                                compressingOutputStream.finish();
                                 ros.close();
                             } else if (request.contains("STOP")) {
                                 stop = true;

@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 public class RacingEventServiceImplMock extends RacingEventServiceImpl {
 
@@ -15,6 +16,12 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
 
     public RacingEventServiceImplMock() {
         super(false, null);
+    }
+    
+    public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl, TypeBasedServiceFinderFactory serviceFinderFactory) {
+        super(null, null, serviceFinderFactory);
+        lock = new DataImportLockWithProgress();
+        lock.addProgress(dataImportProgressImpl.getOperationId(), dataImportProgressImpl);
     }
 
     public RacingEventServiceImplMock(DataImportProgressImpl dataImportProgressImpl) {

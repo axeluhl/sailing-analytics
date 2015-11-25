@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -27,28 +28,30 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
     }
     
     private final EventDispatcher eventDispatcher;
+    private RaceLogResolver resolver;
     
-    public RaceStatusAnalyzer(RaceLog raceLog, ReadonlyRacingProcedure racingProcedure) {
+    public RaceStatusAnalyzer(RaceLogResolver resolver, RaceLog raceLog, ReadonlyRacingProcedure racingProcedure) {
         super(raceLog);
         this.eventDispatcher = new EventDispatcher(new StandardClock(), racingProcedure);
+        this.resolver = resolver;
     }
     
-    public RaceStatusAnalyzer(RaceLog raceLog, Clock clock, ReadonlyRacingProcedure racingProcedure) {
+    public RaceStatusAnalyzer(RaceLogResolver resolver, RaceLog raceLog, Clock clock, ReadonlyRacingProcedure racingProcedure) {
         super(raceLog);
         this.eventDispatcher = new EventDispatcher(clock, racingProcedure);
+        this.resolver = resolver;
     }
 
     @Override
     protected RaceLogRaceStatus performAnalysis() {
-        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<RaceLogRaceStatusEvent>(RaceLogRaceStatusEventComparator.INSTANCE);
+        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(RaceLogRaceStatusEventComparator.INSTANCE);
         for(RaceLogEvent event: getPassEvents()) {
             if(event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }
         }
         for (RaceLogRaceStatusEvent event : statusEvents.descendingSet()) {
-            RaceLogRaceStatusEvent statusEvent = (RaceLogRaceStatusEvent) event;
-            statusEvent.accept(eventDispatcher);
+            event.accept(eventDispatcher);
             return eventDispatcher.nextStatus;
         }
         
@@ -69,21 +72,35 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
         @Override
         public void visit(RaceLogStartTimeEvent event) {
+            TimePoint startTime = event.getStartTime();
+            setRaceLogStatusBasedOnStartTime(startTime);
+        }
+
+        private void setRaceLogStatusBasedOnStartTime(TimePoint startTime) {
+            if (startTime == null) {
+                nextStatus = RaceLogRaceStatus.PRESCHEDULED;
+                return;
+            }
             TimePoint now = clock.now();
-            if (racingProcedure.isStartphaseActive(event.getStartTime(), now)) {
+            if (racingProcedure.isStartphaseActive(startTime, now)) {
                 nextStatus = RaceLogRaceStatus.STARTPHASE;
-            } else if (now.before(event.getStartTime())) {
+            } else if (now.before(startTime)) {
                 nextStatus = RaceLogRaceStatus.SCHEDULED;
             } else {
                 nextStatus = RaceLogRaceStatus.RUNNING;
             }
-        };
-        
+        }
+
         @Override
         public void visit(RaceLogRaceStatusEvent event) {
             nextStatus = event.getNextStatus();
-        };
-        
-    };
+        }
 
+        @Override
+        public void visit(RaceLogDependentStartTimeEvent event) {
+            DependentStartTimeResolver startTimeResolver = new DependentStartTimeResolver(resolver);
+            TimePoint startTime = startTimeResolver.resolve(event).getStartTime();
+            setRaceLogStatusBasedOnStartTime(startTime);
+        };
+    };
 }

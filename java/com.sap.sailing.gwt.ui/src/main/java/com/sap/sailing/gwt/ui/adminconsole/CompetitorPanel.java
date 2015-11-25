@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -9,16 +8,12 @@ import java.util.Set;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
@@ -26,13 +21,8 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.controls.GenericListBox;
-import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -88,6 +78,7 @@ public class CompetitorPanel extends SimplePanel {
         });
         buttonPanel.add(allowReloadButton);
         Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.ensureDebugId("AddCompetitorButton");
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -109,28 +100,14 @@ public class CompetitorPanel extends SimplePanel {
 
         //only if this competitor panel is connected to a leaderboard, we want to enable invitations
         if (leaderboardName != null) {
-            final Button inviteCompetitorsButton = new Button(stringMessages.inviteCompetitors());
+            final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
             inviteCompetitorsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     Set<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
-                    boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
 
-                    if (emailProvidedForAll) {
-                        openChooseEventDialogAndSendMails(competitors);
-                    } else {
-                        Window.alert(stringMessages.notAllCompetitorsProvideEmail());
-                    }
-                }
-
-                private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
-                    for (CompetitorDTO competitor : allCompetitors) {
-                        if (!competitor.hasEmail()) {
-                            return false;
-                        }
-                    }
-
-                    return true;
+                    CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
+                    helper.inviteCompetitors(competitors, leaderboardName);
                 }
             });
             buttonPanel.add(inviteCompetitorsButton);
@@ -190,7 +167,7 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
-        new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
@@ -209,102 +186,9 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void cancel() {
             }
-        }).show();
-    }
-    
-    private class SelectEventAndHostnameDialog extends DataEntryDialog<Pair<EventDTO, String>> {
-        private GenericListBox<EventDTO> events;
-        private TextBox serverUrl;
-        
-        public SelectEventAndHostnameDialog(DialogCallback<Pair<EventDTO, String>> callback) {
-            super(stringMessages.selectEventForInvitation(), null, stringMessages.inviteCompetitors(), stringMessages.cancel(),
-                    new Validator<Pair<EventDTO, String>>() {
-                        @Override
-                        public String getErrorMessage(Pair<EventDTO, String> valueToValidate) {
-                            if (valueToValidate.getA() == null) {
-                                return stringMessages.pleaseSelectAnEvent();
-                            } else if (valueToValidate.getB() == null || valueToValidate.getB().isEmpty()) {
-                                return stringMessages.pleaseEnterA(stringMessages.hostname());
-                            }
-                            return null;
-                        }
-                    }, false, callback);
-        }        
-
-        @Override
-        protected Pair<EventDTO, String> getResult() {
-            EventDTO event = events.getValue();
-            String serverUrlString = serverUrl.getValue();
-            if (serverUrlString.endsWith("/")) {
-                serverUrlString = serverUrlString.substring(0, serverUrlString.length() - 1);
-            }
-            return new Pair<>(event, serverUrlString);
-        }
-        
-        @Override
-        protected Widget getAdditionalWidget() {
-            Grid grid = new Grid(2, 2);
-            grid.setWidget(0, 0, createLabel(stringMessages.hostname()));
-            serverUrl = createTextBox(Window.Location.getProtocol() + "//" + Window.Location.getHost());
-            grid.setWidget(0, 1, serverUrl);
-            
-            grid.setWidget(1, 0, createLabel(stringMessages.event()));
-            events = createGenericListBox(new ValueBuilder<EventDTO>() {
-                @Override
-                public String getValue(EventDTO item) {
-                    if (item == null) {
-                        return "";
-                    }
-                    return item.getName();
-                }
-            }, false);
-            grid.setWidget(1, 1, events);
-            
-            events.addItem((EventDTO) null);
-            sailingService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
-                @Override
-                public void onSuccess(Collection<EventDTO> result) {
-                    events.addItems(result);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Could not load events: " + caught.getMessage());
-                }
-            });
-            return grid;
-        }        
-    }
-    
-    private String getLocaleInfo() {
-        return LocaleInfo.getCurrentLocale().getLocaleName();
-    }
-
-    private void openChooseEventDialogAndSendMails(final Set<CompetitorDTO> competitors) {
-        new SelectEventAndHostnameDialog(new DialogCallback<Pair<EventDTO, String>>() {
-
-            @Override
-            public void ok(Pair<EventDTO, String> result) {
-                sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
-                        competitors, getLocaleInfo(), new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessful());
-                            }
-                        });
-            }
-
-            @Override
-            public void cancel() {
-                
-            }
-        }).show();
+        }, /* boat class to be used from CompetitorDTO */ null);
+        dialog.ensureDebugId("CompetitorEditDialog");
+        dialog.show();
     }
 
     public void refreshCompetitorList() {

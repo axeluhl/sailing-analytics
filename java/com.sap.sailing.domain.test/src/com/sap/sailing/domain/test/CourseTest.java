@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -32,6 +34,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -299,11 +302,12 @@ public class CourseTest {
         assertWaypointIndexes(course);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
+                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
-                /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false);
+                /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                mock(RaceLogResolver.class));
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -329,12 +333,13 @@ public class CourseTest {
         Course course = new CourseImpl("Test Course", waypoints);
         final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
+                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
                         hasso), Collections.<Sideline> emptyList(),
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false);
+                        /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                        mock(RaceLogResolver.class));
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

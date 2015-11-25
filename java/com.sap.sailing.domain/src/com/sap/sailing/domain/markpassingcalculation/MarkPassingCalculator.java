@@ -54,7 +54,7 @@ public class MarkPassingCalculator {
             .getRuntime().availableProcessors() - 1, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
-    /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1));
+    /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true));
 
     private boolean suspended = false;
 
@@ -72,14 +72,17 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
-            new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName()).start();
+            final Thread listenerThread = new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName());
+            listenerThread.setDaemon(true);
+            listenerThread.start();
         }
     }
 
     /**
-     * Waits until an object is in the queue, then drains it entirely. After that, the fixes are sorted by the object
-     * they are tracking in <code>competitorFixes</code> and <code>markFixes</code>. Finally, if <code>suspended</code>
-     * is false, new passing are computed.
+     * Waits until an object is in the queue, then drains it entirely. After that the information is sorted depending on
+     * whether it is a fix, an updated waypoint or an updated fixed markpassing. Finally, if <code>suspended</code> is
+     * false, new passing are computed. First new wayponts are evaluated, than new fixed markpassings. Than the
+     * markpassings are computed using mark and competitor fixes.
      * 
      * @author Nicolas Klose
      * 
@@ -87,62 +90,71 @@ public class MarkPassingCalculator {
     private class Listen implements Runnable {
         @Override
         public void run() {
-            logger.fine("MarkPassingCalculator is listening");
-            boolean finished = false;
-            Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
-            Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
-            List<Waypoint> addedWaypoints = new ArrayList<>();
-            List<Waypoint> removedWaypoints = new ArrayList<>();
-            Integer smallestChangedWaypointIndex = null;
-            List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings = new ArrayList<>();
-            List<Pair<Competitor, Integer>> removedFixedMarkPassings = new ArrayList<>();
-            List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
-            List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
-            while (!finished) {
-                logger.finer("MPC is checking the queue");
-                List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
-                try {
-                    allNewFixInsertions.add(listener.getQueue().take());
-                } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                            + " while waiting for new GPSFixes");
-                }
-                listener.getQueue().drainTo(allNewFixInsertions);
-                logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
-                for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
-                    if (listener.isEndMarker(fixInsertion)) {
-                        logger.info("Stopping "+MarkPassingCalculator.this+"'s listener");
-                        finished = true;
-                    } else {
-                        fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                suppressedMarkPassings, unsuppressedMarkPassings);
+            try {
+                logger.fine("MarkPassingCalculator is listening");
+                boolean finished = false;
+                Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
+                Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
+                List<Waypoint> addedWaypoints = new ArrayList<>();
+                List<Waypoint> removedWaypoints = new ArrayList<>();
+                Integer smallestChangedWaypointIndex = null;
+                List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings = new ArrayList<>();
+                List<Pair<Competitor, Integer>> removedFixedMarkPassings = new ArrayList<>();
+                List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
+                List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
+                while (!finished) {
+                    try {
+                    logger.finer("MPC is checking the queue");
+                    List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
+                    try {
+                        allNewFixInsertions.add(listener.getQueue().take());
+                    } catch (InterruptedException e) {
+                        logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
+                                + " while waiting for new GPSFixes");
                     }
-                }
-                if (!suspended) {
-                    if (smallestChangedWaypointIndex != null) {
-                        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
-                                .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
-                        chooser.removeWaypoints(removedWaypoints);
-                        chooser.addWaypoints(addedWaypoints);
-                        for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
-                                .entrySet()) {
-                            Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                            chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                    listener.getQueue().drainTo(allNewFixInsertions);
+                    logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
+                    for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
+                        if (listener.isEndMarker(fixInsertion)) {
+                            logger.info("Stopping "+MarkPassingCalculator.this+"'s listener");
+                            finished = true;
+                        } else {
+                            fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
+                                    smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                    suppressedMarkPassings, unsuppressedMarkPassings);
                         }
                     }
-                    updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
-                            unsuppressedMarkPassings);
-                    computeMarkPasses(competitorFixes, markFixes);
-                    competitorFixes.clear();
-                    markFixes.clear();
-                    addedWaypoints.clear();
-                    removedWaypoints.clear();
-                    fixedMarkPassings.clear();
-                    removedFixedMarkPassings.clear();
-                    suppressedMarkPassings.clear();
-                    unsuppressedMarkPassings.clear();
+                    if (!suspended) {
+                        if (smallestChangedWaypointIndex != null) {
+                            Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
+                                    .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
+                            chooser.removeWaypoints(removedWaypoints);
+                            chooser.addWaypoints(addedWaypoints);
+                            for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
+                                    .entrySet()) {
+                                Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                                chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                            }
+                        }
+                        updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
+                                unsuppressedMarkPassings);
+                        computeMarkPasses(competitorFixes, markFixes);
+                        competitorFixes.clear();
+                        markFixes.clear();
+                        addedWaypoints.clear();
+                        removedWaypoints.clear();
+                        smallestChangedWaypointIndex = null;
+                        fixedMarkPassings.clear();
+                        removedFixedMarkPassings.clear();
+                        suppressedMarkPassings.clear();
+                            unsuppressedMarkPassings.clear();
+                        }
+                    } catch (Exception e) {
+                        logger.severe("Error while calculating markpassings: " + e.getMessage());
+                    }
                 }
+            } finally {
+                logger.info("MarkPassingCalculator Listen thread terminating");
             }
         }
 
@@ -167,10 +179,10 @@ public class MarkPassingCalculator {
 
         /**
          * The calculation has two steps. For every mark with new fixes those competitor fixes are calculated that may
-         * have changed their status as {@link Candidate} (see {@code FixesAffectedByNewMarkFixes}). Then, the
-         * {@link CandidateFinder} uses those fixes along with any new competitor fixes to calculate any new or wrong
-         * Candidates. These are passed to the {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see
-         * {@link ComputeMarkPassings}).
+         * have changed their status as a {@link Candidate} (see {@code FixesAffectedByNewMarkFixes}). These fixes,
+         * along with any new competitor fixes, are passed into the executor, one task per competitor. The
+         * {@link CandidateFinder} uses the fixes to calculate any new or wrong Candidates. These are passed to the
+         * {@link CandidateChooser} to calculate any new {@link MarkPassing}s (see {@link ComputeMarkPassings}).
          * 
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,

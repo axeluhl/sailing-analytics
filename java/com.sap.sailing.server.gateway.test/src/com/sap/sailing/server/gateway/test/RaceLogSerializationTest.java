@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -50,7 +50,7 @@ public class RaceLogSerializationTest {
     private final AbstractLogEventAuthor author = new LogEventAuthorImpl("test", 0);
     private static final Competitor competitor = new CompetitorImpl("a", "b", null,
             null, null,
-            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"));
+            new TeamImpl("a", Collections.singletonList(new PersonImpl("a", new NationalityImpl("GER"), new Date(), "abc")), null), new BoatImpl("a", new BoatClassImpl("a", true), "abc"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     
     @Before
     public void setup() {
@@ -71,8 +71,8 @@ public class RaceLogSerializationTest {
         setup(DeviceIdentifierJsonDeserializer.create(new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE),
                 DeviceIdentifierJsonSerializer.create(new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE));
         DeviceIdentifier device = new SmartphoneImeiIdentifier("abc");
-        RaceLogDeviceCompetitorMappingEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                t(), author, device, competitor, 0, t(), t());
+        RaceLogDeviceCompetitorMappingEvent event = new RaceLogDeviceCompetitorMappingEventImpl(
+                t(), author, 0, competitor, device, t(), t());
         
         JSONObject json = serializer.serialize(event);
         
@@ -91,8 +91,8 @@ public class RaceLogSerializationTest {
         setup(new DeviceIdentifierJsonDeserializer(onlyFallback),
                 DeviceIdentifierJsonSerializer.create(new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE));
         DeviceIdentifier device = new SmartphoneImeiIdentifier("abc");
-        RaceLogDeviceCompetitorMappingEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                t(), author, device, competitor, 0, t(), t());
+        RaceLogDeviceCompetitorMappingEvent event = new RaceLogDeviceCompetitorMappingEventImpl(
+                t(), author, 0, competitor, device, t(), t());
         
         JSONObject json = serializer.serialize(event);
         
@@ -114,8 +114,8 @@ public class RaceLogSerializationTest {
                 new DeviceIdentifierJsonSerializer(onlyFallback));
         //track file device id can't be restored from string rep
         DeviceIdentifier device = new TrackFileImportDeviceIdentifierImpl("file", "track");
-        RaceLogDeviceCompetitorMappingEvent event = RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(
-                t(), author, device, competitor, 0, t(), t());
+        RaceLogDeviceCompetitorMappingEvent event = new RaceLogDeviceCompetitorMappingEventImpl(
+                t(), author, 0, competitor, device, t(), t());
         
         JSONObject json = serializer.serialize(event);
         

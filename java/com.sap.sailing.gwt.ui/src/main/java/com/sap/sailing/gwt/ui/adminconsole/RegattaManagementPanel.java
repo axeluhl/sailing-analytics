@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -156,9 +157,37 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             @Override
             public void ok(RegattaDTO newRegatta) {
                 createNewRegatta(newRegatta);
+                openCreateDefaultRegattaLeaderboardDialog(newRegatta);
             }
         });
         dialog.ensureDebugId("RegattaCreateDialog");
+        dialog.show();
+    }
+    
+    private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta){
+        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
+            @Override
+            public void ok(RegattaIdentifier regattaIdentifier) {
+                sailingService.createRegattaLeaderboard(regattaIdentifier, /* displayName */ null, new int[]{},
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to create default regatta leaderboard for " + newRegatta.getName()
+                                + ": " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(StrippedLeaderboardDTO result) {
+                    }
+                });
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+        
+        dialog.ensureDebugId("CreateDefaultRegattaDialog");
         dialog.show();
     }
     
@@ -174,7 +203,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
                 newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
-                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference,
+                newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta " + newRegatta.getName() + ": " + t.getMessage());

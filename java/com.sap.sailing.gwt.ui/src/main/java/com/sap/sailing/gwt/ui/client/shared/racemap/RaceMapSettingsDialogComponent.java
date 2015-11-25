@@ -37,6 +37,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
+    private CheckBox showWindStreamletColorsCheckbox;
     private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
@@ -70,6 +71,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         
+        showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
+        showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
+        showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
+        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckboxIntended");
+        vp.add(showWindStreamletColorsCheckbox);
+
+        showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
+            }
+        });
+        
         if (showViewSimulation) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
@@ -98,7 +112,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
-                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
+                cb.setValue(Util.contains(initialSettings.getZoomSettings().getTypesToConsiderOnZoom(), zoomType), false);
                 checkboxAndZoomType.add(new Util.Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
@@ -184,7 +198,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         buoyZoneRadiusLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
         buoyZoneSettingsPanel.add(buoyZoneRadiusLabel);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        buoyZoneRadiusBox = dialog.createDoubleBox((int) (initialSettings.getBuoyZoneRadiusInMeters()), 4);
+        buoyZoneRadiusBox = dialog.createDoubleBox(Double.valueOf((int) (initialSettings.getBuoyZoneRadiusInMeters())), 4);
         buoyZoneRadiusBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
         buoyZoneSettingsPanel.add(buoyZoneRadiusBox);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusBox, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -195,6 +209,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.ADVANTAGELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEMIDDLELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
+        vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
         return vp;
     }
@@ -235,6 +250,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
+        result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
         if (showViewSimulation) {
             result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
         } else {

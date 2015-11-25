@@ -2,36 +2,53 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
+import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedLegImpl implements TrackedLeg {
     private static final long serialVersionUID = -1944668527284130545L;
@@ -43,7 +60,7 @@ public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private transient Map<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private transient ConcurrentHashMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -54,12 +71,22 @@ public class TrackedLegImpl implements TrackedLeg {
             trackedLegsOfCompetitors.put(competitor, new TrackedLegOfCompetitorImpl(this, competitor));
         }
         trackedRace.addListener(new CacheClearingRaceChangeListener());
-        competitorTracksOrderedByRank = new HashMap<>();
+        competitorTracksOrderedByRank = new ConcurrentHashMap<>();
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        competitorTracksOrderedByRank = new HashMap<>();
+        competitorTracksOrderedByRank = new ConcurrentHashMap<>();
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        final Course course = trackedRace.getRace().getCourse();
+        course.lockForRead();
+        try {
+            oos.defaultWriteObject();
+        } finally {
+            course.unlockAfterRead();
+        }
     }
     
     @Override
@@ -82,8 +109,15 @@ public class TrackedLegImpl implements TrackedLeg {
         return trackedLegsOfCompetitors.get(competitor);
     }
 
-    protected Competitor getLeader(TimePoint timePoint) {
+    @Override
+    public Competitor getLeader(TimePoint timePoint) {
         List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint);
+        return byRank.get(0).getCompetitor();
+    }
+
+    @Override
+    public Competitor getLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        List<TrackedLegOfCompetitor> byRank = getCompetitorTracksOrderedByRank(timePoint, cache);
         return byRank.get(0).getCompetitor();
     }
 
@@ -98,16 +132,14 @@ public class TrackedLegImpl implements TrackedLeg {
      * consider the order of the boats not currently in this leg, too.
      */
     protected List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint) {
-        return getCompetitorTracksOrderedByRank(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getCompetitorTracksOrderedByRank(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     List<TrackedLegOfCompetitor> getCompetitorTracksOrderedByRank(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
         List<TrackedLegOfCompetitor> rankedCompetitorList;
-        synchronized (competitorTracksOrderedByRank) {
-            rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
-            if (rankedCompetitorList != null) {
-                rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>(rankedCompetitorList);
-            }
+        rankedCompetitorList = competitorTracksOrderedByRank.get(timePoint);
+        if (rankedCompetitorList != null) {
+            rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>(rankedCompetitorList);
         }
         if (rankedCompetitorList == null) {
             rankedCompetitorList = new ArrayList<TrackedLegOfCompetitor>();
@@ -117,11 +149,9 @@ public class TrackedLegImpl implements TrackedLeg {
             // race may be updated while calculation is going on, but each individual calculation is properly
             // synchronized, usually by read-write locks, so there is no major difference in synchronization issues
             // an the asynchronous nature of how the data is being received
-            Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint, cache));
+            Collections.sort(rankedCompetitorList, getTrackedRace().getRankingMetric().getLegRankingComparator(this, timePoint, cache));
             rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
-            synchronized (competitorTracksOrderedByRank) {
-                competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
-            }
+            competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
             if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
                 logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
                         + ") differs from number of competitors in race ("
@@ -133,7 +163,7 @@ public class TrackedLegImpl implements TrackedLeg {
     
     @Override
     public LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint) {
-        return getRanks(timePoint, new NoCachingWindLegTypeAndLegBearingCache());
+        return getRanks(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
     }
     
     @Override
@@ -281,9 +311,7 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     private void clearCaches() {
-        synchronized (competitorTracksOrderedByRank) {
-            competitorTracksOrderedByRank.clear();
-        }
+        competitorTracksOrderedByRank.clear();
     }
 
     @Override
@@ -319,16 +347,16 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) throws NoWindException {
-        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
+        return getAbsoluteWindwardDistance(pos1, pos2, at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
     }
     
     @Override
     public Distance getAbsoluteWindwardDistance(Position pos1, Position pos2, TimePoint at,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
-        final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode);
+        final Distance preResult = getWindwardDistance(pos1, pos2, at, windPositionMode, cache);
         final Distance result;
-        if (preResult.getMeters() >= 0) {
+        if (preResult == null || preResult.getMeters() >= 0) {
             result = preResult;
         } else {
             result = new MeterDistance(-preResult.getMeters());
@@ -337,35 +365,183 @@ public class TrackedLegImpl implements TrackedLeg {
     }
     
     @Override
-    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
-        return getWindwardDistance(pos1, pos2, at, windPositionMode, new NoCachingWindLegTypeAndLegBearingCache());
+    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos) {
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getAbsoluteWindwardDistanceFromLegStart(pos, referenceTimePoint, new LeaderboardDTOCalculationReuseCache(referenceTimePoint));
     }
     
+    @Override
+    public Distance getWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
+    }
+
+    private Distance getWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
+                pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
+    }
+
+    @Override
+    public Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, WindLegTypeAndLegBearingCache cache) {
+        final TimePoint referenceTimePoint = getReferenceTimePoint();
+        return getAbsoluteWindwardDistanceFromLegStart(pos, referenceTimePoint, cache);
+    }
+
+    private Distance getAbsoluteWindwardDistanceFromLegStart(Position pos, final TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return getAbsoluteWindwardDistance(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint),
+                pos, timePoint, WindPositionMode.LEG_MIDDLE, cache);
+    }
+    
+    @Override
+    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at, WindPositionMode windPositionMode) {
+        return getWindwardDistance(pos1, pos2, at, windPositionMode, new LeaderboardDTOCalculationReuseCache(at));
+    }
+    
+    @Override
+    public Distance getWindwardDistance() {
+        return getWindwardDistance(getReferenceTimePoint());
+    }
+    
+    private Distance getWindwardDistance(TimePoint timePoint) {
+        return getWindwardDistance(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+    
+    @Override
+    public Distance getWindwardDistance(WindLegTypeAndLegBearingCache cache) {
+        final TimePoint middle = getReferenceTimePoint();
+        return getWindwardDistance(middle, cache);
+    }
+
+    @Override
+    public Distance getAbsoluteWindwardDistance(WindLegTypeAndLegBearingCache cache) {
+        final TimePoint middle = getReferenceTimePoint();
+        return getAbsoluteWindwardDistance(middle, cache);
+    }
+
+    @Override
+    public TimePoint getReferenceTimePoint() {
+        Iterable<MarkPassing> legStartMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getFrom());
+        Iterable<MarkPassing> legFinishMarkPassings = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+        getTrackedRace().lockForRead(legStartMarkPassings);
+        final TimePoint firstLegStartMarkPassingTimePoint;
+        final TimePoint lastLegFinishMarkPassingTimePoint;
+        try {
+            Iterator<MarkPassing> i = legStartMarkPassings.iterator();
+            if (i.hasNext()) {
+                firstLegStartMarkPassingTimePoint = i.next().getTimePoint();
+            } else {
+                firstLegStartMarkPassingTimePoint = MillisecondsTimePoint.now();
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(legStartMarkPassings);
+        }
+        getTrackedRace().lockForRead(legFinishMarkPassings);
+        try {
+            Iterator<MarkPassing> i = legFinishMarkPassings.iterator();
+            if (i.hasNext()) {
+                lastLegFinishMarkPassingTimePoint = i.next().getTimePoint();
+            } else {
+                lastLegFinishMarkPassingTimePoint = MillisecondsTimePoint.now();
+            }
+        } finally {
+            getTrackedRace().unlockAfterRead(legFinishMarkPassings);
+        }
+        final TimePoint middle = firstLegStartMarkPassingTimePoint.plus(firstLegStartMarkPassingTimePoint.until(lastLegFinishMarkPassingTimePoint).divide(2));
+        return middle;
+    }
+
+    @Override
+    public Distance getWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingCache cache) {
+        final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
+        final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
+        return getWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
+    }
+
+    @Override
+    public Distance getAbsoluteWindwardDistance(final TimePoint middle, WindLegTypeAndLegBearingCache cache) {
+        final Position fromPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), middle);
+        final Position toPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), middle);
+        return getAbsoluteWindwardDistance(fromPos, toPos, middle, WindPositionMode.LEG_MIDDLE, cache);
+    }
+
     Distance getWindwardDistance(final Position pos1, final Position pos2, TimePoint at, WindPositionMode windPositionMode, WindLegTypeAndLegBearingCache cache) {
         Distance result;
-        try {
-            final LegType legType = cache.getLegType(this, at);
-            if (legType != LegType.REACHING) { // upwind or downwind
-                final Position effectivePosition = getEffectiveWindPosition(
-                        () -> pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)),
-                        at, windPositionMode);
-                Wind wind = getTrackedRace().getWind(effectivePosition, at);
-                if (wind == null) {
-                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+        if (pos1 == null || pos2 == null) {
+            result = null;
+        } else {
+            try {
+                final LegType legType = cache.getLegType(this, at);
+                if (legType != LegType.REACHING) { // upwind or downwind
+                    final Position effectivePosition = getEffectiveWindPosition(() -> pos1.translateGreatCircle(
+                            pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at, windPositionMode);
+                    Wind wind = getTrackedRace().getWind(effectivePosition, at);
+                    if (wind == null) {
+                        result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
+                    } else {
+                        Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
+                        result = pos2.alongTrackDistance(projectionToLineThroughPos2,
+                                legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
+                    }
                 } else {
-                    Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-                    result = pos2.alongTrackDistance(projectionToLineThroughPos2,
-                            legType == LegType.UPWIND ? wind.getFrom() : wind.getBearing());
+                    // reaching leg, return distance projected onto leg's bearing
+                    result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
                 }
-            } else {
-                // reaching leg, return distance projected onto leg's bearing
+            } catch (NoWindException e) {
+                // no wind information; use along-track distance as fallback
                 result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
             }
-        } catch (NoWindException e) {
-            // no wind information; use along-track distance as fallback
-            result = pos2.alongTrackDistance(pos1, cache.getLegBearing(this, at));
         }
         return result;
     }
 
+    @Override
+    public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint)
+            throws NotEnoughDataHasBeenAddedException, NoWindException {
+        Position centralPosition = trackedRace.getCenterOfCourse(timepoint);
+        Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+        Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);
+        Position to = trackedRace.getApproximatePosition(leg.getTo(), timepoint);
+        LegType legType = getLegType(timepoint);
+        BoatClass boatClass = trackedRace.getRace().getBoatClass();
+        Duration result;
+        if (legType == LegType.REACHING) {
+            Bearing trueWindAngle = wind.getBearing().getDifferenceTo(from.getBearingGreatCircle(to));
+            SpeedWithConfidence<Void> reachSpeed = polarDataService.getSpeed(boatClass, wind, trueWindAngle);
+            Distance distance = from.getDistance(to);
+            result = reachSpeed.getObject().getDuration(distance);
+        } else {
+            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+                    boatClass, wind, legType, Tack.PORT);
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
+                    boatClass, wind, legType, Tack.STARBOARD);
+            result = estimateTargetTimeTacking(from, to, portSpeedAndBearing, starboardSpeedAndBearing, wind);
+        }
+        return result;
+    }
+
+    private Duration estimateTargetTimeTacking(Position from, Position to,
+            SpeedWithBearingWithConfidence<Void> portSpeedAndBearing,
+            SpeedWithBearingWithConfidence<Void> starboardSpeedAndBearing, Wind wind) {
+        Bearing portBearing = portSpeedAndBearing.getObject().getBearing();
+        Bearing starboardBearing = starboardSpeedAndBearing.getObject().getBearing();
+        Position intersection = from.getIntersection(portBearing, to, starboardBearing);
+        Distance fromToIntersection = from.getDistance(intersection);
+        Speed portSpeed = portSpeedAndBearing.getObject();
+        Duration duration1 = portSpeed.getDuration(fromToIntersection);
+        Distance fromToTo = intersection.getDistance(to);
+        Speed starboardSpeed = starboardSpeedAndBearing.getObject();
+        Duration duration2 = starboardSpeed.getDuration(fromToTo);
+        return duration1.plus(duration2);
+    }
+
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getAverageTrueWindDirection() {
+        final TimePoint timePoint = getReferenceTimePoint();
+        return getTrackedRace().getWindWithConfidence(getMiddleOfLeg(timePoint), timePoint);
+    }
+    
+    @Override
+    public String toString() {
+        return "TrackedLeg for "+getLeg();
+    }
 }

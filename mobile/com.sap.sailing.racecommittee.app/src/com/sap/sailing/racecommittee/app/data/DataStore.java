@@ -1,46 +1,53 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
-
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.CourseBase;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.*;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+
 public interface DataStore {
     
-    public void reset();
+    void reset();
     
-    public SharedDomainFactory getDomainFactory();
+    SharedDomainFactory getDomainFactory();
 
-    public Collection<EventBase> getEvents();
-    public EventBase getEvent(Serializable id);
-    public boolean hasEvent(Serializable id);
-    public void addEvent(EventBase event);
+    Collection<EventBase> getEvents();
+    EventBase getEvent(Serializable id);
+    boolean hasEvent(Serializable id);
+    void addEvent(EventBase event);
 
-    public Collection<CourseArea> getCourseAreas(EventBase event);
-    public CourseArea getCourseArea(Serializable id);
-    public boolean hasCourseArea(Serializable id);
-    public void addCourseArea(EventBase event, CourseArea courseArea);
+    Collection<CourseArea> getCourseAreas(EventBase event);
+    CourseArea getCourseArea(Serializable id);
+    boolean hasCourseArea(Serializable id);
+    void addCourseArea(EventBase event, CourseArea courseArea);
 
-    public Collection<ManagedRace> getRaces();
-    public void addRace(ManagedRace race);
-    public ManagedRace getRace(Serializable id);
-    public boolean hasRace(Serializable id);
+    Collection<ManagedRace> getRaces();
+    void addRace(ManagedRace race);
+    public ManagedRace getRace(String id);
+    public ManagedRace getRace(SimpleRaceLogIdentifier id);
+    public boolean hasRace(String id);
+    public boolean hasRace(SimpleRaceLogIdentifier id);
 
-    public Collection<Mark> getMarks();
-    public Mark getMark(Serializable id);
-    public boolean hasMark(Serializable id);
-    public void addMark(Mark mark);
+    Collection<Mark> getMarks();
+    Mark getMark(Serializable id);
+    boolean hasMark(Serializable id);
+    void addMark(Mark mark);
     
-    public CourseBase getLastPublishedCourseDesign();
-    public void setLastPublishedCourseDesign(CourseBase courseData);
+    CourseBase getLastPublishedCourseDesign();
+    void setLastPublishedCourseDesign(CourseBase courseData);
 
-    public Set<RaceGroup> getRaceGroups();
-    public RaceGroup getRaceGroup(String name);
+    Set<RaceGroup> getRaceGroups();
+    RaceGroup getRaceGroup(String name);
+
+    Serializable getEventUUID();
+    void setEventUUID(Serializable uuid);
+
+    UUID getCourseUUID();
+    void setCourseUUID(UUID uuid);
+
 }

@@ -3,10 +3,14 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -20,6 +24,8 @@ import com.sap.sse.common.Util;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
+    
+    private static final Logger logger = Logger.getLogger(AbstractRaceColumn.class.getName());
 
     private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
@@ -40,7 +46,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         this.raceLogStore = raceLogStore;
         this.regattaLikeParent = regattaLikeParent;
         for (final Fleet fleet : getFleets()) {
-            reloadRaceLog(fleet);
+           reloadRaceLog(fleet);
         }
     }
 
@@ -70,10 +76,16 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 if (trackedRace != null) {
                     this.trackedRaces.put(fleet, trackedRace);
                     this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
+                    logger.info(String.format("Linked race column %s with tracked race %s.", this.getName(),
+                            trackedRace.getRace() == null ? "null" : trackedRace.getRace().getName()));
                 }
             }
             if (trackedRace != null) {
-                trackedRace.attachRaceLog(getRaceLog(fleet));
+                final RaceLog raceLog = getRaceLog(fleet);
+                if (raceLog != null) {
+                    trackedRace.attachRaceLog(raceLog);
+                }
+                trackedRace.attachRaceExecutionProvider(getRaceExecutionOrderProvider());
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
         }
@@ -98,6 +110,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         if (previouslyLinkedRace != null && regattaLikeParent != null) {
             RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
             previouslyLinkedRace.detachRaceLog(identifier.getIdentifier());
+            previouslyLinkedRace.detachRaceExecutionOrderProvider(getRaceExecutionOrderProvider());
             getRaceColumnListeners().notifyListenersAboutTrackedRaceUnlinked(this, fleet, previouslyLinkedRace);
         }
     }
@@ -110,9 +123,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public Fleet getFleetOfCompetitor(Competitor competitor) {
-        for (Map.Entry<Fleet, TrackedRace> e : trackedRaces.entrySet()) {
-            if (Util.contains(e.getValue().getRace().getCompetitors(), competitor)) {
-                return e.getKey();
+        for (final Fleet fleet : getFleets()) {
+            if (Util.contains(getAllCompetitors(fleet), competitor)) {
+                return fleet;
             }
         }
         return null;
@@ -156,8 +169,15 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             RaceLog raceLogAvailable = raceLogs.get(fleet);
             if (raceLogAvailable == null) {
                 RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+                // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
+                // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
                 newOrLoadedRaceLog.addListener(listener);
                 raceLogs.put(fleet, newOrLoadedRaceLog);
+                final TrackedRace trackedRace = getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    // need to attach race log
+                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
+                }
             } else {
                 // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
                 raceLogAvailable.merge(newOrLoadedRaceLog);
@@ -197,5 +217,41 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void setMasterDataExportOngoingThreadFlag(boolean flagValue) {
         trackedRaces.setMasterDataExportOngoingThreadFlag(flagValue);
     }
+
     
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        final Set<Competitor> result = new HashSet<>();
+        for (Fleet fleet : getFleets()) {
+            TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                Util.addAll(trackedRace.getRace().getCompetitors(), result);
+            } else {
+                // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+                // race exists, its competitors set takes precedence over what's in the race log. Usually,
+                // the tracked race will have the same competitors as those in the race log, or more because
+                // those from the regatta log are added to the tracked race as well.
+                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+                result.addAll(viaRaceLog);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
+        final Iterable<Competitor> result;
+        final TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            result = trackedRace.getRace().getCompetitors();
+        } else {
+            // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer<>(getRaceLog(fleet)).analyze();
+            result = viaRaceLog;
+        }
+        return result;
+    }
 }

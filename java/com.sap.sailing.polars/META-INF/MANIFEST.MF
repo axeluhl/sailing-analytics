@@ -7,19 +7,22 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Export-Package: 
- com.sap.sailing.polars.data,
+ com.sap.sailing.polars.mining,
  com.sap.sailing.polars.regression,
  com.sap.sailing.polars.windestimation
 Require-Bundle: 
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain,
  com.sap.sse.datamining,
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sse.shared.android,
  org.apache.commons.math;bundle-version="2.1.0",
- org.eclipse.osgi
+ org.eclipse.osgi,
+ com.sap.sse.replication;bundle-version="1.0.0",
+ com.sap.sse.operationaltransformation;bundle-version="1.0.0"
 Import-Package: 
  com.sap.sailing.util,
  com.sap.sse.common

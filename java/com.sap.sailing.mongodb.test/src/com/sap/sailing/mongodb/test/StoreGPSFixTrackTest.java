@@ -13,8 +13,9 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -58,7 +59,8 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     public void testStoreAndLoadFixes() throws TransformationException, NoCorrespondingServiceRegisteredException {
     	TypeBasedServiceFinderFactory factory = new MockSmartphoneImeiServiceFinderFactory();
     	AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
-    	Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null);
+    	Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null,
+    	    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     	Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), factory);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
@@ -85,8 +87,8 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
         store.storeFix(device2, fix4);
         
         RaceLog raceLog = new RaceLogImpl("racelog");
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(time0, author, device1, comp, 0, time0, time1));
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(time0, author, device2, mark, 0, time0, time1));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(time0, author, 0, comp, device1, time0, time1));
+        raceLog.add(new RaceLogDeviceMarkMappingEventImpl(time0, author, 0, mark, device2, time0, time1));
         
         DynamicGPSFixMovingTrackImpl<Competitor> track1 = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
         store.loadCompetitorTrack(track1, raceLog, comp);

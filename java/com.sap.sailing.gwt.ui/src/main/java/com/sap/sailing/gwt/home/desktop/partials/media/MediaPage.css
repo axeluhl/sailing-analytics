@@ -1,0 +1,22 @@
+.media {
+  font-size: 15px;
+  font-size: 1rem;
+  padding-top: 2em;
+  padding-bottom: 2em;
+}
+
+.dark {
+  background: #333;
+  color: #fff;
+}
+.photolist {
+	font-size: 0px;
+}
+
+.imggalleryitem {
+	border: 1em solid transparent;
+	
+	box-sizing: border-box;
+	
+}
+

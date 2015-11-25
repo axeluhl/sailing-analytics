@@ -1,0 +1,53 @@
+#!/bin/bash
+
+CACHE=/var/log/old/cache/unique-ips-per-referrer
+VISITED_FILES=$CACHE/visited
+STATS=$CACHE/stats
+MONTHS=$STATS/months
+
+mkdir -p "$STATS"
+
+# groups Apache / httpd log entries into "${referrer}.ips" files, where ${referrer} is the
+# referrer URL identifying the "event"; the lines written to the .ips files hold the IP
+# address of the requestor, the date (not the time) and the user agent string.
+# Sorting for unique entries should give a count similar to what goaccess is using to
+# determine "unique visitors."
+
+# A sample line:
+# 505Worlds2012.sapsailing.com 66.249.73.53 - - [12/Jan/2014:03:33:11 +0000] "GET /robots.txt HTTP/1.1" 404 238 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+
+for i in $*; do
+  grep -q "^$i\$" $VISITED_FILES
+  if [ "$?" = "0" ]; then
+    echo "Already visited $i; ignoring (edit $VISITED_FILES to change this)."
+  else
+    echo "Analyzing log file $i"
+    if [ ${i: -3} == ".gz" ]; then
+      gzip -cd $i
+    else
+      cat $i
+    fi | iconv -f ISO-8859-1 -t UTF8 | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \[\([^:]*\):\([^]]*\)\] \"[^"]*\" [^ ]* [^ ]* \"[^"]*\" \"\([^"]*\)\"/\1 \2 \5 \7/' | while read referrer hit; do
+      echo "$hit" >>${STATS}/${referrer}.ips
+    done
+    echo "$i" >>$VISITED_FILES
+  fi
+done
+for i in ${STATS}/*.ips; do
+  echo -n "`basename $i .ips` "
+  cat $i | sort -u | wc | awk '{ print $1; }'
+  # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
+done | tee $STATS/unique-ips-days-useragents-per-event
+echo "Wrote total results to $STATS/unique-ips-days-useragents-per-event"
+
+
+# Now filter and group by month
+cat ${STATS}/*.ips | awk '{ print $2; }' | sed -e 's/^[0-9]*\///' | sort -u >$MONTHS
+for month in `cat $MONTHS`; do
+  for i in ${STATS}/*.ips; do
+    echo -n "`basename $i .ips` "
+    cat $i | grep "^[^ ]* [0-9]*/$month .*" | sort -u | wc | awk '{ print $1; }'
+    # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
+  done | tee $STATS/unique-ips-days-useragents-per-event-$month
+  echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
+done
+echo "Done."

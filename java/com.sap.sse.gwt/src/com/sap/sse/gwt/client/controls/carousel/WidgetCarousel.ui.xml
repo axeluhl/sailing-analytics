@@ -19,9 +19,12 @@
 		background-color: #fcfcfc;
 	}
 	
+	.slider .slick-slide:focus {
+		outline: 0;
+	}
+	
 	.slider .slick-prev {
 		left: 0px;
-		z-index: 1;
 		height: 60px;
 		width: 60px;
 	}
@@ -30,7 +33,6 @@
 		position: absolute;
 		background-position: 0 0;
 		background-repeat: no-repeat;
-		z-index: 10;
 		cursor: pointer;
 		top: 40%;
 		-webkit-transform: translate(0, -50%);

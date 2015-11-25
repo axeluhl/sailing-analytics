@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.standings.StandingsResources" />
+  <div class="{local_res.css.race}">
+    <div class="{local_res.css.race_item}">
+      <span ui:field="rankUi" class="{local_res.css.standings_list_content_rank} {local_res.css.race_itemname}" />
+      <img ui:field="flagUi" class="{local_res.css.standings_list_content_flag} {local_res.css.race_item_flag}" />
+      <span ui:field="teamIdUi" class="{local_res.css.race_itemname}"/>
+    </div>
+    <div class="{local_res.css.race_item} {local_res.css.race_itemlong}">
+      <span ui:field="teamNameUi" class="{local_res.css.race_item_winner}" />
+    </div>
+    <div ui:field="pointsUi" class="{local_res.css.race_item} {local_res.css.race_itemright} {local_res.css.race_itemname}" />
+  </div>
+</ui:UiBinder>

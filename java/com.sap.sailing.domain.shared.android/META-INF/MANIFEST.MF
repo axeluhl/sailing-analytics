@@ -6,9 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain.common,
- com.sap.sse.datamining.shared,
  com.sap.sse.common,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.impl,
  com.sap.sailing.domain.abstractlog.race,
@@ -35,6 +35,7 @@ Export-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.abstractlog.regatta.events.impl,
  com.sap.sailing.domain.abstractlog.regatta.impl,
+ com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl,
  com.sap.sailing.domain.abstractlog.shared.analyzing,
  com.sap.sailing.domain.abstractlog.shared.events,
  com.sap.sailing.domain.base,

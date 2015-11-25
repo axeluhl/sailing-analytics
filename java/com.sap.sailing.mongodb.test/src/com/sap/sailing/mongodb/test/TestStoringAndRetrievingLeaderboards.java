@@ -38,6 +38,7 @@ import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -80,7 +81,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
                         new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitor(hasso);
@@ -104,7 +105,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
         leaderboard.getScoreCorrection().setComment("Humba");
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
@@ -347,13 +348,14 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        final DomainFactory domainFactory = new DomainFactoryImpl();
+        final DomainFactory domainFactory = new DomainFactoryImpl((srlid)->null);
         // create the competitor through the competitor store/factory here so that the DomainObjectFactory finds it and
         // resolves the score corrections appropriate
         Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, "someone@nowhere.de", null, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null),
+                        /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
         leaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace */ false);
@@ -380,7 +382,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
+                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         return competitor;
     }
 

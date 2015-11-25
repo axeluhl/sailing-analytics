@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -64,9 +65,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final boolean showRaceDetails;
 
     private Button leaderboardRemoveButton;
-
     private Button addRaceColumnsButton;
-
     private Button columnMoveUpButton;
     private Button columnMoveDownButton;
 
@@ -78,7 +77,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
 
@@ -92,8 +91,26 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addLeaderboardConfigControls(Panel configPanel) {
-        filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
+    protected void addLeaderboardControls(Panel controlsPanel) {
+        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
+        controlsPanel.add(createFlexibleLeaderboardBtn);
+        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createFlexibleLeaderboard();
+            }
+        });
+
+        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
+        controlsPanel.add(createRegattaLeaderboardBtn);
+        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createRegattaLeaderboard();
+            }
+        });
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
@@ -106,7 +123,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 }
             }
         });
-        configPanel.add(leaderboardRemoveButton);
+        controlsPanel.add(leaderboardRemoveButton);
     }
     
     @Override
@@ -156,7 +173,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
+        leaderboardDisplayNameColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn, new Comparator<StrippedLeaderboardDTO>() {
 
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                return new NaturalComparator().compare(o1.getDisplayName(), o2.getDisplayName());
+            }
+        });
+        
         TextColumn<StrippedLeaderboardDTO> discardingOptionsColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
@@ -169,6 +194,25 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return result;
             }
         };
+        discardingOptionsColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(discardingOptionsColumn, new Comparator<StrippedLeaderboardDTO>() {
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                String s1 = "";
+                String s2 = "";
+                if (o1.discardThresholds != null) {
+                    for (int i : o1.discardThresholds) {
+                        s1 += i;
+                    }
+                }
+                if (o2.discardThresholds != null) {
+                    for (int i : o2.discardThresholds) {
+                        s2 += i;
+                    }
+                }
+                return new NaturalComparator().compare(s1, s2);
+            }
+        });
 
         TextColumn<StrippedLeaderboardDTO> leaderboardTypeColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -180,6 +224,14 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return result;
             }
         };
+        leaderboardTypeColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(leaderboardTypeColumn, new Comparator<StrippedLeaderboardDTO>() {
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                return o1.type.compareTo(o2.type);
+            }
+            
+        });
 
         TextColumn<StrippedLeaderboardDTO> scoringSystemColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -187,6 +239,16 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return leaderboard.scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(leaderboard.scoringScheme, stringMessages);
             }
         };
+        scoringSystemColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(scoringSystemColumn, new Comparator<StrippedLeaderboardDTO>() {
+
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                String s1 = o1.scoringScheme == null ? null:o1.scoringScheme.toString();
+                String s2 = o2.scoringScheme == null ? null:o2.scoringScheme.toString();
+                return new NaturalComparator().compare(s1, s2);
+            }
+        });
 
         TextColumn<StrippedLeaderboardDTO> courseAreaColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
@@ -194,6 +256,14 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 return leaderboard.defaultCourseAreaId == null ? "" : leaderboard.defaultCourseAreaName;
             }
         };
+        courseAreaColumn.setSortable(true);
+        leaderboardColumnListHandler.setComparator(courseAreaColumn, new Comparator<StrippedLeaderboardDTO>() {
+
+            @Override
+            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                return new NaturalComparator().compare(o1.defaultCourseAreaName, o2.defaultCourseAreaName);
+            }
+        });
 
         ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell>(
                 new LeaderboardConfigImagesBarCell(stringMessages));
@@ -276,28 +346,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
-    }
-
-    protected void addLeaderboardCreateControls(Panel createPanel) {
-        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
-        createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-        createPanel.add(createFlexibleLeaderboardBtn);
-        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createFlexibleLeaderboard();
-            }
-        });
-
-        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
-        createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
-        createPanel.add(createRegattaLeaderboardBtn);
-        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createRegattaLeaderboard();
-            }
-        });
     }
     
     @Override

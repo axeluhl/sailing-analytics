@@ -26,8 +26,8 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     protected final VerticalPanel selectedRaceContentPanel;
     
     public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+            RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), actionButtonsEnabled, stringMessages);
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class SortedCellTable<T> extends CellTable<T> {
      */
     private ListHandler<T> columnSortHandler;
 
-    public SortedCellTable(int pageSize, LeaderboardTableResources resources) {
+    public SortedCellTable(int pageSize, CellTable.Resources resources) {
         super(pageSize, resources);
         dataProvider = new ListDataProvider<T>();
         dataProvider.addDataDisplay(this);
@@ -99,6 +100,13 @@ public class SortedCellTable<T> extends CellTable<T> {
             if (comparator != null) {
                 sortColumn(currentlySortedColumn, comparator, comparator.isAscending());
             }            
+        }
+    }
+
+    public void sortColumn(Column<T, ?> column) {
+        InvertibleComparator<T> comparator = comparators.get(column);
+        if (comparator != null) {
+            sortColumn(column, comparator, comparator.isAscending());
         }
     }
 
@@ -195,7 +203,7 @@ public class SortedCellTable<T> extends CellTable<T> {
      * 
      * @param list
      */
-    public void setList(List<T> list) {
+    public void setList(Collection<T> list) {
         dataProvider.getList().clear();
         if (list != null) {
             for (T element : list) {

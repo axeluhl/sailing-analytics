@@ -6,9 +6,10 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RRS26StartModeFlagFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -39,8 +40,8 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     private boolean startmodeFlagHasBeenSet;
 
     public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, RRS26Configuration configuration) {
-        super(raceLog, author, factory, configuration);
+             RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
         
         RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         if (configuration.getStartModeFlags() != null) {
@@ -188,7 +189,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
 
     @Override
     public void setStartModeFlag(TimePoint timePoint, Flags startMode) {
-        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
+        raceLog.add(new RaceLogFlagEventImpl(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
     }
 
     @Override

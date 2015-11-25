@@ -15,8 +15,8 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -64,7 +64,6 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         logIdentifier = mock(RaceLogIdentifier.class);
         com.sap.sse.common.Util.Triple<String, String, String> triple = new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
         when(logIdentifier.getIdentifier()).thenReturn(triple);
-        when(logIdentifier.getDeprecatedIdentifier()).thenReturn("");
     }
     
     private RaceLog loadRaceLog() {        
@@ -82,10 +81,10 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     
     private DeviceIdentifier storeAndLoad(DeviceIdentifier device, TypeBasedServiceFinderFactory forStoring, TypeBasedServiceFinderFactory forLoading) {
         createFactories(forStoring);
-        Competitor c = new CompetitorImpl("a", "a", null, null, null, null, null);
+        Competitor c = new CompetitorImpl("a", "a", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(now(), author, device,
-                c, 0, now(), now()));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, 0,
+                c, device, now(), now()));
         
         createFactories(forLoading);
         

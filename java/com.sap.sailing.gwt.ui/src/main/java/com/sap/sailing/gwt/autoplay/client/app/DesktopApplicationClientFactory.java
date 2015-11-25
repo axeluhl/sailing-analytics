@@ -20,9 +20,13 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     }
 
     private DesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController) {
-        super(new DesktopApplicationView(new PlaceNavigatorImpl(placeController)), eventBus, placeController);
+        this(eventBus, placeController, new PlaceNavigatorImpl(placeController));
     }
 
+    private DesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, PlaceNavigator navigator) {
+        super(new DesktopApplicationView(navigator), eventBus, placeController, navigator);
+    }
+    
     @Override
     public StartView createStartView() {
         return new DesktopStartView(getPlaceNavigator(), getEventBus());
@@ -37,4 +41,5 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     public ErrorView createErrorView(String errorMessage, Throwable errorReason) {
         return null;
     }
+
 }

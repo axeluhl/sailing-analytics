@@ -6,11 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -26,14 +28,14 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl {
+public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements HasRaceColumnsAndRegattaLike {
     private static final long serialVersionUID = -328091952760083438L;
-
+    
     /**
      * Cache for the combined competitors of this leaderboard; taken from the {@link TrackedRace#getRace() races of the
      * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
      */
-    private transient Iterable<Competitor> allCompetitorsCache;
+    private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
 
     /**
      * @param scoreComparator the comparator to use to compare basic scores, such as net points
@@ -75,20 +77,21 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      */
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        if (allCompetitorsCache == null) {
-            Set<Competitor> result = new HashSet<Competitor>();
-            synchronized (this) {
-                for (TrackedRace r : getTrackedRaces()) {
-                    for (Competitor c : r.getRace().getCompetitors()) {
-                        result.add(c);
-                    }
-                }
-            }
-            allCompetitorsCache = result;
-        }
-        return allCompetitorsCache;
+        return getOrCreateCompetitorsProvider().getAllCompetitors();
     }
     
+    @Override
+    public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
+    }
+
+    private CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        if (competitorsProvider == null) {
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        return competitorsProvider;
+    }
+
     @Override
     public Competitor getCompetitorByIdAsString(String idAsString) {
         for (Competitor competitor : getAllCompetitors()) {
@@ -142,18 +145,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return correctedRank;
     }
 
-    @Override
-    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        allCompetitorsCache = null;
-        super.trackedRaceLinked(raceColumn, fleet, trackedRace);
-    }
-
-    @Override
-    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        allCompetitorsCache = null;
-        super.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
-    }
-    
     // Note: no need to redefine isMedalRaceChanged because that doesn't affect the competitorsCache
 
     @Override
@@ -172,6 +163,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
             }
         }
         return delayToLiveInMillisForLatestRace;
+    }
+    
+    @Override
+    public RaceLog getRacelog(String raceColumnName, String fleetName){
+        RaceColumn raceColumn = getRaceColumnByName(raceColumnName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        return raceColumn.getRaceLog(fleet);
     }
 
 }

@@ -1,16 +1,22 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
  * Image carousel that uses the open source "slick carousel".
@@ -48,10 +54,11 @@ import com.google.gwt.user.client.ui.Widget;
  *
  *      Created by pgtaboada on 10.11.14.
  */
-public class ImageCarousel extends Widget {
+public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
 
+    private LinkedList<TYPE> currentImages = new LinkedList<>();
     /**
      * slick slider property: dots
      */
@@ -81,18 +88,34 @@ public class ImageCarousel extends Widget {
      * The height of the images
      */
     private int imagesHeight = 300;
+    private int currentSlideIndex = 0;
 
     private final String uniqueId;
+
+    private FullscreenViewer<TYPE> fsViewer;
 
     /**
      * Widget constructor
      */
     public ImageCarousel() {
         setElement(ourUiBinder.createAndBindUi(this));
-
         uniqueId = "slider_" + Document.get().createUniqueId();
         getElement().addClassName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
+    }
+
+    public void onClick(EventTarget eventTarget) {
+        if(fsViewer != null && Element.is(eventTarget)) {
+            TYPE imageData = getImageData(eventTarget.<Element>cast());
+            if(imageData != null) {
+                fsViewer.show(imageData, currentImages);
+            }
+        }
     }
 
     /**
@@ -100,13 +123,28 @@ public class ImageCarousel extends Widget {
      *
      * @param uniqueId
      */
-    native void setupSlider(ImageCarousel sliderReference) /*-{
+    native void setupSlider(ImageCarousel<?> sliderReference) /*-{
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-		.slick(
+	var slider = $wnd
+		.$('.'
+			+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId));
+
+	slider
+		.on(
+			'click',
+			'.slick-slide',
+			$entry(function(event) {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick(Lcom/google/gwt/dom/client/EventTarget;)(event.target);
+			}));
+
+	slider
+		.on(
+			'afterChange',
+			$entry(function(event, index) {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::currentSlideIndex = index.currentSlide;
+			}));
+
+	slider.slick(
 			{
 			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
 			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
@@ -136,15 +174,23 @@ public class ImageCarousel extends Widget {
      *
      * @param url
      */
-    public void addImage(String url, int height, int width) {
-
+    public void addImage(TYPE image) {
+        currentImages.add(image);
+        String url = image.getSourceRef();
+        int height = image.getHeightInPx();
+        int width = image.getWidthInPx();
+        
         DivElement imageHolder = Document.get().createDivElement();
         ImageElement imageElement = Document.get().createImageElement();
         imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
+        if(fsViewer != null) {
+            imageElement.getStyle().setCursor(Cursor.POINTER);
+        }
 
         imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
         imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);
         imageHolder.appendChild(imageElement);
+        setImageData(imageElement, image);
 
         getElement().appendChild(imageHolder);
 
@@ -153,6 +199,17 @@ public class ImageCarousel extends Widget {
             setShowDots(false);
         }
     }
+    
+    private native void setImageData(Element element, TYPE imageData) /*-{
+        element.imageData = imageData;
+    }-*/;
+    
+    private native TYPE getImageData(Element element) /*-{
+        if(typeof element.imageData == "undefined") {
+            return null;
+        }
+        return element.imageData;
+    }-*/;
 
     /**
      * Define spacing between images in carousel. In fact, it is setting the img margins in pixels.
@@ -209,7 +266,7 @@ public class ImageCarousel extends Widget {
     /**
      * UiBinder interface
      */
-    interface SlickSliderUiBinder extends UiBinder<DivElement, ImageCarousel> {
+    interface SlickSliderUiBinder extends UiBinder<DivElement, ImageCarousel<?>> {
     }
 
     /**
@@ -242,22 +299,12 @@ public class ImageCarousel extends Widget {
      * Apply slick js to constructed dom tree.
      */
     private void init() {
-        final ImageCarousel reference = this;
-
+        final ImageCarousel<TYPE> reference = this;
         Scheduler.get().scheduleDeferred(new Command() {
-
             @Override
             public void execute() {
                 try {
                     setupSlider(reference);
-
-                    for (int childIndex = 0; childIndex < getElement().getChildCount(); childIndex++) {
-                        Element child = Element.as(getElement().getChild(childIndex));
-                        if (child.getClassName() != null && child.getClassName().contains("slick-track")) {
-
-                        }
-                    }
-
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
@@ -265,4 +312,13 @@ public class ImageCarousel extends Widget {
         });
     }
 
+    public void registerFullscreenViewer(FullscreenViewer<TYPE> fsViewer) {
+        this.fsViewer = fsViewer;
+    }
+
+    public interface FullscreenViewer<TYPE> {
+        
+        public void show(TYPE selectedImage, Collection<TYPE> imageList);
+    }
+    
 }

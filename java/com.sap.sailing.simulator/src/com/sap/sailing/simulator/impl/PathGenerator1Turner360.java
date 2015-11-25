@@ -109,6 +109,7 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
             stepMax = this.evalStepMax;
         }
         boolean targetFound;
+        boolean skipRemainingSteps;
         long timeStep;
         if (this.evalTimeStep == 0) {
             timeStep = windField.getTimeStep().asMillis() / 3;
@@ -128,6 +129,7 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
             currentPosition = posStart;
             currentTime = startTime;
             targetFound = false;
+            skipRemainingSteps = false;
             minimumDistance = courseLength.getMeters();
             path = new LinkedList<TimedPositionWithSpeed>();
             path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
@@ -138,7 +140,7 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
 
             int stepLeft = 0;
             PointOfSail prevPointOfSail = PointOfSail.TACKING;
-            while ((stepLeft < step) && (!targetFound) && (!this.isTimedOut())) {
+            while ((stepLeft < step) && (!targetFound) && (!this.isTimedOut()) && (!skipRemainingSteps)) {
                 // get bearing to target            
                 Bearing bearTarget = currentPosition.getBearingGreatCircle(posEnd);
                 // set wind at current position
@@ -212,6 +214,9 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                     minimumTime = currentTime;
                     allminpath = path;
                 }
+                if (posStart.getDistance(currentPosition).getMeters() > 1.1*posStart.getDistance(posEnd).getMeters()) {
+                    skipRemainingSteps = true;
+                }
                 stepLeft++;
             }
 
@@ -220,7 +225,7 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
             }
             
             int stepRight = 0;
-            while ((stepRight < (stepMax - step)) && (!targetFound) && (!this.isTimedOut())) {
+            while ((stepRight < (stepMax - step)) && (!targetFound) && (!this.isTimedOut()) && (!skipRemainingSteps)) {
                 // get bearing to target
                 Bearing bearTarget = currentPosition.getBearingGreatCircle(posEnd);
                 // set wind at current position
@@ -270,6 +275,9 @@ public class PathGenerator1Turner360 extends PathGeneratorBase {
                 if (targetFound&&(currentTime.before(minimumTime))) {
                     minimumTime = currentTime;
                     allminpath = new LinkedList<TimedPositionWithSpeed>(path);
+                }
+                if (posStart.getDistance(currentPosition).getMeters() > 1.1*posStart.getDistance(posEnd).getMeters()) {
+                    skipRemainingSteps = true;
                 }
                 stepRight++;
             }

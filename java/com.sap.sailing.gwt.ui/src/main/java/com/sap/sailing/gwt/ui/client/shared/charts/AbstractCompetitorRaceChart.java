@@ -391,7 +391,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml()).setSelected(true));
+                    .setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml()).setSelected(true));
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
             dataSeriesByCompetitor.put(competitor, result);
         }
@@ -408,7 +408,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
                     .setName(stringMessages.markPassing() + " " + competitor.getName());
-            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor).getAsHtml())
+            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
         }
@@ -539,7 +539,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private boolean hasReversedYAxis(DetailType detailType) {
-        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
+        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD ||
                 selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
                 selectedDetailType == DetailType.RACE_RANK ||
                 selectedDetailType == DetailType.REGATTA_RANK ||

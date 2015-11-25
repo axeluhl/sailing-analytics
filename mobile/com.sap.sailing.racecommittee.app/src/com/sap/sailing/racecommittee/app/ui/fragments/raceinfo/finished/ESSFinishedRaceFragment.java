@@ -7,7 +7,7 @@ import android.widget.Button;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.PositioningFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PositioningFragment;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 
@@ -23,7 +23,7 @@ public class ESSFinishedRaceFragment extends BaseFinishedRaceFragment<ESSRacingP
             public void onClick(View v) {
                 PositioningFragment fragment = new PositioningFragment();
                 fragment.setArguments(PositioningFragment.createArguments(getRace()));
-                fragment.show(getFragmentManager(), null);
+//                fragment.show(getFragmentManager(), null);
             }
         });
     }

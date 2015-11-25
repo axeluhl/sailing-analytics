@@ -110,9 +110,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
-            if (getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, timePoint)) {
-                int preemptiveColumnResult = 0;
-                final Double o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
+            final boolean o1ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o1, timePoint);
+            final boolean o2ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint);
+            final Double o1Score;
+            if (o1ValidInTotalScore) {
+                o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
                 if (o1Score != null) {
                     o1Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o1Score));
                     if (needToResetO1ScoreUponNextValidResult) {
@@ -121,7 +123,12 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o1ScoreSum += o1Score;
                 }
-                final Double o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
+            } else {
+                o1Score = null;
+            }
+            final Double o2Score;
+            if (o2ValidInTotalScore) {
+                o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
                 if (o2Score != null) {
                     o2Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o2Score));
                     if (needToResetO2ScoreUponNextValidResult) {
@@ -130,6 +137,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o2ScoreSum += o2Score;
                 }
+            } else {
+                o2Score = null;
+            }
+            if (o1ValidInTotalScore && o2ValidInTotalScore) {
+                int preemptiveColumnResult = 0;
                 if (raceColumn.isMedalRace()) {
                     // only count the score for the medal race score if it wasn't a carry-forward column
                     if (!raceColumn.isCarryForward()) {
@@ -161,7 +173,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (result == 0) {
                 result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                 if (result == 0) {
-                    result = compareByBetterScore(Collections.unmodifiableList(o1Scores), Collections.unmodifiableList(o2Scores));
+                    result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
                         result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
@@ -264,11 +276,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     /**
      * Assuming both competitors scored in the same number of races, and assuming they scored the same total score,
      * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
-     * 
-     * @see ScoringScheme#compareByBetterScore(List, List, boolean)
+     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint)
      */
-    protected int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores) {
-        return scoringScheme.compareByBetterScore(o1Scores, o2Scores, nullScoresAreBetter);
+    protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
+        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint);
     }
     
     /**

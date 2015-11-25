@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -48,7 +49,9 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterp
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
+import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -67,12 +70,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     /**
      * Uses a transient competitor store
      */
-    public DomainFactoryImpl() {
-        super(new TransientCompetitorStoreImpl());
+    public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
+        super(new TransientCompetitorStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore) {
-        super(competitorStore);
+    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+        super(competitorStore, raceLogResolver);
     }
 
     @Override
@@ -112,6 +115,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
+        case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
+            return new LowPointWithEliminationsAndRoundsWinnerGets07();
+        case LOW_POINT_LEAGUE_OVERALL:
+            return new LowPointForLeagueOverallLeaderboard();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -165,58 +172,64 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
-        
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
-
         Competitor leaderOrWinner = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
-            if(trackedRace.isLive(now)) {
+            if (trackedRace.isLive(now)) {
                 leaderOrWinner = trackedRace.getOverallLeader(now);
             } else if (trackedRace.getEndOfRace() != null) {
-                for(Competitor competitor: leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
+                for (Competitor competitor : leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                    if(fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
+                    if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
                         break;
                     }
                 }
-            }                
-            if(leaderOrWinner != null) {
+            }
+            if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
                 statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
-                if(track != null) {
-                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
+                if (track != null) {
+                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
                 }
             }
         } catch (NoWindException e) {
         }
-        
+
         // Measured wind sources data
         statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
-        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0; 
+        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0;
 
         // leg progress data
         RaceDefinition race = trackedRace.getRace();
-        if(race.getCourse() != null) {
+        if (race.getCourse() != null) {
             statisticsDTO.hasLegProgressData = true;
             statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
             statisticsDTO.currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
         }
-        
+
         // media data
-        if(mediaTracks != null) {
-            for(MediaTrack track: mediaTracks) {
-                switch(track.mimeType.mediaType) {
+        if (mediaTracks != null) {
+            for (MediaTrack track : mediaTracks) {
+                switch (track.mimeType.mediaType) {
                 case audio:
                     statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1 : statisticsDTO.audioTracksCount++;   
+                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                            : statisticsDTO.audioTracksCount++;
                     break;
                 case video:
                     statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1 : statisticsDTO.videoTracksCount++;   
+                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                            : statisticsDTO.videoTracksCount++;
+                    break;
+                case image: // TODO should this add to an image count?
+                    break;
+                case unknown: // TODO should this add to an "unknown media" count? Probably not
+                    break;
+                default:
                     break;
                 }
             }

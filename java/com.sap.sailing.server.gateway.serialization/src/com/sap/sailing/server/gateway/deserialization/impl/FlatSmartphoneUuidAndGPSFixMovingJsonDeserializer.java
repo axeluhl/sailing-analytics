@@ -9,10 +9,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -23,6 +23,7 @@ import com.sap.sse.common.Util.Pair;
  */
 public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer implements
         JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> {
+    public static final String ACCURACY = "accuracy";
 
     @Override
     public Pair<UUID, List<GPSFixMoving>> deserialize(JSONObject object) throws JsonDeserializationException {

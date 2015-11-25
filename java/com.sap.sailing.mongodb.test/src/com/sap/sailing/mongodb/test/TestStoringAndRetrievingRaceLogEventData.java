@@ -14,8 +14,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -71,7 +71,7 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
     @Test
     public void storeRaceLogFlagEvent() throws UnknownHostException, MongoException, InterruptedException {
         TimePoint now = MillisecondsTimePoint.now();
-        RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(now, author, 0, Flags.AP, Flags.ALPHA, true);
+        RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(now, author, 0, Flags.AP, Flags.ALPHA, true);
         {
             DBObject rcEventForMongo = ((MongoObjectFactoryImpl) PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory())
                     .storeRaceLogFlagEvent(rcEvent);
@@ -91,5 +91,4 @@ public class TestStoringAndRetrievingRaceLogEventData extends AbstractMongoDBTes
             assertEquals(rcEvent.getLowerFlag(), readRcEvent.getLowerFlag());
         }
     }
-
 }

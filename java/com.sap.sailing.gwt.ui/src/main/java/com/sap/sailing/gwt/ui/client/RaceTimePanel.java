@@ -21,6 +21,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
+
+    /**
+     * When a marker update is required but min/max are not yet initialized, this flag is set. If later
+     * {@link #setMinMax(Date, Date, boolean)} is invoked and this flag is set, a {@link #redrawAllMarkers(RaceTimesInfoDTO)}
+     * will be issued and the flag is cleared.
+     */
+    private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
@@ -38,7 +45,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
         if (selectedRaceTimes.startOfRace != null) {
-            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+            if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
             } else {
@@ -105,7 +112,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 // maybe show a special state for this like "Race did not start yet"
             }
         }
-        lastRaceTimesInfo = raceTimesInfo;
+        lastRaceTimesInfo = raceTimesInfo; // TODO bug 3122: when not redrawn yet because min/max not initialized yet, further redraw is disabled by this.
     } 
     
     @Override
@@ -181,6 +188,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
     }
     
+    @Override
+    public void setMinMax(Date min, Date max, boolean fireEvent) {
+        super.setMinMax(min, max, fireEvent);
+        if (redrawAllMarkersPendingForMinMaxBeingInitialized && timeSlider.isMinMaxInitialized()) {
+            redrawAllMarkers(lastRaceTimesInfo);
+            redrawAllMarkersPendingForMinMaxBeingInitialized = false;
+        }
+    }
+
     /**
      * When in {@link PlayModes#Replay} mode, tries to put the {@link #timer} to the time point when the last leg was
      * finished first. If this time point is not (yet?) known, tries to put the {@link #timer} to the
@@ -239,8 +255,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 requiresMarkerUpdate = true;
             }
         }
-        if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
-            redrawAllMarkers(newRaceTimesInfo);
+        if (requiresMarkerUpdate) {
+            if (timeSlider.isMinMaxInitialized()) { // TODO bug 3122 later, the lastRaceTimesInfo will be updated even if not redrawn because min/max not initialized
+                redrawAllMarkers(newRaceTimesInfo);
+            } else {
+                redrawAllMarkersPendingForMinMaxBeingInitialized = true;
+            }
         }
     }
     

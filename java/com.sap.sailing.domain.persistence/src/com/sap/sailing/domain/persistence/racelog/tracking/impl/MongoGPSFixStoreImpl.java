@@ -40,6 +40,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
@@ -109,7 +110,6 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
-
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
@@ -192,9 +192,41 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
+            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
+        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
+        if (mappings != null) {
+            for (DeviceMapping<Competitor> mapping : mappings) {
+                final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
+                final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
+                loadTrack(track, mapping.getDevice(), from, to, true /*inclusive*/);
+            }
+        }
+    }
+
+    @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping)
     throws TransformationException, NoCorrespondingServiceRegisteredException {
         loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+    }
+    
+    @Override
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark,
+            TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
+        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
+        if (mappings != null) {
+            for (DeviceMapping<Mark> mapping : mappings) {
+                final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
+                final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
+                loadTrack(track, mapping.getDevice(), from, to, true /*inclusive*/);
+            }
+        }
+    }
+
+    @Override
+    public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
     }
     
     private DBObject getDeviceQuery(DeviceIdentifier device)
@@ -229,4 +261,5 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
         }
         return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
     }
+
 }

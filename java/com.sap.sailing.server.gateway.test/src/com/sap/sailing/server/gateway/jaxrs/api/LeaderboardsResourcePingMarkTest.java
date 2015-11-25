@@ -28,6 +28,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.gateway.test.jaxrs.AbstractJaxRsApiTest;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -63,7 +64,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
-                new HighPoint(), 0, null);
+                new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
         leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "regatta", new int[] {});
 

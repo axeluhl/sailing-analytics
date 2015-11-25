@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 public interface CompetitorDTO extends Serializable, MappableToDevice {
     
@@ -13,9 +14,11 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
 
     String getCountryName();
 
-    String getSailID();
-
     String getIdAsString();
+
+    String getSailID();
+    
+    BoatDTO getBoat();
 
     BoatClassDTO getBoatClass();
     
@@ -36,5 +39,9 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
     String getFlagImageURL();
 
     String getImageURL();
+
+    Double getTimeOnTimeFactor();
+    
+    Duration getTimeOnDistanceAllowancePerNauticalMile();
     
 }

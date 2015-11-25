@@ -1,10 +1,15 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sse.common.Named;
@@ -18,7 +23,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named, WithID, IsRegattaLike {
+public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
     ScoringScheme getScoringScheme();
 
     /**
@@ -139,6 +144,14 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
      *         discards local to each series rather than spreading them across the entire leaderboard.
      */
     boolean definesSeriesDiscardThresholds();
+    
+    /**
+     * Defines how this regatta is to be ranked. By default, a regatta would be ranked by one-design rules (first boat across
+     * the line wins). Other ranking metrics could define handicaps such as time factors ("time-on-time") or time allowances
+     * per distance sailed ("time-on-distance). This method returns a function that can, given a tracked race, construct the
+     * ranking metric in the context of that race.
+     */
+    RankingMetricConstructor getRankingMetricConstructor();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 
@@ -176,4 +189,10 @@ public interface Regatta extends Named, WithID, IsRegattaLike {
      * opposite end of the association needs to be maintained on the event's side.
      */
     void adjustEventToRegattaAssociation(EventFetcher eventFetcher);
+    
+    RaceExecutionOrderProvider getRaceExecutionOrderProvider();
+
+    default RankingMetrics getRankingMetricType() {
+        return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
+    }
 }

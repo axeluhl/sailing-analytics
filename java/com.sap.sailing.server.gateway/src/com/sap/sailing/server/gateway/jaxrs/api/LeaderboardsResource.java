@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -106,10 +105,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONArray jsonLeaderboards = new JSONArray();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (String leaderboardName : leaderboards.keySet()) {
-            if (!leaderboardName.equals(LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME))
-                jsonLeaderboards.add(leaderboardName);
+            jsonLeaderboards.add(leaderboardName);
         }
-
         String json = jsonLeaderboards.toJSONString();
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
@@ -386,7 +383,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
@@ -412,11 +409,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Set<Competitor> registered = new RegisteredCompetitorsAnalyzer<>(isRegattaLike.getRegattaLog()).analyze();
         if (!registered.contains(mappedTo)) {
             isRegattaLike.getRegattaLog().add(
-                    new RegattaLogRegisterCompetitorEventImpl(now, author, now, UUID.randomUUID(), mappedTo));
+                    new RegattaLogRegisterCompetitorEventImpl(now, now, author, UUID.randomUUID(), mappedTo));
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
-        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device,
+        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedTo, device,
                 from, null);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked in competitor " + mappedTo.getName());
@@ -455,7 +452,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
 
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
 
         logger.fine("Post issued to " + this.getClass().getName());
         Object requestBody;
@@ -499,8 +496,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
-        RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
-                author, now, UUID.randomUUID(), deviceMappingEventId, closingTimePoint);
+        RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
+                author, now, deviceMappingEventId, closingTimePoint);
 
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out competitor " + mappedTo.getName());
@@ -559,7 +556,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     for (Fleet fleet : raceColumn.getFleets()) {
                         RaceLog raceLog = raceColumn.getRaceLog(fleet);
                         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-                        Util.addAll(new DefinedMarkFinder(raceLog).analyze(), marks);
+                        Util.addAll(new RaceLogDefinedMarkFinder(raceLog).analyze(), marks);
                         if (trackedRace != null) {
                             Util.addAll(trackedRace.getMarks(), marks);
                         }
@@ -593,7 +590,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONArray array = new JSONArray();
         for (Mark mark : marks) {
-            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            final TimePoint now = MillisecondsTimePoint.now();
             Position lastKnownPosition = getService().getMarkPosition(mark,
                     (LeaderboardThatHasRegattaLike) leaderboard, now,
                     /* raceLog==null means use all race logs */ null);
@@ -608,7 +605,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
         Set<Mark> marks = new HashSet<>();
-        Util.addAll(new DefinedMarkFinder(raceLog).analyze(), marks);
+        Util.addAll(new RaceLogDefinedMarkFinder(raceLog).analyze(), marks);
         if (trackedRace != null) {
             Util.addAll(trackedRace.getMarks(), marks);
         }
@@ -663,7 +660,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + markId + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         Position lastKnownPosition = getService().getMarkPosition(mark,
                 (LeaderboardThatHasRegattaLike) leaderboard, now,
                 /* raceLog==null means use all race logs */ null);

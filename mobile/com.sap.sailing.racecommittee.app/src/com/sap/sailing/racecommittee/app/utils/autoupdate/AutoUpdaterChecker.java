@@ -1,21 +1,22 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.graphics.drawable.Drawable;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdaterChecker {
 
@@ -94,7 +95,7 @@ public class AutoUpdaterChecker {
 
         @Override
         public void updateToVersion(int serverVersion, final String apkFileName) {
-            int currentVersion = AppUtils.getPackageInfo(context).versionCode;
+            int currentVersion = AppUtils.with(context).getPackageInfo().versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
             ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
             
@@ -179,17 +180,19 @@ public class AutoUpdaterChecker {
         @Override
         public void onError() {
             dialog.dismiss();
-            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context);
+            Drawable drawable = BitmapHelper.getDrawable(context, android.R.drawable.ic_dialog_alert);
+            AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             errorDialog
                 .setTitle(R.string.auto_update)
                 .setMessage(R.string.auto_update_error)
-                .setIcon(context.getResources().getDrawable(android.R.drawable.ic_dialog_alert))
+                .setIcon(drawable)
                 .setPositiveButton(context.getString(android.R.string.ok), new OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
                     })
+                .create()
                 .show();
         }
         
@@ -203,6 +206,5 @@ public class AutoUpdaterChecker {
             return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(), serverUrl.getPath()
                     + "/apps/" + apkFileName);
         }
-    };
-
+    }
 }

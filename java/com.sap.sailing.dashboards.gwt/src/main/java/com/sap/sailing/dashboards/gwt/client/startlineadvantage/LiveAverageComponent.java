@@ -5,22 +5,21 @@ import java.util.Iterator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.visualeffects.NumberTickingAnimation;
 import com.sap.sailing.dashboards.gwt.client.windchart.VerticalWindChartClickListener;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * The purpose of the class is to display a live and an average value of a continuously updating data source.
- * {@link StartLineAdvantageComponent} extends from it and the class {@link WindBotComponent} uses it to display wind
+ * {@link StartLineAdvantageByGeometryComponent} extends from it and the class {@link WindBotComponent} uses it to display wind
  * data.
  * 
  * @author Alexander Ries (D062114)
@@ -31,6 +30,11 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
     private static LiveAverageComponentUiBinder uiBinder = GWT.create(LiveAverageComponentUiBinder.class);
 
     interface LiveAverageComponentUiBinder extends UiBinder<Widget, LiveAverageComponent> {
+    }
+    
+    interface LiveAverageComponentStyle extends CssResource {
+        
+        String liveAverageCompoment_panel_value_unit_degrees();
     }
 
     @UiField
@@ -65,8 +69,14 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
 
     @UiField
     HTMLPanel averagePanel;
+    
+    @UiField
+    LiveAverageComponentStyle style;
 
     private StringMessages stringConstants;
+    private NumberTickingAnimation liveTickingAnimation;
+    private NumberTickingAnimation averageTickingAnimation;
+    
     public LiveAverageComponent() {
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -80,6 +90,7 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
      * */
     public LiveAverageComponent(String header, String unit) {
         stringConstants = StringMessages.INSTANCE;
+        initTickingAnimations();
         initWidget(uiBinder.createAndBindUi(this));
         liveAveragePanel.getElement().getStyle().setProperty("backgroundColor", "white");
         this.header.setInnerText(header);
@@ -87,20 +98,37 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
         this.averageUnit.setInnerText(unit);
         // Lifts the degrees unit string "°". Otherwise it would be too small.
         if (unit.equals("°")) {
-            this.liveUnit.getStyle().setFontSize(15, Unit.PT);
-            this.averageUnit.getStyle().setFontSize(15, Unit.PT);
-            this.liveUnit.getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-            this.averageUnit.getStyle().setFontWeight(Style.FontWeight.LIGHTER);
-            this.liveUnit.getStyle().setPosition(Position.ABSOLUTE);
-            this.averageUnit.getStyle().setPosition(Position.ABSOLUTE);
+            this.liveUnit.addClassName(style.liveAverageCompoment_panel_value_unit_degrees());
+            this.averageUnit.setClassName(style.liveAverageCompoment_panel_value_unit_degrees());
         }
         this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
         this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
     }
+    
+    private void initTickingAnimations() {
+        liveTickingAnimation = new NumberTickingAnimation() {
+            
+            @Override
+            public void setValueInUI(String value) {
+                liveNumber.setInnerText(value);
+            }
+        };
+        
+        averageTickingAnimation = new NumberTickingAnimation() {
+            
+            @Override
+            public void setValueInUI(String value) {
+                averageNumber.setInnerText(value);
+            }
+        };
+    }
 
-    public void updateValues(String liveValue, String averageValue) {
-        this.liveNumber.setInnerText(liveValue);
-        this.averageNumber.setInnerText(averageValue);
+    public void setLiveValue(String liveValue) {
+        liveTickingAnimation.execute(liveValue);
+    }
+    
+    public void setAverageValue(String averageValue) {
+        averageTickingAnimation.execute(averageValue);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.home.client.HomeServiceAsync;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -14,8 +13,6 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public interface SailingClientFactory extends ClientFactory {
     SailingServiceAsync getSailingService();
-
-    HomeServiceAsync getHomeService();
 
     MediaServiceAsync getMediaService();
     

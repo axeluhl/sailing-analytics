@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Fleet;
@@ -16,13 +15,15 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.WithNationality;
+import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardCache;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.concurrent.ConcurrentWeakHashMap;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -127,6 +128,17 @@ public class LeaderboardCacheManager {
         public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
             removeFromCache(leaderboard);
         }
+
+        @Override
+        public void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void timeOnDistanceAllowancePerNauticalMileChanged(Duration oldTimeOnDistanceAllowancePerNauticalMile,
+                Duration newTimeOnDistanceAllowancePerNauticalMile) {
+            removeFromCache(leaderboard);
+        }
     }
     
     private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
@@ -154,6 +166,17 @@ public class LeaderboardCacheManager {
 
         @Override
         public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void timePointOfLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+                TimePoint newTimePointOfLastCorrectionsValidity) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void commentChanged(String oldComment, String newComment) {
             removeFromCache(leaderboard);
         }
     }
@@ -238,8 +261,13 @@ public class LeaderboardCacheManager {
                 leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
                 scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
                 competitorChangeListeners.put(leaderboard, competitorChangeListener);
-                final RaceColumnListener raceColumnListener = new RaceColumnListener() {
+                final RaceColumnListener raceColumnListener = new RaceColumnListenerWithDefaultAction() {
                     private static final long serialVersionUID = 8165124797028386317L;
+
+                    @Override
+                    public void defaultAction() {
+                        removeFromCache(leaderboard);
+                    }
 
                     @Override
                     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
@@ -253,75 +281,6 @@ public class LeaderboardCacheManager {
                     @Override
                     public boolean isTransient() {
                         return true;
-                    }
-
-                    @Override
-                    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        removeFromCache(leaderboard); // removes all listeners from invalidationListenersPerLeaderboard and from their TrackedRaces
-                    }
-
-                    @Override
-                    public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void hasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn,
-                            boolean firstColumnIsNonDiscardableCarryForward) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-                        return true;
-                    }
-
-                    @Override
-                    public void raceColumnAddedToContainer(RaceColumn raceColumn) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void raceColumnRemovedFromContainer(RaceColumn raceColumn) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void raceColumnMoved(RaceColumn raceColumn, int newIndex) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule,
-                            ResultDiscardingRule newDiscardingRule) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void competitorDisplayNameChanged(Competitor competitor, String oldDisplayName,
-                            String displayName) {
-                        removeFromCache(leaderboard);
-                    }
-
-                    @Override
-                    public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier,
-                            RaceLogEvent event) {
-                        removeFromCache(leaderboard);
                     }
                 };
                 leaderboard.addRaceColumnListener(raceColumnListener);

@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFixedMarkPassingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -25,9 +26,10 @@ public class RaceLogFixedMarkPassingEventDeserializer extends BaseRaceLogEventDe
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         TimePoint ofPassing = new MillisecondsTimePoint(
                 (Long) object.get(RaceLogFixedMarkPassingEventSerializer.FIELD_TIMEPOINT_OF_MARKPASSING));
-        Integer zeroBasedIndexOfPassedWaypoint = (Integer) object
+        Number zeroBasedIndexOfPassedWaypointObj = (Number) object
                 .get(RaceLogFixedMarkPassingEventSerializer.FIELD_INDEX_OF_PASSED_WAYPOINT);
-        return factory.createFixedMarkPassingEvent(timePoint, author, id, competitors, passId, ofPassing,
+        Integer zeroBasedIndexOfPassedWaypoint = zeroBasedIndexOfPassedWaypointObj != null ? zeroBasedIndexOfPassedWaypointObj.intValue() : null;
+        return new RaceLogFixedMarkPassingEventImpl(createdAt, timePoint, author, id, competitors, passId, ofPassing,
                 zeroBasedIndexOfPassedWaypoint);
     }
 }

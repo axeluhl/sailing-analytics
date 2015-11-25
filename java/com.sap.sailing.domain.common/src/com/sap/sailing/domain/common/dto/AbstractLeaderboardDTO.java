@@ -26,6 +26,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
+    
+    /**
+     * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
+     */
     public String regattaName;
     public String displayName;
     public UUID defaultCourseAreaId;

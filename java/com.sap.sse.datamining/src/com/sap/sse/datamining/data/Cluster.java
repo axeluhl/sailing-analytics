@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.data;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -16,9 +17,9 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * @see ClusterBoundary
  * @see ClusterGroup
  */
-public interface Cluster<ElementType> {
+public interface Cluster<ElementType extends Serializable> extends Serializable {
 
-    public String getAsLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages);
+    public String asLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages);
     
     public boolean isInRange(ElementType value);
 

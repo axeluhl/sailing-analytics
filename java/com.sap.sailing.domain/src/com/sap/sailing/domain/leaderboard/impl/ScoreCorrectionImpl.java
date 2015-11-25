@@ -2,12 +2,11 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,12 +39,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final Map<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -67,8 +66,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     public ScoreCorrectionImpl(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
-        this.maxPointsReasons = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason>();
-        this.correctedScores = new HashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double>();
+        this.maxPointsReasons = new ConcurrentHashMap<>();
+        this.correctedScores = new ConcurrentHashMap<>();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
 
@@ -121,6 +120,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     public void notifyListenersAboutIsSuppressedChange(Competitor competitor, boolean suppressed) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.isSuppressedChanged(competitor, suppressed);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+            TimePoint newTimePointOfLastCorrectionsValidity) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.timePointOfLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, newTimePointOfLastCorrectionsValidity);
+        }
+    }
+
+    @Override
+    public void notifyListenersAboutCommentChanged(String oldComment, String newComment) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
+            listener.commentChanged(oldComment, newComment);
         }
     }
 
@@ -387,13 +401,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             public Double getUncorrectedScore() {
                 Double resultUncorrected = 0.0;
                 try {
-                    resultUncorrected = scoringScheme.getScoreForRank(raceColumn, competitor,
-                            trackedRankProvider.call(), new Callable<Integer>() {
+                    resultUncorrected = scoringScheme.getScoreForRank(leaderboard, raceColumn,
+                            competitor, trackedRankProvider.call(), new Callable<Integer>() {
                                 @Override
                                 public Integer call() {
                                     return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                                 }
-                            }, numberOfCompetitorsInLeaderboardFetcher);
+                            }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -434,13 +448,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
             try {
                 int trackedRank = trackedRankProvider.call();
-                result = scoringScheme.getScoreForRank(raceColumn, competitor, trackedRank,
-                        new Callable<Integer>() {
+                result = scoringScheme.getScoreForRank(leaderboard, raceColumn, competitor,
+                        trackedRank, new Callable<Integer>() {
                             @Override
                             public Integer call() {
                                 return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
                             }
-                        }, numberOfCompetitorsInLeaderboardFetcher);
+                        }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Exception while computing corrected non maxed score", e);
                 throw new RuntimeException(e);
@@ -458,17 +472,28 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public boolean hasCorrectionFor(RaceColumn raceInLeaderboard) {
+        return internalHasScoreCorrectionFor(raceInLeaderboard, /* considerOnlyUntrackedRaces */ false);
+    }
+
+    private boolean internalHasScoreCorrectionFor(RaceColumn raceInLeaderboard, boolean considerOnlyUntrackedRaces) {
         for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> correctedScoresKey : correctedScores.keySet()) {
-            if (correctedScoresKey.getB() == raceInLeaderboard) {
+            if (correctedScoresKey.getB() == raceInLeaderboard &&
+                    (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(correctedScoresKey.getA()) == null)) {
                 return true;
             }
         }
         for (com.sap.sse.common.Util.Pair<Competitor, RaceColumn> maxPointsReasonsKey : maxPointsReasons.keySet()) {
-            if (maxPointsReasonsKey.getB() == raceInLeaderboard) {
+            if (maxPointsReasonsKey.getB() == raceInLeaderboard &&
+                    (!considerOnlyUntrackedRaces || raceInLeaderboard.getTrackedRace(maxPointsReasonsKey.getA()) == null)) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean hasCorrectionForNonTrackedFleet(RaceColumn raceInLeaderboard) {
+        return internalHasScoreCorrectionFor(raceInLeaderboard, /* considerOnlyUntrackedRaces */ true);
     }
 
     @Override
@@ -483,12 +508,20 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity) {
+        final TimePoint oldTimePointOfLastCorrectionsValidity = this.timePointOfLastCorrectionsValidity;
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
+        if (!Util.equalsWithNull(oldTimePointOfLastCorrectionsValidity, timePointOfLastCorrectionsValidity)) {
+            notifyListenersAboutLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, timePointOfLastCorrectionsValidity);
+        }
     }
 
     @Override
     public void setComment(String scoreCorrectionComment) {
+        final String oldComment = this.comment;
         this.comment = scoreCorrectionComment;
+        if (!Util.equalsWithNull(oldComment, scoreCorrectionComment)) {
+            notifyListenersAboutCommentChanged(oldComment, scoreCorrectionComment);
+        }
     }
 
     protected Leaderboard getLeaderboard() {

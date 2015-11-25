@@ -32,6 +32,8 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJso
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public class EventDataJsonSerializerWithNullValuesTest {
     protected final UUID expectedId = UUID.randomUUID();
@@ -50,6 +52,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected EventBase event;
 
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -65,6 +68,8 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
@@ -79,31 +84,23 @@ public class EventDataJsonSerializerWithNullValuesTest {
     @Test
     public void testBasicAttributes() throws MalformedURLException {
         JSONObject result = serializer.serialize(event);
-        assertEquals(
-                expectedId,
+        assertEquals(expectedId,
                 UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
-        assertEquals(
-                expectedName,
+        assertEquals(expectedName,
                 result.get(EventBaseJsonSerializer.FIELD_NAME));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedOfficialWebsiteURL,
+        assertEquals(expectedOfficialWebsiteURL,
                 result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
-        assertEquals(
-                expectedLogoImageURL,
+        assertEquals(expectedLogoImageURL,
                 result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedStartDate,
+        assertEquals(expectedStartDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_START_DATE)).longValue()));
-        assertEquals(
-                expectedEndDate,
+        assertEquals(expectedEndDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_END_DATE)).longValue()));
     }
 

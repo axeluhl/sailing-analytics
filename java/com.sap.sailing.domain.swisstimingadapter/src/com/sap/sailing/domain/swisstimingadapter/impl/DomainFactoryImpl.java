@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -124,7 +125,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 teamMembers.add(person);
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat);
+            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         }
         return result;
     }
@@ -140,7 +142,8 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
-                competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat);
+                competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         return result;
     }
 
@@ -194,7 +197,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Competitor> competitors = createCompetitorList(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, race.getRaceID());
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, /* competitorsAndTheirBoats */ Collections.emptyMap(), race.getRaceID());
         regatta.addRace(result);
         return result;
     }
@@ -247,12 +250,12 @@ public class DomainFactoryImpl implements DomainFactory {
     private Iterable<Competitor> createCompetitorList(StartList startList, String raceId, BoatClass boatClass) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (com.sap.sailing.domain.swisstimingadapter.Competitor swissTimingCompetitor : startList.getCompetitors()) {
-        	Competitor domainCompetitor;
-        	if(swissTimingCompetitor.getID() != null) {
+            Competitor domainCompetitor;
+            if (swissTimingCompetitor.getID() != null) {
                 domainCompetitor = createCompetitorWithID(swissTimingCompetitor, boatClass);
-        	} else {
+            } else {
                 domainCompetitor = createCompetitorWithoutID(swissTimingCompetitor, raceId, boatClass);
-        	}
+            }
             result.add(domainCompetitor);
         }
         return result;
@@ -319,7 +322,7 @@ public class DomainFactoryImpl implements DomainFactory {
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
             com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
-            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(domainControlPoint, null));
+            newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
     }
@@ -334,10 +337,9 @@ public class DomainFactoryImpl implements DomainFactory {
         Regatta regatta = raceIDToRegattaCache.get(raceID);
         if (regatta != null) {
             Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceID)) {
-                    toRemove.add(race);
-                }
+            RaceDefinition race = regatta.getRaceByName(raceID);
+            if (race != null) {
+                toRemove.add(race);
             }
             for (RaceDefinition raceToRemove : toRemove) {
                 regatta.removeRace(raceToRemove);

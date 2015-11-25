@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,11 +17,13 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventFetcher;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
@@ -40,8 +43,13 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.RankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -55,6 +63,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -67,6 +76,8 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -436,16 +447,51 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void adjustEventToRegattaAssociation(EventFetcher eventFetcher) {
                     }
+
+                    @Override
+                    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+                        return null;
+                    }
+
+                    @Override
+                    public RankingMetricConstructor getRankingMetricConstructor() {
+                        return null;
+                    }
+
+                    @Override
+                    public Double getTimeOnTimeFactor(Competitor competitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor) {
+                        return null;
+                    }
+
+                    @Override
+                    public RaceColumn getRaceColumnByName(String raceColumnName) {
+                        return null;
+                    }
+
+                    @Override
+                    public IsRegattaLike getRegattaLike() {
+                        return null;
+                    }
+
+                    @Override
+                    public RaceLog getRacelog(String raceColumnName, String fleetName) {
+                        return null;
+                    }
+
+                    @Override
+                    public Iterable<? extends RaceColumn> getRaceColumns() {
+                        return null;
+                    }
                 };
             }
 
             @Override
             public Iterable<DynamicTrackedRace> getTrackedRaces() {
-                return null;
-            }
-
-            @Override
-            public Iterable<TrackedRace> getTrackedRaces(BoatClass boatClass) {
                 return null;
             }
 
@@ -484,8 +530,28 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
                     WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator, RaceLogResolver raceLogResolver) {
                 return null;
+            }
+
+            @Override
+            public void lockTrackedRacesForRead() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterRead() {
+            }
+
+            @Override
+            public void lockTrackedRacesForWrite() {
+            }
+
+            @Override
+            public void unlockTrackedRacesAfterWrite() {
+            }
+
+            @Override
+            public void removeRaceListener(RaceListener listener) {
             }
         };
     }
@@ -545,8 +611,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint,
-            WindPositionMode windPositionMode) throws NoWindException {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
         return null;
     }
 
@@ -649,7 +714,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+    public Competitor getOverallLeader(TimePoint timePoint) {
         return null;
     }
 
@@ -746,10 +811,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Distance getDistanceFromStarboardSideOfStartLineWhenPassingStart(Competitor competitor) {
         return null;
-    }
-
-    @Override
-    public void detachAllRaceLogs() {
     }
 
     @Override
@@ -863,7 +924,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public boolean isUsingMarkPassingCalculator() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -902,11 +962,50 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public int getLastLegStarted(TimePoint timePoint) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public void setPolarDataService(PolarDataService polarDataService) {
+    }
+
+    @Override
+    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+            NoWindException {
+        return null;
+    }
+
+    @Override
+    public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public void detachRaceExecutionOrderProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
+    }
+
+    @Override
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+        return null;
+    }
+
+    @Override
+    public RankingMetric getRankingMetric() {
+        return null;
+    }
+
+    @Override
+    public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
+        return this;
     }
 }

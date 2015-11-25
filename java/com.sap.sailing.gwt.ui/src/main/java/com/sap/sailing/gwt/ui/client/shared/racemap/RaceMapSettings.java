@@ -26,6 +26,8 @@ public class RaceMapSettings extends AbstractSettings {
 
     private boolean showSelectedCompetitorsInfo = true;
     
+    private boolean showWindStreamletColors = false;
+    
     private boolean showWindStreamletOverlay = false;
 
     private boolean showSimulationOverlay = false;
@@ -45,6 +47,24 @@ public class RaceMapSettings extends AbstractSettings {
         maneuverTypesToShow = new HashSet<ManeuverType>();
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
+    }
+
+    /**
+     * "Copy constructor" that produces a new settings object that equals the one passed as argument
+     */
+    public RaceMapSettings(RaceMapSettings settings) {
+        this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
+        this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.maneuverTypesToShow = settings.maneuverTypesToShow;
+        this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
+        this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
+        this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
+        this.showSimulationOverlay = settings.showSimulationOverlay;
+        this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
+        this.showWindStreamletColors = settings.showWindStreamletColors;
+        this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
+        this.windUp = settings.windUp;
+        this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
     }
 
     /**
@@ -80,6 +100,14 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setShowWindStreamletOverlay(boolean showWindStreamletOverlay) {
         this.showWindStreamletOverlay = showWindStreamletOverlay;
+    }
+
+    public boolean isShowWindStreamletColors() {
+        return showWindStreamletColors;
+    }
+
+    public void setShowWindStreamletColors(boolean showWindStreamletColors) {
+        this.showWindStreamletColors = showWindStreamletColors;
     }
 
     public boolean isShowSimulationOverlay() {

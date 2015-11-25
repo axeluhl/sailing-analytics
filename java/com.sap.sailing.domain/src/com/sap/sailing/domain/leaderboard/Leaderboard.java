@@ -44,7 +44,7 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Leaderboard extends LeaderboardBase {
+public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."
@@ -54,11 +54,11 @@ public interface Leaderboard extends LeaderboardBase {
      */
     public interface Entry {
         int getTrackedRank();
-        Double getNetPoints() throws NoWindException;
-        Double getNetPointsUncorrected() throws NoWindException;
-        Double getTotalPoints() throws NoWindException;
+        Double getNetPoints();
+        Double getNetPointsUncorrected();
+        Double getTotalPoints();
         MaxPointsReason getMaxPointsReason();
-        boolean isDiscarded() throws NoWindException;
+        boolean isDiscarded();
         /**
          * Tells if the net points have been corrected by a {@link ScoreCorrection}
          */
@@ -93,6 +93,22 @@ public interface Leaderboard extends LeaderboardBase {
      * @return all competitors in this leaderboard, including the suppressed ones.
      */
     Iterable<Competitor> getAllCompetitors();
+
+    /**
+     * Retrieves all competitors expected to race in the fleet and column specified.
+     * When a {@link TrackedRace} is {@link RaceColumn#getTrackedRace(Fleet) attached} to the race
+     * column for the <code>fleet</code> specified, its competitor set is returned. Otherwise,
+     * the competitors are collected from any other information, such as a regatta log and/or the
+     * race log for the combination of race column and fleet or, in case of a meta-leaderboard,
+     * from the leaderboard represented by the race column.
+     */
+    Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet);
+
+    /**
+     * Same as {@link #getAllCompetitors(RaceColumn, Fleet)} with competitors from {@link #getSuppressedCompetitors()}
+     * removed
+     */
+    Iterable<Competitor> getCompetitors(RaceColumn raceColumn, Fleet fleet);
     
     /**
      * Convenience method which returns the difference between {@link #getAllCompetitors()} and {@link #getCompetitors()}.
@@ -247,7 +263,7 @@ public interface Leaderboard extends LeaderboardBase {
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
      * across all races tracked by this leaderboard, respecting the {@link RaceColumn#isStartsWithZeroScore()} property.
      */
-    Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Double getTotalPoints(Competitor competitor, TimePoint timePoint);
     
     /**
      * Sums up the {@link #getTotalPoints(Competitor, RaceColumn, TimePoint) total points} of <code>competitor</code>
@@ -354,7 +370,7 @@ public interface Leaderboard extends LeaderboardBase {
      * that column shall be considered for discarding and counts for determining the number of races so far. Also, if a
      * tracked race is connected to the column and has started already, the column is to be considered for discarding
      * unless the column has several unordered fleets and not all fleets have started their race yet (see
-     * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, TimePoint)}).
+     * {@link ScoringScheme#isValidInTotalScore(Leaderboard, RaceColumn, Competitor, TimePoint)}).
      */
     boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
     

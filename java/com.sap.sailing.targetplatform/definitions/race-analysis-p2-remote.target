@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="98">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="99">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -14,8 +14,8 @@
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
-<unit id="org.eclipse.osgi.source" version="3.10.1.v20140909-1633"/>
+<unit id="org.eclipse.osgi" version="3.10.2.v20150203-1939"/>
+<unit id="org.eclipse.osgi.source" version="3.10.2.v20150203-1939"/>
 <unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
 <unit id="org.eclipse.osgi.services.source" version="3.4.0.v20140312-2051"/>
 <unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
@@ -63,6 +63,11 @@
 <unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
 <unit id="javax.servlet" version="3.1.0.v20140303-1611"/>
 <unit id="javax.servlet.source" version="3.1.0.v20140303-1611"/>
+<unit id="org.dom4j" version="1.6.1.v201312101416"/>
+<unit id="org.apache.xmlbeans" version="2.3.0.v201405241900"/>
+<unit id="org.apache.poi" version="3.9.0.v201405241750"/>
+<unit id="org.apache.poi.ooxml" version="3.9.0.v201405241905"/>
+<unit id="org.apache.poi.ooxml.schemas" version="3.9.0.v201405241750"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/"/>
 </location>
 </locations>
@@ -77,9 +82,9 @@
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
 <plugin id="com.sun.mail.javax.mail"/>
-<plugin id="jackson-core-lgpl"/>
+<plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
-<plugin id="jackson-mapper-lgpl"/>
+<plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
@@ -90,6 +95,7 @@
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
+<plugin id="lz4-java"/>
 <plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
@@ -112,14 +118,13 @@
 <plugin id="org.apache.felix.gogo.shell.source"/>
 <plugin id="org.apache.felix.shell"/>
 <plugin id="org.apache.felix.shell.remote"/>
-<plugin id="org.apache.geronimo.specs.geronimo-annotation_1.0_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-j2ee-management_1.1_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-jms_1.1_spec"/>
-<plugin id="org.apache.geronimo.specs.geronimo-jta_1.0.1B_spec"/>
 <plugin id="org.apache.httpcomponents.httpclient"/>
 <plugin id="org.apache.httpcomponents.httpclient.source"/>
 <plugin id="org.apache.httpcomponents.httpcore"/>
 <plugin id="org.apache.httpcomponents.httpcore.source"/>
+<plugin id="org.apache.poi"/>
+<plugin id="org.apache.poi.ooxml"/>
+<plugin id="org.apache.poi.ooxml.schemas"/>
 <plugin id="org.apache.servicemix.bundles.aws-java-sdk"/>
 <plugin id="org.apache.servicemix.bundles.ehcache"/>
 <plugin id="org.apache.servicemix.bundles.scribe"/>
@@ -127,7 +132,9 @@
 <plugin id="org.apache.shiro.core"/>
 <plugin id="org.apache.shiro.ehcache"/>
 <plugin id="org.apache.shiro.web"/>
+<plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
+<plugin id="org.dom4j"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>
@@ -230,7 +237,6 @@
 <plugin id="org.objectweb.asm"/>
 <plugin id="org.objectweb.asm.source"/>
 <plugin id="org.objenesis"/>
-<plugin id="rome"/>
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>

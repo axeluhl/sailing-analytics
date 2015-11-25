@@ -37,6 +37,9 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -54,6 +57,7 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
@@ -61,9 +65,11 @@ import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -77,6 +83,19 @@ public class RegattasResource extends AbstractSailingServerResource {
     private Response getBadRaceErrorResponse(String regattaName, String raceName) {
         return Response.status(Status.NOT_FOUND)
                 .entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+    
+
+    private Response getNoTrackedRaceErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No tracked race for race with name '" + raceName + "' in regatta '" + regattaName + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getNotEnoughDataAvailabeErrorResponse(String regattaName, String raceName) {
+        return Response.status(Status.NOT_FOUND)
+                .entity("No wind or polar data for race with name '" + raceName + "' in regatta '" + regattaName + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -338,14 +357,24 @@ public class RegattasResource extends AbstractSailingServerResource {
                         lastAdded = false;
                         break;
                     }
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                    addFixToJsonFixes(jsonFixes, fix);
                     lastAdded = true;
                 }
                 
-                if (addLastKnown && fix != null && !lastAdded){
-                    JSONObject jsonFix = constructFixJson(fix);
-                    jsonFixes.add(jsonFix);
+                if (addLastKnown && !lastAdded) {
+                    // find a fix earlier than the interval requested:
+                    Iterator<GPSFix> earlierFixIter = track.getFixesDescendingIterator(from, /* inclusive */false);
+                    final GPSFix earlierFix;
+                    if (earlierFixIter.hasNext()) {
+                        earlierFix = earlierFixIter.next();
+                    } else {
+                        earlierFix = null;
+                    }
+                    if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from).compareTo(to.until(fix.getTimePoint())) <= 0)) {
+                        addFixToJsonFixes(jsonFixes, earlierFix); // the earlier fix is closer to the interval's beginning than fix is to its end
+                    } else if (fix != null) {
+                        addFixToJsonFixes(jsonFixes, fix);
+                    }
                 }
                 
             } finally {
@@ -359,6 +388,12 @@ public class RegattasResource extends AbstractSailingServerResource {
         String json = jsonRace.toJSONString();
 
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
+    private JSONObject addFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
+        JSONObject jsonFix = constructFixJson(fix);
+        jsonFixes.add(jsonFix);
+        return jsonFix;
     }
 
     private JSONObject constructFixJson(GPSFix fix) {
@@ -399,6 +434,54 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonCourse = serializer.serialize(course);
                 String json = jsonCourse.toJSONString();
                 response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            }
+        }
+        return response;
+    }
+    
+    /**
+     * Gets the target time of the race
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @return -1 if not enough polar data or no wind information is available
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/targettime")
+    public Response getTargetTime(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("timeasmillis") Long timeasmillis) {
+        if (timeasmillis == null) {
+            timeasmillis = System.currentTimeMillis();
+        }
+        TimePoint timePoint = new MillisecondsTimePoint(timeasmillis);
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
+                if (trackedRace != null) {
+                    Duration targetTime;
+                    try {
+                        targetTime = trackedRace.getEstimatedTimeToComplete(timePoint);
+
+                        DurationJsonSerializer serializer = new DurationJsonSerializer();
+
+                        JSONObject jsonCourse = serializer.serialize(targetTime);
+                        String json = jsonCourse.toJSONString();
+                        response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                        response = getNotEnoughDataAvailabeErrorResponse(regattaName, raceName);
+                    }
+                } else {
+                    response = getNoTrackedRaceErrorResponse(regattaName, raceName);
+                }
+                
             }
         }
         return response;
@@ -585,7 +668,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
                             .type(MediaType.TEXT_PLAIN).build();
                 }
-
+                // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
+                from = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
+                to = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
                         new DefaultWindTrackJsonSerializer());
                 serializer.setWindSource(windSource);
@@ -718,7 +803,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                         : trackedRace.getTimePointOfNewestEvent();
-
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonRaceResults = new JSONObject();
                 jsonRaceResults.put("name", trackedRace.getRace().getName());
                 jsonRaceResults.put("regatta", regatta.getName());
@@ -732,9 +817,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                     for (TrackedLeg leg : trackedRace.getTrackedLegs()) {
                         JSONObject jsonLeg = new JSONObject();
                         jsonLeg.put("from", leg.getLeg().getFrom().getName());
-                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId());
+                        jsonLeg.put("fromWaypointId", leg.getLeg().getFrom().getId() != null ? leg.getLeg().getFrom().getId().toString() : null);
                         jsonLeg.put("to", leg.getLeg().getTo().getName());
-                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId());
+                        jsonLeg.put("toWaypointId", leg.getLeg().getTo().getId() != null ? leg.getLeg().getTo().getId().toString() : null);
                         try {
                             jsonLeg.put("upOrDownwindLeg", leg.isUpOrDownwindLeg(timePoint));
                         } catch (NoWindException e) {
@@ -823,12 +908,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                                         throw re;
                                     }
                                 }
-                                try {
-                                    jsonCompetitorInLeg.put("gapToLeader-s", trackedLegOfCompetitor
-                                            .getGapToLeaderInSeconds(timePoint, WindPositionMode.LEG_MIDDLE));
-                                } catch (NoWindException e1) {
-                                    // well, we don't know the wind direction... then no gap to leader will be shown...
-                                }
+                                Duration gapToLeaderDuration = trackedLegOfCompetitor.getGapToLeader(timePoint, rankingInfo, WindPositionMode.LEG_MIDDLE);
+                                jsonCompetitorInLeg.put("gapToLeader-s", gapToLeaderDuration != null ? gapToLeaderDuration.asSeconds() : 0.0);
                                 jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                                 jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
                                 jsonCompetitors.add(jsonCompetitorInLeg);
@@ -871,10 +952,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 Course course = trackedRace.getRace().getCourse();
                 Waypoint lastWaypoint = course.getLastWaypoint();
 
-                TimePoint timePoint = trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
-                        : trackedRace.getTimePointOfNewestEvent();
-                // if(trackedRace.isLive(timePoint)) {
-
+                TimePoint timePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
+                final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint);
                 JSONObject jsonLiveData = new JSONObject();
                 jsonLiveData.put("name", trackedRace.getRace().getName());
                 jsonLiveData.put("regatta", regatta.getName());
@@ -892,78 +971,198 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
 
                 JSONArray jsonCompetitors = new JSONArray();
-                try {
-                    List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
-                    Integer rank = 1;
-                    for (Competitor competitor : competitorsFromBestToWorst) {
-                        JSONObject jsonCompetitorInLeg = new JSONObject();
+                List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+                Integer rank = 1;
+                for (Competitor competitor : competitorsFromBestToWorst) {
+                    JSONObject jsonCompetitorInLeg = new JSONObject();
 
-                        if (topN != null && topN > 0 && rank > topN) {
-                            break;
-                        }
-                        jsonCompetitorInLeg
-                                .put("id", competitor.getId() != null ? competitor.getId().toString() : null);
-                        jsonCompetitorInLeg.put("name", competitor.getName());
-                        jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
-                        jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor()
-                                .getAsHtml() : null);
-                        jsonCompetitorInLeg.put("rank", rank++);
-
-                        TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace
-                                .getCurrentLeg(competitor, timePoint);
-                        if (currentLegOfCompetitor != null) {
-                            int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
-                            jsonCompetitorInLeg.put("leg", indexOfWaypoint + 1);
-
-                            Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
-                            if (speedOverGround != null) {
-                                jsonCompetitorInLeg.put("speedOverGround-kts",
-                                        roundDouble(speedOverGround.getKnots(), 2));
-                            }
-
-                            Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
-                            if (distanceTraveled != null) {
-                                jsonCompetitorInLeg.put("distanceTraveled-m",
-                                        roundDouble(distanceTraveled.getMeters(), 2));
-                            }
-                            Distance distanceTraveledConsideringGateStart = currentLegOfCompetitor.getDistanceTraveledConsideringGateStart(timePoint);
-                            if (distanceTraveledConsideringGateStart != null) {
-                                jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m", roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
-                            }
-
-                            Double gapToLeaderInSeconds = currentLegOfCompetitor.getGapToLeaderInSeconds(timePoint,
-                                    WindPositionMode.LEG_MIDDLE);
-                            if (gapToLeaderInSeconds != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeaderInSeconds, 2));
-                            }
-
-                            Distance windwardDistanceToOverallLeader = currentLegOfCompetitor
-                                    .getWindwardDistanceToOverallLeader(timePoint, WindPositionMode.LEG_MIDDLE);
-                            if (windwardDistanceToOverallLeader != null) {
-                                jsonCompetitorInLeg.put("gapToLeader-m",
-                                        roundDouble(windwardDistanceToOverallLeader.getMeters(), 2));
-                            }
-                            jsonCompetitorInLeg.put("finished", false);
-                        } else {
-                            // we need to distinguish between competitors which did not start and competitors which
-                            // already finished
-                            if (trackedRace.getMarkPassing(competitor, lastWaypoint) != null) {
-                                jsonCompetitorInLeg.put("finished", true);
-                            } else {
-                                jsonCompetitorInLeg.put("finished", false);
-                            }
-                        }
-                        jsonCompetitors.add(jsonCompetitorInLeg);
+                    if (topN != null && topN > 0 && rank > topN) {
+                        break;
                     }
-                } catch (NoWindException e1) {
-                    // well, we don't know the wind direction... then no gap to leader will be shown...
+                    jsonCompetitorInLeg.put("id", competitor.getId() != null ? competitor.getId().toString() : null);
+                    jsonCompetitorInLeg.put("name", competitor.getName());
+                    jsonCompetitorInLeg.put("sailNumber", competitor.getBoat().getSailID());
+                    jsonCompetitorInLeg.put("color", competitor.getColor() != null ? competitor.getColor().getAsHtml()
+                            : null);
+                    jsonCompetitorInLeg.put("rank", rank++);
+
+                    TrackedLegOfCompetitor currentLegOfCompetitor = trackedRace.getCurrentLeg(competitor, timePoint);
+                    if (currentLegOfCompetitor != null) {
+                        int indexOfWaypoint = course.getIndexOfWaypoint(currentLegOfCompetitor.getLeg().getFrom());
+                        jsonCompetitorInLeg.put("leg", indexOfWaypoint + 1);
+
+                        Speed speedOverGround = currentLegOfCompetitor.getSpeedOverGround(timePoint);
+                        if (speedOverGround != null) {
+                            jsonCompetitorInLeg.put("speedOverGround-kts", roundDouble(speedOverGround.getKnots(), 2));
+                        }
+
+                        Distance distanceTraveled = currentLegOfCompetitor.getDistanceTraveled(timePoint);
+                        if (distanceTraveled != null) {
+                            jsonCompetitorInLeg.put("distanceTraveled-m", roundDouble(distanceTraveled.getMeters(), 2));
+                        }
+                        Distance distanceTraveledConsideringGateStart = currentLegOfCompetitor
+                                .getDistanceTraveledConsideringGateStart(timePoint);
+                        if (distanceTraveledConsideringGateStart != null) {
+                            jsonCompetitorInLeg.put("distanceTraveledConsideringGateStart-m",
+                                    roundDouble(distanceTraveledConsideringGateStart.getMeters(), 2));
+                        }
+
+                        Duration gapToLeader = currentLegOfCompetitor.getGapToLeader(timePoint,
+                                rankingInfo, WindPositionMode.LEG_MIDDLE);
+                        if (gapToLeader != null) {
+                            jsonCompetitorInLeg.put("gapToLeader-s", roundDouble(gapToLeader.asSeconds(), 2));
+                        }
+
+                        Distance windwardDistanceToCompetitorFarthestAhead = currentLegOfCompetitor
+                                .getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                        if (windwardDistanceToCompetitorFarthestAhead != null) {
+                            jsonCompetitorInLeg.put("gapToLeader-m",
+                                    roundDouble(windwardDistanceToCompetitorFarthestAhead.getMeters(), 2));
+                        }
+                        jsonCompetitorInLeg.put("finished", false);
+                    } else {
+                        // we need to distinguish between competitors which did not start and competitors which
+                        // already finished
+                        if (trackedRace.getMarkPassing(competitor, lastWaypoint) != null) {
+                            jsonCompetitorInLeg.put("finished", true);
+                        } else {
+                            jsonCompetitorInLeg.put("finished", false);
+                        }
+                    }
+                    jsonCompetitors.add(jsonCompetitorInLeg);
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
-
                 String json = jsonLiveData.toJSONString();
                 return Response.ok(json, MediaType.APPLICATION_JSON).build();
             }
         }
         return response;
     }
+    
+    private DataMiningResource dataMiningResource;
+    
+    private DataMiningResource getDataMiningResource() {
+        if (dataMiningResource == null) {
+            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
+        }
+        return dataMiningResource;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("datamining")
+    public Response getRegattaPredefinedQueries() {
+        // TODO Fetch the predefined queries for regattas dynamically
+        ArrayList<PredefinedQueryIdentifier> predefinedRegattaQueries = new ArrayList<>();
+        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"));
+        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumDistance_Per_Competitor-LegType", "Sum of the traveled Distance grouped by Competitor Team Name and Leg Type"));
+        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumManeuvers_Per_Competitor", "Sum of the performed Maneuvers grouped by Competitor Team Name"));
+        return getDataMiningResource().predefinedQueryIdentifiersToJSON(predefinedRegattaQueries);
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor-LegType")
+    public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().avgSpeedPerCompetitorAndLegType(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor-LegType")
+    public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().avgSpeedPerCompetitorAndLegType(regattaName, raceName);
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/SumDistance_Per_Competitor-LegType")
+    public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/SumDistance_Per_Competitor-LegType")
+    public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName, raceName);
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/SumManeuvers_Per_Competitor")
+    public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().sumManeuversPerCompetitor(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/SumManeuvers_Per_Competitor")
+    public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().sumManeuversPerCompetitor(regattaName, raceName);
+            }
+        }
+        return response;
+    }
+    
 }

@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+	xmlns:s="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+	>
+	<ui:with field="i18n" 
+		type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res"
+		type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" 
+		type="com.sap.sailing.gwt.home.mobile.partials.header.HeaderResources" />
+  <ui:style>
+    .dropdownListExt {
+      border-top: 1px solid gray;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    <div class="{res.mediaCss.grid}">
+      <header class="{local_res.css.header} {res.mediaCss.small12} {res.mediaCss.columns}">
+        <div class="{local_res.css.header_logo}">
+          <a href="http://sapsponsorships.com" title="SAP sponsorships">
+            <img src="images/mobile/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.header_logo_image}"></img>
+          </a>
+        </div>
+        <div class="{local_res.css.header_navigation}">
+          <img ui:field="dropdownTriggerUi" src="images/mobile/navigation-icon.svg" class="{local_res.css.header_navigation_icon}"></img>
+          <nav ui:field="dropdownContainerUi" class="{local_res.css.header_navigation_nav}" style="display: none;">
+            <g:FlowPanel tag="ul" ui:field="dropdownListUi" addStyleNames="{local_res.css.header_navigation_nav_list}" />
+            <g:FlowPanel tag="ul" ui:field="dropdownListExtUi" addStyleNames="{local_res.css.header_navigation_nav_list} {style.dropdownListExt}" />
+          </nav>
+        </div>
+        <div ui:field="searchUi" class="{local_res.css.header_search}">
+          <img src="images/mobile/search-icon.svg"  class="{local_res.css.header_search_icon}"></img>
+        </div>
+<!--         <div class="{local_res.css.header_searchbox}"> -->
+<!--           <form action="search-results.html" name="sitesearch" autocomplete="off" class="{local_res.css.header_searchbox_form}"> -->
+<!--             <input name="q" placeholder="{i18n.search}" class="{local_res.css.header_searchbox_form_input}"></input> -->
+<!--             <button type="submit" class="{local_res.css.header_searchbox_form_button}"></button> -->
+<!--           </form> -->
+<!--         </div> -->
+        <div class="{local_res.css.header_title}" ui:field="locationTitleUi">
+			 <ui:text from='{i18n.headerLogo}' />
+        </div>
+      </header>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>
