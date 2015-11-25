@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.celltable;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -31,7 +30,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
 
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        final Set<T> selectedSet = new HashSet<>(getSelectedSet()); // TODO Lukas: a copy doesn't seem required (anymore?) here; the result of getSelectedSet() is not referenced beyond the scope of this method
+        final Set<T> selectedSet = getSelectedSet();
         final boolean isNotEmpty = !selectedSet.isEmpty();
         clear();
         if (isNotEmpty) {

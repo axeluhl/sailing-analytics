@@ -1,8 +1,5 @@
 package com.sap.sse.gwt.client.celltable;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -31,14 +28,14 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
 
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        final Set<T> selectedSet = new HashSet<>(getSelectedSet()); // TODO Lukas: a copy doesn't seem required (anymore?) here; the result of getSelectedSet() is not referenced beyond the scope of this method
-        final T selected = selectedSet.isEmpty() ? null : selectedSet.iterator().next();
+        final T selected = getSelectedObject();
         clear();
-        for (final T it : newObjects) {
-            if (selected != null) {
-                setSelected(it, comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
-            } else {
-                setSelected(it, false); // TODO Lukas: clear() already clears the selection
+        if (selected != null) {
+            for (final T it : newObjects) {
+                boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
+                if (isEqual) {
+                    setSelected(it, true);
+                }
             }
         }
         scheduleSelectionChangeEvent();
