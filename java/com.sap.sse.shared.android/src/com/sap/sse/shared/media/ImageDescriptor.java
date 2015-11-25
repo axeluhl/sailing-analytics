@@ -1,4 +1,4 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media;
 
 import com.sap.sse.common.Util.Pair;
 
