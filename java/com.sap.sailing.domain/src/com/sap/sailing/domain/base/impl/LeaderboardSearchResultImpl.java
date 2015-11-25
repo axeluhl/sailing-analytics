@@ -14,17 +14,17 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardSearchResultImpl implements LeaderboardSearchResult {
     private final Leaderboard leaderboard;
-    private final Event event;
+    private final Set<Event> events;
     private final Set<LeaderboardGroup> leaderboardGroups;
     
-    public LeaderboardSearchResultImpl(Leaderboard leaderboard, Event event, Set<LeaderboardGroup> leaderboardGroups) {
+    public LeaderboardSearchResultImpl(Leaderboard leaderboard, Set<Event> events, Set<LeaderboardGroup> leaderboardGroups) {
         this.leaderboard = leaderboard;
         if (leaderboardGroups == null) {
             this.leaderboardGroups = Collections.emptySet();
         } else {
             this.leaderboardGroups = leaderboardGroups;
         }
-        this.event = event;
+        this.events = events;
     }
 
     @Override
@@ -49,8 +49,8 @@ public class LeaderboardSearchResultImpl implements LeaderboardSearchResult {
     }
 
     @Override
-    public Event getEvent() {
-        return event;
+    public Iterable<Event> getEvents() {
+        return events;
     }
 
     @Override

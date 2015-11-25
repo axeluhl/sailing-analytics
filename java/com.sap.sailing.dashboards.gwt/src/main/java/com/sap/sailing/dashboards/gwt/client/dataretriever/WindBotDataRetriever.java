@@ -89,8 +89,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO");
-                        logger.log(Level.INFO, caught.getMessage());
+                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO, "+caught.getMessage());
                     }
                 });
     }
@@ -157,8 +156,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                 loadWindBotData(finaloldTime, finalNewTime, result);
                 } else {
                     notifyListenersAboutNumberOfWindBotsReceivedIsZero();
-                    logger.log(Level.INFO, "RegattaAndRaceIdentifier for race which takes wind is null");
-                    logger.log(Level.INFO, "Can´t load wind data");
+                    logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
                 }
             }
 

@@ -19,11 +19,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.sap.sailing.gwt.ui.shared.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO>{
@@ -36,22 +38,36 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     interface Style extends CssResource {
         String popup();
         String content();
+        String is_autoplaying();
     }
     
     @UiField Style style;
     @UiField(provided=true) SimpleLayoutPanel contentUi = new FullscreenContentPanel();
+    @UiField Image autoplayActionUi;
     
     private final FullscreenPopupPanel popup = new FullscreenPopupPanel();
     private final LayoutPanel mainPanel;
+    private MobileGalleryPlayer playerUi = null;
     
     public MobileFullscreenGallery() {
         popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
         popup.addStyleName(style.popup());
+        autoplayActionUi.setVisible(ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_MOBILE);
     }
     
     @UiHandler("closeActionUi")
     void onCloseActionClicked(ClickEvent event) {
         popup.hide();
+    }
+    
+    @UiHandler("autoplayActionUi")
+    void onAutoplayActionClicked(ClickEvent event) {
+        if (ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_MOBILE) {
+            if (playerUi != null) {
+                playerUi.toggleAutoplay();
+                autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
+            }
+        }
     }
     
     public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
@@ -60,7 +76,8 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     
     @Override
     public void show(SailingImageDTO selectedImage, Collection<SailingImageDTO> imageList) {
-        contentUi.setWidget(new MobileGalleryPlayer(selectedImage, imageList));
+        contentUi.setWidget(playerUi = new MobileGalleryPlayer(selectedImage, imageList));
+        autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
         contentUi.getWidget().getElement().addClassName(style.content());
         mainPanel.onResize();
         popup.showPopupPanel();

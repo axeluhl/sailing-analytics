@@ -81,7 +81,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (trackedRace != null) {
-                trackedRace.attachRaceLog(getRaceLog(fleet));
+                final RaceLog raceLog = getRaceLog(fleet);
+                if (raceLog != null) {
+                    trackedRace.attachRaceLog(raceLog);
+                }
                 trackedRace.attachRaceExecutionProvider(getRaceExecutionOrderProvider());
                 getRaceColumnListeners().notifyListenersAboutTrackedRaceLinked(this, fleet, trackedRace);
             }
@@ -170,6 +173,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
                 newOrLoadedRaceLog.addListener(listener);
                 raceLogs.put(fleet, newOrLoadedRaceLog);
+                final TrackedRace trackedRace = getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    // need to attach race log
+                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
+                }
             } else {
                 // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
                 raceLogAvailable.merge(newOrLoadedRaceLog);
@@ -213,7 +221,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
+        final Set<Competitor> result = new HashSet<>();
         for (Fleet fleet : getFleets()) {
             TrackedRace trackedRace = getTrackedRace(fleet);
             if (trackedRace != null) {
@@ -233,7 +241,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
         final Iterable<Competitor> result;
-        TrackedRace trackedRace = getTrackedRace(fleet);
+        final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
             result = trackedRace.getRace().getCompetitors();
         } else {

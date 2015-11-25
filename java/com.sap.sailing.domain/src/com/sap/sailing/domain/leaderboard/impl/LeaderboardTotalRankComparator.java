@@ -173,7 +173,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             if (result == 0) {
                 result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
                 if (result == 0) {
-                    result = compareByBetterScore(Collections.unmodifiableList(o1Scores), Collections.unmodifiableList(o2Scores));
+                    result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
                         result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
@@ -276,11 +276,11 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     /**
      * Assuming both competitors scored in the same number of races, and assuming they scored the same total score,
      * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
-     * 
-     * @see ScoringScheme#compareByBetterScore(List, List, boolean)
+     * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint)
      */
-    protected int compareByBetterScore(List<Util.Pair<RaceColumn, Double>> o1Scores, List<Util.Pair<RaceColumn, Double>> o2Scores) {
-        return scoringScheme.compareByBetterScore(o1Scores, o2Scores, nullScoresAreBetter);
+    protected int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2,
+            List<Util.Pair<RaceColumn, Double>> o2Scores, TimePoint timePoint) {
+        return scoringScheme.compareByBetterScore(o1, o1Scores, o2, o2Scores, nullScoresAreBetter, timePoint);
     }
     
     /**
