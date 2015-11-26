@@ -66,15 +66,6 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
-                                            <artifactId>android-sdk-tools</artifactId>
-                                            <version>${ldi.download.android.tools.version}</version>
-                                            <type>zip</type>
-                                            <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}</outputDirectory>
-                                            <includes>**/*</includes>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>com.google.download.android</groupId>
                                             <artifactId>platform-tools-windows</artifactId>
                                             <version>${ldi.download.android.platform-tools.version}</version>
                                             <type>zip</type>
