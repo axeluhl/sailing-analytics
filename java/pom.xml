@@ -271,6 +271,7 @@
         <artifactId>install-android-sdk</artifactId>
         <version>${project.version}</version>
         <scope>provided</scope>
+        <type>pom</type>
       </dependency>
     </dependencies>
     <build>
