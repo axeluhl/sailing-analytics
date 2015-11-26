@@ -44,7 +44,8 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
                 }
                 setSelected(it, isSelected);
             }
-            scheduleSelectionChangeEvent();
+            setEventScheduled(true);
+            fireSelectionChangeEvent();
         }
     }
 }

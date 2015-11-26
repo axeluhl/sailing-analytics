@@ -38,6 +38,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                 }
             }
         }
-        scheduleSelectionChangeEvent();
+        setEventScheduled(true);
+        fireSelectionChangeEvent();
     }
 }
