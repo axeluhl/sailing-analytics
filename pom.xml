@@ -200,7 +200,8 @@
 		<ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
 		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
 		
-		<ldi.android.sdk.parent.location>${basedir}</ldi.android.sdk.parent.location>
+		<!-- WORKSPACE is an env set by Jenkins pointing to the build job's work directory.-->
+		<ldi.android.sdk.parent.location>${env.WORKSPACE}</ldi.android.sdk.parent.location>
 		<ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
 		
 		<android.platform.version>22</android.platform.version>
