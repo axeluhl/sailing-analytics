@@ -16,12 +16,14 @@ import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
@@ -141,6 +143,73 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
+    
+    private class Hoverline {
+        private Polyline hoverline;
+        
+        public Hoverline(final Polyline polyline, PolylineOptions options) {
+            this.hoverline = Polyline.newInstance(this.getHoverlineOptions(options));
+            this.hoverline.setVisible(false);
+            
+            polyline.addMouseOverHandler(new MouseOverMapHandler() {
+                @Override
+                public void onEvent(MouseOverMapEvent event) {
+                    hoverline.setMap(polyline.getMap());
+                    hoverline.setPath(polyline.getPath());
+                    hoverline.setVisible(true);
+                }
+            });
+            
+            hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                @Override
+                public void onEvent(MouseOutMapEvent event) {
+                    hoverline.setVisible(false);
+                }
+            });
+        }
+        
+        public Hoverline setMap(MapWidget mapWidget) {
+            this.hoverline.setMap(mapWidget);
+            return this;
+        }
+        
+        private PolylineOptions getHoverlineOptions(PolylineOptions options) {
+            PolylineOptions hoverlineOptions = PolylineOptions.newInstance();
+            
+            hoverlineOptions.setClickable(options.getClickable());
+            hoverlineOptions.setGeodesic(options.getGeodesic());
+            hoverlineOptions.setMap(options.getMap());
+            hoverlineOptions.setPath(options.getPath_JsArray());
+            hoverlineOptions.setStrokeColor(options.getStrokeColor());
+            hoverlineOptions.setStrokeOpacity(0.2d);
+            hoverlineOptions.setStrokeWeight(options.getStrokeWeight() * 50);
+            hoverlineOptions.setVisible(options.getVisible());
+            //hoverlineOptions.setZindex(options.getZindex());
+            
+            return hoverlineOptions;
+        }
+        
+        public MVCArray<LatLng> getPath() {
+            return this.hoverline.getPath();
+        }
+        
+        public Hoverline setPath(MVCArray<LatLng> path) {
+            this.hoverline.setPath(path);
+            return this;
+        }
+        
+        public HandlerRegistration addClickHandler(ClickMapHandler handler) {
+            return this.hoverline.addClickHandler(handler);
+        }
+        
+        public HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
+            return this.hoverline.addMouseOutMoveHandler(handler);
+        }
+        
+        public HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
+            return this.hoverline.addMouseOverHandler(handler);
+        }
+    }
     
     private MapWidget map;
     
@@ -1301,6 +1370,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         options.setStrokeOpacity(0.5);
 
                         advantageLine = Polyline.newInstance(options);
+                        Hoverline advantageHoverline = new Hoverline(advantageLine, options);
                         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
@@ -1308,8 +1378,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
                         advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
                                 bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
-                        advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
-                        advantageLine.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                        advantageHoverline.addMouseOverHandler(advantageLineMouseOverHandler);
+                        advantageHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
                             @Override
                             public void onEvent(MouseOutMapEvent event) {
                                 map.setTitle("");
@@ -1560,14 +1630,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 options.setStrokeOpacity(1.0);
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
+                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
-                lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
+                lineToShowOrRemoveOrUpdateHoverline.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
                     public void onEvent(MouseOverMapEvent event) {
                         map.setTitle(lineInfoProvider.getLineInfo());
                     }
                 });
-                lineToShowOrRemoveOrUpdate.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                lineToShowOrRemoveOrUpdateHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
                     @Override
                     public void onEvent(MouseOutMapEvent event) {
                         map.setTitle("");
@@ -2493,6 +2564,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
         PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
+        Hoverline resultHoverline = new Hoverline(result, options);
 
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
@@ -2503,13 +2575,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
             }
         });
+        resultHoverline.addClickHandler(new ClickMapHandler() {
+            @Override
+            public void onEvent(ClickMapEvent event) {
+                showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
+            }
+        });
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
+                map.setTitle("");
                 map.setTitle(competitor.getSailID() + ", " + competitor.getName());
             }
         });
-        result.addMouseOutMoveHandler(new MouseOutMapHandler() {
+        resultHoverline.addMouseOverHandler(new MouseOverMapHandler() {
+            @Override
+            public void onEvent(MouseOverMapEvent event) {
+                map.setTitle("");
+                map.setTitle(competitor.getSailID() + ", " + competitor.getName());
+            }
+        });
+        resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
             @Override
             public void onEvent(MouseOutMapEvent event) {
                 map.setTitle("");
