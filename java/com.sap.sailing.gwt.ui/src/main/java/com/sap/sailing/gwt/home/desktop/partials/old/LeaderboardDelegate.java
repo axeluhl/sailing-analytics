@@ -24,4 +24,5 @@ public interface LeaderboardDelegate<T extends Widget> {
 
     Element getScoringSchemeElement();
 
+    Element getBusyIndicatorElement();
 }

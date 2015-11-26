@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.controls.busyindicator;
 
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
 
@@ -39,6 +40,6 @@ public class SimpleBusyIndicator extends BusyIndicator {
     @Override
     public void setBusy(boolean busy) {
         super.setBusy(busy);
-        busyIndicator.setVisible(busy);
+        busyIndicator.getElement().getStyle().setVisibility(busy ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 }

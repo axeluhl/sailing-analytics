@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -29,16 +28,19 @@ import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener {
+public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener, BusyStateChangeListener {
     private static OldMultiLeaderboardUiBinder uiBinder = GWT.create(OldMultiLeaderboardUiBinder.class);
 
     interface OldMultiLeaderboardUiBinder extends UiBinder<Widget, OldMultiLeaderboard> {
@@ -59,8 +61,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     private MultiLeaderboardPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-
-    private final DivElement emptyDivElement;
+    private final BusyIndicator busyIndicator = new SimpleBusyIndicator();
+    private LeaderboardPanel lastSelectedLeaderboardPanel;
 
     public OldMultiLeaderboard() {
         this(null);
@@ -75,8 +77,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
-        emptyDivElement = Document.get().createDivElement();
-        emptyDivElement.setInnerHTML("&nbsp;");
+        busyIndicatorDiv.appendChild(busyIndicator.getElement());
+        lastSelectedLeaderboardPanel = null;
     }
     
     private void setupFullscreenDelegate() {
@@ -209,10 +211,17 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     }
 
     @Override
+    public void onBusyStateChange(boolean busyState) {
+        busyIndicator.setBusy(busyState);
+    }
+
+    @Override
     public void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard) {
-        busyIndicatorDiv.removeAllChildren();
-        busyIndicatorDiv.appendChild(selectedLeaderboard.getBusyIndicator().getElement());
-        busyIndicatorDiv.appendChild(emptyDivElement);
+        if(lastSelectedLeaderboardPanel != null) {
+            lastSelectedLeaderboardPanel.removeBusyStateChangeListener(this);
+        }
+        selectedLeaderboard.addBusyStateChangeListener(this);
+        lastSelectedLeaderboardPanel = selectedLeaderboard;
     }
     
     public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardPanel>{

@@ -8,6 +8,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sse.common.Color;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> extends FullscreenContainer<T> implements
         LeaderboardDelegate<T> {
@@ -19,11 +21,13 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
     private final Label lastScoringUpdateText = new Label();
     protected final Label lastScoringComment = new Label();
     protected final Label scoringScheme = new Label();
+    protected final BusyIndicator busyIndicator = new SimpleBusyIndicator();
 
     public AbstractLeaderboardFullscreenViewer() {
         showLogo();
         showBorder();
         addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
+        addToolbarBusyIndicator(busyIndicator);
         addToolbarAction(autoRefreshControl);
         addToolbarAction(settingsControl);
     }
@@ -88,4 +92,8 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
         return scoringScheme.getElement();
     }
 
+    @Override
+    public Element getBusyIndicatorElement() {
+        return busyIndicator.getElement();
+    }
 }

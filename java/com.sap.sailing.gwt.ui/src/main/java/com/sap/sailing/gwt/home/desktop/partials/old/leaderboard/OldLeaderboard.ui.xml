@@ -10,8 +10,8 @@
 				<div ui:field="hasLiveRaceDiv" class="{local_res.css.regattaleaderboard_meta_liverace}"></div>
 				<div ui:field="scoringSchemeDiv" class="{local_res.css.regattaleaderboard_meta_scoring_type}"></div>
 			</div>
-			<div class="{res.mediaCss.small1} {res.mediaCss.column}">
-				<div ui:field="busyIndicatorDiv">&nbsp;</div>
+			<div class="{res.mediaCss.small1} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_busyindicator}">
+				<div ui:field="busyIndicatorDiv"></div>
 			</div>
 			<div class="{res.mediaCss.small5} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_settings}">
 				<div class="{local_res.css.regattaleaderboard_meta_update}">

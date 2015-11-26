@@ -50,6 +50,9 @@
 			cursor: pointer;
 			padding: 10px;
 		}
+		.toolbarBusyIndicator {
+			display: inline-block;
+		}
 		.toolbarAction:hover {
 			background-color: #d79900;
 		}

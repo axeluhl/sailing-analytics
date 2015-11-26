@@ -31,12 +31,15 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldLeaderboard extends Composite {
+public class OldLeaderboard extends Composite implements BusyStateChangeListener {
     private static OldLeaderboardUiBinder uiBinder = GWT.create(OldLeaderboardUiBinder.class);
 
     interface OldLeaderboardUiBinder extends UiBinder<Widget, OldLeaderboard> {
@@ -58,6 +61,7 @@ public class OldLeaderboard extends Composite {
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
+    private final BusyIndicator busyIndicator = new SimpleBusyIndicator();
     
     public OldLeaderboard() {
         this(null);
@@ -70,6 +74,7 @@ public class OldLeaderboard extends Composite {
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
+        busyIndicatorDiv.appendChild(busyIndicator.getElement());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
     }
@@ -167,7 +172,7 @@ public class OldLeaderboard extends Composite {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         oldLeaderboardPanel.add(leaderboardPanel);
-        busyIndicatorDiv.appendChild(leaderboardPanel.getBusyIndicator().getElement());
+        leaderboardPanel.addBusyStateChangeListener(this);
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
@@ -219,8 +224,14 @@ public class OldLeaderboard extends Composite {
         }
         lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
     }
-    
+
+    @Override
+    public void onBusyStateChange(boolean busyState) {
+        busyIndicator.setBusy(busyState);
+    }
+
     public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
         Element getHasLiveRaceElement();
     }
+
 }

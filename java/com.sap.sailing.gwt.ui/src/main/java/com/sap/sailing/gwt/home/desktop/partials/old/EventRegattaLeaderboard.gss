@@ -106,6 +106,9 @@
   background-color: #f0ab00;
 }
 
+.regattaleaderboard_meta_busyindicator {
+}
+
 .regattaleaderboard_meta_liverace {
   color: red;
   font-weight: 600;

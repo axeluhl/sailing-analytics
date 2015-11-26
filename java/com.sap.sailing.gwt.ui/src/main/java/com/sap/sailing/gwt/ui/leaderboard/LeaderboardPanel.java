@@ -102,6 +102,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateProvider;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -122,7 +124,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * 
  */
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
+        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher,
+        BusyStateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -296,6 +299,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private ImageResource playIcon;
 
     private final BusyIndicator busyIndicator;
+    private final Set<BusyStateChangeListener> busyStateChangeListeners;
 
     /**
      * Tells whether the leaderboard settings were explicitly changed by an external call to
@@ -477,8 +481,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         
-        final boolean oldBusyState = getBusyIndicator().isBusy(); 
-        getBusyIndicator().setBusy(true);
+        final boolean oldBusyState = isBusy(); 
+        setBusyState(true);
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
@@ -501,7 +505,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
                     }
                 }
-                getBusyIndicator().setBusy(oldBusyState);
+                setBusyState(oldBusyState);
             }
         };
         if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails || getLeaderboard().hasOverallDetails()) {
@@ -1824,7 +1828,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
-        
+        busyStateChangeListeners = new HashSet<>();
 
         // the information panel
         if (!isEmbedded) {
@@ -1920,7 +1924,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         filterClearButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                getBusyIndicator().setBusy(true);
+                setBusyState(true);
                 competitorFilterPanel.clearAllActiveFilters();
                 timeChanged(new Date(), null);
             }
@@ -2237,19 +2241,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                         }
         
                         @Override
                         public void onFailure(Throwable caught) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             getErrorReporter()
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
                         }
                     });
         } else {
-            getBusyIndicator().setBusy(false);
+            setBusyState(false);
         }
     }
 
@@ -2424,7 +2428,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 liveRaceLabel.setVisible(hasLiveRace);
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
-            getBusyIndicator().setBusy(false);
+            setBusyState(false);
         }
     }
 
@@ -3146,16 +3150,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             leaderboardSelectionModel.setSelected(row, false);
         }
     }
-
-    @Override
-    public BusyIndicator getBusyIndicator() {
-        return busyIndicator;
-    }
-
-    @Override
-    public boolean hasBusyIndicator() {
-        return true;
-    }
     
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
         return leaderboardSelectionModel.getSelectedSet();
@@ -3276,5 +3270,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     @Override
     public String getDependentCssClassName() {
         return "leaderboard";
+    }
+
+    @Override
+    public void addBusyStateChangeListener(BusyStateChangeListener listener) {
+        busyStateChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeBusyStateChangeListener(BusyStateChangeListener listener) {
+        busyStateChangeListeners.remove(listener);
+    }
+
+    @Override
+    public boolean isBusy() {
+        return busyIndicator.isBusy();
+    }
+
+    @Override
+    public void setBusyState(boolean isBusy) {
+        if (busyIndicator.isBusy() != isBusy) {
+            busyIndicator.setBusy(isBusy);
+            for (BusyStateChangeListener listener : busyStateChangeListeners) {
+                listener.onBusyStateChange(isBusy);
+            }
+        }
     }
 }
