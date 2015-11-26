@@ -5,6 +5,7 @@
 
 
 	<source path='client'/>
+	<source path='theme'/>
 	
 	
 </module>

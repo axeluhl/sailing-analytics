@@ -14,12 +14,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.common.theme.component.sapheader2.SAPHeader2;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
-import com.sap.sse.gwt.theme.client.component.sapheader2.SAPHeader2;
-import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
@@ -43,8 +43,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        ThemeResources.INSTANCE.mediaCss().ensureInjected();
-        ThemeResources.INSTANCE.mainCss().ensureInjected();
+        SharedResources.INSTANCE.mediaCss().ensureInjected();
+        SharedResources.INSTANCE.mainCss().ensureInjected();
         RegattaOverviewResources.INSTANCE.css().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();

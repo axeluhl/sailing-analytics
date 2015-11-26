@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -38,7 +39,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
-import com.sap.sse.gwt.theme.client.resources.ThemeResources;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -69,7 +69,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final FlowPanel repeatedInfoLabel = new FlowPanel();
     
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
-    private final ThemeResources RES = ThemeResources.INSTANCE;
+    private final SharedResources RES = SharedResources.INSTANCE;
     
     public void setEntryClickedHandler(EntryHandler handler) {
         regattaRaceStatesComponent.setEntryClickedHandler(handler);

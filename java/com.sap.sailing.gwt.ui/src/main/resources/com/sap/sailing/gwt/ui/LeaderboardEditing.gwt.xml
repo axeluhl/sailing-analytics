@@ -9,7 +9,6 @@
 	<inherits name='com.google.gwt.debug.Debug'/>
 	
 	<!-- Other module inherits                                      -->
-	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
@@ -45,4 +44,7 @@
 	<source path='actions'/>
 	<source path='masterdataimport'/>
 	<source path='simulator'/>
+	
+	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
+	
 </module>
