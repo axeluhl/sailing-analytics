@@ -692,6 +692,7 @@ img.openColumn {
 .compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
     display: block;
     margin-top: 5px;
+    white-space: nowrap;
 }
 .compactHeader .RegattaAndRaceTime-Header {
     top: 11px;
