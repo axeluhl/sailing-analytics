@@ -28,6 +28,8 @@ import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
@@ -36,7 +38,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldMultiLeaderboard extends Composite {
+public class OldMultiLeaderboard extends Composite implements SelectedLeaderboardChangeListener {
     private static OldMultiLeaderboardUiBinder uiBinder = GWT.create(OldMultiLeaderboardUiBinder.class);
 
     interface OldMultiLeaderboardUiBinder extends UiBinder<Widget, OldMultiLeaderboard> {
@@ -169,16 +171,12 @@ public class OldMultiLeaderboard extends Composite {
     public void setMultiLeaderboard(MultiLeaderboardPanel multiLeaderboardPanel, final Timer timer) {
         this.autoRefreshTimer = timer;
         this.multiLeaderboardPanel = multiLeaderboardPanel;
+        this.multiLeaderboardPanel.addSelectedLeaderboardChangeListener(this);
 
         oldMultiLeaderboardPanel.add(multiLeaderboardPanel);
     }
 
     public void updatedMultiLeaderboard(LeaderboardDTO leaderboard, boolean hasLiveRace) {
-        if(multiLeaderboardPanel.getSelectedLeaderboardPanel() != null) {
-            busyIndicatorDiv.removeAllChildren();
-            busyIndicatorDiv.appendChild(multiLeaderboardPanel.getSelectedLeaderboardPanel().getBusyIndicator().getElement());
-            busyIndicatorDiv.appendChild(emptyDivElement);
-        }
         if(leaderboard != null) {
             String comment = leaderboard.getComment() != null ? leaderboard.getComment() : "";
             String scoringScheme = leaderboard.scoringScheme != null ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, StringMessages.INSTANCE) : "";
@@ -208,6 +206,13 @@ public class OldMultiLeaderboard extends Composite {
                 delegate.getLastScoringUpdateTimeElement().getStyle().setVisibility(lastScoringUpdateTimeVisibility);
             }
         }
+    }
+
+    @Override
+    public void onSelectedLeaderboardChanged(LeaderboardPanel selectedLeaderboard) {
+        busyIndicatorDiv.removeAllChildren();
+        busyIndicatorDiv.appendChild(selectedLeaderboard.getBusyIndicator().getElement());
+        busyIndicatorDiv.appendChild(emptyDivElement);
     }
     
     public interface OldMultiLeaderboardDelegate extends LeaderboardDelegate<MultiLeaderboardPanel>{
