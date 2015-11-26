@@ -253,7 +253,6 @@
       </profile>
       
       <profile>
-        <!-- activate with parameter '-P non-leandi-release'-->
         <id>leandi-release</id>
         <activation>
           <property>
