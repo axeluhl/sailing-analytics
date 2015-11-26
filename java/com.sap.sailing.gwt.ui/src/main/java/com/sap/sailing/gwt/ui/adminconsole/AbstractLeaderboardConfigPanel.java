@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -51,6 +50,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -83,7 +83,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
-    protected final MultiSelectionModel<StrippedLeaderboardDTO> leaderboardSelectionModel;
+    protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardSelectionModel;
 
     protected final RaceSelectionProvider raceSelectionProvider;
 
@@ -174,10 +174,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes);
         @SuppressWarnings("unchecked")
-        MultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (MultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable.getSelectionModel();
-        leaderboardSelectionModel = multiSelectionModel;
+        RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableMultiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable.getSelectionModel();
+        refreshableLeaderboardSelectionModel = refreshableMultiSelectionModel;
         leaderboardTable.setWidth("100%");
-        leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        refreshableLeaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
@@ -288,7 +288,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
-        leaderboardSelectionChanged();
+        //leaderboardSelectionChanged();
+        refreshableLeaderboardSelectionModel.refreshSelectionModel(leaderboards);
         leaderboardRaceColumnSelectionChanged();
     }
 
@@ -302,15 +303,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                         @Override
                         public void onSuccess(StrippedLeaderboardDTO leaderboard) {
-                            for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
+                            for (StrippedLeaderboardDTO leaderboardDTO : refreshableLeaderboardSelectionModel.getSelectedSet()) {
                                 if (leaderboardDTO.name.equals(leaderboardName)) {
-                                    leaderboardSelectionModel.setSelected(leaderboardDTO, false);
+                                    refreshableLeaderboardSelectionModel.setSelected(leaderboardDTO, false);
                                     break;
                                 }
                             }
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
-                            leaderboardSelectionModel.setSelected(leaderboard, true);
+                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true);
                             if (nameOfRaceColumnToSelect != null) {
                                 selectRaceColumn(nameOfRaceColumnToSelect);
                             }
@@ -522,7 +523,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     @Override
     public StrippedLeaderboardDTO getSelectedLeaderboard() {
-        return leaderboardSelectionModel.getSelectedSet().isEmpty() ? null : leaderboardSelectionModel.getSelectedSet().iterator().next();
+        return refreshableLeaderboardSelectionModel.getSelectedSet().isEmpty() ? null : refreshableLeaderboardSelectionModel.getSelectedSet().iterator().next();
     }
 
     protected LeaderboardsRefresher getLeaderboardsRefresher() {

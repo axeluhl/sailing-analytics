@@ -373,7 +373,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     protected void leaderboardSelectionChanged() {
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         regattaHasCompetitors = false;
-        if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
+        if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
@@ -386,7 +386,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 trackedRacesCaptionPanel.setVisible(true);
             }
             
-            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
+            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) refreshableLeaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);

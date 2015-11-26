@@ -119,7 +119,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards())) {
-                    removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
+                    removeLeaderboards(refreshableLeaderboardSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -683,9 +683,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
-        leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
+        leaderboardRemoveButton.setEnabled(!refreshableLeaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
-        if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
+        if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
@@ -785,8 +785,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void addLeaderboard(StrippedLeaderboardDTO result) {
         leaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
-        leaderboardSelectionModel.clear();
-        leaderboardSelectionModel.setSelected(result, true);
+        refreshableLeaderboardSelectionModel.clear();
+        refreshableLeaderboardSelectionModel.setSelected(result, true);
     }
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
@@ -857,6 +857,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void removeLeaderboardFromTable(final StrippedLeaderboardDTO leaderBoard) {
         leaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
-        leaderboardSelectionModel.setSelected(leaderBoard, false);
+        refreshableLeaderboardSelectionModel.setSelected(leaderBoard, false);
     }
 }
