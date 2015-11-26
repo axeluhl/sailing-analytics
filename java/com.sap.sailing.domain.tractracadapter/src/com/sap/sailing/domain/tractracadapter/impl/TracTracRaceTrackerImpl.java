@@ -301,10 +301,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @param regatta
      *            if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used
      *            to obtain a default regatta
-     * @param simulateWithStartTimeNow
-     *            if <code>true</code>, the connector will adjust the time stamps of all events received such that the
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time." So, more or less the time points
+     *            events received such that they seem to be sent in "real-time" + <code>offsetToStartTimeOfSimulatedRace</code> So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
