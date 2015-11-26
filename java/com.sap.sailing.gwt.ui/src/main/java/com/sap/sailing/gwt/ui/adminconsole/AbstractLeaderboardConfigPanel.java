@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.adminconsole.RaceColumnInLeaderboardDialog.RaceColumnDescriptor;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -51,6 +52,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -71,7 +74,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected final CellTable<StrippedLeaderboardDTO> leaderboardTable;
 
     protected final RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
-    protected final SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
+    protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard;
 
@@ -85,7 +88,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardSelectionModel;
 
-    protected final RaceSelectionProvider raceSelectionProvider;
+    //protected final RaceSelectionProvider raceSelectionProvider;
+    protected final RefreshableSingleSelectionModel<RaceDTO> raceSingelSelectionModel;
 
     private final LeaderboardsRefresher leaderboardsRefresher;
 
@@ -210,7 +214,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
-        raceSelectionProvider = new RaceSelectionModel();
+        //raceSelectionProvider = new RaceSelectionModel();
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, /* multiselection */false, isActionButtonsEnabled());
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
@@ -239,7 +243,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
-        this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
+        this.raceColumnTableSelectionModel = raceColumnTable.getRefreshableSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardRaceColumnSelectionChanged();

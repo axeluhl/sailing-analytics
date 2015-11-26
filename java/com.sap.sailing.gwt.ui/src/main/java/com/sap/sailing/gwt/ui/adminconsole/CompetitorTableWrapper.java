@@ -31,7 +31,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager);
+        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table

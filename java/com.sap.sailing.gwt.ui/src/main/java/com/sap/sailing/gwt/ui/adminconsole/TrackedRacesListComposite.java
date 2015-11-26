@@ -155,7 +155,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     }
 
     @Override
-    protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
+    protected void makeControlsReactToSelectionChange(Set<RaceDTO> selectedRaces) {
        if(actionButtonsEnabled) {
             if (selectedRaces.isEmpty()) {
                 btnRemoveRace.setEnabled(false);

@@ -19,7 +19,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
     public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true);
+        super(sailingService, stringMessages, errorReporter, multiSelection, true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {

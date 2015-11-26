@@ -13,7 +13,7 @@ SingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
     
     public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         
         TextColumn<TrackFileImportDeviceIdentifierDTO> uuidColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override

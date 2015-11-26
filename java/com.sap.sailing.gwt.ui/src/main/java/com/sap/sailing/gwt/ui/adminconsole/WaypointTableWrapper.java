@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public class WaypointTableWrapper<S extends SelectionModel<WaypointDTO>> extends TableWrapper<WaypointDTO, S> {    
     public WaypointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true);
+        super(sailingService, stringMessages, errorReporter, multiSelection, true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         
         TextColumn<WaypointDTO> nameColumn = new TextColumn<WaypointDTO>() {
             @Override

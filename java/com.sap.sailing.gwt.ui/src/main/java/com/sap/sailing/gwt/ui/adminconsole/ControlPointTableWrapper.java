@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 public class ControlPointTableWrapper<S extends SelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
     public ControlPointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true);
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         TextColumn<ControlPointDTO> nameColumn = new TextColumn<ControlPointDTO>() {
             @Override
             public String getValue(ControlPointDTO d) {

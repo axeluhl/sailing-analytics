@@ -30,7 +30,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override

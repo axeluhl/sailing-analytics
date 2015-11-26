@@ -11,7 +11,7 @@ public class DeviceIdentifierTableWrapper extends TableWrapper<DeviceIdentifierD
 
     public DeviceIdentifierTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         
         TextColumn<DeviceIdentifierDTO> typeColumn = new TextColumn<DeviceIdentifierDTO>() {
             @Override

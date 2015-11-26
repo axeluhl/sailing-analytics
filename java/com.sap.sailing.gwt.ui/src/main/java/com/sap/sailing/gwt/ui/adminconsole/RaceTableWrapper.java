@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class RaceTableWrapper<S extends SelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
@@ -27,7 +28,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false);
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
                 new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
             @Override
@@ -73,5 +74,9 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     
     public void setSelectedLeaderboardName(String name) {
         this.selectedLeaderboardName = name;
+    }
+    
+    public RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> getRefreshableSelectionModel() {
+        return (RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>) super.getSelectionModel();
     }
 }
