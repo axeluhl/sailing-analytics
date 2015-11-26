@@ -280,10 +280,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         correctWindCheckBox.setWordWrap(false);
         correctWindCheckBox.setValue(Boolean.TRUE);
 
-        final TextBox offsetToStartTimeOfSimulatedRace = new TextBox();
-        offsetToStartTimeOfSimulatedRace.setWidth("40px");
-        offsetToStartTimeOfSimulatedRace.setEnabled(false);
-        offsetToStartTimeOfSimulatedRace.setValue(ZERO_AS_STRING);
+        final TextBox offsetToStartTimeOfSimulatedRaceTextBox = new TextBox();
+        offsetToStartTimeOfSimulatedRaceTextBox.setWidth("40px");
+        offsetToStartTimeOfSimulatedRaceTextBox.setEnabled(false);
+        offsetToStartTimeOfSimulatedRaceTextBox.setValue(ZERO_AS_STRING);
         
         final CheckBox simulateWithStartTimeNowCheckBox = new CheckBox(stringMessages.simulateAsLiveRace());
         simulateWithStartTimeNowCheckBox.ensureDebugId("SimulateWithStartTimeNowCheckBox");
@@ -293,8 +293,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             
             @Override
             public void onClick(ClickEvent event) {
-                offsetToStartTimeOfSimulatedRace.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
-                offsetToStartTimeOfSimulatedRace.setFocus(simulateWithStartTimeNowCheckBox.getValue());
+                offsetToStartTimeOfSimulatedRaceTextBox.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
+                offsetToStartTimeOfSimulatedRaceTextBox.setFocus(simulateWithStartTimeNowCheckBox.getValue());
             }
         });
 
@@ -305,7 +305,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         final HorizontalPanel simulateWithOffsetPanel = new HorizontalPanel();
         simulateWithOffsetPanel.add(offsetToStartLabel);
-        simulateWithOffsetPanel.add(offsetToStartTimeOfSimulatedRace);
+        simulateWithOffsetPanel.add(offsetToStartTimeOfSimulatedRaceTextBox);
         
         final CheckBox ignoreTracTracMarkPassingsCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
@@ -420,8 +420,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         startTrackingButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                Duration offsetToStartTimeOfSimulatedRace = null;
+                if(simulateWithStartTimeNowCheckBox.getValue().booleanValue()) {
+                    offsetToStartTimeOfSimulatedRace = getMillisecondsDurationFromMinutesAsString(offsetToStartTimeOfSimulatedRaceTextBox.getValue());
+                }
                 trackSelectedRaces(trackWindCheckBox.getValue(), correctWindCheckBox.getValue(),
-                        getMillisecondsDurationFromMinutesAsString(offsetToStartTimeOfSimulatedRace.getValue()), ignoreTracTracMarkPassingsCheckbox.getValue());
+                        offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
             }
         });
 
