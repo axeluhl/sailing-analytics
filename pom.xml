@@ -38,7 +38,7 @@
             <activation>
                 <!-- TODO activate on release build branch -->
                 <!-- <file>
-                    <missing>${basedir}/android-sdk-windows/platform-tools/adb.exe</missing>
+                    <missing>${ldi.android.sdk.location}/platform-tools/adb.exe</missing>
                 </file> -->
             </activation>
             <build>
@@ -61,7 +61,7 @@
                                             <version>${ldi.download.android.sdk.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}</outputDirectory>
+                                            <outputDirectory>${ldi.android.sdk.parent.location}</outputDirectory>
                                             <includes>**/*</includes>
                                         </artifactItem>
                                         <artifactItem>
@@ -70,7 +70,7 @@
                                             <version>${ldi.download.android.platform-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows</outputDirectory>
+                                            <outputDirectory>${ldi.android.sdk.location}</outputDirectory>
                                             <includes>**/*</includes>
                                         </artifactItem>
                                         <artifactItem>
@@ -79,7 +79,7 @@
                                             <version>${ldi.download.android.build-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows/build-tools</outputDirectory>
+                                            <outputDirectory>${ldi.android.sdk.location}/build-tools</outputDirectory>
                                             <includes>**/*</includes>
                                         </artifactItem>
                                         <artifactItem>
@@ -88,7 +88,7 @@
                                             <version>${ldi.download.android.platform.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${basedir}/android-sdk-windows/platforms</outputDirectory>
+                                            <outputDirectory>${ldi.android.sdk.location}/platforms</outputDirectory>
                                             <includes>**/*</includes>
                                             
                                         </artifactItem>
@@ -109,10 +109,10 @@
                                 
                                 <configuration>
                                     <tasks>
-                                        <move file="${basedir}/android-sdk-windows/platforms/android-${android.api.version}"
-                                            tofile="${basedir}/android-sdk-windows/platforms/android-${android.platform.version}"/>
-                                        <move file="${basedir}/android-sdk-windows/build-tools/android-${ldi.android.build-tools.version}"
-                                            tofile="${basedir}/android-sdk-windows/build-tools/${ldi.download.android.build-tools.version}"/>
+                                        <move file="${ldi.android.sdk.location}/platforms/android-${android.api.version}"
+                                            tofile="${ldi.android.sdk.location}/platforms/android-${android.platform.version}"/>
+                                        <move file="${ldi.android.sdk.location}/build-tools/android-${ldi.android.build-tools.version}"
+                                            tofile="${ldi.android.sdk.location}/build-tools/${ldi.download.android.build-tools.version}"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -144,7 +144,7 @@
                 <artifactId>android-maven-plugin</artifactId>
                 <configuration>
                     <sdk>
-                        <path>${basedir}/android-sdk-windows</path>
+                        <path>${ldi.android.sdk.location}</path>
                     </sdk>
                 </configuration>
               </plugin>
@@ -199,6 +199,9 @@
 		<ldi.download.android.build-tools.version>22.0.1</ldi.download.android.build-tools.version>
 		<ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
 		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
+		
+		<ldi.android.sdk.parent.location>${basedir}</ldi.android.sdk.parent.location>
+		<ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
 		
 		<android.platform.version>22</android.platform.version>
 		<android.api.groupId>android</android.api.groupId>
