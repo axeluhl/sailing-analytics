@@ -668,7 +668,14 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
-
+            
+            boolean showBoatColor = !isShowCompetitorFullName() && LeaderboardPanel.this.isEmbedded && preSelectedRace != null;
+            if (showBoatColor) {
+                String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(
+                        competitorFetcher.getCompetitor(object), LeaderboardPanel.this.preSelectedRace).getAsHtml();
+                sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
+            }
+            
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
                 sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
@@ -685,6 +692,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
             }
             sb.appendEscaped(competitor.getSailID());
+            if (showBoatColor) {
+                sb.appendHtmlConstant("</div>");
+            }
         }
 
         @Override
