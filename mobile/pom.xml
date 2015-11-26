@@ -286,6 +286,14 @@
         <properties>
             <build.tag>${env.BUILD_TAG} (${env.GIT_BRANCH} : ${env.GIT_COMMIT})</build.tag>
         </properties>
+        <dependencies>
+          <dependency>
+            <groupId>com.sap.sailing</groupId>
+            <artifactId>install-android-sdk</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+          </dependency>
+        </dependencies>
       </profile>
       
       <profile>

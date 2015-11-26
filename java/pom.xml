@@ -265,6 +265,14 @@
     <properties>
       <p2-target>race-analysis-p2-empty</p2-target>
     </properties>
+    <dependencies>
+      <dependency>
+        <groupId>com.sap.sailing</groupId>
+        <artifactId>install-android-sdk</artifactId>
+        <version>${project.version}</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
     <build>
       <plugins>
         <plugin>
