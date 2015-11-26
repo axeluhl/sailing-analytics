@@ -202,21 +202,6 @@
           <artifactId>build-helper-maven-plugin</artifactId>
           <version>1.9.1</version>
         </plugin>
-        <plugin>
-          <groupId>pl.project13.maven</groupId>
-          <artifactId>git-commit-id-plugin</artifactId>
-          <version>2.2.0</version>
-          <configuration>
-            <verbose>true</verbose>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>revision</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
          <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -296,10 +281,43 @@
         <id>non-leandi</id>
         <activation>
           <property>
+            <name>ldi.releaseBuild</name>
+          </property>
+        </activation>
+        <properties>
+            <build.tag>${env.BUILD_TAG} (${env.GIT_BRANCH} : ${env.GIT_COMMIT})</build.tag>
+        </properties>
+      </profile>
+      
+      <profile>
+        <id>non-leandi</id>
+        <activation>
+          <property>
             <name>!ldi.releaseBuild</name>
           </property>
         </activation>
+        <properties>
+            <build.tag>${git.branch}-${git.commit.id.abbrev} (${git.commit.time})</build.tag>
+        </properties>
         <build>
+          <plugins>
+              <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.0</version>
+                <configuration>
+                  <verbose>true</verbose>
+                  <runOnlyOnce>true</runOnlyOnce>
+                </configuration>
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>revision</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+          </plugins>
           <pluginManagement>
             <plugins>
             
