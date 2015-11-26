@@ -10,6 +10,8 @@ public interface LeaderboardDelegate<T extends Widget> {
 
     void setLeaderboardPanel(T leaderboardPanel);
 
+    void setBusyState(boolean isBusy);
+
     Widget getAutoRefreshControl();
 
     Widget getSettingsControl();

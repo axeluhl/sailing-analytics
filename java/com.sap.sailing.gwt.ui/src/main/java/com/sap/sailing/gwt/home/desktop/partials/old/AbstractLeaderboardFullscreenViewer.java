@@ -25,13 +25,13 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
     private final Label lastScoringUpdateText = new Label();
     protected final Label lastScoringComment = new Label();
     protected final Label scoringScheme = new Label();
-    protected final BusyIndicator busyIndicator = new SimpleBusyIndicator(RESOURCES.busyIndicatorCircleInverted());
+    protected final BusyIndicator busyIndicator = new SimpleBusyIndicator(false, 0.9f, RESOURCES.busyIndicatorCircleInverted());
 
     public AbstractLeaderboardFullscreenViewer() {
         showLogo();
         showBorder();
-        addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarBusyIndicator(busyIndicator);
+        addToolbarInfo(createPanel(lastScoringUpdateText, lastScoringUpdateTime));
         addToolbarAction(autoRefreshControl);
         addToolbarAction(settingsControl);
     }
@@ -99,5 +99,10 @@ public abstract class AbstractLeaderboardFullscreenViewer<T extends Widget> exte
     @Override
     public Element getBusyIndicatorElement() {
         return busyIndicator.getElement();
+    }
+    
+    @Override
+    public void setBusyState(boolean isBusy) {
+        busyIndicator.setBusy(isBusy);
     }
 }

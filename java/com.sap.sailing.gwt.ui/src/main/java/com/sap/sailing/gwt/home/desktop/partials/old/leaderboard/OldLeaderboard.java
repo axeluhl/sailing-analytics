@@ -228,6 +228,9 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @Override
     public void onBusyStateChange(boolean busyState) {
         busyIndicator.setBusy(busyState);
+        if(delegate != null) {
+            delegate.setBusyState(busyState);
+        }
     }
 
     public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {

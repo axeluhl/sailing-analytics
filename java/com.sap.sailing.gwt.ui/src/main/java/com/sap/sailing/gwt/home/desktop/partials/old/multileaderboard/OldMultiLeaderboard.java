@@ -213,6 +213,9 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     @Override
     public void onBusyStateChange(boolean busyState) {
         busyIndicator.setBusy(busyState);
+        if(delegate != null) {
+            delegate.setBusyState(busyState);
+        }
     }
 
     @Override
