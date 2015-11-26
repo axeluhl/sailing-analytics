@@ -278,7 +278,7 @@
       </profile>
       
       <profile>
-        <id>non-leandi</id>
+        <id>leandi</id>
         <activation>
           <property>
             <name>ldi.releaseBuild</name>
