@@ -336,6 +336,7 @@
               <classesJarExclude>MANIFEST.MF</classesJarExclude>
               <classesJarExclude>*.ap_</classesJarExclude>
               <classesJarExclude>local-artifacts.properties</classesJarExclude>
+              <classesJarExclude>**/*.gwt.xml</classesJarExclude>
             </classesJarExcludes>
           </configuration>
           <executions>
