@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.Button;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -39,8 +37,8 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         super(stringMessages.linkedRaces(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                new RaceSelectionModel(), stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher/*,
+                new RaceSelectionModel()*/, stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
@@ -54,11 +52,11 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
             protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
                 btnRefresh = (Button)trackedRacesButtonPanel.getWidget(0);
             }
-
+/*
             @Override
             protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
             }
-
+*/
             @Override
             protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
             }
@@ -114,7 +112,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     }
 
     public Set<RegattaAndRaceIdentifier> getAssignedRaces() {
-        List<RaceDTO> races = trackedRacesListComposite.getSelectedRaces();
+        Set<RaceDTO> races = trackedRacesListComposite.getSelectionModel().getSelectedSet();
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         for (RaceDTO race : races) {
             assignedRaces.add(race.getRaceIdentifier());
