@@ -36,7 +36,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -86,7 +85,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(),*/ true, stringMessages);
         this.errorReporter = errorReporter;
         this.previousConfigurations = new HashMap<String, TracTracConfigurationDTO>();
         this.availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();

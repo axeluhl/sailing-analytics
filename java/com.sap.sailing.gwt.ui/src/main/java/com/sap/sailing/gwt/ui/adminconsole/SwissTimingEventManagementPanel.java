@@ -33,7 +33,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -66,7 +65,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringConstants);
+        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(),*/ true, stringConstants);
         this.errorReporter = errorReporter;
 
         VerticalPanel mainPanel = new VerticalPanel();

@@ -124,7 +124,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                // TODO Auto-generated method stub
                 updateWindDisplay();
             }
         });

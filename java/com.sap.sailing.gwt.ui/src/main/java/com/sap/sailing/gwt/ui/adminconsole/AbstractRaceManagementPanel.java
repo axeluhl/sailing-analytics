@@ -1,20 +1,21 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel implements RaceSelectionChangeListener {
+public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel /*implements RaceSelectionChangeListener*/ {
     protected RegattaAndRaceIdentifier singleSelectedRace;
     
     protected RaceDTO selectedRaceDTO;
@@ -27,7 +28,7 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), actionButtonsEnabled, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(), */actionButtonsEnabled, stringMessages);
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -35,7 +36,14 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
         
         mainPanel.add(trackedRacesListComposite);
 
-        trackedRacesListComposite.addRaceSelectionChangeListener(this);
+        //trackedRacesListComposite.addRaceSelectionChangeListener(this);
+        trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                onRaceSelectionChange(trackedRacesListComposite.getSelectionModel().getSelectedSet());
+            }
+        });
         
         singleSelectedRace = null;
         
@@ -51,10 +59,9 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
 
     abstract void refreshSelectedRaceData();
 
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(Set<RaceDTO> selectedRaces) {
         if (selectedRaces.size() == 1) {
-            singleSelectedRace = selectedRaces.get(0);
+            singleSelectedRace = selectedRaces.iterator().next().getRaceIdentifier();
             selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
             selectedCaptionRacePanel.setVisible(true);
             for (RegattaDTO regatta : getAvailableRegattas()) {

@@ -33,7 +33,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -64,7 +63,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(),*/ true, stringMessages);
         this.errorReporter = errorReporter;
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
         previousConfigurationsComboBox = new ListBox();
