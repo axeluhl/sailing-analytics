@@ -50,6 +50,7 @@ import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.mvc.MVCArray;
+import com.google.gwt.maps.client.mvc.MVCArrayCallback;
 import com.google.gwt.maps.client.overlays.InfoWindow;
 import com.google.gwt.maps.client.overlays.InfoWindowOptions;
 import com.google.gwt.maps.client.overlays.Marker;
@@ -81,6 +82,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
@@ -915,7 +918,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
-                        showAdvantageLine(competitorsToShow, newTime);
+                        //showAdvantageLine(competitorsToShow, newTime);
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
@@ -1221,6 +1224,51 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         return null;
     }
+    
+    private class AdvantageLineAnimator extends com.google.gwt.user.client.Timer {
+        private static final double MILLIS_TO_HOURS_FACTOR = 3600000;
+        
+        private DelegateCoordinateSystem coordinateSystem;
+        private GPSFixDTO lastBoatFix;
+        private long lastTime;
+        
+        public AdvantageLineAnimator(DelegateCoordinateSystem coordinateSystem) {
+            this.coordinateSystem = coordinateSystem;
+            this.scheduleRepeating(100);
+            this.lastTime = System.currentTimeMillis();
+        }
+        
+        public void setLastFix(GPSFixDTO lastBoatFix) {
+            this.lastBoatFix = lastBoatFix;
+        }
+
+        @Override
+        public void run() {
+            long time = System.currentTimeMillis();
+            long deltaTime = time - lastTime;
+            lastTime = time;
+            
+            if (lastBoatFix != null) {
+                Position oldPosition = lastBoatFix.position;
+                Position newPosition = oldPosition.translateRhumb(
+                        new DegreeBearingImpl(lastBoatFix.speedWithBearing.bearingInDegrees), 
+                        new NauticalMileDistance(deltaTime / MILLIS_TO_HOURS_FACTOR * lastBoatFix.speedWithBearing.speedInKnots));
+                
+                final double latDelta = newPosition.getLatDeg() - oldPosition.getLatDeg();
+                final double lngDelta = newPosition.getLngDeg() - oldPosition.getLngDeg();
+                
+                final MVCArray<LatLng> path = advantageLine.getPath();
+                advantageLine.getPath().forEach(new MVCArrayCallback<LatLng>() {
+                    @Override
+                    public void forEach(LatLng element, int index) {
+                        path.setAt(index, LatLng.newInstance(element.getLatitude() + latDelta, element.getLongitude() + lngDelta));
+                    }
+                });
+            }
+        }
+    }
+    
+    private AdvantageLineAnimator advantageTimer = new AdvantageLineAnimator(coordinateSystem);
 
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
@@ -1317,14 +1365,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         });
                         advantageLine.setMap(map);
                     } else {
-                        advantageLine.getPath().removeAt(1);
-                        advantageLine.getPath().removeAt(0);
-                        advantageLine.getPath().insertAt(0, advantageLinePos1);
-                        advantageLine.getPath().insertAt(1, advantageLinePos2);
+                        advantageLine.getPath().setAt(0, advantageLinePos1);
+                        advantageLine.getPath().setAt(1, advantageLinePos2);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                         advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
                     drawAdvantageLine = true;
+                    advantageTimer.setLastFix(lastBoatFix);
                 }
             }
             if (!drawAdvantageLine) {
