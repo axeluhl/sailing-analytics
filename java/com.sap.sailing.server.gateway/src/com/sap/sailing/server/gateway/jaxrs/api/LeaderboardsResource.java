@@ -543,7 +543,18 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        final Set<Mark> marks;
+        
+        if (! (leaderboard instanceof HasRegattaLike)) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Leaderboard with name '"+ leaderboardName+ "'does not contain a RegattaLog'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) leaderboard;
+        RegattaLog regattaLog = ((HasRegattaLike) regattaLikeLeaderboard).getRegattaLike().getRegattaLog();
+        
+        final Set<Mark> marks = new HashSet<Mark>();
+        Util.addAll(new DefinedMarkFinder<>(regattaLog).analyze(), marks);
+        
         if (raceColumnName == null) {
             if (fleetName != null) {
                 return Response
@@ -551,7 +562,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Either specify neither raceColumnName nor fleetName, only raceColumnName, or raceColumnName and fleetName but not only fleetName")
                     .type(MediaType.TEXT_PLAIN).build();
             } else {
-                marks = new HashSet<Mark>();
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     for (Fleet fleet : raceColumn.getFleets()) {
                         RaceLog raceLog = raceColumn.getRaceLog(fleet);
@@ -578,11 +588,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                             .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    marks = getMarksForFleet(raceColumn, fleet);
+                    marks.addAll(getMarksForFleet(raceColumn, fleet));
                 }
             } else {
                 // Return all marks for a certain race column
-                marks = new HashSet<Mark>();
                 for (Fleet fleet : raceColumn.getFleets()) {
                     Util.addAll(getMarksForFleet(raceColumn, fleet), marks);
                 }
