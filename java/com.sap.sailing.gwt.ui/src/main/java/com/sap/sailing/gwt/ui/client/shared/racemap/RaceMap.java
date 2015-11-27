@@ -16,7 +16,6 @@ import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
@@ -1378,7 +1377,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
                         advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
                                 bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
-                        advantageHoverline.addMouseOverHandler(advantageLineMouseOverHandler);
+                        advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
                         advantageHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
                             @Override
                             public void onEvent(MouseOutMapEvent event) {
@@ -1632,7 +1631,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                 Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
-                lineToShowOrRemoveOrUpdateHoverline.addMouseOverHandler(new MouseOverMapHandler() {
+                lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
                     public void onEvent(MouseOverMapEvent event) {
                         map.setTitle(lineInfoProvider.getLineInfo());
@@ -2584,14 +2583,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
-                map.setTitle("");
-                map.setTitle(competitor.getSailID() + ", " + competitor.getName());
-            }
-        });
-        resultHoverline.addMouseOverHandler(new MouseOverMapHandler() {
-            @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle("");
                 map.setTitle(competitor.getSailID() + ", " + competitor.getName());
             }
         });
