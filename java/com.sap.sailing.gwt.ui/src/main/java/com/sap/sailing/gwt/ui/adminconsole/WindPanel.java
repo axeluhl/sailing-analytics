@@ -45,15 +45,13 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -66,6 +64,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -76,7 +75,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower, RaceSelectionChangeListener {
+public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower/*, RaceSelectionChangeListener*/ {
 
     private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
 
@@ -93,7 +92,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private final TextColumn<WindDTO> windDirectionInDegColumn;
     private final TextColumn<WindDTO> positionColumn;
     private final TrackedRacesListComposite trackedRacesListComposite;
-    private final RaceSelectionProvider raceSelectionProvider;
+//    private final RaceSelectionProvider raceSelectionProvider;
+    private final RefreshableMultiSelectionModel<RaceDTO> refreshableRaceSelectionModel;
     private final WindSourcesToExcludeSelectorPanel windSourcesToExcludeSelectorPanel;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final CaptionPanel windCaptionPanel;
@@ -108,17 +108,26 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.raceSelectionProvider = new RaceSelectionModel();
+//        this.raceSelectionProvider = new RaceSelectionModel();
         windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages, errorReporter);
 
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, 
-                raceSelectionProvider, stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher/*, 
+                raceSelectionProvider*/, stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
         mainPanel.add(trackedRacesListComposite);
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        //raceSelectionProvider.addRaceSelectionChangeListener(this);
+        refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
+        refreshableRaceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                // TODO Auto-generated method stub
+                updateWindDisplay();
+            }
+        });
 
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
         windCaptionPanel.setVisible(false);
@@ -180,8 +189,8 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
             public void execute(final WindDTO wind) {
-                List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-                final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
+                List<RaceDTO> selectedRaces = new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet());
+                final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1).getRaceIdentifier();
                 sailingService.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -261,14 +270,14 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             @Override
             public void onClick(ClickEvent event) {
                 final String warningMessage;
-                if (trackedRacesListComposite.getSelectedRaces().isEmpty()) {
+                if (refreshableRaceSelectionModel.getSelectedSet().isEmpty()) {
                     warningMessage = stringMessages.windImport_AllRacesWarning();
                 } else {
-                    warningMessage = stringMessages.windImport_SelectedRacesWarning(trackedRacesListComposite.getSelectedRaces().size());
+                    warningMessage = stringMessages.windImport_SelectedRacesWarning(refreshableRaceSelectionModel.getSelectedSet().size());
                 }
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
-                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(),
+                    sailingService.importWindFromIgtimi(new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet()),
                             correctByDeclination.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -375,13 +384,13 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         form.addSubmitHandler(new FormPanel.SubmitHandler() {
             public void onSubmit(SubmitEvent event) {
                 if ((fileUpload.getFilename() != null) && (fileUpload.getFilename().trim().length() > 0)) {
-                    List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+                    Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
                     String warningMessage;
                     if (selectedRaces.size() > 0) {
                         warningMessage = stringMessages.windImport_SelectedRacesWarning(selectedRaces.size());
                         RaceSelection raceSelection = RaceSelection.create();
-                        for (int i = 0; i < selectedRaces.size(); i++) {
-                            RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(i);
+                        for (RaceDTO race : selectedRaces) {
+                            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
                             RaceSelection.RaceEntry raceEntry = RaceSelection.RaceEntry.create();
                             raceEntry.setRaceName(raceIdentifier.getRaceName());
                             raceEntry.setRegatteName(raceIdentifier.getRegattaName());
@@ -557,12 +566,12 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     }
 
     private RegattaAndRaceIdentifier getSelectedRace() {
-        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
         if (selectedRaces.isEmpty() || selectedRaces.size() > 1) {
             return null;
         }
 
-        return selectedRaces.get(0);
+        return selectedRaces.iterator().next().getRaceIdentifier();
     }
 
     private void clearWindSources() {
@@ -625,10 +634,5 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             clearWindFixes();
         }
 
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        updateWindDisplay();
     }
 }
