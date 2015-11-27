@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.util.Iterator;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -130,5 +131,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public RegattaLog getRegattaLog() {
+        Regatta regatta = getRegatta();
+        return regatta.getRegattaLog();
     }
 }

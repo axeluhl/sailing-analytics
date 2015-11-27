@@ -151,6 +151,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             column.addRaceColumnListener(this);
             races.add(column);
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            column.setRegattaLikeHelper(regattaLikeHelper);
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;

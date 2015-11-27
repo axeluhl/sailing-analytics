@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -41,6 +42,12 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public RaceLog getRaceLog(Fleet fleet) {
         return null;
     }
+    
+    @Override
+    public RegattaLog getRegattaLog(Fleet fleet) {
+        return null;
+    }
+
 
     public Leaderboard getLeaderboard() {
         return leaderboard;

@@ -47,6 +47,14 @@ public interface RaceColumn extends Named {
     RaceLog getRaceLog(Fleet fleet);
     
     /**
+     * Gets the regatta log associated with race column's race and the passed fleet. Note that the result may be <code>null</code>
+     * particularly for columns in a {@link MetaLeaderboard}.
+     * 
+     * @return the regatta log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
+     */
+    RegattaLog getRegattaLog();
+    
+    /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first
      */

@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -56,7 +57,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             return raceLogs.get(fleet);
         }
     }
-    
+   
     @Override
     public RaceLogIdentifier getRaceLogIdentifier(Fleet fleet) {
         return new RaceLogIdentifierImpl(regattaLikeParent, getName(), fleet);
@@ -227,11 +228,13 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             if (trackedRace != null) {
                 Util.addAll(trackedRace.getRace().getCompetitors(), result);
             } else {
-                // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+                // if no tracked race is found, use competitors from race/regatta log depending on whether 
+                // the mapping event is present or not; this assumes that if a tracked
                 // race exists, its competitors set takes precedence over what's in the race log. Usually,
                 // the tracked race will have the same competitors as those in the race log, or more because
                 // those from the regatta log are added to the tracked race as well.
-                Set<Competitor> viaRaceLog = new RaceLogRegisteredCompetitorsAnalyzer(getRaceLog(fleet)).analyze();
+                RegattaLog regattaLog = getRegattaLog();
+                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), regattaLog).analyze();
                 result.addAll(viaRaceLog);
             }
         }
@@ -245,11 +248,13 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         if (trackedRace != null) {
             result = trackedRace.getRace().getCompetitors();
         } else {
-            // if no tracked race is found, use competitors from race log; this assumes that if a tracked
+            // if no tracked race is found, use competitors from race/regatta log depending on whether 
+            // the mapping event is present or not; this assumes that if a tracked
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            Set<Competitor> viaRaceLog = new RaceLogRegisteredCompetitorsAnalyzer(getRaceLog(fleet)).analyze();
+            RegattaLog regattaLog = getRegattaLog();
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), regattaLog).analyze();
             result = viaRaceLog;
         }
         return result;
