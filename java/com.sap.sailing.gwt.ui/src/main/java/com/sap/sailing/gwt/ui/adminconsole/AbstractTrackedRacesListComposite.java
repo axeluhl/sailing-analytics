@@ -102,6 +102,29 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
+
+        raceList = new ListDataProvider<RaceDTO>();
+        settings = new TrackedRacesSettings();
+        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
+
+        VerticalPanel panel = new VerticalPanel();
+        setWidget(panel);
+
+        HorizontalPanel filterPanel = new HorizontalPanel();
+        panel.add(filterPanel);
+        Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
+        lblFilterRaces.setWordWrap(false);
+        filterPanel.setSpacing(5);
+        filterPanel.add(lblFilterRaces);
+        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+        noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
+        noTrackedRacesLabel.setWordWrap(false);
+        panel.add(noTrackedRacesLabel);
+
+        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
+        raceTable.ensureDebugId("TrackedRacesCellTable");
+        
         if (multiSelection) {
             this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(
                     tableResources.cellTableStyle().cellTableCheckboxSelected(),
@@ -130,28 +153,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>();
             raceTable.setSelectionModel(refreshableSelectionModel);
         }
-
-        raceList = new ListDataProvider<RaceDTO>();
-        settings = new TrackedRacesSettings();
-        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
-
-        VerticalPanel panel = new VerticalPanel();
-        setWidget(panel);
-
-        HorizontalPanel filterPanel = new HorizontalPanel();
-        panel.add(filterPanel);
-        Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
-        lblFilterRaces.setWordWrap(false);
-        filterPanel.setSpacing(5);
-        filterPanel.add(lblFilterRaces);
-        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
-        noTrackedRacesLabel.setWordWrap(false);
-        panel.add(noTrackedRacesLabel);
-
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
-        raceTable.ensureDebugId("TrackedRacesCellTable");
+        
         ListHandler<RaceDTO> columnSortHandler = setupTableColumns(stringMessages);
         raceTable.setWidth("300px");
 
