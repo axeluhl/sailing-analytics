@@ -13,8 +13,6 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -40,7 +38,6 @@ import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -58,7 +55,7 @@ import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer, RaceSelectionChangeListener,
+public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer, /*RaceSelectionChangeListener,*/
 TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
@@ -673,16 +670,19 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     @Override
     protected void leaderboardSelectionChanged() {
         // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
-        raceSelectionProvider.removeRaceSelectionChangeListener(this);
+        reactOnSelectionChangeEvent = false;
+        //raceSelectionProvider.removeRaceSelectionChangeListener(this);
         trackedRacesListComposite.clearSelection();
         // add listener again using a scheduled command which is executed when the browser's event loop re-gains
         // control; we assume that at that point in time the selection updates have already been performed
+        /*
         Scheduler.get().scheduleFinally(new ScheduledCommand() {
             @Override
             public void execute() {
                 raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
             }
         });
+        */
         leaderboardRemoveButton.setEnabled(!refreshableLeaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
@@ -705,6 +705,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             trackedRacesCaptionPanel.setVisible(false);
             selectedRaceInLeaderboard = null;
         }
+        reactOnSelectionChangeEvent = true;
     }
 
     private void createFlexibleLeaderboard() {

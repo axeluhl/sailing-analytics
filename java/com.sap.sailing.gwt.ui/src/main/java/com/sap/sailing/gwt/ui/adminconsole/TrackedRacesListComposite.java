@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -38,9 +37,9 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
+            final RegattaRefresher regattaRefresher, /*RaceSelectionProvider raceSelectionProvider,*/
             final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection);
+        super(sailingService, errorReporter, regattaRefresher/*, raceSelectionProvider*/, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
@@ -113,7 +112,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnRemoveRace.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    removeAndUntrackRaces(getSelectedRaces());
+                    removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
                 }
             });
             btnRemoveRace.setEnabled(false);
@@ -124,7 +123,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnUntrack.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent click) {
-                    stopTrackingRaces(getSelectedRaces());
+                    stopTrackingRaces(refreshableSelectionModel.getSelectedSet());
                 }
             });
             btnUntrack.setEnabled(false);
@@ -146,7 +145,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             btnExport.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    exportPopup.center(getSelectedRaces());
+                    exportPopup.center(new ArrayList<>(refreshableSelectionModel.getSelectedSet()));
                 }
             });
             btnExport.setEnabled(false);

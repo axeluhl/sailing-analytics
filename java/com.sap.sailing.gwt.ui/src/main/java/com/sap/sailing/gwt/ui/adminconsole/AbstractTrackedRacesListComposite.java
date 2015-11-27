@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -92,7 +91,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            final RaceSelectionProvider raceSelectionProvider, final StringMessages stringMessages, boolean hasMultiSelection) {
+            /*final RaceSelectionProvider raceSelectionProvider, */final StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
