@@ -179,11 +179,9 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         for (Competitor c : compLists[1]) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
         }
-        //expected are all competitors, because the getAllCopmetitors method is called
-        //this includes competitors Registered in the RaceLogs, for which the RaceLog 
-        //is denoted with the RaceLogUseCompetitorsFromRaceLogEvent as well as the competitors in the RegattaLog 
-        Set<Competitor> expected = new HashSet<>(compLists[0]);
-        expected.addAll(compLists[1]);
+        //expected are only the competitors in the RaceLog, because only one RaceColumn is
+        //registered, which has the competitors registered in the RaceLog. 
+        Set<Competitor> expected = new HashSet<>(compLists[1]);
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
         assertEquals(expected, actual);
