@@ -12,13 +12,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -159,10 +157,11 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                     rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
                 }
             }
+            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
+            // listeners set
             provider.addRaceColumnListener(raceColumnListener);
-            // consider {@link RegattaLog}
-            Set<Competitor> viaLog = getCompetitorsFromRegattaLogAndRegisterAsRegattaLogListener();
-            result.addAll(viaLog);
+            // consider {@link RegattaLog} competitor changes
+            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
             allCompetitorsCache = result;
         }
         return allCompetitorsCache;
@@ -178,36 +177,18 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         Iterable<Competitor> result = allCompetitorsCacheByRace.get(key);
         if (result == null) {
             final Set<Competitor> resultSet = new HashSet<>(); 
+            //raceColumn already considers trackedRace, RaceLog and RegattaLog
             Util.addAll(raceColumn.getAllCompetitors(fleet), resultSet);
-            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race log's
+            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
             raceColumn.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
             provider.addRaceColumnListener(raceColumnListener);
-            // consider {@link RegattaLog}
-            Set<Competitor> viaLog = getCompetitorsForRaceAndRegisterAsRegattaLogListener(raceColumn
-                    .getRaceLog(fleet));
-            resultSet.addAll(viaLog);
+            // consider {@link RegattaLog} competitor changes
+            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
             result = resultSet;
             allCompetitorsCacheByRace.put(key, result);
         }
         return result;
-    }
-
-    private Set<Competitor> getCompetitorsForRaceAndRegisterAsRegattaLogListener(RaceLog racelog) {
-        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer(racelog, provider.getRegattaLike().getRegattaLog())
-                .analyze();
-        // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's
-        // listeners set
-        provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
-        return viaLog;
-    }
-
-    private Set<Competitor> getCompetitorsFromRegattaLogAndRegisterAsRegattaLogListener() {
-        Set<Competitor> viaLog = new CompetitorsInLogAnalyzer<>(provider.getRegattaLike().getRegattaLog()).analyze();
-        // note: adding listeners is idempotent; at most one occurrence of this listener exists in the regatta log's
-        // listeners set
-        provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
-        return viaLog;
     }
 
     private void invalidateAllCompetitorsCaches() {
