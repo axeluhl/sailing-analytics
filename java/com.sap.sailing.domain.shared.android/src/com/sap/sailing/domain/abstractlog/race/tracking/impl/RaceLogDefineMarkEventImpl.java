@@ -40,4 +40,9 @@ public class RaceLogDefineMarkEventImpl extends AbstractDefineMarkEventImpl<Race
         return Collections.<Competitor>emptyList();
     }
 
+    @Override
+    public String getShortInfo() {
+        return mark.toString();
+    }
+
 }
