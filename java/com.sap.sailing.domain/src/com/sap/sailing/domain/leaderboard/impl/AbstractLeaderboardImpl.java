@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -172,4 +176,10 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return raceColumn.getRaceLog(fleet);
     }
 
+    @Override
+    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(regattaLog);
+        return analyzer.analyze();
+    }
 }

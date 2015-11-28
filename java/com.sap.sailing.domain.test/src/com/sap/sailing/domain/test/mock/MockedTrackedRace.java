@@ -487,6 +487,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public Iterable<? extends RaceColumn> getRaceColumns() {
                         return null;
                     }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+                        return null;
+                    }
                 };
             }
 
