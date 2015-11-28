@@ -12,6 +12,9 @@ import com.sap.sailing.domain.base.Competitor;
  * Used to find competitors of a race. Checks whether the competitors for the given race are registered on the RaceLog
  * via {@link RaceLogUsesOwnCompetitorsAnalyzer} or on the RegattaLog and fetches the competitors appropriately.
  * 
+ * Should not be used. Instead get the competitor set from the RaceColumn, which automatically checks wether a 
+ * tracked race is present, which has precedence over the Race/RegattaLog
+ * 
  * @author D056848
  *
  */

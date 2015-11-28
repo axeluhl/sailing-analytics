@@ -56,6 +56,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.gwt.thirdparty.guava.common.collect.Iterables;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
@@ -2389,12 +2390,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
                 boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
+                
                 boolean competitorRegistrationsExist;
-                try {
-                    competitorRegistrationsExist = raceLog == null ? false : ! new RegisteredCompetitorsAnalyzer(raceLog, getRegattaLogInternal(leaderboard.getName())).analyze().isEmpty();
-                } catch (DoesNotHaveRegattaLogException e) {
-                    competitorRegistrationsExist = false;
-                }
+                competitorRegistrationsExist = raceLog == null ? false : Iterables.size(raceColumn.getAllCompetitors(fleet)) > 0 ;
+
                 RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, raceLogTrackingState);
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
@@ -5874,9 +5873,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Collection<CompetitorDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
             String fleetName) throws DoesNotHaveRegattaLogException {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        return convertToCompetitorDTOs(new RegisteredCompetitorsAnalyzer(raceLog, regattaLog).analyze());
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        return convertToCompetitorDTOs(raceColumn.getAllCompetitors(fleet));
     }
 
     @Override
