@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,18 +33,12 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEv
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -60,7 +53,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -238,22 +230,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
     }
 
-    @Override
-    public void copyCompetitors(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs,
-            RacingEventService service) {
-        final Set<Competitor> competitors = new CompetitorsInLogAnalyzer<>(fromRaceLog).analyze();
-        for (RaceLog toRaceLog : toRaceLogs) {
-            try {
-                registerCompetitors(service, toRaceLog, competitors);
-            } catch (CompetitorRegistrationOnRaceLogDisabledException e) {
-                int passId = toRaceLog.getCurrentPassId();
-                TimePoint now = MillisecondsTimePoint.now();
-                toRaceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(now, service.getServerAuthor(), now, UUID.randomUUID(), passId));
-                try { registerCompetitors(service, toRaceLog, competitors); } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {/*cannot happen*/}
-            }
-        }
-    }
-
     @FunctionalInterface
     private static interface DeviceMarkMappingEventFactory<VisitorT, EventT extends AbstractLogEvent<VisitorT>> {
         EventT createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint);
@@ -295,64 +271,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         } catch (NotRevokableException e) {
             logger.log(Level.WARNING, "could not remove denotation by adding RevokeEvents", e);
         }
-    }
-
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void registerCompetitors(
-            AbstractLogEventAuthor author, LogT log, Set<Competitor> competitors,
-            Function<Competitor, EventT> registerEventFactory) {
-        Set<Competitor> alreadyRegistered = new HashSet<Competitor>(new CompetitorsInLogAnalyzer<>(log).analyze());
-        Set<Competitor> toBeRegistered = new HashSet<Competitor>();
-
-        for (Competitor c : competitors) {
-            toBeRegistered.add(c);
-        }
-
-        Set<Competitor> toBeRemoved = new HashSet<Competitor>(alreadyRegistered);
-        toBeRemoved.removeAll(toBeRegistered);
-        toBeRegistered.removeAll(alreadyRegistered);
-
-        // register
-        for (Competitor c : toBeRegistered) {
-            log.add(registerEventFactory.apply(c));
-        }
-
-        // unregister
-        for (EventT event : log.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent) {
-                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (toBeRemoved.contains(registerEvent.getCompetitor())) {
-                    try {
-                        log.revokeEvent(author, event,
-                                "unregistering competitor because no longer selected for registration");
-                    } catch (NotRevokableException e) {
-                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors) throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (new RaceLogUsesOwnCompetitorsAnalyzer(raceLog).analyze()){
-            registerCompetitors(
-                    service.getServerAuthor(),
-                    raceLog,
-                    competitors,
-                    c -> new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(),
-                            service.getServerAuthor(), raceLog.getCurrentPassId(), c));
-        } else {
-            logger.warning("Not performing competitor registration on RaceLog as no RaceLogUseCompetitorsFromRaceLogEvent "
-                    + "is present and therefore competitors should be registered on RegattaLog");
-            throw new CompetitorRegistrationOnRaceLogDisabledException();
-        }
-    }
-
-    @Override
-    public void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors) {
-        registerCompetitors(service.getServerAuthor(), regattaLog, competitors,
-                c -> new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(),
-                        MillisecondsTimePoint.now(), service.getServerAuthor(), UUID.randomUUID(), c));
     }
 
     private MailService getMailService() {

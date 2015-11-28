@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base;
 
-import java.util.Collection;
-
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -282,6 +280,20 @@ public interface RaceColumn extends Named {
     boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
 
     /**
+     * Activates competitor registration on the race column's race log associated to the passed fleet. 
+     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
+     * @param fleetByName
+     */
+    void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
+    
+    /**
+     * Disables competitor registration on the race column's race log associated to the passed fleet.
+     * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
+     * @param fleetByName
+     */
+    void disableCompetitorRegistrationOnRaceLog(Fleet fleet);
+    
+    /**
      * Registers a competitor on the the race column's race log associated to the passed fleet.
      * @param competitor
      * @param fleet
@@ -289,7 +301,7 @@ public interface RaceColumn extends Named {
      * thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
     void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
-    void registerCompetitors(Collection<Competitor> competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void registerCompetitors(Iterable<Competitor> competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
     
     /**
      * Deregisters a competitor on the the race column's race log associated to the passed fleet.
@@ -299,5 +311,5 @@ public interface RaceColumn extends Named {
      * thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
     void deRegisterCompetitor(Competitor competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
-    void deRegisterCompetitors(Collection<Competitor> competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void deRegisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 }

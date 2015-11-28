@@ -92,7 +92,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                             @Override
                             public void ok(Void editedObject) {
                                 if (competitorRegistrationInRaceLogCheckBox.getValue()) {
-                                    sailingService.activateCompetitorRegistrationsForRace(leaderboardName,
+                                    sailingService.enableCompetitorRegistrationsForRace(leaderboardName,
                                             raceColumnName, fleetName, new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void isEnabled) {
@@ -110,7 +110,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                             });
 
                                 } else {
-                                    sailingService.deactivateCompetitorRegistrationsForRace(leaderboardName,
+                                    sailingService.disableCompetitorRegistrationsForRace(leaderboardName,
                                             raceColumnName, fleetName, new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void isEnabled) {

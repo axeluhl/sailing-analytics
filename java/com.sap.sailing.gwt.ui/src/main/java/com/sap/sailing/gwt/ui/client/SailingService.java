@@ -526,7 +526,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Date dateOfMarkPassing, CompetitorDTO competitorDTO);
 
     void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitors)
-            throws DoesNotHaveRegattaLogException;
+            throws DoesNotHaveRegattaLogException, NotFoundException;
     
     /**
      * A leaderboard may be situated under multiple events (connected via a leaderboardgroup).
@@ -606,9 +606,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
-    void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException;
+    void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException;
 
-    void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException;
+    void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException;
 
     Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
             String fleetName, Set<MarkDTO> marksToRemove) throws NotFoundException;

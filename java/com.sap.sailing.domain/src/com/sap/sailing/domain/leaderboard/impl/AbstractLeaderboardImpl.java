@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -212,7 +212,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
     
     @Override
-    public void registerCompetitors(Collection<Competitor> competitors) {
+    public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
         
@@ -228,12 +228,15 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     }
     
     @Override
-    public void deregisterCompetitors(Collection<Competitor> competitors) {
+    public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        HashSet<Competitor> competitorSet = new HashSet<Competitor>();
+        Util.addAll(competitors, competitorSet);
+        
         for (RegattaLogEvent event : regattaLog.getUnrevokedEventsDescending()) {
             if (event instanceof RegisterCompetitorEvent) {
                 RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (competitors.contains(registerEvent.getCompetitor())) {
+                if (competitorSet.contains(registerEvent.getCompetitor())) {
                     try {
                         regattaLog.revokeEvent(regattaLogEventAuthorForAbstraceLeaderboard, event,
                                 "unregistering competitor because no longer selected for registration");

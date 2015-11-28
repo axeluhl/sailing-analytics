@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -759,7 +758,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public void registerCompetitors(Collection<Competitor> competitors) {
+    public void registerCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
         
@@ -775,12 +774,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
     
     @Override
-    public void deregisterCompetitors(Collection<Competitor> competitors) {
+    public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        HashSet<Competitor> competitorSet = new HashSet<Competitor>();
+        Util.addAll(competitors, competitorSet);
         for (RegattaLogEvent event : regattaLog.getUnrevokedEventsDescending()) {
             if (event instanceof RegisterCompetitorEvent) {
                 RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (competitors.contains(registerEvent.getCompetitor())) {
+                if (competitorSet.contains(registerEvent.getCompetitor())) {
                     try {
                         regattaLog.revokeEvent(regattaLogEventAuthorForRegatta, event,
                                 "unregistering competitor because no longer selected for registration");

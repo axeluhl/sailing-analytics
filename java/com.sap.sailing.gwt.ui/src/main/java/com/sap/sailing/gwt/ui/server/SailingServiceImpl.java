@@ -81,9 +81,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -5035,25 +5033,54 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        Set<Competitor> competitors = new HashSet<Competitor>();
+        Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
         for (CompetitorDTO dto : competitorDTOs) {
-            competitors.add(getCompetitor(dto));
+            competitorsToRegister.add(getCompetitor(dto));
         }
         
-        getRaceLogTrackingAdapter().registerCompetitors(getService(), raceLog, competitors);
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        Iterable<Competitor> competitorsToRemove = raceColumn.getAllCompetitors(fleet);
+        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
+        Util.addAll(competitorsToRemove, competitorSetToRemove);
+        filterDuplicates(competitorsToRegister, competitorSetToRemove);
+        
+        raceColumn.deRegisterCompetitors(competitorSetToRemove, fleet);
+        raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     
     @Override
     public void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitorDTOs)
-            throws DoesNotHaveRegattaLogException {
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        Set<Competitor> competitors = new HashSet<Competitor>();
-        for (CompetitorDTO dto : competitorDTOs) {
-            competitors.add(getCompetitor(dto));
+            throws DoesNotHaveRegattaLogException, NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (!(leaderboard instanceof HasRegattaLike)){
+            throw new DoesNotHaveRegattaLogException();
         }
         
-        getRaceLogTrackingAdapter().registerCompetitors(getService(), regattaLog, competitors);
+        Set<Competitor> competitorsToRegister = new HashSet<Competitor>();
+        for (CompetitorDTO dto : competitorDTOs) {
+            competitorsToRegister.add(getCompetitor(dto));
+        }
+        
+        HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
+        Iterable<Competitor> competitorsToRemove = leaderboard.getAllCompetitors();
+        HashSet<Competitor> competitorSetToRemove = new HashSet<>();
+        Util.addAll(competitorsToRemove, competitorSetToRemove);
+        filterDuplicates(competitorsToRegister, competitorSetToRemove);
+        
+        hasRegattaLike.deregisterCompetitors(competitorSetToRemove);
+        hasRegattaLike.registerCompetitors(competitorsToRegister);
+    }
+
+    private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister,
+            HashSet<Competitor> competitorSetToRemove) {
+        for (Competitor competitor : competitorSetToRemove) {
+            if (competitorsToRegister.contains(competitor)){
+                competitorsToRegister.remove(competitor);
+                competitorSetToRemove.remove(competitor);
+            }
+        }
+        return competitorSetToRemove;
     }
     
     private Mark convertToMark(MarkDTO dto, boolean resolve) {
@@ -5219,12 +5246,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
-        RaceLog fromRaceLog = getRaceLog(fromTriple);
-        Set<RaceLog> toRaceLogs = new HashSet<>();
+        RaceColumn raceColumn = getRaceColumn(fromTriple.getA(), fromTriple.getB());
+        Iterable<Competitor> competitorsToCopy = raceColumn.getAllCompetitors(getFleetByName(raceColumn, fromTriple.getC()));
+        
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
-            toRaceLogs.add(getRaceLog(toTriple));
+            RaceColumn toRaceColumn = getRaceColumn(toTriple.getA(), toTriple.getB());
+            try {
+                toRaceColumn.registerCompetitors(competitorsToCopy, getFleetByName(toRaceColumn, toTriple.getC()));
+            } catch (CompetitorRegistrationOnRaceLogDisabledException e){
+                toRaceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(toRaceColumn, toTriple.getC()));
+                try {
+                    toRaceColumn.registerCompetitors(competitorsToCopy, getFleetByName(toRaceColumn, toTriple.getC()));
+                } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
+                    //cannot happen
+                }
+            }
         }
-        getRaceLogTrackingAdapter().copyCompetitors(fromRaceLog, toRaceLogs, getService());
     }
     
     private TypeBasedServiceFinder<DeviceIdentifierStringSerializationHandler> getDeviceIdentifierStringSerializerHandlerFinder(
@@ -5288,7 +5325,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(raceLog);
         }
         
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard instanceof HasRegattaLike) {
             result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
         }
@@ -5468,7 +5505,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet);
@@ -5959,25 +5996,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
+    public void disableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
         if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
-            RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-            
-            List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
-            for (RaceLogEvent event : events) {
-                revokeEvent(false, event.getId(), raceLog);
-            }
+            RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+            raceColumn.disableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 
     @Override
-    public void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
+    public void enableCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
         if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
-            RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-            int passId = raceLog.getCurrentPassId();
-            RaceLogUseCompetitorsFromRaceLogEvent event = new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), 
-                    getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), passId);
-            raceLog.add(event);
+            RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+            raceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(raceColumn, fleetName));
         }
     }
 
