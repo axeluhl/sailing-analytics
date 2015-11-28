@@ -42,7 +42,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpe
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.OpenEndedDeviceMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -367,7 +366,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
         }
-        IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
+        HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
@@ -406,16 +405,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         // add registration if necessary
-        Set<Competitor> registered = new CompetitorsInLogAnalyzer<>(isRegattaLike.getRegattaLog()).analyze();
+        Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getCompetitorsRegisteredInRegattaLog();
         if (!registered.contains(mappedTo)) {
-            isRegattaLike.getRegattaLog().add(
+            hasRegattaLike.getRegattaLike().getRegattaLog().add(
                     new RegattaLogRegisterCompetitorEventImpl(now, now, author, UUID.randomUUID(), mappedTo));
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
         event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedTo, device,
                 from, null);
-        isRegattaLike.getRegattaLog().add(event);
+        hasRegattaLike.getRegattaLike().getRegattaLog().add(event);
         logger.fine("Successfully checked in competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();
     }

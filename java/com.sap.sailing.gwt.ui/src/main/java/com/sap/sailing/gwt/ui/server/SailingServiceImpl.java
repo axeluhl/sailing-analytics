@@ -83,7 +83,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.Readon
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -95,7 +94,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCo
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Boat;
@@ -289,6 +287,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.server.exceptions.NotFoundException;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -4812,7 +4811,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) {
+    public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
         // TODO If new is null and current is not, current should be revoked.
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
@@ -4828,7 +4827,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) {
+    public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         final Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
         return times == null ? null : new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
@@ -4963,15 +4962,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void denoteForRaceLogTracking(String leaderboardName,
     		String raceColumnName, String fleetName) throws Exception {
-    	Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-    	RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
-    	Fleet fleet = raceColumn.getFleetByName(fleetName);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+    	RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+    	Fleet fleet = getFleetByName(raceColumn, fleetName);
     	
     	getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn, fleet, null);
     }
     
     @Override
-    public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) {
+    public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
     }
@@ -4985,8 +4984,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     /**
      * @param triple leaderboard and racecolumn and fleet names
      * @return
+     * @throws NotFoundException 
      */
-    private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) {
+    private RaceLog getRaceLog(com.sap.sse.common.Util.Triple<String, String, String> triple) throws NotFoundException {
         return getRaceLog(triple.getA(), triple.getB(), triple.getC());
     }
     
@@ -4998,9 +4998,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return ((HasRegattaLike) l).getRegattaLike().getRegattaLog();
     }
     
-    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        RaceColumn raceColumn = getService().getLeaderboardByName(leaderboardName).getRaceColumnByName(raceColumnName);
-        Fleet fleet = raceColumn.getFleetByName(fleetName);
+    private RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
         return raceColumn.getRaceLog(fleet);
     }
 
@@ -5010,7 +5010,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException {
+            Set<CompetitorDTO> competitorDTOs) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         Set<Competitor> competitors = new HashSet<Competitor>();
         for (CompetitorDTO dto : competitorDTOs) {
@@ -5086,7 +5086,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
+            List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String name = String.format("Course for %s - %s - %s", leaderboardName, raceColumnName, fleetName);
         
@@ -5155,7 +5155,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
+    public RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (lastPublishedCourse == null) {
@@ -5178,7 +5178,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
@@ -5189,7 +5189,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) {
+            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
@@ -5251,7 +5251,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName, String raceColumnName,
-            String fleetName) {
+            String fleetName) throws NotFoundException {
         List<AbstractLog<?, ?>> result = new ArrayList<>();
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         
@@ -5290,13 +5290,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
-            String fleetName) throws TransformationException {
+            String fleetName) throws TransformationException, NotFoundException {
         return getDeviceMappingsFromLogs(getLogHierarchy(leaderboardName, raceColumnName, fleetName));
     }
     
     @Override
     public List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName,
-            String fleetName) throws TransformationException {
+            String fleetName) throws TransformationException, NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         return getDeviceMappingsFromLogs(Collections.<AbstractLog<?, ?>>singletonList(raceLog));
     }
@@ -5395,7 +5395,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
-            List<UUID> eventIds) throws NotRevokableException {
+            List<UUID> eventIds) throws NotRevokableException, NotFoundException {
         List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName, raceColumnName, fleetName);
         revokeEventsFromLogs(logs, eventIds);
     }
@@ -5871,30 +5871,66 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Collection<CompetitorDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
-            String fleetName) throws DoesNotHaveRegattaLogException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
-        Fleet fleet = raceColumn.getFleetByName(fleetName);
+            String fleetName) throws NotFoundException {
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
         return convertToCompetitorDTOs(raceColumn.getAllCompetitors(fleet));
     }
 
     @Override
-    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         
-        return convertToCompetitorDTOs(new CompetitorsInLogAnalyzer<>(regattaLog).analyze());
+        if (! (leaderboard instanceof HasRegattaLike)) {
+            throw new DoesNotHaveRegattaLogException();
+        }
+        HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
+        
+        return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsRegisteredInRegattaLog());
     }
 
     @Override
-    public boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName,
-            String fleetName) {
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        RaceLogUsesOwnCompetitorsAnalyzer analyzer = new RaceLogUsesOwnCompetitorsAnalyzer(raceLog);
-        return analyzer.analyze();
+    public Boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName,
+            String fleetName) throws NotFoundException {
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        return raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet);
+    }
+    
+    private Fleet getFleetByName(RaceColumn raceColumn, String fleetName) throws NotFoundException{
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null){
+            throw new NotFoundException("fleet with name "+fleetName+" not found");
+        }
+        
+        return fleet;
+    }
+    
+    private Leaderboard getLeaderboardByName(String leaderboardName) throws NotFoundException{
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null){
+            throw new NotFoundException("Leaderboard with name "+leaderboardName+" not found");
+        }
+        
+        return leaderboard;
+    }
+    
+    private RaceColumn getRaceColumn(String leaderboardName, String raceColumnName) throws NotFoundException{
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null){
+            throw new NotFoundException("leaderboard with name "+leaderboardName+" not found");
+        } 
+        
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null){
+            throw new NotFoundException("raceColumn with name "+raceColumnName+" not found");
+        }
+        
+        return raceColumn;
     }
 
     @Override
-    public void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException {
+    public void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException {
         if (areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
             
@@ -5906,7 +5942,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) {
+    public void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException {
         if (!areCompetitorRegistrationsEnabledForRace(leaderboardName, raceColumnName, fleetName)){
             RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
             int passId = raceLog.getCurrentPassId();
@@ -5918,7 +5954,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
-            String fleetName, Set<MarkDTO> marksToRemove) {
+            String fleetName, Set<MarkDTO> marksToRemove) throws NotFoundException {
         Set<String> markIds = new HashSet<String>();
         for (MarkDTO markDTO : marksToRemove) {
             markIds.add(markDTO.getIdAsString());

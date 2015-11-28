@@ -45,6 +45,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.server.exceptions.NotFoundException;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
@@ -448,10 +449,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     /**
      * Revoke the {@link RaceLogDenoteForTrackingEvent}. This does not affect an existing {@code RaceLogRaceTracker}
      * or {@link TrackedRace} for this {@code RaceLog}.
+     * @throws NotFoundException 
      * 
      * @see RaceLogTrackingAdapter#removeDenotationForRaceLogTracking
      */
-    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName);
+    void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
     void denoteForRaceLogTracking(String leaderboardName) throws Exception;
     
@@ -464,15 +466,16 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void startRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName, boolean trackWind, boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
     
-    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void setCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName, Set<CompetitorDTO> competitors) throws CompetitorRegistrationOnRaceLogDisabledException, NotFoundException;
     
     /**
      * Adds the course definition to the racelog, while trying to reuse existing marks, controlpoints and waypoints
      * from the previous course definition in the racelog.
+     * @throws NotFoundException 
      */
-    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course);
+    void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course) throws NotFoundException;
     
-    RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName);
+    RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
      * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
@@ -481,16 +484,17 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void pingMark(String leaderboardName, MarkDTO mark, Position position) throws DoesNotHaveRegattaLogException;
     
     List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName)
-            throws TransformationException;
+            throws TransformationException, NotFoundException;
     
     List<String> getDeserializableDeviceIdentifierTypes();
     
     /**
      * Revoke the events in the {@code RaceLog} that are identified by the {@code eventIds}.
      * This only affects such events that implement {@link Revokable}.
+     * @throws NotFoundException 
      */
     void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName, List<UUID> eventIds)
-            throws NotRevokableException;
+            throws NotRevokableException, NotFoundException;
     
     Collection<String> getGPSFixImporterTypes();
     
@@ -543,7 +547,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Integer getStructureImportOperationProgress();
     
     List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
-            String fleetName) throws TransformationException;
+            String fleetName) throws TransformationException, NotFoundException;
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
@@ -566,44 +570,46 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;
 
     RegattaAndRaceIdentifier getRaceIdentifier(String regattaLikeName, String raceColumnName, String fleetName);
-    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto);
+    void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 
-    Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName);
+    Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
     /**
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
      * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     * @throws NotFoundException 
      */
     void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples);
+            Set<Triple<String, String, String>> toTriples) throws NotFoundException;
 
     /**
      * @param raceLogFrom identifies the race log to copy from by its leaderboard name, race column name and fleet name
      * @param raceLogsTo identifies the race log to copy from by their leaderboard name, race column name and fleet name
+     * @throws NotFoundException 
      */
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
-            Set<Triple<String, String, String>> toTriples);
+            Set<Triple<String, String, String>> toTriples) throws NotFoundException;
 
     /**
      * Get the competitors registered for a certain race. This automatically checks, whether competitors are registered 
-     * in the raceLog (in case of e.g. splitFleets) or in the RegattaLog (default)
-     * @throws DoesNotHaveRegattaLogException 
+     * in the raceLog (in case of e.g. splitFleets) or in the RegattaLog (default) 
+     * @throws NotFoundException 
      */
     Collection<CompetitorDTO> getCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName,
-            String fleetName) throws DoesNotHaveRegattaLogException;
+            String fleetName) throws DoesNotHaveRegattaLogException, NotFoundException;
 
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark) throws DoesNotHaveRegattaLogException;
 
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO) throws DoesNotHaveRegattaLogException;
 
-    Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
+    Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException;
 
-    boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName, String fleetName);
+    Boolean areCompetitorRegistrationsEnabledForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
 
-    void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException;
+    void deactivateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws NotRevokableException, NotFoundException;
 
-    void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName);
+    void activateCompetitorRegistrationsForRace(String leaderboardName, String raceColumnName, String fleetName) throws IllegalArgumentException, NotFoundException;
 
     Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
-            String fleetName, Set<MarkDTO> marksToRemove);
+            String fleetName, Set<MarkDTO> marksToRemove) throws NotFoundException;
 }
