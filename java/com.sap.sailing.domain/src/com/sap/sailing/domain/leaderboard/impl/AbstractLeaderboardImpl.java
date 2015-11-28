@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -15,11 +18,13 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -49,6 +54,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     private final AbstractLogEventAuthor regattaLogEventAuthorForAbstraceLeaderboard = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
+    
+    private static final Logger logger = Logger.getLogger(AbstractLeaderboardImpl.class.getName());
+    
 
     /**
      * @param scoreComparator
@@ -200,9 +208,40 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     @Override
     public void registerCompetitor(Competitor competitor) {
+        registerCompetitors(Collections.singleton(competitor));
+    }
+    
+    @Override
+    public void registerCompetitors(Collection<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstraceLeaderboard,
-                UUID.randomUUID(), competitor));
+        
+        for (Competitor competitor : competitors) {
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstraceLeaderboard,
+                    UUID.randomUUID(), competitor));
+        }
+    }
+    
+    @Override
+    public void deregisterCompetitor(Competitor competitor) {
+        deregisterCompetitors(Collections.singleton(competitor));
+    }
+    
+    @Override
+    public void deregisterCompetitors(Collection<Competitor> competitors) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        for (RegattaLogEvent event : regattaLog.getUnrevokedEventsDescending()) {
+            if (event instanceof RegisterCompetitorEvent) {
+                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                if (competitors.contains(registerEvent.getCompetitor())) {
+                    try {
+                        regattaLog.revokeEvent(regattaLogEventAuthorForAbstraceLeaderboard, event,
+                                "unregistering competitor because no longer selected for registration");
+                    } catch (NotRevokableException e) {
+                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+                    }
+                }
+            }
+        }
     }
 }

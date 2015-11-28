@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.regattalike;
 
+import java.util.Collection;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
@@ -20,4 +22,8 @@ public interface HasRegattaLike {
     Iterable<Competitor> getCompetitorsRegisteredInRegattaLog();
     
     void registerCompetitor(Competitor competitor);
+    void registerCompetitors(Collection<Competitor> competitor);
+    
+    void deregisterCompetitor(Competitor competitor);
+    void deregisterCompetitors(Collection<Competitor> competitor);
 }

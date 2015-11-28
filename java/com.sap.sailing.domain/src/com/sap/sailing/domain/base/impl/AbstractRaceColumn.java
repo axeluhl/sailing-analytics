@@ -3,27 +3,32 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -277,6 +282,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     
     @Override
     public void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        registerCompetitors(Collections.singleton(competitor), fleet);
+    }
+    
+    @Override
+    public void registerCompetitors(Collection<Competitor> competitors, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
         if (isCompetitorRegistrationInRacelogEnabled(fleet)){
             throw new CompetitorRegistrationOnRaceLogDisabledException();
         }
@@ -284,8 +295,39 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
         int passId = raceLog.getCurrentPassId();
-        raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
-                UUID.randomUUID(), passId, competitor));
+        for (Competitor competitor: competitors){
+            raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
+                    UUID.randomUUID(), passId, competitor));
+        }
+    }
+    
+    @Override
+    public void deRegisterCompetitor(Competitor competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        deRegisterCompetitors(Collections.singleton(competitor), fleet);
+    }
+    
+    @Override
+    public void deRegisterCompetitors(Collection<Competitor> competitors, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        if (isCompetitorRegistrationInRacelogEnabled(fleet)){
+            throw new CompetitorRegistrationOnRaceLogDisabledException();
+        }
+        
+        RaceLog raceLog = getRaceLog(fleet);
+        for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
+            if (event instanceof RegisterCompetitorEvent) {
+                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                if (competitors.contains(registerEvent.getCompetitor())) {
+                    try {
+                        raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event,
+                                "unregistering competitor because no longer selected for registration");
+                    } catch (NotRevokableException e) {
+                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+                    }
+                }
+            }
+        }
     }
 
     @Override

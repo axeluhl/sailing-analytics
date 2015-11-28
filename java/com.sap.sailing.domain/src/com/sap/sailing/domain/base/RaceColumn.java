@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.util.Collection;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -287,4 +289,15 @@ public interface RaceColumn extends Named {
      * thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
     void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void registerCompetitors(Collection<Competitor> competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    
+    /**
+     * Deregisters a competitor on the the race column's race log associated to the passed fleet.
+     * @param competitor
+     * @param fleet
+     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     * thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
+     */
+    void deRegisterCompetitor(Competitor competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void deRegisterCompetitors(Collection<Competitor> competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 }

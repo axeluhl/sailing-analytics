@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -45,6 +47,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.AbstractLeaderboardImpl;
@@ -749,12 +752,43 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 regattaLog);
         return analyzer.analyze();
     }
-
+    
     @Override
     public void registerCompetitor(Competitor competitor) {
+        registerCompetitors(Collections.singleton(competitor));
+    }
+    
+    @Override
+    public void registerCompetitors(Collection<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         TimePoint now = MillisecondsTimePoint.now();
-        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForRegatta ,
-                UUID.randomUUID(), competitor));
+        
+        for (Competitor competitor : competitors) {
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForRegatta,
+                    UUID.randomUUID(), competitor));
+        }
+    }
+    
+    @Override
+    public void deregisterCompetitor(Competitor competitor) {
+        deregisterCompetitors(Collections.singleton(competitor));
+    }
+    
+    @Override
+    public void deregisterCompetitors(Collection<Competitor> competitors) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        for (RegattaLogEvent event : regattaLog.getUnrevokedEventsDescending()) {
+            if (event instanceof RegisterCompetitorEvent) {
+                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
+                if (competitors.contains(registerEvent.getCompetitor())) {
+                    try {
+                        regattaLog.revokeEvent(regattaLogEventAuthorForRegatta, event,
+                                "unregistering competitor because no longer selected for registration");
+                    } catch (NotRevokableException e) {
+                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
+                    }
+                }
+            }
+        }
     }
 }

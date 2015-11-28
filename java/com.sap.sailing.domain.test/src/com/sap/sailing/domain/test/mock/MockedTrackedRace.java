@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
@@ -495,6 +496,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void registerCompetitor(Competitor competitor) {   
+                    }
+
+                    @Override
+                    public void registerCompetitors(Collection<Competitor> competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitor(Competitor competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitors(Collection<Competitor> competitor) {
                     }
                 };
             }

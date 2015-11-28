@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -249,6 +250,24 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void registerCompetitor(Competitor competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void registerCompetitors(Collection<Competitor> competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void deRegisterCompetitor(Competitor competitors, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void deRegisterCompetitors(Collection<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
