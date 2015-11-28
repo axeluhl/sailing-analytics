@@ -262,4 +262,19 @@ public interface RaceColumn extends Named {
      * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.
      */
     Iterable<Mark> getAllMarks(Fleet fleet);
+
+    /**
+     * Returns the competitor set registered in the race column's race log associated to the passed fleet. 
+     * If competitor registration in RaceLog is disabled or in case of a MetaLeaderboardColumn an empty set is returned.
+     * @param fleet
+     * @return competitors in RaceLog if registration enabled or empty set in case this column belongs to a {@link MetaLeaderboard}
+     */
+    Iterable<Competitor> getCompetitorsRegisteredInRacelog(Fleet fleet);
+
+    /**
+     * Checks whether competitor registration on RaceLog is enabled.
+     * @param fleet
+     * @return boolean if competitor registration on the RaceLog is enabled, false in case this column belongs to a {@link MetaLeaderboard} 
+     */
+    boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
 }
