@@ -1,12 +1,15 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
@@ -18,6 +21,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 
 /**
  * All {@link RaceColumnListener} events received from the underlying leaderboard's race columns
@@ -42,12 +46,6 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public RaceLog getRaceLog(Fleet fleet) {
         return null;
     }
-    
-    @Override
-    public RegattaLog getRegattaLog(Fleet fleet) {
-        return null;
-    }
-
 
     public Leaderboard getLeaderboard() {
         return leaderboard;
@@ -225,5 +223,26 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
             result = Collections.emptySet();
         }
         return result;
+    }
+
+    @Override
+    public RegattaLog getRegattaLog() {
+        return null;
+    }
+
+    @Override
+    public Iterable<Mark> getAllMarks() {
+        Set<Mark> marks = new HashSet<Mark>();
+        for (Fleet fleet: getFleets()) {
+            TrackedRace trackedRace = getTrackedRace(fleet);
+            Util.addAll(trackedRace.getMarks(), marks);
+        }
+        return marks;
+    }
+
+    @Override
+    public Iterable<Mark> getAllMarks(Fleet fleet) {
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        return trackedRace.getMarks();
     }
 }
