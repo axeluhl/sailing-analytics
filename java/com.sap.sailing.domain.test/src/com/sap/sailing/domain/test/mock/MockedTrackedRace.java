@@ -492,6 +492,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
                         return null;
                     }
+
+                    @Override
+                    public void registerCompetitor(Competitor competitor) {   
+                    }
                 };
             }
 

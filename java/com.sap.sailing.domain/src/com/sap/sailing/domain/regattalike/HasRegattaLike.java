@@ -18,4 +18,6 @@ public interface HasRegattaLike {
     RaceLog getRacelog(String raceColumnName, String fleetName);
     
     Iterable<Competitor> getCompetitorsRegisteredInRegattaLog();
+    
+    void registerCompetitor(Competitor competitor);
 }

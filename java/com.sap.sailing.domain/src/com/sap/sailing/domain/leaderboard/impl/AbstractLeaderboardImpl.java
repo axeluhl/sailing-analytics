@@ -5,11 +5,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -21,34 +25,41 @@ import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Abstract leaderboard implementation that already knows about carried points, competitor display name re-keying,
- * score corrections and result discarding rules. It manages a set of registered {@link RaceColumnListener}s and
- * is itself one. All events received this way are forwarded to all {@link RaceColumnListener}s subscribed. This can
- * be used to subscribe a concrete leaderboard implementation to the data structure providing the actual race columns
- * in order to be notified whenever the set of {@link TrackedRace}s attached to the leaderboard changes.
+ * Abstract leaderboard implementation that already knows about carried points, competitor display name re-keying, score
+ * corrections and result discarding rules. It manages a set of registered {@link RaceColumnListener}s and is itself
+ * one. All events received this way are forwarded to all {@link RaceColumnListener}s subscribed. This can be used to
+ * subscribe a concrete leaderboard implementation to the data structure providing the actual race columns in order to
+ * be notified whenever the set of {@link TrackedRace}s attached to the leaderboard changes.
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements HasRaceColumnsAndRegattaLike {
+public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements
+        HasRaceColumnsAndRegattaLike {
     private static final long serialVersionUID = -328091952760083438L;
-    
+
     /**
      * Cache for the combined competitors of this leaderboard; taken from the {@link TrackedRace#getRace() races of the
      * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
      */
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
 
+    private final AbstractLogEventAuthor regattaLogEventAuthorForAbstraceLeaderboard = new LogEventAuthorImpl(
+            AbstractLeaderboardImpl.class.getName(), 0);
+
     /**
-     * @param scoreComparator the comparator to use to compare basic scores, such as net points
-     * @param name must not be <code>null</code>
+     * @param scoreComparator
+     *            the comparator to use to compare basic scores, such as net points
+     * @param name
+     *            must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
     }
-    
+
     @Override
     public Fleet getFleet(String fleetName) {
         for (RaceColumn raceColumn : getRaceColumns()) {
@@ -83,7 +94,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public Iterable<Competitor> getAllCompetitors() {
         return getOrCreateCompetitorsProvider().getAllCompetitors();
     }
-    
+
     @Override
     public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
@@ -110,8 +121,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         return trackedRace == null ? 0
-                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race, trackedRace, timePoint, trackedRace
-                        .getRank(competitor, timePoint)) : 0;
+                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race,
+                        trackedRace, timePoint, trackedRace.getRank(competitor, timePoint)) : 0;
     }
 
     /**
@@ -139,9 +150,11 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
         while (betterCompetitorRank < rank && ci.hasNext()) {
             Competitor betterTrackedCompetitor = ci.next();
-            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn, timePoint);
-            if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE &&
-                    maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
+            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
+                    betterTrackedCompetitor, raceColumn, timePoint);
+            if (maxPointsReasonForBetterCompetitor != null
+                    && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
+                    && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
                 correctedRank--;
             }
             betterCompetitorRank++;
@@ -160,7 +173,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null) {
                     if (startOfLatestRace == null
-                            || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
+                            || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(
+                                    startOfLatestRace) > 0)) {
                         delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
                     }
                 }
@@ -168,9 +182,9 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         }
         return delayToLiveInMillisForLatestRace;
     }
-    
+
     @Override
-    public RaceLog getRacelog(String raceColumnName, String fleetName){
+    public RaceLog getRacelog(String raceColumnName, String fleetName) {
         RaceColumn raceColumn = getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         return raceColumn.getRaceLog(fleet);
@@ -179,7 +193,16 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(regattaLog);
+        CompetitorsInLogAnalyzer<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> analyzer = new CompetitorsInLogAnalyzer<>(
+                regattaLog);
         return analyzer.analyze();
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor) {
+        RegattaLog regattaLog = getRegattaLike().getRegattaLog();
+        TimePoint now = MillisecondsTimePoint.now();
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstraceLeaderboard,
+                UUID.randomUUID(), competitor));
     }
 }

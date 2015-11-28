@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -277,4 +278,13 @@ public interface RaceColumn extends Named {
      * @return boolean if competitor registration on the RaceLog is enabled, false in case this column belongs to a {@link MetaLeaderboard} 
      */
     boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
+
+    /**
+     * Registers a competitor on the the race column's race log associated to the passed fleet.
+     * @param competitor
+     * @param fleet
+     * @throws CompetitorRegistrationOnRaceLogDisabledException
+     * thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
+     */
+    void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 }

@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -244,5 +245,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     public Iterable<Mark> getAllMarks(Fleet fleet) {
         TrackedRace trackedRace = getTrackedRace(fleet);
         return trackedRace.getMarks();
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
 }
