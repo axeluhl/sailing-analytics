@@ -67,11 +67,13 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Rebuild all projects
 4. Run the Race Analysis Suite
   * Start the MongoDB
-  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the run dropdown
-  * Run "Security UI sdm" in the run dropdown
-  * Run "SailingGWT" in the run dropdown 
-5. Within the Race Analysis Suite
+  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
+  * Run "Security UI sdm" in the debug dropdown
+  * Run "SailingGWT" in the debug dropdown
+5. Import races within the Race Analysis Suite
+  * Choose "Security UI sdm" in the upper left corner of the "Development Mode" Tab in Eclipse and open "...Login.html" in your browser
   * Default Login: user "admin", password "admin"
+  * Choose "Sailing GWT" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
   * For TracTrac Events: (Date 27.11.2012) Use Live URI tcp://10.18.22.156:4412, Stored URI tcp://10.18.22.156:4413, JSON URL  http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php
   * Press List Races
 

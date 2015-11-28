@@ -38,22 +38,27 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
     private String boatClass;
     
+    protected String leaderboardName;
+
     /**
      * @param boatClass
-     *            The <code>boatClass</code> parameter describes the default shown boat class for new competitors. The <code>boatClass</code> parameter is <code>null</code>,
-     *            if you want to edit a competitor or there is no boat class for the new competitor.
+     *            The <code>boatClass</code> parameter describes the default shown boat class for new competitors. The
+     *            <code>boatClass</code> parameter is <code>null</code>, if you want to edit a competitor or there is no
+     *            boat class for the new competitor.
      */
     public AbstractCompetitorRegistrationsDialog(final SailingServiceAsync sailingService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, boolean editable,
-            DialogCallback<Set<CompetitorDTO>> callback, String boatClass) {
-        super(stringMessages.registerCompetitors(), /*messsage*/ null, stringMessages.save(), stringMessages.cancel(), /*validator*/ null, callback);
+            DialogCallback<Set<CompetitorDTO>> callback, String leaderboardName, String boatClass) {
+        super(stringMessages.registerCompetitors(), /* messsage */null, stringMessages.save(), stringMessages.cancel(), /* validator */
+                null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
-        this.errorReporter  = errorReporter;
+        this.errorReporter = errorReporter;
         this.editable = editable;
+        this.leaderboardName = leaderboardName;
         this.boatClass = boatClass;
     }
-    
+
     @Override
     protected Widget getAdditionalWidget() {
         FlowPanel mainPanel = new FlowPanel();
@@ -65,7 +70,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 openAddCompetitorDialog();
             }
         });
-        
+
         Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
         editCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
@@ -74,11 +79,25 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
             }
         });
 
+        final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
+        inviteCompetitorsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Set<CompetitorDTO> competitors = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
+
+                CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
+                        errorReporter);
+                helper.inviteCompetitors(competitors, leaderboardName);
+            }
+        });
+
         HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
-        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
-        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true);
+        allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
+                true, /* enablePager */true);
+        registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
+                true, /* enablePager */true);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();
@@ -104,20 +123,19 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         competitorRegistrationPanel.add(movePanel);
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
-        
+
         refreshCompetitors();
-        
         buttonPanel.add(addCompetitorButton);
-        buttonPanel.add(editCompetitorButton);        
+        buttonPanel.add(editCompetitorButton);
+        buttonPanel.add(inviteCompetitorsButton);
         mainPanel.add(buttonPanel);
         
         addAdditionalWidgets(mainPanel);
-
         mainPanel.add(competitorRegistrationPanel);
 
         return mainPanel;
     }
-    
+
     public abstract void addAdditionalWidgets(FlowPanel mainPanel);
 
     void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
@@ -137,7 +155,6 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
             CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
     }
-
 
     private void openAddCompetitorDialog() {
         new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(),
@@ -162,37 +179,40 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                     }
                 }, boatClass).show();
     }
-    
+
     private void openEditCompetitorDialog() {
-        //get currently selected competitor
-        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1){
+        // get currently selected competitor
+        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1) {
             // show some warning
         } else {
-            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet().iterator().next();
+            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet()
+                    .iterator().next();
             new CompetitorEditDialog(stringMessages, competitorToEdit,
                     new DataEntryDialog.DialogCallback<CompetitorDTO>() {
-                @Override
-                public void ok(CompetitorDTO competitor) {
-                    sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
                         @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+                        public void ok(CompetitorDTO competitor) {
+                            sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(CompetitorDTO updatedCompetitor) {
+                                    int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList()
+                                            .indexOf(competitorToEdit);
+                                    registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
+                                    registeredCompetitorsTable.getDataProvider().getList()
+                                            .add(editedCompetitorIndex, updatedCompetitor);
+                                    registeredCompetitorsTable.getDataProvider().refresh();
+                                }
+                            });
                         }
 
                         @Override
-                        public void onSuccess(CompetitorDTO updatedCompetitor) {
-                            int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList().indexOf(competitorToEdit);
-                            registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
-                            registeredCompetitorsTable.getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
-                            registeredCompetitorsTable.getDataProvider().refresh();
+                        public void cancel() {
                         }
-                    });
-                }
-
-                @Override
-                public void cancel() {
-                }
-            }, /* boatClass */ null).show();
+                    }, /* boatClass */null).show();
         }
     }
 
@@ -200,7 +220,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         registeredCompetitorsTable.getDataProvider().getList().clear();
         setRegisterableCompetitors();
     }
-    
+
     protected abstract void setRegisteredCompetitors();
     protected abstract void setRegisterableCompetitors();
     

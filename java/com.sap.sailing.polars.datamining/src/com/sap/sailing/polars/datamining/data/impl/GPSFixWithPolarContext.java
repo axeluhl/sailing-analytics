@@ -38,7 +38,7 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
 
     @Override
     public ClusterDTO getWindSpeedRange() {
-        return new ClusterDTO(windSpeedRangeGroup.getClusterFor(wind.getObject()).toString());
+        return new ClusterDTO(wind == null || wind.getObject() == null ? "null" : windSpeedRangeGroup.getClusterFor(wind.getObject()).toString());
     }
 
     @Override
