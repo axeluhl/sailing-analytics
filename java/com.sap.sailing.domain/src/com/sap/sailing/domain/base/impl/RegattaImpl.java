@@ -131,16 +131,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
-            CourseArea courseArea) {
-        this(name, boatClass, startDate, endDate, series, persistent, scoringScheme, id, courseArea,
-                OneDesignRankingMetric::new);
-    }
-
-    /**
-     * Constructs a regatta with an empty {@link RaceLogStore}.
-     */
-    public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate,
-            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
             CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, startDate, endDate, series,
                 persistent, scoringScheme, id, courseArea, /* useStartTimeInference */true, rankingMetricConstructor);
