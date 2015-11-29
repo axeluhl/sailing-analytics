@@ -54,7 +54,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
         leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "regatta", new int[] {});
-
+        regatta.registerCompetitor(competitor);
         log = leaderboard.getRegattaLike().getRegattaLog();
     }
 
