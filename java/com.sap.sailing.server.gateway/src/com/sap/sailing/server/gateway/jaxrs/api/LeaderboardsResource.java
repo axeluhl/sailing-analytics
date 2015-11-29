@@ -404,11 +404,12 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        // add registration if necessary
+        
         Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getCompetitorsRegisteredInRegattaLog();
         if (!registered.contains(mappedTo)) {
-            hasRegattaLike.getRegattaLike().getRegattaLog().add(
-                    new RegattaLogRegisterCompetitorEventImpl(now, now, author, UUID.randomUUID(), mappedTo));
+            logger.warning("Competitor found but not registered on a race of " + leaderboardName);
+            return Response.status(Status.BAD_REQUEST).entity("Competitor found but not registered on a race of " + leaderboardName)
+                    .type(MediaType.TEXT_PLAIN).build();
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
