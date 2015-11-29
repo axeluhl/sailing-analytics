@@ -13,7 +13,7 @@ DefineMarkEvent<VisitorT> {
 
     private static final long serialVersionUID = 5865183507521850320L;
 
-    private final Mark mark;
+    protected final Mark mark;
     
     public AbstractDefineMarkEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
             Serializable pId, Mark mark) {
