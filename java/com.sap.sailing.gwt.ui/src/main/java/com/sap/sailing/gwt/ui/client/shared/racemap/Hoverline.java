@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -18,25 +15,25 @@ import com.google.gwt.maps.client.overlays.PolylineOptions;
 class Hoverline {
     private static final double TRANSPARENT = 0;
     private static final double VISIBLE = 0.2d;
-    private static final Set<Hoverline> hoverlines = new HashSet<>();
+    
+    private static boolean transparent = true;
+    private static int weight = 10;
     
     private Polyline hoverline;
     private PolylineOptions options;
     
-    public Hoverline(final Polyline polyline, PolylineOptions options) {
-        hoverlines.add(this);
-        
+    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions) {        
         this.options = PolylineOptions.newInstance();
         
-        this.options.setClickable(options.getClickable());
-        this.options.setGeodesic(options.getGeodesic());
-        this.options.setMap(options.getMap());
-        this.options.setPath(options.getPath_JsArray());
-        this.options.setStrokeColor(options.getStrokeColor());
-        this.options.setStrokeOpacity(TRANSPARENT);
-        this.options.setStrokeWeight(10);
-        this.options.setVisible(options.getVisible());
-        this.options.setZindex(options.getZindex());
+        this.options.setClickable(polylineOptions.getClickable());
+        this.options.setGeodesic(polylineOptions.getGeodesic());
+        this.options.setMap(polylineOptions.getMap());
+        this.options.setPath(polylineOptions.getPath_JsArray());
+        this.options.setStrokeColor(polylineOptions.getStrokeColor());
+        this.options.setStrokeOpacity(Hoverline.transparent ? TRANSPARENT : VISIBLE);
+        this.options.setStrokeWeight(weight);
+        this.options.setVisible(polylineOptions.getVisible());
+        this.options.setZindex(polylineOptions.getZindex());
         
         hoverline = Polyline.newInstance(this.options);
         
@@ -45,8 +42,13 @@ class Hoverline {
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
+                options.setStrokeOpacity(Hoverline.getOpacity());
+                options.setStrokeWeight(weight);
+                hoverline.setOptions(options);
+                
                 hoverline.setMap(polyline.getMap());
                 hoverline.setPath(polyline.getPath());
+                
                 hoverline.setVisible(true);
             }
         });
@@ -65,17 +67,11 @@ class Hoverline {
     }
     
     public static void setTransparent(boolean transparent) {
-        for (Hoverline hoverline : hoverlines) {
-            hoverline.options.setStrokeOpacity(transparent ? TRANSPARENT : VISIBLE);
-            hoverline.hoverline.setOptions(hoverline.options);
-        }
+        Hoverline.transparent = transparent;
     }
     
     public static void setStrokeWeight(int weight) {
-        for (Hoverline hoverline : hoverlines) {
-            hoverline.options.setStrokeWeight(weight);
-            hoverline.hoverline.setOptions(hoverline.options);
-        }
+        Hoverline.weight = weight;
     }
     
     public MVCArray<LatLng> getPath() {
@@ -97,5 +93,9 @@ class Hoverline {
     
     public HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
         return this.hoverline.addMouseOverHandler(handler);
+    }
+    
+    private static double getOpacity() {
+        return Hoverline.transparent ? TRANSPARENT : VISIBLE;
     }
 }

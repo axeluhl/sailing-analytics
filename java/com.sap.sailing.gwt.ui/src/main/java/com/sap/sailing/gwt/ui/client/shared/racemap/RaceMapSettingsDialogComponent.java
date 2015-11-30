@@ -322,6 +322,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
                         && (valueToValidate.getBuoyZoneRadiusInMeters() < 0.0 || valueToValidate.getBuoyZoneRadiusInMeters() > 100.0)) {
                         errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), "0", "100");
+                } else if (valueToValidate.getHoverlineStrokeWeight() < 0d || valueToValidate.getHoverlineStrokeWeight() > 33d) {
+                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.bufferLineStrokeWeight(), "0", "33");
                 }
                 return errorMessage;
             }
