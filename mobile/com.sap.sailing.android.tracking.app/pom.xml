@@ -27,7 +27,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.android.gms</groupId>
+			<groupId>${play-services-gcm.groupId}</groupId>
 			<artifactId>play-services-gcm</artifactId>
 			<type>aar</type>
 		</dependency>

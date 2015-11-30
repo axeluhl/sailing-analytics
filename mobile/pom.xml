@@ -28,6 +28,7 @@
     <app-version></app-version>
     <android.support.version>22.1.1</android.support.version>
     <play.services.version>7.5.0</play.services.version>
+    <play-services-gcm.groupId>com.google.android.gms</play-services-gcm.groupId>
 
     <sign.keystore>../android-keystore/STG-debug.jks</sign.keystore>
     <sign.alias>stg_debug</sign.alias>
@@ -68,10 +69,16 @@
         <type>aar</type>
       </dependency>
       <dependency>
-        <groupId>com.google.android.gms</groupId>
+        <groupId>${play-services-gcm.groupId}</groupId>
         <artifactId>play-services-gcm</artifactId>
         <version>${play.services.version}</version>
         <type>aar</type>
+        <exclusions>
+          <exclusion>
+            <groupId>${play-services-gcm.groupId}</groupId>
+            <artifactId>play-services-base</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -285,6 +292,7 @@
         </activation>
         <properties>
             <build.tag>${env.BUILD_TAG} (${env.GIT_BRANCH} : ${env.GIT_COMMIT})</build.tag>
+            <play-services-gcm.groupId>com.google.download.android.gms</play-services-gcm.groupId>
         </properties>
         <dependencies>
           <dependency>
