@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class WaypointTableWrapper<S extends SelectionModel<WaypointDTO>> extends TableWrapper<WaypointDTO, S> {    
     public WaypointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
@@ -45,5 +46,11 @@ public class WaypointTableWrapper<S extends SelectionModel<WaypointDTO>> extends
             }
         };
         table.addColumn(passingInstructionsColumn, stringMessages.passingInstructions());
+    }
+    
+    @Override
+    public void refresh(Iterable<WaypointDTO> wayPoints) {
+        super.refresh(wayPoints);
+        ((RefreshableSelectionModel<WaypointDTO>) getSelectionModel()).refreshSelectionModel(wayPoints);
     }
 }

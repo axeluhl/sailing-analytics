@@ -8,11 +8,20 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class ControlPointTableWrapper<S extends SelectionModel<ControlPointDTO>> extends TableWrapper<ControlPointDTO, S> {    
     public ControlPointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
+                new EntityIdentityComparator<ControlPointDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(ControlPointDTO dto1, ControlPointDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                });
         TextColumn<ControlPointDTO> nameColumn = new TextColumn<ControlPointDTO>() {
             @Override
             public String getValue(ControlPointDTO d) {
@@ -34,5 +43,10 @@ public class ControlPointTableWrapper<S extends SelectionModel<ControlPointDTO>>
             }
         };
         table.addColumn(typeColumn, stringMessages.type());
+    }
+    @Override
+    public void refresh(Iterable<ControlPointDTO> controllPoints) {
+        super.refresh(controllPoints);
+        ((RefreshableSelectionModel<ControlPointDTO>) getSelectionModel()).refreshSelectionModel(controllPoints);
     }
 }

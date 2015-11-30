@@ -15,6 +15,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
     public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
@@ -99,5 +100,6 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
                 return o1.getName().compareTo(o2.getName());
             }
         });
+        ((RefreshableSelectionModel<MarkDTO>) getSelectionModel()).refreshSelectionModel(marks);
     }
 }
