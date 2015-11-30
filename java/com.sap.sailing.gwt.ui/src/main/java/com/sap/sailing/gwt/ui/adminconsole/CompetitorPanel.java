@@ -8,7 +8,6 @@ import java.util.Set;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -22,9 +21,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -81,6 +78,7 @@ public class CompetitorPanel extends SimplePanel {
         });
         buttonPanel.add(allowReloadButton);
         Button addCompetitorButton = new Button(stringMessages.add());
+        addCompetitorButton.ensureDebugId("AddCompetitorButton");
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -108,27 +106,8 @@ public class CompetitorPanel extends SimplePanel {
                 public void onClick(ClickEvent event) {
                     Set<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
 
-                    if (competitors.size() == 0){
-                        Window.alert(stringMessages.selectAtLeastOneCompetitorForInvitation());
-                    } else {
-                        boolean emailProvidedForAll = isEmailProvidedForAll(competitors);
-
-                        if (emailProvidedForAll) {
-                            openChooseEventDialogAndSendMails(competitors);
-                        } else {
-                            Window.alert(stringMessages.notAllCompetitorsProvideEmail());
-                        }
-                    }
-                }
-
-                private boolean isEmailProvidedForAll(Iterable<CompetitorDTO> allCompetitors) {
-                    for (CompetitorDTO competitor : allCompetitors) {
-                        if (!competitor.hasEmail()) {
-                            return false;
-                        }
-                    }
-
-                    return true;
+                    CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
+                    helper.inviteCompetitors(competitors, leaderboardName);
                 }
             });
             buttonPanel.add(inviteCompetitorsButton);
@@ -188,7 +167,7 @@ public class CompetitorPanel extends SimplePanel {
     }
 
     private void openEditCompetitorDialog(CompetitorDTO competitor) {
-        new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
@@ -207,38 +186,9 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void cancel() {
             }
-        }).show();
-    }
-    
-    private String getLocaleInfo() {
-        return LocaleInfo.getCurrentLocale().getLocaleName();
-    }
-
-    private void openChooseEventDialogAndSendMails(final Set<CompetitorDTO> competitors) {
-        new SelectEventAndHostnameDialog(sailingService, stringMessages, errorReporter, leaderboardName, new DialogCallback<Pair<EventDTO, String>>() {
-
-            @Override
-            public void ok(Pair<EventDTO, String> result) {
-                sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
-                        competitors, getLocaleInfo(), new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.alert(stringMessages.sendingMailsSuccessful());
-                            }
-                        });
-            }
-
-            @Override
-            public void cancel() {
-                
-            }
-        }).show();
+        }, /* boat class to be used from CompetitorDTO */ null);
+        dialog.ensureDebugId("CompetitorEditDialog");
+        dialog.show();
     }
 
     public void refreshCompetitorList() {

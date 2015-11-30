@@ -15,15 +15,15 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.ImageDescriptorImpl;
 import com.sap.sse.common.media.ImageSize;
-import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.media.MediaUtils;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.media.VideoDescriptor;
-import com.sap.sse.common.media.VideoDescriptorImpl;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.MediaDescriptor;
+import com.sap.sse.shared.media.MediaUtils;
+import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
+import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 
 public abstract class EventBaseImpl implements EventBase {
     private static final long serialVersionUID = -5749964088848611074L;

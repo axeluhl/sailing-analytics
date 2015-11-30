@@ -240,7 +240,7 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
     }
 
     private Pair<Position, Position> retrieveStartlineMarkPositionsFromStartLineWayPoint(Waypoint startLineWayPoint) {
-        Pair<Position, Position> startLineMarkPositions = null;
+        Pair<Position, Position> result = null;
         Iterator<Mark> markIterator = startLineWayPoint.getMarks().iterator();
         if (markIterator.hasNext()) {
             Mark startboat = (Mark) markIterator.next();
@@ -249,10 +249,12 @@ public class RibDashboardServiceImpl extends RemoteServiceServlet implements Rib
                 TimePoint now = MillisecondsTimePoint.now();
                 Position startBoatPosition = getPositionFromMarkAtTimePoint(runningRace, startboat, now);
                 Position pinEndPosition = getPositionFromMarkAtTimePoint(runningRace, pinEnd, now);
-                return  new Pair<Position, Position>(startBoatPosition, pinEndPosition);
+                if(startBoatPosition != null && pinEndPosition != null) {
+                    result = new Pair<Position, Position>(startBoatPosition, pinEndPosition);                    
+                }
             }
         }
-        return startLineMarkPositions;
+        return result;
     }
 
     private Position getPositionFromMarkAtTimePoint(TrackedRace trackedRace, Mark mark, TimePoint timePoint) {

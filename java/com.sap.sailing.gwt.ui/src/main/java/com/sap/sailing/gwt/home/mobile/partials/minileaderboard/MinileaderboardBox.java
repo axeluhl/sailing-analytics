@@ -10,15 +10,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class MinileaderboardBox extends Composite implements RefreshableWidget<GetMiniLeaderboardDTO> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -31,13 +31,10 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
     
-    private boolean showIfEmpty = false;
-
     public MinileaderboardBox(boolean isOverall) {
         initWidget(uiBinder.createAndBindUi(this));
         headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
         headerUi.setInfoText(StringMessages.INSTANCE.details());
-        setVisible(false);
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
@@ -45,21 +42,15 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         headerUi.setClickAction(placeNavigation);
     }
     
-    public void setShowIfEmpty(boolean showIfEmpty) {
-        this.showIfEmpty = showIfEmpty;
-    }
-
     @Override
     public void setData(final GetMiniLeaderboardDTO data) {
         itemContainerUi.clearContent();
         
         if(data.getItems().isEmpty()) {
-            setVisible(showIfEmpty);
             itemContainerUi.addContent(getNoResultsInfoWidget());
             return;
         }
         
-        setVisible(true);
         headerUi.setLabelType(data.isLive() ? LabelType.LIVE : LabelType.NONE);
         
         if(data.getScoreCorrectionText() != null || data.getLastScoreUpdate() != null) {

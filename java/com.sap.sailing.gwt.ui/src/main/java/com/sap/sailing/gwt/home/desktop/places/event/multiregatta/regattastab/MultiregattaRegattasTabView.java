@@ -9,21 +9,22 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.dispatch.client.SortedSetResult;
+import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForEventAction;
+import com.sap.sailing.gwt.home.communication.event.GetRegattaListViewAction;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
-import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
+import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.SortedSetResult;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetLiveRacesForEventAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetRegattaListViewAction;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaWithProgressDTO;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -60,15 +61,15 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, true);
         MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();
-        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.allBoatClasses(), regattaFilterList);
+        boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.all(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, true);
         initWidget(ourUiBinder.createAndBindUi(this));
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
-        RefreshManager refreshManager = new RefreshManager(this, contentArea, currentPresenter.getDispatch());
-        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getCtx().getEventDTO().getId()));
+        RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
+        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForEventAction(currentPresenter.getEventDTO().getId()));
         
-        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getCtx().getEventDTO().getId()));
+        refreshManager.add(regattaFilterList, new GetRegattaListViewAction(currentPresenter.getEventDTO().getId()));
     }
     
     @Override

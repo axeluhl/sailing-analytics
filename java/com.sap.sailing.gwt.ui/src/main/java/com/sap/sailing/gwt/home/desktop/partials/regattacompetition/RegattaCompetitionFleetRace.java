@@ -3,16 +3,13 @@ package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.UIObject;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.ui.shared.race.SimpleRaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.AbstractRegattaCompetitionFleetRace;
 
-public class RegattaCompetitionFleetRace extends UIObject {
+public class RegattaCompetitionFleetRace extends AbstractRegattaCompetitionFleetRace {
 
     private static RegattaCompetitionFleetRaceUiBinder uiBinder = GWT.create(RegattaCompetitionFleetRaceUiBinder.class);
 
@@ -20,37 +17,51 @@ public class RegattaCompetitionFleetRace extends UIObject {
     }
     
     @UiField RegattaCompetitionResources local_res;
-    @UiField StringMessages i18n;
     @UiField DivElement raceNameUi;
     @UiField DivElement raceStateUi;
     @UiField DivElement raceDateUi;
-    private final AnchorElement anchorUi;
 
     public RegattaCompetitionFleetRace(SimpleRaceMetadataDTO race, String raceViewerUrl) {
-        anchorUi = uiBinder.createAndBindUi(this);
-        if (raceViewerUrl != null) {
-            anchorUi.setTarget("_blank");
-            anchorUi.setHref(raceViewerUrl);
-        }
-        setupRaceState(race.getTrackingState(), race.getViewState());
-        this.raceNameUi.setInnerText(race.getRaceName());
-        if (race.getStart() != null) {
-            this.raceDateUi.setInnerText(DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter.render(race.getStart())); 
-        }
-        setElement(anchorUi);
+        super(race, raceViewerUrl);
     }
     
-    private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-        if (viewState == RaceViewState.RUNNING) {
-            anchorUi.addClassName(local_res.css().fleet_races_racelive());
-            raceStateUi.setInnerText(isUntrackedRace ? i18n.live() : i18n.actionWatch());
-        } else if (viewState == RaceViewState.PLANNED || viewState == RaceViewState.SCHEDULED) {
-            anchorUi.addClassName(local_res.css().fleet_races_raceplanned());
-            raceStateUi.setInnerText(i18n.raceIsPlanned());
-        } else {
-            raceStateUi.setInnerText(isUntrackedRace ? i18n.finished() : i18n.actionAnalyze());
-        }
-        setStyleName(anchorUi, local_res.css().fleet_races_raceuntracked(), isUntrackedRace);
+    @Override
+    public void doFilter(boolean filter) {
+        setVisible(!filter);
+    }
+
+    @Override
+    protected AnchorElement getMainUiElement() {
+        return uiBinder.createAndBindUi(this);
+    }
+
+    @Override
+    protected Element getRaceNameUiElement() {
+        return raceNameUi;
+    }
+    
+    @Override
+    protected Element getRaceStateUiElement() {
+        return raceStateUi;
+    }
+
+    @Override
+    protected Element getRaceDateUiElement() {
+        return raceDateUi;
+    }
+
+    @Override
+    protected String getRaceLiveStyleName() {
+        return local_res.css().fleet_races_racelive();
+    }
+
+    @Override
+    protected String getRacePlannedStyleName() {
+        return local_res.css().fleet_races_raceplanned();
+    }
+
+    @Override
+    protected String getRaceUntrackedStyleName() {
+        return local_res.css().fleet_races_raceuntracked();
     }
 }
