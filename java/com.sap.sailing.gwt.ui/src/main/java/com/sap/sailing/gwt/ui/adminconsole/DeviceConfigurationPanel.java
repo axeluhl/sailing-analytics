@@ -58,7 +58,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements /*Selection
         this.errorReporter = reporter;
         
         this.refreshableMultiSelectionModel = new RefreshableMultiSelectionModel<>();
-        //TODO Create an appropriate EntityIdentityComparator or define an .eqauls() method for DeviceConfigurationMatcherDTO
+        //TODO create an appropriate EntityIdentityComparator or define an .eqauls() method for DeviceConfigurationMatcherDTO
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
 
             @Override
