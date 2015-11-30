@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
@@ -53,6 +52,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -76,6 +76,7 @@ public class MediaPanel extends FlowPanel {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
     private Date latestDate;
+    private RefreshableSingleSelectionModel<MediaTrack> refreshableSelectionModel;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -143,6 +144,7 @@ public class MediaPanel extends FlowPanel {
                 allMediaTracks.addAll(mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(allMediaTracks);
                 mediaTrackListDataProvider.refresh();
+                refreshableSelectionModel.refreshSelectionModel(allMediaTracks);
             }
         });
         
@@ -164,12 +166,12 @@ public class MediaPanel extends FlowPanel {
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        final SelectionModel<MediaTrack> selectionModel = new SingleSelectionModel<MediaTrack>();
-        mediaTracksTable.setSelectionModel(selectionModel,
+        refreshableSelectionModel = new RefreshableSingleSelectionModel<>();
+        mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
 
         // Initialize the columns.
-        initTableColumns(selectionModel, sortHandler);
+        initTableColumns(refreshableSelectionModel, sortHandler);
 
         mediaTrackListDataProvider.addDataDisplay(mediaTracksTable);
         add(mediaTracksTable);

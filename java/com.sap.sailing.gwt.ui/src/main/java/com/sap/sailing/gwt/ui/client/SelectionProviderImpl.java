@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client;
+/*package com.sap.sailing.gwt.ui.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,11 +63,11 @@ public class SelectionProviderImpl<T> implements SelectionProvider<T> {
         }
     }
     
-    /**
+    *//**
      * Sets the universe of all items from which this selection model may select. An equal list will subsequently be
      * returned by {@link #getAllItems()}. Items from the {@link #getSelectedItems() selection} not in
      * <code>newAllItems</code> are removed from the selection. If this happens, the selection listeners are notified.
-     */
+     *//*
     @Override
     public void setAllItems(List<T> newAllItems) {
         allItems.clear();
@@ -95,3 +95,4 @@ public class SelectionProviderImpl<T> implements SelectionProvider<T> {
         return hasMultiSelection;
     }
 }
+*/

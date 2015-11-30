@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,20 +14,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class DeviceConfigurationListComposite extends Composite {
 
     protected static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
     
-    private final SelectionModel<DeviceConfigurationMatcherDTO> configurationSelectionModel;
+    private final RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableConfigurationSelectionModel;
     private final CellTable<DeviceConfigurationMatcherDTO> configurationTable;
     protected ListDataProvider<DeviceConfigurationMatcherDTO> configurationsDataProvider;
     
@@ -42,7 +38,8 @@ public class DeviceConfigurationListComposite extends Composite {
     protected final StringMessages stringMessages;
 
     public DeviceConfigurationListComposite(final SailingServiceAsync sailingService, 
-            final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
+            /*final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider,*/
+            final RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableSelectionModel,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -62,14 +59,14 @@ public class DeviceConfigurationListComposite extends Composite {
         configurationTable = createConfigurationTable();
         configurationTable.setVisible(true);
 
-        configurationSelectionModel = new MultiSelectionModel<DeviceConfigurationMatcherDTO>();
-        configurationSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        refreshableConfigurationSelectionModel = refreshableSelectionModel;
+        /*refreshableConfigurationSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 selectionProvider.setSelection(getSelectedConfigurations());
             }
-        });
-        configurationTable.setSelectionModel(configurationSelectionModel);
+        });*/
+        configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
         panel.add(configurationTable);
 
         initWidget(mainPanel);
@@ -89,6 +86,7 @@ public class DeviceConfigurationListComposite extends Composite {
                 ColumnSortEvent.fire(configurationTable, configurationTable.getColumnSortList());
                 
                 noConfigurationsLabel.setVisible(false);
+                refreshableConfigurationSelectionModel.refreshSelectionModel(result);
             }
             
             @Override
@@ -97,6 +95,7 @@ public class DeviceConfigurationListComposite extends Composite {
                 noConfigurationsLabel.setVisible(true);
                 configurationTable.setVisible(false);
                 errorReporter.reportError("Error retrieving configuration data from server: " + caught.getMessage());
+                refreshableConfigurationSelectionModel.clear();
             }
         });
     }
@@ -145,16 +144,16 @@ public class DeviceConfigurationListComposite extends Composite {
         table.addColumn(identifierNameColumn, stringMessages.device());
         return table;
     }
-
+/*
     private List<DeviceConfigurationMatcherDTO> getSelectedConfigurations() {
         List<DeviceConfigurationMatcherDTO> result = new ArrayList<DeviceConfigurationMatcherDTO>();
         if (configurationsDataProvider != null) {
             for (DeviceConfigurationMatcherDTO regatta : configurationsDataProvider.getList()) {
-                if (configurationSelectionModel.isSelected(regatta)) {
+                if (refreshableConfigurationSelectionModel.isSelected(regatta)) {
                     result.add(regatta);
                 }
             }
         }
         return result;
-    }
+    }*/
 }

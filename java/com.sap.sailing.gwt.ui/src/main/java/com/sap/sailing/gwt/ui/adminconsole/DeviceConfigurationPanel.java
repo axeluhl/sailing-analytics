@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,20 +13,21 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationDetailComposite.DeviceConfigurationCloneListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.SelectionProvider;
-import com.sap.sailing.gwt.ui.client.SelectionProviderImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO>, DeviceConfigurationCloneListener {
+public class DeviceConfigurationPanel extends SimplePanel implements /*SelectionChangeListener<DeviceConfigurationMatcherDTO>,*/ DeviceConfigurationCloneListener {
 
     public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
         if (clientIdentifiers.size() == 1) {
@@ -48,15 +49,35 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
     
-    private final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider;
+    //private final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider;
+    private final RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> refreshableMultiSelectionModel;
 
     public DeviceConfigurationPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter reporter) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
         
-        this.selectionProvider = new SelectionProviderImpl<DeviceConfigurationMatcherDTO>(true);
-        this.selectionProvider.addSelectionChangeListener(this);
+        this.refreshableMultiSelectionModel = new RefreshableMultiSelectionModel<>();
+        //TODO Create an appropriate EntityIdentityComparator or define an .eqauls() method for DeviceConfigurationMatcherDTO
+        refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Set<DeviceConfigurationMatcherDTO> selectedConfigurations = refreshableMultiSelectionModel
+                        .getSelectedSet();
+                if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
+                    detailComposite.setConfiguration(selectedConfigurations.iterator().next());
+                    detailComposite.setVisible(true);
+                } else {
+                    detailComposite.setConfiguration(null);
+                    detailComposite.setVisible(false);
+                }
+                removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
+
+            }
+        });
+        //this.selectionProvider = new SelectionProviderImpl<DeviceConfigurationMatcherDTO>(true);
+        //this.selectionProvider.addSelectionChangeListener(this);
         
         setupUi();
     }
@@ -96,8 +117,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
             
             @Override
             public void onClick(ClickEvent event) {
-                detailComposite.setConfiguration(null);
-                detailComposite.setVisible(false);
                 listComposite.refreshTable();
             }
         });
@@ -110,7 +129,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
         
-        listComposite = createListComposite(sailingService, selectionProvider, errorReporter, stringMessages);
+        listComposite = createListComposite(sailingService, refreshableMultiSelectionModel, errorReporter, stringMessages);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
@@ -118,18 +137,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         detailComposite = createDetailComposite(sailingService, errorReporter, stringMessages, this);
         detailComposite.setVisible(false);
         grid.setWidget(0, 1, detailComposite);
-    }
-
-    @Override
-    public void onSelectionChange(List<DeviceConfigurationMatcherDTO> selectedConfigurations) {
-        if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
-            detailComposite.setConfiguration(selectedConfigurations.iterator().next());
-            detailComposite.setVisible(true);
-        } else {
-            detailComposite.setConfiguration(null);
-            detailComposite.setVisible(false);
-        }
-        removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
     }
     
     private void createConfiguration() {
@@ -161,7 +168,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
                     @Override
                     public void onSuccess(DeviceConfigurationMatcherDTO newMatcher) {
                         listComposite.refreshTable();
-                        onSelectionChange(Arrays.asList(newMatcher));
+                        refreshableMultiSelectionModel.clear();
+                        refreshableMultiSelectionModel.setSelected(newMatcher, true);
                     }
                     
                     @Override
@@ -182,9 +190,9 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
         return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
     }
 
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
+    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, RefreshableSelectionModel<DeviceConfigurationMatcherDTO> selectionModel,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationListComposite(sailingService, selectionProvider, 
+        return new DeviceConfigurationListComposite(sailingService, selectionModel, 
                 errorReporter, stringMessages);
     }
 
@@ -196,7 +204,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
     private void removeConfiguration() {
         detailComposite.setConfiguration(null);
         detailComposite.setVisible(false);
-        for (DeviceConfigurationMatcherDTO identifier : selectionProvider.getSelectedItems()) {
+        for (DeviceConfigurationMatcherDTO identifier : refreshableMultiSelectionModel.getSelectedSet()) {
             sailingService.removeDeviceConfiguration(identifier.type, identifier.clients, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
