@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -36,7 +37,7 @@ public class CompetitorPanel extends SimplePanel {
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> competitorTable;
-    private final MultiSelectionModel<CompetitorDTO> competitorSelectionModel;
+    private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
     private final String leaderboardName;
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
@@ -52,7 +53,7 @@ public class CompetitorPanel extends SimplePanel {
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
-        this.competitorSelectionModel = competitorTable.getSelectionModel();
+        this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -73,7 +74,7 @@ public class CompetitorPanel extends SimplePanel {
         allowReloadButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                allowUpdate(competitorSelectionModel.getSelectedSet());
+                allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet());
             }
         });
         buttonPanel.add(allowReloadButton);
@@ -92,7 +93,7 @@ public class CompetitorPanel extends SimplePanel {
             @Override
             public void onClick(ClickEvent event) {
                 for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
-                    competitorSelectionModel.setSelected(c, true);
+                    refreshableCompetitorSelectionModel.setSelected(c, true);
                 }
             }
         });
@@ -104,7 +105,7 @@ public class CompetitorPanel extends SimplePanel {
             inviteCompetitorsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    Set<CompetitorDTO> competitors = competitorSelectionModel.getSelectedSet();
+                    Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
 
                     CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
                     helper.inviteCompetitors(competitors, leaderboardName);
@@ -132,13 +133,13 @@ public class CompetitorPanel extends SimplePanel {
 
         competitorTable.getTable().addColumn(competitorActionColumn, stringMessages.actions());
         mainPanel.add(competitorTable);
-        competitorSelectionModel.addSelectionChangeHandler(new Handler() {
+        refreshableCompetitorSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
+                allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
             }
         });
-        allowReloadButton.setEnabled(!competitorSelectionModel.getSelectedSet().isEmpty());
+        allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
 
         if (leaderboardName != null) {
             refreshCompetitorList();

@@ -24,6 +24,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
@@ -31,7 +33,14 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+                new EntityIdentityComparator<CompetitorDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                });
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table
@@ -244,6 +253,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     refreshCompetitorList(result);
+                    ((RefreshableSelectionModel<CompetitorDTO>) getSelectionModel()).refreshSelectionModel(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });
@@ -259,6 +269,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
                     refreshCompetitorList(result);
+                    ((RefreshableSelectionModel<CompetitorDTO>) getSelectionModel()).refreshSelectionModel(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });
