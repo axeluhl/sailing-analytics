@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T> {
@@ -38,7 +39,8 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                 }
             }
         }
-        setEventScheduled(true);
-        fireSelectionChangeEvent();
+        //setEventScheduled(true);
+        //fireSelectionChangeEvent();
+        SelectionChangeEvent.fire(this);
     }
 }

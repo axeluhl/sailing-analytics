@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
@@ -44,8 +45,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
                 }
                 setSelected(it, isSelected);
             }
-            setEventScheduled(true);
-            fireSelectionChangeEvent();
+            //setEventScheduled(true);
+            //fireSelectionChangeEvent();
+            SelectionChangeEvent.fire(this);
         }
     }
 }

@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
-
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,7 +28,6 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -55,6 +52,8 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -76,7 +75,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> groupsFilterablePanel;
     private Button removeButton;
     private CellTable<LeaderboardGroupDTO> groupsTable;
-    private MultiSelectionModel<LeaderboardGroupDTO> groupsSelectionModel;
+    private RefreshableMultiSelectionModel<LeaderboardGroupDTO> refreshableGroupsSelectionModel;
     /**
      * True, if only one group is selected in the {@link #groupsSelectionModel}.
      */
@@ -84,7 +83,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private ListDataProvider<LeaderboardGroupDTO> groupsProvider;
 
     private CellTable<StrippedLeaderboardDTO> groupDetailsTable;
-    private MultiSelectionModel<StrippedLeaderboardDTO> groupDetailsSelectionModel;
+    private RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableGroupDetailsSelectionModel;
     private ListDataProvider<StrippedLeaderboardDTO> groupDetailsProvider;
     private Button editDescriptionButton;
     private Button abortDescriptionButton;
@@ -95,7 +94,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> leaderboardsFilterablePanel;
     private CellTable<StrippedLeaderboardDTO> leaderboardsTable;
-    private MultiSelectionModel<StrippedLeaderboardDTO> leaderboardsSelectionModel;
+    private RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardsSelectionModel;
     private ListDataProvider<StrippedLeaderboardDTO> leaderboardsProvider;
 
     private Button moveToLeaderboardsButton;
@@ -198,8 +197,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                 return leaderboardsProvider;
                             }
         };
-        leaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
-        leaderboardsTable.setSelectionModel(leaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
+        refreshableLeaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
+        leaderboardsTable.setSelectionModel(refreshableLeaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
@@ -258,10 +257,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsTable.addColumn(leaderboardsNameColumn, stringMessages.leaderboardName());
         leaderboardsTable.addColumn(leaderboardsRacesColumn, stringMessages.races());
 
-        leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        refreshableLeaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<StrippedLeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
+                Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
                 moveToGroupButton.setEnabled(selectedLeaderboards != null && selectedLeaderboards.size() > 0);
             }
         });
@@ -377,17 +376,17 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupDetailsTable.addColumn(groupDetailsNameColumn, stringMessages.leaderboardName());
         groupDetailsTable.addColumn(groupDetailsRacesColumn, stringMessages.races());
 
-        groupDetailsSelectionModel = groupDetailsTableSelectionColumn.getSelectionModel();
-        groupDetailsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        refreshableGroupDetailsSelectionModel = groupDetailsTableSelectionColumn.getSelectionModel();
+        refreshableGroupDetailsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<StrippedLeaderboardDTO> selectedLeaderboardsInGroup = groupDetailsSelectionModel.getSelectedSet();
+                Set<StrippedLeaderboardDTO> selectedLeaderboardsInGroup = refreshableGroupDetailsSelectionModel.getSelectedSet();
                 moveToLeaderboardsButton.setEnabled(selectedLeaderboardsInGroup != null && !selectedLeaderboardsInGroup.isEmpty());
                 leaderboardDownButton.setEnabled(selectedLeaderboardsInGroup != null && selectedLeaderboardsInGroup.size() == 1);
                 leaderboardUpButton.setEnabled(selectedLeaderboardsInGroup != null && selectedLeaderboardsInGroup.size() == 1);
             }
         });
-        groupDetailsTable.setSelectionModel(groupDetailsSelectionModel, groupDetailsTableSelectionColumn.getSelectionManager());
+        groupDetailsTable.setSelectionModel(refreshableGroupDetailsSelectionModel, groupDetailsTableSelectionColumn.getSelectionManager());
         groupDetailsPanel.add(groupDetailsTable);
 
         //Create details functionality
@@ -466,12 +465,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             @Override
             public void onClick(ClickEvent event) {
                 StringBuilder messageBuilder = new StringBuilder("Do you really want to remove the leaderboard groups:\n");
-                for (LeaderboardGroupDTO group : groupsSelectionModel.getSelectedSet()) {
+                for (LeaderboardGroupDTO group : refreshableGroupsSelectionModel.getSelectedSet()) {
                     messageBuilder.append("\n" + group.getName());
                 }
                 
                 if (Window.confirm(messageBuilder.toString())) {
-                    removeLeaderboardGroups(groupsSelectionModel.getSelectedSet());
+                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -570,14 +569,21 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 return group.getName();
             }
         };
-        groupsSelectionModel = new MultiSelectionModel<LeaderboardGroupDTO>(groupsKeyProvider);
-        groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        refreshableGroupsSelectionModel = new RefreshableMultiSelectionModel<>(groupsKeyProvider,
+                new EntityIdentityComparator<LeaderboardGroupDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
+                        return dto1.getId().equals(dto2.getId());
+                    }
+                });
+        refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 groupSelectionChanged();
             }
         });
-        groupsTable.setSelectionModel(groupsSelectionModel);
+        groupsTable.setSelectionModel(refreshableGroupsSelectionModel);
 
         groupsProvider.addDataDisplay(groupsTable);
         leaderboardGroupsContentPanel.add(groupsTable);
@@ -593,18 +599,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         }
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
         
-        UUID id = getSelectedGroup().getId();
-        if (id != null) {
-            groupsSelectionModel.clear();
-            for (LeaderboardGroupDTO leaderboardGroup : availableLeaderboardGroups) {
-                if (id.equals(leaderboardGroup.getId())) {
-                    groupsSelectionModel.setSelected(leaderboardGroup, true);
-                } else {
-                    groupsSelectionModel.setSelected(leaderboardGroup, false);
-                }
-            }
-            groupSelectionChanged();
-        }
+        refreshableGroupsSelectionModel.refreshSelectionModel(groups);
     }
 
     @Override
@@ -624,7 +619,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
      */
     private void refreshLeaderboardsList() {
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-        final Set<StrippedLeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
+        final Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableLeaderboardsSelectionModel.getSelectedSet();
         if (isSingleGroupSelected && selectedGroup != null) {
             sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
                     new AsyncCallback<List<StrippedLeaderboardDTO>>() {
@@ -644,9 +639,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
                             leaderboardsFilterablePanel.getTextBox().setText("");
                             leaderboardsFilterablePanel.updateAll(availableLeaderboards);
-                            leaderboardsSelectionModel.clear();
+                            refreshableLeaderboardsSelectionModel.clear();
                             for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
-                                leaderboardsSelectionModel.setSelected(leaderboard, true);
+                                refreshableLeaderboardsSelectionModel.setSelected(leaderboard, true);
                             }
                         }
                     }));
@@ -682,8 +677,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             public void onSuccess(LeaderboardGroupDTO newGroup) {
                                 availableLeaderboardGroups.add(newGroup);
                                 groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-                                groupsSelectionModel.clear();
-                                groupsSelectionModel.setSelected(newGroup, true);
+                                refreshableGroupsSelectionModel.clear();
+                                refreshableGroupsSelectionModel.setSelected(newGroup, true);
                                 leaderboardGroupsRefresher.updateLeaderboardGroups(availableLeaderboardGroups, LeaderboardGroupConfigPanel.this);
                             }
                         }));
@@ -713,7 +708,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                         // if the leaderboard is selected, de-select equality/hashCode may change) and select again when done
                                         final boolean wasSelected = Util.equalsWithNull(groupToUpdate, getSelectedGroup());
                                         if (wasSelected) {
-                                            groupsSelectionModel.setSelected(groupToUpdate, false);
+                                            refreshableGroupsSelectionModel.setSelected(groupToUpdate, false);
                                         }
                                         groupToUpdate.setName(updateDescriptor.getName());
                                         groupToUpdate.description = updateDescriptor.getDescription();
@@ -727,7 +722,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                                             groupsProvider.getList().set(displayedIndex, groupToUpdate);
                                         }
                                         if (wasSelected) {
-                                            groupsSelectionModel.setSelected(groupToUpdate, true);
+                                            refreshableGroupsSelectionModel.setSelected(groupToUpdate, true);
                                         }
                                     }
                                 }
@@ -807,13 +802,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private void removeGroupFromTable(final LeaderboardGroupDTO group) {
         availableLeaderboardGroups.remove(group);
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-        groupsSelectionModel.setSelected(group, false);
+        refreshableGroupsSelectionModel.setSelected(group, false);
     }
 
 
 
     private void groupSelectionChanged() {
-        isSingleGroupSelected = groupsSelectionModel.getSelectedSet().size() == 1;
+        isSingleGroupSelected = refreshableGroupsSelectionModel.getSelectedSet().size() == 1;
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
         removeButton.setEnabled(selectedGroup != null);
         splitPanel.setVisible(isSingleGroupSelected && selectedGroup != null);
@@ -823,13 +818,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             descriptionTextArea.setText(selectedGroup.description);
             setDescriptionEditable(false);
 
-            groupDetailsSelectionModel.clear();
+            refreshableGroupDetailsSelectionModel.refreshSelectionModel(availableLeaderboards);
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
             groupDetailsProvider.refresh();
 
             // Tell leaderboards filter panel to use all available leaderboards except the leaderboards of the group from the list
-            leaderboardsSelectionModel.clear();
+            refreshableLeaderboardsSelectionModel.clear();
             ArrayList<StrippedLeaderboardDTO> allLeaderboardsExceptThoseOfSelectedLeaderboardGroup = new ArrayList<>(availableLeaderboards);
             allLeaderboardsExceptThoseOfSelectedLeaderboardGroup.removeAll(selectedGroup.leaderboards);
             leaderboardsFilterablePanel.updateAll(allLeaderboardsExceptThoseOfSelectedLeaderboardGroup);
@@ -843,12 +838,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void moveToLeaderboards() {
         LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-        Set<StrippedLeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableGroupDetailsSelectionModel.getSelectedSet();
         if (isSingleGroupSelected && selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() > 0) {
             for (StrippedLeaderboardDTO leaderboard : selectedLeaderboards) {
                 selectedGroup.leaderboards.remove(leaderboard);
                 groupDetailsProvider.getList().remove(leaderboard);
-                groupDetailsSelectionModel.setSelected(leaderboard, false);
+                refreshableGroupDetailsSelectionModel.setSelected(leaderboard, false);
                 leaderboardsProvider.getList().add(leaderboard);
             }
             updateGroup(selectedGroup);
@@ -860,7 +855,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void moveToGroup() {
         final LeaderboardGroupDTO selectedGroup = getSelectedGroup();
-        ArrayList<StrippedLeaderboardDTO> selectedLeaderboards = new ArrayList<StrippedLeaderboardDTO>(leaderboardsSelectionModel.getSelectedSet());
+        ArrayList<StrippedLeaderboardDTO> selectedLeaderboards = new ArrayList<StrippedLeaderboardDTO>(refreshableLeaderboardsSelectionModel.getSelectedSet());
         if (isSingleGroupSelected && selectedGroup != null && selectedLeaderboards != null && !selectedLeaderboards.isEmpty()) {
             Collections.sort(selectedLeaderboards, new Comparator<StrippedLeaderboardDTO>() {
                 @Override
@@ -874,7 +869,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     selectedGroup.leaderboards.add(leaderboard);
                     groupDetailsProvider.getList().add(leaderboard);
                     leaderboardsProvider.getList().remove(leaderboard);
-                    leaderboardsSelectionModel.setSelected(leaderboard, false);
+                    refreshableLeaderboardsSelectionModel.setSelected(leaderboard, false);
                 }
             }
             updateGroup(selectedGroup);
@@ -883,7 +878,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void moveLeaderboardInGroupUp() {
         LeaderboardGroupDTO selectedGroup = getSelectedGroup(); 
-        Set<StrippedLeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableGroupDetailsSelectionModel.getSelectedSet();
         if (isSingleGroupSelected && selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() == 1) {
             StrippedLeaderboardDTO selectedLeaderboard = selectedLeaderboards.iterator().next();
             moveLeaderboardInGroup(selectedGroup, selectedLeaderboard, -1);
@@ -892,7 +887,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private void moveLeaderboardInGroupDown() {
         LeaderboardGroupDTO selectedGroup = getSelectedGroup(); 
-        Set<StrippedLeaderboardDTO> selectedLeaderboards = groupDetailsSelectionModel.getSelectedSet();
+        Set<StrippedLeaderboardDTO> selectedLeaderboards = refreshableGroupDetailsSelectionModel.getSelectedSet();
         if (isSingleGroupSelected && selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() == 1) {
             StrippedLeaderboardDTO selectedLeaderboard = selectedLeaderboards.iterator().next();
             moveLeaderboardInGroup(selectedGroup, selectedLeaderboard, 1);
@@ -946,6 +941,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private LeaderboardGroupDTO getSelectedGroup() {
-        return groupsSelectionModel.getSelectedSet().isEmpty() ? null : groupsSelectionModel.getSelectedSet().iterator().next();
+        return refreshableGroupsSelectionModel.getSelectedSet().isEmpty() ? null : refreshableGroupsSelectionModel.getSelectedSet().iterator().next();
     }
 }
