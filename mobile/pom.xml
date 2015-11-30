@@ -333,6 +333,26 @@
                   </execution>
                 </executions>
               </plugin>
+                  <plugin>
+                      <groupId>org.codehaus.mojo</groupId>
+                      <artifactId>build-helper-maven-plugin</artifactId>
+                      <executions>
+                              <execution>
+                                      <id>set-build-tag</id>
+                                      <!-- insert phase here where u guys do the  release build e.g. install -->
+                                      <phase>install</phase>
+                                      <goals>
+                                              <goal>regex-property</goal>
+                                      </goals>
+                                      <configuration>
+                                              <name>build.tag</name>
+                                              <value>${git.branch}-${git.commit.id.abbrev} (${git.commit.time})</value>
+                                              <regex>^(.*)$</regex>
+                                              <replacement>$1</replacement>
+                                      </configuration>
+                              </execution>
+                      </executions>
+              </plugin>
           </plugins>
           <pluginManagement>
             <plugins>
