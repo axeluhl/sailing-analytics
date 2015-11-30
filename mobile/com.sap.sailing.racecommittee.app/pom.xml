@@ -1,113 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.sap.sailing</groupId>
-		<artifactId>mobile</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>com.sap.sailing</groupId>
+        <artifactId>mobile</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-	<groupId>com.sap.sailing</groupId>
-	<artifactId>com.sap.sailing.racecommittee.app</artifactId>
-	<packaging>apk</packaging>
+    <groupId>com.sap.sailing</groupId>
+    <artifactId>com.sap.sailing.racecommittee.app</artifactId>
+    <packaging>apk</packaging>
 
-	<properties>
-		<!-- If you change this name, change in RCApp too! -->
-		<additional-deployment-version-file>com.sap.sailing.racecommittee.app.version</additional-deployment-version-file>
-		<!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
-		<app-version>${rc-app-version}</app-version>
-	</properties>
+    <properties>
+        <!-- If you change this name, change in RCApp too! -->
+        <additional-deployment-version-file>com.sap.sailing.racecommittee.app.version</additional-deployment-version-file>
+        <!-- passed by buildAndUpdateProduct.sh (parsed from AndroidManifest.xml) -->
+        <app-version>${rc-app-version}</app-version>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>${android.api.groupId}</groupId>
-			<artifactId>android</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${android.api.groupId}</groupId>
+            <artifactId>android</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
-			<artifactId>advrecyclerview</artifactId>
-			<version>0.6.2</version>
-			<type>aar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.android.support</groupId>
-					<artifactId>recyclerview-v7</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.android.support</groupId>
-					<artifactId>appcompat-v7</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+            <groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
+            <artifactId>advrecyclerview</artifactId>
+            <version>0.6.2</version>
+            <type>aar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.android.support</groupId>
+                    <artifactId>recyclerview-v7</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.android.support</groupId>
+                    <artifactId>appcompat-v7</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
-			<groupId>com.android.support</groupId>
-			<artifactId>recyclerview-v7</artifactId>
-			<type>aar</type>
-		</dependency>
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>recyclerview-v7</artifactId>
+            <type>aar</type>
+        </dependency>
 
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>com.sap.sailing.android.shared</artifactId>
-			<version>${project.version}</version>
-			<type>aar</type>
-		</dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.sap.sailing.android.shared</artifactId>
+            <version>${project.version}</version>
+            <type>aar</type>
+        </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>1.10.16</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.16</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<finalName>${project.artifactId}</finalName>
-		<sourceDirectory>src</sourceDirectory>
-		<plugins>
-			<plugin>
-				<groupId>com.simpligility.maven.plugins</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>alignApk</id>
-						<phase>install</phase>
-						<goals>
-							<goal>zipalign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${project.basedir}/tests-jvm/src</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-	
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>alignApk</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>zipalign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/tests-jvm/src</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
     <profiles>
       <profile>
         <id>non-leandi</id>

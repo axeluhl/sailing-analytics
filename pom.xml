@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.sap.sailing</groupId>
-	<artifactId>workspace</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>com.sap.sailing</groupId>
+    <artifactId>workspace</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<modules>
-		<module>java</module>
-	</modules>
+    <modules>
+        <module>java</module>
+    </modules>
 
-	<profiles>
-		<profile>
-			<id>with-mobile</id>
-			<activation>
-				<property>
-					<name>ldi.releaseBuild</name>
-				</property>
-			</activation>
-			<modules>
-				<module>mobile</module>
-			</modules>
-		</profile>
-		<profile>
-			<!-- activate with parameter '-P with-ios'-->
-			<id>with-ios</id>
-			<modules>
-				<module>ios</module>
-			</modules>
-		</profile>
+    <profiles>
+        <profile>
+            <id>with-mobile</id>
+            <activation>
+                <property>
+                    <name>ldi.releaseBuild</name>
+                </property>
+            </activation>
+            <modules>
+                <module>mobile</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- activate with parameter '-P with-ios'-->
+            <id>with-ios</id>
+            <modules>
+                <module>ios</module>
+            </modules>
+        </profile>
 
       <profile>
         <id>leandi</id>
@@ -99,32 +99,32 @@
           </repository>
         </repositories>
       </profile>
-	</profiles>
+    </profiles>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		
-		<ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
-		<ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
-		<ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
-		<ldi.download.android.build-tools.version>22.0.1</ldi.download.android.build-tools.version>
-		<ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
-		<ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
-		
-		<!-- WORKSPACE is an env set by Jenkins pointing to the build job's work directory.-->
-		<ldi.android.sdk.parent.location>${env.WORKSPACE}</ldi.android.sdk.parent.location>
-		<ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
-		
-		<android.platform.version>22</android.platform.version>
-		<android.api.groupId>android</android.api.groupId>
-		<android.api.version>5.1.1_r2</android.api.version>
-	</properties>
-	
-	<build>
-		<pluginManagement>
-			<plugins>
-			
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
+        <ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
+        <ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
+        <ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
+        <ldi.download.android.build-tools.version>22.0.1</ldi.download.android.build-tools.version>
+        <ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
+        <ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
+        
+        <!-- WORKSPACE is an env set by Jenkins pointing to the build job's work directory.-->
+        <ldi.android.sdk.parent.location>${env.WORKSPACE}</ldi.android.sdk.parent.location>
+        <ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
+        
+        <android.platform.version>22</android.platform.version>
+        <android.api.groupId>android</android.api.groupId>
+        <android.api.version>5.1.1_r2</android.api.version>
+    </properties>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+            
       <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>
           <artifactId>android-maven-plugin</artifactId>
@@ -139,7 +139,7 @@
           </configuration>
         </plugin>
         
-			</plugins>
-		</pluginManagement>
-	</build>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
