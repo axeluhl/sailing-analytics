@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -43,6 +44,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
+    private CheckBox transparentHoverlines;
+    private IntegerBox hoverlineStrokeWeight; //TODO: Why are there two different IntegerBoxes?
     private boolean showViewSimulation;
     
     private final StringMessages stringMessages;
@@ -211,6 +214,17 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
+        transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
+        transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
+        vp.add(transparentHoverlines);
+        
+        HorizontalPanel hoverlineStrokeWeightPanel = new HorizontalPanel();
+        Label hoverlineStrokeWeightLabel = new Label(stringMessages.bufferLineStrokeWeight() + ":");
+        hoverlineStrokeWeightPanel.add(hoverlineStrokeWeightLabel);
+        hoverlineStrokeWeight = dialog.createIntegerBox(initialSettings.getHoverlineStrokeWeight(), 3);
+        hoverlineStrokeWeightPanel.add(hoverlineStrokeWeight);
+        vp.add(hoverlineStrokeWeightPanel);
+        
         return vp;
     }
     
@@ -267,6 +281,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 result.setBuoyZoneRadiusInMeters(value);
             }
         }
+        result.setTransparentHoverlines(transparentHoverlines.getValue());
+        result.setHoverlineStrokeWeight(hoverlineStrokeWeight.getValue());
         return result;
     }
     

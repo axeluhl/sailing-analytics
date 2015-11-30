@@ -22,7 +22,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
@@ -142,73 +141,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
-    
-    private class Hoverline {
-        private Polyline hoverline;
-        
-        public Hoverline(final Polyline polyline, PolylineOptions options) {
-            this.hoverline = Polyline.newInstance(this.getHoverlineOptions(options));
-            this.hoverline.setVisible(false);
-            
-            polyline.addMouseOverHandler(new MouseOverMapHandler() {
-                @Override
-                public void onEvent(MouseOverMapEvent event) {
-                    hoverline.setMap(polyline.getMap());
-                    hoverline.setPath(polyline.getPath());
-                    hoverline.setVisible(true);
-                }
-            });
-            
-            hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                @Override
-                public void onEvent(MouseOutMapEvent event) {
-                    hoverline.setVisible(false);
-                }
-            });
-        }
-        
-        public Hoverline setMap(MapWidget mapWidget) {
-            this.hoverline.setMap(mapWidget);
-            return this;
-        }
-        
-        private PolylineOptions getHoverlineOptions(PolylineOptions options) {
-            PolylineOptions hoverlineOptions = PolylineOptions.newInstance();
-            
-            hoverlineOptions.setClickable(options.getClickable());
-            hoverlineOptions.setGeodesic(options.getGeodesic());
-            hoverlineOptions.setMap(options.getMap());
-            hoverlineOptions.setPath(options.getPath_JsArray());
-            hoverlineOptions.setStrokeColor(options.getStrokeColor());
-            hoverlineOptions.setStrokeOpacity(0.2d);
-            hoverlineOptions.setStrokeWeight(options.getStrokeWeight() * 50);
-            hoverlineOptions.setVisible(options.getVisible());
-            //hoverlineOptions.setZindex(options.getZindex());
-            
-            return hoverlineOptions;
-        }
-        
-        public MVCArray<LatLng> getPath() {
-            return this.hoverline.getPath();
-        }
-        
-        public Hoverline setPath(MVCArray<LatLng> path) {
-            this.hoverline.setPath(path);
-            return this;
-        }
-        
-        public HandlerRegistration addClickHandler(ClickMapHandler handler) {
-            return this.hoverline.addClickHandler(handler);
-        }
-        
-        public HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-            return this.hoverline.addMouseOutMoveHandler(handler);
-        }
-        
-        public HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-            return this.hoverline.addMouseOverHandler(handler);
-        }
-    }
     
     private MapWidget map;
     
@@ -664,7 +596,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   }
               });
               
-              // If there was a time change before the API was loaded, reset the time
+              // If there was a time change before the API was loaded, reset the timeadvantage
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
@@ -2397,6 +2329,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setWindUp(newSettings.isWindUp());
             updateCoordinateSystemFromSettings();
             requiredRedraw = true;
+        }
+        if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
+            settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
+            Hoverline.setTransparent(settings.getTransparentHoverlines());
+        }
+        if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
+            settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
+            Hoverline.setStrokeWeight(newSettings.getHoverlineStrokeWeight());
         }
         if (requiredRedraw) {
             redraw();
