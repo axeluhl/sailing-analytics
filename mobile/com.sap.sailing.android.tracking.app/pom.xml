@@ -125,8 +125,8 @@
         <id>leandi-no-realsign</id>
         <activation>
             <property>
-                <name>codesign.sap.realcodesigning</name>
-                <value>false</value>
+                <name>ldi.releaseType</name>
+                <value>milestone</value>
             </property>
         </activation>
         <build>
@@ -143,8 +143,8 @@
         <id>leandi-realsign</id>
         <activation>
             <property>
-                <name>codesign.sap.realcodesigning</name>
-                <value>true</value>
+                <name>ldi.releaseType</name>
+                <value>release</value>
             </property>
         </activation>
         <build>
