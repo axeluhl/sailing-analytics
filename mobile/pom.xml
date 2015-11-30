@@ -291,7 +291,7 @@
           </property>
         </activation>
         <properties>
-            <build.tag>${env.BUILD_TAG} (${env.GIT_BRANCH} : ${env.GIT_COMMIT})</build.tag>
+            <build.tag>${env.BUILD_TAG}</build.tag>
             <play-services-gcm.groupId>com.google.download.android.gms</play-services-gcm.groupId>
         </properties>
         <dependencies>
