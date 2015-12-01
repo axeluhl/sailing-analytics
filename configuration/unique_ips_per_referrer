@@ -52,4 +52,4 @@ for month in `cat $MONTHS`; do
   done | tee $STATS/unique-ips-days-useragents-per-event-$month
   echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
 done
-echo "Done."
+echo "Done at `date`."
