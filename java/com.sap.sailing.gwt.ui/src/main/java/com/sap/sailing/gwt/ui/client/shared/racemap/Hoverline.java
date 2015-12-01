@@ -44,10 +44,9 @@ class Hoverline {
             public void onEvent(MouseOverMapEvent event) {
                 options.setStrokeOpacity(Hoverline.getOpacity());
                 options.setStrokeWeight(weight);
+                options.setMap(polyline.getMap());
+                options.setPath(polyline.getPath());
                 hoverline.setOptions(options);
-                
-                hoverline.setMap(polyline.getMap());
-                hoverline.setPath(polyline.getPath());
                 
                 hoverline.setVisible(true);
             }
