@@ -29,13 +29,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -46,6 +46,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final CellTable<String> allAccounts;
     private final LabeledAbstractFilterablePanel<String> filterAccountsPanel;
+    private final RefreshableSingleSelectionModel<String> refreshableAccountsSelectionModel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -75,8 +76,8 @@ public class IgtimiAccountsPanel extends FlowPanel {
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         allAccounts = new CellTable<String>(/* pageSize */10000, tableRes);
-        final SingleSelectionModel<String> accountsSelectionModel = new SingleSelectionModel<String>();
-        allAccounts.setSelectionModel(accountsSelectionModel);
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>();
+        allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
         ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
@@ -94,17 +95,17 @@ public class IgtimiAccountsPanel extends FlowPanel {
         removeAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (accountsSelectionModel.getSelectedObject() != null) {
+                if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
                     if (Window.confirm("Do you really want to remove the leaderboards?")) {
-                        removeAccount(accountsSelectionModel.getSelectedObject(), filteredAccounts);
+                        removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
                     }
                 }
             }
         });
-        accountsSelectionModel.addSelectionChangeHandler(new Handler() {
+        refreshableAccountsSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                removeAccountButton.setEnabled(accountsSelectionModel.getSelectedObject() != null);
+                removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedObject() != null);
             }
         });
         controlsPanel.add(filterAccountsPanel);
@@ -250,7 +251,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             return new UserData(eMail.getText(), password.getText());
         }
     }
-    
+
     private static void updateAllAccounts(SailingServiceAsync sailingService, final LabeledAbstractFilterablePanel<String> filterAccountsPanel,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         sailingService.getAllIgtimiAccountEmailAddresses(new AsyncCallback<Iterable<String>>() {
