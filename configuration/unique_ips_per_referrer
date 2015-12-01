@@ -16,6 +16,8 @@ mkdir -p "$STATS"
 # A sample line:
 # 505Worlds2012.sapsailing.com 66.249.73.53 - - [12/Jan/2014:03:33:11 +0000] "GET /robots.txt HTTP/1.1" 404 238 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 
+echo Starting "$0" at `date` on file set "$*"
+
 for i in $*; do
   grep -q "^$i\$" $VISITED_FILES
   if [ "$?" = "0" ]; then
@@ -50,4 +52,4 @@ for month in `cat $MONTHS`; do
   done | tee $STATS/unique-ips-days-useragents-per-event-$month
   echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
 done
-echo "Done."
+echo "Done at `date`."
