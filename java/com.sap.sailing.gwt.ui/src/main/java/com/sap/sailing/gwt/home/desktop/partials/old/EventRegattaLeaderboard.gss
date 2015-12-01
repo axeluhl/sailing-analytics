@@ -107,6 +107,8 @@
 }
 
 .regattaleaderboard_meta_busyindicator {
+  display: inline-block;
+  margin: 0 0.666666666666667em;
 }
 
 .regattaleaderboard_meta_liverace {

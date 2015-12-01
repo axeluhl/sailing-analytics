@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.SelectedLeaderboardChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
-import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
@@ -55,13 +54,12 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     @UiField DivElement lastScoringUpdateTextDiv;
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
-    @UiField DivElement busyIndicatorDiv;
+    @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
     private MultiLeaderboardPanel multiLeaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldMultiLeaderboardDelegate delegate;
-    private final BusyIndicator busyIndicator = new SimpleBusyIndicator();
     private LeaderboardPanel lastSelectedLeaderboardPanel;
 
     public OldMultiLeaderboard() {
@@ -77,7 +75,6 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
-        busyIndicatorDiv.appendChild(busyIndicator.getElement());
         lastSelectedLeaderboardPanel = null;
     }
     

@@ -33,7 +33,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
-import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
@@ -55,13 +54,12 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
     @UiField DivElement hasLiveRaceDiv;
-    @UiField DivElement busyIndicatorDiv;
+    @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
     private Timer autoRefreshTimer;
     private final OldLeaderboardDelegate delegate;
-    private final BusyIndicator busyIndicator = new SimpleBusyIndicator();
     
     public OldLeaderboard() {
         this(null);
@@ -74,7 +72,6 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         settingsAnchor.setTitle(StringMessages.INSTANCE.settings());
         autoRefreshAnchor.setTitle(StringMessages.INSTANCE.refresh());
         fullscreenAnchor.setTitle(StringMessages.INSTANCE.openFullscreenView());
-        busyIndicatorDiv.appendChild(busyIndicator.getElement());
         this.delegate = delegate;
         this.setupFullscreenDelegate();
     }
