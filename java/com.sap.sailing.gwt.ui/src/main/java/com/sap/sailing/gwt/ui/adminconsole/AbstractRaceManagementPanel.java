@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel /*implements RaceSelectionChangeListener*/ {
+public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel {
     protected RegattaAndRaceIdentifier singleSelectedRace;
     
     protected RaceDTO selectedRaceDTO;
@@ -28,7 +28,7 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(), */actionButtonsEnabled, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -36,7 +36,6 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
         
         mainPanel.add(trackedRacesListComposite);
 
-        //trackedRacesListComposite.addRaceSelectionChangeListener(this);
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(new Handler() {
 
             @Override

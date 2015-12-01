@@ -56,7 +56,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
-        RegattasDisplayer, /*RaceSelectionChangeListener, */TrackedRaceChangedListener, LeaderboardsDisplayer {
+        RegattasDisplayer, TrackedRaceChangedListener, LeaderboardsDisplayer {
     protected final VerticalPanel mainPanel;
 
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -86,7 +86,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardSelectionModel;
 
-    //protected final RaceSelectionProvider raceSelectionProvider;
     protected final RefreshableSingleSelectionModel<RaceDTO> raceSingelSelectionModel;
     protected boolean reactOnSelectionChangeEvent;
 
@@ -214,9 +213,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
 
-        //raceSelectionProvider = new RaceSelectionModel();
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,/*
-                raceSelectionProvider, */stringMessages, /* multiselection */false, isActionButtonsEnabled());
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+                stringMessages, /* multiselection */false, isActionButtonsEnabled());
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
@@ -316,7 +314,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
-        //leaderboardSelectionChanged();
         refreshableLeaderboardSelectionModel.refreshSelectionModel(leaderboards);
         leaderboardRaceColumnSelectionChanged();
     }

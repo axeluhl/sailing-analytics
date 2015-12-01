@@ -117,8 +117,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        createUI(mainPanel);
         
+        createUI(mainPanel);
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

@@ -37,9 +37,8 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, /*RaceSelectionProvider raceSelectionProvider,*/
-            final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(sailingService, errorReporter, regattaRefresher/*, raceSelectionProvider*/, stringMessages, hasMultiSelection);
+            final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
+        super(sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();

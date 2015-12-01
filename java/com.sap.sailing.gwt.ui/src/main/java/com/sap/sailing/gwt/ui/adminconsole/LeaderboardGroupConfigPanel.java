@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -191,8 +192,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
         SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
-                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
-                            @Override
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
+                null /* entityIdentityComparator to create a RefreshableSelectionModel */) {
+            @Override
                             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                                 return leaderboardsProvider;
                             }

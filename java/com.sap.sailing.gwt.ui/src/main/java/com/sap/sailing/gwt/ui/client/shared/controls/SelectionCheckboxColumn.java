@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable
@@ -51,6 +52,21 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final RefreshableMultiSelectionModel<T> selectionModel;
     
     /**
+     * @param selectionmodel
+     *            {@link RefreshableSelectionModel} to set an already existing selectionmodel for the
+     *            {@link SelectionCheckboxColumn}
+     * @param selectedCheckboxCSSClass
+     *            CSS class for the <code>&lt;div&gt;</code> element representing a selected element
+     * @param deselectedCheckboxCSSClass
+     *            CSS class for the <code>&lt;div&gt;</code> element representing a deselected element
+     * @param checkboxColumnCellCSSClass
+     *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
+     */
+    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionmodel, String selectedCheckboxCSSClass,
+            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
+        this(selectionmodel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
+    }
+    /**
      * @param selectedCheckboxCSSClass
      *            CSS class for the <code>&lt;div&gt;</code> element representing a selected element
      * @param deselectedCheckboxCSSClass
@@ -60,11 +76,6 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param entityIdentityComparator
      *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}.
      */
-    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionmodel, String selectedCheckboxCSSClass,
-            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
-        this(selectionmodel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
-    }
-    
     protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String checkboxColumnCellCSSClass,
             String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
         this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,

@@ -37,8 +37,8 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         super(stringMessages.linkedRaces(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher/*,
-                new RaceSelectionModel()*/, stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+                stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
@@ -52,11 +52,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
             protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
                 btnRefresh = (Button)trackedRacesButtonPanel.getWidget(0);
             }
-/*
-            @Override
-            protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
-            }
-*/
+            
             @Override
             protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
             }

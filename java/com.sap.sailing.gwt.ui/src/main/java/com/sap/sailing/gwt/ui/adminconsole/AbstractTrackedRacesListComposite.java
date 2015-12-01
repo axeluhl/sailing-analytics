@@ -50,13 +50,11 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
-        RegattasDisplayer/*, RaceSelectionChangeListener*/ {
+        RegattasDisplayer {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
     private final boolean multiSelection;
-
-    //private boolean dontFireNextSelectionChangeEvent;
 
     protected RefreshableSelectionModel<RaceDTO> refreshableSelectionModel;
     
@@ -73,7 +71,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final RegattaRefresher regattaRefresher;
-    //private final RaceSelectionProvider raceSelectionProvider;
     protected final StringMessages stringMessages;
 
     private Button btnRefresh;
@@ -91,12 +88,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            /*final RaceSelectionProvider raceSelectionProvider, */final StringMessages stringMessages, boolean hasMultiSelection) {
+            final StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
-//        this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
     }
 
@@ -166,18 +162,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<RaceDTO> selectedRaces = refreshableSelectionModel.getSelectedSet();
                 makeControlsReactToSelectionChange(selectedRaces);
-                /*if (dontFireNextSelectionChangeEvent) {
-                    dontFireNextSelectionChangeEvent = false;
-                } else {
-                    
-                    List<RegattaAndRaceIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
-                    for (RaceDTO selectedRace : selectedRaces) {
-                        selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
-                    }
-                    AbstractTrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers,
-                            AbstractTrackedRacesListComposite.this);
-                    
-                }*/
             }
         });
         filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
@@ -394,14 +378,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         return columnSortHandler;
     }
 
-    /*
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        for (RaceDTO raceFromAllRaces : raceList.getList()) {
-            selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
-        }
-    }
-*/
     @Override
     public boolean hasSettings() {
         return true;
@@ -468,26 +444,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         }
         return result;
     }
-/*
-    List<RaceDTO> getSelectedRaces() {
-        List<RaceDTO> result = new ArrayList<RaceDTO>();
-        if (raceList != null) {
-            for (RaceDTO race : raceList.getList()) {
-                if (selectionModel.isSelected(race)) {
-                    result.add(race);
-                }
-            }
-        }
-        return result;
-    }
-*/
+
     public void selectRaceByIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
                 String regattaName = race.getRegattaName();
                 if (regattaName.equals(raceIdentifier.getRegattaName())
                         && race.getName().equals(raceIdentifier.getRaceName())) {
-                    //dontFireNextSelectionChangeEvent = true;
                     refreshableSelectionModel.setSelected(race, true);
                     break;
                 }
@@ -511,22 +474,18 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
-        //List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
         for (RegattaDTO regatta : regattas) {
             newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     if (raceIsToBeAddedToList(race)) {
                         newAllRaces.add(race);
-                        //newAllRaceIdentifiers.add(race.getRaceIdentifier());
                     }
                 }
             }
         }
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
-        //raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers
-                                                                  // onRaceSelectionChange
         refreshableSelectionModel.refreshSelectionModel(allRaces);
     }
 

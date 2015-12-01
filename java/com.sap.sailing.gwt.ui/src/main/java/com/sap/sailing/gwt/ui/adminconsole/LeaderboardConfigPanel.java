@@ -55,7 +55,7 @@ import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer, /*RaceSelectionChangeListener,*/
+public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
@@ -671,18 +671,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     protected void leaderboardSelectionChanged() {
         // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
         reactOnSelectionChangeEvent = false;
-        //raceSelectionProvider.removeRaceSelectionChangeListener(this);
         trackedRacesListComposite.clearSelection();
         // add listener again using a scheduled command which is executed when the browser's event loop re-gains
         // control; we assume that at that point in time the selection updates have already been performed
-        /*
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
-            }
-        });
-        */
         leaderboardRemoveButton.setEnabled(!refreshableLeaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {

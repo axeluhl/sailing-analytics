@@ -134,7 +134,6 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                 removeRegattaButton.setEnabled(!selectedRegattas.isEmpty());
             }            
         });
-        //refreshableRegattaMultiSelectionModel.addRegattaSelectionChangeListener(this);
         
         regattaListComposite = new RegattaListComposite(sailingService, refreshableRegattaMultiSelectionModel, regattaRefresher, errorReporter, stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");

@@ -37,8 +37,7 @@ public class DeviceConfigurationListComposite extends Composite {
     private final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
 
-    public DeviceConfigurationListComposite(final SailingServiceAsync sailingService, 
-            /*final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider,*/
+    public DeviceConfigurationListComposite(final SailingServiceAsync sailingService,
             final RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableSelectionModel,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
@@ -60,12 +59,6 @@ public class DeviceConfigurationListComposite extends Composite {
         configurationTable.setVisible(true);
 
         refreshableConfigurationSelectionModel = refreshableSelectionModel;
-        /*refreshableConfigurationSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                selectionProvider.setSelection(getSelectedConfigurations());
-            }
-        });*/
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
         panel.add(configurationTable);
 
@@ -144,16 +137,4 @@ public class DeviceConfigurationListComposite extends Composite {
         table.addColumn(identifierNameColumn, stringMessages.device());
         return table;
     }
-/*
-    private List<DeviceConfigurationMatcherDTO> getSelectedConfigurations() {
-        List<DeviceConfigurationMatcherDTO> result = new ArrayList<DeviceConfigurationMatcherDTO>();
-        if (configurationsDataProvider != null) {
-            for (DeviceConfigurationMatcherDTO regatta : configurationsDataProvider.getList()) {
-                if (refreshableConfigurationSelectionModel.isSelected(regatta)) {
-                    result.add(regatta);
-                }
-            }
-        }
-        return result;
-    }*/
 }

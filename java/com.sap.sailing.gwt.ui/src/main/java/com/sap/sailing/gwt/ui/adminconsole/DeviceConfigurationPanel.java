@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public class DeviceConfigurationPanel extends SimplePanel implements /*SelectionChangeListener<DeviceConfigurationMatcherDTO>,*/ DeviceConfigurationCloneListener {
+public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
 
     public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
         if (clientIdentifiers.size() == 1) {
@@ -49,7 +49,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements /*Selection
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
     
-    //private final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider;
     private final RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> refreshableMultiSelectionModel;
 
     public DeviceConfigurationPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter reporter) {
@@ -73,12 +72,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements /*Selection
                     detailComposite.setVisible(false);
                 }
                 removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
-
             }
         });
-        //this.selectionProvider = new SelectionProviderImpl<DeviceConfigurationMatcherDTO>(true);
-        //this.selectionProvider.addSelectionChangeListener(this);
-        
         setupUi();
     }
 

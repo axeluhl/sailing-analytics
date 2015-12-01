@@ -64,7 +64,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, /*new RaceSelectionModel(),*/ true, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
         previousConfigurationsComboBox = new ListBox();

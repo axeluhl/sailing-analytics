@@ -75,7 +75,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower/*, RaceSelectionChangeListener*/ {
+public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower {
 
     private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
 
@@ -92,7 +92,6 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private final TextColumn<WindDTO> windDirectionInDegColumn;
     private final TextColumn<WindDTO> positionColumn;
     private final TrackedRacesListComposite trackedRacesListComposite;
-//    private final RaceSelectionProvider raceSelectionProvider;
     private final RefreshableMultiSelectionModel<RaceDTO> refreshableRaceSelectionModel;
     private final WindSourcesToExcludeSelectorPanel windSourcesToExcludeSelectorPanel;
     private final CheckBox raceIsKnownToStartUpwindBox;
@@ -108,17 +107,15 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-//        this.raceSelectionProvider = new RaceSelectionModel();
         windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages, errorReporter);
 
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher/*, 
-                raceSelectionProvider*/, stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+                stringMessages, /*multiselection*/true, /* actionButtonsEnabled */ false);
         mainPanel.add(trackedRacesListComposite);
-        //raceSelectionProvider.addRaceSelectionChangeListener(this);
         refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
         refreshableRaceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
