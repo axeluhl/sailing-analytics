@@ -772,18 +772,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // For those competitors for which the tails don't overlap (and therefore will be replaced by the new tail coming from the server)
                     // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
                     // boat positions at newTime with zero tail length; and another one fetching everything else.
+                    // TODO bug3378: two calls that both request simulation and mark data wastes bandwidth and CPU; one of them should only use getBoatPositions to request missing pieces of tails; showBoatsOnMap must not remove canvases / tails if one of the two calls delivers only partial results
                     GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
+                    final boolean updateMarksAndLinesExceptAdvantageLineInCallback;
                     if (getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping != null) {
                         asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
-                                getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                                getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID,
+                                        /* updateMarksAndLinesExceptAdvantageLineInCallback */ true));
+                        updateMarksAndLinesExceptAdvantageLineInCallback = false; // don't do this again in the second call that mainly fetches 
                         requestID = ++boatPositionRequestIDCounter;
+                    } else {
+                        updateMarksAndLinesExceptAdvantageLineInCallback = true;
                     }
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
                     // supersedes the earlier call which may get dropped then
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null));
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
-                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID,
+                                    updateMarksAndLinesExceptAdvantageLineInCallback));
                     
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
@@ -868,11 +875,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return result;
     }
 
+    /**
+     * @param updateMarksAndLinesExceptAdvantageLineInCallback
+     *            when <code>true</code>, mark positions, mark-related lines such as start line and course middle lines,
+     *            three hull length circles and side lines are drawn; otherwise, only the boats, their info flags and
+     *            the advantage line will be updated.
+     */
     private AsyncCallback<RaceMapDataDTO> getRaceMapDataCallback(
             final Date oldTime,
             final Date newTime,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, final int requestID) {
+            final Iterable<CompetitorDTO> competitorsToShow, final int requestID,
+            final boolean updateMarksAndLinesExceptAdvantageLineInCallback) {
         return new AsyncCallback<RaceMapDataDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -895,9 +909,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
                         long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
-                        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
-                        showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
+                        Iterable<CompetitorDTO> competitorsForWhichNewFixesWereReveiced =
+                                fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
+                        if (!Util.isEmpty(competitorsForWhichNewFixesWereReveiced)) {
+                            showBoatsOnMap(newTime, timeForPositionTransitionMillis, competitorsForWhichNewFixesWereReveiced);
+                            showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
+                            // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
+                            // adjust to new boat positions
+                            showAdvantageLine(competitorsToShow, newTime);
+                        }
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
@@ -905,17 +925,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             removeAllManeuverMarkers();
                         }
                         
-                        // Do mark specific actions
-                        showCourseMarksOnMap(raceMapDataDTO.coursePositions);
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
                         }
-                        showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);                            
-                        showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
-                        showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-                        // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
-                        // adjust to new boat positions
-                        showAdvantageLine(competitorsToShow, newTime);
+                        if (updateMarksAndLinesExceptAdvantageLineInCallback) {
+                            // Do mark specific actions
+                            showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                            showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
+                            showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
+                            showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
+                        }
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;

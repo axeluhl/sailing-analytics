@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -178,18 +179,23 @@ public class FixesAndTails {
      * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
      * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
      * The {@link #tails} affected by these fixes are updated accordingly when modifications fall inside the interval
-     * shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails are, however,
-     * not trimmed according to the specification for the tail length. This has to happen elsewhere (see also
+     * shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails are, however, not
+     * trimmed according to the specification for the tail length. This has to happen elsewhere (see also
      * {@link #updateTail}).
      * 
      * @param fixesForCompetitors
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
      *            the last one in the list
+     * 
+     * @return the competitors for which new fixes have been added; this will not include competitors appearing as keys
+     *         in <code>foxesForCompetitor</code> but with a <code>null</code> or empty fixes list
      */
-    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
+    protected Iterable<CompetitorDTO> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
+        final Set<CompetitorDTO> competitorsWithNewFixes = new HashSet<>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
+                competitorsWithNewFixes.add(e.getKey());
                 List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
                     fixesForCompetitor = new ArrayList<GPSFixDTO>();
@@ -212,6 +218,7 @@ public class FixesAndTails {
                 }
             }
         }
+        return competitorsWithNewFixes;
     }
 
     /**

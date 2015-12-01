@@ -42,12 +42,10 @@ public class GetRaceMapDataAction implements AsyncAction<RaceMapDataDTO> {
         for (Map.Entry<CompetitorDTO, Date> fromEntry : from.entrySet()) {
             fromByCompetitorIdAsString.put(fromEntry.getKey().getIdAsString(), fromEntry.getValue());
         }
-        
         Map<String, Date> toByCompetitorIdAsString = new HashMap<String, Date>();
         for (Map.Entry<CompetitorDTO, Date> toEntry : to.entrySet()) {
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
-        
         sailingService.getRaceMapData(raceIdentifier, date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
                 extrapolate, simulationLegIdentifier, new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override
