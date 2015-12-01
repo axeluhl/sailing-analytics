@@ -58,12 +58,12 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
         DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
+            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
             if (getSimulator() != null) {
                 fix = new GPSFixMovingImpl(fix.getPosition(), getSimulator().delay(
                         fix.getTimePoint()), fix.getSpeed());
+                getSimulator().scheduleCompetitorPosition(competitor, fix);
             }
-            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
-            trackedRace.recordFix(competitor, fix);
         } else {
             logger.warning("Couldn't find tracked race for race " + race.getName()
                     + ". Dropping raw position event " + event);
