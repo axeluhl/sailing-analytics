@@ -1,19 +1,28 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class TrackFileImportDeviceIdentifierTableWrapper extends TableWrapper<TrackFileImportDeviceIdentifierDTO,
-SingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
+RefreshableSingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
     
     public TrackFileImportDeviceIdentifierTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                new EntityIdentityComparator<TrackFileImportDeviceIdentifierDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(TrackFileImportDeviceIdentifierDTO dto1,
+                            TrackFileImportDeviceIdentifierDTO dto2) {
+                        return dto1.uuidAsString.equals(dto2.uuidAsString);
+                    }
+                });
         
         TextColumn<TrackFileImportDeviceIdentifierDTO> uuidColumn = new TextColumn<TrackFileImportDeviceIdentifierDTO>() {
             @Override
