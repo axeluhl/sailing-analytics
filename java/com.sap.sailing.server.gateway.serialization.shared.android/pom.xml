@@ -10,16 +10,16 @@
   <artifactId>com.sap.sailing.server.gateway.serialization.shared.android</artifactId>
   <packaging>eclipse-plugin</packaging>
   <build>
-	<plugins>
-		<plugin>
-			<groupId>org.eclipse.tycho</groupId>
-			<artifactId>tycho-compiler-plugin</artifactId>
-			<version>${tycho-version}</version>
-			<configuration>
-				<source>1.7</source>
-				<target>1.7</target>
-			</configuration>
-		</plugin>
-	</plugins>
+    <plugins>
+        <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-compiler-plugin</artifactId>
+            <version>${tycho-version}</version>
+            <configuration>
+                <source>1.7</source>
+                <target>1.7</target>
+            </configuration>
+        </plugin>
+    </plugins>
   </build>
 </project>
