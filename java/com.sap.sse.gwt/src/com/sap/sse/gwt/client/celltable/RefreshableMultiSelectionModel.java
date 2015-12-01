@@ -36,14 +36,18 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
         clear();
         if (isNotEmpty) {
             for (T it : newObjects) {
-                boolean isSelected = false;
-                for (T selected : selectedSet) {
-                    isSelected = (comp == null ? selected.equals(it) : comp.representSameEntity(selected, it));
-                    if (isSelected) {
-                        break;
+                if (comp == null) {
+                    setSelected(it, selectedSet.contains(it));
+                } else {
+                    boolean isSelected = false;
+                    for (T selected : selectedSet) {
+                        isSelected = comp.representSameEntity(selected, it);
+                        if (isSelected) {
+                            break;
+                        }
                     }
+                    setSelected(it, isSelected);
                 }
-                setSelected(it, isSelected);
             }
             SelectionChangeEvent.fire(this);
         }
