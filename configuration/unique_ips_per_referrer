@@ -16,17 +16,19 @@ mkdir -p "$STATS"
 # A sample line:
 # 505Worlds2012.sapsailing.com 66.249.73.53 - - [12/Jan/2014:03:33:11 +0000] "GET /robots.txt HTTP/1.1" 404 238 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 
+echo Starting "$0" at `date` on file set "$*"
+
 for i in $*; do
   grep -q "^$i\$" $VISITED_FILES
   if [ "$?" = "0" ]; then
-    echo "Already visited $i; ignoring (edit $VISITED_FILES to change this)." >&2
+    echo "Already visited $i; ignoring (edit $VISITED_FILES to change this)."
   else
-    echo "Analyzing log file $i" >&2
+    echo "Analyzing log file $i"
     if [ ${i: -3} == ".gz" ]; then
       gzip -cd $i
     else
       cat $i
-    fi | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \[\([^:]*\):\([^]]*\)\] \"[^"]*\" [^ ]* [^ ]* \"[^"]*\" \"\([^"]*\)\"/\1 \2 \5 \7/' | while read referrer hit; do
+    fi | iconv -f ISO-8859-1 -t UTF8 | sed -e 's/^\([^ ]*\) \([^ ]*\) \([^ ]*\) \([^ ]*\) \[\([^:]*\):\([^]]*\)\] \"[^"]*\" [^ ]* [^ ]* \"[^"]*\" \"\([^"]*\)\"/\1 \2 \5 \7/' | while read referrer hit; do
       echo "$hit" >>${STATS}/${referrer}.ips
     done
     echo "$i" >>$VISITED_FILES
@@ -37,7 +39,7 @@ for i in ${STATS}/*.ips; do
   cat $i | sort -u | wc | awk '{ print $1; }'
   # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
 done | tee $STATS/unique-ips-days-useragents-per-event
-echo "Done. Wrote results to $STATS/unique-ips-days-useragents-per-event"
+echo "Wrote total results to $STATS/unique-ips-days-useragents-per-event"
 
 
 # Now filter and group by month
@@ -48,5 +50,6 @@ for month in `cat $MONTHS`; do
     cat $i | grep "^[^ ]* [0-9]*/$month .*" | sort -u | wc | awk '{ print $1; }'
     # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
   done | tee $STATS/unique-ips-days-useragents-per-event-$month
-  echo "Done. Wrote results to $STATS/unique-ips-days-useragents-per-event-$month"
+  echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
 done
+echo "Done at `date`."
