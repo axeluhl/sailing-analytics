@@ -8,12 +8,8 @@
 		.row {
 			padding-bottom:1em;
 		}
-		.configTabPanel {
+		.perspectiveConfigurationPanel {
 			width: 100%;
-		}
-		.configTabContent {
-			border: 1px solid lightgray;
-			padding: 8px;
 		}
     </ui:style>
     <g:HTMLPanel>
@@ -104,38 +100,14 @@
 					<g:CheckBox ui:field="autoSelectMediaBox" />
 		        </div>
 			</div>
-			
-			
-			<div class="{res.mediaCss.columns}">
-				<div ui:field="components" class="{res.mediaCss.grid} {style.row}">
-					<g:TabPanel ui:field="componentConfigurationTabPanel" styleName="{style.configTabPanel}">
-					
-					
-					<!-- 
-					    <g:Tab text="Raceboard">
-					    	<g:HTMLPanel ui:field="raceboardConfigPanel" styleName="{style.configTabContent}">
-								<div class="{res.mediaCss.grid} {style.row}">
-									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-									    <span>Leaderboard Settings:</span>
-							        </div>
-								    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-							    		<g:Button ui:field="leaderboardInRaceboardSettingsButton" text="Configure" styleName="{res.mainCss.button}" />
-							        </div>
-								</div>
-								<div class="{res.mediaCss.grid} {style.row}">
-									<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-									    <span>Map Settings:</span>
-							        </div>
-								    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-							    		<g:Button ui:field="mapInRaceboardSettingsButton" text="Configure" styleName="{res.mainCss.button}" />
-							        </div>
-								</div>
-					    	</g:HTMLPanel>
-					    </g:Tab>
-					    
-					    -->
-					</g:TabPanel>
-				</div>
+			<div class="{res.mediaCss.grid} {style.row}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
+				    <span>Settings:</span>
+		        </div>
+			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
+					<g:HorizontalPanel ui:field="perspectiveConfigurationPanel" styleName="{res.mediaCss.grid} {style.row}">
+					</g:HorizontalPanel>
+		        </div>
 			</div>
 		</div>
 		<div class="{res.mediaCss.grid}">

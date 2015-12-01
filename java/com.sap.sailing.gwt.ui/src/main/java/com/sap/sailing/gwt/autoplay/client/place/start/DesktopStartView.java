@@ -7,9 +7,11 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,8 +19,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,15 +30,12 @@ import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
-import com.sap.sailing.gwt.ui.client.shared.perspective.PerspectiveConfigurationComposite;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigurationDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspective;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceViewerPerspective;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -58,10 +57,10 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField DivElement leaderboardZoomDiv;
     @UiField DivElement leaderboardAutoZoomDiv;
     @UiField DivElement screenConfiguraionUi;
+    @UiField HorizontalPanel perspectiveConfigurationPanel;
     
     @UiField CheckBox autoSwitchToRaceboard;
     @UiField TextBox timeToRaceStartInSeconds;
-    @UiField TabPanel componentConfigurationTabPanel;
     
     private final PlaceNavigator navigator;
     private final EventBus eventBus;
@@ -125,12 +124,17 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfiguraionUi.getStyle().setVisibility(Visibility.HIDDEN);
         
-        componentConfigurationTabPanel.setVisible(false);
+        perspectiveConfigurationPanel.setVisible(false);
         
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
 
+    private void openPerspectiveConfigurationDialog(Perspective perspective) {
+        TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE, perspective);
+        dialog.show();
+    }
+    
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
@@ -168,17 +172,24 @@ public class DesktopStartView extends Composite implements StartView {
             
             leaderboardPerspective.setLeaderboard(selectedLeaderboard);
             raceViewerPerspective.setLeaderboard(selectedLeaderboard);
-            
-            componentConfigurationTabPanel.clear();
-            for(Perspective perspective: supportedPerspectives) {
-                componentConfigurationTabPanel.add(new PerspectiveConfigurationComposite(perspective), perspective.getPerspectiveName());
+
+            perspectiveConfigurationPanel.clear();
+            for(final Perspective perspective: supportedPerspectives) {
+                Button perspectiveConfigButton = new Button(perspective.getPerspectiveName());
+                perspectiveConfigButton.getElement().getStyle().setMargin(5, Unit.PX);
+                perspectiveConfigurationPanel.add(perspectiveConfigButton);
+                perspectiveConfigButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        openPerspectiveConfigurationDialog(perspective);
+                    }
+                });
             }
-            componentConfigurationTabPanel.getTabBar().selectTab(0);
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
-        componentConfigurationTabPanel.setVisible(selectedLeaderboardName != null);
+        perspectiveConfigurationPanel.setVisible(selectedLeaderboardName != null);
         screenConfiguraionUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
     
@@ -206,40 +217,6 @@ public class DesktopStartView extends Composite implements StartView {
         }
     }
 
-    private void handleLeaderboardSettingsClick(ClickEvent e) {
-        LeaderboardSettingsDialog dialog = new LeaderboardSettingsDialog(StringMessages.INSTANCE, getSelectedLeaderboard(), 
-                new DialogCallback<LeaderboardSettings>() {
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void ok(LeaderboardSettings newSettings) {
-            }
-        });
-        dialog.show();
-    }
-
-    private void handleMapInRaceboardSettingsClick(ClickEvent e) {
-        RaceMapSettings settings = new RaceMapSettings();
-        RaceMapSettingsDialog dialog = new RaceMapSettingsDialog(settings, StringMessages.INSTANCE, 
-                new DialogCallback<RaceMapSettings>() {
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void ok(RaceMapSettings newSettings) {
-            }
-        });
-        dialog.show();
-    }
-
-//    @UiHandler("leaderboardAutoZoomBox")
-//    public void onLeaderboardAutoZoomClicked(ValueChangeEvent<Boolean> ev) {
-//        leaderboardZoomBox.setEnabled(!leaderboardAutoZoomBox.getValue());
-//    }
-    
     private String getLeaderboardZoom() {
         return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
     }

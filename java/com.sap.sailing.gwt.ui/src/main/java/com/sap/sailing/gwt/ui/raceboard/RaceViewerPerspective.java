@@ -36,8 +36,6 @@ public class RaceViewerPerspective implements Perspective {
 
     @Override
     public String getPerspectiveName() {
-        return "RaceViewer";
+        return "Race Viewer";
     }
-
-
 }
