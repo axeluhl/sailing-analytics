@@ -7,10 +7,10 @@ import com.google.gwt.resources.client.CssResource;
 public interface SharedResources extends ClientBundle {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
-    @Source("com/sap/sailing/gwt/home/main.gss")
+    @Source("main.gss")
     MainCss mainCss();
 
-    @Source("com/sap/sailing/gwt/home/media.gss")
+    @Source("media.gss")
     MediaCss mediaCss();
 
     public interface MainCss extends CssResource{
