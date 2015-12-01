@@ -50,7 +50,6 @@ import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.mvc.MVCArray;
-import com.google.gwt.maps.client.mvc.MVCArrayCallback;
 import com.google.gwt.maps.client.overlays.InfoWindow;
 import com.google.gwt.maps.client.overlays.InfoWindowOptions;
 import com.google.gwt.maps.client.overlays.Marker;
@@ -82,8 +81,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.gwt.ui.actions.GetPolarAction;
@@ -177,7 +174,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
-    private Polyline advantageLine;
+    Polyline advantageLine;
+    
+    private AdvantageLineAnimator advantageTimer;
     
     /**
      * The windward of two Polylines representing a triangle between startline and first mark.
@@ -1224,51 +1223,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         return null;
     }
-    
-    private class AdvantageLineAnimator extends com.google.gwt.user.client.Timer {
-        private static final double MILLIS_TO_HOURS_FACTOR = 3600000;
-        
-        private DelegateCoordinateSystem coordinateSystem;
-        private GPSFixDTO lastBoatFix;
-        private long lastTime;
-        
-        public AdvantageLineAnimator(DelegateCoordinateSystem coordinateSystem) {
-            this.coordinateSystem = coordinateSystem;
-            this.scheduleRepeating(100);
-            this.lastTime = System.currentTimeMillis();
-        }
-        
-        public void setLastFix(GPSFixDTO lastBoatFix) {
-            this.lastBoatFix = lastBoatFix;
-        }
-
-        @Override
-        public void run() {
-            long time = System.currentTimeMillis();
-            long deltaTime = time - lastTime;
-            lastTime = time;
-            
-            if (lastBoatFix != null) {
-                Position oldPosition = lastBoatFix.position;
-                Position newPosition = oldPosition.translateRhumb(
-                        new DegreeBearingImpl(lastBoatFix.speedWithBearing.bearingInDegrees), 
-                        new NauticalMileDistance(deltaTime / MILLIS_TO_HOURS_FACTOR * lastBoatFix.speedWithBearing.speedInKnots));
-                
-                final double latDelta = newPosition.getLatDeg() - oldPosition.getLatDeg();
-                final double lngDelta = newPosition.getLngDeg() - oldPosition.getLngDeg();
-                
-                final MVCArray<LatLng> path = advantageLine.getPath();
-                advantageLine.getPath().forEach(new MVCArrayCallback<LatLng>() {
-                    @Override
-                    public void forEach(LatLng element, int index) {
-                        path.setAt(index, LatLng.newInstance(element.getLatitude() + latDelta, element.getLongitude() + lngDelta));
-                    }
-                });
-            }
-        }
-    }
-    
-    private AdvantageLineAnimator advantageTimer = new AdvantageLineAnimator(coordinateSystem);
 
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
@@ -1349,6 +1303,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         options.setStrokeOpacity(0.5);
 
                         advantageLine = Polyline.newInstance(options);
+                        advantageTimer = new AdvantageLineAnimator(advantageLine);
                         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
