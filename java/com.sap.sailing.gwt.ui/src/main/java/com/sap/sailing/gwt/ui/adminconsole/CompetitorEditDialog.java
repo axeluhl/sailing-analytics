@@ -81,10 +81,12 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                         return result;
                     }
                 }, /* animationEnabled */true, callback);
+        this.ensureDebugId("CompetitorEditDialog");
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
                 
         this.boatClassName = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* includeAlternativeNames */ true));
+        boatClassName.ensureDebugId("BoatClassNameSuggestBox");
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
         for (BoatClassMasterdata t : BoatClassMasterdata.values()) {
@@ -97,6 +99,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             boatClassName.setValue(boatClass); // widgets have to accept null values here
         }
         this.name = createTextBox(competitorToEdit.getName());
+        name.ensureDebugId("NameTextBox");
         this.email = createTextBox(competitorToEdit.getEmail());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
         this.threeLetterIocCountryCode = createListBox(/* isMultipleSelect */ false);
@@ -127,6 +130,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         this.sailId = createTextBox(competitorToEdit.getSailID());
+        sailId.ensureDebugId("SailIdTextBox");
         this.flagImageURL = new URLFieldWithFileUpload(stringMessages);
         this.flagImageURL.setURL(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages);

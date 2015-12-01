@@ -1,0 +1,16 @@
+#!/bin/bash
+
+CACHE=/var/log/old/cache/unique-ips-per-referrer
+VISITED_FILES=$CACHE/visited
+STATS=$CACHE/stats
+MONTHS=$STATS/months
+
+for month in `cat $MONTHS`; do
+  for i in ${STATS}/*.ips; do
+    echo -n "`basename $i .ips` "
+    cat $i | grep "^[^ ]* [0-9]*/$month .*" | sort -u | wc | awk '{ print $1; }'
+    # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
+  done | tee $STATS/unique-ips-days-useragents-per-event-`echo $month | tr / -`
+  echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
+done
+echo "Done."
