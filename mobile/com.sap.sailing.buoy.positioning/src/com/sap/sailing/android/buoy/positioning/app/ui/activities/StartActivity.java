@@ -11,6 +11,7 @@ import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
+import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class StartActivity extends AbstractStartActivity {
@@ -23,6 +24,14 @@ public class StartActivity extends AbstractStartActivity {
             getSupportActionBar().setHomeButtonEnabled(false);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!EulaHelper.isEulaAccepted(this)) {
+            EulaHelper.showEulaDialog(this);
+        }
     }
 
     @Override

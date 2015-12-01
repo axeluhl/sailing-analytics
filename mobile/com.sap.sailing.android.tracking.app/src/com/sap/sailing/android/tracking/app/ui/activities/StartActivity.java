@@ -12,6 +12,7 @@ import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
+import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -44,6 +45,14 @@ public class StartActivity extends AbstractStartActivity {
         if (prefs.getTrackerIsTracking()) {
             String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
             startRegatta(checkinDigest);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!EulaHelper.isEulaAccepted(this)) {
+            EulaHelper.showTrackingEulaDialog(this);
         }
     }
 

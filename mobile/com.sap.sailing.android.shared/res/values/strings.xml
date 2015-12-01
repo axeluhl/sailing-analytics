@@ -47,4 +47,11 @@
     <string name="checkin_digest" translatable="false">CheckinDigest</string>
     <string name="leaderboard_name" translatable="false">leaderboard_name</string>
     <string name="mark_id" translatable="false">mark_id</string>
+
+    <!-- Eula -->
+    <string name="eula_title">EULA</string>
+    <string name="eula_message">By using this App you confirm to accept the SAP SE end user license agreement. Please read this EULA here.</string>
+    <string name="confirm">Confirm</string>
+    <string name="skip">Skip</string>
+
 </resources>
