@@ -238,7 +238,6 @@ public class Simulator {
             // deliver an empty list now
             trackedRace.updateMarkPassings(competitor, markPassings);
         }
-        
     }
     
     public void scheduleCompetitorPosition(final Competitor competitor, GPSFixMoving competitorFix) {
