@@ -52,6 +52,10 @@
 		}
 		.toolbarBusyIndicator {
 			display: inline-block;
+			height: 50px;
+			width: auto;
+			padding: 10px;
+			vertical-align: top;
 		}
 		.toolbarAction:hover {
 			background-color: #d79900;
