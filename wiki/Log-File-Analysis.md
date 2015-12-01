@@ -80,6 +80,21 @@ Content can be synced from there to a local directory using the following comman
 
 Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`.
 
+### Broken or Partly Missing Logs and How We Recover
+
+During a few events we unfortunately failed to create proper Apache log files according to the above rules for scenarios using a load-balanced setup ("ELB scenario"). In some cases, the Apache log format was missing the referrer URL. This is easy to patch into the files because we collected the logs on a per-server basis and we knew which server ran which event. For example, for Kieler Woche 2015 and Travemünder Woche 2015 we needed to insert `kielerwoche2015.sapsailing.com` and `tw2015.sapsailing.com`, respectively, to match the general log format used for analysis.
+
+The other problem, as described already above, is that of the original client IP address. Before we encountered how to log the original client IP from the `X-Forwarded-For` header field, only the ELB's IP addresses were logged in the Apache logs. While counting the correct number of hits is possible with such logs, they don't reveal the true number of unique visitors. They do, however, contain a valid referrer URL, telling us which leaderboards and races were the most popular.
+
+In case we had an ELB log active, storing the Amazon ELB logs to an S3 bucket, we were able to convert those with a script stored in our git at `configuration/convertELBLogToApacheFormat` into our general Apache log format. This allows us to count the unique visitors for those events, but the ELB logs don't contain the referrer URL, so we patch that to always be the plain event URL, such as `http://kielerwoche2015.sapsailing.com`. Therefore, while these converted logs tell the correct number of unique visitors and the correct number of hits, they don't allow for an analysis of the most popular leaderboards and races.
+
+We hope that these partially-logged events remain the exception and that future events are logged homogeneously according to the rules above. The following naming conventions have been established under `/var/log/old` that shall allow the automatic log analyzers to identify the log file contents by file name patterns:
+
+ - `access_log*`: A proper Apache log file with virtual host name as the first field, followed by the original client's IP address and a valid referrer URL as the second-to-last field
+ - `elb-origin-access_log*`: An Apache log file whose origin IP addresses are usually only the ELB IP addresses, therefore not allowing for unique visitor analysis
+ - `bundesliga2015_elb_access_log.gz` and `tw2015_elb_access_log.gz`: ELB log files converted to Apache format, appended in order of ascending time stamps, prefixed with the virtual host name as the first field, using the original client IP address which allows for unique visitor analysis, and the virtual host name used again as generic referrer URL
+ - `original-access_log*`: Apache log file without leading virtual host name field, also usually only with ELB IP addresses instead of an original client IP; not good for any log file analysis without further conversion, but kept for reference purposes
+
 ## Automatic Log File Rotation to /var/log/old
 
 When an EC2 server is launched from its Amazon Machine Image (AMI), the /etc/init.d/sailing script is executed with the "start" parameter. This script is really just a link to `/home/sailing/code/configuration/sailing` which comes from the git version checked out to the workspace at `/home/sailing/code`. This script patches the file `/etc/logrotate.d/httpd` such that when log rotation happens, the existence of the directory `/var/log/old/$SERVER_NAME/$SERVER_IP` is ensured and the log files are copied there.
