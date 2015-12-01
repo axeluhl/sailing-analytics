@@ -78,7 +78,7 @@ Content can be synced from there to a local directory using the following comman
 
 ``s3cmd sync s3://sapsailing-access-logs/elb-access-logs ./elb-access-logs/``
 
-Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`.
+Our central web server at `www.sapsailing.com` does this periodically every day, sync'ing the logs to `/var/log/old/elb-access-logs/`. The corresponding cron job is defined in `/etc/cron.daily/syncEC2ElbLogs` which is a script also found in git in the `configuration/` folder.
 
 ### Broken or Partly Missing Logs and How We Recover
 
@@ -107,19 +107,60 @@ The general log rotation rules (size, time, compression, etc.) is governed by `/
 
 ### goaccess
 
- - mention specific parameters and .goaccess config file required to parse our format
+The file `/root/.goaccessrc` on `www.sapsailing.com` looks as follows:
+
+```
+color_scheme 1
+date_format %d/%b/%Y
+time_format %H:%M:%S
+log_format %^ %h %^[%d:%^] "%r" %s %b "%R" "%u"
+log_file STDIN
+```
+
+Still, specific parameters are required for `goaccess` in order to parse our regular Apache logs that have the virtual host name as their first field:
+
+`goaccess --no-global-config -a -f /var/log/httpd/access_log`
+
+The unique visitors that goaccess lists are based on the common definition that counts requests as originating from the same visitor if they happened on the same day with equal user agent and IP address.
 
 ### apachetop
 
+The simple command `apachetop` shows the traffic on the Apache httpd server running on the host where the command is invoked, based on the access log file in the usual location `/var/log/httpd/access_log`.
+
 ### AWStats
 
- - specific log collection approach configured in /etc/awstats/*.conf script
+We use AWStats to analyze our Apache access log files and produce per-month reports at [http://awstats.sapsailing.com](http://awstats.sapsailing.com/awstats/awstats.pl?output=main&config=www.sapsailing.com&framename=index). The username is `awstats`. Ask axel.uhl@sap.com or stefan.lacher@sap.com for the password.
 
- - extension for per-virtual-host hit count
+AWStats report production is controlled by three things: a cron job hooked up by `/etc/cron.weekly/awstats` which is basically a one-liner launching the `awstats` command like this:
 
- - configuration of central apache to present results (awstats.sapsailing.com)
+`exec /usr/share/awstats/tools/awstats_updateall.pl now         -configdir="/etc/awstats"         -awstatsprog="/usr/share/awstats/wwwroot/cgi-bin/awstats.pl"`
+
+and a configuration file located at `/etc/awstats/awstats.www.sapsailing.com.conf` which describes in its `LogFile` directive the filename pattern to use for collecting the log files that shall be analyzed. Currently, the file name pattern is this:
+
+`/var/log/httpd/access_log /var/log/old/access_log-???????? /var/log/old/access_log-????????.gz /var/log/old/*/elb-origin-access_log* /var/log/old/*/*/elb-origin-access_log* /var/log/old/*/access_log* /var/log/old/*/*/access_log*`
+
+and all log entries that contain `HealthChecker` are eliminated as they are only a "ping" request sent by the load balancer to check the instance's health status which is not to be counted as a "hit." Note that according to the above explanations of our log file formats and variants this focuses on hit analysis for those events with broken or partial / incomplete log files such as Kieler Woche 2015 and Travemünder Woche 2015. It uses the `elb-origin-*` flavors, tolerating the fact that these don't have the original client's IP address.
+
+The third element of AWStats configuration is how it is published through Apache. This is described in `/etc/httpd/conf.d/awstats.conf` and uses the password definition file `/etc/httpd/conf/passwd.awstats` which can be updated using the `htpasswd` command.
 
 ### Custom Scripts
 
- - unique_ips_per_referrer
- - convertELBLogToApacheFormat
+#### `unique_ips_per_referrer`
+
+The script is located in git at `configuration/unique_ips_per_referrer`. It has two variants next to it: `unique_ips_per_referrer_generate_results_only` and `unique_ips_per_referrer_generate_month_results_only`. The basic idea of this family of scripts is to count the unique visitors for each virtual host name (usually corresponding to an event), in total and by month. Neither the `goaccess` nor the AWStats tool provide us with these numbers. AWStats can only compute the _hits_ per virtual host name, and `goaccess` only lists unique visitors per day, not per virtual host.
+
+The script can be fed with a list of log files in our common Apache format, with virtual host name in first, original client IP in second, time stamp in third and user agent in last column. For all new files (files already analyzed are recorded in `/var/log/old/cache/unique-ips-per-referrer/visited) the script then reduces each line to its timestamp, original client IP and user agent fields, constituting the key for identifying a unique visitor. Each log entry that has been analyzed and reduced this way is then appended to a file under `/var/log/old/cache/unique-ips-per-referrer/stats/<virtual-host-name>.ips`. When done with all inputs, the `*.ips` files produced are filtered for unique entries (using `sort -u`) and number of lines are counted, resulting in the total number of unique visitors per virtual host name since the beginning of our log file records.
+
+Additionally, a per-month analysis is carried out by splitting the `*.ips` files by the months found in the time stamps and again applying a unique count. The resulting files can be found at `/var/log/old/cache/unique-ips-per-referrer/stats/unique-ips-days-useragents-per-event` and `/var/log/old/cache/unique-ips-per-referrer/stats/unique-ips-days-useragents-per-event-MMM-YYYY` where `MMM` represents the three-letter month name such as `Apr` and `YYYY` stands for the year.
+
+The `unique_ips_per_referrer` script is registered as a weekly cron job in `/etc/cron.weekly` and is fed the special converted log files of Travemünder Woche 2015 and the Bundesliga logs from 2015, as well as all files matching the file name pattern `access_log-*` anywhere under `/var/log/old`. This only matches proper Apache log files with original client IP addresses, not those with ELB IP addresses only (which are named `elb-origin-access_log*` by convention, see above).
+
+The variant `unique_ips_per_referrer_generate_results_only` assumes that the `*.ips` files have already been updated and produces the total and per-month output files.
+
+The variant `unique_ips_per_referrer_generate_month_results_only` produces only the per-month output files, also assuming that the `*.ips` files have already been updated.
+
+The results are published under the link [http://awstats.sapsailing.com/unique-visitors/](http://awstats.sapsailing.com/unique-visitors/) which uses the same credentials as the main AWStats publishing page.
+
+#### `convertELBLogToApacheFormat`
+
+This script was already briefly mentioned above. It is found at `configuration/convertELBLogToApacheFormat` and converts and Amazon Elastic Load Balancer (ELB) log file to our common Apache log file format with leading virtual host name. The virtual host name is expected as the first parameter; all subsequent parameters are treated as file names of ELB log files, either in GZIP format with `.gz` extension or uncompressed. The conversion result is streamed to the standard output and may therefore be redirected into a file.
