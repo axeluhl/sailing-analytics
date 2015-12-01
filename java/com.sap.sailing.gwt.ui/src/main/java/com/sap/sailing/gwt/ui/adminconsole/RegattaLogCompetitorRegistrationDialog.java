@@ -11,13 +11,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRegistrationsDialog {
 
-    private String leaderboardName;
-
     public RegattaLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable, String leaderboardName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, boatClass);
-        this.leaderboardName = leaderboardName;
+        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
     }
 
     @Override

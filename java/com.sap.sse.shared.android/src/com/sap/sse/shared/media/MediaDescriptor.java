@@ -1,10 +1,11 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media;
 
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Locale;
 
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.media.MimeType;
 
 /**
  * A common media interface for all kinds of media like images or videos. 
