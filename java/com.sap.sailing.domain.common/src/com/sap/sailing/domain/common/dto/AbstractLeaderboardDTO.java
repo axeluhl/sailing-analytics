@@ -165,14 +165,16 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      *            {@link RaceColumnInSeriesDTO}
      * @param fleetDTO
      *            must not be null
+     * @param isMetaLeaderboardColumn 
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
-            String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
+            String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace,
+            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
         if (raceColumnDTO == null) {
             raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
-                explicitFactor, regattaName, seriesName);
+                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn);
             races.add(raceColumnDTO);
         }
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
@@ -191,9 +193,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return raceColumnDTO;
     }
 
-    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName, String seriesName) {
+    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName,
+            String seriesName, boolean isMetaLeaderboardColumn) {
         final RaceColumnDTO raceColumn = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName,
-                medalRace, /* explicit factor */ null, regattaName, seriesName);
+                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn);
         races.add(raceColumn);
         return raceColumn;
     }
