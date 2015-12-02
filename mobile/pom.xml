@@ -301,9 +301,6 @@
             <name>ldi.releaseBuild</name>
           </property>
         </activation>
-        <properties>
-            <build.tag>${env.BUILD_TAG}</build.tag>
-        </properties>
         <dependencies>
           <dependency>
             <!-- This dependency simply ensures, that the Android SDK installation is completed on Lean DI before anything else is being built. -->
