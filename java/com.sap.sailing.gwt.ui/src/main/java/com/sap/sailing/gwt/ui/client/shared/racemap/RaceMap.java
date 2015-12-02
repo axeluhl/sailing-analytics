@@ -2506,18 +2506,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
         
-        result.addClickHandler(new ClickMapHandler() {
+        final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
                 showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
             }
-        });
-        resultHoverline.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
-            }
-        });
+        };
+        result.addClickHandler(clickHandler);
+        resultHoverline.addClickHandler(clickHandler);
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
