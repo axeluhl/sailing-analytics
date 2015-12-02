@@ -76,7 +76,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         allAccounts = new CellTable<String>(/* pageSize */10000, tableRes);
-        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>();
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null);
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
         ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());

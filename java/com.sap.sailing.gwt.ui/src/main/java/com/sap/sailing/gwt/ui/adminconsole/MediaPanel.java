@@ -52,6 +52,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -166,7 +167,12 @@ public class MediaPanel extends FlowPanel {
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableSingleSelectionModel<>();
+        refreshableSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
+            @Override
+            public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
+                return dto1.dbId.equals(dto2.dbId);
+            }
+        });
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
 

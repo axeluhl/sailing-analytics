@@ -12,10 +12,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
     
-    public RefreshableSingleSelectionModel() {
-         super();
-         comp = null;
-     }
     /**
      * TODO Lukas: Add Javadoc
      */
