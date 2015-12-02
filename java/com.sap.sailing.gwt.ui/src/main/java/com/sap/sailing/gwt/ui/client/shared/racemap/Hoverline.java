@@ -12,32 +12,28 @@ import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
-class Hoverline {
+public class Hoverline {
     private static final double TRANSPARENT = 0;
     private static final double VISIBLE = 0.2d;
     
     private final Polyline hoverline;
     private final PolylineOptions options;
-    private final RaceMap map;
     
-    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, RaceMap map) {     
-        this.map = map;
+    public Hoverline(final Polyline polyline, PolylineOptions polylineOptions, final RaceMap map) {     
         this.options = PolylineOptions.newInstance();
         this.options.setClickable(polylineOptions.getClickable());
         this.options.setGeodesic(polylineOptions.getGeodesic());
         this.options.setMap(polylineOptions.getMap());
+        this.options.setPath(polyline.getPath());
         this.options.setStrokeColor(polylineOptions.getStrokeColor());
-        this.options.setVisible(polylineOptions.getVisible());
         this.options.setZindex(polylineOptions.getZindex());
         this.hoverline = Polyline.newInstance(this.options);
         this.hoverline.setVisible(false);
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
-                Hoverline.this.options.setStrokeOpacity(Hoverline.this.map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
-                options.setStrokeWeight(Hoverline.this.map.getSettings().getHoverlineStrokeWeight());
-                options.setMap(polyline.getMap());
-                options.setPath(polyline.getPath());
+                options.setStrokeOpacity(map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
+                options.setStrokeWeight(map.getSettings().getHoverlineStrokeWeight());
                 hoverline.setOptions(options);
                 hoverline.setVisible(true);
             }

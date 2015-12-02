@@ -30,6 +30,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
+    private static final int MAX_BUOY_ZONE_RADIUS_IN_METERS = 100;
+    private static final int MAX_STROKE_WEIGHT = 33;
     //Initializing the lists to prevent a null pointer exception in the first validation call
     private List<Util.Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Util.Pair<CheckBox, ManeuverType>>();
     private List<Util.Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Util.Pair<CheckBox,ZoomTypes>>();
@@ -320,10 +322,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS) && valueToValidate.getTailLengthInMilliseconds() <= 0) {
                     errorMessage = stringMessages.tailLengthMustBePositive();
                 } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
-                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0.0 || valueToValidate.getBuoyZoneRadiusInMeters() > 100.0)) {
-                        errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), "0", "100");
-                } else if (valueToValidate.getHoverlineStrokeWeight() < 0d || valueToValidate.getHoverlineStrokeWeight() > 33d) {
-                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.bufferLineStrokeWeight(), "0", "33");
+                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0 || valueToValidate.getBuoyZoneRadiusInMeters() > MAX_BUOY_ZONE_RADIUS_IN_METERS)) {
+                        errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), 0, 100);
+                } else if (valueToValidate.getHoverlineStrokeWeight() < 0 || valueToValidate.getHoverlineStrokeWeight() > MAX_STROKE_WEIGHT) {
+                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.bufferLineStrokeWeight(), 0, MAX_STROKE_WEIGHT);
                 }
                 return errorMessage;
             }

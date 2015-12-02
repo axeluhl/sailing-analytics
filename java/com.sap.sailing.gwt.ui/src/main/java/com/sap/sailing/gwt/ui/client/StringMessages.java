@@ -436,7 +436,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String overallDetailsToShow();
     String hhmmssUnit();
     String actionAddWindData();
-    String valueMustBeBetweenMinMax(String name, String minValue, String maxValue);
+    String valueMustBeBetweenMinMax(String name, int minValue, int maxValue);
     String valueMustBeGreaterThan(String name, String minValue);
     String optional();
     String pleaseEnterAValue();
