@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.desktop.partials.eventheader;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 public interface EventHeaderResources extends ClientBundle {
     public static final EventHeaderResources INSTANCE = GWT.create(EventHeaderResources.class);
@@ -57,8 +56,5 @@ public interface EventHeaderResources extends ClientBundle {
         String navbar_button();
         String navbar_buttonhidden();
     }
-
-    @Source("com/sap/sailing/gwt/home/images/default_event_logo.jpg")
-    ImageResource defaultEventLogoImage();
 
 }

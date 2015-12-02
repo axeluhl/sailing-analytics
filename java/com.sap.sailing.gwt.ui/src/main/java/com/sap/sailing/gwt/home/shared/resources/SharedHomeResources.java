@@ -8,6 +8,9 @@ public interface SharedHomeResources extends ClientBundle {
     
     public static final SharedHomeResources INSTANCE = GWT.create(SharedHomeResources.class);
     
+    @Source("default_event_logo.jpg")
+    ImageResource defaultEventLogoImage();
+    
     @Source("default_event_photo.jpg")
     ImageResource defaultEventPhotoImage();
     
