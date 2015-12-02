@@ -29,27 +29,38 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
-
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         mainPanel.add(trackedRacesListComposite);
-
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(new Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                onRaceSelectionChange(trackedRacesListComposite.getSelectionModel().getSelectedSet());
+                Set<RaceDTO> selectedRaces = trackedRacesListComposite.getSelectionModel().getSelectedSet();
+                if (selectedRaces.size() == 1) {
+                    singleSelectedRace = selectedRaces.iterator().next().getRaceIdentifier();
+                    selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
+                    selectedCaptionRacePanel.setVisible(true);
+                    for (RegattaDTO regatta : getAvailableRegattas()) {
+                        for (RaceDTO race : regatta.races) {
+                            if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
+                                AbstractRaceManagementPanel.this.selectedRaceDTO = race;
+                                refreshSelectedRaceData();
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    selectedCaptionRacePanel.setCaptionText("");
+                    singleSelectedRace = null;
+                    selectedCaptionRacePanel.setVisible(false);
+                }
             }
         });
-        
         singleSelectedRace = null;
-        
         selectedCaptionRacePanel = new CaptionPanel(stringMessages.race());
         selectedCaptionRacePanel.setWidth("100%");
         mainPanel.add(selectedCaptionRacePanel);
-
         selectedRaceContentPanel = new VerticalPanel();
         selectedRaceContentPanel.setWidth("100%");
         selectedCaptionRacePanel.setContentWidget(selectedRaceContentPanel);
@@ -57,25 +68,4 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     }
 
     abstract void refreshSelectedRaceData();
-
-    public void onRaceSelectionChange(Set<RaceDTO> selectedRaces) {
-        if (selectedRaces.size() == 1) {
-            singleSelectedRace = selectedRaces.iterator().next().getRaceIdentifier();
-            selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
-            selectedCaptionRacePanel.setVisible(true);
-            for (RegattaDTO regatta : getAvailableRegattas()) {
-                for (RaceDTO race : regatta.races) {
-                    if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
-                        this.selectedRaceDTO = race;
-                        refreshSelectedRaceData();
-                        break;
-                    }
-                }
-            }
-        } else {
-            selectedCaptionRacePanel.setCaptionText("");
-            singleSelectedRace = null;
-            selectedCaptionRacePanel.setVisible(false);
-        }
-    }
 }
