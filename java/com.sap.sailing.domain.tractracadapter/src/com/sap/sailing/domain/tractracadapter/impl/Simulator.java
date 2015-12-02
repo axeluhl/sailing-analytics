@@ -162,7 +162,7 @@ public class Simulator {
 
     /**
      * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
-     * {@link #delay(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
+     * {@link #advance(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
      * race which is then used to compute {@link #advanceInMillis} such that
      * <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
      */
@@ -238,21 +238,35 @@ public class Simulator {
             // deliver an empty list now
             trackedRace.updateMarkPassings(competitor, markPassings);
         }
-        
+    }
+    
+    public void scheduleCompetitorPosition(final Competitor competitor, GPSFixMoving competitorFix) {
+        final RecordGPSFix<Competitor> recorder = (c, f)->trackedRace.recordFix(c, f);
+        scheduleFixRecording(competitor, competitorFix, recorder);
+    }
+    
+    @FunctionalInterface
+    private static interface RecordGPSFix<T> {
+        void recordFix(T objectForFix, GPSFixMoving fix);
     }
 
     public void scheduleMarkPosition(final Mark mark, GPSFixMoving markFix) {
-        final TimePoint transformedTimepoint = advance(markFix.getTimePoint());
-        final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(markFix.getPosition(), transformedTimepoint, markFix.getSpeed());
+        final RecordGPSFix<Mark> recorder = (m, f)->trackedRace.recordFix(mark, f);
+        scheduleFixRecording(mark, markFix, recorder);
+    }
+
+    private <T> void scheduleFixRecording(final T object, GPSFixMoving fix, final RecordGPSFix<T> recorder) {
+        final TimePoint transformedTimepoint = advance(fix.getTimePoint());
+        final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed());
         long waitTime = getWaitTimeInMillisUntil(transformedMarkFix.getTimePoint());
         if (waitTime <= 0) {
-            trackedRace.recordFix(mark, transformedMarkFix);
+            recorder.recordFix(object, transformedMarkFix);
         } else {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-                        trackedRace.recordFix(mark, transformedMarkFix);
+                        recorder.recordFix(object, transformedMarkFix);
                     } catch (Exception e) {
                         logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                     }
