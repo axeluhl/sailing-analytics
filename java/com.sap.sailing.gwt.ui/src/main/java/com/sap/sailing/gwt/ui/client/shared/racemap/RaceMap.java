@@ -596,7 +596,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   }
               });
               
-              // If there was a time change before the API was loaded, reset the timeadvantage
+              // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
@@ -1301,7 +1301,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         options.setStrokeOpacity(0.5);
 
                         advantageLine = Polyline.newInstance(options);
-                        Hoverline advantageHoverline = new Hoverline(advantageLine, options);
+                        Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
                         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
@@ -1561,7 +1561,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 options.setStrokeOpacity(1.0);
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
-                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options);
+                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
                 lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
@@ -2332,11 +2332,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
             settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
-            Hoverline.setTransparent(settings.getTransparentHoverlines());
         }
         if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
             settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
-            Hoverline.setStrokeWeight(newSettings.getHoverlineStrokeWeight());
         }
         if (requiredRedraw) {
             redraw();
@@ -2503,7 +2501,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
         PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
-        Hoverline resultHoverline = new Hoverline(result, options);
+        Hoverline resultHoverline = new Hoverline(result, options, this);
 
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
