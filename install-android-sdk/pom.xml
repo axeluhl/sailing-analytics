@@ -11,7 +11,9 @@
 
   <artifactId>install-android-sdk</artifactId>
   <packaging>pom</packaging>
-
+  
+    <!-- The submodule "install-android-sdk" is only added to the build on Lean DI.
+         The modules only purpose is to assemble the Android SDK if it doesn't already exist in the build Job. -->
     <profiles>
         <profile>
             <id>install-android-sdk-windows</id>
