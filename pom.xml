@@ -46,7 +46,6 @@
         <properties>
             <android.api.groupId>com.google.download.android</android.api.groupId>
             <android.api.version>5.1.1</android.api.version>
-            <android.platform.version>22</android.platform.version>
         </properties>
         <build>
           <pluginManagement>
