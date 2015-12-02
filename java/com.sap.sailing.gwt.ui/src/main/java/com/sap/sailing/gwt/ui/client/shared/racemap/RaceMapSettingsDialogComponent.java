@@ -45,7 +45,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
     private CheckBox transparentHoverlines;
-    private IntegerBox hoverlineStrokeWeight; //TODO: Why are there two different IntegerBoxes?
+    private IntegerBox hoverlineStrokeWeight;
     private boolean showViewSimulation;
     
     private final StringMessages stringMessages;
