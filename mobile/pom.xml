@@ -74,6 +74,13 @@
         <version>${play.services.version}</version>
         <type>aar</type>
         <exclusions>
+          <!-- On Lean DI, "play-services-gcm" uses a different groupId.
+               So we also get "play-services-base" with that groupId.
+               Because "play-services-location" is added to "com.sap.sailing.android.shared",
+               we already have "play-services-base" with groupId "com.google.android.gms".
+               So on Lead DI we would have "play-services-base" twice with different groupIds.
+               As said, "com.google.android.gms:play-services-base" is already transitively referenced by "com.sap.sailing.android.shared",
+               why we can simply exclude it here and rely on the fact that it is there. -->
           <exclusion>
             <groupId>${play-services-gcm.groupId}</groupId>
             <artifactId>play-services-base</artifactId>
@@ -296,6 +303,7 @@
         </properties>
         <dependencies>
           <dependency>
+            <!-- This dependency simply ensures, that the Android SDK installation is completed on Lean DI before anything else is being built. -->
             <groupId>com.sap.sailing</groupId>
             <artifactId>install-android-sdk</artifactId>
             <version>${project.version}</version>
@@ -429,6 +437,7 @@
       </profile>
       
         <profile>
+            <!-- This turns SAP specific signing on. -->
             <id>leandi-realsign</id>
             <activation>
                 <property>
