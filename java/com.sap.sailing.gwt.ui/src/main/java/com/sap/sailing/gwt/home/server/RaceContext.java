@@ -648,9 +648,6 @@ public class RaceContext {
     }
     
     private boolean isCompetitorInFleet(Competitor competitor) {
-        if (trackedRace == null) {
-            return false;
-        }
         Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
         return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
     }

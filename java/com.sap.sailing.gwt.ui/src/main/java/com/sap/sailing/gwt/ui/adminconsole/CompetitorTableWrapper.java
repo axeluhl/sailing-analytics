@@ -209,6 +209,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
+        table.ensureDebugId("CompetitorsTable");
     }
     
     public Iterable<CompetitorDTO> getAllCompetitors() {

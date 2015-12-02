@@ -826,5 +826,4 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
-
 }

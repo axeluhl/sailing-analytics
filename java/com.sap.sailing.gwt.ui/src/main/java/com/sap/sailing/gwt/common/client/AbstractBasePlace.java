@@ -46,14 +46,11 @@ public abstract class AbstractBasePlace extends Place {
     public AbstractBasePlace(String url) {
         if (url != null && !url.isEmpty()) {
             this.placeParametersAsToken = url;
-
             List<String> list = Arrays.asList(placeParametersAsToken.split("&"));
-    
             if (list == null || list.size() < 1) {
                 logger.warning("Token empty, no-op");
                 return;
             }
-    
             for (String listItem : list) {
                 List<String> nvPair = Arrays.asList(listItem.split("="));
                 if (nvPair == null || nvPair.size() != 2) {
