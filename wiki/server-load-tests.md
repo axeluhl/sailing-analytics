@@ -15,4 +15,4 @@ Run a typical live server instance. Import the master data for the event that yo
 
 Then, test a URL with your local browser on a simulated live raceboard. Use this URL as the User Details for firing up a number of "Brower Test" instances and observe how the load on the server is increasing as the instances come online.
 
-You can then observe the server instance either by using a JVM profiler or by looking at it through JMX (see [here](wiki/jmx)).
+You can then observe the server instance either by using a JVM profiler or by looking at it through JMX (see [here](/jmx)).
