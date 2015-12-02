@@ -28,7 +28,6 @@
     <app-version></app-version>
     <android.support.version>22.1.1</android.support.version>
     <play.services.version>7.5.0</play.services.version>
-    <play-services-gcm.groupId>com.google.android.gms</play-services-gcm.groupId>
 
     <sign.keystore>../android-keystore/STG-debug.jks</sign.keystore>
     <sign.alias>stg_debug</sign.alias>
@@ -69,23 +68,10 @@
         <type>aar</type>
       </dependency>
       <dependency>
-        <groupId>${play-services-gcm.groupId}</groupId>
+        <groupId>com.google.android.gms</groupId>
         <artifactId>play-services-gcm</artifactId>
         <version>${play.services.version}</version>
         <type>aar</type>
-        <exclusions>
-          <!-- On Lean DI, "play-services-gcm" uses a different groupId.
-               So we also get "play-services-base" with that groupId.
-               Because "play-services-location" is added to "com.sap.sailing.android.shared",
-               we already have "play-services-base" with groupId "com.google.android.gms".
-               So on Lead DI we would have "play-services-base" twice with different groupIds.
-               As said, "com.google.android.gms:play-services-base" is already transitively referenced by "com.sap.sailing.android.shared",
-               why we can simply exclude it here and rely on the fact that it is there. -->
-          <exclusion>
-            <groupId>${play-services-gcm.groupId}</groupId>
-            <artifactId>play-services-base</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -299,7 +285,6 @@
         </activation>
         <properties>
             <build.tag>${env.BUILD_TAG}</build.tag>
-            <play-services-gcm.groupId>com.google.download.android.gms</play-services-gcm.groupId>
         </properties>
         <dependencies>
           <dependency>
