@@ -42,6 +42,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -1218,6 +1219,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
                         .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails);
+        result.type = getLeaderboardType();
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
@@ -1929,4 +1931,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
         return new NumberOfCompetitorsFetcherImpl();
     }
+    
+    protected abstract LeaderboardType getLeaderboardType();
+    
 }
