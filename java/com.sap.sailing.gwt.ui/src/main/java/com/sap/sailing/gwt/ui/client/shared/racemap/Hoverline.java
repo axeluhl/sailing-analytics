@@ -1,14 +1,11 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
-import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 
@@ -44,20 +41,6 @@ public class Hoverline {
                 hoverline.setVisible(false);
             }
         });
-    }
-    
-    public Hoverline setMap(MapWidget mapWidget) {
-        this.hoverline.setMap(mapWidget);
-        return this;
-    }
-    
-    public MVCArray<LatLng> getPath() {
-        return this.hoverline.getPath();
-    }
-    
-    public Hoverline setPath(MVCArray<LatLng> path) {
-        this.hoverline.setPath(path);
-        return this;
     }
     
     public HandlerRegistration addClickHandler(ClickMapHandler handler) {
