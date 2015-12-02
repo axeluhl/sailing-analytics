@@ -19,8 +19,6 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
         comp = null;
     }
     
-    // TODO / FIXME: Need to redefine setSelected here: if an element is set selected for which another element is in the current selection that is compared equal by the EntityIdentityComparator then it should be replaced
-    
     /**
      * TODO Lukas: Add Javadoc
      */
@@ -40,6 +38,32 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
     @Override
     public EntityIdentityComparator<T> getEntityIdentityComparator() {
         return comp;
+    }
+
+    /*
+     * TODO / FIXME: Need to redefine setSelected here: if an element is set selected for which another element is in
+     * the current selection that is compared equal by the EntityIdentityComparator then it should be replaced
+     */
+    @Override
+    public void setSelected(T item, boolean selected) {
+        if (comp == null) {
+            super.setSelected(item, selected);
+        } else {
+            T wasSelectedBefore = null;
+            Set<T> selectedSet = getSelectedSet();
+            for (T it : selectedSet) {
+                if(comp.representSameEntity(it, item)) {
+                    wasSelectedBefore = it;
+                    break;
+                }
+            }
+            if(wasSelectedBefore == null) {
+                super.setSelected(wasSelectedBefore, false); //This old version of item will be deleted with the next clear()
+                super.setSelected(item, selected);
+            } else {
+                super.setSelected(item, selected);
+            }
+        }
     }
 
     @Override
