@@ -1,1 +1,1 @@
-${build.tag}
+${git.branch}-${git.commit.id.abbrev} (${git.commit.time})

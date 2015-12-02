@@ -84,6 +84,24 @@
         <targetPath>${project.basedir}/assets</targetPath>
       </resource>
     </resources>
+        <plugins>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.0</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <runOnlyOnce>true</runOnlyOnce>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -305,47 +323,7 @@
             <name>!ldi.releaseBuild</name>
           </property>
         </activation>
-        <properties>
-            <build.tag>${git.branch}-${git.commit.id.abbrev} (${git.commit.time})</build.tag>
-        </properties>
         <build>
-          <plugins>
-              <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.0</version>
-                <configuration>
-                  <verbose>true</verbose>
-                  <runOnlyOnce>true</runOnlyOnce>
-                </configuration>
-                <executions>
-                  <execution>
-                    <goals>
-                      <goal>revision</goal>
-                    </goals>
-                  </execution>
-                </executions>
-              </plugin>
-                  <plugin>
-                      <groupId>org.codehaus.mojo</groupId>
-                      <artifactId>build-helper-maven-plugin</artifactId>
-                      <executions>
-                              <execution>
-                                      <id>set-build-tag</id>
-                                      <phase>initialize</phase>
-                                      <goals>
-                                              <goal>regex-property</goal>
-                                      </goals>
-                                      <configuration>
-                                              <name>build.tag</name>
-                                              <value>${git.branch}-${git.commit.id.abbrev} (${git.commit.time})</value>
-                                              <regex>^(.*)$</regex>
-                                              <replacement>$1</replacement>
-                                      </configuration>
-                              </execution>
-                      </executions>
-              </plugin>
-          </plugins>
           <pluginManagement>
             <plugins>
             
