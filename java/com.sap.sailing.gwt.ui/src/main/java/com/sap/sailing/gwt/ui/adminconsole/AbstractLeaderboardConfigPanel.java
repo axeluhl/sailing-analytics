@@ -334,7 +334,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                             }
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
-                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true);
+                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true); // TODO Lukas: should/will this replace a previously selected element that is compared equal by the EntityIdentityComparator?
                             if (nameOfRaceColumnToSelect != null) {
                                 selectRaceColumn(nameOfRaceColumnToSelect);
                             }
@@ -354,12 +354,12 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
-            if (existingLeaderboard.name.equals(leaderboardToReplace)) {
+            if (existingLeaderboard.name.equals(leaderboardToReplace)) { // TODO Lukas: this should be the EntityIdentityComparator used for the RefreshableSelectionModel
                 break;
             }
         }
         if (index >= 0) {
-            leaderboardList.set(index, newLeaderboard);
+            leaderboardList.set(index, newLeaderboard); // TODO Lukas: update refreshable selection model accordingly
         }
     }
 
