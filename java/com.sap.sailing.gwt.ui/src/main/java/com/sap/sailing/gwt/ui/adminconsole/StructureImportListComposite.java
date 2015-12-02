@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
@@ -25,25 +25,29 @@ public class StructureImportListComposite extends RegattaListComposite implement
         RegattaStructure getRegattaStructure(RegattaDTO regatta);
     }
 
-    public StructureImportListComposite(final SailingServiceAsync sailingService,
-            final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaSelectionModel, RegattaRefresher regattaRefresher,
+    public StructureImportListComposite(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             RegattaStructureProvider regattaStructureProvider, final ErrorReporter errorReporter,
             final StringMessages stringMessages) {
-        super(sailingService, refreshableRegattaSelectionModel, regattaRefresher, errorReporter, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
 
     // create Regatta Table in StructureImportManagementPanel
     @Override
-    protected CellTable<RegattaDTO> createRegattaTable(RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaSelectionModel) {
+    protected CellTable<RegattaDTO> createRegattaTable() {
         CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
         
-        this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(refreshableRegattaSelectionModel,
+        this.selectionCheckboxColumn = new SelectionCheckboxColumn<RegattaDTO>(
                 tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RegattaDTO>() {
+                    @Override
+                    public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                        return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                    }
+                }) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;

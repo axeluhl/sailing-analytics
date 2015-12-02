@@ -47,6 +47,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -90,10 +91,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public EventListComposite(final SailingServiceAsync sailingService, final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
-        this.refreshableEventSelectionModel = refreshableEventSelectionModel;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         availableLeaderboardGroups = Collections.emptyList();
@@ -184,9 +183,15 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
-        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(refreshableEventSelectionModel, tableRes.cellTableStyle().cellTableCheckboxSelected(),
+        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
                 tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                }) {
             @Override
             protected ListDataProvider<EventDTO> getListDataProvider() {
                 return eventListDataProvider;
@@ -598,5 +603,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     public List<EventDTO> getAllEvents() {
         return allEvents;
+    }
+    
+    public RefreshableMultiSelectionModel<EventDTO> getRefreshableMultiSelectionModel() {
+        return refreshableEventSelectionModel;
     }
 }

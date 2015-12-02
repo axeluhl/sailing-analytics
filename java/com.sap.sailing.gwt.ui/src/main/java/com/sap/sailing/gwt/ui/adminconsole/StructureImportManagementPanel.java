@@ -45,8 +45,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -104,14 +102,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(this.sailingService,
-                new RefreshableMultiSelectionModel<RegattaDTO>(new EntityIdentityComparator<RegattaDTO>() {
-
-                    @Override
-                    public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
-                        return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
-                    }
-                }), this.regattaRefresher, this, this.errorReporter, this.stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaRefresher, this,
+                this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
         VerticalPanel mainPanel = new VerticalPanel();

@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 /**
@@ -39,16 +38,17 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
         
-        refreshableEventSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<EventDTO>() {
-
-            @Override
-            public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
-                return dto1.id.equals(dto2.id);
-            }
-        });
+        eventListComposite = new EventListComposite(sailingService, errorReporter, stringMessages);
+        eventListComposite.ensureDebugId("EventListComposite");
+        eventsContentPanel.add(eventListComposite);
         
+        eventDetailsComposite = new EventDetailsComposite(sailingService, errorReporter, stringMessages);
+        eventDetailsComposite.ensureDebugId("EventDetailsComposite");
+        eventDetailsComposite.setVisible(false);
+        mainPanel.add(eventDetailsComposite);
+        
+        refreshableEventSelectionModel = eventListComposite.getRefreshableMultiSelectionModel();
         refreshableEventSelectionModel.addSelectionChangeHandler(new Handler() {
-
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 final Set<EventDTO> selectedEvents = refreshableEventSelectionModel.getSelectedSet();
@@ -67,15 +67,6 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
                 }
             }
         });
-        
-        eventListComposite = new EventListComposite(sailingService, refreshableEventSelectionModel, errorReporter, stringMessages);
-        eventListComposite.ensureDebugId("EventListComposite");
-        eventsContentPanel.add(eventListComposite);
-        
-        eventDetailsComposite = new EventDetailsComposite(sailingService, errorReporter, stringMessages);
-        eventDetailsComposite.ensureDebugId("EventDetailsComposite");
-        eventDetailsComposite.setVisible(false);
-        mainPanel.add(eventDetailsComposite);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
 import java.util.List;
-
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
@@ -21,7 +20,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable
@@ -50,23 +48,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
     private final RefreshableMultiSelectionModel<T> selectionModel;
-    
-    /**
-     * @param selectionModel
-     *            {@link RefreshableSelectionModel} to set an already existing selectionmodel for the
-     *            {@link SelectionCheckboxColumn}
-     * @param selectedCheckboxCSSClass
-     *            CSS class for the <code>&lt;div&gt;</code> element representing a selected element
-     * @param deselectedCheckboxCSSClass
-     *            CSS class for the <code>&lt;div&gt;</code> element representing a deselected element
-     * @param checkboxColumnCellCSSClass
-     *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
-     */
-    // TODO Lukas: test whether using an arbitrary selection model here that does not trigger the redrawRow method displays the checkbox correctly when the selection is changed programmatically; is this required at all, or could the client grab the selection model from this column instead?
-    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionModel, String selectedCheckboxCSSClass,
-            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
-        this(selectionModel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
-    }
+
     /**
      * @param selectedCheckboxCSSClass
      *            CSS class for the <code>&lt;div&gt;</code> element representing a selected element
@@ -81,15 +63,6 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
             String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
         this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
                 entityIdentityComparator);
-    }
-
-    // TODO Lukas: test whether using an arbitrary selection model here that does not trigger the redrawRow method displays the checkbox correctly when the selection is changed programmatically; is this required at all, or could the client grab the selection model from this column instead?
-    private SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionModel, BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass) {
-        super(checkboxCell, SortingOrder.DESCENDING);
-        this.cell = checkboxCell;
-        this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
-        this.selectionEventTranslator = createSelectionEventTranslator();
-        this.selectionModel = selectionModel;
     }
     
     private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
