@@ -339,8 +339,7 @@
                       <executions>
                               <execution>
                                       <id>set-build-tag</id>
-                                      <!-- insert phase here where u guys do the  release build e.g. install -->
-                                      <phase>install</phase>
+                                      <phase>initialize</phase>
                                       <goals>
                                               <goal>regex-property</goal>
                                       </goals>
