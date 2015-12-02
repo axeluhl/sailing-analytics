@@ -63,7 +63,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final StringMessages stringMessages;
 
     private CellTable<EventDTO> eventTable;
-    private RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
+    private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     private ListDataProvider<EventDTO> eventListDataProvider;
     private List<EventDTO> allEvents;
     private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
@@ -91,6 +91,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
+    @SuppressWarnings("unchecked")
     public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -139,6 +140,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventListDataProvider = new ListDataProvider<EventDTO>();
         eventTable = createEventTable();
         eventTable.ensureDebugId("EventsCellTable");
+        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         eventTable.setVisible(false);
 
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
