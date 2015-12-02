@@ -52,7 +52,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final RefreshableMultiSelectionModel<T> selectionModel;
     
     /**
-     * @param selectionmodel
+     * @param selectionModel
      *            {@link RefreshableSelectionModel} to set an already existing selectionmodel for the
      *            {@link SelectionCheckboxColumn}
      * @param selectedCheckboxCSSClass
@@ -62,9 +62,10 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param checkboxColumnCellCSSClass
      *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
      */
-    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionmodel, String selectedCheckboxCSSClass,
+    // TODO Lukas: test whether using an arbitrary selection model here that does not trigger the redrawRow method displays the checkbox correctly when the selection is changed programmatically; is this required at all, or could the client grab the selection model from this column instead?
+    protected SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionModel, String selectedCheckboxCSSClass,
             String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
-        this(selectionmodel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
+        this(selectionModel, new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
     }
     /**
      * @param selectedCheckboxCSSClass
@@ -82,6 +83,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
                 entityIdentityComparator);
     }
 
+    // TODO Lukas: test whether using an arbitrary selection model here that does not trigger the redrawRow method displays the checkbox correctly when the selection is changed programmatically; is this required at all, or could the client grab the selection model from this column instead?
     private SelectionCheckboxColumn(RefreshableMultiSelectionModel<T> selectionModel, BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass) {
         super(checkboxCell, SortingOrder.DESCENDING);
         this.cell = checkboxCell;
@@ -143,7 +145,6 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
                     redrawRow(item, getListDataProvider().getList());
                 }
             }
-            
         };
     }
     

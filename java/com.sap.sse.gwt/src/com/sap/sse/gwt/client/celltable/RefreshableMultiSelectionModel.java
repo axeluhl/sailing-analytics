@@ -6,6 +6,11 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
+/**
+ * TODO Lukas: Add Javadoc
+ *
+ * @param <T>
+ */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
     
@@ -14,11 +19,17 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> im
         comp = null;
     }
     
+    /**
+     * TODO Lukas: Add Javadoc
+     */
     public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp) {
         super();
         this.comp = comp;
     }
     
+    /**
+     * TODO Lukas: Add Javadoc
+     */
     public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp) {
         super(keyProvider);
         this.comp = comp;

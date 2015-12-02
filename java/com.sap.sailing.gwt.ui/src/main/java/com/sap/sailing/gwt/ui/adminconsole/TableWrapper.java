@@ -8,13 +8,13 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
@@ -22,8 +22,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * offers already a {@link ListHandler} for sorting. Subclasses can obtain the table's default column sort handler
  * created by this class's constructor by calling {@link #getColumnSortHandler}.
  */
-//TODO change <T, S extends SelectionModel<T>> to <T, S extents RefreshableSelectionModel<T>>
-public abstract class TableWrapper<T, S extends SelectionModel<T>> implements IsWidget {
+public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
     protected final CellTable<T> table;
     private final S selectionModel;
     protected final ListDataProvider<T> dataProvider;

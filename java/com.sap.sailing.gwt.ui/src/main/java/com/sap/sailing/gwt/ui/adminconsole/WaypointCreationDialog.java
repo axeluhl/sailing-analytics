@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -17,10 +16,11 @@ import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {    
-    private final ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>> controlPointsWrapper;
+    private final ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>> controlPointsWrapper;
     private final ListBox passingInstructions;
     private final StringMessages stringMessages;
     
@@ -39,7 +39,7 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
 
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
-        controlPointsWrapper = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
+        controlPointsWrapper = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         controlPointsWrapper.getDataProvider().getList().addAll(controlPoints);
         

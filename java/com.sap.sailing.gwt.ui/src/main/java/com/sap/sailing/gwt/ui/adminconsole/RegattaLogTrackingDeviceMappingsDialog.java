@@ -29,7 +29,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 mappings = result;
-
                 updateChart();
                 deviceMappingTable.refresh(mappings);
             }
