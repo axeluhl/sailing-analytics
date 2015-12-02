@@ -2399,27 +2399,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     scoreCorrectionLastUpdateTimeLabel.setText("");
                 }
                 
-                List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
-                boolean hasLiveRace = !liveRaces.isEmpty();
+                boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
                 liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
-                if (hasLiveRace) {
-                    String liveRaceText = "";
-                    if(liveRaces.size() == 1) {
-                        com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                        liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
-                    } else {
-                        String raceNames = "";
-                        for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                            raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
-                        }
-                        // remove last ", "
-                        raceNames = raceNames.substring(0, raceNames.length() - 2);
-                        liveRaceText = stringMessages.racesAreLive(raceNames);
-                    }
-                    liveRaceLabel.setText(liveRaceText);
-                } else {
-                    liveRaceLabel.setText("");
-                }
                 scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
                 liveRaceLabel.setVisible(hasLiveRace);
             }
@@ -3256,18 +3237,20 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public String getLiveRacesText() {
         String result = "";
         List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+        boolean isMeta = leaderboard.type.isMetaLeaderboard();
         if (!liveRaces.isEmpty()) {
             if(liveRaces.size() == 1) {
                 com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                result = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                String text = "'" + liveRace.getA().getRaceColumnName() + "'";
+                result = isMeta ? stringMessages.regattaIsLive(text) : stringMessages.raceIsLive(text);
             } else {
-                String raceNames = "";
+                String names = "";
                 for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                    raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                    names += "'" + liveRace.getA().getRaceColumnName() + "', ";
                 }
                 // remove last ", "
-                raceNames = raceNames.substring(0, raceNames.length() - 2);
-                result = stringMessages.racesAreLive(raceNames);
+                names = names.substring(0, names.length() - 2);
+                result = isMeta ? stringMessages.regattasAreLive(names) : stringMessages.racesAreLive(names);
             }
         }
         return result;
