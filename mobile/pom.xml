@@ -437,7 +437,7 @@
                         </executions>
                         
                     </plugin>
-                    
+                    <!-- 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -485,13 +485,13 @@
                                             <classifier>smp</classifier>
                                         </artifact>
                                         
-                                        <!-- TODO implement -->
-                                        <!-- <artifact>
+                                        TODO implement
+                                        <artifact>
                                             <file>${project.build.directory}/AndroidMarketMetadata.zip
                                             </file>
                                             <type>zip </type>
                                             <classifier>AndroidMetadata</classifier>
-                                        </artifact> -->
+                                        </artifact>
                                         
                                     </artifacts>
                                 </configuration>
@@ -499,7 +499,7 @@
                             
                             
                         </executions>
-                    </plugin>
+                    </plugin> -->
                 </plugins>
               </pluginManagement>
             </build>
