@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
+import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
@@ -28,6 +29,7 @@ import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvanta
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
+import com.sap.sailing.dashboards.gwt.shared.RaceIdDTO;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -91,22 +93,24 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
     private RibDashboardServiceAsync ribDashboardService;
+    DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
-    public RibDashboardPanel(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingServiceAsync, RibDashboardDataRetriever ribDashboardDataRetriever) {
-        this.ribDashboardService = ribDashboardService;
-        windBotComponents = new ArrayList<WindBotComponent>();
-        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
-        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
-        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(ribDashboardDataRetriever);
+    public RibDashboardPanel(DashboardClientFactory dashboardClientFactory) {
+        this.dashboardClientFactory = dashboardClientFactory;
+//        this.ribDashboardService = ribDashboardService;
+//        windBotComponents = new ArrayList<WindBotComponent>();
+//        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
+//        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
+//        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(ribDashboardDataRetriever);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
-        initLogos();
-        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
-        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+//        initLogos();
+//        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
+//        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+//        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         startUpdatingRaceLabelIn20SecondInterval();
-        loadAndAddEventLogo(sailingServiceAsync);
+//        loadAndAddEventLogo(sailingServiceAsync);
         initAndAddWrongOrientationNotification();
     }
 
@@ -176,26 +180,29 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
     
     private void startUpdatingRaceLabelIn20SecondInterval() {
         Timer timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(20000);
-        timer.addTimeListener( new TimeListener() {
-            
+        timer.setRefreshInterval(5000);
+        timer.addTimeListener(new TimeListener() {
+
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
                 String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
                 if (leaderboardNameParameterValue != null) {
-                    ribDashboardService.getIDFromRaceThatIsLive(leaderboardNameParameterValue,
-                            new AsyncCallback<RegattaAndRaceIdentifier>() {
-                                @Override
-                                public void onSuccess(RegattaAndRaceIdentifier result) {
-                                    if (result != null) {
-                                        logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
-                                        setHeaderText(result.getRaceName());
-                                    }
-                                }
+                    dashboardClientFactory.getDispatch().execute(
+                            new GetIDFromRaceThatIsLiveAction(leaderboardNameParameterValue),
+                            new AsyncCallback<RaceIdDTO>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    logger.log(Level.INFO, "Failed to received RegattaAndRaceIdentifier from race that is live, " + caught.getMessage());
+                                    logger.log(Level.INFO,
+                                            "Failed to received RegattaAndRaceIdentifier from race that is live, "+caught.getMessage());
+                                }
+
+                                @Override
+                                public void onSuccess(RaceIdDTO result) {
+                                    if (result != null) {
+                                        logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
+                                        setHeaderText(result.getRaceId().getRaceName());
+                                    }
                                 }
                             });
                 }

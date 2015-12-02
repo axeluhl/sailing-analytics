@@ -9,8 +9,6 @@ import com.sap.sailing.gwt.dispatch.client.DispatchAsync;
 import com.sap.sailing.gwt.dispatch.client.DispatchContext;
 import com.sap.sailing.gwt.dispatch.client.Result;
 import com.sap.sailing.gwt.dispatch.client.ResultWrapper;
-import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
-import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 
 public class SimpleDispatch<CTX extends DispatchContext> implements DispatchAsync<CTX> {
     
@@ -18,8 +16,8 @@ public class SimpleDispatch<CTX extends DispatchContext> implements DispatchAsyn
 
     private long clientServerOffset = 0;
     
-    public SimpleDispatch(SailingClientFactory clientFactory) {
-        ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(RemoteServiceMappingConstants.dispatchServiceRemotePath);
+    public SimpleDispatch(String dispatchRPCPath) {
+        ((ServiceDefTarget) dispatchRPC).setServiceEntryPoint(dispatchRPCPath);
     }
 
     @Override

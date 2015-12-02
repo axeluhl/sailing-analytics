@@ -39,14 +39,15 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
         RibDashboardDataRetriever dataRetriever = new RibDashboardDataRetriever(ribdashboardService);
 
         applyMGWTSettings();
-        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(ribdashboardService, sailingService, dataRetriever);
+        DashboardClientFactory dashboardClientFactory = new DashboardClientFactoryImpl();
+        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(dashboardClientFactory);
         RootLayoutPanel.get().add(ribDashboardPanel);
-        WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(ribdashboardService, sailingService);
+        /*WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(ribdashboardService, sailingService);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);
         Timer dashboardTimer = new Timer(PlayModes.Live);
         dashboardTimer.setRefreshInterval(DASHBOARD_RERFRESH_INTERVAL);
         dashboardTimer.addTimeListener(windBotDataRetriever);
-        dashboardTimer.addTimeListener(dataRetriever);
+        dashboardTimer.addTimeListener(dataRetriever);*/
     }
 
     private void applyMGWTSettings() {

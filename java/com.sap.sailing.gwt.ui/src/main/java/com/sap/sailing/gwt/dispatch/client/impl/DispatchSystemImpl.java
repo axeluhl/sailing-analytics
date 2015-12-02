@@ -15,10 +15,15 @@ import com.sap.sailing.gwt.dispatch.client.rpcimpl.SimpleDispatch;
 
 public class DispatchSystemImpl<CTX extends DispatchContext> implements DispatchSystem<CTX> {
     
-    private final SimpleDispatch<CTX> simpleDispatch = new SimpleDispatch<CTX>(null);
-    private final DispatchAsync<CTX> dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
-            simpleDispatch));
+    private final SimpleDispatch<CTX> simpleDispatch;
+    private final DispatchAsync<CTX> dispatch;
 
+    public DispatchSystemImpl(String dispatchRPCPath) {
+        simpleDispatch = new SimpleDispatch<CTX>(dispatchRPCPath);
+        dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
+                simpleDispatch));
+    }
+    
     @Override
     public <R extends Result, A extends Action<R, CTX>> void execute(final A action, final AsyncCallback<R> callback) {
         // TODO: client side execution time logging

@@ -1,0 +1,27 @@
+package com.sap.sailing.dashboards.gwt.shared.dispatch;
+
+import java.util.Date;
+import java.util.Locale;
+
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.dispatch.client.DispatchContext;
+import com.sap.sailing.server.RacingEventService;
+
+/**
+ * @author Alexander Ries (D062114)
+ *
+ */
+public interface DashboardDispatchContext extends DispatchContext {
+
+    @GwtIncompatible
+    RacingEventService getRacingEventService();
+
+    @GwtIncompatible
+    String getClientLocaleName();
+
+    @GwtIncompatible
+    Locale getClientLocale();
+
+    @GwtIncompatible
+    Date getCurrentClientTime();
+}
