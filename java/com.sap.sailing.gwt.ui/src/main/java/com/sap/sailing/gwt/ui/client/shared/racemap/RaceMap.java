@@ -596,7 +596,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   }
               });
               
-              // If there was a time change before the API was loaded, reset the timeadvantage
+              // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
                   lastTimeChangeBeforeInitialization = null;
@@ -1301,11 +1301,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         options.setStrokeOpacity(0.5);
 
                         advantageLine = Polyline.newInstance(options);
-                        Hoverline advantageHoverline = new Hoverline(advantageLine, options);
                         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
                         advantageLine.setPath(pointsAsArray);
+                        Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
 
                         advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
                                 bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
@@ -1561,8 +1561,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 options.setStrokeOpacity(1.0);
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
-                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
+                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
                 lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
                     public void onEvent(MouseOverMapEvent event) {
@@ -2332,11 +2332,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
             settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
-            Hoverline.setTransparent(settings.getTransparentHoverlines());
         }
         if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
             settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
-            Hoverline.setStrokeWeight(newSettings.getHoverlineStrokeWeight());
         }
         if (requiredRedraw) {
             redraw();
@@ -2503,23 +2501,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public Polyline createTail(final CompetitorDTO competitor, List<LatLng> points) {
         PolylineOptions options = createTailStyle(competitor, displayHighlighted(competitor));
         Polyline result = Polyline.newInstance(options);
-        Hoverline resultHoverline = new Hoverline(result, options);
-
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
-        
-        result.addClickHandler(new ClickMapHandler() {
+        Hoverline resultHoverline = new Hoverline(result, options, this);
+        final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
                 showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
             }
-        });
-        resultHoverline.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                showCompetitorInfoWindow(competitor, event.getMouseEvent().getLatLng());
-            }
-        });
+        };
+        result.addClickHandler(clickHandler);
+        resultHoverline.addClickHandler(clickHandler);
         result.addMouseOverHandler(new MouseOverMapHandler() {
             @Override
             public void onEvent(MouseOverMapEvent event) {
