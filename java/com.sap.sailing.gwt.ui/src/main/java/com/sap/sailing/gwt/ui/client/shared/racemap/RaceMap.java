@@ -1158,7 +1158,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
                     if (tail == null) {
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
-                        tail.setMap(map);
                     } else {
                         fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
                                 (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
@@ -1305,6 +1304,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
                         advantageLine.setPath(pointsAsArray);
+                        advantageLine.setMap(map);
                         Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
 
                         advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
@@ -1316,7 +1316,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 map.setTitle("");
                             }
                         });
-                        advantageLine.setMap(map);
                     } else {
                         advantageLine.getPath().removeAt(1);
                         advantageLine.getPath().removeAt(0);
@@ -1562,6 +1561,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 pointsAsArray = MVCArray.newInstance();
                 lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
                 lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
+                lineToShowOrRemoveOrUpdate.setMap(map);
                 Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
                 lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
                     @Override
@@ -1575,7 +1575,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         map.setTitle("");
                     }
                 });
-                lineToShowOrRemoveOrUpdate.setMap(map);
+                
                 
             } else {
                 pointsAsArray = lineToShowOrRemoveOrUpdate.getPath();
@@ -2503,6 +2503,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Polyline result = Polyline.newInstance(options);
         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance(points.toArray(new LatLng[0]));
         result.setPath(pointsAsArray);
+        result.setMap(map);
         Hoverline resultHoverline = new Hoverline(result, options, this);
         final ClickMapHandler clickHandler = new ClickMapHandler() {
             @Override

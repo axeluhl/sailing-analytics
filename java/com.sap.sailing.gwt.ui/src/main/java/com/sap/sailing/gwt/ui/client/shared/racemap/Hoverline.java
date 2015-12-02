@@ -20,7 +20,7 @@ public class Hoverline {
         this.options = PolylineOptions.newInstance();
         this.options.setClickable(polylineOptions.getClickable());
         this.options.setGeodesic(polylineOptions.getGeodesic());
-        this.options.setMap(polylineOptions.getMap());
+        this.options.setMap(polyline.getMap());
         this.options.setPath(polyline.getPath());
         this.options.setStrokeColor(polylineOptions.getStrokeColor());
         this.options.setZindex(polylineOptions.getZindex());
@@ -31,8 +31,8 @@ public class Hoverline {
             public void onEvent(MouseOverMapEvent event) {
                 options.setStrokeOpacity(map.getSettings().getTransparentHoverlines() ? TRANSPARENT : VISIBLE);
                 options.setStrokeWeight(map.getSettings().getHoverlineStrokeWeight());
+                options.setVisible(true);
                 hoverline.setOptions(options);
-                hoverline.setVisible(true);
             }
         });
         hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
