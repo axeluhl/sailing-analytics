@@ -91,7 +91,6 @@
                 <version>2.2.0</version>
                 <configuration>
                     <verbose>true</verbose>
-                    <runOnlyOnce>true</runOnlyOnce>
                 </configuration>
                 <executions>
                     <execution>
