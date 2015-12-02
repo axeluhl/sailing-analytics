@@ -13,6 +13,9 @@
   <packaging>pom</packaging>
 
   <modules>
+    <!-- By default, only the modules are added that are always needed.
+         These are the module that are needed for both backend and Android builds.
+         To add additional modules for the backend build, there is a specific profile. -->
     <module>com.sap.sse.common</module>
     <module>com.sap.sse.shared.android</module>
     <module>com.sap.sse.datamining.annotations</module>
@@ -58,6 +61,9 @@
 
   <profiles>
     <profile>
+      <!-- This profile activates some configuration (submodules and Tycho) that must not be active when building the Android apps.
+           On Lean DI this profile is inactive.
+           In a non Lean DI environment this is active by default and can be deactivated using the parameter "-P !with-not-android-relevant". -->
       <id>with-not-android-relevant</id>
       <activation>
         <property>
@@ -258,15 +264,22 @@
   <profile>
     <id>leandi</id>
     <activation>
+      <!-- Only active on Lean DI. -->
       <property>
         <name>ldi.releaseBuild</name>
       </property>
     </activation>
     <properties>
+      <!-- On Lean DI we do not build any artifact that needs stuff from the target platform.
+           To avoid problems during target platform resolution,
+           we use an empty target platform file that simply doesn't reference any artifacts.
+           The alternative would be to completely deactivate some Tycho configuration on Lean DI,
+           but this would be much more complex and fragile. -->
       <p2-target>race-analysis-p2-empty</p2-target>
     </properties>
     <dependencies>
       <dependency>
+        <!-- This dependency simply ensures, that the Android SDK installation is completed on Lean DI before anything else is being built. -->
         <groupId>com.sap.sailing</groupId>
         <artifactId>install-android-sdk</artifactId>
         <version>${project.version}</version>
@@ -280,6 +293,9 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
+            <!-- Toolchan stuff doesn't work on Lean DI,
+                 so we need to hard-code Java 1.7 (Android 5.1 SDK isn't compatible with Java 8)
+                 compatibility for all builds. -->
             <source>1.7</source>
             <target>1.7</target>
           </configuration>
@@ -291,6 +307,7 @@
   <profile>
     <id>non-leandi</id>
     <activation>
+      <!-- Only active in non Lean DI environments. -->
       <property>
         <name>!ldi.releaseBuild</name>
       </property>
@@ -298,6 +315,7 @@
     <build>
       <plugins>
         <plugin>
+          <!-- On Lean DI, the toolchains stuff isn't correctly configured, so this can only be used if it isn't a Lean DI build. -->
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
