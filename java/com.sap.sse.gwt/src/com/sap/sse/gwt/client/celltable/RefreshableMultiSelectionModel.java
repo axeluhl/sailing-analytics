@@ -13,12 +13,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T> implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
-    
-    public RefreshableMultiSelectionModel() {
-        super();
-        comp = null;
-    }
-    
+
     /**
      * TODO Lukas: Add Javadoc
      */
