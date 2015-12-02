@@ -15,7 +15,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
+public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     
     private RegattaAndRaceIdentifier selectedRace;
@@ -30,11 +30,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, RegattaAndRaceIdentifier selectedRaceIdentifier) {
         super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
+        selectedRace = selectedRaceIdentifier;
+        if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
+            raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
+        }
     }
     
     /**
@@ -146,16 +150,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
                 ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
                  (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
-    }
-    
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRace = selectedRaces.iterator().next();
-            if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
-                raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
-            }
-        }
     }
     
     @Override

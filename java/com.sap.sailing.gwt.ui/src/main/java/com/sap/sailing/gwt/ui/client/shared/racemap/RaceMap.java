@@ -90,7 +90,6 @@ import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -137,7 +136,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
@@ -286,8 +285,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final CompetitorSelectionProvider competitorSelection;
     
-    private List<RegattaAndRaceIdentifier> selectedRaces;
-
     /**
      * Used to check if the first initial zoom to the mark markers was already done.
      */
@@ -441,6 +438,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
         orientationChangeInProgress = false;
+        mapFirstZoomDone = false;
+        // TODO bug 494: reset zoom settings to user preferences
     }
     
     /**
@@ -736,16 +735,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        mapFirstZoomDone = false;
-        // TODO bug 494: reset zoom settings to user preferences
-        this.selectedRaces = selectedRaces;
-    }
-
-    @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
-        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaces.get(0));        
+        this.lastRaceTimesInfo = raceTimesInfos.get(raceIdentifier);        
     }
 
     /**
@@ -761,8 +753,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
         if (newTime != null && isMapInitialized) {
-            if (selectedRaces != null && !selectedRaces.isEmpty()) {
-                RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+            if (raceIdentifier != null) {
+                RegattaAndRaceIdentifier race = raceIdentifier;
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
@@ -1941,8 +1933,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(),
                     (int) Math.abs(lastFix.degreesBoatToTheWind) + " " + stringMessages.degreesShort()));
         }
-        if (!selectedRaces.isEmpty()) {
-            RegattaAndRaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+        if (raceIdentifier != null) {
+            RegattaAndRaceIdentifier race = raceIdentifier;
             if (race != null) {
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
                 from.put(competitorDTO, fixesAndTails.getFixes(competitorDTO).get(fixesAndTails.getFirstShownFix(competitorDTO)).timepoint);
