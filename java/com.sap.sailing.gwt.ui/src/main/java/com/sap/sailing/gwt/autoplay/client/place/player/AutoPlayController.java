@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
@@ -29,7 +27,6 @@ import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -167,12 +164,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     }
     
     private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
-        raceSelectionModel.setSelection(singletonList);
-        
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                competitorsAndTheirBoats, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
+                competitorsAndTheirBoats, raceboardTimer, raceToShow, leaderboardName, null, /* event */null, raceboardViewConfig,
                 errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */false);
         return raceBoardPanel;
     }

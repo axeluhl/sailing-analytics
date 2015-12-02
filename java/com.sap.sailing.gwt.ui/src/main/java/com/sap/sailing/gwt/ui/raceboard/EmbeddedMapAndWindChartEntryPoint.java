@@ -2,9 +2,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +27,6 @@ import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
@@ -141,9 +138,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             title.append(fleetName);
         }
         Window.setTitle(title.toString());
-        final RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        final List<RegattaAndRaceIdentifier> raceList = Collections.singletonList(selectedRaceIdentifier);
-        raceSelectionModel.setSelection(raceList);
         final long refreshInterval = Duration.ONE_SECOND.times(3).asMillis();
         final Timer timer = new Timer(play ? PlayModes.Live : PlayModes.Replay);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
@@ -187,14 +181,12 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         mapSettings.setWindUp(windUp);
         raceMap.updateSettings(mapSettings);
-        raceMap.onRaceSelectionChange(raceList);
         final WindChart windChart;
         if (showWindChart) {
-            windChart = new WindChart(sailingService, raceSelectionModel, timer,
+            windChart = new WindChart(sailingService, selectedRaceIdentifier, timer,
                     timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
                     asyncActionsExecutor, /* errorReporter */
                     EmbeddedMapAndWindChartEntryPoint.this, /* compactChart */ true);
-            windChart.onRaceSelectionChange(raceList);
         } else {
             windChart = null;
         }

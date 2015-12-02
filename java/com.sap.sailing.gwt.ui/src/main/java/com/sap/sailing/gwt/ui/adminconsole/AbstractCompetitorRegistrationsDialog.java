@@ -17,18 +17,18 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDialog<Set<CompetitorDTO>> {
-    protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
-    protected CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
+    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> allCompetitorsTable;
+    protected CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> registeredCompetitorsTable;
     protected final boolean filterByLeaderBoardInitially = false;
     private final StringMessages stringMessages;
     protected final SailingServiceAsync sailingService;
@@ -145,8 +145,8 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         }
     }
 
-    private void moveSelected(CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> from,
-            CompetitorTableWrapper<MultiSelectionModel<CompetitorDTO>> to) {
+    private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> from,
+            CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
     }
 

@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SetSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -71,7 +70,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final CellTable<StrippedLeaderboardDTO> leaderboardTable;
 
-    protected final RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
+    protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard;
@@ -86,7 +85,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardSelectionModel;
 
-    protected final RefreshableSingleSelectionModel<RaceDTO> raceSingelSelectionModel;
+    protected final RefreshableSingleSelectionModel<RaceDTO> raceSingleSelectionModel;
     protected boolean reactOnSelectionChangeEvent;
 
     private final LeaderboardsRefresher leaderboardsRefresher;
@@ -218,16 +217,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         trackedRacesPanel.add(trackedRacesListComposite);
         trackedRacesListComposite.addTrackedRaceChangeListener(this);
-        this.raceSingelSelectionModel = (RefreshableSingleSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
-        this.raceSingelSelectionModel.addSelectionChangeHandler(new Handler() {
-
+        this.raceSingleSelectionModel = (RefreshableSingleSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
+        this.raceSingleSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (reactOnSelectionChangeEvent) {
                     // if no leaderboard column is selected, ignore the race selection change
                     RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceColumnAndFleetName = getSelectedRaceColumnWithFleet();
                     if (selectedRaceColumnAndFleetName != null) {
-                        if (raceSingelSelectionModel.getSelectedSet().isEmpty()) {
+                        if (raceSingleSelectionModel.getSelectedSet().isEmpty()) {
                             if (selectedRaceColumnAndFleetName.getA()
                                     .getRaceIdentifier(selectedRaceColumnAndFleetName.getB()) != null) {
                                 unlinkRaceColumnFromTrackedRace(
@@ -237,7 +235,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         } else {
                             linkTrackedRaceToSelectedRaceColumn(selectedRaceColumnAndFleetName.getA(),
                                     selectedRaceColumnAndFleetName.getB(),
-                                    raceSingelSelectionModel.getSelectedObject().getRaceIdentifier());
+                                    raceSingleSelectionModel.getSelectedObject().getRaceIdentifier());
                         }
                     }
                 }
@@ -261,11 +259,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         vPanel.add(reloadAllRaceLogs);
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
-        raceColumnTable = new RaceTableWrapper<SetSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
+        raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
-        this.raceColumnTableSelectionModel = raceColumnTable.getRefreshableSelectionModel();
+        this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardRaceColumnSelectionChanged();
@@ -336,7 +334,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                             }
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
-                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true);
+                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true); // TODO Lukas: should/will this replace a previously selected element that is compared equal by the EntityIdentityComparator?
                             if (nameOfRaceColumnToSelect != null) {
                                 selectRaceColumn(nameOfRaceColumnToSelect);
                             }
@@ -356,12 +354,12 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
-            if (existingLeaderboard.name.equals(leaderboardToReplace)) {
+            if (existingLeaderboard.name.equals(leaderboardToReplace)) { // TODO Lukas: this should be the EntityIdentityComparator used for the RefreshableSelectionModel
                 break;
             }
         }
         if (index >= 0) {
-            leaderboardList.set(index, newLeaderboard);
+            leaderboardList.set(index, newLeaderboard); // TODO Lukas: update refreshable selection model accordingly
         }
     }
 

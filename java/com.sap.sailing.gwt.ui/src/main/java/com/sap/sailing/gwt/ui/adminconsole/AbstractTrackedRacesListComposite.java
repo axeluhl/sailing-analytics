@@ -98,14 +98,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-
         raceList = new ListDataProvider<RaceDTO>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
-
         VerticalPanel panel = new VerticalPanel();
         setWidget(panel);
-
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
@@ -116,23 +113,21 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
-        
+        final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
+            @Override
+            public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
+                return dto1.getRaceIdentifier().equals(dto2.getRaceIdentifier());
+            }
+        };
         if (multiSelection) {
             this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(
                     tableResources.cellTableStyle().cellTableCheckboxSelected(),
                     tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                     tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                    new EntityIdentityComparator<RaceDTO>() {
-
-                        @Override
-                        public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
-                            return dto1.getRaceIdentifier().equals(dto2.getRaceIdentifier());
-                        }
-                    }) {
+                    entityIdentityComparator) {
                 @Override
                 protected ListDataProvider<RaceDTO> getListDataProvider() {
                     return raceList;
@@ -146,7 +141,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             refreshableSelectionModel = selectionCheckboxColumn.getSelectionModel();
             raceTable.setSelectionModel(refreshableSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
         } else {
-            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>();
+            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator);
             raceTable.setSelectionModel(refreshableSelectionModel);
         }
         

@@ -21,13 +21,14 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLogImportFixesAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
     TrackFileImportWidget importWidget;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
-    protected final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
-    protected final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
+    protected final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    protected final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private final StringMessages stringMessages;
     
     private final Map<TrackFileImportDeviceIdentifierDTO, MappableToDevice> mappings = new HashMap<>();
@@ -56,7 +57,7 @@ public abstract class AbstractLogImportFixesAndAddMappingsDialog extends DataEnt
             }
         });
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, true);
-        markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(
+        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
         
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

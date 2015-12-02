@@ -9,7 +9,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -21,7 +20,7 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
-public class RaceTableWrapper<S extends SelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
+public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
@@ -74,9 +73,5 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     
     public void setSelectedLeaderboardName(String name) {
         this.selectedLeaderboardName = name;
-    }
-    
-    public RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> getRefreshableSelectionModel() {
-        return (RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>) super.getSelectionModel();
     }
 }

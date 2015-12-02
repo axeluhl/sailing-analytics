@@ -2,7 +2,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -17,12 +16,10 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
@@ -140,14 +137,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         }
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
-        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
-        raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this, singletonList, 5000l /* requestInterval*/);
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
+                Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor,
-                raceboardData.getCompetitorAndTheirBoats(), timer, raceSelectionModel, leaderboardName, leaderboardGroupName, eventId, 
+                raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName, leaderboardGroupName, eventId, 
                 raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls);
 
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
