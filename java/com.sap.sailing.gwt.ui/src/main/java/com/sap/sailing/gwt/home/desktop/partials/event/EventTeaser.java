@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 
@@ -74,7 +75,7 @@ public class EventTeaser extends Composite {
         final StringBuilder thumbnailUrlBuilder = new StringBuilder("url('");
         final String thumbnailImageUrl = event.getThumbnailImageURL();
         if (thumbnailImageUrl == null || thumbnailImageUrl.isEmpty()) {
-            thumbnailUrlBuilder.append(EventTeaserResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
+            thumbnailUrlBuilder.append(SharedHomeResources.INSTANCE.defaultEventPhotoImage().getSafeUri().asString());
         } else {
             thumbnailUrlBuilder.append(UriUtils.fromString(thumbnailImageUrl).asString());
         }
