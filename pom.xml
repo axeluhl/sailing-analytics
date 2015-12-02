@@ -17,6 +17,9 @@
         <profile>
             <id>with-mobile</id>
             <activation>
+                <!-- This profile is active by default, when running on a Lean DI environment.
+                     On Lean DI, the only things we want to build are the Android apps and everything that's needed for it.
+                     In a non Lean DI build, you can activate this profile with the parameter "-P with-mobile". -->
                 <property>
                     <name>ldi.releaseBuild</name>
                 </property>
@@ -36,15 +39,25 @@
       <profile>
         <id>leandi</id>
         <activation>
+          <!-- This profile is active by default, when running on a Lean DI environment.
+               The definitions in this profile aren't valid when running locally or on hudson.sapsailing.com. -->
           <property>
             <name>ldi.releaseBuild</name>
           </property>
         </activation>
         <modules>
+            <!-- The submodule "install-android-sdk" ensures that the Android SDK is being assembled by unzipping severall *.zip files on Lean DI. -->
             <module>install-android-sdk</module>
         </modules>
         <properties>
+            <!-- By default, the Android API *.jar is hosted in MAven repositories under "android:android".
+                 On Lean DI, the deviant coordinates "com.google.download.android:android".
+                 To make this work without the need of a duplicate definition of the dependencies by profile,
+                 the groupId of this artifact is defined by a property so that we can easily change it for Lean DI. -->
             <android.api.groupId>com.google.download.android</android.api.groupId>
+            <!-- By default, the Android API we use is "5.1.1_r2". On Lean DI this version is uploaded to nexus with a different version.
+                 To make this work without the need of a duplicate definition of the dependencies by profile,
+                 the version of this artifact is defined by a property so that we can easily change it for Lean DI. -->
             <android.api.version>5.1.1</android.api.version>
         </properties>
         <build>
@@ -55,6 +68,8 @@
                 <artifactId>android-maven-plugin</artifactId>
                 <configuration>
                     <sdk>
+                        <!-- On Lean DI ther is no environment variable "ANDROID_HOME" that by default points to the location where the Android SDK is hosted.
+                             That's why we need to explicitly define the location of the SDK. -->
                         <path>${ldi.android.sdk.location}</path>
                     </sdk>
                 </configuration>
@@ -70,6 +85,8 @@
             <name>!ldi.releaseBuild</name>
           </property>
         </activation>
+        <!-- The repository declarations are only active when running ion a non Lean DI environment.
+             On Lean DI we are not allowed to define our own repositories because everything must be hosted in SAP's Nexus server. -->
         <repositories>
           <repository>
               <id>equinox-sdk-3.9</id>
@@ -104,6 +121,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
+        <!-- Lean DI specific properties that are needed to assemble the Android SDK. -->
         <ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
         <ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
         <ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
