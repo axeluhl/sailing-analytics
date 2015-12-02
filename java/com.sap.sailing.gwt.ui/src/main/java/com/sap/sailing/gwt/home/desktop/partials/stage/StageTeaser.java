@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.carousel.LazyLoadable;
@@ -35,8 +36,8 @@ public abstract class StageTeaser extends Composite implements LazyLoadable {
 
     @Override
     public void doInitializeLazyComponents() {
-        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() : StageResources.INSTANCE
-                .defaultStageEventTeaserImage().getSafeUri().asString();
+        String stageImageUrl = event.getStageImageURL() != null ? event.getStageImageURL() :
+                SharedHomeResources.INSTANCE.defaultStageEventTeaserImage().getSafeUri().asString();
         String backgroundImage = "url(" + stageImageUrl + ")";
         teaserImage.getStyle().setBackgroundImage(backgroundImage);
     }
