@@ -17,15 +17,15 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialog extends SettingsDialog<LeaderboardSettings> {
 
-    public LeaderboardSettingsDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, DialogCallback<LeaderboardSettings> callback) {
-        super(new ProxyLeaderboardComponent(stringMessages, leaderboard), stringMessages, callback);
+    public LeaderboardSettingsDialog(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, DialogCallback<LeaderboardSettings> callback) {
+        super(new ProxyLeaderboardComponent(leaderboard, stringMessages), stringMessages, callback);
     }
     
     public static class ProxyLeaderboardComponent implements Component<LeaderboardSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardSettingsDialogComponent settingsDialogComponent;
         
-        public ProxyLeaderboardComponent(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
+        public ProxyLeaderboardComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
             List<RaceColumnDTO> raceList = leaderboard.getRaceList();
             List<String> namesOfRaceColumnsToShow = new ArrayList<String>();

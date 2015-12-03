@@ -26,7 +26,7 @@ public class RaceViewerPerspective implements Perspective {
     public void setLeaderboard(AbstractLeaderboardDTO leaderboard) {
         components.clear();
         components.add(new ProxyRaceMapComponent(new RaceMapSettings(), StringMessages.INSTANCE));
-        components.add(new ProxyLeaderboardComponent(StringMessages.INSTANCE, leaderboard));
+        components.add(new ProxyLeaderboardComponent(leaderboard, StringMessages.INSTANCE));
     }
     
     @Override
