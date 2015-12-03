@@ -269,7 +269,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
     
-    private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
+    private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected final MarkPassingCalculator markPassingCalculator;
     
@@ -425,7 +425,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
         this.windSourcesToExclude = new ConcurrentHashMap<>();
-        this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        this.directionFromStartToNextMarkCache = new ConcurrentHashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
@@ -624,7 +624,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         gpsFixStore = EmptyGPSFixStore.INSTANCE;
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
-        directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
@@ -1738,30 +1738,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Wind getDirectionFromStartToNextMark(final TimePoint at) {
         Future<Wind> future;
         FutureTask<Wind> newFuture = null;
-        synchronized (directionFromStartToNextMarkCache) {
-            future = directionFromStartToNextMarkCache.get(at);
-            if (future == null) {
-                newFuture = new FutureTask<Wind>(new Callable<Wind>() {
-                    @Override
-                    public Wind call() {
-                        Wind result;
-                        Leg firstLeg = getRace().getCourse().getFirstLeg();
-                        if (firstLeg != null) {
-                            Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                            Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-                            if (firstLegStart != null && firstLegEnd != null) {
-                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
-                                        firstLegEnd.getBearingGreatCircle(firstLegStart)));
+        future = directionFromStartToNextMarkCache.get(at);
+        if (future == null) {
+            synchronized (directionFromStartToNextMarkCache) {
+                future = directionFromStartToNextMarkCache.get(at);
+                if (future == null) {
+                    newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                        @Override
+                        public Wind call() {
+                            Wind result;
+                            Leg firstLeg = getRace().getCourse().getFirstLeg();
+                            if (firstLeg != null) {
+                                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+                                Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+                                if (firstLegStart != null && firstLegEnd != null) {
+                                    result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
+                                            firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                                } else {
+                                    result = null;
+                                }
                             } else {
                                 result = null;
                             }
-                        } else {
-                            result = null;
+                            return result;
                         }
-                        return result;
-                    }
-                });
-                directionFromStartToNextMarkCache.put(at, newFuture);
+                    });
+                    directionFromStartToNextMarkCache.put(at, newFuture);
+                }
             }
         }
         if (newFuture != null) {
