@@ -63,6 +63,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                 boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
                 if (isEqual) {
                     setSelected(it, true);
+                    break;
                 }
             }
         }
