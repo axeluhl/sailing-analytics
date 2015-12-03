@@ -24,6 +24,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.PlayerPlace;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
@@ -31,12 +33,16 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigurationDialog;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspective;
-import com.sap.sailing.gwt.ui.raceboard.RaceViewerPerspective;
+import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.raceboard.ProxyRaceViewerPerspective;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -69,13 +75,14 @@ public class DesktopStartView extends Composite implements StartView {
     private Map<String, String> raceboardParameters;
     private Map<String, String> leaderboardParameters;
     
-    private List<Perspective> supportedPerspectives;
+    private final List<Perspective> supportedPerspectives;
 
-    private LeaderboardPerspective leaderboardPerspective;
-    private RaceViewerPerspective raceViewerPerspective;
+    private ProxyLeaderboardPerspective leaderboardPerspective;
+    private ProxyRaceViewerPerspective raceViewerPerspective;
     
     private final int defaultTimeToStartTimeInSeconds = 180;
-
+    private final Map<Perspective, CompositeSettings> perspectiveSettings;
+    
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
         this.navigator = navigator;
@@ -93,11 +100,7 @@ public class DesktopStartView extends Composite implements StartView {
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
 
-        leaderboardPerspective = new LeaderboardPerspective();
-        raceViewerPerspective = new RaceViewerPerspective(); 
-        
-        supportedPerspectives.add(leaderboardPerspective);
-        supportedPerspectives.add(raceViewerPerspective);
+        perspectiveSettings = new HashMap<>();
         
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
@@ -130,8 +133,28 @@ public class DesktopStartView extends Composite implements StartView {
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
 
-    private void openPerspectiveConfigurationDialog(Perspective perspective) {
-        TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE, perspective);
+    private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
+        leaderboardPerspective = new ProxyLeaderboardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
+        raceViewerPerspective = new ProxyRaceViewerPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
+        
+        perspectiveSettings.clear();
+        supportedPerspectives.clear();
+        supportedPerspectives.add(leaderboardPerspective);
+        supportedPerspectives.add(raceViewerPerspective);
+    }
+
+    private void openPerspectiveConfigurationDialog(final Perspective perspective) {
+        TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE,
+                perspective, new DialogCallback<CompositeSettings>() {
+                    @Override
+                    public void cancel() {
+                    }
+
+                    @Override
+                    public void ok(CompositeSettings newSettings) {
+                        perspectiveSettings.put(perspective, newSettings);
+                    }
+                });
         dialog.show();
     }
     
@@ -169,9 +192,7 @@ public class DesktopStartView extends Composite implements StartView {
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
 
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
-            
-            leaderboardPerspective.setLeaderboard(selectedLeaderboard);
-            raceViewerPerspective.setLeaderboard(selectedLeaderboard);
+            this.updatePerspectives(selectedLeaderboard);
 
             perspectiveConfigurationPanel.clear();
             for(final Perspective perspective: supportedPerspectives) {
@@ -217,6 +238,17 @@ public class DesktopStartView extends Composite implements StartView {
         }
     }
 
+    private LeaderboardSettings createDefaultLeaderboardSettings(AbstractLeaderboardDTO leaderboard) {
+        List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
+        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+            namesOfRaceColumnsToShow.add(raceColumn.getName());
+        }
+        return LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+                namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
+                false, /* showRegattaRank */ true);
+
+    }
+    
     private String getLeaderboardZoom() {
         return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
     }
