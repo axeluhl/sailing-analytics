@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.event.news;
 
 import java.util.Date;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -18,6 +19,7 @@ public class RaceCompetitorNewsEntryDTO extends AbstractRaceNewsEntryDTO {
     private RaceCompetitorNewsEntryDTO() {
     }
     
+    @GwtIncompatible
     public RaceCompetitorNewsEntryDTO(String leaderboardName, String leaderboardGroupName,
             RegattaAndRaceIdentifier regattaAndRaceIdentifier, String raceTitle, String boatClass, Date timestamp,
             String competitorName, Type type) {

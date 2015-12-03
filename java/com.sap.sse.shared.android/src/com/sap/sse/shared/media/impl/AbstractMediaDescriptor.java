@@ -1,4 +1,4 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media.impl;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -8,6 +8,8 @@ import java.util.Set;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.shared.media.MediaDescriptor;
 
 /**
  * Common media data for media items
