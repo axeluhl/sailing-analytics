@@ -40,18 +40,18 @@ public class AddWindFixDialog extends DataEntryDialog<WindDTO> {
             if(windDTO.trueWindSpeedInKnots == null) {
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.trueWindSpeedInKnots != null && (windDTO.trueWindSpeedInKnots < 0.0 || windDTO.trueWindSpeedInKnots > 100.0)) { 
-                errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.speedInKnots(), "0", "100");
+                errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.speedInKnots(), 0, 100);
             } else if(windDTO.trueWindFromDeg == null){
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.trueWindFromDeg != null && (windDTO.trueWindFromDeg < 0.0 || windDTO.trueWindFromDeg > 360.0)){
-                errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.fromDeg(), "0", "360");
+                errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.fromDeg(), 0, 360);
             } else if(windDTO.measureTimepoint == null) {
                 errorMessage = stringMessages.pleaseEnterAValue();
             } else if(windDTO.position != null) {
                 if(windDTO.position.getLatDeg() < -90.0 || windDTO.position.getLatDeg() > 90.0){
-                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.latitude(), "-90", "90");
+                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.latitude(), -90, 90);
                 } else if(windDTO.position.getLngDeg() < -180.0 || windDTO.position.getLngDeg() > 180.0){
-                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.longitude(), "-180", "180");
+                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.longitude(), -180, 180);
                 }
             } 
             
