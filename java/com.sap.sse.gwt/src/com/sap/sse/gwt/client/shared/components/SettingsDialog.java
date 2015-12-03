@@ -51,18 +51,23 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
      */
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
-            boolean animationEnabled, DialogCallback<SettingsType> callback) {
+            boolean animationEnabled, final DialogCallback<SettingsType> callback) {
         super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
                 stringMessages.cancel(), dialogComponent.getValidator(), animationEnabled,
-                callback != null ? callback: 
                     new DialogCallback<SettingsType>() {
                         @Override
                         public void cancel() {
+                            if(callback != null) {
+                                callback.cancel();
+                            }
                         }
     
                         @Override
                         public void ok(SettingsType newSettings) {
                             component.updateSettings(newSettings);
+                            if(callback != null) {
+                                callback.ok(newSettings);
+                            }
                         }
                     });
         this.settingsDialogComponent = dialogComponent;
