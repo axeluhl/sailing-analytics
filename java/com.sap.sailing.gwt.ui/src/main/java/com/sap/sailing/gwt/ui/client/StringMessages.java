@@ -503,6 +503,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String regattaIsLive(String regattaName);
+    String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
