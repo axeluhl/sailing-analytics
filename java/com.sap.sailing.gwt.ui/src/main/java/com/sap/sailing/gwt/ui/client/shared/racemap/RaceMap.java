@@ -1575,8 +1575,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         map.setTitle("");
                     }
                 });
-                
-                
             } else {
                 pointsAsArray = lineToShowOrRemoveOrUpdate.getPath();
                 pointsAsArray.removeAt(1);
