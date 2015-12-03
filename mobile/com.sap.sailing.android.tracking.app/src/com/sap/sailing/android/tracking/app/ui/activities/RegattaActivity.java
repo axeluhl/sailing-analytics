@@ -52,6 +52,7 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BitmapHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
@@ -144,28 +145,31 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        case R.id.options_menu_checkout:
-            ExLog.i(this, TAG, "Clicked CHECKOUT.");
-            checkout();
-            return true;
-        case R.id.options_menu_add_team_image:
-            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-            return true;
-        case R.id.options_menu_refresh:
-            manager.callServerAndGenerateCheckinData();
-            return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            AboutDialog dialog = new AboutDialog(this);
-            dialog.show();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_checkout:
+                ExLog.i(this, TAG, "Clicked CHECKOUT.");
+                checkout();
+                return true;
+            case R.id.options_menu_add_team_image:
+                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+                return true;
+            case R.id.options_menu_refresh:
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.options_menu_info:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.options_menu_version:
+                ExLog.i(this, TAG, "Clicked INFO.");
+                AboutDialog dialog = new AboutDialog(this);
+                dialog.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

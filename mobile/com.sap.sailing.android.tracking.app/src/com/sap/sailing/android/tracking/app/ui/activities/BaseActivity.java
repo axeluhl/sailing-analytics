@@ -10,6 +10,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class BaseActivity extends AbstractBaseActivity {
@@ -33,18 +34,21 @@ public class BaseActivity extends AbstractBaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            AboutDialog dialog = new AboutDialog(this);
-            dialog.show();
-            // startActivity(new Intent(this, SystemInformationActivity.class));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_info:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.options_menu_version:
+                ExLog.i(this, TAG, "Clicked INFO.");
+                AboutDialog dialog = new AboutDialog(this);
+                dialog.show();
+                // startActivity(new Intent(this, SystemInformationActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
