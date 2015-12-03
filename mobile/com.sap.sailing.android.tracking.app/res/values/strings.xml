@@ -12,7 +12,8 @@
     <string name="tracker_started">SAP Sailing Tracker started</string>
     <string name="tracker_stopped">SAP Sailing Tracker stopped</string>
     <string name="title_activity_regatta">Regatta</string>
-    <string name="title_activity_webview">Leader board</string>
+    <string name="title_activity_leaderboard">Leader board</string>
+    <string name="title_activity_event">Event</string>
     <string name="title_activity_start">Setup GPS-Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
@@ -47,6 +48,7 @@
     <string name="speed_over_ground">Speed over Ground</string>
     <string name="none">None</string>
     <string name="show_leaderboard">Leader board</string>
+    <string name="show_event">Event</string>
     <string name="error_while_receiving_server_data">Error while receiving server data</string>
     <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
     <string name="warning">Warning</string>
