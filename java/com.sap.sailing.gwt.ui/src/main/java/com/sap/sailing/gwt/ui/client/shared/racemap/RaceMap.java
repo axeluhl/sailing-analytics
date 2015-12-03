@@ -1289,6 +1289,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                         break;
                     }
+                    MVCArray<LatLng> nextPath = MVCArray.newInstance();
                     LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
                             coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLengthInKm / 2.0);
                     LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -1320,13 +1321,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             }
                         });
                     } else {
-                        advantageLine.getPath().setAt(0, advantageLinePos1);
-                        advantageLine.getPath().setAt(1, advantageLinePos2);
+                        nextPath.push(advantageLinePos1);
+                        nextPath.push(advantageLinePos2);
+                        advantageTimer.setNextPosition(nextPath);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                         advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
                     drawAdvantageLine = true;
-                    advantageTimer.setLastFix(lastBoatFix);
                 }
             }
             if (!drawAdvantageLine) {

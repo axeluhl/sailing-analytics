@@ -4,60 +4,58 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 class AdvantageLineAnimator extends Timer {
-    private static final double MILLIS_TO_HOURS_FACTOR = 3600000;
+    private static final int ANIMATION_PERIOD = 100;
     
     private final Polyline advantageLine;
-    private GPSFixDTO lastBoatFix;
     private long lastTime;
-    private int repetitions = -1;
+    private int durationMillis = -1;
+    private MVCArray<LatLng> nextPosition;
     
     public AdvantageLineAnimator(Polyline advantageLine) {
         this.advantageLine = advantageLine;
     }
     
-    public void setLastFix(GPSFixDTO lastBoatFix) {
-        this.lastBoatFix = lastBoatFix;
-        scheduleRepeating(100, 10);
+    public void setNextPosition(MVCArray<LatLng> nextPosition) {
+        this.nextPosition = nextPosition;
+        scheduleRepeating(ANIMATION_PERIOD, 1000); //TODO: calculate the duration as Boats do
     }
     
-    public void scheduleRepeating(int periodMillis, int repetitions) { // TODO Jonas: use duration instead of repetitions and check time as we go
+    public void scheduleRepeating(int periodMillis, int durationMillis) {
         this.lastTime = System.currentTimeMillis();
         this.scheduleRepeating(periodMillis);
-        this.repetitions = repetitions;
+        this.durationMillis = durationMillis;
     }
 
     @Override
     public void run() {
-        if (repetitions > 0) {
-            repetitions--;
-        } else if (repetitions == 0) { // TODO Jonas: see above, use duration / target time
+        long time = System.currentTimeMillis();
+        long deltaTime = time - lastTime;
+        lastTime = time;
+        double moveFactor = 1;
+        if (durationMillis > 0) {
+            long oldDurationMillis = durationMillis;
+            durationMillis -= deltaTime;
+            if (durationMillis < 0) {
+                deltaTime = oldDurationMillis;
+                durationMillis = 0;
+            }
+            moveFactor = (double)deltaTime / oldDurationMillis;
+        } else if (durationMillis == 0) {
             this.cancel();
             return;
         }
-        if (advantageLine != null) {
-            long time = System.currentTimeMillis();
-            long deltaTime = time - lastTime;
-            lastTime = time;
-            if (lastBoatFix != null) {
-                Position oldPosition = lastBoatFix.position;
-                Position newPosition = oldPosition.translateRhumb( // TODO Jonas: use great circle navigation
-                        new DegreeBearingImpl(lastBoatFix.speedWithBearing.bearingInDegrees), 
-                        new NauticalMileDistance(deltaTime / MILLIS_TO_HOURS_FACTOR * lastBoatFix.speedWithBearing.speedInKnots));
-                
-                final double latDelta = newPosition.getLatDeg() - oldPosition.getLatDeg(); // FIXME Jonas: this would be a delta in "logical coordinates" but not Google Map coordinates
-                final double lngDelta = newPosition.getLngDeg() - oldPosition.getLngDeg();
-                
-                final MVCArray<LatLng> path = this.advantageLine.getPath();
-                LatLng pos1 = path.pop();
-                LatLng pos2 = path.pop();
-                path.push(LatLng.newInstance(pos2.getLatitude() + latDelta, pos2.getLongitude() + lngDelta)); // FIXME Jonas: must not use Position's lat/lng to draw on map; always use coordinateSystem to map
-                path.push(LatLng.newInstance(pos1.getLatitude() + latDelta, pos1.getLongitude() + lngDelta));
+        if (advantageLine != null && nextPosition != null) {
+            final MVCArray<LatLng> currentPosition = this.advantageLine.getPath();
+            
+            LatLng currentLatLng;
+            LatLng nextLatLng;
+            for(int i = 0; i <= 1; i++) {
+                currentLatLng = currentPosition.get(i);
+                nextLatLng = nextPosition.get(i);
+                currentPosition.setAt(i, LatLng.newInstance(currentLatLng.getLatitude() + (nextLatLng.getLatitude() - currentLatLng.getLatitude()) * moveFactor, 
+                        currentLatLng.getLongitude() + (nextLatLng.getLongitude() - currentLatLng.getLongitude()) * moveFactor));
             }
         }
     }
