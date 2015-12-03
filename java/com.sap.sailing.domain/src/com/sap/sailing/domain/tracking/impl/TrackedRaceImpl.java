@@ -183,7 +183,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
      * sources such as the track-based estimation wind source, may be excluded by adding them to this set.
      */
-    private final Set<WindSource> windSourcesToExclude;
+    private final ConcurrentHashMap<WindSource, TrackedRaceImpl> windSourcesToExclude;
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a mark fix, a race
@@ -424,7 +424,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 + race.getName(), /* fair */ false);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
-        this.windSourcesToExclude = new HashSet<WindSource>();
+        this.windSourcesToExclude = new ConcurrentHashMap<>();
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.delayToLiveInMillis = delayToLiveInMillis;
@@ -1679,24 +1679,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Set<WindSource> getWindSourcesToExclude() {
-        synchronized (windSourcesToExclude) {
-            return Collections.unmodifiableSet(windSourcesToExclude);
-        }
+        return Collections.unmodifiableSet(windSourcesToExclude.keySet());
     }
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
-        synchronized (this.windSourcesToExclude) {
-            LockUtil.lockForRead(getSerializationLock());
-            try {
-                this.windSourcesToExclude.clear();
-                for (WindSource windSourceToExclude : windSourcesToExclude) {
-                    this.windSourcesToExclude.add(windSourceToExclude);
-                }
-            } finally {
-                LockUtil.unlockAfterRead(getSerializationLock());
+        Set<WindSource> old = new HashSet<>(getWindSourcesToExclude());
+        LockUtil.lockForRead(getSerializationLock());
+        try {
+            this.windSourcesToExclude.clear();
+            for (WindSource windSourceToExclude : windSourcesToExclude) {
+                this.windSourcesToExclude.put(windSourceToExclude, this);
             }
+        } finally {
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
         if (!old.equals(this.windSourcesToExclude)) {
             clearAllCachesExceptManeuvers();
