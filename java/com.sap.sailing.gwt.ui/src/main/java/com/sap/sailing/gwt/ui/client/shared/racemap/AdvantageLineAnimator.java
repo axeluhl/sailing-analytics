@@ -10,19 +10,19 @@ class AdvantageLineAnimator extends Timer {
     
     private final Polyline advantageLine;
     private long lastTime;
-    private int durationMillis = -1;
+    private long durationMillis = -1;
     private MVCArray<LatLng> nextPosition;
     
     public AdvantageLineAnimator(Polyline advantageLine) {
         this.advantageLine = advantageLine;
     }
     
-    public void setNextPosition(MVCArray<LatLng> nextPosition) {
+    public void setNextPositionAndTransitionMillis(MVCArray<LatLng> nextPosition, long timeForPositionTransitionMillis) {
         this.nextPosition = nextPosition;
-        scheduleRepeating(ANIMATION_PERIOD, 1000); //TODO: calculate the duration as Boats do
+        scheduleRepeating(ANIMATION_PERIOD, timeForPositionTransitionMillis);
     }
     
-    public void scheduleRepeating(int periodMillis, int durationMillis) {
+    public void scheduleRepeating(int periodMillis, long durationMillis) {
         this.lastTime = System.currentTimeMillis();
         this.scheduleRepeating(periodMillis);
         this.durationMillis = durationMillis;

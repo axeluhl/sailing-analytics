@@ -917,7 +917,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
-                        showAdvantageLine(competitorsToShow, newTime);
+                        showAdvantageLine(competitorsToShow, newTime, timeForPositionTransitionMillis);
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
@@ -1223,7 +1223,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
+    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
@@ -1323,7 +1323,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     } else {
                         nextPath.push(advantageLinePos1);
                         nextPath.push(advantageLinePos2);
-                        advantageTimer.setNextPosition(nextPath);
+                        advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                         advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
