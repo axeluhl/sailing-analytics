@@ -46,7 +46,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -233,17 +232,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     protected HorizontalPanel createRacesPanel() {
         HorizontalPanel racesPanel = new HorizontalPanel();
-        
         CaptionPanel trackableRacesPanel = createTrackableRacesPanel();
-        
         racesPanel.add(trackableRacesPanel);
         racesPanel.setCellWidth(trackableRacesPanel, "50%");
-        
         CaptionPanel trackedRacesPanel = createTrackedRacesPanel();
-        
         racesPanel.add(trackedRacesPanel);
         racesPanel.setCellWidth(trackedRacesPanel, "50%");
-        
         return racesPanel;
     }
     
@@ -337,8 +331,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         racesFilterablePanel.getTextBox().ensureDebugId("TrackableRacesFilterTextBox");
-        layoutTable.setWidget(5, 0, racesFilterLabel);
-        layoutTable.setWidget(5, 1, racesFilterablePanel);
+        layoutTable.setWidget(6, 0, racesFilterLabel);
+        layoutTable.setWidget(6, 1, racesFilterablePanel);
 
         // Races
         TextColumn<TracTracRaceRecordDTO> regattaNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
@@ -384,7 +378,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         raceVisibilityColumn.setSortable(true);
-        
         SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<TracTracRaceRecordDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell()) {
                     @Override
@@ -408,12 +401,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
         racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
         racesTable.setWidth("100%");
-
         raceList.addDataDisplay(racesTable);
-
         layoutTable.setWidget(6, 0, racesTable);
         cellFormatter.setColSpan(6, 0, 2);
-        
         Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.addClickHandler(new ClickHandler() {
@@ -427,11 +417,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
             }
         });
-
         layoutTable.setWidget(7, 1, startTrackingButton);
-
         trackableRacesPanel.setContentWidget(layoutTable);
-
         return trackableRacesPanel;
     }
     
@@ -499,7 +486,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (minutesAsString != null) {
             Double minutesAsDouble = Double.parseDouble(minutesAsString);
             if (minutesAsDouble != null) {
-                result = new MillisecondsDurationImpl(minutesAsDouble.longValue() * 60000/* One Minute in Milliseconds */);
+                result = Duration.ONE_MINUTE.times(minutesAsDouble.longValue());
             }
         }
         return result;
