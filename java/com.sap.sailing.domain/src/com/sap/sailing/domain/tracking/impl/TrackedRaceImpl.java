@@ -1146,7 +1146,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(startOfLeg);
             if (indexOfWaypoint == -1) {
                 throw new IllegalArgumentException("Waypoint " + startOfLeg + " not found in " + getRace().getCourse());
-            } else if (indexOfWaypoint == Util.size(getRace().getCourse().getWaypoints()) - 1) {
+            } else if (indexOfWaypoint == getRace().getCourse().getNumberOfWaypoints() - 1) {
                 throw new IllegalArgumentException("Waypoint " + startOfLeg + " isn't start of any leg in "
                         + getRace().getCourse());
             }
