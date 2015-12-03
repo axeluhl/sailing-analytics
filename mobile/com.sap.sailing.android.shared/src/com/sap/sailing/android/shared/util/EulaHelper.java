@@ -3,7 +3,9 @@ package com.sap.sailing.android.shared.util;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import com.sap.sailing.android.shared.R;
 
@@ -55,5 +57,11 @@ public class EulaHelper {
             accepted = preferences.getBoolean(EULA_CONFIRMED, false);
         }
         return accepted;
+    }
+
+    public static void openEulaPage(Context context) {
+        String url = context.getString(R.string.eula_url);
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        context.startActivity(browserIntent);
     }
 }
