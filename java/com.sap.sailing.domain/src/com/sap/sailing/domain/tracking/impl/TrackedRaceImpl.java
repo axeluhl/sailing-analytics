@@ -1150,7 +1150,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 throw new IllegalArgumentException("Waypoint " + startOfLeg + " isn't start of any leg in "
                         + getRace().getCourse());
             }
-            return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint));
+            return trackedLegs.get(race.getCourse().getLeg(indexOfWaypoint));
         } finally {
             getRace().getCourse().unlockAfterRead();
         }
