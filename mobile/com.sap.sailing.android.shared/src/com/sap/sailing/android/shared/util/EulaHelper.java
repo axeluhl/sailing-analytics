@@ -6,6 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.view.View;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.R;
 
@@ -17,7 +23,7 @@ public class EulaHelper {
     public static void showTrackingEulaDialog(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(R.string.eula_message);
+        builder.setMessage(getSpannableMessage(context));
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
@@ -25,13 +31,14 @@ public class EulaHelper {
                 storeEulaAccepted(context);
             }
         });
-        builder.show();
+        AlertDialog alertDialog = builder.show();
+        ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     public static void showEulaDialog(final Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(R.string.eula_message);
+        builder.setMessage(getSpannableMessage(context));
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
@@ -40,7 +47,8 @@ public class EulaHelper {
             }
         });
         builder.setNegativeButton(R.string.skip, null);
-        builder.show();
+        AlertDialog alertDialog = builder.show();
+        ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private static void storeEulaAccepted(Context context) {
@@ -63,5 +71,27 @@ public class EulaHelper {
         String url = context.getString(R.string.eula_url);
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         context.startActivity(browserIntent);
+    }
+
+    /**
+     * Prepare text for dialog with clickable text part.
+     * @param context
+     * @return
+     */
+    private static SpannableString getSpannableMessage(final Context context) {
+        String message = context.getString(R.string.eula_message);
+        String clickableText = context.getString(R.string.linked_eula_message_part);
+
+        SpannableString spannableString = new SpannableString(message);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                openEulaPage(context);
+            }
+        };
+
+        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+        return spannableString;
     }
 }
