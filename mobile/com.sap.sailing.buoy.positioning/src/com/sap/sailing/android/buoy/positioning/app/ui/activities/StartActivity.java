@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
@@ -45,15 +46,18 @@ public class StartActivity extends AbstractStartActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.about:
-            AboutDialog aboutDialog = new AboutDialog(this);
-            aboutDialog.show();
-            return true;
-        case R.id.settings:
-            startActivity(new Intent(this, SettingActivity.class));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.about:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.version:
+                AboutDialog aboutDialog = new AboutDialog(this);
+                aboutDialog.show();
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -73,4 +77,5 @@ public class StartActivity extends AbstractStartActivity {
             getHomeFragment().displayUserConfirmationScreen(data);
         }
     }
+
 }

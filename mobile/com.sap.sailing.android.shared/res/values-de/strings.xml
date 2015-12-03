@@ -38,4 +38,9 @@
     <string name="confirm">Zustimmen</string>
     <string name="skip">Überspringen</string>
 
+    <!-- About this app -->
+    <string name="about_this_app">Über diese App</string>
+    <string name="eula">Datenschutz</string>
+    <string name="licence_information">Lizenzhinweise</string>
+
 </resources>

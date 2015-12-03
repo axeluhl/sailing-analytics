@@ -17,6 +17,7 @@ import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
@@ -126,21 +127,24 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.refresh:
-            ExLog.i(this, TAG, "Clicked REFRESH.");
-            CheckinManager manager = new CheckinManager(checkinUrl, this);
-            manager.callServerAndGenerateCheckinData();
-            return true;
-        case R.id.check_out:
-            checkOut();
-            return true;
-        case R.id.about:
-            AboutDialog aboutDialog = new AboutDialog(this);
-            aboutDialog.show();
-            return true;
-        case R.id.settings:
-            startActivity(new Intent(this, SettingActivity.class));
-            return true;
+            case R.id.refresh:
+                ExLog.i(this, TAG, "Clicked REFRESH.");
+                CheckinManager manager = new CheckinManager(checkinUrl, this);
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.check_out:
+                checkOut();
+                return true;
+            case R.id.about:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.version:
+                AboutDialog aboutDialog = new AboutDialog(this);
+                aboutDialog.show();
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingActivity.class));
+                return true;
         default:
             return super.onOptionsItemSelected(item);
         }

@@ -54,4 +54,9 @@
     <string name="confirm">Confirm</string>
     <string name="skip">Skip</string>
 
+    <!-- About this app -->
+    <string name="about_this_app">About this app</string>
+    <string name="eula">EULA</string>
+    <string name="licence_information">Licence Information</string>
+
 </resources>
