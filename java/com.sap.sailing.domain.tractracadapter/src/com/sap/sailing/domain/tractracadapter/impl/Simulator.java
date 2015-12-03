@@ -37,7 +37,7 @@ public class Simulator {
     private boolean stopped;
     private Duration advanceInMillis = Duration.NULL.minus(1);
     private Timer timer = new Timer("Timer for TracTrac Simulator");
-    private Duration offsetToStart;
+    private final Duration offsetToStart;
     
     public Simulator(WindStore windStore, Duration offsetToStart) {
         super();
