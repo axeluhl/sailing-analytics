@@ -804,7 +804,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 lastCombinedWindTrackInfoDTO = windInfo; 
-                                showAdvantageLine(competitorsToShow, newTime);
+//                                showAdvantageLine(competitorsToShow, newTime); // TODO bug 1662: can we live without this call and assume that updating the advantage line in case the boats are moved is enough?
                                 for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
@@ -896,7 +896,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         startedProcessingRequestID = requestID;
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                        long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
+                        long timeForPositionTransitionMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
                         fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
                         showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
                         showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
@@ -917,7 +917,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
-                        //showAdvantageLine(competitorsToShow, newTime);
+                        showAdvantageLine(competitorsToShow, newTime);
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
@@ -1136,7 +1136,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private long calculateTimeForPositionTransition(final Date newTime, final Date oldTime) {
+    private long calculateTimeForPositionTransitionInMillis(final Date newTime, final Date oldTime) {
         final long timeForPositionTransitionMillis;
         boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > 3*timer.getRefreshInterval();
         if (timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
