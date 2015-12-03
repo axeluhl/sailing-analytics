@@ -290,7 +290,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         simulateWithStartTimeNowCheckBox.setWordWrap(false);
         simulateWithStartTimeNowCheckBox.setValue(Boolean.FALSE);
         simulateWithStartTimeNowCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 offsetToStartTimeOfSimulatedRaceTextBox.setEnabled(simulateWithStartTimeNowCheckBox.getValue());
