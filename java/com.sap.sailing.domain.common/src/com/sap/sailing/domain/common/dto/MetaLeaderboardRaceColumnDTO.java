@@ -17,7 +17,7 @@ public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
         return false;
     }
     
-    public void addRace(RaceDTO race) {
+    public void addRace(BasicRaceDTO race) {
         raceList.add(race);
     }
 

@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.dto.BasicRaceDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -1377,8 +1378,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     String regattaName = trackedRace.getTrackedRegatta().getRegatta().getName();
                     String raceName = trackedRace.getRace().getName();
                     RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);
-                    columnDTO.addRace(baseDomainFactory.createRaceDTO(trackedRegattaRegistry, 
-                            /* withGeoLocationData */ false, raceIdentifier, trackedRace));
+                    columnDTO.addRace(new BasicRaceDTO(raceIdentifier, baseDomainFactory.createTrackedRaceDTO(trackedRace)));
                 }
             }
         }
