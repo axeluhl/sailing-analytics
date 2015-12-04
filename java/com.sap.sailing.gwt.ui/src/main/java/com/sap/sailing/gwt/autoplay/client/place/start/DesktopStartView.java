@@ -75,13 +75,13 @@ public class DesktopStartView extends Composite implements StartView {
     private Map<String, String> raceboardParameters;
     private Map<String, String> leaderboardParameters;
     
-    private final List<Perspective> supportedPerspectives;
+    private final List<Perspective<?>> supportedPerspectives;
 
     private ProxyLeaderboardPerspective leaderboardPerspective;
     private ProxyRaceBoardPerspective raceViewerPerspective;
     
     private final int defaultTimeToStartTimeInSeconds = 180;
-    private final Map<Perspective, CompositeSettings> perspectiveSettings;
+    private final Map<Perspective<?>, CompositeSettings> perspectiveSettings;
     
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
@@ -90,7 +90,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.events = new ArrayList<EventDTO>();
         this.raceboardParameters = new HashMap<String, String>();
         this.leaderboardParameters = new HashMap<String, String>();
-        this.supportedPerspectives = new ArrayList<Perspective>();
+        this.supportedPerspectives = new ArrayList<Perspective<?>>();
         
         sapHeader = new SAPHeader("Auto player configuration", false);
         eventSelectionBox = new ListBox();
@@ -143,7 +143,7 @@ public class DesktopStartView extends Composite implements StartView {
         supportedPerspectives.add(raceViewerPerspective);
     }
 
-    private void openPerspectiveConfigurationDialog(final Perspective perspective) {
+    private void openPerspectiveConfigurationDialog(final Perspective<?> perspective) {
         TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE,
                 perspective, new DialogCallback<CompositeSettings>() {
                     @Override
@@ -195,7 +195,7 @@ public class DesktopStartView extends Composite implements StartView {
             this.updatePerspectives(selectedLeaderboard);
 
             perspectiveConfigurationPanel.clear();
-            for(final Perspective perspective: supportedPerspectives) {
+            for(final Perspective<?> perspective: supportedPerspectives) {
                 Button perspectiveConfigButton = new Button(perspective.getPerspectiveName());
                 perspectiveConfigButton.getElement().getStyle().setMargin(5, Unit.PX);
                 perspectiveConfigurationPanel.add(perspectiveConfigButton);
