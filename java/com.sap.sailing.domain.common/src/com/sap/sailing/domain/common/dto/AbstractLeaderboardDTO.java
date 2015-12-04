@@ -348,6 +348,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         result = prime * result + ((competitorDisplayNames == null) ? 0 : competitorDisplayNames.hashCode());
         result = prime * result + Arrays.hashCode(discardThresholds);
         result = prime * result + (hasCarriedPoints ? 1231 : 1237);
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
         if (races == null) {
