@@ -59,4 +59,8 @@ class AdvantageLineAnimator extends Timer {
             }
         }
     }
+
+    public void removeAnimation() {
+        this.durationMillis = -1;        
+    }
 }

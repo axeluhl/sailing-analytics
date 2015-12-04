@@ -712,6 +712,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
             infoOverlay.removeCanvasPositionAndRotationTransition();
         }
+        // remove the advantage line animation
+        advantageTimer.removeAnimation();
     }
 
     public void redraw() {
