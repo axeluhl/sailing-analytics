@@ -46,7 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -159,7 +158,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
@@ -1074,31 +1072,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
-            // try to load from store
-            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-            track = loadedTrack;
-            Set<AbstractLog<?, ?>> logs = new HashSet<>();
-            logs.add(leaderboard.getRegattaLike().getRegattaLog());
-            if (raceLog == null) { // no race log explicitly provided --> use all race logs
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        logs.add(raceColumn.getRaceLog(fleet));
-                    }
-                }
-            } else {
-                logs.add(raceLog);
-            }
-            for (AbstractLog<?, ?> log : logs) {
-                try {
-                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
-                }
-            }
-        }
-        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
-        if (result == null) {
+        
+        Position result; 
+        if (track != null){
+            result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        } else {
             result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
         }
         return result;
