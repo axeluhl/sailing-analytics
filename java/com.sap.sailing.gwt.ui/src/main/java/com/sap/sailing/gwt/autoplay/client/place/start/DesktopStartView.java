@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,8 +19,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -33,16 +34,18 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigurationDialog;
-import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -56,14 +59,13 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField(provided=true) ListBox leaderboardSelectionBox;
     @UiField CheckBox leaderboardAutoZoomBox;
     @UiField CheckBox startInFullscreenModeBox;
-    @UiField CheckBox autoSelectMediaBox;
     @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
     @UiField DivElement leaderboardSelectionUi;
     @UiField DivElement leaderboardZoomDiv;
     @UiField DivElement leaderboardAutoZoomDiv;
     @UiField DivElement screenConfiguraionUi;
-    @UiField HorizontalPanel perspectiveConfigurationPanel;
+    @UiField VerticalPanel perspectiveConfigurationPanel;
     
     @UiField CheckBox autoSwitchToRaceboard;
     @UiField TextBox timeToRaceStartInSeconds;
@@ -135,7 +137,7 @@ public class DesktopStartView extends Composite implements StartView {
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         leaderboardPerspective = new ProxyLeaderboardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
-        raceViewerPerspective = new ProxyRaceBoardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
+        raceViewerPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard, createDefaultLeaderboardSettings(leaderboard));
         
         perspectiveSettings.clear();
         supportedPerspectives.clear();
@@ -143,7 +145,12 @@ public class DesktopStartView extends Composite implements StartView {
         supportedPerspectives.add(raceViewerPerspective);
     }
 
-    private void openPerspectiveConfigurationDialog(final Perspective<?> perspective) {
+    private void openPerspectiveSettingsDialog(final Perspective<?> perspective) {
+        SettingsDialog<?> dialog = new SettingsDialog<>(perspective, StringMessages.INSTANCE);
+        dialog.show();
+    }
+    
+    private void openPerspectiveComponentSettingsDialog(final Perspective<?> perspective) {
         TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE,
                 perspective, new DialogCallback<CompositeSettings>() {
                     @Override
@@ -196,15 +203,31 @@ public class DesktopStartView extends Composite implements StartView {
 
             perspectiveConfigurationPanel.clear();
             for(final Perspective<?> perspective: supportedPerspectives) {
-                Button perspectiveConfigButton = new Button(perspective.getPerspectiveName());
-                perspectiveConfigButton.getElement().getStyle().setMargin(5, Unit.PX);
-                perspectiveConfigurationPanel.add(perspectiveConfigButton);
-                perspectiveConfigButton.addClickHandler(new ClickHandler() {
+                HorizontalPanel hPanel = new HorizontalPanel();
+                perspectiveConfigurationPanel.add(hPanel);
+                hPanel.add(new Label(perspective.getPerspectiveName() + ":"));
+                hPanel.setSpacing(5);
+                
+                Button perspectiveComponentSettingsButton = new Button("Component settings");
+                hPanel.add(perspectiveComponentSettingsButton);
+                perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        openPerspectiveConfigurationDialog(perspective);
+                        openPerspectiveComponentSettingsDialog(perspective);
                     }
                 });
+                
+                if(perspective.hasSettings()) {
+                    Button perspectiveSettingsButton = new Button("Settings");
+                    hPanel.add(perspectiveSettingsButton);
+                    perspectiveSettingsButton.addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            openPerspectiveSettingsDialog(perspective);
+                        }
+                    });
+                    
+                }
             }
         } else {
             startAutoPlayButton.setEnabled(false);
@@ -226,12 +249,11 @@ public class DesktopStartView extends Composite implements StartView {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         String leaderboardZoom = getLeaderboardZoom();
-        Boolean isAutoSelectMedia = autoSelectMediaBox.getValue();
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_ZOOM, leaderboardZoom);
             leaderboardParameters.put(PlayerPlace.PARAM_LEADEROARD_NAME, selectedLeaderboardName);
-            raceboardParameters.put(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA, String.valueOf(isAutoSelectMedia));
+//            raceboardParameters.put(PlayerPlace.PARAM_RACEBOARD_AUTOSELECT_MEDIA, String.valueOf(isAutoSelectMedia));
 
             navigator.goToPlayer(selectedEvent.id.toString(), startInFullscreenModeBox.getValue(), 
                     leaderboardParameters, raceboardParameters);

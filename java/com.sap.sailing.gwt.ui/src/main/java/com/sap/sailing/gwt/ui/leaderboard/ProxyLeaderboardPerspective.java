@@ -18,6 +18,6 @@ public class ProxyLeaderboardPerspective extends AbstractPerspectiveWithoutSetti
 
     @Override
     public String getPerspectiveName() {
-        return StringMessages.INSTANCE.leaderboard();
+        return StringMessages.INSTANCE.leaderboard() + " Viewer";
     }
 }

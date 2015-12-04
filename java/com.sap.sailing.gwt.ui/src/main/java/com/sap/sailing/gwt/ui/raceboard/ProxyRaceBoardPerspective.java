@@ -18,8 +18,13 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *
  */
 public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPerspectiveSettings> {
-    public ProxyRaceBoardPerspective(AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
+    private RaceBoardPerspectiveSettings perspectiveSettings;
+    
+    public ProxyRaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
         super();
+        
+        this.perspectiveSettings = perspectiveSettings;
+        
         components.add(new ProxyRaceMapComponent(new RaceMapSettings(), StringMessages.INSTANCE));
         components.add(new ProxyWindChartComponent(new WindChartSettings(), StringMessages.INSTANCE));
         components.add(new ProxyLeaderboardComponent(defaultLeaderboardSettings, leaderboard, StringMessages.INSTANCE));
@@ -32,49 +37,40 @@ public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPers
 
     @Override
     public String getLocalizedShortName() {
-        // TODO Auto-generated method stub
-        return null;
+        return getPerspectiveName();
     }
 
     @Override
     public Widget getEntryWidget() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean isVisible() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void setVisible(boolean visibility) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public boolean hasSettings() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public SettingsDialogComponent<RaceBoardPerspectiveSettings> getSettingsDialogComponent() {
-        // TODO Auto-generated method stub
-        return null;
+        return new RaceBoardPerspectiveSettingsDialogComponent(perspectiveSettings, StringMessages.INSTANCE);
     }
 
     @Override
     public void updateSettings(RaceBoardPerspectiveSettings newSettings) {
-        // TODO Auto-generated method stub
-        
+        this.perspectiveSettings = newSettings;
     }
 
     @Override
     public String getDependentCssClassName() {
-        // TODO Auto-generated method stub
-        return null;
+        return "";
     }
 }

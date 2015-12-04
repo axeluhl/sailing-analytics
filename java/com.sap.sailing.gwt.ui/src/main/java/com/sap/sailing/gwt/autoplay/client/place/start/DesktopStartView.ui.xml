@@ -105,8 +105,8 @@
 				    <span>Settings:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:HorizontalPanel ui:field="perspectiveConfigurationPanel" styleName="{res.mediaCss.grid} {style.row}">
-					</g:HorizontalPanel>
+					<g:VerticalPanel ui:field="perspectiveConfigurationPanel" styleName="{res.mediaCss.grid} {style.row}">
+					</g:VerticalPanel>
 		        </div>
 			</div>
 		</div>
