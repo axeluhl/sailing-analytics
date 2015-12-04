@@ -2412,7 +2412,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
                 
                 boolean competitorRegistrationsExist;
-                competitorRegistrationsExist = raceLog == null ? false : Iterables.size(raceColumn.getAllCompetitors(fleet)) > 0 ;
+                competitorRegistrationsExist = raceLog == null ? false : sizeOf(raceColumn.getAllCompetitors(fleet)) > 0 ;
 
                 RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, raceLogTrackingState);
@@ -2420,6 +2420,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return leaderboardDTO;
+    }
+
+    private int sizeOf(Iterable<Competitor> values) {
+        if (values instanceof Collection<?>) {
+            return ((Collection<?>)values).size();
+        } else {
+            Iterator<Competitor> it = values.iterator();
+            int sum = 0;
+            while (it.hasNext()) {
+              it.next();
+              sum++;
+            }
+            return sum;
+        }
     }
 
     @Override
