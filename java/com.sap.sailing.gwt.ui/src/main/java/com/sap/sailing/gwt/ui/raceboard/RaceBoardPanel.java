@@ -85,7 +85,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     private final UUID eventId;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final RaceBoardViewConfiguration raceboardViewConfiguration;
+    private final RaceBoardPerspectiveSettings raceboardViewConfiguration;
     private String raceBoardName;
         
     private RaceTimePanel timePanel;
@@ -127,7 +127,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
-            String leaderboardGroupName, UUID eventId, RaceBoardViewConfiguration raceboardViewConfiguration,
+            String leaderboardGroupName, UUID eventId, RaceBoardPerspectiveSettings raceboardViewConfiguration,
             ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls) {
         this.sailingService = sailingService;
@@ -340,7 +340,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
     }
 
-    public RaceBoardViewConfiguration getConfiguration() {
+    public RaceBoardPerspectiveSettings getConfiguration() {
         return raceboardViewConfiguration;
     }
 

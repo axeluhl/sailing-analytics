@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @author Frank
  *
  */
-public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardViewConfiguration> {
+public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPerspectiveSettings> {
     public ProxyRaceBoardPerspective(AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
         super();
         components.add(new ProxyRaceMapComponent(new RaceMapSettings(), StringMessages.INSTANCE));
@@ -61,13 +61,13 @@ public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardView
     }
 
     @Override
-    public SettingsDialogComponent<RaceBoardViewConfiguration> getSettingsDialogComponent() {
+    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getSettingsDialogComponent() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void updateSettings(RaceBoardViewConfiguration newSettings) {
+    public void updateSettings(RaceBoardPerspectiveSettings newSettings) {
         // TODO Auto-generated method stub
         
     }

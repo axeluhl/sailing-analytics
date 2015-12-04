@@ -8,7 +8,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -39,7 +39,7 @@ public class PlayerActivity extends AbstractActivity {
             @Override
             public void onSuccess(final EventDTO event) {
                 UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-                RaceBoardViewConfiguration readRaceboardConfiguration = readRaceboardConfiguration();
+                RaceBoardPerspectiveSettings readRaceboardConfiguration = readRaceboardConfiguration();
 
                 PlayerView view = clientFactory.createPlayerView();
                 panel.setWidget(view.asWidget());
@@ -60,25 +60,25 @@ public class PlayerActivity extends AbstractActivity {
         }); 
     }
     
-    private RaceBoardViewConfiguration readRaceboardConfiguration() {
+    private RaceBoardPerspectiveSettings readRaceboardConfiguration() {
         Boolean autoSelectMedia = Boolean.valueOf(playerPlace.getRaceboardAutoSelectMedia());
 
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
         final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
         final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default */);
         final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, false /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_SIMULATION, false /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
-        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
+        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
+        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_DEFAULT_MEDIA, null /* default */);
         
-        return new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
+        return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard,
                 showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
     }
 

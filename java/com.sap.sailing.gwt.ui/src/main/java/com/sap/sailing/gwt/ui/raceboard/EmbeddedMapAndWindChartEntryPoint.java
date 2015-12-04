@@ -83,11 +83,11 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters
-        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, true /* default*/);
-        final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
-        final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);
-        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_WINDCHART, true /* default*/);
+        final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
+        final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);
+        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         final boolean showCompetitors = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COMPETITORS, false /* default */);
         final boolean play = GwtHttpRequestUtils.getBooleanParameter(PARAM_PLAY, false /* default */);
         final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, true /* default */);

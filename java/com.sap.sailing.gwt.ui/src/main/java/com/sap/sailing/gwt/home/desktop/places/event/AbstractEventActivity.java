@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -150,8 +150,8 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         linkParams.put("raceName", trackedRaceName);
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
+        linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, "true");
+        linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", regattaName);
         return linkParams;
     }

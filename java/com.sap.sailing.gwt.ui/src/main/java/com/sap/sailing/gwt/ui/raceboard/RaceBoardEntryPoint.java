@@ -47,7 +47,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private String leaderboardName;
     private String leaderboardGroupName;
     private UUID eventId;
-    private RaceBoardViewConfiguration raceboardViewConfig;
+    private RaceBoardPerspectiveSettings raceboardViewConfig;
 
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
 
@@ -80,18 +80,18 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         }
         
         // read optional parameters 
-        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
-        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
-        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
-        boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
-        boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);        
-        boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
-        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
-        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, true);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
-        raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
+        boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_LEADERBOARD, true /* default*/);
+        boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_WINDCHART, false /* default*/);
+        boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default*/);
+        boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLETS, false /* default*/);
+        boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);        
+        boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
+        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
+        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
+        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_AUTOSELECT_MEDIA, true);
+        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_DEFAULT_MEDIA, null /* default*/);
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
+        raceboardViewConfig = new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard,
                 showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
 
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
@@ -170,7 +170,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createRaceBoardInOneScreenMode(final RaceBoardPanel raceBoardPanel,
-            RaceBoardViewConfiguration raceboardViewConfiguration) {
+            RaceBoardPerspectiveSettings raceboardViewConfiguration) {
         final DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         final FlowPanel timePanel = createTimePanel(raceBoardPanel);

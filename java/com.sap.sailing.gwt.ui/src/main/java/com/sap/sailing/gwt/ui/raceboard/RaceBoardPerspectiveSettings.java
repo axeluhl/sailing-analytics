@@ -7,7 +7,7 @@ import com.sap.sse.common.settings.AbstractSettings;
  * @author Frank
  *
  */
-public class RaceBoardViewConfiguration extends AbstractSettings {
+public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showLeaderboard; 
     private final boolean showWindChart; 
     private final boolean showCompetitorsChart;
@@ -33,13 +33,13 @@ public class RaceBoardViewConfiguration extends AbstractSettings {
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
     public static final String PARAM_DEFAULT_MEDIA = "defaultMedia";
 
-    public RaceBoardViewConfiguration() {
+    public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewStreamletColors */ false, /* showViewSimulation */ false,
         /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
     }	
     
-    public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
+    public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
             boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
             boolean autoSelectMedia, String defaultMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;

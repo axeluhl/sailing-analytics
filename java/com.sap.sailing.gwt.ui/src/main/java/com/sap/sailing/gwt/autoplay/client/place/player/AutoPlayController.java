@@ -38,7 +38,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -80,7 +80,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
     private boolean showWindChart;
-    private final RaceBoardViewConfiguration raceboardViewConfig;
+    private final RaceBoardPerspectiveSettings raceboardViewConfig;
     private final PlayerView playerView;
     private Widget currentContentWidget;
 
@@ -90,7 +90,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             UserService userService, ErrorReporter errorReporter, boolean isfullscreenMode,
             String leaderboardGroupName, String leaderboardName, final String leaderboardZoom,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardViewConfiguration raceboardViewConfig, PlayerView playerView, LeaderboardSettings leaderboardSettings) {
+            RaceBoardPerspectiveSettings raceboardViewConfig, PlayerView playerView, LeaderboardSettings leaderboardSettings) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
