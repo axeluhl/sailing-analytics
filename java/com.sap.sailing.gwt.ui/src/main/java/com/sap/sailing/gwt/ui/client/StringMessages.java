@@ -361,7 +361,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String successfullyUpdatedScores();
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
     String maneuverTypesToShowWhenCompetitorIsClicked();
-    String simulateWithStartTimeNow();
+    String simulateAsLiveRace();
+    String simulateWithOffset();
     String boatClassDoesNotMatchSelectedRegatta(String boatClass);
     String regattaExistForSelectedBoatClass();
     String reload();
