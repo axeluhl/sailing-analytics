@@ -6,10 +6,10 @@ public class MetaLeaderboardRaceColumnDTO extends RaceColumnDTO {
 
     private static final long serialVersionUID = 6152752963316150432L;
     
-    private ArrayList<RaceDTO> raceList = new ArrayList<RaceDTO>();
+    private ArrayList<BasicRaceDTO> raceList = new ArrayList<BasicRaceDTO>();
     
     public boolean isLive(FleetDTO fleet, long serverTimePointAsMillis) {
-        for (RaceDTO race : raceList) {
+        for (BasicRaceDTO race : raceList) {
             if (race.isLive(serverTimePointAsMillis)) {
                 return true;
             }
