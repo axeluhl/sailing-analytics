@@ -1,7 +1,8 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.List;
+
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -38,5 +39,8 @@ public interface RefreshableSelectionModel<T> extends SetSelectionModel<T> {
      * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent) onSelectionChangedEvent} using
      * {@link AbstractSelectionModel#fireEvent(com.google.gwt.event.shared.GwtEvent)}.
      */
+    // consider deleting this method and switch to private in sub classes
     public void refreshSelectionModel(Iterable<T> newObjects);
+    // consider deleting this method and switch to private in sub classes
+    public void refreshSelectionModel(int start, List<T> newObjects);
 }

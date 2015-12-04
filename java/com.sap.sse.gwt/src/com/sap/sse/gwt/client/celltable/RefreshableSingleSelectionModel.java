@@ -1,10 +1,9 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -14,25 +13,22 @@ import com.google.gwt.view.client.RangeChangeEvent.Handler;
 
 /**
  * TODO Lukas: Add Javadoc
+ * 
+ * *            TODO /FIXME Describe interaction with ListDataProvider
  */
 
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
-    private final ListDataProvider<T> provider;
+    private final List<T> elements;
     
     /**
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
-     * @param provider
-     *            {@link ListDataProvider} to register this as listener and get the entries
      */
-    public RefreshableSingleSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> provider) {
+    public RefreshableSingleSelectionModel(EntityIdentityComparator<T> comp) {
         super();
         this.comp=comp;
-        this.provider = provider;
-        if (this.provider != null) {
-            this.provider.addDataDisplay(this);            
-        }
+        elements = new ArrayList<>();
     }
     
     /**
@@ -40,16 +36,11 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      *            {@link ProvidesKey} for the super class constructor
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
-     * @param provider
-     *            {@link ListDataProvider} to register this as listener and get the entries
      */
-    public RefreshableSingleSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> provider) {
+    public RefreshableSingleSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp) {
         super(keyProvider);
         this.comp =comp;
-        this.provider = provider;
-        if (this.provider != null) {
-            this.provider.addDataDisplay(this);  
-        }
+        elements = new ArrayList<>();
     }
 
     @Override
@@ -70,7 +61,6 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
             }
         }
     }
-
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
         final T selected = getSelectedObject();
@@ -79,7 +69,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
             for (final T it : newObjects) {
                 boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
                 if (isEqual) {
-                    setSelected(it, true);
+                    super.setSelected(it, true);
                     break;
                 }
             }
@@ -87,11 +77,67 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
         SelectionChangeEvent.fire(this);
     }
     
+    /**
+     * refreshes the {@link RefreshableMultiSelectionModel SelectionModel}-Part from <code>start</code> to
+     * <code>elements.size()</code>
+     * 
+     * @param start
+     * @param newObjects
+     */
+    @Override
+    public void refreshSelectionModel(int start, List<T> newObjects) {
+        List<T> oldElements = elements.subList(start, elements.size());
+        T selectedElement = null;
+        for (T it : oldElements) {
+            if (isSelected(it)) {
+                selectedElement = it;
+                super.setSelected(it, false);
+                break;
+            }
+        }
+        if (selectedElement != null) {
+            if (comp != null) {
+                for (T newElement : newObjects) {
+                    if (comp.representSameEntity(selectedElement, newElement)) {
+                        super.setSelected(newElement, true);
+                        break;
+                    }
+                }
+            } else if (newObjects.contains(selectedElement)) {
+                super.setSelected(newObjects.get(newObjects.indexOf(selectedElement)), true);
+            }
+            SelectionChangeEvent.fire(this);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        refreshSelectionModel(provider.getList());
+        // refresh the selectionModel
+        if (start > 0 && values.size() > 0) {
+            refreshSelectionModel(start, (List<T>) values);
+        } else {
+            refreshSelectionModel((Iterable<T>) values);
+        }
+        // refresh the element list
+        // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
+        if (values.isEmpty()) {
+            elements.clear();
+        } else if (elements.isEmpty()) {
+            elements.addAll(values);
+        } else if (values.size() == 1) {
+            elements.set(start, values.get(0));
+        } else if (start == 0) {
+            elements.clear();
+            elements.addAll(values);
+        } else {
+            for (int i = start; i < elements.size(); i++) {
+                elements.remove(i);
+            }
+            elements.addAll(values);
+        }
     }
-    
+
     @Override
     public int getRowCount() {
         return Integer.MAX_VALUE;
@@ -106,56 +152,68 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     public int getVisibleItemCount() {
         return Integer.MAX_VALUE;
     }
-    
+
     @Override
     public HandlerRegistration addRangeChangeHandler(Handler handler) {
         return null;
     }
+
     @Override
     public HandlerRegistration addRowCountChangeHandler(
             com.google.gwt.view.client.RowCountChangeEvent.Handler handler) {
         return null;
     }
+
     @Override
     public boolean isRowCountExact() {
         return false;
     }
+
     @Override
     public void setRowCount(int count) {
         return;
     }
+
     @Override
     public void setRowCount(int count, boolean isExact) {
         return;
     }
+
     @Override
     public void setVisibleRange(int start, int length) {
         return;
     }
+
     @Override
     public void setVisibleRange(Range range) {
         return;
     }
+
     @Override
     public HandlerRegistration addCellPreviewHandler(com.google.gwt.view.client.CellPreviewEvent.Handler<T> handler) {
         return null;
     }
+
     @Override
     public SelectionModel<? super T> getSelectionModel() {
         return null;
     }
+
     @Override
     public T getVisibleItem(int indexOnPage) {
         return null;
     }
+
     @Override
     public Iterable<T> getVisibleItems() {
         return null;
     }
+
     @Override
     public void setSelectionModel(SelectionModel<? super T> selectionModel) {
         return;
     }
+
     @Override
     public void setVisibleRangeAndClearData(Range range, boolean forceRangeChangeEvent) {
         clear();
