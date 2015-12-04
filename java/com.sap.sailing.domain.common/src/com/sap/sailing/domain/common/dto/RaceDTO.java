@@ -43,14 +43,14 @@ public class RaceDTO extends BasicRaceDTO {
     }
 
     public RaceLiveState getLiveState(long serverTimePointAsMillis) {
-        RaceLiveState result = RaceLiveState.NOT_TRACKED;         
-        if(trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+        RaceLiveState result = RaceLiveState.NOT_TRACKED;
+        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
             result = RaceLiveState.TRACKED;
-            if(isLive(serverTimePointAsMillis)) {
+            if (isLive(serverTimePointAsMillis)) {
                 result = RaceLiveState.TRACKED_AND_LIVE;
-                if(startOfRace == null) {
+                if (startOfRace == null) {
                     result = RaceLiveState.TRACKED_BUT_NOT_SCHEDULED;
-                }                    
+                }
             }
         }
         return result;

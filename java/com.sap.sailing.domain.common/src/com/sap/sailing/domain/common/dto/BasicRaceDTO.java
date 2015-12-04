@@ -14,13 +14,6 @@ import com.sap.sailing.domain.common.TimingConstants;
 public class BasicRaceDTO extends NamedDTO {
     private static final long serialVersionUID = 2613189982608149975L;
 
-    /**
-     * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
-     * listening for incoming GPS fixes, mark passings etc., to update a {@link TrackedRace} object
-     * accordingly.
-     */
-    public boolean isTracked;
-
     public Date startOfRace;
     public Date endOfRace;
     public TrackedRaceDTO trackedRace;
@@ -83,7 +76,6 @@ public class BasicRaceDTO extends NamedDTO {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((endOfRace == null) ? 0 : endOfRace.hashCode());
-        result = prime * result + (isTracked ? 1231 : 1237);
         result = prime * result + ((startOfRace == null) ? 0 : startOfRace.hashCode());
         result = prime * result + ((trackedRace == null) ? 0 : trackedRace.hashCode());
         return result;
@@ -102,8 +94,6 @@ public class BasicRaceDTO extends NamedDTO {
             if (other.endOfRace != null)
                 return false;
         } else if (!endOfRace.equals(other.endOfRace))
-            return false;
-        if (isTracked != other.isTracked)
             return false;
         if (startOfRace == null) {
             if (other.startOfRace != null)
