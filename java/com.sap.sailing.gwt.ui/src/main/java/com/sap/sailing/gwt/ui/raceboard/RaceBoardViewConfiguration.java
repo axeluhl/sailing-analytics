@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.sap.sse.common.settings.AbstractSettings;
+
 /** 
  * Represents the parameters for configuring the raceboard view
  * @author Frank
  *
  */
-public class RaceBoardViewConfiguration {
+public class RaceBoardViewConfiguration extends AbstractSettings {
     private final boolean showLeaderboard; 
     private final boolean showWindChart; 
     private final boolean showCompetitorsChart;

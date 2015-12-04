@@ -36,7 +36,7 @@ import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigu
 import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.raceboard.ProxyRaceViewerPerspective;
+import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -78,7 +78,7 @@ public class DesktopStartView extends Composite implements StartView {
     private final List<Perspective> supportedPerspectives;
 
     private ProxyLeaderboardPerspective leaderboardPerspective;
-    private ProxyRaceViewerPerspective raceViewerPerspective;
+    private ProxyRaceBoardPerspective raceViewerPerspective;
     
     private final int defaultTimeToStartTimeInSeconds = 180;
     private final Map<Perspective, CompositeSettings> perspectiveSettings;
@@ -135,7 +135,7 @@ public class DesktopStartView extends Composite implements StartView {
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         leaderboardPerspective = new ProxyLeaderboardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
-        raceViewerPerspective = new ProxyRaceViewerPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
+        raceViewerPerspective = new ProxyRaceBoardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
         
         perspectiveSettings.clear();
         supportedPerspectives.clear();

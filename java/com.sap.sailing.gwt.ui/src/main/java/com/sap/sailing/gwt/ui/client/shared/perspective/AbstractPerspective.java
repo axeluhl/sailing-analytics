@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.perspective;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
@@ -10,7 +11,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
  * @author Frank
  *
  */
-public abstract class AbstractPerspective implements Perspective {
+public abstract class AbstractPerspective<SettingsType extends Settings> implements Perspective<SettingsType> {
 
     protected final List<Component<?>> components;
     
