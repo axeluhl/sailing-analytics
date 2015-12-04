@@ -2,9 +2,13 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -60,7 +64,6 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsEx
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -140,8 +143,16 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            throw new NotDenotableForRaceLogTrackingException(
-                    "Can only denote races in RegattaLeaderboards for RaceLog-tracking");
+            if (sizeOf(raceColumn.getAllCompetitors(fleet)) > 0){
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors(fleet));
+            } else if (sizeOf(raceColumn.getAllCompetitors()) > 0){
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
+            } else if (sizeOf(leaderboard.getAllCompetitors()) > 0){
+                boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
+            } else {
+                throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
+            }
+            
         }
 
         if (raceName == null) {
@@ -159,13 +170,46 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
         raceLog.add(event);
     }
+    
+    private int sizeOf(Iterable<Competitor> values) {
+        if (values instanceof Collection<?>) {
+            return ((Collection<?>)values).size();
+        } else {
+            Iterator<Competitor> it = values.iterator();
+            int sum = 0;
+            while (it.hasNext()) {
+              it.next();
+              sum++;
+            }
+            return sum;
+        }
+    }
+    
+    //implemented somewhere in domainFactory? 
+    private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
+        HashMap<BoatClass, Integer> occurenceCount = new HashMap<>();
+        for (Competitor competitor : allCompetitors) {
+            BoatClass boatclass = competitor.getBoat().getBoatClass();
+            if (occurenceCount.containsKey(boatclass) ) {
+                int value = occurenceCount.get(boatclass);
+                occurenceCount.put(boatclass, value + 1);
+            } else {
+                occurenceCount.put(boatclass, 1);
+            }
+        }
+
+        Entry<BoatClass, Integer> mostFrequentEntry = occurenceCount.entrySet().iterator().next();
+        for (Entry<BoatClass, Integer> entry : occurenceCount.entrySet()) {
+            if (mostFrequentEntry.getValue() < entry.getValue()){
+                mostFrequentEntry = entry;
+            }
+        }
+        return mostFrequentEntry.getKey();
+    }
 
     @Override
     public void denoteAllRacesForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
             throws NotDenotableForRaceLogTrackingException {
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            throw new NotDenotableForRaceLogTrackingException("Can only use regatta leaderboards for RaceLog-tracking");
-        }
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
                 try {
