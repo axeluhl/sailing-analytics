@@ -5053,7 +5053,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        Iterable<Competitor> competitorsToRemove = raceColumn.getAllCompetitors(fleet);
+        Iterable<Competitor> competitorsToRemove = raceColumn.getCompetitorsRegisteredInRacelog(fleet);
         HashSet<Competitor> competitorSetToRemove = new HashSet<>();
         Util.addAll(competitorsToRemove, competitorSetToRemove);
         filterDuplicates(competitorsToRegister, competitorSetToRemove);
@@ -5087,10 +5087,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister,
             HashSet<Competitor> competitorSetToRemove) {
-        for (Competitor competitor : competitorSetToRemove) {
+        
+        for (Iterator<Competitor> iterator = competitorSetToRemove.iterator(); iterator.hasNext();) {
+            Competitor competitor = iterator.next();
             if (competitorsToRegister.contains(competitor)){
                 competitorsToRegister.remove(competitor);
-                competitorSetToRemove.remove(competitor);
+                iterator.remove();
             }
         }
         return competitorSetToRemove;
