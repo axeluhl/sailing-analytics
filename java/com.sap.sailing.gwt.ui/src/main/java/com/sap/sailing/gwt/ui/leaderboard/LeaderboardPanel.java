@@ -3239,7 +3239,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
         boolean isMeta = leaderboard.type.isMetaLeaderboard();
         if (!liveRaces.isEmpty()) {
-            if(liveRaces.size() == 1) {
+            if (liveRaces.size() == 1) {
                 com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
                 String text = "'" + liveRace.getA().getRaceColumnName() + "'";
                 result = isMeta ? stringMessages.regattaIsLive(text) : stringMessages.raceIsLive(text);

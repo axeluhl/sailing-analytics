@@ -165,7 +165,6 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      *            {@link RaceColumnInSeriesDTO}
      * @param fleetDTO
      *            must not be null
-     * @param isMetaLeaderboardColumn 
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
             String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace,
