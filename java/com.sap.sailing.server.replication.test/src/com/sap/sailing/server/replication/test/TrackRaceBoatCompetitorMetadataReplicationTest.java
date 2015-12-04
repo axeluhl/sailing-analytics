@@ -70,7 +70,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
+                        0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 
