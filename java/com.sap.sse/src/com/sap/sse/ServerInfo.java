@@ -3,6 +3,8 @@ package com.sap.sse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class providing static information about the running server.
@@ -10,14 +12,16 @@ import java.io.FileReader;
  *
  */
 public class ServerInfo {
+    private static final Logger logger = Logger.getLogger(ServerInfo.class.getName());
+    
     public static String getBuildVersion() {
         String version = "Unknown or Development (" + ServerStartupConstants.SERVER_NAME + ")";
         File versionfile = new File(ServerStartupConstants.JETTY_HOME + File.separator + "version.txt");
         if (versionfile.exists()) {
-            try {
-                version = new BufferedReader(new FileReader(versionfile)).readLine();
+            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(versionfile))) {
+                version = bufferedReader.readLine();
             } catch (Exception ex) {
-                /* ignore */
+                logger.log(Level.WARNING, "Error trying to obtain version info", ex);
             }
         }
         return version;
