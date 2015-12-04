@@ -8,7 +8,14 @@ import android.view.ViewGroup;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
+
+import de.psdev.licensesdialog.LicensesDialog;
+import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
+import de.psdev.licensesdialog.licenses.License;
+import de.psdev.licensesdialog.model.Notice;
+import de.psdev.licensesdialog.model.Notices;
 
 public class AboutFragment extends BaseFragment {
 
@@ -26,7 +33,7 @@ public class AboutFragment extends BaseFragment {
         view.findViewById(R.id.licence_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                showLicenceDialog();
             }
         });
         view.findViewById(R.id.eula_button).setOnClickListener(new View.OnClickListener() {
@@ -36,5 +43,18 @@ public class AboutFragment extends BaseFragment {
             }
         });
         return view;
+    }
+
+    private void showLicenceDialog() {
+        Notices notices = new Notices();
+        LicenseHelper licenseHelper = new LicenseHelper();
+        notices.addNotice(licenseHelper.getAndroidSupportNotice());
+        notices.addNotice(licenseHelper.getOpenSansNotice());
+        notices.addNotice(licenseHelper.getJsonSimpleNotice());
+        notices.addNotice(licenseHelper.getDialogNotice());
+        LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
+        builder.setTitle(getString(R.string.licence_information));
+        builder.setNotices(notices);
+        builder.build().show();
     }
 }

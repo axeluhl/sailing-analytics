@@ -51,6 +51,9 @@ dependencies {
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
+    /* licence dialog */
+    compile('de.psdev.licensesdialog:licensesdialog:1.8.0')
+
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
 
