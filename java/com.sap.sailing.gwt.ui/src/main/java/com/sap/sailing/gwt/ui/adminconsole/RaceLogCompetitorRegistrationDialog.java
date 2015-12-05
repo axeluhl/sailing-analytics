@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.Callback;
@@ -98,7 +99,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                                 public void onSuccess(Void isEnabled) {
                                                     competitorRegistrationInRaceLogCheckBox.setValue(true);
                                                     activateRegistrationButtons();
-                                                    setRegisteredCompetitors();
+                                                    refreshCompetitors();
                                                 }
 
                                                 @Override
@@ -117,7 +118,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                                     competitorRegistrationInRaceLogCheckBox.setValue(false);
                                                     deactivateRegistrationButtons(stringMessages
                                                             .competitorRegistrationsOnRaceDisabled());
-                                                    setRegisteredCompetitors();
+                                                    refreshCompetitors();
                                                 }
 
                                                 @Override
@@ -155,5 +156,14 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             public void onFailure(Throwable reason) {
             }
         });
+    }
+
+    @Override
+    protected Set<CompetitorDTO> getResult() {
+        if (competitorRegistrationInRaceLogCheckBox.getValue()) {
+            return super.getResult();
+        } else {
+            return new HashSet<CompetitorDTO>();
+        }
     }
 }
