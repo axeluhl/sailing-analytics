@@ -6,14 +6,16 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
 
 /**
- * Master data about a single race that is to be transferred to the client.<p>
+ * Master data about a single race that is to be transferred to the client. Holds only timing and a bit
+ * of information about the tracked race, if any. See also {@link RaceDTO} for a more comprehensive set
+ * of data about a race to be serialized to a client.<p>
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class BasicRaceDTO extends NamedDTO {
-    private static final long serialVersionUID = 2613189982608149975L;
-
+    private static final long serialVersionUID = -7884808503795229609L;
+    
     public Date startOfRace;
     public Date endOfRace;
     public TrackedRaceDTO trackedRace;
