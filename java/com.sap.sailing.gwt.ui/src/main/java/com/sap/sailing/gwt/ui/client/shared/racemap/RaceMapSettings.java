@@ -19,6 +19,10 @@ public class RaceMapSettings extends AbstractSettings {
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
+    
+    private boolean transparentHoverlines = true;
+    
+    private int hoverlineStrokeWeight = 10;
 
     private long tailLengthInMilliseconds = 100000l;
 
@@ -55,6 +59,8 @@ public class RaceMapSettings extends AbstractSettings {
     public RaceMapSettings(RaceMapSettings settings) {
         this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
         this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.transparentHoverlines = settings.transparentHoverlines;
+        this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
         this.maneuverTypesToShow = settings.maneuverTypesToShow;
         this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
         this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
@@ -152,6 +158,22 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
+    }
+    
+    public boolean getTransparentHoverlines() {
+        return this.transparentHoverlines;
+    }
+    
+    public void setTransparentHoverlines(boolean transparentHoverlines) {
+        this.transparentHoverlines = transparentHoverlines;
+    }
+    
+    public int getHoverlineStrokeWeight() {
+        return this.hoverlineStrokeWeight;
+    }
+    
+    public void setHoverlineStrokeWeight(int hoverlineStrokeWeight) {
+        this.hoverlineStrokeWeight = hoverlineStrokeWeight;
     }
 
     public boolean isShowSelectedCompetitorsInfo() {

@@ -1,9 +1,11 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media.impl;
 
 import java.net.URL;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.media.MimeType;
+import com.sap.sse.shared.media.ImageDescriptor;
 
 
 public class ImageDescriptorImpl extends AbstractMediaDescriptor implements ImageDescriptor {

@@ -1,4 +1,5 @@
-package com.sap.sse.common.media;
+package com.sap.sse.shared.media;
+
 
 public interface WithImages {
     /**
