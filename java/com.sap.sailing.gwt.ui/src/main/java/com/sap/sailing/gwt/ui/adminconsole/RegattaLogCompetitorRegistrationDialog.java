@@ -13,27 +13,45 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRegistrationsDialog {
 
-    public RegattaLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean editable, String leaderboardName,
+    public RegattaLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
+            StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
     }
 
     @Override
     protected void setRegisteredCompetitors() {
-        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
-                new AsyncCallback<Collection<CompetitorDTO>>() {
-                    @Override
-                    public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
-                        move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                    }
+        if (showOnlyCompetitorsOfLog()) {
+            sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                            move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                        }
 
-                    @Override
-                    public void onFailure(Throwable reason) {
-                        errorReporter.reportError("Could not load already registered competitors: "
-                                + reason.getMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not load already registered competitors: "
+                                    + reason.getMessage());
+                        }
+                    });
+
+        } else {
+            sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                            move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not load already registered competitors: "
+                                    + reason.getMessage());
+                        }
+                    });
+
+        }
     }
 
     @Override
@@ -47,7 +65,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
             public void onSuccess(Iterable<CompetitorDTO> result) {
                 setRegisteredCompetitors();
             }
-            
+
             @Override
             public void onFailure(Throwable reason) {
             }

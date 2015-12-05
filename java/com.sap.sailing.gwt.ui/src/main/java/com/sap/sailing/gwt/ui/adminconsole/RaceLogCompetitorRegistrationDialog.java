@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -22,8 +21,9 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     private String raceColumnName;
     private CheckBox competitorRegistrationInRaceLogCheckBox;
 
-    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean editable, String leaderboardName, String raceColumnName, String fleetName,
+    public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
+            StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+            String raceColumnName, String fleetName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
         this.raceColumnName = raceColumnName;
@@ -34,19 +34,35 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
     @Override
     protected void setRegisteredCompetitors() {
-        sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<Collection<CompetitorDTO>>() {
-                    @Override
-                    public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
-                        move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
-                    }
+        if (showOnlyCompetitorsOfLog()) {
+            sailingService.getCompetitorRegistrationsInRaceLog(leaderboardName, raceColumnName, fleetName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                            move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                        }
 
-                    @Override
-                    public void onFailure(Throwable reason) {
-                        errorReporter.reportError("Could not load already registered competitors: "
-                                + reason.getMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not load already registered competitors: "
+                                    + reason.getMessage());
+                        }
+                    });
+        } else {
+            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
+                            move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not load already registered competitors: "
+                                    + reason.getMessage());
+                        }
+                    });
+        }
     }
 
     @Override
@@ -146,16 +162,42 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
     @Override
     protected void setRegisterableCompetitors() {
-        allCompetitorsTable.refreshCompetitorList(leaderboardName, new Callback<Iterable<CompetitorDTO>, Throwable>() {
-            @Override
-            public void onSuccess(Iterable<CompetitorDTO> result) {
-                setRegisteredCompetitors();
-            }
-            
-            @Override
-            public void onFailure(Throwable reason) {
-            }
-        });
+        if (showOnlyCompetitorsOfLog()) {
+            sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> competitors) {
+                            allCompetitorsTable.refreshCompetitorList(competitors);
+                            setRegisteredCompetitors();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
+                                    + reason.getMessage());
+                        }
+
+                    });
+
+        } else {
+            sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
+                    new AsyncCallback<Collection<CompetitorDTO>>() {
+
+                        @Override
+                        public void onSuccess(Collection<CompetitorDTO> competitors) {
+                            allCompetitorsTable.refreshCompetitorList(competitors);
+                            setRegisteredCompetitors();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable reason) {
+                            errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
+                                    + reason.getMessage());
+                        }
+
+                    });
+        }
     }
 
     @Override

@@ -749,4 +749,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName, String fleetName,
             Set<MarkDTO> marksToRemove, AsyncCallback<Pair<Boolean, String>> asyncCallback);
+
+    void getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Collection<CompetitorDTO>> callback);
+
+    void getCompetitorRegistrationsForLeaderboard(String leaderboardName,
+            AsyncCallback<Collection<CompetitorDTO>> callback);
 }

@@ -5957,6 +5957,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Fleet fleet = getFleetByName(raceColumn, fleetName);
         return convertToCompetitorDTOs(raceColumn.getAllCompetitors(fleet));
     }
+    
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        return convertToCompetitorDTOs(leaderboard.getAllCompetitors());
+    }
 
     @Override
     public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
@@ -5968,6 +5974,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
         
         return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsRegisteredInRegattaLog());
+    }
+    
+    @Override
+    public Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) throws NotFoundException {
+        
+        RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
+        Fleet fleet = getFleetByName(raceColumn, fleetName);
+        
+        return convertToCompetitorDTOs(raceColumn.getCompetitorsRegisteredInRacelog(fleet));
     }
 
     @Override

@@ -292,7 +292,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (isCompetitorRegistrationInRacelogEnabled(fleet)){
+        if (!isCompetitorRegistrationInRacelogEnabled(fleet)){
             throw new CompetitorRegistrationOnRaceLogDisabledException();
         }
 
@@ -314,7 +314,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void deRegisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (isCompetitorRegistrationInRacelogEnabled(fleet)){
+        if (!isCompetitorRegistrationInRacelogEnabled(fleet)){
             throw new CompetitorRegistrationOnRaceLogDisabledException();
         }
         

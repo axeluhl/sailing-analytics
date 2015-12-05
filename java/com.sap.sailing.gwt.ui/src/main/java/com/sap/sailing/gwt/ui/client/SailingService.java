@@ -613,4 +613,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Pair<Boolean, String> checkIfMarksAreUsedInOtherRaceLogs(String leaderboardName, String raceColumnName,
             String fleetName, Set<MarkDTO> marksToRemove) throws NotFoundException;
+
+    Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
+            String fleetName) throws NotFoundException;
+
+    Collection<CompetitorDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException;
 }

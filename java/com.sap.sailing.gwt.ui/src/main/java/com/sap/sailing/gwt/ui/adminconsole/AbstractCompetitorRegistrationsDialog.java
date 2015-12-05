@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -35,6 +36,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     private boolean editable;
     private Button registerBtn;
     private Button unregisterBtn;
+    private CheckBox showOnlyCompetitorsOfLogCheckBox;
 
     private String boatClass;
     
@@ -124,15 +126,30 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
 
-        refreshCompetitors();
+        
         buttonPanel.add(addCompetitorButton);
         buttonPanel.add(editCompetitorButton);
         buttonPanel.add(inviteCompetitorsButton);
         mainPanel.add(buttonPanel);
         
+        showOnlyCompetitorsOfLogCheckBox = new CheckBox(stringMessages.showOnlyCompetitorsOfLog());
+        showOnlyCompetitorsOfLogCheckBox.setValue(false);
+        
+        showOnlyCompetitorsOfLogCheckBox.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                refreshCompetitors();
+            }
+        });
+        
+        mainPanel.add(showOnlyCompetitorsOfLogCheckBox);
+        
         addAdditionalWidgets(mainPanel);
         mainPanel.add(competitorRegistrationPanel);
 
+        refreshCompetitors();
+        
         return mainPanel;
     }
 
@@ -178,6 +195,10 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                     public void cancel() {
                     }
                 }, boatClass).show();
+    }
+    
+    public boolean showOnlyCompetitorsOfLog(){
+        return showOnlyCompetitorsOfLogCheckBox.getValue();
     }
 
     private void openEditCompetitorDialog() {
