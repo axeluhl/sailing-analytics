@@ -162,7 +162,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
             newFromList.removeAll(toMove);
             from.getFilterField().updateAll(newFromList);
             List<CompetitorDTO> newToList = new ArrayList<>();
-            Util.addAll(to.getFilterField().getAll(), newToList);
+            Util.addAll(to.getDataProvider().getList(), newToList);
             newToList.addAll(toMove);
             to.getFilterField().updateAll(newToList);
         }
