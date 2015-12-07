@@ -96,8 +96,8 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     public void refreshSelectionModel(Iterable<T> newObjects) {
         dontcheckSelectionState = true;
         final Set<T> selectedSet = getSelectedSet();
-        final boolean isNotEmpty = !selectedSet.isEmpty();
-        if (isNotEmpty) {
+        final boolean isEmpty = selectedSet.isEmpty();
+        if (!isEmpty) {
             clear();
             for (T it : newObjects) {
                 if (comp == null) {
@@ -107,10 +107,10 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                     for (T selected : selectedSet) {
                         isSelected = comp.representSameEntity(selected, it);
                         if (isSelected) {
+                            setSelected(it, isSelected);
                             break;
                         }
                     }
-                    setSelected(it, isSelected);
                 }
             }
             SelectionChangeEvent.fire(this);

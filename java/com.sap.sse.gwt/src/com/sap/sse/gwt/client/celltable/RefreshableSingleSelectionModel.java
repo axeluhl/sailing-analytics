@@ -90,16 +90,13 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     @Override
     public void refreshSelectionModel(int start, List<T> newObjects) {
         dontcheckSelectionState = true;
-        List<T> oldElements = elements.subList(start, elements.size());
-        T selectedElement = null;
-        for (T it : oldElements) {
-            if (isSelected(it)) {
-                selectedElement = it;
-                setSelected(it, false);
-                break;
-            }
-        }
+        T selectedElement = getSelectedObject();
         if (selectedElement != null) {
+            final int index = elements.indexOf(selectedElement);
+            if (index < 0 || index < start) {
+                return;
+            }
+            setSelected(selectedElement, false);
             if (comp != null) {
                 for (T newElement : newObjects) {
                     if (comp.representSameEntity(selectedElement, newElement)) {
