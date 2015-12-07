@@ -149,15 +149,15 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
      */
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
-            final boolean oldBusyState = getLeaderboardPanel().getBusyIndicator().isBusy(); 
-            getLeaderboardPanel().getBusyIndicator().setBusy(true);
+            final boolean oldBusyState = getLeaderboardPanel().isBusy(); 
+            getLeaderboardPanel().setBusyState(true);
             setTogglingInProcess(true);
             final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
                 for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                     getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                 }
-                getLeaderboardPanel().getBusyIndicator().setBusy(false);
+                getLeaderboardPanel().setBusyState(false);
                 setTogglingInProcess(false);
                 // important: toggle expanded state after asking for all visible children
                 setExpanded(!isExpanded());
@@ -177,7 +177,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();
                         }
-                        getLeaderboardPanel().getBusyIndicator().setBusy(oldBusyState);
+                        getLeaderboardPanel().setBusyState(oldBusyState);
                         setTogglingInProcess(false);
                     }
                 });

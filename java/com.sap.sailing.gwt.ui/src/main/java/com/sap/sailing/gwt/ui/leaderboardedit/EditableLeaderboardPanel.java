@@ -319,13 +319,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getBusyIndicator().setBusy(true);
+                    setBusyState(true);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(),
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
                                     getLeaderboardDisplayDate(), new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             getErrorReporter().reportError(
                                     "Error trying to update max points reason for competitor "
                                             + row.competitor.getName() + " in leaderboard " + getLeaderboardName()
@@ -334,7 +334,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                         @Override
                         public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                     || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
                             row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPointsAndIsCorrected.getA();
@@ -444,14 +444,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getBusyIndicator().setBusy(true);
+                    setBusyState(true);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                             value == null || value.trim().length() == 0 ? null : value.trim().equals("n/a") ? null
                                     : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
                             new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
                                     row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                     " for race "+raceColumnName+": "+t.getMessage()+
@@ -460,7 +460,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                         @Override
                         public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                             leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
                                     .getA() : Double.valueOf(value.trim());
@@ -523,13 +523,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Util.Pair<MaxPointsReason, Double>>() {
                         @Override
                         public void ok(final Util.Pair<MaxPointsReason, Double> editedObject) {
-                            getBusyIndicator().setBusy(true);
+                            setBusyState(true);
                             getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                     editedObject.getB(), getLeaderboardDisplayDate(),
                                             new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
-                                    getBusyIndicator().setBusy(false);
+                                    setBusyState(false);
                                     getErrorReporter().reportError("Error trying to update score correction for competitor "+
                                             row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                             " for race "+raceColumnName+": "+t.getMessage()+
@@ -543,7 +543,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                                     new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                         @Override
                                         public void onFailure(Throwable t) {
-                                            getBusyIndicator().setBusy(false);
+                                            setBusyState(false);
                                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
                                                     row.competitor.getName()+" in leaderboard "+getLeaderboardName()+
                                                     " for race "+raceColumnName+": "+t.getMessage()+
@@ -552,7 +552,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                         @Override
                                         public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                                            getBusyIndicator().setBusy(false);
+                                            setBusyState(false);
                                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                                             leaderboardEntryDTO.reasonForMaxPoints = editedObject.getA();
                                             leaderboardEntryDTO.netPoints = newNetAndTotalPointsAndIsCorrected.getA();

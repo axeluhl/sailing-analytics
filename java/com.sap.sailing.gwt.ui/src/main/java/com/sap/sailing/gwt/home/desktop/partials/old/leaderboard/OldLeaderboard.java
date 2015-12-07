@@ -31,12 +31,14 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public class OldLeaderboard extends Composite {
+public class OldLeaderboard extends Composite implements BusyStateChangeListener {
     private static OldLeaderboardUiBinder uiBinder = GWT.create(OldLeaderboardUiBinder.class);
 
     interface OldLeaderboardUiBinder extends UiBinder<Widget, OldLeaderboard> {
@@ -52,6 +54,7 @@ public class OldLeaderboard extends Composite {
     @UiField DivElement lastScoringCommentDiv;
     @UiField DivElement scoringSchemeDiv;
     @UiField DivElement hasLiveRaceDiv;
+    @UiField BusyIndicator busyIndicator;
     @UiField EventRegattaLeaderboardResources local_res;
 
     private LeaderboardPanel leaderboardPanel;
@@ -166,6 +169,7 @@ public class OldLeaderboard extends Composite {
         this.autoRefreshTimer = timer;
         this.leaderboardPanel = leaderboardPanel;
         oldLeaderboardPanel.add(leaderboardPanel);
+        leaderboardPanel.addBusyStateChangeListener(this);
     }
 
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
@@ -217,8 +221,17 @@ public class OldLeaderboard extends Composite {
         }
         lastScoringUpdateTimeDiv.getStyle().setVisibility(Visibility.HIDDEN);
     }
-    
+
+    @Override
+    public void onBusyStateChange(boolean busyState) {
+        busyIndicator.setBusy(busyState);
+        if(delegate != null) {
+            delegate.setBusyState(busyState);
+        }
+    }
+
     public interface OldLeaderboardDelegate extends LeaderboardDelegate<LeaderboardPanel> {
         Element getHasLiveRaceElement();
     }
+
 }
