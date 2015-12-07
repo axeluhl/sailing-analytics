@@ -25,8 +25,10 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.gwt.adminconsole,
  org.apache.commons.math;bundle-version="2.1.0"
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sailing.news,
- com.sap.sse.util,
+Import-Package: com.sap.sse.util,
+ javax.servlet;version="3.1.0",
+ javax.servlet.descriptor;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker
 Web-ContextPath: /dashboards
