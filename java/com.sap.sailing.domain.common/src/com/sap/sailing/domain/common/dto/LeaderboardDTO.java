@@ -62,7 +62,6 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     /**
      * @param uuidGenerator used to provide the {@link #id ID} for this object (see also {@link #getId()}) and for any clones produced
      * from it by the {@link #clone()} operation.
-     * @param hasOverallDetails TODO
      */
     public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, ScoringSchemeType scoringScheme, boolean higherScoreIsBetter, UUIDGenerator uuidGenerator, boolean hasOverallDetails) {
         initCollections();
@@ -79,7 +78,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
         this.suppressedCompetitors = new ArrayList<CompetitorDTO>();
     }
     
-    public LeaderboardDTO(String id) {
+    protected LeaderboardDTO(String id) {
         initCollections();
         this.id = id;
     }

@@ -91,7 +91,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private LeaderboardSettings getOrCreateLeaderboardSettings(String leaderboardName, LeaderboardSettings currentLeaderboardSettings) {
         LeaderboardSettings newLeaderboardSettings = leaderboardNamesAndSettings.get(leaderboardName);
         if(newLeaderboardSettings == null) {
-            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false, /* showRegattaRank */ true);
+            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
         }
         if(currentLeaderboardSettings != null) {
             newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(newLeaderboardSettings, currentLeaderboardSettings);
