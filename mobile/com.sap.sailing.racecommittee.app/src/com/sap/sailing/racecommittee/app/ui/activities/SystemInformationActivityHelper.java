@@ -13,7 +13,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.racecommittee.app.R;
+
+import de.psdev.licensesdialog.LicensesDialog;
+import de.psdev.licensesdialog.model.Notices;
 
 public class SystemInformationActivityHelper {
     private final SendingServiceAwareActivity activity;
@@ -25,6 +30,7 @@ public class SystemInformationActivityHelper {
         setupCompileView();
         setupInstalledView();
         setupPersistenceView();
+        setupAboutButtons();
     }
 
     /**
@@ -89,8 +95,38 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
-                DateFormat.getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
+                .getTimeFormat(activity).format(installDate)));
         }
+    }
+
+    private void setupAboutButtons() {
+        Button eulaButton = (Button) activity.findViewById(R.id.eula_button);
+        Button licenceButton = (Button) activity.findViewById(R.id.licence_button);
+        eulaButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EulaHelper.openEulaPage(activity);
+            }
+        });
+        licenceButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showLicenceDialog();
+            }
+        });
+    }
+
+    private void showLicenceDialog() {
+        Notices notices = new Notices();
+        LicenseHelper licenseHelper = new LicenseHelper();
+        notices.addNotice(licenseHelper.getAndroidSupportNotice());
+        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice());
+        notices.addNotice(licenseHelper.getJsonSimpleNotice());
+        notices.addNotice(licenseHelper.getDialogNotice());
+        LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.licence_information));
+        builder.setNotices(notices);
+        builder.build().show();
     }
 }
