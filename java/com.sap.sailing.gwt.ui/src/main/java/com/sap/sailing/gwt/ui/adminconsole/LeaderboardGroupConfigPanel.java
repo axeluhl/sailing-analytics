@@ -580,7 +580,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
                         return dto1.getId().equals(dto2.getId());
                     }
-                });
+                }, groupsProvider);
         refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

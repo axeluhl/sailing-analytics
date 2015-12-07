@@ -41,6 +41,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final StringMessages stringMessages;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
     private RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO> refreshableServerSelectionModel;
     private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTablePanel;
 
@@ -61,8 +62,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         VerticalPanel remoteServersContentPanel = new VerticalPanel();
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
+        serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         serverDataProvider.addDataDisplay(remoteServersTable);
 
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
@@ -167,7 +168,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                             RemoteSailingServerReferenceDTO dto2) {
                         return dto1.getUrl().equals(dto2.getUrl());
                     }
-                });
+                }, serverDataProvider);
         serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;

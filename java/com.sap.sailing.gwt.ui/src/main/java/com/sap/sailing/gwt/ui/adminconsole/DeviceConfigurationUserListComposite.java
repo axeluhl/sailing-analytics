@@ -9,14 +9,12 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class DeviceConfigurationUserListComposite extends DeviceConfigurationListComposite {
 
-    public DeviceConfigurationUserListComposite(SailingServiceAsync sailingService,
-            RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableSelectionModel, ErrorReporter errorReporter,
+    public DeviceConfigurationUserListComposite(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingService, refreshableSelectionModel, errorReporter, stringMessages);
+        super(sailingService, errorReporter, stringMessages);
     }
     
     @Override

@@ -190,6 +190,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
+        raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
                 new EntityIdentityComparator<SwissTimingReplayRaceDTO>() {
 
@@ -197,13 +198,11 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                     public boolean representSameEntity(SwissTimingReplayRaceDTO dto1, SwissTimingReplayRaceDTO dto2) {
                         return dto1.race_id.equals(dto2.race_id);
                     }
-                }) {
+                }, raceList) {
         });
 
         racesHorizontalPanel.add(raceTable);
         racesHorizontalPanel.add(trackPanel);
-
-        raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);

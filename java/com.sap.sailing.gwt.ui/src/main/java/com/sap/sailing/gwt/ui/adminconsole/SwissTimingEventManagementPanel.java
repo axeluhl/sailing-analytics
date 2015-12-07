@@ -262,6 +262,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(genderColumn, "Gender");
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
+        raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
                 new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
 
@@ -269,12 +270,10 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                     public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
                         return dto1.raceId.equals(dto2.raceId);
                     }
-                }) {
+                }, raceList) {
         });
 
         trackableRacesPanel.add(raceTable);
-
-        raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
         		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);

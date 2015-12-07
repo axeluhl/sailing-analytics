@@ -141,7 +141,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             refreshableSelectionModel = selectionCheckboxColumn.getSelectionModel();
             raceTable.setSelectionModel(refreshableSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
         } else {
-            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator);
+            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator, raceList);
             raceTable.setSelectionModel(refreshableSelectionModel);
         }
         

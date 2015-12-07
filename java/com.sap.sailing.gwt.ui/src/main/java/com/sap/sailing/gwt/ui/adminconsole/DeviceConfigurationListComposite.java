@@ -18,13 +18,13 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 public class DeviceConfigurationListComposite extends Composite {
 
     protected static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
     
-    private final RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableConfigurationSelectionModel;
+    private final RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> refreshableConfigurationSelectionModel;
     private final CellTable<DeviceConfigurationMatcherDTO> configurationTable;
     protected ListDataProvider<DeviceConfigurationMatcherDTO> configurationsDataProvider;
     
@@ -38,7 +38,6 @@ public class DeviceConfigurationListComposite extends Composite {
     protected final StringMessages stringMessages;
 
     public DeviceConfigurationListComposite(final SailingServiceAsync sailingService,
-            final RefreshableSelectionModel<DeviceConfigurationMatcherDTO> refreshableSelectionModel,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -57,8 +56,8 @@ public class DeviceConfigurationListComposite extends Composite {
         
         configurationTable = createConfigurationTable();
         configurationTable.setVisible(true);
-
-        refreshableConfigurationSelectionModel = refreshableSelectionModel;
+        // TODO / FIXME Lukas define EntityIdentityComparator
+        refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(null, configurationsDataProvider);
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
         panel.add(configurationTable);
 
@@ -135,5 +134,9 @@ public class DeviceConfigurationListComposite extends Composite {
         table.addColumn(identifierTypeColumn, stringMessages.matcher());
         table.addColumn(identifierNameColumn, stringMessages.device());
         return table;
+    }
+    
+    public RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> getSelectionModel() {
+        return refreshableConfigurationSelectionModel;
     }
 }

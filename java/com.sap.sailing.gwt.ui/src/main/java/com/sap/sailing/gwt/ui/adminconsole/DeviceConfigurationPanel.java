@@ -22,7 +22,6 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
@@ -55,9 +54,8 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
-        
-        this.refreshableMultiSelectionModel = new RefreshableMultiSelectionModel<>(null);
-        //TODO create an appropriate EntityIdentityComparator or define an .eqauls() method for DeviceConfigurationMatcherDTO
+        setupUi();
+        refreshableMultiSelectionModel = listComposite.getSelectionModel();
         refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
 
             @Override
@@ -73,8 +71,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                 }
                 removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
             }
-        });
-        setupUi();
+        }); 
     }
 
     private void setupUi() {
@@ -124,7 +121,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
         
-        listComposite = createListComposite(sailingService, refreshableMultiSelectionModel, errorReporter, stringMessages);
+        listComposite = createListComposite(sailingService, errorReporter, stringMessages);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
@@ -185,10 +182,9 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
     }
 
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, RefreshableSelectionModel<DeviceConfigurationMatcherDTO> selectionModel,
+    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationListComposite(sailingService, selectionModel, 
-                errorReporter, stringMessages);
+        return new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages);
     }
 
     protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
