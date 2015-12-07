@@ -353,7 +353,7 @@ public class LoginActivity extends BaseActivity
         }
 
         if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showTrackingEulaDialog(this);
+            EulaHelper.showEulaDialog(this);
         }
     }
 
