@@ -12,9 +12,6 @@ import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 import de.psdev.licensesdialog.LicensesDialog;
-import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
-import de.psdev.licensesdialog.licenses.License;
-import de.psdev.licensesdialog.model.Notice;
 import de.psdev.licensesdialog.model.Notices;
 
 public class AboutFragment extends BaseFragment {
