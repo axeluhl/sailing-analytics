@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Resultimport
 Bundle-SymbolicName: com.sap.sailing.freg.resultimport
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.1
 Bundle-Activator: com.sap.sailing.freg.resultimport.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

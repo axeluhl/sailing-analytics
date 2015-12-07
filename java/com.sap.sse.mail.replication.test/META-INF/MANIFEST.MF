@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sse.mail.replication.test
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.1
 Bundle-Vendor: SAP
 Fragment-Host: com.sap.sse.mail
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WinRegatta result import
 Bundle-SymbolicName: com.sap.sailing.barbados.resultimport
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.1
 Bundle-Activator: com.sap.sailing.barbados.resultimport.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
