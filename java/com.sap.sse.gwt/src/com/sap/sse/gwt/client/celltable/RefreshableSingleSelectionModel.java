@@ -1,8 +1,10 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -19,14 +21,17 @@ import com.google.gwt.view.client.RangeChangeEvent.Handler;
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
+    private final ListDataProvider<T> listDataProvider;
     
     /**
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
      */
-    public RefreshableSingleSelectionModel(EntityIdentityComparator<T> comp) {
+    public RefreshableSingleSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super();
         this.comp=comp;
+        this.listDataProvider = listDataProvider;
+        this.listDataProvider.addDataDisplay(this);
     }
     
     /**
@@ -35,9 +40,11 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
      */
-    public RefreshableSingleSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp) {
+    public RefreshableSingleSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super(keyProvider);
         this.comp =comp;
+        this.listDataProvider = listDataProvider;
+        this.listDataProvider.addDataDisplay(this);
     }
 
     @Override
@@ -79,8 +86,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
 
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        //TODO / FIXME update with all elements of ListDataProvider
-
+        refreshSelectionModel(new ArrayList<>(listDataProvider.getList()));
     }
 
     @Override

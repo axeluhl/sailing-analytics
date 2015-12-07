@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -30,14 +31,17 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
+    private final ListDataProvider<T> listDataProvider;
 
     /**
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
      */
-    public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp) {
+    public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super();
         this.comp = comp;
+        this.listDataProvider = listDataProvider;
+        this.listDataProvider.addDataDisplay(this);
     }
 
     /**
@@ -46,9 +50,11 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
      */
-    public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp) {
+    public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super(keyProvider);
         this.comp = comp;
+        this.listDataProvider = listDataProvider;
+        this.listDataProvider.addDataDisplay(this);
     }
 
     @Override
@@ -116,7 +122,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
 
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        //TODO /FIME refresh selectionModel with all data of ListDataProvider
+        refreshSelectionModel(new ArrayList<>(listDataProvider.getList()));
     }
 
     @Override
