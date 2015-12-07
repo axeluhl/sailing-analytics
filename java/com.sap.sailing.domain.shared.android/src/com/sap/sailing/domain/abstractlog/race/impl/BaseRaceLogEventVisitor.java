@@ -127,12 +127,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogRegisterCompetitorEvent event) {
 
     }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event) {
-         
-    }
 
     @SuppressWarnings("deprecation")
     @Override

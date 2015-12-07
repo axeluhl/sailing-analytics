@@ -136,11 +136,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     public void visit(@SuppressWarnings("deprecation") com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
                         RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
                     }
-                    
-                    @Override
-                    public void visit(@SuppressWarnings("deprecation") com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event) {
-                        RaceLogRaceTracker.this.onDefineMarkEvent(event);
-                    }
 
                     @Override
                     public void visit(RaceLogStartTrackingEvent event) {

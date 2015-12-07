@@ -19,14 +19,16 @@ import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -347,16 +349,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                     Util.addAll(waypoint.getMarks(), result);
                 }
             } else {
-                // if no tracked race is found, use competitors from race/regatta log depending on whether
-                // the mapping event is present or not; this assumes that if a tracked
-                // race exists, its competitors set takes precedence over what's in the race log. Usually,
-                // the tracked race will have the same competitors as those in the race log, or more because
-                // those from the regatta log are added to the tracked race as well.
+                // if no tracked race is found, use marks regatta log
                 RegattaLog regattaLog = getRegattaLog();
-                Collection<Mark> viaRegattaLog = new DefinedMarkFinder<>(regattaLog).analyze();
-                //FIXME: soon to be removed, as RaceLogDefineMarkEvent is deprecated
-                Collection<Mark> viaRaceLog = new DefinedMarkFinder<>(getRaceLog(fleet)).analyze();
-                result.addAll(viaRaceLog);
+                Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
                 result.addAll(viaRegattaLog);
             }
         }
@@ -372,16 +367,16 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 Util.addAll(waypoint.getMarks(), result);
             }
         } else {
-            // if no tracked race is found, use competitors from race/regatta log depending on whether
-            // the mapping event is present or not; this assumes that if a tracked
-            // race exists, its competitors set takes precedence over what's in the race log. Usually,
-            // the tracked race will have the same competitors as those in the race log, or more because
-            // those from the regatta log are added to the tracked race as well.
-            RegattaLog regattaLog = getRegattaLog();
-            Collection<Mark> viaRegattaLog = new DefinedMarkFinder<>(regattaLog).analyze();
-            Collection<Mark> viaRaceLog = new DefinedMarkFinder<>(getRaceLog(fleet)).analyze();
-            result.addAll(viaRaceLog);
-            result.addAll(viaRegattaLog);
+            // if no tracked race is found, use marks from race course if present in racelog
+            // if not the marks defined in the regatta log 
+            
+            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
+            CourseBase courseBase = courseDesginFinder.analyze();
+            if (courseBase != null){
+                courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));
+            } else {
+                Util.addAll(new RegattaLogDefinedMarkAnalyzer(getRegattaLog()).analyze(), result);
+            }
         }
         return result;
     }

@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,8 +26,6 @@ import org.osgi.framework.ServiceReference;
 import com.google.zxing.WriterException;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -230,20 +227,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze();
     }
 
-    /* TODO: delete as soon as there are no marks in RaceLogs anymore */
-    private void revokeAlreadyDefinedMarks(RaceLog raceLog, AbstractLogEventAuthor author) {
-        @SuppressWarnings("deprecation")
-        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */true,
-                com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent.class).analyze();
-        for (RaceLogEvent event : markEvents) {
-            try {
-                raceLog.revokeEvent(author, event, "removing mark that was already defined");
-            } catch (NotRevokableException e) {
-                logger.log(Level.WARNING, "Could not remove mark that was already defined by adding RevokeEvent", e);
-            }
-        }
-    }
-
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service) {
@@ -259,7 +242,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
                     TimePoint now = MillisecondsTimePoint.now();
                     int i = 0;
-                    revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
                         newCourse.addWaypoint(i++, oldWaypoint);
                     }

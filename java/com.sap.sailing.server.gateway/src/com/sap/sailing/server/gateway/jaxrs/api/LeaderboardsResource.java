@@ -35,8 +35,6 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -548,12 +546,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Leaderboard with name '"+ leaderboardName+ "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) leaderboard;
-        RegattaLog regattaLog = ((HasRegattaLike) regattaLikeLeaderboard).getRegattaLike().getRegattaLog();
         
         final Set<Mark> marks = new HashSet<Mark>();
-        Util.addAll(new DefinedMarkFinder<>(regattaLog).analyze(), marks);
-        
         if (raceColumnName == null) {
             if (fleetName != null) {
                 return Response
@@ -562,14 +556,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
             } else {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-                        Util.addAll(new DefinedMarkFinder<>(raceLog).analyze(), marks);
-                        if (trackedRace != null) {
-                            Util.addAll(trackedRace.getMarks(), marks);
-                        }
-                    }
+                           Util.addAll(raceColumn.getAllMarks(), marks);
                 }
             }
         } else {
@@ -587,13 +574,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                             .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    marks.addAll(getMarksForFleet(raceColumn, fleet));
+                    Util.addAll(raceColumn.getAllMarks(fleet), marks);
                 }
             } else {
                 // Return all marks for a certain race column
-                for (Fleet fleet : raceColumn.getFleets()) {
-                    Util.addAll(getMarksForFleet(raceColumn, fleet), marks);
-                }
+                // if all races have a tracked race return all marks part of at least one tracked race
+                // if at least one race doesn't have a tracked race, return also the marks defined in the RegattaLog
+                Util.addAll(raceColumn.getAllMarks(), marks);
             }
         }
         JSONArray array = new JSONArray();
@@ -607,17 +594,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         JSONObject result = new JSONObject();
         result.put("marks", array);
         return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
-    }
-
-    private Set<Mark> getMarksForFleet(RaceColumn raceColumn, Fleet fleet) {
-        RaceLog raceLog = raceColumn.getRaceLog(fleet);
-        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet); // might not yet be attached
-        Set<Mark> marks = new HashSet<>();
-        Util.addAll(new DefinedMarkFinder<>(raceLog).analyze(), marks);
-        if (trackedRace != null) {
-            Util.addAll(trackedRace.getMarks(), marks);
-        }
-        return marks;
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();

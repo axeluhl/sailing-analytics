@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -21,6 +23,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sse.common.Util;
 
 public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -69,9 +72,14 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
         } else {
             final List<Mark> marksList = new ArrayList<>();
             // no tracked race associated yet; grab the mark definitions from the race log:
-            for (Mark markDefinitionFromRaceLog : new DefinedMarkFinder<>(raceColumn.getRaceLog(fleet)).analyze()) {
-                marksList.add(markDefinitionFromRaceLog);
+            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(raceColumn.getRaceLog(fleet));
+            CourseBase courseBase = courseDesginFinder.analyze();
+            if (courseBase != null){
+                courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), marksList));
+            } else {
+                marksList.addAll(new RegattaLogDefinedMarkAnalyzer(raceColumn.getRegattaLog()).analyze());
             }
+
             marks = marksList;
         }
         MarkJsonSerializer serializer = new MarkJsonSerializer();

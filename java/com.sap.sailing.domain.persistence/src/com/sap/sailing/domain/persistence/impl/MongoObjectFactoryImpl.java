@@ -888,14 +888,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @SuppressWarnings("deprecation")
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event) {
-        BasicDBObject result = new BasicDBObject();
-        storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDefineMarkEvent(event));
-        return result;
-    }
-
-    @SuppressWarnings("deprecation")
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1059,15 +1051,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogRegisterCompetitorEvent.class.getSimpleName());
         result.put(FieldNames.RACE_LOG_COMPETITOR_ID.name(), event.getCompetitor().getId());
-        return result;
-    }
-
-    @SuppressWarnings("deprecation")
-    private Object storeRaceLogDefineMarkEvent(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent event) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent.class.getSimpleName());
-        result.put(FieldNames.RACE_LOG_MARK.name(), storeMark(event.getMark()));
         return result;
     }
 
