@@ -251,8 +251,8 @@ public class DesktopStartView extends Composite implements StartView {
         }
         return LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                false, /* showRegattaRank */ true);
-
+                false, /* showRegattaRank */ true, /*showCompetitorSailIdColumns*/ true,
+                /*showCompetitorFullNameColumn*/ true);
     }
     
     private String getLeaderboardZoom() {

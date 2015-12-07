@@ -169,8 +169,7 @@ body ::-webkit-scrollbar-track {
 
 .gwt-SplitLayoutPanel-EastToggleButton-Panel {
 	position: absolute;
-	bottom: 77px;
-	margin-left: -35px;
+	bottom: -10px;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton {
@@ -181,9 +180,14 @@ body ::-webkit-scrollbar-track {
 	-moz-transform: rotate(-90deg);
 	-o-transform: rotate(-90deg);
 	-ms-transform: rotate(-90deg);
+	transform: rotate(-90deg);
+	-webkit-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-ms-transform-origin: 0 0;
+	transform-origin: 0 0;
 	padding-right: 25px;
 	padding-left: 30px;
-	margin-left: -15px;
 	border-bottom: 1px solid #cecece;
 	border-right: 1px solid #cecece;
 	border-left: 1px solid #cecece;

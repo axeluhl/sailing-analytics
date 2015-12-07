@@ -3,9 +3,11 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
@@ -24,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
@@ -42,7 +45,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
-    private final int MIN_LEADERBOARD_WIDTH = 432; // works well for 505 and ESS
+    private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
 
     /**
      * Absolute Panel that informs its children about a resize
@@ -83,12 +86,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
-        
         userService.addUserStatusEventHandler(this);
-
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
-
-            public void notifyStateChange(){
+            public void notifyStateChange() {
                 String caption;
                 String tooltip;
                 switch (mediaPlayerManagerComponent.getAssignedMediaTracks().size()) {
@@ -123,17 +123,26 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 mediaSelectionButton.setTitle(tooltip);
                 mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
             }
-
         });
         this.leftScrollPanel = new ScrollPanel();
         this.leftScrollPanel.add(leftComponentP.getEntryWidget());
         this.leftScrollPanel.setTitle(leftComponentP.getEntryWidget().getTitle());
-        this.mainPanel = new LayoutPanel();
+        this.mainPanel = new LayoutPanel() {
+            @Override
+            public void onResize() {
+                int leftWidth = leftScrollPanel.getOffsetWidth();
+                // The left scroll panel is potentially resized to ensure it is not too wide when the screen gets narrower,
+                // e.g. when resizing browser window or changing mobile device orientation. An offset of 40px is used, so
+                // the panels size slider and its toggle button is always accessable if it is open.
+                savedSplitPosition = Math.min(leftWidth > 0 ? leftWidth : savedSplitPosition, Window.getClientWidth() - 40);
+                splitLayoutPanel.setWidgetSize(leftScrollPanel, savedSplitPosition);
+                super.onResize();
+            }
+        };
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */
-                25);
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */ 25);
         this.mainPanel.add(splitLayoutPanel);
 
         // initialize components - they need to be added before other widgets to get the right width
@@ -157,7 +166,6 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                     "managemedia"));
         }
         onUserStatusChange(userService.getCurrentUser());
-
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
@@ -207,14 +215,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         final MediaManagementControl multiSelectionControl = new MediaManagementControl(mediaPlayerManager,
                 result, stringMessages);
         result.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                     multiSelectionControl.show();
             }
         });
-
-        // hide button initially as we defer showing the button to the asynchroneous
+        // hide button initially as we defer showing the button to the asynchronous
         // task that gets launched by the media service to get video tracks
         result.setVisible(false);
         return result;
@@ -242,7 +248,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             // the leaderboard is not visible, but the map is
             if (isWidgetInSplitPanel(leftScrollPanel)) {
                 if (leftScrollPanel.getOffsetWidth() > 0) {
-                    savedSplitPosition = leftScrollPanel.getOffsetWidth();
+                    savedSplitPosition = Math.min(savedSplitPosition, leftScrollPanel.getOffsetWidth());
                 }
                 splitLayoutPanel.setWidgetVisibility(leftScrollPanel, leftComponent, /* hidden */true,
                         savedSplitPosition);
@@ -290,15 +296,38 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     @Override
     public void onUserStatusChange(UserDTO user) {
-        Button toggleButton = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel).getToggleButton();
+        final Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
+        if (associatedSplitter != null) { // if the panel is not present, the splitter may not be found
+            final Button toggleButton = associatedSplitter.getToggleButton();
         if (user != null
-                && (user.hasRole(DefaultRoles.ADMIN.getRolename()) || user.hasRole(Roles.eventmanager.getRolename()))) {
+                    && (user.hasRole(DefaultRoles.ADMIN.getRolename()) ||
+                        user.hasRole(Roles.eventmanager.getRolename()))) {
             toggleButton.setVisible(true);
             forceLayout();
         } else {
             markPassingsPanel.setVisible(false);
             toggleButton.setVisible(false);
             forceLayout();
+        }
+    }
+    }
+    
+    /**
+     * Shows/hides the text on left components toggle button by modifying CSS <code>font-size</code> property and adjust
+     * the dragger position by modifying CSS <code>margin-top</code> property. 
+     * 
+     * @param visible
+     *            <code>true</code> to show the button text, <code>false</code> to hide it
+     */
+    void setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(final boolean visible) {
+        Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
+        if (leftScrollPanelSplitter != null) {
+            Style toggleButtonStyle = leftScrollPanelSplitter.getToggleButton().getElement().getStyle();
+            if (visible) toggleButtonStyle.clearFontSize();
+            else toggleButtonStyle.setFontSize(0, Unit.PX);
+            Style drapperStyle = leftScrollPanelSplitter.getDragger().getElement().getStyle();
+            if (visible) drapperStyle.clearMarginTop();
+            else drapperStyle.setMarginTop(-25, Unit.PX);
         }
     }
 }
