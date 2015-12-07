@@ -76,9 +76,11 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
         dontcheckSelectionState = false;
     }
 
+
     @Override
     public void setRowData(int start, List<? extends T> values) {
         //TODO / FIXME update with all elements of ListDataProvider
+
     }
 
     @Override
