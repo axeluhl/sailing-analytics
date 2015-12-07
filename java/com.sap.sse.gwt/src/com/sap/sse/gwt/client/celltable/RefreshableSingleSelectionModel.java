@@ -20,6 +20,7 @@ import com.google.gwt.view.client.RangeChangeEvent.Handler;
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
     private final List<T> elements;
+    private boolean dontcheckSelectionState = false;
     
     /**
      * @param comp
@@ -50,7 +51,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null) {
+        if (comp == null || dontcheckSelectionState) {
             super.setSelected(item, selected);
         } else {
             if(comp.representSameEntity(getSelectedObject(), item)) {
@@ -63,18 +64,20 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     }
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
+        dontcheckSelectionState = true;
         final T selected = getSelectedObject();
-        clear();
         if (selected != null) {
+            clear();
             for (final T it : newObjects) {
                 boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
                 if (isEqual) {
-                    super.setSelected(it, true);
+                    setSelected(it, true);
                     break;
                 }
             }
         }
         SelectionChangeEvent.fire(this);
+        dontcheckSelectionState = false;
     }
     
     /**
@@ -86,12 +89,13 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      */
     @Override
     public void refreshSelectionModel(int start, List<T> newObjects) {
+        dontcheckSelectionState = true;
         List<T> oldElements = elements.subList(start, elements.size());
         T selectedElement = null;
         for (T it : oldElements) {
             if (isSelected(it)) {
                 selectedElement = it;
-                super.setSelected(it, false);
+                setSelected(it, false);
                 break;
             }
         }
@@ -99,42 +103,45 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
             if (comp != null) {
                 for (T newElement : newObjects) {
                     if (comp.representSameEntity(selectedElement, newElement)) {
-                        super.setSelected(newElement, true);
+                        setSelected(newElement, true);
                         break;
                     }
                 }
             } else if (newObjects.contains(selectedElement)) {
-                super.setSelected(newObjects.get(newObjects.indexOf(selectedElement)), true);
+                setSelected(newObjects.get(newObjects.indexOf(selectedElement)), true);
             }
             SelectionChangeEvent.fire(this);
         }
+        dontcheckSelectionState = false;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        // refresh the selectionModel
-        if (start > 0 && values.size() > 0) {
-            refreshSelectionModel(start, (List<T>) values);
-        } else {
-            refreshSelectionModel((Iterable<T>) values);
-        }
-        // refresh the element list
-        // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
-        if (values.isEmpty()) {
-            elements.clear();
-        } else if (elements.isEmpty()) {
-            elements.addAll(values);
-        } else if (values.size() == 1) {
-            elements.set(start, values.get(0));
-        } else if (start == 0) {
-            elements.clear();
-            elements.addAll(values);
-        } else {
-            for (int i = start; i < elements.size(); i++) {
-                elements.remove(i);
+        if (!values.equals(elements.subList(start, elements.size()))) {
+            // refresh the selectionModel
+            if (start == 0 && (values.size() > 1 || values.size() == 0)) {
+                refreshSelectionModel((Iterable<T>) values);
+            } else {
+                refreshSelectionModel(start, (List<T>) values);
             }
-            elements.addAll(values);
+            // refresh the element list
+            // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
+            if (values.isEmpty()) {
+                elements.clear();
+            } else if (elements.isEmpty()) {
+                elements.addAll(values);
+            } else if (values.size() == 1) {
+                elements.set(start, values.get(0));
+            } else if (start == 0) {
+                elements.clear();
+                elements.addAll(values);
+            } else {
+                for (int i = start; i < elements.size(); i++) {
+                    elements.remove(i);
+                }
+                elements.addAll(values);
+            }
         }
     }
 
