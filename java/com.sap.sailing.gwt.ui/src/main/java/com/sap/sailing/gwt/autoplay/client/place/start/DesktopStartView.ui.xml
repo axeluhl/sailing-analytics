@@ -100,8 +100,7 @@
 				    <span>Leaderboard Viewer:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:VerticalPanel ui:field="leaderboardPerspectiveSettingsPanel" styleName="{res.mediaCss.columns}">
-					</g:VerticalPanel>
+					<g:FlowPanel ui:field="leaderboardPerspectiveSettingsPanel" />
 		        </div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
@@ -109,10 +108,12 @@
 				    <span>Raceboard Viewer:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:VerticalPanel ui:field="raceboardPerspectiveSettingsPanel" styleName="{res.mediaCss.columns}">
-					</g:VerticalPanel>
+					<g:FlowPanel ui:field="raceboardPerspectiveSettingsPanel" />
 		        </div>
 			</div>
+			<div class="{res.mediaCss.grid} {style.row}">
+				<div class="{res.mediaCss.columns}"><hr/></div>
+			</div>			
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    &nbsp;

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,10 +19,9 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -64,8 +64,8 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField DivElement leaderboardZoomDiv;
     @UiField DivElement leaderboardAutoZoomDiv;
     @UiField DivElement screenConfigurationUi;
-    @UiField VerticalPanel leaderboardPerspectiveSettingsPanel;
-    @UiField VerticalPanel raceboardPerspectiveSettingsPanel;
+    @UiField FlowPanel leaderboardPerspectiveSettingsPanel;
+    @UiField FlowPanel raceboardPerspectiveSettingsPanel;
     
     @UiField CheckBox autoSwitchToRaceboard;
     @UiField TextBox timeToRaceStartInSeconds;
@@ -197,15 +197,12 @@ public class DesktopStartView extends Composite implements StartView {
         screenConfigurationUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
-    private void createPerspectiveSettingsUI(final Perspective<?> perspective, VerticalPanel perspectiveSettingsPanel) {
+    private void createPerspectiveSettingsUI(final Perspective<?> perspective, FlowPanel perspectiveSettingsPanel) {
         perspectiveSettingsPanel.clear();
         
-        HorizontalPanel hPanel = new HorizontalPanel();
-        perspectiveSettingsPanel.add(hPanel);
-        hPanel.setSpacing(5);
-        
         Button perspectiveComponentSettingsButton = new Button("Component settings");
-        hPanel.add(perspectiveComponentSettingsButton);
+        perspectiveSettingsPanel.add(perspectiveComponentSettingsButton);
+        perspectiveComponentSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
         perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -214,8 +211,8 @@ public class DesktopStartView extends Composite implements StartView {
         });
         
         if(perspective.hasSettings()) {
-            Button perspectiveSettingsButton = new Button("Settings");
-            hPanel.add(perspectiveSettingsButton);
+            Button perspectiveSettingsButton = new Button("General Settings");
+            perspectiveSettingsPanel.add(perspectiveSettingsButton);
             perspectiveSettingsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
