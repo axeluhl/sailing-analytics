@@ -252,7 +252,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     refreshCompetitorList(result);
-                    ((RefreshableSelectionModel<CompetitorDTO>) getSelectionModel()).refreshSelectionModel(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });
@@ -268,7 +267,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
                     refreshCompetitorList(result);
-                    ((RefreshableSelectionModel<CompetitorDTO>) getSelectionModel()).refreshSelectionModel(result);
                     if (callback != null) callback.onSuccess(result);
                 }
             });

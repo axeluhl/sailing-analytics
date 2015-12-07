@@ -46,6 +46,5 @@ public class ControlPointTableWrapper<S extends RefreshableSelectionModel<Contro
     @Override
     public void refresh(Iterable<ControlPointDTO> controllPoints) {
         super.refresh(controllPoints);
-        ((RefreshableSelectionModel<ControlPointDTO>) getSelectionModel()).refreshSelectionModel(controllPoints);
     }
 }

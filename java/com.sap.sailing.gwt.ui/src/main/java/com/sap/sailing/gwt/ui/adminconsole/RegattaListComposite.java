@@ -352,7 +352,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         Util.addAll(regattas, newAllRegattas);
         allRegattas = newAllRegattas;
         filterablePanelRegattas.updateAll(allRegattas);
-        refreshableRegattaMultiSelectionModel.refreshSelectionModel(regattas);
     }
 
     public List<RegattaDTO> getAllRegattas() {

@@ -183,7 +183,6 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
             @Override
             public void onSuccess(List<RemoteSailingServerReferenceDTO> result) {
                 filteredServerTablePanel.updateAll(result);
-                refreshableServerSelectionModel.refreshSelectionModel(result);
             }
         });
     }

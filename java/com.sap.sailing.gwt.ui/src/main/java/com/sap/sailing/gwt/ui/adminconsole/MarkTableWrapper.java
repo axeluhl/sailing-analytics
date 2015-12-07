@@ -99,6 +99,5 @@ public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> exte
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        ((RefreshableSelectionModel<MarkDTO>) getSelectionModel()).refreshSelectionModel(marks);
     }
 }

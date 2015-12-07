@@ -312,7 +312,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
-        refreshableLeaderboardSelectionModel.refreshSelectionModel(leaderboards);
         leaderboardRaceColumnSelectionChanged();
     }
 

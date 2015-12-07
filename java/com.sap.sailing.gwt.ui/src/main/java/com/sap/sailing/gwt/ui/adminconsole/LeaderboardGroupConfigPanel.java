@@ -602,8 +602,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             Util.addAll(groups, availableLeaderboardGroups);
         }
         groupsFilterablePanel.updateAll(availableLeaderboardGroups);
-        
-        refreshableGroupsSelectionModel.refreshSelectionModel(groups);
     }
 
     @Override
@@ -822,7 +820,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             descriptionTextArea.setText(selectedGroup.description);
             setDescriptionEditable(false);
 
-            refreshableGroupDetailsSelectionModel.refreshSelectionModel(availableLeaderboards);
             groupDetailsProvider.getList().clear();
             groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
             groupDetailsProvider.refresh();

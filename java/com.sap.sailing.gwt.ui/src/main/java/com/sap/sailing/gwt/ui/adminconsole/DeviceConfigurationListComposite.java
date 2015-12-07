@@ -79,7 +79,6 @@ public class DeviceConfigurationListComposite extends Composite {
                 ColumnSortEvent.fire(configurationTable, configurationTable.getColumnSortList());
                 
                 noConfigurationsLabel.setVisible(false);
-                refreshableConfigurationSelectionModel.refreshSelectionModel(result);
             }
             
             @Override

@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.celltable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +29,6 @@ import com.google.gwt.view.client.SelectionModel;
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
-    private final List<T> elements;
     private boolean dontcheckSelectionState = false;
 
     /**
@@ -41,7 +38,6 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp) {
         super();
         this.comp = comp;
-        elements = new ArrayList<>();
     }
 
     /**
@@ -53,7 +49,6 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp) {
         super(keyProvider);
         this.comp = comp;
-        elements = new ArrayList<>();
     }
 
     @Override
@@ -89,11 +84,12 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     }
 
     /**
-     * refreshes the {@link RefreshableMultiSelectionModel SelectionModel} with all elements of the {@link ListDataProvider}
+     * refreshes the {@link RefreshableMultiSelectionModel SelectionModel} with all elements of the
+     * {@link ListDataProvider}
      * <p>
      * FIXME change to private
      */
-    public void refreshSelectionModel(Iterable<T> newObjects) {
+    private void refreshSelectionModel(Iterable<T> newObjects) {
         dontcheckSelectionState = true;
         final Set<T> selectedSet = getSelectedSet();
         final boolean isEmpty = selectedSet.isEmpty();
@@ -118,73 +114,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         dontcheckSelectionState = false;
     }
 
-    /**
-     * refreshes the {@link RefreshableMultiSelectionModel SelectionModel}-Part from <code>start</code> to
-     * <code>elements.size()</code>
-     * 
-     * @param start
-     * @param newObjects
-     */
-    @Override
-    public void refreshSelectionModel(int start, List<T> newObjects) {
-        dontcheckSelectionState = true;
-        List<T> oldElements = elements.subList(start, elements.size());
-        Set<T> selectedElements = new HashSet<T>();
-        for (T it : oldElements) {
-            if (isSelected(it)) {
-                selectedElements.add(it);
-                setSelected(it, false);
-            }
-        }
-        if (!selectedElements.isEmpty()) {
-            for (T newElement : newObjects) {
-                if (comp != null) {
-                    for (T selected : selectedElements) {
-                        if (comp.representSameEntity(selected, newElement)) {
-                            setSelected(newElement, true);
-                            break;
-                        }
-                    }
-                } else {
-                    if (selectedElements.contains(newElement)) {
-                        setSelected(newElement, true);
-                    }
-                }
-            }
-            SelectionChangeEvent.fire(this);
-        }
-        isSelected(newObjects.iterator().next()); // Triggers a clear of unselected elements in superclass
-        dontcheckSelectionState = false;
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        if (!values.equals(elements.subList(start, elements.size()))) {
-            // refresh the selectionModel
-            if (start == 0 && (values.size() > 1 || values.size()==0)) {
-                refreshSelectionModel((Iterable<T>) values);
-            } else {
-                refreshSelectionModel(start, (List<T>) values);
-            }
-            // refresh the element list
-            // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
-            if (values.isEmpty()) {
-                elements.clear();
-            } else if (elements.isEmpty()) {
-                elements.addAll(values);
-            } else if (values.size() == 1) {
-                elements.set(start, values.get(0));
-            } else if (start == 0) {
-                elements.clear();
-                elements.addAll(values);
-            } else {
-                for (int i = start; i < elements.size(); i++) {
-                    elements.remove(i);
-                }
-                elements.addAll(values);
-            }
-        }
+        //TODO /FIME refresh selectionModel with all data of ListDataProvider
     }
 
     @Override

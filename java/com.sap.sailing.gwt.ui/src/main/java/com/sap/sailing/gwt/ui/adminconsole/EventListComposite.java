@@ -595,7 +595,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     eventTable.setVisible(true);
                     noEventsLabel.setVisible(false);
                 }
-                refreshableEventSelectionModel.refreshSelectionModel(events);
                 allEvents.clear();
                 allEvents.addAll(events);
                 filterTextbox.updateAll(allEvents);

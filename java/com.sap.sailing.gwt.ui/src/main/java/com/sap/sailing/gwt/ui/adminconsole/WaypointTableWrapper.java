@@ -50,6 +50,5 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
     @Override
     public void refresh(Iterable<WaypointDTO> wayPoints) {
         super.refresh(wayPoints);
-        ((RefreshableSelectionModel<WaypointDTO>) getSelectionModel()).refreshSelectionModel(wayPoints);
     }
 }

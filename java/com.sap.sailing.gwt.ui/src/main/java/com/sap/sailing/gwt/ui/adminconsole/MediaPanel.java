@@ -145,7 +145,6 @@ public class MediaPanel extends FlowPanel {
                 allMediaTracks.addAll(mediaTrackListDataProvider.getList());
                 filterableMediaTracks.updateAll(allMediaTracks);
                 mediaTrackListDataProvider.refresh();
-                refreshableSelectionModel.refreshSelectionModel(allMediaTracks);
             }
         });
         

@@ -481,7 +481,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         }
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
-        refreshableSelectionModel.refreshSelectionModel(allRaces);
     }
 
     /**
