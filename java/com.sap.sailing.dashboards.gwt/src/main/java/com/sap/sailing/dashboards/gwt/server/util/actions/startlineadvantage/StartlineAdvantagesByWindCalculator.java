@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.server.startlineadvantages;
+package com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,9 +6,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.dashboards.gwt.server.LiveTrackedRaceListener;
-import com.sap.sailing.dashboards.gwt.server.startlineadvantages.precalculation.AbstracPreCalculationDataRetriever;
-import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
+import com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.precalculation.AbstracPreCalculationDataRetriever;
+import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.domain.common.Bearing;
@@ -17,7 +16,6 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -26,35 +24,22 @@ import com.sap.sse.common.Util.Pair;
  * @author Alexander Ries (D062114)
  *
  */
-public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRetriever implements LiveTrackedRaceListener{
+public  class StartlineAdvantagesByWindCalculator extends AbstracPreCalculationDataRetriever {
 
-    private TrackedRace currentLiveTrackedRace;
-    private MovingAverage advantageMaximumAverage;
-    private PolarDataService polarDataService;
+    private DashboardDispatchContext dashboardDispatchContext;
     private DefaultPolarWindAngleBoatSpeedFunction defaultPolarSpeedWindAngleFunction;
     
-    private static final Logger logger = Logger.getLogger(StartlineAdvantagesCalculator.class.getName());
+    private  final Logger logger = Logger.getLogger(StartlineAdvantagesByWindCalculator.class.getName());
     
-    public StartlineAdvantagesCalculator(PolarDataService polarDataService){
-        this.advantageMaximumAverage = new MovingAverage(500);
-        this.polarDataService = polarDataService;
+    public StartlineAdvantagesByWindCalculator(DashboardDispatchContext dashboardDispatchContext){
+        this.dashboardDispatchContext = dashboardDispatchContext;
         this.defaultPolarSpeedWindAngleFunction = new DefaultPolarWindAngleBoatSpeedFunction();
     }
     
-    // Get Course Buoys
-    // Get Wind
-    // Get Maneuver Angle and Boat Speed at Angle
-    // Get Positions on start line with normal upwind and overlaying lay line upwind
-    // Calculate intersection point(s) between start line and lay lines
-    // Calculate duration from start line to first mark for overlaying positions
-    // Calculate intersection points from normal upwind start positions to first mark
-    // Calculate duration from two new distances for normal upwind starts
-    // Put all durations in one set
-    // Get the smallest of the durations and subtract number from every other number
-    public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineAtTimePoint(TimePoint timepoint) {
+    public StartlineAdvantagesWithMaxAndAverageDTO getStartLineAdvantagesAccrossLineFromTrackedRaceAtTimePoint(TrackedRace trackedRace,TimePoint timepoint) {
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
-        if (currentLiveTrackedRace != null) {
-            retrieveDataForCalculation(currentLiveTrackedRace);
+        if (trackedRace != null) {
+            retrieveDataForCalculation(trackedRace, dashboardDispatchContext.getPolarDataService());
             if (wind != null) {
                 if (isStartlineCompletelyUnderneathLaylines()) {
                     logger.log(Level.INFO, "Startline is completely underneath laylines");
@@ -62,8 +47,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
                     result.advantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
                     double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
                     result.maximum = maximum;
-                    advantageMaximumAverage.add(maximum);
-                    result.average = advantageMaximumAverage.getAverage();
                 } else if (isStartlineCompletelyAboveLaylines()) {
                     logger.log(Level.INFO, "Startline is completely above laylines");
                     Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
@@ -71,8 +54,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
                     subtractMinimumOfAllStartlineAdvantages(result.advantages);
                     double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
                     result.maximum = maximum;
-                    advantageMaximumAverage.add(maximum);
-                    result.average = advantageMaximumAverage.getAverage();
                     subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
                 } else {
                     logger.log(Level.INFO, "Layline(s) cross startline");
@@ -85,8 +66,6 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
                     subtractMinimumOfAllStartlineAdvantages(result.advantages);
                     double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
                     result.maximum = maximum;
-                    advantageMaximumAverage.add(maximum);
-                    result.average = advantageMaximumAverage.getAverage();
                     subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
                     addClosingZeroPointToMixedAdvantages(result.advantages, pinEndStartlineAdvatagesRange);
                 }
@@ -108,7 +87,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return result;
     }
     
-    private boolean isBearingUnderneathAdvantageLines(Bearing bearing){
+    private  boolean isBearingUnderneathAdvantageLines(Bearing bearing){
         boolean result = false;
         Bearing bearingOfRightLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() - meouvreAngle / 2);
         Bearing bearingOfLeftLaylineInDeg = new DegreeBearingImpl(wind.getBearing().getDegrees() + meouvreAngle / 2);
@@ -314,13 +293,13 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         return advantages;
     }
     
-    private double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
-        double result = 0;
+    private Double getMaximumAdvantageOfStartlineAdvantageDTOs(List<StartLineAdvantageDTO> advantages) {
+        Double result = null;
         List<StartLineAdvantageDTO> sortedAdvantages = new ArrayList<StartLineAdvantageDTO>();
         sortedAdvantages.addAll(advantages);
-        if(sortedAdvantages != null && sortedAdvantages.size() > 0) {
-        Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
-        result = sortedAdvantages.get(0).startLineAdvantage;
+        if (sortedAdvantages != null && sortedAdvantages.size() > 0) {
+            Collections.sort(sortedAdvantages, StartLineAdvantageDTO.startlineAdvantageComparatorByAdvantageDesc);
+            result = new Double(sortedAdvantages.get(0).startLineAdvantage);
         }
         return result;
     }
@@ -334,15 +313,5 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
         result = sortedAdvantages.get(sortedAdvantages.size()-1).startLineAdvantage;
         }
         return result;
-    }
-
-    @Override
-    public void liveTrackedRaceDidChange(TrackedRace trackedRace) {
-        this.currentLiveTrackedRace = trackedRace;
-    }
-
-    @Override
-    public PolarDataService getPolarDataService() {
-        return this.polarDataService;
     }
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.shared;
+package com.sap.sailing.dashboards.gwt.shared.dto;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.dispatch.client.Result;
@@ -11,8 +11,7 @@ public class RaceIdDTO implements Result {
 
     private RegattaAndRaceIdentifier raceId;
 
-    public RaceIdDTO() {
-    }
+    public RaceIdDTO() {}
 
     public RegattaAndRaceIdentifier getRaceId() {
         return raceId;

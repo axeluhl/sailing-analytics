@@ -5,22 +5,41 @@ package com.sap.sailing.dashboards.gwt.client.actions;
  *
  */
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.StartlineAdvantagesByWindCalculator;
+import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
+import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAndCachesMovingAverageAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
-import com.sap.sse.gwt.client.async.AsyncAction;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class GetStartlineAdvantagesByWindAction implements AsyncAction<StartlineAdvantagesWithMaxAndAverageDTO> {
+public class GetStartlineAdvantagesByWindAction  extends RequiresLiveRaceAndCachesMovingAverageAction<StartlineAdvantagesWithMaxAndAverageDTO> {
 
-    private final RibDashboardServiceAsync ribDashboardService;
-    private final String leaderboardName;
-
-    public GetStartlineAdvantagesByWindAction(RibDashboardServiceAsync ribDashboardService, String leaderboardName) {
-        this.ribDashboardService = ribDashboardService;
-        this.leaderboardName = leaderboardName;
+    public GetStartlineAdvantagesByWindAction() {}
+    
+    public GetStartlineAdvantagesByWindAction(String leaderboardName) {
+        super(leaderboardName);
+    }
+    
+    @Override
+    @GwtIncompatible
+    public StartlineAdvantagesWithMaxAndAverageDTO execute(DashboardDispatchContext dashboardDispatchContext) throws DispatchException {
+        StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
+        TrackedRace liveRace = super.getLiveRace(dashboardDispatchContext);
+        if (liveRace != null) {
+            StartlineAdvantagesByWindCalculator startlineAdvantagesByWindCalculator = new StartlineAdvantagesByWindCalculator(dashboardDispatchContext);
+            result = startlineAdvantagesByWindCalculator.getStartLineAdvantagesAccrossLineFromTrackedRaceAtTimePoint(liveRace, MillisecondsTimePoint.now());
+        }
+        if(result != null && result.maximum != null) {
+            super.addValueToMovingAverage(result.maximum, dashboardDispatchContext.getMovingAveragesCache());
+            result.average = dashboardDispatchContext.getMovingAveragesCache().getValueForKey(getKeyForMovingAverage());
+        }
+        return result;
     }
 
     @Override
-    public void execute(AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO> callback) {
-        ribDashboardService.getAdvantagesOnStartline(leaderboardName, callback);
-    }}
+    protected String getKeyForMovingAverage() {
+        return super.getLeaderboardName();
+    }
+}

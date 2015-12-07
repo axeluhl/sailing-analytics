@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
-import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetriever;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.WrongDeviceOrientationNotification;
@@ -29,8 +28,7 @@ import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartLineAdvanta
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.StartlineAdvantagesByWindComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
-import com.sap.sailing.dashboards.gwt.shared.RaceIdDTO;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -92,25 +90,23 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
 
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
-    private RibDashboardServiceAsync ribDashboardService;
     DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
 
     public RibDashboardPanel(DashboardClientFactory dashboardClientFactory) {
         this.dashboardClientFactory = dashboardClientFactory;
-//        this.ribDashboardService = ribDashboardService;
-//        windBotComponents = new ArrayList<WindBotComponent>();
-//        startanalysisComponent = new StartlineAnalysisComponent(ribDashboardService, sailingServiceAsync);
-//        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(ribDashboardService);
-//        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(ribDashboardDataRetriever);
+        windBotComponents = new ArrayList<WindBotComponent>();
+        startanalysisComponent = new StartlineAnalysisComponent(this.dashboardClientFactory);
+        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(this.dashboardClientFactory);
+        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(this.dashboardClientFactory);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
-//        initLogos();
-//        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-//        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
-//        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        initLogos();
+        windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
+        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
+        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         startUpdatingRaceLabelIn20SecondInterval();
-//        loadAndAddEventLogo(sailingServiceAsync);
+        loadAndAddEventLogo(dashboardClientFactory.getSailingService());
         initAndAddWrongOrientationNotification();
     }
 
@@ -192,17 +188,18 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
                             new AsyncCallback<RaceIdDTO>() {
 
                                 @Override
-                                public void onFailure(Throwable caught) {
-                                    logger.log(Level.INFO,
-                                            "Failed to received RegattaAndRaceIdentifier from race that is live, "+caught.getMessage());
-                                }
-
-                                @Override
                                 public void onSuccess(RaceIdDTO result) {
-                                    if (result != null) {
-                                        logger.log(Level.INFO, "Updating UI with RibDashboardRaceInfoDTO race name");
+                                    if (result != null && result.getRaceId() != null) {
+                                        logger.log(Level.INFO, "Updating UI with live race id");
                                         setHeaderText(result.getRaceId().getRaceName());
+                                    } else {
+                                        logger.log(Level.INFO, "Received null for live race id");
                                     }
+                                }
+                                
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    logger.log(Level.INFO, "Failed to received live race id"+caught.getMessage());
                                 }
                             });
                 }

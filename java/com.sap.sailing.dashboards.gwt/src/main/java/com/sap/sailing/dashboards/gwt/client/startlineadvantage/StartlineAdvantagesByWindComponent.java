@@ -15,12 +15,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
+import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesByWindAction;
-import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
+import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -50,55 +49,59 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     @UiField
     StartlineAdvantagesByWindComponentStyle style;
     
-    private RibDashboardServiceAsync ribDashboardService;
-    private AsyncActionsExecutor asyncActionsExecutor;
-    private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
+    public DashboardClientFactory dashboardClientFactory;
+    private static final Logger logger = Logger.getLogger(StartlineAdvantagesByWindComponent.class.getName());
     
-    public StartlineAdvantagesByWindComponent(RibDashboardServiceAsync ribDashboardService) {
+    public StartlineAdvantagesByWindComponent(DashboardClientFactory dashboardClientFactory) {
+        this.dashboardClientFactory = dashboardClientFactory;
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart();
         advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWind(), "m");
         advantageMaximumLiveAverage.header.getStyle().setFontSize(14, Unit.PT);
         advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
         advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
         initWidget(uiBinder.createAndBindUi(this));
-        this.ribDashboardService = ribDashboardService;
-        this.asyncActionsExecutor = new AsyncActionsExecutor();
         initSampleTimer();
     }
     
     private void loadData() {
-        GetStartlineAdvantagesByWindAction getRibDashboardRaceInfoAction = new GetStartlineAdvantagesByWindAction(ribDashboardService, "");
         logger.log(Level.INFO, "Executing GetStartlineAdvantagesAction");
-        asyncActionsExecutor.execute(getRibDashboardRaceInfoAction,
-                new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
+        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
+        if (leaderboardNameParameterValue != null) {
+            dashboardClientFactory.getDispatch().execute(
+                    new GetStartlineAdvantagesByWindAction(leaderboardNameParameterValue),
+                    new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
 
-                    @Override
-                    public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
-                        logger.log(Level.INFO, "Received StartlineAdvantagesWithMaxAndAverageDTO");
-                        if (result != null) {
-                            logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
-                            startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
-                            advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(result.maximum));
-                            advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(result.average));
-                        } else {
-                            logger.log(Level.INFO, "StartlineAdvantagesWithMaxAndAverageDTO is null");
+                        @Override
+                        public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
+                            logger.log(Level.INFO, "Received StartlineAdvantagesWithMaxAndAverageDTO");
+                            if (result != null && result.maximum != null && result.average != null) {
+                                logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
+                                startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
+                                advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(
+                                        result.maximum.doubleValue()));
+                                advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(
+                                        result.average.doubleValue()));
+                            } else {
+                                logger.log(Level.INFO, "StartlineAdvantagesWithMaxAndAverageDTO is null");
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO, "+caught.getMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO, "
+                                    + caught.getMessage());
+                        }
+                    });
+        }
     }
-    
-    private void initSampleTimer(){
+
+    private void initSampleTimer() {
         Timer timer = new Timer(PlayModes.Live);
         timer.setRefreshInterval(5000);
         timer.addTimeListener(this);
         timer.play();
     }
-        
+
     @Override
     public void add(Widget w) {
         throw new UnsupportedOperationException("The method add(Widget w) is not supported.");

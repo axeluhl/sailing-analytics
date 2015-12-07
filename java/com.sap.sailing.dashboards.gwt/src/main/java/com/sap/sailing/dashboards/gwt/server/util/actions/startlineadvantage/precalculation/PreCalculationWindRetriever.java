@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.server.startlineadvantages.precalculation;
+package com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.precalculation;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;

@@ -6,7 +6,10 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sap.sailing.dashboards.gwt.shared.DashboardLiveRaceProvider;
+import com.sap.sailing.dashboards.gwt.shared.MovingAveragesCache;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
@@ -17,14 +20,21 @@ import com.sap.sailing.server.RacingEventService;
  */
 public class DashboardDispatchContextImpl implements DashboardDispatchContext{
     private final RacingEventService racingEventService;
+    private final PolarDataService polarDataService;
+    private final DashboardLiveRaceProvider dashboardLiveRaceProvider;
+    private final MovingAveragesCache movingAveragesCache;
     private final Date currentClientTime;
-//    private final Date currentServerTime = new Date();
     private String clientLocaleName;
     private final HttpServletRequest request;
 
-    public  DashboardDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService, String clientLocaleName, HttpServletRequest request) {
+    public DashboardDispatchContextImpl(Date currentClientTime, RacingEventService racingEventService,
+            PolarDataService polarDataService, DashboardLiveRaceProvider dashboardLiveRaceProvider,
+            MovingAveragesCache movingAveragesCache, String clientLocaleName, HttpServletRequest request) {
         this.currentClientTime = currentClientTime;
         this.racingEventService = racingEventService;
+        this.polarDataService = polarDataService;
+        this.dashboardLiveRaceProvider = dashboardLiveRaceProvider;
+        this.movingAveragesCache = movingAveragesCache;
         this.clientLocaleName = clientLocaleName;
         this.request = request;
     }
@@ -32,6 +42,16 @@ public class DashboardDispatchContextImpl implements DashboardDispatchContext{
     @Override
     public RacingEventService getRacingEventService() {
         return racingEventService;
+    }
+    
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
+    }
+    
+    @Override
+    public DashboardLiveRaceProvider getDashboardLiveRaceProvider() {
+        return dashboardLiveRaceProvider;
     }
     
     @Override
@@ -58,5 +78,9 @@ public class DashboardDispatchContextImpl implements DashboardDispatchContext{
     public URL getRequestBaseURL() throws DispatchException {
         return HomeServiceUtil.getRequestBaseURL(request);
     }
-    
+
+    @Override
+    public MovingAveragesCache getMovingAveragesCache() {
+        return movingAveragesCache;
+    }
 }

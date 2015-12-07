@@ -23,8 +23,10 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
+import com.sap.sailing.dashboards.gwt.client.actions.GetCompetitorInLeaderboardAction;
+import com.sap.sailing.dashboards.gwt.client.actions.GetStartAnalysesAction;
 import com.sap.sailing.dashboards.gwt.client.notifications.BottomNotification;
 import com.sap.sailing.dashboards.gwt.client.notifications.BottomNotificationClickListener;
 import com.sap.sailing.dashboards.gwt.client.notifications.BottomNotificationType;
@@ -32,9 +34,10 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
+import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -104,13 +107,13 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private List<StartlineAnalysisCard> pageChangeListener;
     private BottomNotification bottomNotification;
     private Timer timer;
-    private RibDashboardServiceAsync ribDashboardServiceAsync;
-    private SailingServiceAsync sailingServiceAsync;
 
     private static final int RERFRESH_INTERVAL = 10000;
 
     private CompetitorSelectionPopup competitorSelectionPopup;
     private SettingsButtonWithSelectionIndicationLabel settingsButtonWithSelectionIndicationLabel;
+    
+    private DashboardClientFactory dashboardClientFactory;
 
     private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
     private static final int SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
@@ -120,9 +123,8 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
-    public StartlineAnalysisComponent(RibDashboardServiceAsync ribDashboardServiceAsync, SailingServiceAsync sailingServiceAsync) {
-        this.ribDashboardServiceAsync = ribDashboardServiceAsync;
-        this.sailingServiceAsync = sailingServiceAsync;
+    public StartlineAnalysisComponent(DashboardClientFactory dashboardClientFactory) {
+        this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartlineAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
 
@@ -172,34 +174,31 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     
     private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
         logger.log(Level.INFO, "Loading startanalysis for competitor id " + competitorIdAsString);
-        ribDashboardServiceAsync.getStartAnalysisListForCompetitorIDAndLeaderboardName(
-                competitorIdAsString, DashboardURLParameters.LEADERBOARD_NAME.getValue(), new AsyncCallback<List<StartAnalysisDTO>>() {
-                    @Override
-                    public void onSuccess(List<StartAnalysisDTO> result) {
-                        logger.log(Level.INFO, "Received startanalysis list");
-                        if (result != null && !result.isEmpty()) {
-                            
-                            if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
-                                removeAllStartAnalysisCards();
-                            }
-                            
-                            if (result.size() != starts.size()) {
-                                showNotificationForNewStartAnalysis();
-                            }
-                            logger.log(Level.INFO, "Updating UI with startanalysis list");
-                            addNewStartAnalysisCards(result);
-                            settingsButtonWithSelectionIndicationLabel
-                                    .setSelectionIndicationTextOnLabel(result.get(0).competitor.getName());
-                        } else {
-                            logger.log(Level.INFO, "Received startanalysis list is null or empty");
-                        }
-                    }
+        dashboardClientFactory.getDispatch().execute(new GetStartAnalysesAction(DashboardURLParameters.LEADERBOARD_NAME.getValue(), competitorIdAsString), new AsyncCallback<StartAnalysesDTO>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(StartAnalysesDTO result) {
+              logger.log(Level.INFO, "Received startanalysis list");
+              if (result != null && !result.getStartAnalyses().isEmpty()) {
+                  if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
+                      removeAllStartAnalysisCards();
+                  }
+                  if (result.getStartAnalyses().size() != starts.size()) {
+                      showNotificationForNewStartAnalysis();
+                  }
+                  logger.log(Level.INFO, "Updating UI with startanalysis list");
+                  addNewStartAnalysisCards(result.getStartAnalyses());
+                  settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(result.getStartAnalyses().get(0).competitor.getName());
+              } else {
+                  logger.log(Level.INFO, "Received startanalysis list is null or empty");
+              }
+            }
+        });
     }
 
     private void initAndAddBottomNotification() {
@@ -243,27 +242,28 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
     private void loadCompetitorsAndShowCompetitorSelectionPopup() {
         logger.log(Level.INFO, "Requesting Competitors in Leaderboard");
-        ribDashboardServiceAsync.getCompetitorsInLeaderboard(DashboardURLParameters.LEADERBOARD_NAME.getValue(), new AsyncCallback<List<CompetitorDTO>>() {
-            @Override
-            public void onSuccess(List<CompetitorDTO> result) {
-                logger.log(Level.INFO, "Received competitors for leaderboard name");
-                if (result != null && result.size() > 0) {
-                    if (!competitorSelectionPopup.isShown()) {
-                        logger.log(Level.INFO, "Showing CompetitorSelectionPopup with competitors");
-                        competitorSelectionPopup.show(result);
-                    } else {
-                        logger.log(Level.INFO, "CompetitorSelectionPopup aleady shown");
-                    }
-                } else {
-                    logger.log(Level.INFO, "Received competitors are null or empty");
-                }
-            }
+        dashboardClientFactory.getDispatch().execute(new GetCompetitorInLeaderboardAction(DashboardURLParameters.LEADERBOARD_NAME.getValue()), new AsyncCallback<LeaderboardCompetitorsDTO>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
-            }
-        });
+                    @Override
+                    public void onSuccess(LeaderboardCompetitorsDTO result) {
+                        logger.log(Level.INFO, "Received competitors for leaderboard name");
+                        if (result.getCompetitors() != null && result.getCompetitors().size() > 0) {
+                            if (!competitorSelectionPopup.isShown()) {
+                                logger.log(Level.INFO, "Showing CompetitorSelectionPopup with competitors");
+                                competitorSelectionPopup.show(result.getCompetitors());
+                            } else {
+                                logger.log(Level.INFO, "CompetitorSelectionPopup aleady shown");
+                            }
+                        } else {
+                            logger.log(Level.INFO, "Received competitors are null or empty");
+                        }
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
+                    }
+                });
     }
 
     private void initAndAddSettingsButtonWithSelectionIndicationLabel() {
@@ -349,7 +349,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         }
         final StartlineAnalysisCard startlineAnalysisCard = new StartlineAnalysisCard(numberOfStartAnalysisCards
                 * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO,
-                sailingServiceAsync);
+                dashboardClientFactory.getSailingService());
         startanalysis_card_container.add(startlineAnalysisCard);
         startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
         registerPageChangeListener(startlineAnalysisCard);

@@ -12,6 +12,6 @@ import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 public interface DashboardAction<R extends Result> extends Action<R, DashboardDispatchContext> {
 
     @GwtIncompatible
-    R execute(DashboardDispatchContext ctx) throws DispatchException;
+    R execute(DashboardDispatchContext dashboardDispatchContext) throws DispatchException;
 
 }

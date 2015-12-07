@@ -9,14 +9,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardServiceAsync;
+import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatTakesWindFixesNowAction;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
+import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -24,8 +24,6 @@ import com.sap.sse.gwt.client.player.TimeListener;
 public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverProvider {
 
     private AsyncActionsExecutor asyncActionsExecutor;
-    private final RibDashboardServiceAsync ribDashboardService;
-    private final SailingServiceAsync sailingService;
     private List<NumberOfWindBotsChangeListener> numberOfWindBotsChangeListeners;
     private List<WindBotDataRetrieverListener> windBotDataRetrieverListeners;
     private List<String> windBotIDsInLiveRace;
@@ -36,11 +34,12 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     private final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     private boolean didInitialLoading;
     
+    private DashboardClientFactory dashboardClientFactory;
+    
     private static final Logger logger = Logger.getLogger(WindBotDataRetriever.class.getName());
     
-    public WindBotDataRetriever(RibDashboardServiceAsync ribDashboardService, SailingServiceAsync sailingService) {
-        this.ribDashboardService = ribDashboardService;
-        this.sailingService = sailingService;
+    public WindBotDataRetriever(DashboardClientFactory dashboardClientFactory) {
+        this.dashboardClientFactory = dashboardClientFactory;
         didInitialLoading = false;
         asyncActionsExecutor = new AsyncActionsExecutor();
         numberOfWindBotsChangeListeners = new ArrayList<NumberOfWindBotsChangeListener>();
@@ -56,7 +55,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
             from = new Date(from.getTime()-ONE_HOUR_IN_MILLISECONDS);
         }
         logger.log(Level.INFO, "Executing GetWindInfoAction with from "+from+" and to "+to);
-        GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier, from, to,
+        GetWindInfoAction getWindInfoAction = new GetWindInfoAction(dashboardClientFactory.getSailingService(), selectedRaceIdentifier, from, to,
                 WIND_CHART_RESOLUTION_IN_MILLISECONDS, windSourceTypeNames, /*
                                                               * onlyUpToNewestEvent==true because we don't want to
                                                               * overshoot the evidence so far
@@ -143,26 +142,31 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     public void timeChanged(Date newTime, Date oldTime) {
         final Date finalNewTime = newTime;
         final Date finaloldTime = oldTime;
-        GetIDFromRaceThatTakesWindFixesNowAction getIDFromRaceThatTakesWindFixesNowAction = new GetIDFromRaceThatTakesWindFixesNowAction(ribDashboardService, DashboardURLParameters.LEADERBOARD_NAME.getValue());
         logger.log(Level.INFO, "Executing GetIDFromRaceThatTakesWindFixesNowAction");
-        asyncActionsExecutor.execute(getIDFromRaceThatTakesWindFixesNowAction, new AsyncCallback<RegattaAndRaceIdentifier>() {
-            @Override
-            public void onSuccess(RegattaAndRaceIdentifier result) {
-                logger.log(Level.INFO, "Received RegattaAndRaceIdentifier from race that takes wind fixes now");
-                if(result != null) {
-                loadWindBotData(finaloldTime, finalNewTime, result);
-                } else {
-                    notifyListenersAboutNumberOfWindBotsReceivedIsZero();
-                    logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
-                }
-            }
+        dashboardClientFactory.getDispatch().execute(
+                new GetIDFromRaceThatTakesWindFixesNowAction(DashboardURLParameters.LEADERBOARD_NAME.getValue()),
+                new AsyncCallback<RaceIdDTO>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
-                logger.log(Level.INFO, " Failed to received RegattaAndRaceIdentifier from race that takes wind fixes now");
-                logger.log(Level.INFO, caught.getMessage());
-            }
-        });
+                    @Override
+                    public void onSuccess(RaceIdDTO result) {
+                        if (result != null) {
+                            RegattaAndRaceIdentifier raceId = result.getRaceId();
+                            if (raceId != null) {
+                                logger.log(Level.INFO, "Received RegattaAndRaceIdentifier from race that takes wind fixes now");
+                                loadWindBotData(finaloldTime, finalNewTime, raceId);
+                            } else {
+                                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
+                                logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        notifyListenersAboutNumberOfWindBotsReceivedIsZero();
+                        logger.log(Level.INFO, "Failed to received RegattaAndRaceIdentifier from race that takes wind fixes now");
+                        logger.log(Level.INFO, caught.getMessage());
+                    }
+                });
     }
 }

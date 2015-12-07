@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.server.startlineadvantages;
+package com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage;
 
 import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator;
