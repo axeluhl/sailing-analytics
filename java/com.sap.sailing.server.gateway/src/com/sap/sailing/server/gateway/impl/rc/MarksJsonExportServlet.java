@@ -1,8 +1,6 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -11,19 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.simple.JSONArray;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
-import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
-import com.sap.sse.common.Util;
 
 public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 4510175441769759252L;
@@ -64,24 +57,8 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No such fleet found.");
             return;
         }
-        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         JSONArray result = new JSONArray();
-        final Iterable<Mark> marks;
-        if (trackedRace != null) {
-            marks = trackedRace.getMarks();
-        } else {
-            final List<Mark> marksList = new ArrayList<>();
-            // no tracked race associated yet; grab the mark definitions from the race log:
-            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(raceColumn.getRaceLog(fleet));
-            CourseBase courseBase = courseDesginFinder.analyze();
-            if (courseBase != null){
-                courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), marksList));
-            } else {
-                marksList.addAll(new RegattaLogDefinedMarkAnalyzer(raceColumn.getRegattaLog()).analyze());
-            }
-
-            marks = marksList;
-        }
+        final Iterable<Mark> marks = raceColumn.getAllMarks(fleet);
         MarkJsonSerializer serializer = new MarkJsonSerializer();
         for (Mark mark : marks) {
             if (toUUID(mark.getId().toString()) != null) {
