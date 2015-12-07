@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>root</artifactId>
 		<groupId>com.sap.sailing</groupId>
-		<version>1.0.1</version>
+		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>com.sap.sse.security.ui</artifactId>
 	<packaging>eclipse-plugin</packaging>
@@ -25,25 +25,25 @@
 		<dependency>
 			<groupId>com.sap.sailing</groupId>
 			<artifactId>com.sap.sse.common</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.sap.sailing</groupId>
 			<artifactId>com.sap.sse.gwt</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.sap.sailing</groupId>
 			<artifactId>com.sap.sse.security</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.sap.sailing</groupId>
 			<artifactId>com.sap.sse.security.common</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 			</dependencies>

@@ -6,7 +6,7 @@
   <parent>
     <artifactId>workspace</artifactId>
     <groupId>com.sap.sailing</groupId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>root</artifactId>

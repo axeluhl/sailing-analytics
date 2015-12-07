@@ -5,7 +5,7 @@
   <parent>
     <artifactId>root</artifactId>
     <groupId>com.sap.sailing</groupId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>com.sap.sailing.resultimport</artifactId>
   <packaging>eclipse-plugin</packaging>

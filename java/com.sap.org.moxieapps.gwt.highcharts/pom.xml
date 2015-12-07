@@ -5,11 +5,11 @@
   <parent>
     <artifactId>root</artifactId>
     <groupId>com.sap.sailing</groupId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
   </parent>
   <groupId>com.sap.org.moxieapps.gwt</groupId>
   <artifactId>com.sap.org.moxieapps.gwt.highcharts</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 
   <build>
