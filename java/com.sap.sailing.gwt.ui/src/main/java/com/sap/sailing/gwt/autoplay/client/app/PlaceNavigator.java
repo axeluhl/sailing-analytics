@@ -1,9 +1,8 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
-import java.util.Map;
+import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 
 public interface PlaceNavigator {
     void goToStart();
-    void goToPlayer(String eventUuidAsString, boolean fullscreen, 
-            Map<String, String> leaderboardParameters, Map<String, String> raceboardParameters); 
+    void goToPlayer(AutoPlayerConfiguration playerConfig); 
 }

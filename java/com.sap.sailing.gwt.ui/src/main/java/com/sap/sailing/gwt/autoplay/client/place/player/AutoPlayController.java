@@ -66,14 +66,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private final Timer raceboardTimer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;  
     private AutoPlayModes activeTvView;
-    private final boolean isfullscreenMode;
     private boolean isInitialScreen = true;
 
     // leaderboard related attributes
     private LeaderboardDTO leaderboard;
-    private final String leaderboardName;
-    private final String leaderboardGroupName;
-    private final String leaderboardZoom;
     private LeaderboardSettings leaderboardSettings;
    
     // raceboard related attributes
@@ -82,24 +78,21 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private boolean showWindChart;
     private final RaceBoardPerspectiveSettings raceboardViewConfig;
     private final PlayerView playerView;
+    private final AutoPlayerConfiguration autoPlayerConfiguration;
     private Widget currentContentWidget;
 
     private static int SAP_HEADER_HEIGHT = 70;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, ErrorReporter errorReporter, boolean isfullscreenMode,
-            String leaderboardGroupName, String leaderboardName, final String leaderboardZoom,
+            UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
             RaceBoardPerspectiveSettings raceboardViewConfig, PlayerView playerView, LeaderboardSettings leaderboardSettings) {
         this.raceboardViewConfig = raceboardViewConfig;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
-        this.isfullscreenMode = isfullscreenMode;
         this.errorReporter = errorReporter;
-        this.leaderboardName = leaderboardName;
-        this.leaderboardZoom = leaderboardZoom;
-        this.leaderboardGroupName = leaderboardGroupName;
+        this.autoPlayerConfiguration = autoPlayerConfiguration;
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
@@ -128,6 +121,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
+                String leaderboardZoom = AutoPlayController.this.autoPlayerConfiguration.getLeaderboardZoom();
                 if(leaderboardZoom != null && leaderboardZoom.equalsIgnoreCase("auto")) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
@@ -135,11 +129,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         });
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardGroupName, String leaderboardName, boolean showRaceDetails) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, true,
-                /* preSelectedRace */null, selectionModel, leaderboardTimer, leaderboardGroupName, leaderboardName,
+                /* preSelectedRace */null, selectionModel, leaderboardTimer, /*leaderboardGroupName*/ "", leaderboardName,
                 errorReporter, StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
                 /* adjustTimerDelay */true, /*autoApplyTopNFilter*/ false, false) {
@@ -185,23 +179,23 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         if (activeTvView != AutoPlayModes.Leaderboard) {
             playerView.clear();
             
-            boolean withFullscreenButton = isfullscreenMode && isInitialScreen;
+            boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
             
-            SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + leaderboardName, withFullscreenButton);
+            SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + autoPlayerConfiguration.getLeaderboardName(), withFullscreenButton);
             playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
 
-            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(leaderboardGroupName, leaderboardName, showRaceDetails);
+            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
             OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
             leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
             
             currentContentWidget = oldLeaderboard.getContentWidget();
             
-            if(leaderboardZoom != null) {
-                if(leaderboardZoom.equalsIgnoreCase("auto")) {
+            if(autoPlayerConfiguration.getLeaderboardZoom() != null) {
+                if(autoPlayerConfiguration.getLeaderboardZoom().equalsIgnoreCase("auto")) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 } else {
                     try {
-                        Double zoom = Double.valueOf(leaderboardZoom);
+                        Double zoom = Double.valueOf(autoPlayerConfiguration.getLeaderboardZoom());
                         zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
                     } catch (NumberFormatException e) {
                         // do nothing
@@ -289,11 +283,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
             sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),
-                    leaderboardName, null, null, new AsyncCallback<RaceboardDataDTO>() {
+                    autoPlayerConfiguration.getLeaderboardName(), null, null, new AsyncCallback<RaceboardDataDTO>() {
                 @Override
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clear();
-                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace, result.getCompetitorAndTheirBoats());
+                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
+                            currentLiveRace, result.getCompetitorAndTheirBoats());
                     raceBoardPanel.setSize("100%", "100%");
                     if (showWindChart) {
                         raceBoardPanel.setWindChartVisible(true);

@@ -11,6 +11,11 @@
 		.perspectiveConfigurationPanel {
 			width: 100%;
 		}
+		.headline {
+			background-color: #eeeeee;
+			margin-top: 1em;
+			margin-bottom: 1em;
+		}
     </ui:style>
     <g:HTMLPanel>
         <s:header.SAPHeader ui:field="sapHeader" />
@@ -23,14 +28,6 @@
 				<g:ListBox ui:field="localeSelectionBox" />
 	        </div>
         </div>
-		<div class="{res.mediaCss.grid} {style.row}">
-			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    <span>Start browser in full screen mode:</span>
-	        </div>
-		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-				<g:CheckBox ui:field="startInFullscreenModeBox" />
-	        </div>
-		</div>
 		<div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 			    <span>Event:</span>
@@ -47,16 +44,20 @@
 				<g:ListBox ui:field="leaderboardSelectionBox" />
 	        </div>
 		</div>
-		
-		<div class="{res.mediaCss.grid} {style.row}">
-			<div ui:field="screenConfiguraionUi" class="{res.mediaCss.columns}">
-				Screen configuration
+        
+        <div ui:field="screenConfigurationUi">
+			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
+				<div class="{res.mediaCss.columns}">Screen size and zoom</div>
+			</div>			
+			<div class="{res.mediaCss.grid} {style.row}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
+				    <span>Start browser in full screen mode:</span>
+		        </div>
+			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
+					<g:CheckBox ui:field="startInFullscreenModeBox" />
+		        </div>
 			</div>
-			
 			<div ui:field="leaderboardAutoZoomDiv" class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.columns} {style.row}">
-					Screen settings
-				</div>
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    <span>Auto-Zoom:</span>
 		        </div>
@@ -72,52 +73,54 @@
 					<g:TextBox ui:field="leaderboardZoomBox" />
 		        </div>
 			</div>
-
+			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
+				<div class="{res.mediaCss.columns}">Screen switching</div>
+			</div>			
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Auto switch when race active:</span>
+				    <span>Switch automatically to live race:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:CheckBox ui:field="autoSwitchToRaceboard" />
 		        </div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.columns} {style.row}">
-					Trigger to switch to raceboard
-				</div>
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Time to race start (in s):</span>
+				    <span>...when to start is less than (in s):</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:TextBox ui:field="timeToRaceStartInSeconds" />
 		        </div>
 			</div>
-			<div class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Auto-Play video:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:CheckBox ui:field="autoSelectMediaBox" />
-		        </div>
+			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
+				<div class="{res.mediaCss.columns}">Viewer Settings</div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Settings:</span>
+				    <span>Leaderboard Viewer:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:VerticalPanel ui:field="perspectiveConfigurationPanel" styleName="{res.mediaCss.grid} {style.row}">
+					<g:VerticalPanel ui:field="leaderboardPerspectiveSettingsPanel" styleName="{res.mediaCss.columns}">
 					</g:VerticalPanel>
 		        </div>
 			</div>
+			<div class="{res.mediaCss.grid} {style.row}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
+				    <span>Raceboard Viewer:</span>
+		        </div>
+			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
+					<g:VerticalPanel ui:field="raceboardPerspectiveSettingsPanel" styleName="{res.mediaCss.columns}">
+					</g:VerticalPanel>
+		        </div>
+			</div>
+			<div class="{res.mediaCss.grid} {style.row}">
+				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
+				    &nbsp;
+		        </div>
+			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
+		    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay" styleName="{res.mainCss.button}" />
+			    </div>
+			</div>
 		</div>
-		<div class="{res.mediaCss.grid}">
-			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    &nbsp;
-	        </div>
-		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-	    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay" styleName="{res.mainCss.button}" />
-		    </div>
-		</div>
-		
 	</g:HTMLPanel>
 </ui:UiBinder>    

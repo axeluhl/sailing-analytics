@@ -34,7 +34,7 @@ public class PlayerActivity extends AbstractActivity {
         final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ? Long
                 .valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
         
-        UUID eventUUID = UUID.fromString(playerPlace.getEventUuidAsString());
+        UUID eventUUID = UUID.fromString(playerPlace.getConfiguration().getEventUidAsString());
         clientFactory.getSailingService().getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
             @Override
             public void onSuccess(final EventDTO event) {
@@ -46,9 +46,8 @@ public class PlayerActivity extends AbstractActivity {
                 RootLayoutPanel.get().add(view.asWidget());
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
-                        .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), playerPlace
-                        .isFullscreen(), /* leaderboardGroupName */"", playerPlace.getLeaderboardIdAsNameString(),
-                        playerPlace.getLeaderboardZoom(), userAgent, delayToLiveMillis, showRaceDetails,
+                        .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
+                        playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails,
                         readRaceboardConfiguration, view, /** TODO: pass leaderboardSettings*/ null);
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
@@ -61,7 +60,7 @@ public class PlayerActivity extends AbstractActivity {
     }
     
     private RaceBoardPerspectiveSettings readRaceboardConfiguration() {
-        Boolean autoSelectMedia = Boolean.valueOf(playerPlace.getRaceboardAutoSelectMedia());
+        Boolean autoSelectMedia = true;
 
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
