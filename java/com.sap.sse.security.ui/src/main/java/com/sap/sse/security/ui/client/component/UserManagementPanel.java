@@ -22,7 +22,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -37,7 +38,7 @@ public class UserManagementPanel extends DockPanel {
     
     private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private SingleSelectionModel<UserDTO> singleSelectionModel;
+    private RefreshableSingleSelectionModel<UserDTO> refreshableSingleSelectionModel;
 
     private UserListDataProvider userListDataProvider;
     
@@ -46,7 +47,14 @@ public class UserManagementPanel extends DockPanel {
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
         west.add(buttonPanel);
-        singleSelectionModel = new SingleSelectionModel<>();
+        refreshableSingleSelectionModel = new RefreshableSingleSelectionModel<>(
+                new EntityIdentityComparator<UserDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(UserDTO dto1, UserDTO dto2) {
+                        return dto1.getEmail().equals(dto2.getEmail());
+                    }
+                });
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -57,7 +65,7 @@ public class UserManagementPanel extends DockPanel {
         final Button deleteButton = new Button(stringMessages.deleteUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final UserDTO userToDelete = singleSelectionModel.getSelectedObject();
+                final UserDTO userToDelete = refreshableSingleSelectionModel.getSelectedObject();
                 final String username = userToDelete.getName();
                 if (Window.confirm(stringMessages.doYouReallyWantToDeleteUser(username))) {
                     userManagementService.deleteUser(username, new AsyncCallback<SuccessInfo>() {
@@ -78,12 +86,12 @@ public class UserManagementPanel extends DockPanel {
             }
         });
         buttonPanel.add(deleteButton);
-        deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
+        deleteButton.setEnabled(refreshableSingleSelectionModel.getSelectedObject() != null);
         final UserList userList = new UserList();
-        userList.setSelectionModel(singleSelectionModel);
+        userList.setSelectionModel(refreshableSingleSelectionModel);
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
-        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, permissionsForRoleProvider);
+        final UserDetailsView userDetailsView = new UserDetailsView(userService, refreshableSingleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, permissionsForRoleProvider);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override
@@ -91,11 +99,11 @@ public class UserManagementPanel extends DockPanel {
                 userListDataProvider.updateDisplays();
             }
         });
-        singleSelectionModel.addSelectionChangeHandler(new Handler() {
+        refreshableSingleSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                userDetailsView.updateUser(singleSelectionModel.getSelectedObject(), userManagementService);
-                deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
+                userDetailsView.updateUser(refreshableSingleSelectionModel.getSelectedObject(), userManagementService);
+                deleteButton.setEnabled(refreshableSingleSelectionModel.getSelectedObject() != null);
             }
         });
         userList.setPageSize(20);
@@ -127,7 +135,7 @@ public class UserManagementPanel extends DockPanel {
                 if (user != null) {
                     for (UserDTO u : userList.getVisibleItems()) {
                         if (u.getName().equals(user.getName())) {
-                            singleSelectionModel.setSelected(user, true);
+                            refreshableSingleSelectionModel.setSelected(user, true);
                         }
                     }
                 }

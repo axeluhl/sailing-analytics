@@ -32,6 +32,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T>, HasData<T> {
     private final EntityIdentityComparator<T> comp;
     private final List<T> elements;
+    private boolean dontcheckSelectionState = false;
 
     /**
      * @param comp
@@ -66,7 +67,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null) {
+        if (comp == null || dontcheckSelectionState) {
             super.setSelected(item, selected);
         } else {
             T wasSelectedBefore = null;
@@ -93,26 +94,28 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      * FIXME change to private
      */
     public void refreshSelectionModel(Iterable<T> newObjects) {
+        dontcheckSelectionState = true;
         final Set<T> selectedSet = getSelectedSet();
-        final boolean isNotEmpty = !selectedSet.isEmpty();
-        clear();
-        if (isNotEmpty) {
+        final boolean isEmpty = selectedSet.isEmpty();
+        if (!isEmpty) {
+            clear();
             for (T it : newObjects) {
                 if (comp == null) {
-                    super.setSelected(it, selectedSet.contains(it));
+                    setSelected(it, selectedSet.contains(it));
                 } else {
                     boolean isSelected = false;
                     for (T selected : selectedSet) {
                         isSelected = comp.representSameEntity(selected, it);
                         if (isSelected) {
+                            setSelected(it, isSelected);
                             break;
                         }
                     }
-                    super.setSelected(it, isSelected);
                 }
             }
             SelectionChangeEvent.fire(this);
         }
+        dontcheckSelectionState = false;
     }
 
     /**
@@ -124,12 +127,13 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void refreshSelectionModel(int start, List<T> newObjects) {
+        dontcheckSelectionState = true;
         List<T> oldElements = elements.subList(start, elements.size());
         Set<T> selectedElements = new HashSet<T>();
         for (T it : oldElements) {
             if (isSelected(it)) {
                 selectedElements.add(it);
-                super.setSelected(it, false);
+                setSelected(it, false);
             }
         }
         if (!selectedElements.isEmpty()) {
@@ -137,46 +141,49 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                 if (comp != null) {
                     for (T selected : selectedElements) {
                         if (comp.representSameEntity(selected, newElement)) {
-                            super.setSelected(newElement, true);
+                            setSelected(newElement, true);
                             break;
                         }
                     }
                 } else {
                     if (selectedElements.contains(newElement)) {
-                        super.setSelected(newElement, true);
+                        setSelected(newElement, true);
                     }
                 }
             }
             SelectionChangeEvent.fire(this);
         }
         isSelected(newObjects.iterator().next()); // Triggers a clear of unselected elements in superclass
+        dontcheckSelectionState = false;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        // refresh the selectionModel
-        if (start > 0 && values.size() > 0) {
-            refreshSelectionModel(start, (List<T>) values);
-        } else {
-            refreshSelectionModel((Iterable<T>) values);
-        }
-        // refresh the element list
-        // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
-        if (values.isEmpty()) {
-            elements.clear();
-        } else if (elements.isEmpty()) {
-            elements.addAll(values);
-        } else if (values.size() == 1) {
-            elements.set(start, values.get(0));
-        } else if (start == 0) {
-            elements.clear();
-            elements.addAll(values);
-        } else {
-            for (int i = start; i < elements.size(); i++) {
-                elements.remove(i);
+        if (!values.equals(elements.subList(start, elements.size()))) {
+            // refresh the selectionModel
+            if (start == 0 && (values.size() > 1 || values.size()==0)) {
+                refreshSelectionModel((Iterable<T>) values);
+            } else {
+                refreshSelectionModel(start, (List<T>) values);
             }
-            elements.addAll(values);
+            // refresh the element list
+            // TODO discuss with Axel if this depends to much of the implementation of ListDataProvider
+            if (values.isEmpty()) {
+                elements.clear();
+            } else if (elements.isEmpty()) {
+                elements.addAll(values);
+            } else if (values.size() == 1) {
+                elements.set(start, values.get(0));
+            } else if (start == 0) {
+                elements.clear();
+                elements.addAll(values);
+            } else {
+                for (int i = start; i < elements.size(); i++) {
+                    elements.remove(i);
+                }
+                elements.addAll(values);
+            }
         }
     }
 
