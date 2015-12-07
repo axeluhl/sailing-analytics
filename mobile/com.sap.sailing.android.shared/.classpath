@@ -12,5 +12,6 @@
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/com.sap.sse.shared.android"/>
 	<classpathentry kind="lib" path="/google-play-services_lib/libs/google-play-services.jar"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.json.simple"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/de.psdev.licensesdialog"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
