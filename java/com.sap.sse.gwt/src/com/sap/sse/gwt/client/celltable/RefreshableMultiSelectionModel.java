@@ -68,7 +68,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null || dontcheckSelectionState) {
+        if (comp == null || dontcheckSelectionState || item == null || getSelectedSet() == null) {
             super.setSelected(item, selected);
         } else {
             T wasSelectedBefore = null;

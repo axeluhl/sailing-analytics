@@ -54,7 +54,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
     
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null || dontcheckSelectionState) {
+        if (comp == null || dontcheckSelectionState || item == null || getSelectedObject() == null) {
             super.setSelected(item, selected);
         } else {
             if(comp.representSameEntity(getSelectedObject(), item)) {
