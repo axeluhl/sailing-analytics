@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -181,7 +182,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private CellTable<EventDTO> createEventTable() {
-        CellTable<EventDTO> table = new CellTable<EventDTO>(/* pageSize */10000, tableRes);
+        FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
@@ -193,7 +194,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
                         return dto1.id.equals(dto2.id);
                     }
-                }) {
+                },eventListDataProvider,table) {
             @Override
             protected ListDataProvider<EventDTO> getListDataProvider() {
                 return eventListDataProvider;

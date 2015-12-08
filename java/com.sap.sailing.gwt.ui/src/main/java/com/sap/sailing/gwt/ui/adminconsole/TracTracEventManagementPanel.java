@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -40,6 +39,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -84,7 +84,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private Label loadingMessageLabel;
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
-    private CellTable<TracTracRaceRecordDTO> racesTable;
+    private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
     private static final String ZERO_AS_STRING = "0";
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
@@ -314,7 +314,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        racesTable = new CellTable<TracTracRaceRecordDTO>(10000, tableResources);
+        racesTable = new FlushableCellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("TrackableRacesCellTable");
         this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
             @Override
@@ -388,7 +388,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public boolean representSameEntity(TracTracRaceRecordDTO dto1, TracTracRaceRecordDTO dto2) {
                         return dto1.id.equals(dto2.id);
                     }
-                }) {
+                }, raceList, racesTable) {
                     @Override
                     public Boolean getValue(TracTracRaceRecordDTO row) {
                         return racesTable.getSelectionModel().isSelected(row);

@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
@@ -125,7 +126,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     }
 
     protected CellTable<RegattaDTO> createRegattaTable() {
-        CellTable<RegattaDTO> table = new CellTable<RegattaDTO>(/* pageSize */10000, tableRes);
+        FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
@@ -137,7 +138,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
                         return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
                     }
-                }) {
+                },regattaListDataProvider, table) {
             @Override
             protected ListDataProvider<RegattaDTO> getListDataProvider() {
                 return regattaListDataProvider;

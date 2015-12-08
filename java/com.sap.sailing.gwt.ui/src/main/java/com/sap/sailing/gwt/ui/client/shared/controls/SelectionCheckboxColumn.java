@@ -48,6 +48,8 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
     private final RefreshableMultiSelectionModel<T> selectionModel;
+    private final ListDataProvider<T> listDataProvider;
+    private final Flushable display;
 
     /**
      * @param selectedCheckboxCSSClass
@@ -57,16 +59,25 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param checkboxColumnCellCSSClass
      *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
      * @param entityIdentityComparator
-     *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}.
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}
+     * @param listDataProvider
+     *            {@link ListDataProvider} to create a {@link RefreshableMultiSelectionModel}
+     * @param display
+     *            {@link Flushable} to redraw the selected elements on the display
      */
     protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String checkboxColumnCellCSSClass,
-            String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
+            String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator,
+            ListDataProvider<T> listDataProvider, Flushable display) {
         this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
-                entityIdentityComparator);
+                entityIdentityComparator, listDataProvider, display);
     }
     
-    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator) {
+    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass,
+            EntityIdentityComparator<T> entityIdentityComparator, ListDataProvider<T> listDataProvider,
+            Flushable display) {
         super(checkboxCell, SortingOrder.DESCENDING);
+        this.display = display;
+        this.listDataProvider = listDataProvider;
         this.cell = checkboxCell;
         this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
         this.selectionEventTranslator = createSelectionEventTranslator();
@@ -100,22 +111,19 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * after selection changes.
      */
     private RefreshableMultiSelectionModel<T> createSelectionModel(final EntityIdentityComparator<T> entityIdentityComparator) {
-        return new RefreshableMultiSelectionModel<T>(entityIdentityComparator) {
+        return new RefreshableMultiSelectionModel<T>(entityIdentityComparator, listDataProvider) {
             @Override
             public void clear() {
                 super.clear();
-                final List<T> list = getListDataProvider().getList();
-                for (T item : list) {
-                    redrawRow(item, list);
-                }
+                display.flush();
             }
 
             @Override
             public void setSelected(T item, boolean selected) {
-                final boolean redrawRequired = isSelected(item) != selected;
+                boolean wasSelected = isSelected(item);
                 super.setSelected(item, selected);
-                if (redrawRequired) {
-                    redrawRow(item, getListDataProvider().getList());
+                if(wasSelected != selected) {
+                    display.flush();
                 }
             }
         };
@@ -208,23 +216,5 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
                 return result;
             }
         };
-    }
-
-    /**
-     * Subclasses shall use this after an update to the selection state of a row to ensure the checkboxes are
-     * displayed correctly and consistently again.
-     * 
-     * @param row
-     *            the row object to be re-drawn
-     * @param dataList
-     *            the result of calling {@link ListDataProvider#getList()} on the table's data provider which is
-     *            actually a list wrapper where updates to which are reflected in the table display
-     */
-    protected void redrawRow(final T row, final List<T> dataList) {
-        int rowIndex = dataList.indexOf(row);
-        if (rowIndex >= 0) {
-            dataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
-        }
-        getListDataProvider().flush();
     }
 }

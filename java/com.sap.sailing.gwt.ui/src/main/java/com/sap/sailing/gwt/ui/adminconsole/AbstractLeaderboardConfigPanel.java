@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -48,6 +49,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
@@ -68,7 +70,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final ErrorReporter errorReporter;
 
-    protected final CellTable<StrippedLeaderboardDTO> leaderboardTable;
+    protected final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable;
 
     protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
@@ -159,7 +161,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardsPanel.add(leaderboardControlsPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
+        leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
                 availableLeaderboardList, leaderboardTable, leaderboardList) {
             @Override
@@ -174,7 +176,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
-        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes);
+        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes, leaderboardList);
         @SuppressWarnings("unchecked")
         RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableMultiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable.getSelectionModel();
         refreshableLeaderboardSelectionModel = refreshableMultiSelectionModel;
@@ -283,15 +285,27 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
     
     protected abstract void addLeaderboardControls(Panel controlsPanel);
+
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
-    protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableRes);
+
+    protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(
+            FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableRes,
+            ListDataProvider<StrippedLeaderboardDTO> leaderboardListDataProvider);
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
     protected SelectionCheckboxColumn<StrippedLeaderboardDTO> createSortableSelectionCheckboxColumn(
-            final CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources,
-            ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler) {
-        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
+            final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources,
+            ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
+        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
+                new EntityIdentityComparator<StrippedLeaderboardDTO>() {
+                    @Override
+                    public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
+                        return dto1.name.equals(dto2.name);
+                    }
+                }, listDataProvider, leaderboardTable) {
             @Override
             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                 return leaderboardList;

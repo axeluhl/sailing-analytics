@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -23,7 +24,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * created by this class's constructor by calling {@link #getColumnSortHandler}.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
-    protected final CellTable<T> table;
+    protected final FlushableCellTable<T> table;
     private final S selectionModel;
     protected final ListDataProvider<T> dataProvider;
     protected VerticalPanel mainPanel;
@@ -44,7 +45,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         this.entityIdentityComparator = entityIdentityComparator;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        table = new CellTable<T>(10000, tableRes);
+        table = new FlushableCellTable<T>(10000, tableRes);
         this.dataProvider = new ListDataProvider<T>();
         this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
         table.addColumnSortHandler(this.columnSortHandler);
@@ -52,7 +53,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
             SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
                     tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), this.entityIdentityComparator) {
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), this.entityIdentityComparator, dataProvider, table) {
                         @Override
                         protected ListDataProvider<T> getListDataProvider() {
                             return dataProvider;
@@ -66,7 +67,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
             table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         } else {
             @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) new RefreshableSingleSelectionModel<T>(entityIdentityComparator);
+            S typedSelectionModel = (S) new RefreshableSingleSelectionModel<T>(entityIdentityComparator, dataProvider);
             selectionModel = typedSelectionModel;
             table.setSelectionModel(selectionModel);
         }

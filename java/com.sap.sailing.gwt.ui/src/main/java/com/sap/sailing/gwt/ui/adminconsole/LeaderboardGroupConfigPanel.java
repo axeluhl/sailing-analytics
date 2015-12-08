@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
@@ -83,7 +84,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private boolean isSingleGroupSelected;
     private ListDataProvider<LeaderboardGroupDTO> groupsProvider;
 
-    private CellTable<StrippedLeaderboardDTO> groupDetailsTable;
+    private FlushableCellTable<StrippedLeaderboardDTO> groupDetailsTable;
     private RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableGroupDetailsSelectionModel;
     private ListDataProvider<StrippedLeaderboardDTO> groupDetailsProvider;
     private Button editDescriptionButton;
@@ -94,7 +95,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private Button leaderboardDownButton;
 
     private LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> leaderboardsFilterablePanel;
-    private CellTable<StrippedLeaderboardDTO> leaderboardsTable;
+    private FlushableCellTable<StrippedLeaderboardDTO> leaderboardsTable;
     private RefreshableMultiSelectionModel<StrippedLeaderboardDTO> refreshableLeaderboardsSelectionModel;
     private ListDataProvider<StrippedLeaderboardDTO> leaderboardsProvider;
 
@@ -188,14 +189,20 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         // Create leaderboards table
         leaderboardsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
+        leaderboardsTable = new FlushableCellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
         SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                null /* entityIdentityComparator to create a RefreshableSelectionModel */) {
+                new EntityIdentityComparator<StrippedLeaderboardDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
+                        return dto1.name.equals(dto2.name);
+                    }
+                }, leaderboardsProvider, leaderboardsTable) {
             @Override
                             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                                 return leaderboardsProvider;
@@ -362,13 +369,20 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         };
 
-        groupDetailsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
+        groupDetailsTable = new FlushableCellTable<StrippedLeaderboardDTO>(10000, tableRes);
         groupDetailsTable.ensureDebugId("LeaderboardGroupsCellTable");
         groupDetailsProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         groupDetailsProvider.addDataDisplay(groupDetailsTable);
         SelectionCheckboxColumn<StrippedLeaderboardDTO> groupDetailsTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
-                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/) {
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<StrippedLeaderboardDTO>() {
+
+                            @Override
+                            public boolean representSameEntity(StrippedLeaderboardDTO dto1,
+                                    StrippedLeaderboardDTO dto2) {
+                                return dto1.name.equals(dto2.name);
+                            }
+                        }, groupDetailsProvider, groupDetailsTable) {
                             @Override
                             protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
                                 return groupDetailsProvider;

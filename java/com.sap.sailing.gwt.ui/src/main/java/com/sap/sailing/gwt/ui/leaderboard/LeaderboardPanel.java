@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
@@ -101,6 +102,7 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -161,7 +163,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final StringMessages stringMessages;
 
-    private final SortedCellTable<LeaderboardRowDTO> leaderboardTable;
+    private final FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable;
 
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
@@ -1593,7 +1595,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private class LeaderboardSelectionCheckboxColumn extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
     implements CompetitorSelectionChangeListener {
         protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
-            super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), null /*entityIdentityComparator to create a RefreshableSelectionModel*/);
+            super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                    tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<LeaderboardRowDTO>() {
+                        @Override
+                        public boolean representSameEntity(LeaderboardRowDTO dto1, LeaderboardRowDTO dto2) {
+                            return dto1.competitor.getIdAsString().equals(dto2.competitor.getIdAsString());
+                        }
+                    }, getData(), leaderboardTable);
             competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         }
         
@@ -1611,28 +1619,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
          */
         @Override
         public void addedToSelection(CompetitorDTO competitor) {
-            final LeaderboardRowDTO row = getRow(competitor);
+            getSelectionModel().setSelected(getRow(competitor), true);
+/*            final LeaderboardRowDTO row = getRow(competitor);
             if (row != null) {
                 redrawRow(row);
-            }
+            }*/
         }
-
+/*
         private void redrawRow(final LeaderboardRowDTO row) {
             final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
             synchronized (leaderboardDataList) {
                 redrawRow(row, leaderboardDataList);
             }
         }
-
+*/
         /**
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
         public void removedFromSelection(CompetitorDTO competitor) {
-            final LeaderboardRowDTO row = getRow(competitor);
+            getSelectionModel().setSelected(getRow(competitor), false);
+/*            final LeaderboardRowDTO row = getRow(competitor);
             if (row != null) {
                 redrawRow(row);
-            }
+            }*/
         }
 
         @Override
@@ -1770,7 +1780,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
-        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1778,7 +1787,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
+        leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
@@ -1792,6 +1801,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
+        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it

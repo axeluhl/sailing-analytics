@@ -12,7 +12,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -35,6 +34,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -60,7 +60,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     
     private SelectionCheckboxColumn<RaceDTO> selectionCheckboxColumn;
 
-    private CellTable<RaceDTO> raceTable;
+    private FlushableCellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
 
@@ -114,7 +114,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
+        raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
         final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
             @Override
@@ -127,7 +127,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     tableResources.cellTableStyle().cellTableCheckboxSelected(),
                     tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                     tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                    entityIdentityComparator) {
+                    entityIdentityComparator, raceList, raceTable) {
                 @Override
                 protected ListDataProvider<RaceDTO> getListDataProvider() {
                     return raceList;
