@@ -20,9 +20,9 @@ public class RaceMapSettings extends AbstractSettings {
 
     private RaceMapHelpLinesSettings helpLinesSettings;
     
-    private boolean transparentHoverlines = true;
+    private boolean transparentHoverlines = false; // as discussed with Stefan on 2015-12-08
     
-    private int hoverlineStrokeWeight = 10;
+    private int hoverlineStrokeWeight = 15; // as discussed with Stefan on 2015-12-08
 
     private long tailLengthInMilliseconds = 100000l;
 
