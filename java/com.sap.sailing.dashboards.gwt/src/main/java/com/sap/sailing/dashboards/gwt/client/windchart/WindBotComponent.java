@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.dataretriever.RibDashboardDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverListener;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.compass.LocationPointerCompass;

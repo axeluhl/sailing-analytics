@@ -15,9 +15,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.visualeffects.BlurEffect;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionPopup extends Composite implements HasWidgets, CompetitorTableRowSelectionListener {
@@ -33,6 +32,12 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     @UiField
     CompetitorSelectionPopupStyle style;
 
+    @UiField
+    HTMLPanel competitorselectionbackground;
+    
+    @UiField
+    VerticalPanel competitorselectionpopup;
+    
     @UiField
     HTMLPanel header;
 
@@ -61,19 +66,17 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
 
     public void show(List<CompetitorDTO> competitorList) {
         competitortable.setTableContent(competitorList);
-        RootPanel.get().add(this);
+        RootLayoutPanel.get().add(this);
         this.button.setText("OK");
-        this.getElement().addClassName(style.popupshow());
-        this.getElement().removeClassName(style.popuphide());
-        BlurEffect.getInstance().addToView(RootLayoutPanel.get());
+        competitorselectionpopup.addStyleName(style.popupshow());
+        competitorselectionpopup.removeStyleName(style.popuphide());
         isVisible = true;
     }
 
     public void hide() {
-        this.getElement().addClassName(style.popuphide());
-        this.getElement().removeClassName(style.popupshow());
-        BlurEffect.getInstance().removeFromView(RootLayoutPanel.get());
-        RootPanel.get().remove(this);
+        competitorselectionpopup.addStyleName(style.popuphide());
+        competitorselectionpopup.removeStyleName(style.popupshow());
+        RootLayoutPanel.get().remove(this);
         isVisible = false;
     }
     
