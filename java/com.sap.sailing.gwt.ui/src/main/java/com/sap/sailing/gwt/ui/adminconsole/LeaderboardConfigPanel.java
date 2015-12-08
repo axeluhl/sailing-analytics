@@ -854,6 +854,5 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void removeLeaderboardFromTable(final StrippedLeaderboardDTO leaderBoard) {
         leaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
-        refreshableLeaderboardSelectionModel.setSelected(leaderBoard, false);
     }
 }

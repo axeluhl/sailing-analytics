@@ -326,7 +326,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
-        leaderboardRaceColumnSelectionChanged();
     }
 
     /**
@@ -339,15 +338,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                         @Override
                         public void onSuccess(StrippedLeaderboardDTO leaderboard) {
-                            for (StrippedLeaderboardDTO leaderboardDTO : refreshableLeaderboardSelectionModel.getSelectedSet()) {
-                                if (leaderboardDTO.name.equals(leaderboardName)) {
-                                    refreshableLeaderboardSelectionModel.setSelected(leaderboardDTO, false);
-                                    break;
-                                }
-                            }
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
-                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true); // TODO Lukas: should/will this replace a previously selected element that is compared equal by the EntityIdentityComparator?
+                            refreshableLeaderboardSelectionModel.setSelected(leaderboard, true);
                             if (nameOfRaceColumnToSelect != null) {
                                 selectRaceColumn(nameOfRaceColumnToSelect);
                             }
@@ -362,7 +355,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         }
                 }));
     }
-
+//TODO If the list does not contains the element the last element will be replaced?
     private void replaceLeaderboardInList(List<StrippedLeaderboardDTO> leaderboardList, String leaderboardToReplace, StrippedLeaderboardDTO newLeaderboard) {
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
