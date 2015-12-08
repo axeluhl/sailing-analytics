@@ -33,6 +33,11 @@ public interface Component<SettingsType extends Settings> {
      */
     SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
     
+    /** 
+     * @return the current settings of the component or null if the component has no settings.
+     */
+    SettingsType getSettings();
+
     /**
      * Updates the settings of this component. Expected to be called when a settings dialog using this component's
      * {@link #getSettingsDialogComponent()} has been confirmed.

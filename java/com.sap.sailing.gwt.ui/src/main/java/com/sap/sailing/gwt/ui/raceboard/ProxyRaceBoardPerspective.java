@@ -73,4 +73,9 @@ public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPers
     public String getDependentCssClassName() {
         return "";
     }
+
+    @Override
+    public RaceBoardPerspectiveSettings getSettings() {
+        return perspectiveSettings;
+    }
 }

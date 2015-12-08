@@ -764,6 +764,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         storeRegattaRaceStatesSettings(settings);
     }
 
+    @Override
+    public RegattaRaceStatesSettings getSettings() {
+        return settings;
+    }
+
     private void refreshTableWithNewSettings() {
         if (eventDTO != null && raceGroupDTOs != null) {
             loadAndUpdateEventLog();

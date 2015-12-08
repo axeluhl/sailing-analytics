@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.ui.datamining.DataMiningSettingsInfoManager;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
@@ -244,4 +245,29 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         notifyListeners();
     }
 
-}
+    @Override 
+    public CompositeSettings getSettings() {
+        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+
+        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(getDataRetrieverChainDefinition()).entrySet()) {
+            final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
+            final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
+            RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(retrieverLevel, settingsManager.getSettingsInfo(settingsType).getLocalizedName(stringMessages)) {
+                @Override
+                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
+                    return null;
+                }
+                @Override
+                public void updateSettings(SerializableSettings newSettings) {
+                }
+            };
+            settings.add(getComponentAndSettings(c));
+        }
+        
+        return new CompositeSettings(settings);
+    }
+    
+    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentAndSettingsPair<SettingsType>(component, component.getSettings()) : null;
+    }
+ }

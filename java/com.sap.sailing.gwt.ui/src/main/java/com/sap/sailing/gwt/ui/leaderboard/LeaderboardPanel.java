@@ -3110,6 +3110,12 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 isShowCompetitorSailId(), isShowCompetitorFullName(), stringMessages);
     }
 
+    @Override 
+    public LeaderboardSettings getSettings() {
+        // TODO: Where do we get the LeaderboardSettings from?
+        return null;
+    }
+    
     @Override
     public String getLocalizedShortName() {
         return stringMessages.leaderboard();

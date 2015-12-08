@@ -31,6 +31,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
     private static class ProxyLeaderboardUrlComponent implements Component<LeaderboardUrlSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardUrlConfigurationDialogComponent settingsDialogComponent;
+        private LeaderboardUrlSettings settings;
         
         public ProxyLeaderboardUrlComponent(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
             this.stringMessages = stringMessages;
@@ -49,7 +50,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
         @Override
         public void updateSettings(LeaderboardUrlSettings newSettings) {
-            // no-op; the resulting URL has already been updated to the anchor in the dialog
+            this.settings = newSettings;
         }
 
         @Override
@@ -76,6 +77,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         @Override
         public String getDependentCssClassName() {
             return "leaderboardUrlConfigurationDialog";
+        }
+
+        @Override
+        public LeaderboardUrlSettings getSettings() {
+            return settings;
         }
     }
     

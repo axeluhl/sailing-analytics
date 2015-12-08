@@ -735,12 +735,17 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
 
     @Override
     public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
-        throw new UnsupportedOperationException();
+        // no-op
+    }
+
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
     }
 
     @Override

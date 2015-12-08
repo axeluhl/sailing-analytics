@@ -274,11 +274,17 @@ public class SimpleStatisticProvider implements StatisticProvider {
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) { }
+    public void updateSettings(SerializableSettings newSettings) {
+        // no-op
+    }
     
     @Override
     public String getDependentCssClassName() {
         return "simpleStatisticsProvider";
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
 }

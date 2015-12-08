@@ -193,5 +193,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         return "trackedRacesListComposite";
     }
 
+    @Override
+    public TrackedRacesSettings getSettings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     
 }

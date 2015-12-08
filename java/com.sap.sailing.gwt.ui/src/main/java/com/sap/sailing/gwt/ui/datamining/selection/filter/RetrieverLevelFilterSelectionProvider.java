@@ -213,6 +213,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
+        // no-op
     }
 
     @Override
@@ -240,4 +241,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return "singleRetrieverLevelSelectionPanel";
     }
 
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
 }

@@ -79,6 +79,11 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType());
+    }
+    
+    @Override
     protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;
     }

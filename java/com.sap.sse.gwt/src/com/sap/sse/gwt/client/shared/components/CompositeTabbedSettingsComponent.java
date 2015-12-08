@@ -39,6 +39,11 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
     }
 
     @Override
+    public CompositeSettings getSettings() {
+        return null;
+    }
+ 
+    @Override
     public void updateSettings(CompositeSettings newSettings) {
         for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
@@ -86,6 +91,5 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
     @Override
     public String getDependentCssClassName() {
         return null;
-    }
-    
+    }   
 }

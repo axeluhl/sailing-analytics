@@ -162,6 +162,12 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
+    }
+
+    @Override
+    public Settings getSettings() {
+        return null;
     }
 
     @Override
@@ -195,5 +201,4 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
         }
         
     }
-
 }

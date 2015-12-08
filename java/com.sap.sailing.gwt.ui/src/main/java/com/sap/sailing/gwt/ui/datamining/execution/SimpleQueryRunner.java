@@ -122,6 +122,11 @@ public class SimpleQueryRunner implements QueryRunner {
     }
 
     @Override
+    public QueryRunnerSettings getSettings() {
+        return settings;
+    }
+
+    @Override
     public SettingsDialogComponent<QueryRunnerSettings> getSettingsDialogComponent() {
         return new QueryRunnerSettingsDialogComponent(settings, stringMessages);
     }

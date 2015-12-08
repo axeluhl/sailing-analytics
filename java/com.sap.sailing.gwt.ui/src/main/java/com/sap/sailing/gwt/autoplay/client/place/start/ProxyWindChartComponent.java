@@ -56,4 +56,9 @@ public class ProxyWindChartComponent implements Component<WindChartSettings> {
     public String getDependentCssClassName() {
         return "windChartSettingsDialog";
     }
+
+    @Override
+    public WindChartSettings getSettings() {
+        return settings;
+    }
 }

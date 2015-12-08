@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 import com.google.gwt.core.client.GWT;
@@ -91,6 +92,22 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
         for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
+    }
+
+    @Override 
+    public CompositeSettings getSettings() {
+        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        for (Component<?> component : components) {
+            ComponentAndSettingsPair<?> componentAndSettings = getComponentAndSettings(component);
+            if (componentAndSettings != null) {
+                settings.add(componentAndSettings);
+            }
+        }
+        return new CompositeSettings(settings);
+    }
+    
+    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentAndSettingsPair<SettingsType>(component, component.getSettings()) : null;
     }
 
     private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {

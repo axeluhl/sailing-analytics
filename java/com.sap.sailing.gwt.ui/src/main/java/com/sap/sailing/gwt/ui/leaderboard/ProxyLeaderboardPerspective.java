@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.place.start.ProxyLeaderboardComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,5 +20,24 @@ public class ProxyLeaderboardPerspective extends AbstractPerspectiveWithoutSetti
     @Override
     public String getPerspectiveName() {
         return StringMessages.INSTANCE.leaderboard() + " Viewer";
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return getPerspectiveName();
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return null;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return false;
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
     }
 }

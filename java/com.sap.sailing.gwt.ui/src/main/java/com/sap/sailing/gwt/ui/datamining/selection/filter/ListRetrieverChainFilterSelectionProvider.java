@@ -328,6 +328,11 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     @Override
     public void updateSettings(SerializableSettings newSettings) {
+        // no-op
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
 }

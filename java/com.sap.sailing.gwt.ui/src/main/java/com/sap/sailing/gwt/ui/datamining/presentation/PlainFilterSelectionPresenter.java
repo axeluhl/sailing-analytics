@@ -179,4 +179,8 @@ public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, 
     public void updateSettings(AbstractSettings newSettings) {
     }
 
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
 }

@@ -49,4 +49,9 @@ public abstract class RetrieverLevelSettingsComponent implements Component<Seria
         return null;
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return retrieverLevel.getDefaultSettings();
+    }
+
 }

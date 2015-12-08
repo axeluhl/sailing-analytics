@@ -56,4 +56,9 @@ public class ProxyRaceMapComponent implements Component<RaceMapSettings> {
     public String getDependentCssClassName() {
         return "raceMapSettingsDialog";
     }
+
+    @Override
+    public RaceMapSettings getSettings() {
+        return settings;
+    }
 }

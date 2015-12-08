@@ -68,4 +68,9 @@ public class ProxyLeaderboardComponent implements Component<LeaderboardSettings>
     public String getDependentCssClassName() {
         return "leaderboardSettingsDialog";
     }
+
+    @Override
+    public LeaderboardSettings getSettings() {
+        return settings;
+    }
 }

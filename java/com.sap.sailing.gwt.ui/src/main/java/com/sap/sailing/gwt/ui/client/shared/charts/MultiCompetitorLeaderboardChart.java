@@ -26,6 +26,11 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     }
 
     @Override
+    public MultiCompetitorLeaderboardChartSettings getSettings() {
+        return settings;
+    }
+    
+    @Override
     public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent() {
         MultiCompetitorLeaderboardChartSettings chartSettings = new MultiCompetitorLeaderboardChartSettings(settings.getDetailType());
         return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings, stringMessages);

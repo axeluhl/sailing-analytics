@@ -640,5 +640,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     public String getDependentCssClassName() {
         return "windChart";
     }
-    
+
+    @Override
+    public WindChartSettings getSettings() {
+        return settings;
+    }
 }
