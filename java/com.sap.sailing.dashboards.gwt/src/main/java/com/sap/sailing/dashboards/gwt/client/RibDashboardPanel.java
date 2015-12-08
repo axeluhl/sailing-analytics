@@ -31,9 +31,6 @@ import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -42,7 +39,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries
  * 
  */
-public class RibDashboardPanel extends Composite implements NumberOfWindBotsChangeListener {
+public class RibDashboardPanel extends Composite implements NumberOfWindBotsChangeListener, PollsLiveDataEvery5Seconds {
 
     interface RootUiBinder extends UiBinder<Widget, RibDashboardPanel> {
     }
@@ -105,9 +102,9 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
         windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
-        startUpdatingRaceLabelIn20SecondInterval();
         loadAndAddEventLogo(dashboardClientFactory.getSailingService());
         initAndAddWrongOrientationNotification();
+        registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
 
     private void initLogos() {
@@ -174,42 +171,40 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
         }
     }
     
-    private void startUpdatingRaceLabelIn20SecondInterval() {
-        Timer timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(5000);
-        timer.addTimeListener(new TimeListener() {
-
-            @Override
-            public void timeChanged(Date newTime, Date oldTime) {
-                String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
-                if (leaderboardNameParameterValue != null) {
-                    dashboardClientFactory.getDispatch().execute(
-                            new GetIDFromRaceThatIsLiveAction(leaderboardNameParameterValue),
-                            new AsyncCallback<RaceIdDTO>() {
-
-                                @Override
-                                public void onSuccess(RaceIdDTO result) {
-                                    if (result != null && result.getRaceId() != null) {
-                                        logger.log(Level.INFO, "Updating UI with live race id");
-                                        setHeaderText(result.getRaceId().getRaceName());
-                                    } else {
-                                        logger.log(Level.INFO, "Received null for live race id");
-                                    }
-                                }
-                                
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    logger.log(Level.INFO, "Failed to received live race id"+caught.getMessage());
-                                }
-                            });
-                }
-            }
-        });
-        timer.play();
-    }
-    
     private void setHeaderText(String raceName) {
         this.header.getElement().setInnerText(raceName);
+    }
+    
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
+        if (leaderboardNameParameterValue != null) {
+            dashboardClientFactory.getDispatch().execute(
+                    new GetIDFromRaceThatIsLiveAction(leaderboardNameParameterValue), new AsyncCallback<RaceIdDTO>() {
+
+                        @Override
+                        public void onSuccess(RaceIdDTO result) {
+                            if (result != null && result.getRaceId() != null) {
+                                logger.log(Level.INFO, "Updating UI with live race id");
+                                setHeaderText(result.getRaceId().getRaceName());
+                            } else {
+                                logger.log(Level.INFO, "Received null for live race id");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            logger.log(Level.INFO, "Failed to received live race id" + caught.getMessage());
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
+        if (dashboardClientFactory != null) {
+            dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
+        }
     }
     
     @Override

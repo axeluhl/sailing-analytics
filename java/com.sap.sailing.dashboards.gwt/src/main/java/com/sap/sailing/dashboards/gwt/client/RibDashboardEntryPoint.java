@@ -9,8 +9,6 @@ import com.googlecode.mgwt.ui.client.MGWTStyle;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * 
@@ -18,8 +16,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  *
  */
 public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
-
-    private static final int DASHBOARD_RERFRESH_INTERVAL = 5000;
 
     @Override
     public void doOnModuleLoad() {
@@ -29,10 +25,6 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
         RootLayoutPanel.get().add(ribDashboardPanel);
         WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(dashboardClientFactory);
         windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);
-        Timer dashboardTimer = new Timer(PlayModes.Live);
-        dashboardTimer.setRefreshInterval(DASHBOARD_RERFRESH_INTERVAL);
-        dashboardTimer.addTimeListener(windBotDataRetriever);
-//        dashboardTimer.addTimeListener(dataRetriever);
     }
 
     private void applyMGWTSettings() {

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
+import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatTakesWindFixesNowAction;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
@@ -19,9 +20,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.player.TimeListener;
 
-public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverProvider {
+public class WindBotDataRetriever implements PollsLiveDataEvery5Seconds, WindBotDataRetrieverProvider {
 
     private AsyncActionsExecutor asyncActionsExecutor;
     private List<NumberOfWindBotsChangeListener> numberOfWindBotsChangeListeners;
@@ -47,6 +47,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
         windBotIDsInLiveRace = new ArrayList<String>();
         windSourceTypeNames = new HashSet<>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
+        registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
 
     private void loadWindBotData(Date from, Date to, RegattaAndRaceIdentifier selectedRaceIdentifier) {
@@ -168,5 +169,12 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                         logger.log(Level.INFO, caught.getMessage());
                     }
                 });
+    }
+    
+    @Override
+    public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
+        if (dashboardClientFactory != null) {
+            dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
+        }
     }
 }

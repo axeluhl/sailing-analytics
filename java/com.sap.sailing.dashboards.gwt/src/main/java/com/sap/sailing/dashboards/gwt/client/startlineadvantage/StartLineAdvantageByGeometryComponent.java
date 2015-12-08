@@ -7,13 +7,11 @@ import java.util.logging.Logger;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
+import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantageByGeometryAction;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * The purpose of the class is to display the live and average start line advantage either by wind or by geometry. There
@@ -25,7 +23,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries (D062114)
  *
  */
-public class StartLineAdvantageByGeometryComponent extends LiveAverageComponent implements TimeListener {
+public class StartLineAdvantageByGeometryComponent extends LiveAverageComponent implements PollsLiveDataEvery5Seconds {
 
     private DashboardClientFactory dashboardClientFactory;
     
@@ -44,16 +42,9 @@ public class StartLineAdvantageByGeometryComponent extends LiveAverageComponent 
         averagePanel.getElement().addClassName(StartLineAdvantageComponentRessources.INSTANCE.css().startLineAdvantageComponent_averagePanel());
         this.liveLabel.setInnerHTML(stringConstants.dashboardLiveWind());
         this.averageLabel.setInnerHTML(stringConstants.dashboardAverageWind()+"<br>"+stringConstants.dashboardAverageWindMinutes(15));
-        initSampleTimer();
+        registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
     
-    private void initSampleTimer(){
-        Timer timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(5000);
-        timer.addTimeListener(this);
-        timer.play();
-    }
-
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
@@ -78,6 +69,13 @@ public class StartLineAdvantageByGeometryComponent extends LiveAverageComponent 
                             }
                         }
                     });
+        }
+    }
+
+    @Override
+    public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
+        if (dashboardClientFactory != null) {
+            dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
         }
     }
 }

@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
+import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.actions.GetCompetitorInLeaderboardAction;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartAnalysesAction;
@@ -38,9 +39,6 @@ import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * The class contains an collection of {@link StartlineAnalysisCard}s that are displayed in horizontal aligned pages. It
@@ -52,7 +50,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Alexander Ries (D062114)
  *
  */
-public class StartlineAnalysisComponent extends Composite implements HasWidgets {
+public class StartlineAnalysisComponent extends Composite implements HasWidgets, PollsLiveDataEvery5Seconds {
 
     private static StartlineAnalysisComponentUiBinder uiBinder = GWT.create(StartlineAnalysisComponentUiBinder.class);
 
@@ -106,9 +104,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
     private List<StartAnalysisDTO> starts;
     private List<StartlineAnalysisCard> pageChangeListener;
     private BottomNotification bottomNotification;
-    private Timer timer;
-
-    private static final int RERFRESH_INTERVAL = 10000;
 
     private CompetitorSelectionPopup competitorSelectionPopup;
     private SettingsButtonWithSelectionIndicationLabel settingsButtonWithSelectionIndicationLabel;
@@ -127,12 +122,9 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartlineAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
-
         initWidget(uiBinder.createAndBindUi(this));
-
         initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
-        initTimer();
         initAndAddBottomNotification();
         getCachedSelectedCompetitorOrAskForWithPopup();
         initAndAddSettingsButtonWithSelectionIndicationLabel();
@@ -155,23 +147,6 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
         });
     }
 
-    private void initTimer() {
-        timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(RERFRESH_INTERVAL);
-        timer.addTimeListener(new TimeListener() {
-
-            @Override
-            public void timeChanged(Date newTime, Date oldTime) {
-                String selectedCompetitorId = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
-                if (selectedCompetitorId != null) {
-                    loadStartAnalysisDTOsForCompetitorID(selectedCompetitorId);
-                } else {
-                    loadCompetitorsAndShowCompetitorSelectionPopup();
-                }
-            }
-        });
-    }
-    
     private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
         logger.log(Level.INFO, "Loading startanalysis for competitor id " + competitorIdAsString);
         dashboardClientFactory.getDispatch().execute(new GetStartAnalysesAction(DashboardURLParameters.LEADERBOARD_NAME.getValue(), competitorIdAsString), new AsyncCallback<StartAnalysesDTO>() {
@@ -406,6 +381,23 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
             return true;
         } else {
             return false;
+        }
+    }
+    
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        String selectedCompetitorId = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
+        if (selectedCompetitorId != null) {
+            loadStartAnalysisDTOsForCompetitorID(selectedCompetitorId);
+        } else {
+            loadCompetitorsAndShowCompetitorSelectionPopup();
+        }
+    }
+    
+    @Override
+    public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
+        if (dashboardClientFactory != null) {
+            dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
         }
     }
 

@@ -16,19 +16,17 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
+import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesByWindAction;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.player.TimeListener;
-import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
 /**
  * @author Alexander Ries (D062114)
  *
  */
-public class StartlineAdvantagesByWindComponent extends Composite implements HasWidgets, TimeListener {
+public class StartlineAdvantagesByWindComponent extends Composite implements HasWidgets, PollsLiveDataEvery5Seconds {
 
     private static StartlineAdvantagesByWindComponentUiBinder uiBinder = GWT
             .create(StartlineAdvantagesByWindComponentUiBinder.class);
@@ -60,7 +58,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
         advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
         advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
         initWidget(uiBinder.createAndBindUi(this));
-        initSampleTimer();
+        registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
     
     private void loadData() {
@@ -94,14 +92,19 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
                     });
         }
     }
-
-    private void initSampleTimer() {
-        Timer timer = new Timer(PlayModes.Live);
-        timer.setRefreshInterval(5000);
-        timer.addTimeListener(this);
-        timer.play();
+    
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        loadData();
     }
-
+    
+    @Override
+    public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
+        if (dashboardClientFactory != null) {
+            dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
+        }
+    }
+    
     @Override
     public void add(Widget w) {
         throw new UnsupportedOperationException("The method add(Widget w) is not supported.");
@@ -121,10 +124,4 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
     public boolean remove(Widget w) {
         return false;
     }
-    
-    @Override
-    public void timeChanged(Date newTime, Date oldTime) {
-        loadData();
-    }
-    
 }
