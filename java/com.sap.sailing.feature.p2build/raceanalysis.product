@@ -55,8 +55,6 @@
       <plugin id="com.sap.sailing.sailwave.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="4" />
-      <plugin id="com.sap.sailing.server.gateway.ess40" autoStart="true" startLevel="4" />
-      <plugin id="com.sap.sailing.server.replication" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
