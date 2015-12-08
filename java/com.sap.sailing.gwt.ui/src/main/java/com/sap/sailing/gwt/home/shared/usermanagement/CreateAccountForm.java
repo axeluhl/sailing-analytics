@@ -36,8 +36,14 @@ public class CreateAccountForm extends Composite {
         setPlaceholder(passwordConfirmationUi, "TODO Password Confirmation");
     }
     
+    public void setErrorMessage(String errorMessage) {
+        formErrorUi.setInnerText(errorMessage);
+    }
+    
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
+        // String email = emailUi.getValue(), username = usernameUi.getValue();
+        // String password = passwordUi.getValue(), passwordConfirm = passwordConfirmationUi.getValue();
         // TODO
     }
     

@@ -25,6 +25,10 @@ public class PasswordRecoveryForm extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(loginNameUi, "TODO Username or Email");
     }
+
+    public void setErrorMessage(String errorMessage) {
+        formErrorUi.setInnerText(errorMessage);
+    }
     
     @UiHandler("resetPasswordUi")
     void onResetPasswordUiControlClicked(ClickEvent event) {

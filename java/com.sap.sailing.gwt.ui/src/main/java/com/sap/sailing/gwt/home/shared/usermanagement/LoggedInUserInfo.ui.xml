@@ -10,8 +10,8 @@
             <div class="{local_res.css.info_user_image}">
                 <div class="{local_res.css.info_user_image_item}" ui:field="userImageUi"></div>
             </div>
-            <div class="{local_res.css.info_user_realname}" ui:field="userRealnameUi">TODO Max Mustermann</div>
-            <div class="{local_res.css.info_user_username}" ui:field="userUsernameUi">TODO user001</div>
+            <div class="{local_res.css.info_user_realname}" ui:field="userRealnameUi"></div>
+            <div class="{local_res.css.info_user_username}" ui:field="userUsernameUi"></div>
         </div>
          <div class="{local_res.css.form_actions}">
             <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 

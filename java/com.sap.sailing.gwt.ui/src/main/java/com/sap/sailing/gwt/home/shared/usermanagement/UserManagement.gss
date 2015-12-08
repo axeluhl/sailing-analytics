@@ -194,7 +194,6 @@ a.form_social_button_google:before {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
-    background-image: url('images/home/userdefault.svg');
 }
 .info_user_realname {
     color: #0a0a0a;

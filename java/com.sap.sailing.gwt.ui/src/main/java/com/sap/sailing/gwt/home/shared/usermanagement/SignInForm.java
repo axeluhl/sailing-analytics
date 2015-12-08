@@ -40,6 +40,10 @@ public class SignInForm extends Composite {
         }
     }
     
+    public void setErrorMessage(String errorMessage) {
+        formErrorUi.setInnerText(errorMessage);
+    }
+    
     @UiHandler("forgotPasswordUi")
     void onForgotPasswordUiControlClicked(ClickEvent event) {
         // TODO

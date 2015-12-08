@@ -26,6 +26,13 @@ public class LoggedInUserInfo extends Composite {
     
     public LoggedInUserInfo() {
         initWidget(uiBinder.createAndBindUi(this));
+        setUserInfo();
+    }
+    
+    public void setUserInfo() {
+        userImageUi.getStyle().setBackgroundImage("url('images/home/userdefault.svg')");
+        userRealnameUi.setInnerText("Max Mustermann");
+        userUsernameUi.setInnerText("user001");
     }
     
     @UiHandler("userProfileUi")
