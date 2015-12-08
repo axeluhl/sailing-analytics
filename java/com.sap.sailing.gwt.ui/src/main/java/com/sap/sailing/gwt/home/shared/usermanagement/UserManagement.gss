@@ -41,7 +41,7 @@
     font-weight: 600;
     margin-bottom: .4em;
 }
-.form_input, .form_errors {
+.form_input, .form_description, .form_errors {
     margin-bottom: 1.333333333333333em;
 }
 .form_input {

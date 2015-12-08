@@ -15,9 +15,10 @@ public interface UserManagementResources extends ClientBundle {
         String flyover();
         String flyover_content();
         String form_title();
+        String form_description();
+        String form_errors();
         String form_label();
         String form_input();
-        String form_errors();
         String form_link();
         String form_actions();
         String form_action_button();
