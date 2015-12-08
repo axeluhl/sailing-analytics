@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -171,7 +172,7 @@ public class User implements Named, WithID {
     
     private String createRandomSecret() {
         final byte[] bytes1 = new byte[64];
-        new Random().nextBytes(bytes1);
+        new SecureRandom().nextBytes(bytes1);
         final byte[] bytes2 = new byte[64];
         new Random().nextBytes(bytes2);
         return new Sha256Hash(bytes1, bytes2, 1024).toBase64();
