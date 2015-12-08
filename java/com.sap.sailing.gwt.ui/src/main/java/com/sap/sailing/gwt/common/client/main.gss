@@ -167,6 +167,16 @@ figcaption {
 .buttonprimary:hover {
   background-color: #0081b8;
 }
+.buttonprimaryoutlined {
+  background-color: transparent;
+  padding: .533333333333333em 1.333333333333333em;
+  border: 1px solid #008fcc;
+  color: #008fcc;
+}
+.buttonprimaryoutlined:hover {
+  background-color: #0081b8;
+  color: #fff;
+}
 .buttonred {
   background-color: #e94a1b;
 }
