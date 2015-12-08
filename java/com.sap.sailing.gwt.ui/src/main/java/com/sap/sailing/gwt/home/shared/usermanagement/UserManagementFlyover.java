@@ -29,7 +29,8 @@ public class UserManagementFlyover extends Composite implements AcceptsOneWidget
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
         popupPanel.addAutoHidePartner(autoHidePartner);
-        popupPanel.setWidget(uiBinder.createAndBindUi(this));
+        super.initWidget(uiBinder.createAndBindUi(this));
+        popupPanel.setWidget(this);
     }
     
     @Override
