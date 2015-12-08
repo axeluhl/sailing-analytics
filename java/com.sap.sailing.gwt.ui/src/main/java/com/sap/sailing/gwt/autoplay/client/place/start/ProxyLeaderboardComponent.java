@@ -45,7 +45,7 @@ public class ProxyLeaderboardComponent implements Component<LeaderboardSettings>
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.leaderboardConfiguration();
+        return stringMessages.leaderboard();
     }
 
     @Override

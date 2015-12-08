@@ -76,6 +76,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         CompetitorSelectionChangeListener, RequiresResize {
     public static final String LOAD_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
     
+    public static final long DEFAULT_STEPSIZE = 5000;
+    
     private static final int LINE_WIDTH = 1;
     
     private final Label noCompetitorsSelectedLabel;
@@ -87,7 +89,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final boolean allowTimeAdjust;
     private final String leaderboardGroupName;
     private final String leaderboardName;
-    private long stepSize = 5000;
+    private long stepSize = DEFAULT_STEPSIZE;
     private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private Long timeOfEarliestRequestInMillis;

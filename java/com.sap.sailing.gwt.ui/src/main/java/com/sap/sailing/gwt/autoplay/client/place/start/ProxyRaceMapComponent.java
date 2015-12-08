@@ -33,7 +33,7 @@ public class ProxyRaceMapComponent implements Component<RaceMapSettings> {
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.settingsForComponent(stringMessages.map());
+        return stringMessages.map();
     }
 
     @Override

@@ -105,7 +105,7 @@
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Raceboard Viewer:</span>
+				    <span>Race Viewer:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="raceboardPerspectiveSettingsPanel" />

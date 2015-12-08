@@ -2,16 +2,16 @@ package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettingsComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ProxyWindChartComponent implements Component<WindChartSettings> {
+public class ProxyMultiCompetitorRaceChartComponent implements Component<MultiCompetitorRaceChartSettings> {
     private final StringMessages stringMessages;
-    private WindChartSettings settings;
+    private MultiCompetitorRaceChartSettings settings;
     
-    public ProxyWindChartComponent(WindChartSettings settings, StringMessages stringMessages) {
+    public ProxyMultiCompetitorRaceChartComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages) {
         this.settings = settings;
         this.stringMessages = stringMessages;
     }
@@ -22,24 +22,24 @@ public class ProxyWindChartComponent implements Component<WindChartSettings> {
     }
 
     @Override
-    public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return new WindChartSettingsDialogComponent(settings, stringMessages);
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
+        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, true);
     }
 
     @Override
-    public void updateSettings(WindChartSettings newSettings) {
+    public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         this.settings = newSettings;
     }
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.windChart();
+        return stringMessages.competitorCharts();
     }
 
     @Override
     public Widget getEntryWidget() {
         throw new UnsupportedOperationException(
-                "Internal error. This settings dialog does not actually belong to a wind chart");
+                "Internal error. This settings dialog does not actually belong to a real chart");
     }
 
     @Override
@@ -54,11 +54,11 @@ public class ProxyWindChartComponent implements Component<WindChartSettings> {
 
     @Override
     public String getDependentCssClassName() {
-        return "windChartSettingsDialog";
+        return "multiCompetitorRaceChart";
     }
 
     @Override
-    public WindChartSettings getSettings() {
+    public MultiCompetitorRaceChartSettings getSettings() {
         return settings;
     }
 }

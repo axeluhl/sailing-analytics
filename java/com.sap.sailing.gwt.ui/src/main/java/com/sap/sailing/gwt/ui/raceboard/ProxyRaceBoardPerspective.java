@@ -3,9 +3,11 @@ package com.sap.sailing.gwt.ui.raceboard;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.place.start.ProxyLeaderboardComponent;
+import com.sap.sailing.gwt.autoplay.client.place.start.ProxyMultiCompetitorRaceChartComponent;
 import com.sap.sailing.gwt.autoplay.client.place.start.ProxyRaceMapComponent;
 import com.sap.sailing.gwt.autoplay.client.place.start.ProxyWindChartComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspective;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -20,7 +22,8 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPerspectiveSettings> {
     private RaceBoardPerspectiveSettings perspectiveSettings;
     
-    public ProxyRaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
+    public ProxyRaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings,
+            MultiCompetitorRaceChartSettings defaultMultiCompetitorRaceChartSettings) {
         super();
         
         this.perspectiveSettings = perspectiveSettings;
@@ -28,6 +31,7 @@ public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPers
         components.add(new ProxyRaceMapComponent(new RaceMapSettings(), StringMessages.INSTANCE));
         components.add(new ProxyWindChartComponent(new WindChartSettings(), StringMessages.INSTANCE));
         components.add(new ProxyLeaderboardComponent(defaultLeaderboardSettings, leaderboard, StringMessages.INSTANCE));
+        components.add(new ProxyMultiCompetitorRaceChartComponent(defaultMultiCompetitorRaceChartSettings, StringMessages.INSTANCE));
     }
 
     @Override
