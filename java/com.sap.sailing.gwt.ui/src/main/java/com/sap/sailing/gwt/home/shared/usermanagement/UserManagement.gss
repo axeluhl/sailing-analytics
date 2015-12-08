@@ -36,6 +36,13 @@
     line-height: 1.363636363636364em;
     margin-bottom: .909090909090909em;
 }
+.form_subtitle {
+    color: #666;
+    font-size: 1em;
+    font-weight: 400;
+    line-height: 1.333333333333333em;
+    margin-bottom: .666666666666667em
+}
 .form_label {
     display: block;
     font-weight: 600;
@@ -153,7 +160,7 @@ a.form_social_button_facebook {
     background-color: #3b5998;
 }
 a.form_social_button_facebook:hover {
-    background-color: #355089
+    background-color: #355089;
 }
 a.form_social_button_facebook:before {
     background-image: url(images/home/facebook.svg);
@@ -162,8 +169,38 @@ a.form_social_button_google {
     background-color: #de5342;
 }
 a.form_social_button_google:hover {
-    background-color: #da3d29
+    background-color: #da3d29;
 }
 a.form_social_button_google:before {
     background-image: url(images/home/google.svg);
+}
+.info_user {
+    overflow: hidden;
+    clear: both;
+}
+.info_user_image {
+    float: left;
+    width: 5.333333333333333em;
+    height: 5.333333333333333em;
+    padding: .333333333333333em;
+    margin-right: .666666666666667em;
+    border: 1px solid #dedede;
+    border-radius: .2em;
+}
+.info_user_image_item {
+    width: 4.533333333333333em;
+    height: 4.533333333333333em;
+    background-color: #ebebeb;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    background-image: url('images/home/userdefault.svg');
+}
+.info_user_realname {
+    color: #0a0a0a;
+    font-size: 1.466666666666667em;
+    font-weight: 600;
+}
+.info_user_username {
+    color: #666;
 }

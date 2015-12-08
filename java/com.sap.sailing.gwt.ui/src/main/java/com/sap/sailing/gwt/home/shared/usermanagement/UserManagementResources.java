@@ -15,6 +15,7 @@ public interface UserManagementResources extends ClientBundle {
         String flyover();
         String flyover_content();
         String form_title();
+        String form_subtitle();
         String form_description();
         String form_errors();
         String form_label();
@@ -27,6 +28,11 @@ public interface UserManagementResources extends ClientBundle {
         String form_social_button();
         String form_social_button_facebook();
         String form_social_button_google();
+        String info_user();
+        String info_user_image();
+        String info_user_image_item();
+        String info_user_realname();
+        String info_user_username();
     }
     
 }
