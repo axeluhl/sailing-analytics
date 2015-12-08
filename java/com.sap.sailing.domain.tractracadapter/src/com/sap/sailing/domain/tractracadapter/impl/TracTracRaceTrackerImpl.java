@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.ModelLocator;
@@ -253,26 +254,26 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException,
             SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory, paramURL, liveURI,
                 storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
+                offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
                 tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
     private TracTracRaceTrackerImpl(IRace tractracRace, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         this(tractracRace, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
+                endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
                 gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
@@ -284,14 +285,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException,
             MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), regatta, domainFactory, paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
-                simulateWithStartTimeNow, ignoreTracTracMarkPassings, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
+                offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings, raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername,
                 tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
     
@@ -300,15 +301,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @param regatta
      *            if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used
      *            to obtain a default regatta
-     * @param simulateWithStartTimeNow
-     *            if <code>true</code>, the connector will adjust the time stamps of all events received such that the
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time." So, more or less the time points
+     *            events received such that they seem to be sent in "real-time" + <code>offsetToStartTimeOfSimulatedRace</code> So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm,
+            TimePoint endOfTracking, long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException, MalformedURLException,
@@ -323,8 +324,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.gpsFixStore = gpsFixStore;
         this.domainFactory = domainFactory;
         this.lastProgressPerID = new HashMap<>();
-        if (simulateWithStartTimeNow) {
-            simulator = new Simulator(windStore);
+        if (offsetToStartTimeOfSimulatedRace != null) {
+            simulator = new Simulator(windStore, offsetToStartTimeOfSimulatedRace);
             // don't write the transformed wind fixes into the DB again... see also bug 1974 
             this.windStore = EmptyWindStore.INSTANCE;
         } else {
