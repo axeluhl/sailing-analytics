@@ -10,6 +10,8 @@ public interface LeaderboardDelegate<T extends Widget> {
 
     void setLeaderboardPanel(T leaderboardPanel);
 
+    void setBusyState(boolean isBusy);
+
     Widget getAutoRefreshControl();
 
     Widget getSettingsControl();
@@ -24,4 +26,5 @@ public interface LeaderboardDelegate<T extends Widget> {
 
     Element getScoringSchemeElement();
 
+    Element getBusyIndicatorElement();
 }
