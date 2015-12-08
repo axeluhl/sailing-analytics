@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
@@ -27,6 +28,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserChangeEvent;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
@@ -35,6 +37,15 @@ public class DesktopActivityMapper implements ActivityMapper {
     public DesktopActivityMapper(DesktopClientFactory clientFactory) {
         super();
         this.clientFactory = clientFactory;
+        
+        // TODO: remove example usage.
+        clientFactory.getEventBus().addHandler(UserChangeEvent.TYPE, new UserChangeEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserChangeEvent event) {
+                Window.alert("Login: " + event.getCurrentUser().getName());
+            }
+        });
+        
     }
 
     @Override
