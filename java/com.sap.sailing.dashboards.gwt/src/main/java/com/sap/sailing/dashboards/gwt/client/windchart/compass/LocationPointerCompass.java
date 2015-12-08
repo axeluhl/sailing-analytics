@@ -78,7 +78,8 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
             compassNeedle.getElement().getStyle().setProperty("transform", "rotate(" + winddirectionformatted + "deg)");
             compassNeedle.getElement().getStyle()
                     .setProperty("webkitTransform", "rotate(" + winddirectionformatted + "deg)");
-            angleToPointetLocationLabel.setText(winddirectionformatted + "°");
+            String winddirectionFormattedForLabel = NumberFormat.getFormat("#0").format((newDirection-angleOffset < 0) ? 360-newDirection-angleOffset : newDirection-angleOffset);
+            angleToPointetLocationLabel.setText(winddirectionFormattedForLabel+"°");
         }
     }
 
