@@ -36,6 +36,7 @@
             <g:Button ui:field="searchButton" styleName="{res.mainCss.button} {res.mainCss.buttonsearch} {local_res.css.search_button}" />
           </span>
           <!-- IFEND siteNavigation.current -->
+          <g:Anchor addStyleNames="{local_res.css.sitenavigation_link} {local_res.css.user_menu_button}" ui:field="usermenu"/>
         </nav>
       </div>
   </g:HTMLPanel>

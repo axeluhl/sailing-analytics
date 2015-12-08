@@ -104,3 +104,12 @@
 .submit {
   font-size: inherit;
 }
+
+.user_menu_button {
+  width: 3rem;
+  height: 3rem;
+  vertical-align: middle;
+  background: url('images/home/loggedin.svg') no-repeat center;
+  margin-left: 1rem;
+  cursor: pointer;
+}

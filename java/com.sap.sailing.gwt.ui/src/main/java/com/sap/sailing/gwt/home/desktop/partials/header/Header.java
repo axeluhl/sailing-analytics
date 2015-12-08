@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
@@ -31,6 +32,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementFlyover;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
@@ -41,6 +43,8 @@ public class Header extends Composite {
     
     @UiField TextBox searchText;
     @UiField Button searchButton;
+    
+    @UiField Anchor usermenu;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
@@ -50,6 +54,8 @@ public class Header extends Composite {
     private final PlaceNavigation<StartPlace> homeNavigation;
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
+    
+    private final UserManagementFlyover userManagementFlyover;
     
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
@@ -74,6 +80,7 @@ public class Header extends Composite {
         HeaderResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
+        userManagementFlyover = new UserManagementFlyover(usermenu.getElement());
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
 
         homeNavigation = navigator.getHomeNavigation();
@@ -120,6 +127,17 @@ public class Header extends Composite {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
                 .getText());
         navigator.goToPlace(searchResultNavigation);
+    }
+    
+    @UiHandler("usermenu")
+    void toggleUsermenu(ClickEvent event) {
+        if (userManagementFlyover.isShowing()) {
+            userManagementFlyover.hide();
+        } else {
+            userManagementFlyover.show();
+            // FIXME: Temporary dummy content for user management flyover
+            userManagementFlyover.setWidget(new Label("TODO User Management"));
+        }
     }
     
     private void updateActiveLink(Place place) {

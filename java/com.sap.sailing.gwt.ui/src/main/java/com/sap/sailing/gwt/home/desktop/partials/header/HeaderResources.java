@@ -23,5 +23,6 @@ public interface HeaderResources extends ClientBundle {
         String search_textfield();
         String search_button();
         String submit();
+        String user_menu_button();
     }
 }
