@@ -16,7 +16,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
@@ -32,6 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.LoggedInUserInfo;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementFlyover;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
@@ -136,7 +136,7 @@ public class Header extends Composite {
         } else {
             userManagementFlyover.show();
             // FIXME: Temporary dummy content for user management flyover
-            userManagementFlyover.setWidget(new Label("TODO User Management"));
+            userManagementFlyover.setWidget(new LoggedInUserInfo());
         }
     }
     
