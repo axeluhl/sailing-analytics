@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 
 public class SignInForm extends Composite {
     
@@ -34,6 +35,9 @@ public class SignInForm extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(loginNameUi, "TODO Username or Email");
         setPlaceholder(passwordUi, "TODO Password");
+        if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANGEMENT) {
+            socialLoginUi.removeFromParent();
+        }
     }
     
     @UiHandler("forgotPasswordUi")
