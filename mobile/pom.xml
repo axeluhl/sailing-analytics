@@ -82,6 +82,17 @@
         <directory>${project.basedir}/assets</directory>
         <filtering>true</filtering>
         <targetPath>${project.build.directory}/filtered-assets</targetPath>
+        <includes>
+            <include>build.info</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/assets</directory>
+        <filtering>false</filtering>
+        <targetPath>${project.build.directory}/filtered-assets</targetPath>
+        <excludes>
+            <exclude>build.info</exclude>
+        </excludes>
       </resource>
     </resources>
         <plugins>
