@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LoggedInUserInfo extends Composite {
+public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     
-    interface LoggedInUserInfoUiBinder extends UiBinder<Widget, LoggedInUserInfo> {
+    interface LoggedInUserInfoUiBinder extends UiBinder<Widget, LoggedInUserInfoViewImpl> {
     }
     
     private static LoggedInUserInfoUiBinder uiBinder = GWT.create(LoggedInUserInfoUiBinder.class);
@@ -23,8 +23,9 @@ public class LoggedInUserInfo extends Composite {
 
     @UiField Anchor userProfileUi;
     @UiField Anchor signOutUi;
+    private Presenter presenter;
     
-    public LoggedInUserInfo() {
+    public LoggedInUserInfoViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         setUserInfo();
     }
@@ -37,12 +38,17 @@ public class LoggedInUserInfo extends Composite {
     
     @UiHandler("userProfileUi")
     void onUserProfileUiControlClicked(ClickEvent event) {
-        // TODO
+        this.presenter.gotoProfileUi();
     }
     
     @UiHandler("signOutUi")
     void onSignOutUiControlClicked(ClickEvent event) {
-        // TODO
+        this.presenter.signOut();
+    }
+
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
     
 }
