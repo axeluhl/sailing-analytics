@@ -16,7 +16,11 @@ public class UserManagementContextImpl implements UserManagementContext {
     }
 
     public UserManagementContextImpl(UserDTO currentUser) {
-        this.currentUser = currentUser;
+        if (currentUser == null) {
+            this.currentUser = ANONYMOUS;
+        } else {
+            this.currentUser = currentUser;
+        }
     }
 
     @Override
