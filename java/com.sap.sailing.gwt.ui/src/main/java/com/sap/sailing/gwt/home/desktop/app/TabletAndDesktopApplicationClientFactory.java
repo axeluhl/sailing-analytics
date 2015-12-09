@@ -159,6 +159,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         return uCtx;
     }
     
+    @Override
+    public void resetUserManagementContext() {
+        uCtx = new UserManagementContextImpl();
+        securityProvider.getUserService().updateUser(true);
+    }
+
     private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
         private PlaceController placeController;
 
@@ -187,7 +193,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         
         @Override
         public Place getStartPlace() {
-            return new SigInPlace();
+            if (uCtx.isLoggedIn()) {
+                return new LoggedInUserInfoPlace();
+            } else {
+                return new SigInPlace();
+            }
         }
 
         @Override

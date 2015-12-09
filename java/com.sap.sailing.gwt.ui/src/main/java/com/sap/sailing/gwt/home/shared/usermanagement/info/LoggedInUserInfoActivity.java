@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sse.security.ClientUtils;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
@@ -41,12 +41,12 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                ClientUtils.reload();
+                clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                ClientUtils.reload();
+                clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
             }
         });
     }

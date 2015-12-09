@@ -109,7 +109,13 @@ public class MobileApplicationClientFactory extends
     public UserManagementContext getUserManagementContext() {
         return uCtx;
     }
-
+    
+    @Override
+    public void resetUserManagementContext() {
+        uCtx = new UserManagementContextImpl();
+        securityProvider.getUserService().updateUser(true);
+    }
+    
     @Override
     public UserManagementServiceAsync getUserManagement() {
         return securityProvider.getUserManagementService();
