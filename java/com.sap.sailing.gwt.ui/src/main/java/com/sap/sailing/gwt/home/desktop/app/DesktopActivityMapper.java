@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
@@ -28,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 
 public class DesktopActivityMapper implements ActivityMapper {
@@ -70,6 +72,8 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
+        } else if (place instanceof AbstractUserProfilePlace) {
+            return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof SponsoringPlace) {

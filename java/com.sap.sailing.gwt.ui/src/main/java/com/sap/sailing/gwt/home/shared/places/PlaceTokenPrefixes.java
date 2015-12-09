@@ -22,4 +22,6 @@ public class PlaceTokenPrefixes {
     public static final String EventSeriesLeaderboards = "/series/leaderboards/";
     public static final String EventSeriesCompetitorAnalytics = "/series/competitoranalytics/";
     public static final String EventSeriesMiniOverallLeaderboard = "/series/minioverallleaderboard/";
+    
+    public static final String UserProfileDetails = "/user/profile/details/";
 }
