@@ -42,7 +42,7 @@
       <c:header>
         <dp:userHeader.UserHeader ui:field="headerUi" />
       </c:header>
-      <c:tabcontent title="TODO Details">
+      <c:tabcontent title="{i18n.details}">
         <s:detailstab.UserProfileDetailsTabView />
       </c:tabcontent>
     </c:TabPanel>
