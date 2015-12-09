@@ -61,9 +61,9 @@ public class TestColumnSwapping {
                     return UUID.randomUUID().toString();
                 }
             }, /* hasOverallDetails */ false);
-            leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race1", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
+            leaderboardOriginalDTO.addRace("Race3", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
+            leaderboardOriginalDTO.addRace("Race2", /* explicitFactor */ null, 2., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -126,9 +126,9 @@ public class TestColumnSwapping {
             }
         }, /* hasOverallDetails */ false);
         assertNotNull("Leaderboard != NULL", lb);
-        lb.addRace("1", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null);
-        lb.addRace("2", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null);
-        lb.addRace("3", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null);
+        lb.addRace("1", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null, false);
+        lb.addRace("2", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, false, null, null, false);
+        lb.addRace("3", /* explicitFactor */ null, 1., /* regattaName */ null, /* seriesName */ null, DEFAULT_FLEET, true, null, null, false);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
         for (int i = 0; i < lb.getRaceList().size(); i++) {

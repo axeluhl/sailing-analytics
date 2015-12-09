@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -113,5 +114,10 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
+    }
+    
+    @Override
+    protected LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboard;
     }
 }
