@@ -132,6 +132,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String declinationCheckbox();
     String raceStartTrackingColumn();
     String pauseAutomaticRefresh();
+    String autoZoom();
+    String zoomFactor();
     String autoRefresh();
     String delayInSeconds();
     String delayBetweenAutoAdvances();

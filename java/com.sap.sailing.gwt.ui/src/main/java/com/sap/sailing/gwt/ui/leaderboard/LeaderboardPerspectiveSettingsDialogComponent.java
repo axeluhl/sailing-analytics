@@ -42,14 +42,14 @@ public class LeaderboardPerspectiveSettingsDialogComponent implements SettingsDi
             }
         });
         
-        grid.setWidget(0, 0, new Label("Auto zoom:"));
+        grid.setWidget(0, 0, new Label(stringMessages.autoZoom()));
         grid.setWidget(0, 1, leaderboardAutoZoomBox);
         
         leaderboardZoomFactorBox = dialog.createDoubleBox(5);
         leaderboardZoomFactorBox.setValue(initialSettings.getLeaderboardZoomFactor());
         leaderboardZoomFactorBox.setEnabled(!initialSettings.isLeaderboardAutoZoom());
         
-        grid.setWidget(1, 0, new Label("Zoom factor:"));
+        grid.setWidget(1, 0, new Label(stringMessages.zoomFactor()));
         grid.setWidget(1, 1, leaderboardZoomFactorBox);
 
         return vp;
