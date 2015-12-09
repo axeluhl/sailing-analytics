@@ -31,8 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.LoggedInUserInfo;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementFlyover;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
@@ -55,7 +54,7 @@ public class Header extends Composite {
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     
-    private final UserManagementFlyover userManagementFlyover;
+    private final EventBus eventBus;
     
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
@@ -63,30 +62,18 @@ public class Header extends Composite {
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
-        this(navigator);
-        
-        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
-
-            @Override
-            public void onPlaceChanged(PlaceChangedEvent event) {
-                updateActiveLink(event.getNewPlace());
-            }
-        });
-    }
-    
-    public Header(final DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
+        this.eventBus = eventBus;
 
         HeaderResources.INSTANCE.css().ensureInjected();
-
+        
         initWidget(uiBinder.createAndBindUi(this));
-        userManagementFlyover = new UserManagementFlyover(usermenu.getElement());
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
-
+        
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
-
+        
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
@@ -98,6 +85,13 @@ public class Header extends Composite {
                 if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
                     searchButton.click();
                 }
+            }
+        });
+        
+        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+            @Override
+            public void onPlaceChanged(PlaceChangedEvent event) {
+                updateActiveLink(event.getNewPlace());
             }
         });
     }
@@ -131,13 +125,7 @@ public class Header extends Composite {
     
     @UiHandler("usermenu")
     void toggleUsermenu(ClickEvent event) {
-        if (userManagementFlyover.isShowing()) {
-            userManagementFlyover.hide();
-        } else {
-            userManagementFlyover.show();
-            // FIXME: Temporary dummy content for user management flyover
-            userManagementFlyover.setWidget(new LoggedInUserInfo());
-        }
+        eventBus.fireEvent(new UserManagementRequestEvent());
     }
     
     private void updateActiveLink(Place place) {

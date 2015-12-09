@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -25,10 +24,10 @@ public class UserManagementFlyover extends Composite implements AcceptsOneWidget
     
     @UiField SimplePanel contentContainerUi;
 
-    public UserManagementFlyover(Element autoHidePartner) {
+    public UserManagementFlyover() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
-        popupPanel.addAutoHidePartner(autoHidePartner);
+//        popupPanel.addAutoHidePartner(autoHidePartner);
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
     }
