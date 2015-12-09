@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface SignInView extends IsWidget {
 
     void setPresenter(Presenter presenter);
+    
+    void setErrorMessage(String errorMessage);
 
     public interface Presenter {
         

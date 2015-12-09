@@ -47,6 +47,7 @@ public class SignInViewImpl extends Composite implements SignInView {
         this.presenter = presenter;
     }
     
+    @Override
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
     }
