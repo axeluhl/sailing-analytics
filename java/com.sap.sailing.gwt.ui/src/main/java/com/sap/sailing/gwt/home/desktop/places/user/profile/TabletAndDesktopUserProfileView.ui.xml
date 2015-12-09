@@ -40,7 +40,7 @@
   <g:HTMLPanel>
     <c:TabPanel ui:field="tabPanelUi">
       <c:header>
-        <dp:userprofileheader.UserProfileHeader ui:field="headerUi" />
+        <dp:userHeader.UserHeader ui:field="headerUi" />
       </c:header>
       <c:tabcontent title="TODO Details">
         <s:detailstab.UserProfileDetailsTabView />

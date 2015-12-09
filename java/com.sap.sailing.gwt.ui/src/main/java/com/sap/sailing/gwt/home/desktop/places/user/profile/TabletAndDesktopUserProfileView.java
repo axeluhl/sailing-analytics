@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.desktop.partials.userprofileheader.UserProfileHeader;
+import com.sap.sailing.gwt.home.desktop.partials.userHeader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
@@ -33,7 +33,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     TabPanel<AbstractUserProfilePlace, UserProfileView.Presenter, UserProfileTabView<AbstractUserProfilePlace>> tabPanelUi;
     
     @UiField(provided = true)
-    UserProfileHeader headerUi;
+    UserHeader headerUi;
 
     public TabletAndDesktopUserProfileView() {
     }
@@ -43,7 +43,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
         this.currentPresenter = currentPresenter;
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         
-        headerUi = new UserProfileHeader();
+        headerUi = new UserHeader();
         
         initWidget(uiBinder.createAndBindUi(this));
     }

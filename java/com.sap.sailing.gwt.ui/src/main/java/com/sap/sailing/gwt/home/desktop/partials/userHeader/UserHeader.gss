@@ -1,0 +1,45 @@
+/**
+ * The header of the pages to an event
+ */
+.userheader {
+  position: relative;
+  font-size: 1rem;
+  color: #666;
+  background: #f2f2f2;
+  border-bottom: 1px solid #dedede;
+}
+.userheader_intro {
+  padding-left: 5.8em;
+  margin: 0.666666666666667em 0 1.333333333333333em;
+  min-height: 4.8em;
+  position: relative;
+}
+.userheader_intro_logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4.8em;
+  height: 4.8em;
+  border: 0.333333333333333em solid #fff;
+  box-shadow: 0 0 5px rgba(235,235,235,0.5);
+}
+.userheader_intro_logo_image {
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.userheader_intro_title {
+  font-weight: 600;
+}
+.userheader_intro_title_realname {
+  margin: 0 0.178571428571429em 0 0;
+  font-size: 1.866666666666667em;
+  color: #333;
+}
+.userheader_intro_title_username {
+  color: #666;
+  margin-left: 0;
+  padding-left: 0;
+  border: none;
+}
