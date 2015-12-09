@@ -16,6 +16,7 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         SignInView view = new SignInViewImpl();
+        view.setPresenter(this);
         panel.setWidget(view);
     }
 
