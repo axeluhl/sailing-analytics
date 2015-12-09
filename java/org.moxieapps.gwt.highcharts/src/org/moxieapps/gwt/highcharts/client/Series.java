@@ -16,15 +16,22 @@
 
 package org.moxieapps.gwt.highcharts.client;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.json.client.*;
-import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+
+import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
+
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNull;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 /**
  * Manages a data series (and its options) that can then be added to a {@link org.moxieapps.gwt.highcharts.client.Chart}.  As an extension
@@ -1230,13 +1237,25 @@ public class Series extends Configurable<Series> {
     }-*/;
 
     public void updateThreshold(String threshold) {
-        updateNativeWay(this.getNativeSeries(), threshold);
+        updateThresHoldNative(this.getNativeSeries(), threshold);
+    }
+    
+    public void updateSeriesFillColor(String fillColor) {
+        JavaScriptObject fillColorObject = JsonUtils.safeEval(fillColor);
+        updateFillColorNative(this.getNativeSeries(), fillColorObject);
     }
 
-    public static native void updateNativeWay(JavaScriptObject series, String threshold) /*-{
+    public static native void updateThresHoldNative(JavaScriptObject series, String threshold) /*-{
         series.update({
            threshold: threshold,
            borderColor: '#FF0000'
         })
     }-*/;
+    
+    public static native void updateFillColorNative(JavaScriptObject series, JavaScriptObject fillColorValue) /*-{
+       series.update({
+           fillColor: fillColorValue
+       })
+    }-*/;
+   
 }
