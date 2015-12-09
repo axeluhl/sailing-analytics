@@ -41,8 +41,9 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
         StringMessages i18n = StringMessages.INSTANCE;
+        com.sap.sse.security.ui.client.i18n.StringMessages i18n_sec = com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE;
         navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
-                new NavigationItem("TODO User Details", getUserProfileNavigation()));
+                new NavigationItem(i18n_sec.userDetails(), getUserProfileNavigation()));
     }
     
     @Override

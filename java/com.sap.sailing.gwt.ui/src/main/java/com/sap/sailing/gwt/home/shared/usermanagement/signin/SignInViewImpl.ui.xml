@@ -2,21 +2,22 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
         xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
     <g:HTMLPanel>
-        <div class="{local_res.css.form_title}">TODO Sign In</div>
+        <div class="{local_res.css.form_title}"><ui:text from="{i18n_sec.signIn}" /></div>
         <div class="{local_res.css.form_errors}" ui:field="formErrorUi"></div>
         <label class="{local_res.css.form_label}">TODO Username or Email</label>
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="loginNameUi"/>
-        <label class="{local_res.css.form_label}">TODO Password</label>
+        <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.password}" /></label>
         <g:PasswordTextBox addStyleNames="{local_res.css.form_input}" ui:field="passwordUi"/>
-        <g:Anchor addStyleNames="{local_res.css.form_link}" ui:field="forgotPasswordUi">TODO Forgot Password?</g:Anchor>
+        <g:Anchor addStyleNames="{local_res.css.form_link}" ui:field="forgotPasswordUi"><ui:text from="{i18n_sec.forgotPassword}" /></g:Anchor>
         <div class="{local_res.css.form_actions}">
             <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
-                    ui:field="createAccountUi">TODO Create account</g:Anchor>
+                    ui:field="createAccountUi"><ui:text from="{i18n_sec.signUp}" /></g:Anchor>
             <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}" 
-                    ui:field="signInUi">TODO Sign in</g:Anchor>
+                    ui:field="signInUi"><ui:text from="{i18n_sec.signIn}" /></g:Anchor>
         </div>
         <div ui:field="socialLoginUi">
             <div class="{local_res.css.form_social_seperator}">

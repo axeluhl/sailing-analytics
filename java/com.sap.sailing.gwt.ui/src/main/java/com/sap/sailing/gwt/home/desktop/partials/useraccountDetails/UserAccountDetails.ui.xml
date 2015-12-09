@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+    <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UseraccountDetailsResources" />
   <g:HTMLPanel>
@@ -14,41 +15,40 @@
           <div class="{local_res.css.useraccountdetails_content}">
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <!-- <ui:text from="{i18n.username}" /> -->
-                TODO username
+                <ui:text from="{i18n_sec.username}" />
               </label>
               <input ui:field="usernameUi" type="text" class="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from='{i18n.name}' />
+                <ui:text from="{i18n_sec.name}" />
               </label>
               <input ui:field="nameUi" type="text" class="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from='{i18n.password}' />
+                <ui:text from="{i18n_sec.password}" />
               </label>
               <!-- placeholder="{i18n.passwordwordText}" -->
               <input type="password" placeholder="TODO placeholder text" class="{local_res.css.useraccountdetails_content_detail_input}"></input>
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from='{i18n.email}' />
+                <ui:text from="{i18n_sec.email}" />
               </label>
               <input ui:field="emailUi" type="email" class="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
               <!-- <ui:text from='{i18n_ubi.passwordConfirmation}' /> -->
-                TODO password confirmation
+                <ui:text from="{i18n_sec.passwordRepeat}" />
               </label>
               <!-- placeholder="{i18n.passwordConfirmationText}" -->
               <input type="password" placeholder="TODO placeholder text" class="{local_res.css.useraccountdetails_content_detail_input}"></input>
             </div>
             <div class="{local_res.css.useraccountdetails_content_submit}">
               <div class="{res.mainCss.button} {res.mainCss.buttonprimary}">
-                <ui:text from='{i18n.save}' />
+                <ui:text from="{i18n_sec.save}" />
               </div>
             </div>
           </div>
