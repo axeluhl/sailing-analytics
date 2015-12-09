@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.flyover.UserManagementFlyover;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInForm;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInViewImpl;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -80,7 +80,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                     userManagementDisplay.setWidget(createBusyView());
                     userManagementDisplay.show();
                     // TODO remove
-                    userManagementDisplay.setWidget(new SignInForm());
+                    userManagementDisplay.setWidget(new SignInViewImpl());
                     // userManagementWizardController.start();
                 }
             }
