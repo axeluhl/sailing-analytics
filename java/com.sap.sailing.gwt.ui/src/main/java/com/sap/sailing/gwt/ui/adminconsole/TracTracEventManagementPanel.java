@@ -393,11 +393,6 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public Boolean getValue(TracTracRaceRecordDTO row) {
                         return racesTable.getSelectionModel().isSelected(row);
                     }
-
-                    @Override
-                    protected ListDataProvider<TracTracRaceRecordDTO> getListDataProvider() {
-                        return raceList;
-                    }
         };
         racesTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         racesTable.addColumn(regattaNameColumn, stringMessages.event());

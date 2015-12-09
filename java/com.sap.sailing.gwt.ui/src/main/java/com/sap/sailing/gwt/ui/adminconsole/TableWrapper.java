@@ -54,10 +54,6 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
                     tableRes.cellTableStyle().cellTableCheckboxDeselected(),
                     tableRes.cellTableStyle().cellTableCheckboxColumnCell(), this.entityIdentityComparator, dataProvider, table) {
-                        @Override
-                        protected ListDataProvider<T> getListDataProvider() {
-                            return dataProvider;
-                        }
             };
             columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
             @SuppressWarnings("unchecked")

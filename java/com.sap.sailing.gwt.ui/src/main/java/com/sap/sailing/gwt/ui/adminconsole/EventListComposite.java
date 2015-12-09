@@ -195,10 +195,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         return dto1.id.equals(dto2.id);
                     }
                 },eventListDataProvider,table) {
-            @Override
-            protected ListDataProvider<EventDTO> getListDataProvider() {
-                return eventListDataProvider;
-            }
 
             @Override
             public Boolean getValue(EventDTO row) {

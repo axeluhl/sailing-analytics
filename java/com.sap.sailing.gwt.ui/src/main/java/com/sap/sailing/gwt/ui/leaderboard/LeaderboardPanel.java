@@ -1647,11 +1647,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
         @Override
         public void updateMinMax() {}
-
-        @Override
-        protected ListDataProvider<LeaderboardRowDTO> getListDataProvider() {
-            return getData();
-        }
     }
     
     private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {

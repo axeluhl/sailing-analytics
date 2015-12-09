@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
-import java.util.List;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
@@ -16,7 +15,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -30,9 +28,11 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * updates work properly.
  * <p>
  * 
- * If clients don't choose to use this columns own {@link #getSelectionModel() selection model}, they have to ensure
- * that selection changes with subsequent {@link #redrawRow(Object, List) redraw requests} are triggered properly upon
- * selection status changes. Otherwise, the checkboxes will run out of sync with the selection status.
+ * Clients should use the columns own {@link #getSelectionModel() RefreshableMultiSelectionModel}. This will ensure that
+ * the {@link SelectionCheckboxColumn} will be refreshed correctly, when the selection changes or the
+ * {@link ListDataProvider} have new elements. Clients should also ensure that the {@link Flushable display} and the
+ * {@link ListDataProvider} is not <code>null</code> otherwise the {@link RefreshableMultiSelectionModel selectionmodel}
+ * won´t work correct.
  * <p>
  * 
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
@@ -85,13 +85,6 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     }
     
     /**
-     * Subclasses need to tell this column what the data list is. This is necessary in order to reach all rows after the
-     * selection is cleared, as well as to trigger the redraw of a row by setting it again in the list data provider which
-     * triggers the necessary redraw operation.
-     */
-    protected abstract ListDataProvider<T> getListDataProvider();
-    
-    /**
      * @return a selection manager that should be used for the table to which this column is added; use
      *         {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel, com.google.gwt.view.client.CellPreviewEvent.Handler)}
      *         to set the selection manager together with the selection model on the table.
@@ -99,16 +92,20 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     public CellPreviewEvent.Handler<T> getSelectionManager() {
         return DefaultSelectionEventManager.createCustomManager(getSelectionEventTranslator());
     }
+    
+    protected ListDataProvider<T> getListDataProvider() {
+        return listDataProvider;
+    }
 
     public RefreshableMultiSelectionModel<T> getSelectionModel() {
         return selectionModel;
     }
 
     /**
-     * Clients should use the multi-selection model returned by this method for the {@link CellTable} to which they add this column.
-     * If they do so, the {@link #redrawRow(LeaderboardRowDTO, List)} method will be triggered correctly for all selection changes.
-     * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
-     * after selection changes.
+     * Clients should use the {@link RefreshableMultiSelectionModel} returned by this method for the {@link CellTable}
+     * to which they add this column. If they do so, the {@link Flushable#flush()} method will be
+     * triggered correctly for all selection changes. Otherwise, clients or subclasses are responsible to issue the
+     * necessary calls to {@link Flushable#flush()} after selection changes.
      */
     private RefreshableMultiSelectionModel<T> createSelectionModel(final EntityIdentityComparator<T> entityIdentityComparator) {
         return new RefreshableMultiSelectionModel<T>(entityIdentityComparator, listDataProvider) {

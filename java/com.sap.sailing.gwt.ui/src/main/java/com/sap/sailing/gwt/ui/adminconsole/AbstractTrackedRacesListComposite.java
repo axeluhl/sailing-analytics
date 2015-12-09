@@ -128,11 +128,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                     tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
                     entityIdentityComparator, raceList, raceTable) {
-                @Override
-                protected ListDataProvider<RaceDTO> getListDataProvider() {
-                    return raceList;
-                }
-
+                
                 @Override
                 public Boolean getValue(RaceDTO row) {
                     return raceTable.getSelectionModel().isSelected(row);

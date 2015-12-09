@@ -5,7 +5,6 @@ import java.util.Comparator;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -49,11 +48,6 @@ public class StructureImportListComposite extends RegattaListComposite implement
                         return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
                     }
                 }, regattaListDataProvider, table) {
-            @Override
-            protected ListDataProvider<RegattaDTO> getListDataProvider() {
-                return regattaListDataProvider;
-            }
-
             @Override
             public Boolean getValue(RegattaDTO row) {
                 return regattaTable.getSelectionModel().isSelected(row);

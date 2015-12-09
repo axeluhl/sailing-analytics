@@ -140,11 +140,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     }
                 },regattaListDataProvider, table) {
             @Override
-            protected ListDataProvider<RegattaDTO> getListDataProvider() {
-                return regattaListDataProvider;
-            }
-
-            @Override
             public Boolean getValue(RegattaDTO row) {
                 return regattaTable.getSelectionModel().isSelected(row);
             }

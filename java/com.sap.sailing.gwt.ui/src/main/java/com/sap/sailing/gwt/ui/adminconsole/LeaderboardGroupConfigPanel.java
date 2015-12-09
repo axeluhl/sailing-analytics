@@ -203,10 +203,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                         return dto1.name.equals(dto2.name);
                     }
                 }, leaderboardsProvider, leaderboardsTable) {
-            @Override
-                            protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
-                                return leaderboardsProvider;
-                            }
         };
         refreshableLeaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
         leaderboardsTable.setSelectionModel(refreshableLeaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
@@ -375,18 +371,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupDetailsProvider.addDataDisplay(groupDetailsTable);
         SelectionCheckboxColumn<StrippedLeaderboardDTO> groupDetailsTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
-                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<StrippedLeaderboardDTO>() {
-
+                        tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), 
+                        tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<StrippedLeaderboardDTO>() {
                             @Override
                             public boolean representSameEntity(StrippedLeaderboardDTO dto1,
                                     StrippedLeaderboardDTO dto2) {
                                 return dto1.name.equals(dto2.name);
                             }
                         }, groupDetailsProvider, groupDetailsTable) {
-                            @Override
-                            protected ListDataProvider<StrippedLeaderboardDTO> getListDataProvider() {
-                                return groupDetailsProvider;
-                            }
         };
 
         groupDetailsTable.setWidth("100%");
