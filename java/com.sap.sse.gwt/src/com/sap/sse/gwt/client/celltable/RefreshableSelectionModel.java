@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -22,6 +23,10 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * When the selection is refreshed this {@link RefreshableSelectionModel selectionmodel} triggers a
  * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent) onSelectionChangedEvent} using
  * {@link AbstractSelectionModel#fireEvent(com.google.gwt.event.shared.GwtEvent)}.
+ * <p>
+ * When you use this {@link RefreshableSelectionModel selectionmodel} make sure that you don't modify
+ * {@link ListDataProvider} in {@link Handler#onSelectionChange(com.google.gwt.view.client.SelectionChangeEvent)
+ * onSelectionChange()} (it causes a stackoverflow).
  * 
  * @author D064976
  */
