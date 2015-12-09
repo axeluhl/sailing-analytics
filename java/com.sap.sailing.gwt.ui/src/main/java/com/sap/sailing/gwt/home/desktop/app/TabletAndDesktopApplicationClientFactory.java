@@ -18,14 +18,24 @@ import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
+    private WithSecurity securityProvider;
+    private UserManagementContext uCtx = new UserManagementContextImpl();
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -41,6 +51,14 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
+        securityProvider = new DefaultWithSecurityImpl();
+        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                uCtx = new UserManagementContextImpl(user);
+                getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+            }
+        });
     }
     
     @Override
@@ -91,5 +109,15 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public BusyView createBusyView() {
         return new BusyViewImpl();
+    }
+
+    @Override
+    public UserManagementServiceAsync getUserManagement() {
+        return securityProvider.getUserManagementService();
+    }
+
+    @Override
+    public UserManagementContext getUserManagementContext() {
+        return uCtx;
     }
 }

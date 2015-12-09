@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserChangeEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
@@ -39,10 +39,10 @@ public class DesktopActivityMapper implements ActivityMapper {
         this.clientFactory = clientFactory;
         
         // TODO: remove example usage.
-        clientFactory.getEventBus().addHandler(UserChangeEvent.TYPE, new UserChangeEvent.Handler() {
+        clientFactory.getEventBus().addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserChangeEvent event) {
-                Window.alert("Login: " + event.getCurrentUser().getName());
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                        Window.alert("Login: " + event.getCtx().getCurrentUser().getName());
             }
         });
         

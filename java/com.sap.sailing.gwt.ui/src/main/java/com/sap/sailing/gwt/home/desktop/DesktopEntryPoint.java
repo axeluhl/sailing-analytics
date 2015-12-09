@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopActivityMapper;
 import com.sap.sailing.gwt.home.desktop.app.DesktopClientFactory;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserChangeEvent;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
@@ -21,14 +20,9 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.WithSecurity;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, DesktopClientFactory> {
 
-    private WithSecurity securityProvider;
 
     @Override
     public void doOnModuleLoad() {
@@ -57,13 +51,6 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
         final DesktopClientFactory clientFactory = new TabletAndDesktopApplicationClientFactory(isStandaloneServer);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new DesktopActivityMapper(clientFactory));
-        securityProvider = new DefaultWithSecurityImpl();
-        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                clientFactory.getEventBus().fireEvent(new UserChangeEvent(user));
-            }
-        });
     }
     
     @Override

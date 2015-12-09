@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.SailingActivityManager;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserChangeEvent;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationService;
 import com.sap.sailing.gwt.ui.client.ServerConfigurationServiceAsync;
@@ -20,14 +19,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 import com.sap.sse.gwt.resources.CommonControlsCSS;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.WithSecurity;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, MobileApplicationClientFactory> {
 
-    private WithSecurity securityProvider;
 
     @Override
     public void doOnModuleLoad() {
@@ -55,13 +49,6 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
         final MobileApplicationClientFactory clientFactory = new MobileApplicationClientFactory(isStandaloneServer);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new MobileActivityMapper(clientFactory));
-        securityProvider = new DefaultWithSecurityImpl();
-        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                clientFactory.getEventBus().fireEvent(new UserChangeEvent(user));
-            }
-        });
     }
 
     @Override
