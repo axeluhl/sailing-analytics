@@ -1,12 +1,15 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.flyover;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
@@ -39,7 +42,17 @@ public class UserManagementFlyover extends Composite implements AcceptsOneWidget
     }
     
     public void show() {
-        popupPanel.show();
+        popupPanel.setPopupPositionAndShow(new PositionCallback() {
+            @Override
+            public void setPosition(int offsetWidth, int offsetHeight) {
+                Element anchor = Document.get().getElementById("usrMngmtFlyover");
+
+                if (anchor != null) {
+                    popupPanel.setPopupPosition(anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 20,
+                            anchor.getAbsoluteTop() + 20);
+                }
+            }
+        });
     }
     
     public void hide() {
