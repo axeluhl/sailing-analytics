@@ -12,12 +12,12 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class CreateAccountForm extends Composite {
+public class CreateAccountViewImpl extends Composite implements CreateAccountView {
     
-    interface CreateAccountFormUiBinder extends UiBinder<Widget, CreateAccountForm> {
+    interface CreateAccountViewImplUiBinder extends UiBinder<Widget, CreateAccountViewImpl> {
     }
     
-    private static CreateAccountFormUiBinder uiBinder = GWT.create(CreateAccountFormUiBinder.class);
+    private static CreateAccountViewImplUiBinder uiBinder = GWT.create(CreateAccountViewImplUiBinder.class);
     
     @UiField TextBox emailUi;
     @UiField TextBox usernameUi;
@@ -27,13 +27,20 @@ public class CreateAccountForm extends Composite {
     @UiField Anchor signInUi;
     
     @UiField DivElement formErrorUi;
+
+    private Presenter presenter;
     
-    public CreateAccountForm() {
+    public CreateAccountViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(emailUi, "TODO Email");
         setPlaceholder(usernameUi, "TODO Username");
         setPlaceholder(passwordUi, "TODO Password");
         setPlaceholder(passwordConfirmationUi, "TODO Password Confirmation");
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
     
     public void setErrorMessage(String errorMessage) {
@@ -42,14 +49,14 @@ public class CreateAccountForm extends Composite {
     
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
-        // String email = emailUi.getValue(), username = usernameUi.getValue();
-        // String password = passwordUi.getValue(), passwordConfirm = passwordConfirmationUi.getValue();
-        // TODO
+        String username = usernameUi.getValue(), email = emailUi.getValue();
+        String password = passwordUi.getValue(), passwordConfirmation = passwordConfirmationUi.getValue();
+        presenter.createAccount(username, email, password, passwordConfirmation);
     }
     
     @UiHandler("signInUi")
     void onSignInControlUiClicked(ClickEvent event) {
-        // TODO
+        presenter.signIn();
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
