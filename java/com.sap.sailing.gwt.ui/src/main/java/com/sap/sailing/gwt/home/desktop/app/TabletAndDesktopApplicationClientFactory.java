@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
+import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -20,10 +22,15 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNa
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
+import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementController;
+import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementController.StartPlaceActivityMapper;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.usermanagement.SignInForm;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementFlyover;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -34,7 +41,8 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
-    private WithSecurity securityProvider;
+    private final WithSecurity securityProvider;
+    private final WrappedPlacesManagementController userManagementWizardController;
     private UserManagementContext uCtx = new UserManagementContextImpl();
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
@@ -57,6 +65,24 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             public void onUserStatusChange(UserDTO user) {
                 uCtx = new UserManagementContextImpl(user);
                 getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+            }
+        });
+        
+        final UserManagementFlyover userManagementDisplay = new UserManagementFlyover();
+        this.userManagementWizardController = new WrappedPlacesManagementController(
+                new DesktopUserManagementStartPlaceActivityMapper(), userManagementDisplay);
+        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
+            @Override
+            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
+                if (userManagementDisplay.isShowing()) {
+                    userManagementDisplay.hide();
+                } else {
+                    userManagementDisplay.setWidget(createBusyView());
+                    userManagementDisplay.show();
+                    // TODO remove
+                    userManagementDisplay.setWidget(new SignInForm());
+                    // userManagementWizardController.start();
+                }
             }
         });
     }
@@ -119,5 +145,19 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     @Override
     public UserManagementContext getUserManagementContext() {
         return uCtx;
+    }
+    
+    private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
+        @Override
+        public Activity getActivity(Place place) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        @Override
+        public Place getStartPlace() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 }
