@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
 
@@ -30,7 +31,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     @Override
     public void signIn() {
-        // TODO Auto-generated method stub
+        placeController.goTo(new SigInPlace());
     }
 
 }
