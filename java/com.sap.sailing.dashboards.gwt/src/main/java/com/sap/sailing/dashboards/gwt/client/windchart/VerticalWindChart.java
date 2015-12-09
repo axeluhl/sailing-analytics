@@ -28,8 +28,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.BarPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -193,24 +191,18 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * {@link #setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall()}.
      * */
     public void addPointsToSeriesWithAverage(final Point[] points, final double average) {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                if (verticalWindChartSeries == null) {
-                    initVerticalWindChartSeries();
-                    verticalWindChartSeries.setPoints(points, true);
-                    logger.log(Level.INFO, "Set Points");
-                } else {
-                    for (Point point : points) {
-                        verticalWindChartSeries.addPoint(point, true, false, false);
-                        logger.log(Level.INFO, "Add Point");
-                    }
-                }
-                verticalWindChartSeries.updateThreshold("" + average);
-                adaptVerticalWindChartExtemes();
+        if (verticalWindChartSeries == null) {
+            initVerticalWindChartSeries();
+            verticalWindChartSeries.setPoints(points, true);
+            logger.log(Level.INFO, "Set Points");
+        } else {
+            for (Point point : points) {
+                verticalWindChartSeries.addPoint(point, true, false, false);
+                logger.log(Level.INFO, "Add Point");
             }
-        });
+        }
+        verticalWindChartSeries.updateThreshold("" + average);
+        adaptVerticalWindChartExtemes();
     }
 
     /**
@@ -271,13 +263,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         } else {
             chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
         }
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                adaptVerticalWindChartExtemes();
-                notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
-            }});
+        adaptVerticalWindChartExtemes();
+        notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
     }
 
     @Override
