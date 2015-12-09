@@ -27,10 +27,10 @@ import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementControll
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.shared.usermanagement.SignInForm;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementFlyover;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.flyover.UserManagementFlyover;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInForm;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
