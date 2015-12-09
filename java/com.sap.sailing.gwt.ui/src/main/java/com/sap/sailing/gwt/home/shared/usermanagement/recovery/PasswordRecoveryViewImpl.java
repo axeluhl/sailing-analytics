@@ -10,20 +10,27 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PasswordRecoveryForm extends Composite {
+public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     
-    interface PasswordRecoveryFormUiBinder extends UiBinder<Widget, PasswordRecoveryForm> {
+    interface PasswordRecoveryViewImplUiBinder extends UiBinder<Widget, PasswordRecoveryViewImpl> {
     }
     
-    private static PasswordRecoveryFormUiBinder uiBinder = GWT.create(PasswordRecoveryFormUiBinder.class);
+    private static PasswordRecoveryViewImplUiBinder uiBinder = GWT.create(PasswordRecoveryViewImplUiBinder.class);
     
     @UiField TextBox loginNameUi;
     
     @UiField DivElement formErrorUi;
+
+    private Presenter presenter;
     
-    public PasswordRecoveryForm() {
+    public PasswordRecoveryViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(loginNameUi, "TODO Username or Email");
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
 
     public void setErrorMessage(String errorMessage) {
@@ -32,8 +39,7 @@ public class PasswordRecoveryForm extends Composite {
     
     @UiHandler("resetPasswordUi")
     void onResetPasswordUiControlClicked(ClickEvent event) {
-        // String login = loginNameUi.getValue();
-        // TODO
+        presenter.resetPassword(loginNameUi.getValue());
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
