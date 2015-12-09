@@ -29,7 +29,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<UserProfileView.Presenter> tabPanelUi;
+    TabPanel<AbstractUserProfilePlace, UserProfileView.Presenter, UserProfileTabView<AbstractUserProfilePlace>> tabPanelUi;
     
     @UiField(provided = true)
     UserProfileHeader headerUi;

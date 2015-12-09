@@ -32,11 +32,11 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
  * Created by pgtaboada on 25.11.14.
  */
 
-public class TabPanel<PRESENTER> extends Composite {
+public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PLACE, PRESENTER>> extends Composite {
     private static final Logger logger = Logger.getLogger(TabPanel.class.getName());
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
-    private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new LinkedHashMap<>();
-    private final Map<Class<Place>, String> knownTabTitles = new HashMap<>();
+    private final Map<Class<PLACE>, TABVIEW> knownTabs = new LinkedHashMap<>();
+    private final Map<Class<PLACE>, String> knownTabTitles = new HashMap<>();
 
     @UiField
     SimplePanel additionalHeader;
@@ -47,7 +47,7 @@ public class TabPanel<PRESENTER> extends Composite {
     @UiField BreadcrumbPane breadcrumbs;
     @UiField DivElement breadcrumbsContainer;
     @UiField FlowPanel tabExtension;
-    private TabView<Place, PRESENTER> currentTab;
+    private TABVIEW currentTab;
     
 
     private final PlaceHistoryMapper historyMapper;
@@ -63,7 +63,7 @@ public class TabPanel<PRESENTER> extends Composite {
         }
     }
 
-    public TabView<?, PRESENTER> getCurrentTab() {
+    public TABVIEW getCurrentTab() {
         return currentTab;
     }
     
@@ -80,20 +80,20 @@ public class TabPanel<PRESENTER> extends Composite {
      * @param title
      *            The label for the tab.
      */
+    @SuppressWarnings("unchecked")
     @UiChild
-    public void addTabContent(final TabView<Place, PRESENTER> tab, String title) {
-
+    public void addTabContent(final TABVIEW tab, String title) {
         GWT.log("Adding TAB: " + title);
         
         // TODO: check if place class already known, reject...
         tab.setPresenter(presenter);
-        final Class<Place> classForActivation = tab.getPlaceClassForActivation();
+        final Class<PLACE> classForActivation = tab.getPlaceClassForActivation();
         knownTabs.put(classForActivation, tab);
         knownTabTitles.put(classForActivation, title);
 
         if(tab.getState() == State.VISIBLE) {
             String link = "#" + historyMapper.getToken(tab.placeToFire());
-            tabBar.addTab(title, classForActivation, link);
+            tabBar.addTab(title, (Class<Place>) classForActivation, link);
         }
     }
 
@@ -123,13 +123,13 @@ public class TabPanel<PRESENTER> extends Composite {
      * @param placeToGo
      *            the given place.
      */
-    public void activatePlace(Place placeToGo) {
+    public void activatePlace(PLACE placeToGo) {
         if (knownTabs.containsKey(placeToGo.getClass())) {
-            final TabView<Place, PRESENTER> newTab = knownTabs.get(placeToGo.getClass());
+            final TABVIEW newTab = knownTabs.get(placeToGo.getClass());
             
             if (newTab.getState() == State.NOT_AVAILABLE_REDIRECT
                     || newTab.getState() == State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE) {
-                for(TabView<Place, PRESENTER> tab : knownTabs.values()) {
+                for(TabView<PLACE, PRESENTER> tab : knownTabs.values()) {
                     if(tab.getState() == State.VISIBLE) {
                         // TODO is this redirect wanted? Just silently select another tab?
                         if (currentTab != null) {
@@ -181,7 +181,7 @@ public class TabPanel<PRESENTER> extends Composite {
         return addHandler(handler, TabPanelPlaceSelectionEvent.TYPE);
     }
 
-    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?>> {
+    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?, ?, ?>> {
     }
 
     public String getCurrentTabTitle() {
