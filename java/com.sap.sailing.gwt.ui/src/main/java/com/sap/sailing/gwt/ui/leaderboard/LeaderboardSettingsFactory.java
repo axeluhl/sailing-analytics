@@ -78,11 +78,11 @@ public class LeaderboardSettingsFactory {
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
                         /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
                         /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
-                        /*showCompetitorSailIdColumns*/showCompetitorSailIdColumn, /*showCompetitorFullNameColumn*/showCompetitorNameColumn);
+                        showCompetitorSailIdColumn, showCompetitorNameColumn);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
-                    nameOfRaceColumnToShow != null, showRegattaRank);
+                    nameOfRaceColumnToShow != null, showRegattaRank, showCompetitorSailIdColumn, showCompetitorNameColumn);
             break;
         }
         return settings;
@@ -127,28 +127,32 @@ public class LeaderboardSettingsFactory {
      *            such a meta leaderboard exists; if multiple such meta leaderboards exist, they are all shown
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Boolean showRegattaRank) {
+            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Boolean showRegattaRank,
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
         final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
         return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetails,
-                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null);
+                nameOfRaceToSort, autoExpandPreSelectedRace, /* refreshIntervalMillis */ null,
+                showCompetitorSailIdColumn, showCompetitorFullNameColumn);
     }
     
     /**
-     * Like {@link #createNewDefaultSettings(List, List, String, boolean, boolean)}, only that an additional refresh interval for auto-refresh
+     * Like {@link #createNewDefaultSettings(List, List, String, boolean, boolean, boolean, boolean)}, only that an additional refresh interval for auto-refresh
      * may be specified; if <code>null</code>, no auto-refresh shall be performed
      */
-    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+    private LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
-            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
+            boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, boolean showCompetitorSailIdColumns, boolean showCompetitorFullNameColumn) {
         return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetailsToShow,
                 nameOfRaceToSort, autoExpandPreSelectedRace, refreshIntervalMillis,
-                /* numberOfLastRacesToShow */null, /* raceColumnSelectionStrategy */ RaceColumnSelectionStrategies.EXPLICIT);
+                /* numberOfLastRacesToShow */null, /* raceColumnSelectionStrategy */ RaceColumnSelectionStrategies.EXPLICIT,
+                showCompetitorSailIdColumns, showCompetitorFullNameColumn);
     }
     
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
             boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, Integer numberOfLastRacesToShow,
-            RaceColumnSelectionStrategies raceColumnSelectionStrategy) {
+            RaceColumnSelectionStrategies raceColumnSelectionStrategy, boolean showCompetitorSailIdColumns,
+            boolean showCompetitorFullNameColumn) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -168,7 +172,7 @@ public class LeaderboardSettingsFactory {
                 autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ nameOfRaceToSort,
                 /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionStrategy,
                 /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
-                /*showCompetitorSailIdColumns*/true, /*showCompetitorFullNameColumn*/true);
+                showCompetitorSailIdColumns, showCompetitorFullNameColumn);
     }
     
     public LeaderboardSettings mergeLeaderboardSettings(LeaderboardSettings settingsWithRaceSelection, LeaderboardSettings settingsWithDetails) {

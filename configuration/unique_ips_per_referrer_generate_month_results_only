@@ -11,6 +11,6 @@ for month in `cat $MONTHS`; do
     cat $i | grep "^[^ ]* [0-9]*/$month .*" | sort -u | wc | awk '{ print $1; }'
     # TODO consider producing an AWStats configuration file for each virtual host name and splitting all new logs into virtual host name-specific log files
   done | tee $STATS/unique-ips-days-useragents-per-event-`echo $month | tr / -`
-  echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-$month"
+  echo "Wrote per-month results to $STATS/unique-ips-days-useragents-per-event-`echo $month | tr / -`"
 done
 echo "Done."

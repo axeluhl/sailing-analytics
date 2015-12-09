@@ -17,6 +17,8 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tractracadapter.impl.Simulator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -65,12 +67,13 @@ public interface TracTracAdapter {
      *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     * @param raceStatus 
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow,  boolean useInternalMarkPassingAlgorithm,
+            long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 

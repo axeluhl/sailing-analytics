@@ -150,7 +150,7 @@
             <property>
                 <!-- When running on Lean DI and it's a release build, we do SAP signing. -->
                 <name>ldi.releaseType</name>
-                <value>release</value>
+                <value>customer</value>
             </property>
         </activation>
         <build>
