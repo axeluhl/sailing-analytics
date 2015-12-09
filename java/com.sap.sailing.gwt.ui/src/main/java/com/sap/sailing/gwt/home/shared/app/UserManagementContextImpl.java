@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.home.shared.app;
 
+import java.util.ArrayList;
+
+import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementContextImpl implements UserManagementContext {
 
     private final UserDTO currentUser;
-    private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", false, null, null, null);
+    private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", false, new ArrayList<AccountDTO>(),
+            new ArrayList<String>(), new ArrayList<String>());
 
     public UserManagementContextImpl() {
         this.currentUser = ANONYMOUS;
