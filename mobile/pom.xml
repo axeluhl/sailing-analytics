@@ -412,7 +412,7 @@
             <activation>
                 <property>
                     <name>ldi.releaseType</name>
-                    <value>release</value>
+                    <value>customer</value>
                 </property>
             </activation>
             <build>
