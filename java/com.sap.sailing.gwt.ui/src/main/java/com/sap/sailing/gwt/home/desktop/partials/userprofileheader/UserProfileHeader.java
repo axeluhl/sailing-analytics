@@ -11,11 +11,7 @@ public class UserProfileHeader extends Composite {
     }
 
     public void setUserManagementContext(UserManagementContext userManagementContext) {
-        if(userManagementContext.isLoggedIn()) {
-            ((Label)getWidget()).setText(userManagementContext.getCurrentUser().getName());
-        } else {
-            ((Label)getWidget()).setText("TODO: anonymous");
-        }
+        ((Label)getWidget()).setText(userManagementContext.getCurrentUser().getName());
     }
 
 }
