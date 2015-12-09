@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sailing.gwt.home.shared.usermanagement.flyover;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
 
 public class UserManagementFlyover extends Composite implements AcceptsOneWidget {

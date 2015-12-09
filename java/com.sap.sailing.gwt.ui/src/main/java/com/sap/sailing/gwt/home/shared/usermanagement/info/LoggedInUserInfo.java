@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sailing.gwt.home.shared.usermanagement.info;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
