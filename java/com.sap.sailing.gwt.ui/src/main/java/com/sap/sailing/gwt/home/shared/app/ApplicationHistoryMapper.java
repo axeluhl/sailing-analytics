@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
@@ -60,6 +61,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
         MiniLeaderboardPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
         // User management places:
+        UserProfileDefaultPlace.Tokenizer.class,
         UserProfileDetailsPlace.Tokenizer.class,
         ErrorPlace.Tokenizer.class
 })

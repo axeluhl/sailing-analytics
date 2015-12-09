@@ -6,6 +6,8 @@ import com.sap.sailing.gwt.home.desktop.app.WithHeader;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class UserProfileActivityProxy extends AbstractActivityProxy implements ProvidesNavigationPath, WithHeader {
@@ -32,6 +34,9 @@ public class UserProfileActivityProxy extends AbstractActivityProxy implements P
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
+                if(place instanceof UserProfileDefaultPlace) {
+                    place = new UserProfileDetailsPlace();
+                }
                 super.onSuccess(new UserProfileActivity(place, clientFactory,
                         homePlacesNavigator, navigationPathDisplay));
             }

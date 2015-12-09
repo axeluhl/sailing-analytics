@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
@@ -103,6 +103,6 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
-        return createGlobalPlaceNavigation(new UserProfileDetailsPlace());
+        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
     }
 }
