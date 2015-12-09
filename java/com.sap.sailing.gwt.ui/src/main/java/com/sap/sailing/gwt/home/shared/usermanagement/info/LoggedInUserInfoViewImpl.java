@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     
@@ -27,13 +28,13 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     
     public LoggedInUserInfoViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        setUserInfo();
     }
     
-    public void setUserInfo() {
+    @Override
+    public void setUserInfo(UserDTO user) {
         userImageUi.getStyle().setBackgroundImage("url('images/home/userdefault.svg')");
-        userRealnameUi.setInnerText("Max Mustermann");
-        userUsernameUi.setInnerText("user001");
+        userRealnameUi.setInnerText(user.getName());
+        userUsernameUi.setInnerText(user.getEmail());
     }
     
     @UiHandler("userProfileUi")

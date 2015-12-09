@@ -7,20 +7,21 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 
 public class WrappedPlacesManagementController {
     
     public interface StartPlaceActivityMapper extends ActivityMapper {
         Place getStartPlace();
+        void setPlaceController(PlaceController placeController);
     }
 
     private final StartPlaceActivityMapper wrappedActivityMapper;
-    private final PlaceController wrappedPlaceController;
+    private final EventBus eventBus = new SimpleEventBus();
+    private final PlaceController wrappedPlaceController = new PlaceController(eventBus);
     
     public WrappedPlacesManagementController(StartPlaceActivityMapper wrappedActivityMapper, AcceptsOneWidget wrappedDisplay) {
-        EventBus eventBus = new SimpleEventBus();
         this.wrappedActivityMapper = wrappedActivityMapper;
-        this.wrappedPlaceController = new PlaceController(eventBus);
         ActivityManager wrappedActivityManager = new ActivityManager(this.wrappedActivityMapper, eventBus);
         wrappedActivityManager.setDisplay(wrappedDisplay);
     }
@@ -31,6 +32,10 @@ public class WrappedPlacesManagementController {
     
     public void goTo(Place newPlace) {
         this.wrappedPlaceController.goTo(newPlace);
+    }
+
+    public void fireEvent(UserManagementContextEvent event) {
+        eventBus.fireEvent(event);
     }
     
 }

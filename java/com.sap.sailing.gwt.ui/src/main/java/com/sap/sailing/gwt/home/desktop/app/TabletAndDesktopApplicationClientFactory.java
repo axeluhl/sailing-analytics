@@ -91,6 +91,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 }
             }
         });
+        getEventBus().addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                userManagementWizardController.fireEvent(event);
+            }
+        });
     }
     
     @Override
@@ -154,6 +160,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
+        private PlaceController placeController;
+
         @Override
         public Activity getActivity(final Place requestedPlace) {
             final Place placeToUse;
@@ -165,21 +173,26 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
             final TabletAndDesktopApplicationClientFactory cf = TabletAndDesktopApplicationClientFactory.this;
             if (placeToUse instanceof SigInPlace) {
-                return new SignInActivity(cf);
+                return new SignInActivity(cf, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(cf);
+                return new CreateAccountActivity(cf, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity(cf);
+                return new PasswordRecoveryActivity(cf, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity(cf);
             }
             
-            return new SignInActivity(cf);
+            return new SignInActivity(cf, placeController);
         }
         
         @Override
         public Place getStartPlace() {
             return new SigInPlace();
+        }
+
+        @Override
+        public void setPlaceController(PlaceController placeController) {
+            this.placeController = placeController;
         }
     }
 }
