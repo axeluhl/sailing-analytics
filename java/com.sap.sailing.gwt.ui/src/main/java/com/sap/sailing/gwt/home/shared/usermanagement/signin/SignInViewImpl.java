@@ -13,12 +13,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 
-public class SignInForm extends Composite {
+public class SignInViewImpl extends Composite implements SignInView {
     
-    interface SignInFormUiBinder extends UiBinder<Widget, SignInForm> {
+    interface SignInViewImplUiBinder extends UiBinder<Widget, SignInViewImpl> {
     }
     
-    private static SignInFormUiBinder uiBinder = GWT.create(SignInFormUiBinder.class);
+    private static SignInViewImplUiBinder uiBinder = GWT.create(SignInViewImplUiBinder.class);
     
     @UiField TextBox loginNameUi;
     @UiField PasswordTextBox passwordUi;
@@ -31,7 +31,9 @@ public class SignInForm extends Composite {
     @UiField DivElement formErrorUi;
     @UiField DivElement socialLoginUi;
 
-    public SignInForm() {
+    private Presenter presenter;
+
+    public SignInViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(loginNameUi, "TODO Username or Email");
         setPlaceholder(passwordUi, "TODO Password");
@@ -40,34 +42,38 @@ public class SignInForm extends Composite {
         }
     }
     
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
+    }
+    
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
     }
     
     @UiHandler("forgotPasswordUi")
     void onForgotPasswordUiControlClicked(ClickEvent event) {
-        // TODO
+        presenter.forgotPassword();
     }
     
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
-        // TODO
+        presenter.createAccount();
     }
     
     @UiHandler("signInUi")
     void onSignInControlUiClicked(ClickEvent event) {
-        // String login = loginNameUi.getValue(), pw = passwordUi.getValue();
-        // TODO
+         presenter.login(loginNameUi.getValue(), passwordUi.getValue());
     }
     
     @UiHandler("loginFacebookUi")
     void onLoginFacebookUiClicked(ClickEvent event) {
-        // TODO
+        presenter.loginWithFacebook();
     }
     
     @UiHandler("loginGoogleUi")
     void onLoginGoogleUiClicked(ClickEvent event) {
-        // TODO
+        presenter.loginWithGoogle(); 
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
