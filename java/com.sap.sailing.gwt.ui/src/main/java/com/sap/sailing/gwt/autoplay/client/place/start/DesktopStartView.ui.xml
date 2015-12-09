@@ -57,22 +57,6 @@
 					<g:CheckBox ui:field="startInFullscreenModeBox" />
 		        </div>
 			</div>
-			<div ui:field="leaderboardAutoZoomDiv" class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Auto-Zoom:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:CheckBox ui:field="leaderboardAutoZoomBox" />
-		        </div>
-			</div>
-			<div ui:field="leaderboardZoomDiv" class="{res.mediaCss.grid} {style.row}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Zoom-Factor:</span>
-		        </div>
-			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:TextBox ui:field="leaderboardZoomBox" />
-		        </div>
-			</div>
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
 				<div class="{res.mediaCss.columns}">Screen switching</div>
 			</div>			

@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
 import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigurationDialog;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
@@ -45,6 +46,8 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -60,13 +63,9 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField(provided=true) ListBox localeSelectionBox;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
-    @UiField CheckBox leaderboardAutoZoomBox;
     @UiField CheckBox startInFullscreenModeBox;
-    @UiField TextBox leaderboardZoomBox;
     @UiField Button startAutoPlayButton;
     @UiField DivElement leaderboardSelectionUi;
-    @UiField DivElement leaderboardZoomDiv;
-    @UiField DivElement leaderboardAutoZoomDiv;
     @UiField DivElement screenConfigurationUi;
     @UiField FlowPanel leaderboardPerspectiveSettingsPanel;
     @UiField FlowPanel raceboardPerspectiveSettingsPanel;
@@ -116,8 +115,6 @@ public class DesktopStartView extends Composite implements StartView {
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
 
-        leaderboardAutoZoomBox.setValue(true);
-        leaderboardZoomBox.setEnabled(false);
         startInFullscreenModeBox.setValue(true);
         autoSwitchToRaceboard.setValue(true);
         timeToRaceStartInSeconds.setValue(String.valueOf(defaultTimeToStartTimeInSeconds));
@@ -130,7 +127,7 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        leaderboardPerspective = new ProxyLeaderboardPerspective(leaderboard, createDefaultLeaderboardSettings(leaderboard));
+        leaderboardPerspective = new ProxyLeaderboardPerspective(new LeaderboardPerspectiveSettings(), leaderboard, createDefaultLeaderboardSettings(leaderboard));
         raceboardPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard, 
                 createDefaultLeaderboardSettings(leaderboard), createDefaultMultiCompetitorRaceChartSettings());
         
@@ -238,11 +235,15 @@ public class DesktopStartView extends Composite implements StartView {
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        String leaderboardZoom = getLeaderboardZoom();
+        
+        Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveSettings = new Util.Pair<>(raceboardPerspective.getSettings(), 
+                raceboardPerspective.getSettingsOfComponents());
+        Pair<LeaderboardPerspectiveSettings, CompositeSettings> leaderboardPerspectiveSettings = new Util.Pair<>(leaderboardPerspective.getSettings(), 
+                leaderboardPerspective.getSettingsOfComponents());
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    startInFullscreenModeBox.getValue(), leaderboardZoom));
+                    startInFullscreenModeBox.getValue()), leaderboardPerspectiveSettings, raceboardPerspectiveSettings);
         }
     }
 
@@ -263,10 +264,6 @@ public class DesktopStartView extends Composite implements StartView {
                 /*showCompetitorFullNameColumn*/ true);
     }
     
-    private String getLeaderboardZoom() {
-        return leaderboardAutoZoomBox.getValue() == true ? "auto" : String.valueOf(leaderboardZoomBox.getValue());
-    }
-
     private String getSelectedLocale() {
         String result = null;
         int selectedIndex = localeSelectionBox.getSelectedIndex();

@@ -35,8 +35,8 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -76,7 +76,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
     private boolean showWindChart;
-    private final RaceBoardPerspectiveSettings raceboardViewConfig;
+    private final RaceBoardPerspectiveSettings raceboardPerspectiveSettings;
+    private final LeaderboardPerspectiveSettings leaderboardPerspectiveSettings;
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     private Widget currentContentWidget;
@@ -86,8 +87,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardPerspectiveSettings raceboardViewConfig, PlayerView playerView, LeaderboardSettings leaderboardSettings) {
-        this.raceboardViewConfig = raceboardViewConfig;
+            RaceBoardPerspectiveSettings raceboardPerspectiveSettings, PlayerView playerView,
+            LeaderboardPerspectiveSettings leaderboardPerspectiveSettings) {
+        this.raceboardPerspectiveSettings = raceboardPerspectiveSettings;
+        this.leaderboardPerspectiveSettings = leaderboardPerspectiveSettings;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -96,12 +99,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
-        this.leaderboardSettings = leaderboardSettings;
         
-        if(this.leaderboardSettings == null) {
-            leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true); 
-        }
-        
+//        if(this.leaderboardSettings == null) {
+//            leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true); 
+//        }
+//        
         asyncActionsExecutor = new AsyncActionsExecutor();
         showWindChart = false;
         leaderboard = null;
@@ -120,8 +122,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                String leaderboardZoom = AutoPlayController.this.autoPlayerConfiguration.getLeaderboardZoom();
-                if(leaderboardZoom != null && leaderboardZoom.equalsIgnoreCase("auto")) {
+                if(AutoPlayController.this.leaderboardPerspectiveSettings.isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
@@ -168,7 +169,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                competitorsAndTheirBoats, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */ null, raceboardViewConfig,
+                competitorsAndTheirBoats, raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */ null, raceboardPerspectiveSettings,
                 errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
                 /* isScreenLargeEnoughToOfferChartSupport */ true);
         return raceBoardPanel;
@@ -189,17 +190,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             
             currentContentWidget = oldLeaderboard.getContentWidget();
             
-            if(autoPlayerConfiguration.getLeaderboardZoom() != null) {
-                if(autoPlayerConfiguration.getLeaderboardZoom().equalsIgnoreCase("auto")) {
-                    autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
-                } else {
-                    try {
-                        Double zoom = Double.valueOf(autoPlayerConfiguration.getLeaderboardZoom());
-                        zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
-                    } catch (NumberFormatException e) {
-                        // do nothing
-                    }
-                }
+            if(leaderboardPerspectiveSettings.isLeaderboardAutoZoom()) {
+                autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
+            } else {
+                Double zoom = leaderboardPerspectiveSettings.getLeaderboardZoomFactor();
+                zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
             }
 
             playerView.getDockPanel().add(oldLeaderboard);
