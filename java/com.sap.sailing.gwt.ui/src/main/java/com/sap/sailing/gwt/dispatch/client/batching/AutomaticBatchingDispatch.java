@@ -18,6 +18,8 @@ public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements D
 
     private DispatchCallStack<CTX> currentCallstack;
 
+    private boolean processResultsScheduled;
+
     /**
      * Creates a batching dispatch service using the given dispatch implementation.
      * 
@@ -28,7 +30,21 @@ public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements D
      * 
      */
     public AutomaticBatchingDispatch(DispatchAsync<CTX> service) {
+        this(service, false);
+    }
+    
+    /**
+     * Creates a batching dispatch service using the given dispatch implementation.
+     * 
+     * The underlying dispatch service is responsible for the context propagation.
+     * 
+     * @param service
+     *            the underlying service implementation to use
+     * 
+     */
+    public AutomaticBatchingDispatch(DispatchAsync<CTX> service, boolean processResultsScheduled) {
         this.executionContext = service;
+        this.processResultsScheduled = processResultsScheduled;
     }
 
     /**
@@ -73,7 +89,7 @@ public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements D
 
                             @Override
                             public void onSuccess(BatchResult result) {
-                                callStackInExecution.processResult(result);
+                                callStackInExecution.processResult(result, processResultsScheduled);
                             }
                         });
             }
