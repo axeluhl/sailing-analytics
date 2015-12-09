@@ -16,8 +16,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
 
@@ -30,12 +30,9 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView = new TabletAndDesktopUserProfileView();
     
-    private final UserDTO user;
-
-    public UserProfileActivity(AbstractUserProfilePlace place, UserDTO user, UserProfileClientFactory clientFactory,
+    public UserProfileActivity(AbstractUserProfilePlace place, UserProfileClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
         this.currentPlace = place;
-        this.user = user;
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
         
@@ -52,7 +49,18 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
+        
         currentView.navigateTabsTo(currentPlace);
+        
+        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
+        
+        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                currentView.setUserManagementContext(event.getCtx());
+            }
+        });
+        
     }
 
     @Override
@@ -79,10 +87,5 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return homePlacesNavigator.getUserProfileNavigation();
-    }
-    
-    @Override
-    public UserDTO getUser() {
-        return user;
     }
 }

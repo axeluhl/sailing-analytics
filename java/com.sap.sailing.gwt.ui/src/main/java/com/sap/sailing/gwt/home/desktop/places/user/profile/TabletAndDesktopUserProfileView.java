@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionE
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.userprofileheader.UserProfileHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -61,6 +62,12 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
 //        }
 //        Window.setTitle(titleBuilder.toString());
         Window.setTitle("TODO User Profile title");
+    }
+    
+    @Override
+    public void setUserManagementContext(UserManagementContext userManagementContext) {
+        headerUi.setUserManagementContext(userManagementContext);
+        tabPanelUi.getCurrentTab().setUserManagementContext(userManagementContext);
     }
 
     @SuppressWarnings("unchecked")

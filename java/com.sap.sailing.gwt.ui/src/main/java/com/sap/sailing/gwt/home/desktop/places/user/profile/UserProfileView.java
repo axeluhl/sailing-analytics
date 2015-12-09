@@ -5,10 +5,10 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
@@ -20,8 +20,6 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
         
         PlaceNavigation<StartPlace> getHomeNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation();
-
-        UserDTO getUser();
     }
     
     /**
@@ -39,5 +37,7 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
     void navigateTabsTo(PLACE place);
     
     void showErrorInCurrentTab(IsWidget errorView);
+
+    void setUserManagementContext(UserManagementContext userManagementContext);
     
 }

@@ -7,7 +7,6 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserProfileActivityProxy extends AbstractActivityProxy implements ProvidesNavigationPath, WithHeader {
 
@@ -30,24 +29,10 @@ public class UserProfileActivityProxy extends AbstractActivityProxy implements P
 
     @Override
     protected void startAsync() {
-        // TODO implement
-//        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-//        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
-//                new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
-//            @Override
-//            public void onSuccess(EventSeriesViewDTO series) {
-//                afterLoad(series);
-//            }
-//        });
-        // TODO remove
-        afterLoad(null);
-    }
-
-    private void afterLoad(final UserDTO user) {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                super.onSuccess(new UserProfileActivity(place, user, clientFactory,
+                super.onSuccess(new UserProfileActivity(place, clientFactory,
                         homePlacesNavigator, navigationPathDisplay));
             }
         });

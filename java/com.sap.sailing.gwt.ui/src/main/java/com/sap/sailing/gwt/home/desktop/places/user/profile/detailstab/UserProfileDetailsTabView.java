@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 
 /**
@@ -19,7 +23,11 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+    @SuppressWarnings("unused")
     private UserProfileView.Presenter currentPresenter;
+    
+    @UiField DivElement userUi;
+    @UiField DivElement notLoggedInUi;
     
     public UserProfileDetailsTabView() {
     }
@@ -38,10 +46,19 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        // TODO fill contents
-        currentPresenter.getUser();
-        
         contentArea.setWidget(this);
+    }
+    
+    @Override
+    public void setUserManagementContext(UserManagementContext userManagementContext) {
+        if(userManagementContext.isLoggedIn()) {
+            notLoggedInUi.getStyle().setDisplay(Display.NONE);
+            userUi.getStyle().clearDisplay();
+            userUi.setInnerText(userManagementContext.getCurrentUser().getName());
+        } else {
+            notLoggedInUi.getStyle().clearDisplay();
+            userUi.getStyle().setDisplay(Display.NONE);
+        }
     }
 
     @Override

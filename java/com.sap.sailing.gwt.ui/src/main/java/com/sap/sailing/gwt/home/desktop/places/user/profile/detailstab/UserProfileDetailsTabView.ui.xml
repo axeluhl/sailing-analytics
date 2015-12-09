@@ -5,7 +5,8 @@
 	</ui:style>
 	<g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
 		<div class="{res.mediaCss.columns} {res.mediaCss.small12}">
-			<div>TODO implement content</div>
+			<div ui:field="notLoggedInUi">TODO you are currently not logged in</div>
+			<div ui:field="userUi">TODO implement content</div>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
