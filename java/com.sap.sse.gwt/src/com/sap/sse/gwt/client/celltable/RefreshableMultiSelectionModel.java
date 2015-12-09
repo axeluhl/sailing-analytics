@@ -5,27 +5,30 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent.Handler;
+import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 
 /**
- * This {@link RefreshableMultiSelectionModel} have the property that it is refreshable. That means if the
- * {@link CellTable} have new Elements you can call
- * {@link RefreshableMultiSelectionModel#refreshSelectionModel(Iterable) refreshSelectionModel(Iterable)} and the
- * elements with {@link EntityIdentityComparator#representSameEntity(Object, Object) the same identity} will be
- * reselected.
+ * This {@link RefreshableMultiSelectionModel} implements the {@link RefreshableSelectionModel} interface. So it
+ * register it self as a display on the {@link ListDataProvider} and reacts on the changes of {@link ListDataProvider}.
+ * When the {@link ListDataProvider} is changed this {@link RefreshableMultiSelectionModel selectionmodel} will refresh
+ * the selection according to the {@link ListDataProvider} changes. To make this class work correct it is very important
+ * to set the {@link ListDataProvider}, otherwise it won´t work.
+ * <p>
+ * For more details on the update process read the {@link RefreshableSelectionModel} Javadoc and see the methods
+ * {@link RefreshableMultiSelectionModel#refreshSelectionModel(Iterable)} and
+ * {@link RefreshableMultiSelectionModel#setRowData(int, List)}.
  * 
+ * @author D064976
  * @param <T>
- *            the type of {@link CellTable} entries
- * 
- *            TODO /FIXME Describe interaction with ListDataProvider
+ *            the type of entries
  */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T>, HasData<T> {
@@ -36,6 +39,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     /**
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
+     * @param listDataProvider
+     *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
+     *            display on {@link ListDataProvider}
      */
     public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super();
@@ -49,6 +55,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      *            {@link ProvidesKey} for the super class constructor
      * @param comp
      *            {@link EntityIdentityComparator} to compare the identity of the objects
+     * @param listDataProvider
+     *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
+     *            display on {@link ListDataProvider}
      */
     public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
         super(keyProvider);
@@ -57,14 +66,21 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         this.listDataProvider.addDataDisplay(this);
     }
 
+    /**
+     * @return the {@link EntityIdentityComparator} for the {@link RefreshableSingleSelectionModel}. If the
+     *         {@link EntityIdentityComparator} is not set this method will return <code>null</code>.
+     */
     @Override
     public EntityIdentityComparator<T> getEntityIdentityComparator() {
         return comp;
     }
 
-    /*
-     * TODO / FIXME: Need to redefine setSelected here: if an element is set selected for which another element is in
-     * the current selection that is compared equal by the EntityIdentityComparator then it should be replaced
+    /**
+     * Checks the old selection state of the object. If it was selected before, the old version will be replaced with
+     * the new one. In all other cases this method behave same as
+     * <code>super.setSelected(T item, boolean selected)</code>.
+     * <p>
+     * When the {@link EntityIdentityComparator} is null this method also behaves like the <code>super</code> method
      */
     @Override
     public void setSelected(T item, boolean selected) {
@@ -90,10 +106,20 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     }
 
     /**
-     * refreshes the {@link RefreshableMultiSelectionModel SelectionModel} with all elements of the
-     * {@link ListDataProvider}
+     * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>.All objects from the
+     * current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same
+     * entity} as an object from <code>newObjects</code> will be reselected. All others are de-selected. That means a
+     * selected object is not contained in <code>newObjects</code> the object wouldn't be selected anymore. If this
+     * selection model has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)}
+     * method to compare. If an object is reselected it will be replaced with the new version of it.
      * <p>
-     * FIXME change to private
+     *
+     * When the selection is refreshed this method triggers a
+     * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent) onSelectionChangedEvent} using
+     * {@link AbstractSelectionModel#fireEvent(com.google.gwt.event.shared.GwtEvent)}.
+     * 
+     * @param newObjects
+     *            the new objects to refresh the {@link RefreshableMultiSelectionModel selectionmodel}
      */
     private void refreshSelectionModel(Iterable<T> newObjects) {
         dontcheckSelectionState = true;
@@ -119,7 +145,11 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         }
         dontcheckSelectionState = false;
     }
-
+    
+    /**
+     * This method is called when the {@link ListDataProvider} has new elements. It takes the new elements and refreshes
+     * the {@link RefreshableMultiSelectionModel selectionmodel} with them.
+     */
     @Override
     public void setRowData(int start, List<? extends T> values) {
         refreshSelectionModel(new ArrayList<>(listDataProvider.getList()));
