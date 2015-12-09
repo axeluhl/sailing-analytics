@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountDetails;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
@@ -26,8 +27,8 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     @SuppressWarnings("unused")
     private UserProfileView.Presenter currentPresenter;
     
-    @UiField DivElement userUi;
     @UiField DivElement notLoggedInUi;
+    @UiField(provided = true) UserAccountDetails accountDetailsUi;
     
     public UserProfileDetailsTabView() {
     }
@@ -44,6 +45,7 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
 
     @Override
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
+        accountDetailsUi = new UserAccountDetails(null);
         initWidget(ourUiBinder.createAndBindUi(this));
         
         contentArea.setWidget(this);
@@ -53,11 +55,11 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     public void setUserManagementContext(UserManagementContext userManagementContext) {
         if(userManagementContext.isLoggedIn()) {
             notLoggedInUi.getStyle().setDisplay(Display.NONE);
-            userUi.getStyle().clearDisplay();
-            userUi.setInnerText(userManagementContext.getCurrentUser().getName());
+            accountDetailsUi.getElement().getStyle().clearDisplay();
+            accountDetailsUi.setUserManagementContext(userManagementContext);
         } else {
             notLoggedInUi.getStyle().clearDisplay();
-            userUi.getStyle().setDisplay(Display.NONE);
+            accountDetailsUi.getElement().getStyle().setDisplay(Display.NONE);
         }
     }
 
