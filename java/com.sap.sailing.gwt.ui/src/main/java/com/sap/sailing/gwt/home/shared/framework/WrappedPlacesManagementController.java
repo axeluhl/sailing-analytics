@@ -22,6 +22,7 @@ public class WrappedPlacesManagementController {
     
     public WrappedPlacesManagementController(StartPlaceActivityMapper wrappedActivityMapper, AcceptsOneWidget wrappedDisplay) {
         this.wrappedActivityMapper = wrappedActivityMapper;
+        this.wrappedActivityMapper.setPlaceController(this.wrappedPlaceController);
         ActivityManager wrappedActivityManager = new ActivityManager(this.wrappedActivityMapper, eventBus);
         wrappedActivityManager.setDisplay(wrappedDisplay);
     }
