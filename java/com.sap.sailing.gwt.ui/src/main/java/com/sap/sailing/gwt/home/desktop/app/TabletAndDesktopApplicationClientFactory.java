@@ -191,7 +191,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity(cf, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity(cf);
+                return new LoggedInUserInfoActivity(cf, placeController);
             }
             
             return new SignInActivity(cf, placeController);
