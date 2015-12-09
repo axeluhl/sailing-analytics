@@ -28,6 +28,7 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         
     }
+    
     // MARK:- Timer
     
     func timer(timer: NSTimer) {

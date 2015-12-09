@@ -16,7 +16,7 @@ import AVFoundation
     optional func qrCodeCancel()
 }
 
-class QRCodeManager: NSObject, UIAlertViewDelegate {
+class QRCodeManager : NSObject, UIAlertViewDelegate {
     
     enum AlertView: Int {
         case IncorrectQRCode, AcceptMapping, ServerError
@@ -80,7 +80,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         
         self.delegate.activityIndicatorView?.startAnimating()
 
-        var checkIn = DataManager.sharedManager.getCheckIn(qrcodeData!.eventId!, leaderBoardName: qrcodeData!.leaderBoardName!, competitorId: qrcodeData!.competitorId!)
+        let checkIn = DataManager.sharedManager.getCheckIn(qrcodeData!.eventId!, leaderBoardName: qrcodeData!.leaderBoardName!, competitorId: qrcodeData!.competitorId!)
         
         // already checked in
         if checkIn != nil {
@@ -112,7 +112,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                     let competitorName = (self.competitorDictionary!["name"]) as! String
                                     let leaderBoardName = (self.leaderBoardDictionary!["name"]) as! String
                                     let sailId = (self.competitorDictionary!["sailID"]) as! String
-                                    var title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
+                                    let title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
                                     let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
                                     alertView.tag = AlertView.AcceptMapping.rawValue;
                                     alertView.show()
@@ -178,11 +178,11 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 
                 // create core data objects
-                var event = DataManager.sharedManager.newEvent(checkIn)
+                let event = DataManager.sharedManager.newEvent(checkIn)
                 event.initWithDictionary(self.eventDictionary!)
-                var leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
+                let leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
                 leaderBoard.initWithDictionary(self.leaderBoardDictionary!)
-                var competitor = DataManager.sharedManager.newCompetitor(checkIn)
+                let competitor = DataManager.sharedManager.newCompetitor(checkIn)
                 competitor.initWithDictionary(self.competitorDictionary!)
                 DataManager.sharedManager.saveContext()
 
