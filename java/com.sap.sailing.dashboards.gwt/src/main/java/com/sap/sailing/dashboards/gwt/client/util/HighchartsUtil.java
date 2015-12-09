@@ -22,7 +22,7 @@ public class HighchartsUtil {
     }
 
     /**
-     * In cases where it is necessary to initialize a {@link Chart}, with dynamic size during the same browser loop, where it´s dynamic container is initialized,
+     * In cases where it is necessary to initialize a {@link Chart} with dynamic size during the same browser loop, where it´s dynamic container is initialized,
      * the {@link Chart.setSizeToMatchContainer()} method will not work. The solution to that problem is to call {@link Chart#setSizeToMatchContainer()} later,
      * when the container of the chart is completely initialized and its size is available to the {@link Chart}.
      * */

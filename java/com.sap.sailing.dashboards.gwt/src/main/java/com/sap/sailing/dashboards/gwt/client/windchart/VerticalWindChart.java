@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.util.HighchartsUtil;
 
 /**
  * The class represents a wind chart that is displayed vertically. Because it is meant to be used to display wind fixes,
@@ -114,6 +115,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         positiveSeriesColorAsHex = positiveFillColor;
         negativeSeriesColorAsHex = negativeFillColor;
         verticalWindChartClickListeners = new ArrayList<VerticalWindChartClickListener>();
+        HighchartsUtil.setSizeToMatchContainerDelayed(verticalWindChart);
     }
 
     private void setChartOptions() {
@@ -207,7 +209,6 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 }
                 verticalWindChartSeries.updateThreshold("" + average);
                 adaptVerticalWindChartExtemes();
-                verticalWindChart.setSizeToMatchContainer();
             }
         });
     }
@@ -229,7 +230,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private void setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall() {
                 long maximumExtremeValueInMillis = getLastPointOfVerticalWindChartSeries().getX().longValue();
                 long minimumExtremeValueInMillis = maximumExtremeValueInMillis - chartIntervallinMinutes * 60 * 1000;
-                verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, true);                
+                verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, false);                
     }
 
 
