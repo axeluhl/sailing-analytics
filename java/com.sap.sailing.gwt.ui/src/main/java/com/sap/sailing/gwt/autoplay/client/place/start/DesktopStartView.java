@@ -204,10 +204,20 @@ public class DesktopStartView extends Composite implements StartView {
 
     private void createPerspectiveSettingsUI(final Perspective<?> perspective, FlowPanel perspectiveSettingsPanel) {
         perspectiveSettingsPanel.clear();
-        
+
+        Button perspectiveSettingsButton = new Button("General Settings");
+        perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
+        perspectiveSettingsPanel.add(perspectiveSettingsButton);
+        perspectiveSettingsButton.setEnabled(perspective.hasSettings());
+        perspectiveSettingsButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openPerspectiveSettingsDialog(perspective);
+            }
+        });
+
         Button perspectiveComponentSettingsButton = new Button("Component settings");
         perspectiveSettingsPanel.add(perspectiveComponentSettingsButton);
-        perspectiveComponentSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
         perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -215,16 +225,6 @@ public class DesktopStartView extends Composite implements StartView {
             }
         });
         
-        if(perspective.hasSettings()) {
-            Button perspectiveSettingsButton = new Button("General Settings");
-            perspectiveSettingsPanel.add(perspectiveSettingsButton);
-            perspectiveSettingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    openPerspectiveSettingsDialog(perspective);
-                }
-            });
-        }
     }
     
     @UiHandler("localeSelectionBox") 
