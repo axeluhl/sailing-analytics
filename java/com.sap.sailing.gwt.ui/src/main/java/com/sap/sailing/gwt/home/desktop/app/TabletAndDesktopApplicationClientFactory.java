@@ -165,6 +165,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         securityProvider.getUserService().updateUser(true);
     }
 
+    @Override
+    public void didLogin(UserDTO user) {
+        uCtx = new UserManagementContextImpl(user);
+        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+
     private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
         private PlaceController placeController;
 
@@ -205,4 +211,5 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             this.placeController = placeController;
         }
     }
+
 }

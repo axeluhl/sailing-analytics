@@ -115,7 +115,13 @@ public class MobileApplicationClientFactory extends
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
     }
-    
+
+    @Override
+    public void didLogin(UserDTO user) {
+        uCtx = new UserManagementContextImpl(user);
+        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+
     @Override
     public UserManagementServiceAsync getUserManagement() {
         return securityProvider.getUserManagementService();
