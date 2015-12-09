@@ -116,3 +116,6 @@
   margin-left: 1rem;
   cursor: pointer;
 }
+.user_menu_button.loggedin {
+  background-image: url('images/home/loggedin.svg');
+}

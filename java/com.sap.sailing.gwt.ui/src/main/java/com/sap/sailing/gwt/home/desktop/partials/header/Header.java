@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
@@ -92,6 +93,12 @@ public class Header extends Composite {
             @Override
             public void onPlaceChanged(PlaceChangedEvent event) {
                 updateActiveLink(event.getNewPlace());
+            }
+        });
+        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
             }
         });
     }
