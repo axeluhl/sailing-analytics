@@ -317,6 +317,7 @@
 		7FED45C81A25F5900022505F /* competitor1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C21A25F5900022505F /* competitor1.json */; };
 		7FED45CA1A25F5910022505F /* event1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C41A25F5900022505F /* event1.json */; };
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
+		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -676,6 +677,7 @@
 		7FED45C21A25F5900022505F /* competitor1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = competitor1.json; sourceTree = "<group>"; };
 		7FED45C41A25F5900022505F /* event1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = event1.json; sourceTree = "<group>"; };
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
+		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1108,6 +1110,7 @@
 			children = (
 				7F83F15419F154F000C53328 /* Info.plist */,
 				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
+				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1332,6 +1335,7 @@
 				7F14A1DF1A13B9A6001C1ECB /* SG.png in Resources */,
 				7F14A2031A13B9A6001C1ECB /* VC.png in Resources */,
 				7F14A1CF1A13B9A6001C1ECB /* PN.png in Resources */,
+				C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */,
 				7F14A1A21A13B9A6001C1ECB /* LV.png in Resources */,
 				7F14A1B31A13B9A6001C1ECB /* MS.png in Resources */,
 				7F14A1111A13B9A6001C1ECB /* _mars.png in Resources */,

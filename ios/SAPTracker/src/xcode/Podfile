@@ -3,3 +3,9 @@ platform :ios, '7.1'
 link_with ['SAPTracker', 'SAPTrackerTests']
 pod 'AFNetworking', '2.5.0'
 pod 'AFNetworkActivityLogger', '2.0.3', :configurations => ['Debug']
+
+# Update acknowledgements in build settings
+post_install do | installer |
+  require 'fileutils'
+  FileUtils.cp_r('Pods/Target Support Files/Pods/Pods-Acknowledgements.plist', 'SAPTracker/Settings.bundle/Acknowledgements.plist', :remove_destination => true)
+end
