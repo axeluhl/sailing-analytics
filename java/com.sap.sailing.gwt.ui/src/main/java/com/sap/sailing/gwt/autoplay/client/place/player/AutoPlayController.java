@@ -41,10 +41,12 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -70,14 +72,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     // leaderboard related attributes
     private LeaderboardDTO leaderboard;
-    private LeaderboardSettings leaderboardSettings;
+//    private LeaderboardSettings leaderboardSettings;
    
     // raceboard related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
-    private boolean showWindChart;
-    private final RaceBoardPerspectiveSettings raceboardPerspectiveSettings;
     private final LeaderboardPerspectiveSettings leaderboardPerspectiveSettings;
+    private final CompositeSettings leaderboardComponentsSettings;
+    private final RaceBoardPerspectiveSettings raceboardPerspectiveSettings;
+    private final CompositeSettings raceboardComponentsSettings;
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     private Widget currentContentWidget;
@@ -86,11 +89,9 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
-            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails,
-            RaceBoardPerspectiveSettings raceboardPerspectiveSettings, PlayerView playerView,
-            LeaderboardPerspectiveSettings leaderboardPerspectiveSettings) {
-        this.raceboardPerspectiveSettings = raceboardPerspectiveSettings;
-        this.leaderboardPerspectiveSettings = leaderboardPerspectiveSettings;
+            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView,
+            Pair<RaceBoardPerspectiveSettings, CompositeSettings> allRaceboardSettings,
+            Pair<LeaderboardPerspectiveSettings, CompositeSettings> allLeaderboardSettings) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -99,13 +100,16 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
+        this.raceboardPerspectiveSettings = allRaceboardSettings.getA();
+        this.raceboardComponentsSettings = allRaceboardSettings.getB();
+        this.leaderboardPerspectiveSettings = allLeaderboardSettings.getA();
+        this.leaderboardComponentsSettings = allLeaderboardSettings.getB();
         
 //        if(this.leaderboardSettings == null) {
 //            leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true); 
 //        }
 //        
         asyncActionsExecutor = new AsyncActionsExecutor();
-        showWindChart = false;
         leaderboard = null;
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
@@ -131,6 +135,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        LeaderboardSettings leaderboardSettings = (LeaderboardSettings) leaderboardComponentsSettings.getSettingsPerComponent().iterator().next().getB();
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, true,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, /*leaderboardGroupName*/ "", leaderboardName,
@@ -284,9 +289,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                     RaceBoardPanel raceBoardPanel = createRaceBoardPanel(AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
                             currentLiveRace, result.getCompetitorAndTheirBoats());
                     raceBoardPanel.setSize("100%", "100%");
-                    if (showWindChart) {
-                        raceBoardPanel.setWindChartVisible(true);
-                    }
                     FlowPanel timePanel = createTimePanel(raceBoardPanel);
                     
                     final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();

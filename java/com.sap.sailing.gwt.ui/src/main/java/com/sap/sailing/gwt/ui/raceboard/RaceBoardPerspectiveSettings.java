@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
-/** 
+/**
  * Represents the parameters for configuring the raceboard view
+ * 
  * @author Frank
  *
  */
 public class RaceBoardPerspectiveSettings extends AbstractSettings {
-    private final boolean showLeaderboard; 
-    private final boolean showWindChart; 
+    private final boolean showLeaderboard;
+    private final boolean showWindChart;
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
@@ -18,7 +20,7 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showViewStreamlets;
     private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
-    
+
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
@@ -34,13 +36,15 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public static final String PARAM_DEFAULT_MEDIA = "defaultMedia";
 
     public RaceBoardPerspectiveSettings() {
-        this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
-                /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewStreamletColors */ false, /* showViewSimulation */ false,
+        this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
+        /* showWindChart */false, /* showCompetitorsChart */false, /* showViewStreamlets */false, /* showViewStreamletColors */
+        false, /* showViewSimulation */false,
         /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
-    }	
-    
+    }
+
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets,
+            boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
             boolean autoSelectMedia, String defaultMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
@@ -94,4 +98,20 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return defaultMedia;
     }
 
+    public static RaceBoardPerspectiveSettings readSettingsFromURL() {
+        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, false /* default */);
+        final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
+        final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(
+                PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default */);
+        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, false /* default */);
+        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
+        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, null /* default */);
+        final Boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTOSELECT_MEDIA, true /* default */);
+        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(PARAM_DEFAULT_MEDIA, null /* default */);
+
+        return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
+                showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, /* canReplayWhileLiveIsPossible */
+                false, autoSelectMedia, defaultMedia);
+    }
 }

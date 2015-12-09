@@ -38,7 +38,6 @@ public class PlayerActivity extends AbstractActivity {
             @Override
             public void onSuccess(final EventDTO event) {
                 UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-                //RaceBoardPerspectiveSettings readRaceboardConfiguration = readRaceboardConfiguration();
 
                 PlayerView view = clientFactory.createPlayerView();
                 panel.setWidget(view.asWidget());
@@ -46,8 +45,8 @@ public class PlayerActivity extends AbstractActivity {
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
                         .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
-                        playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails,
-                        playerPlace.getRaceboardPerspectiveSettings().getA(), view, /** TODO: pass leaderboardSettings*/ null);
+                        playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails, view,
+                        playerPlace.getRaceboardPerspectiveSettings(), playerPlace.getLeaderboardPerspectiveSettings());
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 
@@ -57,28 +56,6 @@ public class PlayerActivity extends AbstractActivity {
             }
         }); 
     }
-    
-//    private RaceBoardPerspectiveSettings readRaceboardConfiguration() {
-//        Boolean autoSelectMedia = true;
-//
-//        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
-//        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_WINDCHART, false /* default */);
-//        final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
-//        final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default */);
-//        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_SIMULATION, false /* default */);
-//        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(
-//                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
-//        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-//        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_DEFAULT_MEDIA, null /* default */);
-//        
-//        return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard,
-//                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, /* canReplayWhileLiveIsPossible */false, autoSelectMedia, defaultMedia);
-//    }
 
     private void createErrorView(String errorMessage, Throwable errorReason, AcceptsOneWidget panel) {
         ErrorView view = clientFactory.createErrorView(errorMessage, errorReason);
