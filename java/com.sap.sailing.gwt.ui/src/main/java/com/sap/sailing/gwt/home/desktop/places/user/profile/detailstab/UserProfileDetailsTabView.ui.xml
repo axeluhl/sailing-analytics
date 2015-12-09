@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:style>
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+		<div class="{res.mediaCss.columns} {res.mediaCss.small12}">
+			<div>TODO implement content</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>
