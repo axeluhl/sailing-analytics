@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringClientFactor
 import com.sap.sailing.gwt.home.desktop.places.start.StartClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithSecurity;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFac
 public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
         EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory,
         SearchResultClientFactory, WhatsNewClientFactory, SeriesClientFactory, UserProfileClientFactory,
-        ErrorClientFactory, ClientFactoryWithSecurity, ClientFactoryWithUserManagementService {
+        ErrorClientFactory, ClientFactoryWithUserManagementContext, ClientFactoryWithUserManagementService {
 
     DesktopPlacesNavigator getHomePlacesNavigator();
 

@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithSecurity;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
@@ -36,7 +36,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithSecurity,
+        ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithUserManagementContext,
         ClientFactoryWithUserManagementService {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
