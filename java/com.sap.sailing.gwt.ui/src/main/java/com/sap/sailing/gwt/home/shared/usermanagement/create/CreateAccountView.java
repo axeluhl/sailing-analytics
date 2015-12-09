@@ -5,6 +5,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface CreateAccountView extends IsWidget {
     
     void setPresenter(Presenter presenter);
+
+    void setErrorMessage(String message);
     
     public interface Presenter {
         
@@ -13,5 +15,6 @@ public interface CreateAccountView extends IsWidget {
         void signIn();
         
     }
+
 
 }

@@ -43,6 +43,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         this.presenter = presenter;
     }
     
+    @Override
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
     }
