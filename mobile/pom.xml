@@ -79,9 +79,9 @@
   <build>
     <resources>
       <resource>
-        <directory>${project.basedir}/assets_resources</directory>
+        <directory>${project.basedir}/assets</directory>
         <filtering>true</filtering>
-        <targetPath>${project.basedir}/assets</targetPath>
+        <targetPath>${project.build.directory}/filtered-assets</targetPath>
       </resource>
     </resources>
         <plugins>
@@ -112,7 +112,7 @@
               <sourceDirectory>${project.basedir}/src</sourceDirectory>
             </sourceDirectories>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
-            <assetsDirectory>${project.basedir}/assets</assetsDirectory>
+            <assetsDirectory>${project.build.directory}/filtered-assets</assetsDirectory>
             <failOnNonStandardStructure>false</failOnNonStandardStructure>
             <failOnConflictingLayouts>false</failOnConflictingLayouts>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
