@@ -5,9 +5,10 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class UserManagementContextImpl implements UserManagementContext {
 
     private final UserDTO currentUser;
+    private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", false, null, null, null);
 
     public UserManagementContextImpl() {
-        this.currentUser = null;
+        this.currentUser = ANONYMOUS;
     }
 
     public UserManagementContextImpl(UserDTO currentUser) {
@@ -16,7 +17,7 @@ public class UserManagementContextImpl implements UserManagementContext {
 
     @Override
     public boolean isLoggedIn() {
-        return (currentUser != null);
+        return (currentUser != ANONYMOUS);
     }
 
     @Override
