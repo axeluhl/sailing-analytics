@@ -1,0 +1,61 @@
+.useraccountdetails {
+  overflow: hidden;
+}
+.useraccountdetails_image {
+  float: left;
+  width: 8em;
+  height: 8em;
+  z-index: 1;
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+.useraccountdetails_image_editbutton {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 2em;
+  height: 2em;
+  background-image: url("images/home/edit.svg");
+  background-color: #efaa00;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+}
+.useraccountdetails_image:hover .useraccountdetails_image_editbutton {
+  display: block;
+}
+.useraccountdetails_content {
+  float: left;
+  width: 100%;
+  max-width: 53.333333333333336em;
+  padding-left: 12em;
+  margin-left: -10em;
+}
+.useraccountdetails_content_detail {
+  float: right;
+  width: 50%;
+  padding-left: 1.333333333333333em;
+  margin-bottom: 1.333333333333333em;
+  overflow: hidden;
+}
+.useraccountdetails_content_detail_label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4em;
+}
+.useraccountdetails_content_detail_input {
+  display: block;
+  width: 100%;
+  padding: 0.666666666666667em;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+.useraccountdetails_content_submit {
+  width: 100%;
+  float: right;
+  text-align: right;
+  text-transform: uppercase;
+}
