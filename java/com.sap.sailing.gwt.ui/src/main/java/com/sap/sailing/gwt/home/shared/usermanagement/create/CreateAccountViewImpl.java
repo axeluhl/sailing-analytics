@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class CreateAccountViewImpl extends Composite implements CreateAccountView {
     
@@ -32,10 +33,12 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     public CreateAccountViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        setPlaceholder(emailUi, "TODO Email");
-        setPlaceholder(usernameUi, "TODO Username");
-        setPlaceholder(passwordUi, "TODO Password");
-        setPlaceholder(passwordConfirmationUi, "TODO Password Confirmation");
+        
+        StringMessages i18n = StringMessages.INSTANCE;
+        setPlaceholder(emailUi, i18n.email());
+        setPlaceholder(usernameUi, i18n.username());
+        setPlaceholder(passwordUi, i18n.password());
+        setPlaceholder(passwordConfirmationUi, i18n.passwordRepeat());
     }
     
     @Override
