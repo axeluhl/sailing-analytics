@@ -42,6 +42,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void gotoProfileUi() {
+        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
         clientFactory.getHomePlacesNavigator().getUserProfileNavigation().goToPlace();
     }
 
