@@ -8,10 +8,9 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
-import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
@@ -39,29 +38,12 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             @Override
             public void onSuccess(UserDTO result) {
                 clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (result.isSuccessful()) {
-                                    clientFactory.didLogin(result.getUserDTO());
-                                    placeController.goTo(new LoggedInUserInfoPlace());
-                                } else {
-                                    view.setErrorMessage(result.getMessage());
-                                }
-                            }
-                            
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                // TODO
-                                view.setErrorMessage("TODO - login failed");
-                            }
-                        });
+                        new AsyncLoginCallback(clientFactory, placeController, view));
             }
             
             @Override
             public void onFailure(Throwable caught) {
-                // TODO
-                view.setErrorMessage("TODO - create account failed");
+                view.setErrorMessage("Error occured! Creating account failed.");
             }
         });
     }
