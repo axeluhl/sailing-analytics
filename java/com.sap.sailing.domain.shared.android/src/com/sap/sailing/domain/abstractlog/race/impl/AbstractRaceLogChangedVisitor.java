@@ -89,12 +89,6 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
         notifyListenerAboutEventAdded(event);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
     @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
         notifyListenerAboutEventAdded(event);

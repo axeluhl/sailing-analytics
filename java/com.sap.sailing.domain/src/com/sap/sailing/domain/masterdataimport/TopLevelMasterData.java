@@ -156,10 +156,9 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private boolean isMarkMappingEvent(DeviceMappingEvent<?, ?> mappingEvent) {
         boolean isMarkMappingEvent = false;
-        if (mappingEvent instanceof com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent || mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
+        if (mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
             isMarkMappingEvent = true;
         }
         return isMarkMappingEvent;

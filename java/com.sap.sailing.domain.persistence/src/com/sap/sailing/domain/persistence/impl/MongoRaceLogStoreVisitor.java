@@ -122,13 +122,6 @@ public class MongoRaceLogStoreVisitor implements RaceLogEventVisitor {
         mongoObjectFactory.storeRaceLogEventEvent(object);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
-        DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);
-        mongoObjectFactory.storeRaceLogEventEvent(object);
-    }
-
     @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
         DBObject object = mongoObjectFactory.storeRaceLogEntry(raceLogIdentifier, event);

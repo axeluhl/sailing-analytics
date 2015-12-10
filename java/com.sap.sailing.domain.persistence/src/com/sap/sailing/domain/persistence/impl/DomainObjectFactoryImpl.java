@@ -1309,8 +1309,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         return result;
     }
-
-    @SuppressWarnings("deprecation") /*TODO: remove deprecated RaceLogEvents when migrated*/ 
+ 
     public RaceLogEvent loadRaceLogEvent(DBObject dbObject) {
         TimePoint logicalTimePoint = loadTimePoint(dbObject);
         TimePoint createdAt = loadTimePoint(dbObject, FieldNames.RACE_LOG_EVENT_CREATED_AT);
@@ -1360,8 +1359,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogProtestStartTimeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogWindFixEvent.class.getSimpleName())) {
             return loadRaceLogWindFixEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent.class.getSimpleName())) {
-            return loadRaceLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogDenoteForTrackingEvent.class.getSimpleName())) {
             return loadRaceLogDenoteForTrackingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogStartTrackingEvent.class.getSimpleName())) {
@@ -1393,24 +1390,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Wind wind = loadWind((DBObject) dbObject.get(FieldNames.WIND.name()));
         Boolean isMagnetic = (Boolean) dbObject.get(FieldNames.IS_MAGNETIC.name());
         return new RaceLogWindFixEventImpl(createdAt, logicalTimePoint, author, id, passId, wind, isMagnetic == null ? true : isMagnetic);
-    }
-    
-    @SuppressWarnings("deprecation")
-    private RaceLogEvent loadRaceLogDeviceMarkMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        DeviceIdentifier device = null;
-        try {
-            device = loadDeviceId(deviceIdentifierServiceFinder,
-                    (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
-            e.printStackTrace();
-        }
-        //have to load complete mark, as no order is guaranteed for loading of racelog events
-        Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
-        TimePoint from = loadTimePoint(dbObject, FieldNames.RACE_LOG_FROM);
-        TimePoint to = loadTimePoint(dbObject, FieldNames.RACE_LOG_TO);
-        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl(createdAt, logicalTimePoint, author, id, passId, mappedTo, device, from, to);
     }
 
     private RaceLogEvent loadRaceLogDenoteForTrackingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,

@@ -127,11 +127,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             if (log instanceof RaceLog) {
                 RaceLogEventVisitor visitor = new BaseRaceLogEventVisitor() {
                     @Override
-                    public void visit(@SuppressWarnings("deprecation") com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
-                    }
-
-                    @Override
                     public void visit(RaceLogStartTrackingEvent event) {
                         RaceLogRaceTracker.this.onStartTrackingEvent(event);
                     };
@@ -163,7 +158,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                         RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
                     }
                     
-                    //FIXME: check with Axel whether this is the desired behavior
                     @Override
                     public void visit(RegattaLogDefineMarkEvent event) {
                         RaceLogRaceTracker.this.onDefineMarkEvent(event);

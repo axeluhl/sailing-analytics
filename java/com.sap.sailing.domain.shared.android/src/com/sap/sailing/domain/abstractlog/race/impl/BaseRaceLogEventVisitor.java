@@ -96,12 +96,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
 
     }
     
-    @SuppressWarnings("deprecation")
-    @Override
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
-    	
-    }
-    
     @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
     	
