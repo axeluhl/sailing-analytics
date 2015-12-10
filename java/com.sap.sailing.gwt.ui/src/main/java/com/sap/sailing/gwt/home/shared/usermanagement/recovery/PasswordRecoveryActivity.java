@@ -24,7 +24,7 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
     }
 
     @Override
-    public void resetPassword(String loginName) {
+    public void resetPassword(String email, String username) {
         // TODO Auto-generated method stub
     }
     
