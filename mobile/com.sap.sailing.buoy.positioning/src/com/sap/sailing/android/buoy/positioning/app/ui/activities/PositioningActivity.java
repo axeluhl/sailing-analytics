@@ -17,7 +17,6 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class PositioningActivity extends BaseActivity implements pingListener {
 
@@ -83,10 +82,6 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         switch (item.getItemId()) {
             case R.id.about:
                 AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.version:
-                AboutDialog aboutDialog = new AboutDialog(this);
-                aboutDialog.show();
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this, SettingActivity.class));

@@ -28,7 +28,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class RegattaActivity extends AbstractRegattaActivity {
 
@@ -137,10 +136,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 return true;
             case R.id.about:
                 AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.version:
-                AboutDialog aboutDialog = new AboutDialog(this);
-                aboutDialog.show();
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this, SettingActivity.class));

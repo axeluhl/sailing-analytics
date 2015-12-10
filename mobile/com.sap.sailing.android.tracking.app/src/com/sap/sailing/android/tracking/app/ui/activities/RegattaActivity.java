@@ -43,7 +43,6 @@ import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -162,11 +161,6 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 return true;
             case R.id.options_menu_info:
                 AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.options_menu_version:
-                ExLog.i(this, TAG, "Clicked INFO.");
-                AboutDialog dialog = new AboutDialog(this);
-                dialog.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

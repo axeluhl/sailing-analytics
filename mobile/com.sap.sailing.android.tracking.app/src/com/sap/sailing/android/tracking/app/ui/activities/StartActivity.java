@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
@@ -85,12 +84,6 @@ public class StartActivity extends AbstractStartActivity {
                 return true;
             case R.id.options_menu_info:
                 AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.options_menu_version:
-                ExLog.i(this, TAG, "Clicked INFO.");
-                AboutDialog dialog = new AboutDialog(this);
-                dialog.show();
-                // startActivity(new Intent(this, SystemInformationActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
