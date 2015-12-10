@@ -25,7 +25,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends AbstractLogTrackingD
 
     @Override
     protected void refresh() {
-        sailingService.getDeviceMappingsFromLogHierarchy(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
+        sailingService.getDeviceMappings(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
                 mappings = result;

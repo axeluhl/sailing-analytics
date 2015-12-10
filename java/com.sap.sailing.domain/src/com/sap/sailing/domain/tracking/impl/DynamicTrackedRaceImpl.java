@@ -755,7 +755,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        super.attachRaceLog(raceLog);
         logListener.addTo(raceLog);
     }
     

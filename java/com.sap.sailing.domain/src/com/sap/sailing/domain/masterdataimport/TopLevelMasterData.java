@@ -15,8 +15,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -120,8 +120,8 @@ public class TopLevelMasterData implements Serializable {
 
     private void addAllFixesIfMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
             AbstractLogEvent<?> logEvent) {
-        if (logEvent instanceof DeviceMappingEvent<?,?>) {
-            DeviceMappingEvent<?,?> mappingEvent = (DeviceMappingEvent<?,?>) logEvent;
+        if (logEvent instanceof RegattaLogDeviceMappingEvent<?>) {
+            RegattaLogDeviceMappingEvent<?> mappingEvent = (RegattaLogDeviceMappingEvent<?>) logEvent;
             try {
                 addAllFixesForMappingEvent(gpsFixStore, relevantFixes, mappingEvent);
             } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
@@ -132,7 +132,7 @@ public class TopLevelMasterData implements Serializable {
     }
 
     private void addAllFixesForMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
-            DeviceMappingEvent<?, ?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
+            RegattaLogDeviceMappingEvent<?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
         DynamicGPSFixTrack<WithID, ?> track;
         if (isMarkMappingEvent(mappingEvent)) {
             track = new DynamicGPSFixTrackImpl<WithID>(mappingEvent.getMappedTo(), 10000);
@@ -156,7 +156,7 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    private boolean isMarkMappingEvent(DeviceMappingEvent<?, ?> mappingEvent) {
+    private boolean isMarkMappingEvent(RegattaLogDeviceMappingEvent<?> mappingEvent) {
         boolean isMarkMappingEvent = false;
         if (mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
             isMarkMappingEvent = true;

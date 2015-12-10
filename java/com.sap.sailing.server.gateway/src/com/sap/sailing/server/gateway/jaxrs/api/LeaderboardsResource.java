@@ -494,7 +494,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
 
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
-                author, now, deviceMappingEventId, closingTimePoint);
+                now, author, deviceMappingEventId, closingTimePoint);
 
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out competitor " + mappedTo.getName());

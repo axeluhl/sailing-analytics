@@ -10,7 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -690,7 +690,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
-     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link DeviceMappingEvent}s
+     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link RegattaLogDeviceMappingEvent}s
      * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
      * serialization until it is finished. If multiple race logs are attached, the loading process is
      * forced to be serialized.

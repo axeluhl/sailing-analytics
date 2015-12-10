@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -77,7 +77,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         {
         Response response = resource.pingMark(PING_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        Map<Mark, List<DeviceMapping<Mark>>> mappings = new DeviceMarkMappingFinder<>(log).analyze();
+        Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
         List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
         assertThat("one mapping was created for the one ping", mappingsForMark.size(), equalTo(1));
         assertOneFixPerMapping(mappingsForMark);
@@ -87,7 +87,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         // position, and another one with the new position.
         Response response = resource.pingMark(PING2_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-        Map<Mark, List<DeviceMapping<Mark>>> mappings = new DeviceMarkMappingFinder<>(log).analyze();
+        Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
         List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
         assertThat("Assert an additional mapping was created for the second ping", mappingsForMark.size(), equalTo(2));
         assertOneFixPerMapping(mappingsForMark);

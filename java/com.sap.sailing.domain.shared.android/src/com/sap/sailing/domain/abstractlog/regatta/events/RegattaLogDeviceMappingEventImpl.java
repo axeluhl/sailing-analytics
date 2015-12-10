@@ -1,16 +1,16 @@
-package com.sap.sailing.domain.abstractlog.shared.events.impl;
+package com.sap.sailing.domain.abstractlog.regatta.events;
 
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
-public abstract class AbstractDeviceMappingEventImpl<VisitorT, ItemType extends WithID> extends AbstractLogEventImpl<VisitorT> implements
-DeviceMappingEvent<VisitorT, ItemType> {
+public abstract class RegattaLogDeviceMappingEventImpl<ItemType extends WithID> extends AbstractLogEventImpl<RegattaLogEventVisitor> implements
+RegattaLogDeviceMappingEvent<ItemType> {
     private static final long serialVersionUID = -8439653251231710356L;
 
     private final ItemType mappedTo;
@@ -18,7 +18,7 @@ DeviceMappingEvent<VisitorT, ItemType> {
     private final TimePoint from;
     private final TimePoint to;
 
-    public AbstractDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+    public RegattaLogDeviceMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, ItemType mappedTo,
             DeviceIdentifier device, TimePoint from, TimePoint to) {
         super(createdAt, logicalTimePoint, author, id);
@@ -28,7 +28,7 @@ DeviceMappingEvent<VisitorT, ItemType> {
         this.to = to;
     }
 
-    public AbstractDeviceMappingEventImpl(TimePoint logicalTimePoint,
+    public RegattaLogDeviceMappingEventImpl(TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, ItemType mappedTo,
             DeviceIdentifier device, TimePoint from, TimePoint to) {
         this(now(), logicalTimePoint, author, randId(), mappedTo, device, from, to);

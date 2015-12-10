@@ -485,9 +485,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     void pingMark(String leaderboardName, MarkDTO mark, Position position) throws DoesNotHaveRegattaLogException;
     
-    List<DeviceMappingDTO> getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName)
-            throws TransformationException, NotFoundException;
-    
     List<String> getDeserializableDeviceIdentifierTypes();
     
     /**
@@ -548,8 +545,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Integer getStructureImportOperationProgress();
     
-    List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName,
-            String fleetName) throws TransformationException, NotFoundException;
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
             String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo) throws MailException;
 
@@ -560,7 +555,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
-    List<DeviceMappingDTO> getDeviceMappingsFromLogHierarchy(String leaderboardName) throws TransformationException;
+    List<DeviceMappingDTO> getDeviceMappings(String leaderboardName) throws DoesNotHaveRegattaLogException, TransformationException;
 
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds) throws NotRevokableException, DoesNotHaveRegattaLogException;
 

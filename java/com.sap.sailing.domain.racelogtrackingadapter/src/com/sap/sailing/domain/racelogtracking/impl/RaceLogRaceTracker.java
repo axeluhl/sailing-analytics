@@ -13,8 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectionReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -33,11 +31,9 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEve
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.shared.events.DefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -57,6 +53,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -235,14 +232,12 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         return params.getRaceLog().getId();
     }
 
-    private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() {
-        return new MultiLogAnalyzer<>(new DeviceCompetitorMappingFinder.Factory(),
-                new MapWithValueCollectionReducer<>(), params.getLogHierarchy()).analyze();
+    private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() throws DoesNotHaveRegattaLogException {
+        return new RegattaLogDeviceCompetitorMappingFinder(params.getRegattaLog()).analyze();
     }
 
-    private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() {
-        return new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory(), new MapWithValueCollectionReducer<>(),
-                params.getLogHierarchy()).analyze();
+    private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() throws DoesNotHaveRegattaLogException {
+        return new RegattaLogDeviceMarkMappingFinder(params.getRegattaLog()).analyze();
     }
 
     /**
@@ -314,7 +309,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         return result;
     }
 
-    private void updateMarkMappings(boolean loadIfNotCovered) {
+    private void updateMarkMappings(boolean loadIfNotCovered) throws DoesNotHaveRegattaLogException {
         assert trackedRace != null;
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
@@ -348,9 +343,13 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         updateStartAndEndOfTracking();
     }
 
-    private void onDeviceMarkMappingEvent(DeviceMarkMappingEvent<?> event) {
+    private void onDeviceMarkMappingEvent(RegattaLogDeviceMarkMappingEvent event) {
         if (trackedRace != null) {
-            updateMarkMappings(true);
+            try {
+                updateMarkMappings(true);
+            } catch (DoesNotHaveRegattaLogException e) {
+                logger.warning("Could not load update mark mappings as RegattaLog couldn't be found");
+            }
             gpsFixStore.addListener(this, event.getDevice());
         }
     }
@@ -367,14 +366,18 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         }
     }
 
-    private void onDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent<?> event) {
+    private void onDeviceCompetitorMappingEvent(RegattaLogDeviceCompetitorMappingEvent event) {
         if (trackedRace != null) {
-            updateCompetitorMappings(true);
+            try {
+                updateCompetitorMappings(true);
+            } catch (DoesNotHaveRegattaLogException e) {
+                logger.warning("Could not load update competitor mappings as RegattaLog couldn't be found");
+            }
             gpsFixStore.addListener(this, event.getDevice());
         }
     }
 
-    private void updateCompetitorMappings(boolean loadIfNotCovered) {
+    private void updateCompetitorMappings(boolean loadIfNotCovered) throws DoesNotHaveRegattaLogException {
         // TODO remove fixes, if mappings have been removed
 
         // check if there are new time ranges not covered so far
@@ -472,8 +475,12 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             }
         }
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
-        updateCompetitorMappings(false);
-        updateMarkMappings(false);
+        try {
+            updateCompetitorMappings(false);
+            updateMarkMappings(false);
+        } catch (DoesNotHaveRegattaLogException e) {
+            logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
+        }
         // add listeners for devices in mappings already present
         addListeners(competitorMappings);
         addListeners(markMappings);

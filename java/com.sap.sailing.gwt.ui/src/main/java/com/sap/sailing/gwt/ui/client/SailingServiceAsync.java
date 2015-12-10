@@ -642,15 +642,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
 
-    /**
-     * Do not only use the racelog, but also other logs (e.g. RegattaLogs) in the hierarchy of the race.
-     */
-    void getDeviceMappingsFromLogHierarchy(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<List<DeviceMappingDTO>> callback);
-
-    void getDeviceMappingsFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<List<DeviceMappingDTO>> callback);
-
     void revokeRaceAndRegattaLogEvents(String leaderboardName, String raceColumnName, String fleetName,
             List<UUID> eventIds, AsyncCallback<Void> callback);
 
@@ -706,7 +697,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getMarksInRegattaLog(String leaderboardName, AsyncCallback<Iterable<MarkDTO>> callback);
 
-    void getDeviceMappingsFromLogHierarchy(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
+    void getDeviceMappings(String leaderboardName, AsyncCallback<List<DeviceMappingDTO>> asyncCallback);
     
     void revokeRaceAndRegattaLogEvents(String leaderboardName, List<UUID> eventIds, AsyncCallback<Void> callback);
 

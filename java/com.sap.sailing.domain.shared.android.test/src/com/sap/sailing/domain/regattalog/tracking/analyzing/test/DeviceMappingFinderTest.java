@@ -14,7 +14,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -31,7 +31,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     private int time = 0;
     
     private List<DeviceMapping<Competitor>> getMappings() {
-        return new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
+        return new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
     }
     
     private TimePoint t() {

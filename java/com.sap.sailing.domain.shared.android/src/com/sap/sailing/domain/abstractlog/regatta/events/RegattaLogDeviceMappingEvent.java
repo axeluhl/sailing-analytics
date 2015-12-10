@@ -1,7 +1,7 @@
-package com.sap.sailing.domain.abstractlog.shared.events;
+package com.sap.sailing.domain.abstractlog.regatta.events;
 
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -17,12 +17,12 @@ import com.sap.sse.common.WithID;
  * as the semantics of somehow later limiting this range would become unclear
  * <p>
  * If one end of the time range enclosed by {@link #getFrom()} and {@link #getTo()} is open, this can be closed
- * by a {@link CloseOpenEndedDeviceMappingEvent}.
+ * by a {@link RegattaLogCloseOpenEndedDeviceMappingEvent}.
  * 
  * @see RegattaLogDefinedMarkAnalyzer for rules by which {@link DeviceMapping}s are derived from these events.
  * @author Fredrik Teschke
  */
-public interface DeviceMappingEvent<VisitorT, ItemType extends WithID> extends AbstractLogEvent<VisitorT>, Revokable {
+public interface RegattaLogDeviceMappingEvent<ItemType extends WithID> extends RegattaLogEvent, Revokable {
     ItemType getMappedTo();
     DeviceIdentifier getDevice();
     
