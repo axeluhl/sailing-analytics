@@ -33,7 +33,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.events.DefineMarkEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -360,7 +359,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
      * {@link RaceLogDefineMarkEvent} is received, the existence of the track for that mark in the {@link TrackedRace}
      * has to be ensured, also ensuring that the mark will exist in the mark tracks map key set.
      */
-    private void onDefineMarkEvent(DefineMarkEvent<?> event) {
+    private void onDefineMarkEvent(RegattaLogDefineMarkEvent event) {
         if (trackedRace != null) {
             trackedRace.getOrCreateTrack(event.getMark());
         }
