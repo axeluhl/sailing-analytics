@@ -273,7 +273,8 @@ public class ReplicationPanel extends FlowPanel {
                     errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
-                            replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
+                            replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort(),
+                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName())));
                     i++;
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);
