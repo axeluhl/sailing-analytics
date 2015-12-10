@@ -86,13 +86,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
-            AdminConsoleTableResources tableResources,
-            ListDataProvider<StrippedLeaderboardDTO> leaderboardListDataProvider) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
+            AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
-                leaderboardTable, tableResources, leaderboardColumnListHandler, leaderboardListDataProvider);
+                leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
@@ -377,7 +376,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     protected void leaderboardSelectionChanged() {
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         regattaHasCompetitors = false;
-        if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
+        if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
@@ -390,7 +389,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 trackedRacesCaptionPanel.setVisible(true);
             }
             
-            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) refreshableLeaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
+            sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
         } else {
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);

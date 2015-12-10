@@ -13,6 +13,8 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -118,7 +120,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards())) {
-                    removeLeaderboards(refreshableLeaderboardSelectionModel.getSelectedSet());
+                    removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -126,14 +128,12 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(
-            final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
-            AdminConsoleTableResources tableResources,
-            ListDataProvider<StrippedLeaderboardDTO> leaderboardListDataProvider) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
+            AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
-                leaderboardTable, tableResources, leaderboardColumnListHandler, leaderboardListDataProvider);
+                leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         AnchorCell anchorCell = new AnchorCell();
         Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
@@ -675,13 +675,19 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     @Override
     protected void leaderboardSelectionChanged() {
         // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
-        reactOnSelectionChangeEvent = false;
+        trackedRaceListHandlerRegistration.removeHandler();
         trackedRacesListComposite.clearSelection();
         // add listener again using a scheduled command which is executed when the browser's event loop re-gains
         // control; we assume that at that point in time the selection updates have already been performed
-        leaderboardRemoveButton.setEnabled(!refreshableLeaderboardSelectionModel.getSelectedSet().isEmpty());
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
+            }
+        });
+        leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
-        if (refreshableLeaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
+        if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
@@ -701,7 +707,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             trackedRacesCaptionPanel.setVisible(false);
             selectedRaceInLeaderboard = null;
         }
-        reactOnSelectionChangeEvent = true;
     }
 
     private void createFlexibleLeaderboard() {
@@ -782,8 +787,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void addLeaderboard(StrippedLeaderboardDTO result) {
         leaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
-        refreshableLeaderboardSelectionModel.clear();
-        refreshableLeaderboardSelectionModel.setSelected(result, true);
+        leaderboardSelectionModel.clear();
+        leaderboardSelectionModel.setSelected(result, true);
     }
 
     private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUpdate) {
@@ -854,5 +859,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     private void removeLeaderboardFromTable(final StrippedLeaderboardDTO leaderBoard) {
         leaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
+        leaderboardSelectionModel.setSelected(leaderBoard, false);
     }
 }

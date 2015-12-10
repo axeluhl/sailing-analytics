@@ -43,6 +43,8 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * 
  * @param <T>
  */
+
+// TODO Lukas: discuss with Axel change to non abstract class. (Here are no abstract methods anymore.)
 public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnWithMinMax<T, Boolean> {
     private final BetterCheckboxCell cell;
     private final String checkboxColumnCellCSSClass;
