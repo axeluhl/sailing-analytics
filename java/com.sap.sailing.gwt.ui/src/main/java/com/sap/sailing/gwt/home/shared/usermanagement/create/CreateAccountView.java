@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.create;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.gwt.home.shared.usermanagement.ErrorMessageView;
 
-public interface CreateAccountView extends IsWidget {
+public interface CreateAccountView extends ErrorMessageView, IsWidget {
     
     void setPresenter(Presenter presenter);
-
-    void setErrorMessage(String message);
     
     public interface Presenter {
         
