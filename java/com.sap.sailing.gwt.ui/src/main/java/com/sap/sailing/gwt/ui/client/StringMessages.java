@@ -1111,6 +1111,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String timeZone();
     String eventOfficialWebsiteURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
