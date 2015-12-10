@@ -14,6 +14,8 @@ public interface ThemeResources extends ClientBundle {
     MediaCss mediaCss();
 
     public interface MainCss extends CssResource{
+        String mobile();
+        String desktop();
         String wrapper();
         String navbar();
         String navbar_button();
@@ -65,6 +67,7 @@ public interface ThemeResources extends ClientBundle {
         String slideto();
         String slidetonav();
         String slidetoactive();
+        String fleetcorner();
     }
 
     public interface MediaCss extends CssResource{

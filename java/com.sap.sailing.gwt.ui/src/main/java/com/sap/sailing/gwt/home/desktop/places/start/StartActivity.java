@@ -3,11 +3,12 @@ package com.sap.sailing.gwt.home.desktop.places.start;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.communication.start.GetStartViewAction;
+import com.sap.sailing.gwt.home.communication.start.StartViewDTO;
+import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.shared.start.StartViewDTO;
 
 public class StartActivity extends AbstractActivity {
     private final StartClientFactory clientFactory;
@@ -21,14 +22,7 @@ public class StartActivity extends AbstractActivity {
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(new Placeholder());
-        clientFactory.getHomeService().getStartView(new AsyncCallback<StartViewDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
-            }
-
+        clientFactory.getDispatch().execute(new GetStartViewAction(), new ActivityCallback<StartViewDTO>(clientFactory, panel) {
             @Override
             public void onSuccess(StartViewDTO result) {
                 final StartView view = clientFactory.createStartView();

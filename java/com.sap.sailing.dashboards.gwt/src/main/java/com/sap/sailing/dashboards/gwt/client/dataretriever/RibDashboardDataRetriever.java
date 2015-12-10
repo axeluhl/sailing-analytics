@@ -89,8 +89,7 @@ public class RibDashboardDataRetriever implements TimeListener, RaceSelectionPro
 
             @Override
             public void onFailure(Throwable caught) {
-                logger.log(Level.INFO, "Failed to received RibDashboardRaceInfoDTO");
-                logger.log(Level.INFO, caught.getMessage());
+                logger.log(Level.INFO, "Failed to received RibDashboardRaceInfoDTO, "+caught.getMessage());
             }
         });
     }

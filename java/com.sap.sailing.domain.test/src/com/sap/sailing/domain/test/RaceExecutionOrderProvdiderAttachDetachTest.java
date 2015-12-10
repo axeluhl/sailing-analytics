@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -197,6 +200,17 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         assertTrue(trackedRace.hasRaceExecutionOrderProvidersAttached());
         series.setRegatta(null);
         assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
+    }
+
+    @Test
+    public void testThatTrackedRaceReceivesRaceLogWhenSeriesIsLinkedToRegatta() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */false);
+        raceColumnInSeries.setTrackedRace(fleet, trackedRace);
+        assertNull(raceColumnInSeries.getRaceLog(fleet));
+        regatta.addSeries(series);
+        final RaceLog raceLog = raceColumnInSeries.getRaceLog(fleet);
+        assertNotNull(raceLog);
+        assertNotNull(trackedRace.getRaceLog(raceLog.getId()));
     }
 
     private void createTestSetupWithRegattaAndSeries(boolean linkSeriesToRegatta) {

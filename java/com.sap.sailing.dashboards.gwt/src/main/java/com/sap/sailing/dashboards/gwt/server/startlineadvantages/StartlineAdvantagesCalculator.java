@@ -254,7 +254,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
             StartLineAdvantageDTO leftEdgeAdvantage = new StartLineAdvantageDTO();
             leftEdgeAdvantage.confidence = 1.0;
             leftEdgeAdvantage.distanceToRCBoatInMeters = rangePinEndStartlineAdvantage.getB();
-            if (startlineAdvantageAtPinEndInMeters > 0) {
+            if (startlineAdvantageAtPinEndInMeters >= 0) {
                 leftEdgeAdvantage.startLineAdvantage = startlineAdvantageAtPinEndInMeters;
                 rightEdgeAdvantage.startLineAdvantage = 0.0;
             } else {
@@ -290,7 +290,7 @@ public  class StartlineAdvantagesCalculator extends AbstracPreCalculationDataRet
                 Speed speed = defaultPolarSpeedWindAngleFunction.getBoatSpeedForWindAngleAndSpeed(angleToWind, wind.getBeaufort());
                 logger.log(Level.INFO, "Speed"+speed.getKnots());
                 logger.log(Level.INFO, "startingPositionToFirstMarkDistance.getMeters()"+startingPositionToFirstMarkDistance.getMeters());
-                startlineAdvantage.startLineAdvantage = (startingPositionToFirstMarkDistance.getMeters()/speed.getMetersPerSecond())*speed.getMetersPerSecond();
+                startlineAdvantage.startLineAdvantage = Math.abs((startingPositionToFirstMarkDistance.getMeters()/speed.getMetersPerSecond())*speed.getMetersPerSecond());
                 result.add(startlineAdvantage);
             }
         } else {

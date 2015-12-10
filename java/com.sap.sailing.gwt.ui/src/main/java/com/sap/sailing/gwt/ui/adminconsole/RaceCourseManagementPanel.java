@@ -28,7 +28,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, errorReporter, regattaRefresher, stringMessages);
+        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ false, stringMessages);
         
         courseManagementWidget = new CourseManagementWidget(sailingService, errorReporter, stringMessages) {
             @Override

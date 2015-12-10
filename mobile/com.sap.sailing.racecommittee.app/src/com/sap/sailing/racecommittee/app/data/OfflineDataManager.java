@@ -16,9 +16,9 @@ import android.content.Context;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -98,16 +98,15 @@ public class OfflineDataManager extends DataManager {
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
 
-        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
         ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
                 .loadFromPreferences(preferences);
 
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
+        log.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
                 new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
-        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
+        log.add(new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),

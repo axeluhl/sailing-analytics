@@ -143,7 +143,9 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load marks: " + caught.getMessage());
+                        errorReporter.reportError(
+                        stringMessages.errorTryingToObtainTheMarksOfTheRace(
+                        caught.getMessage()));
                     }
                 });
     }

@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -29,12 +31,21 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
 
     @Override
     public LeaderboardSearchResultBase deserialize(JSONObject object) throws JsonDeserializationException {
-        final JSONObject eventJson = (JSONObject) object.get(LeaderboardSearchResultJsonSerializer.FIELD_EVENT);
-        final EventBase event;
-        if (eventJson != null) {
-            event = eventDeserializer.deserialize(eventJson);
+        final JSONArray eventsJson = (JSONArray) object.get(LeaderboardSearchResultJsonSerializer.FIELD_EVENTS);
+        Collection<EventBase> events = new ArrayList<>();
+        if (eventsJson != null) {
+            for (Object eventJson : eventsJson) {
+                final EventBase event = eventDeserializer.deserialize((JSONObject) eventJson);
+                events.add(event);
+            }
         } else {
-            event = null;
+            // for backward compatibility try the FIELD_EVENT approach:
+            JSONObject deprecatedEventJson = (JSONObject) object.get("event");
+            if (deprecatedEventJson == null) {
+                events = Collections.emptySet();
+            } else {
+                events = Collections.singleton(eventDeserializer.deserialize(deprecatedEventJson));
+            }
         }
         JSONObject leaderboardJson = Helpers.getNestedObjectSafe(object, LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD);
         String leaderboardName = (String) leaderboardJson.get(LeaderboardSearchResultJsonSerializer.FIELD_LEADERBOARD_NAME);
@@ -47,7 +58,7 @@ public class LeaderboardSearchResultBaseJsonDeserializer implements JsonDeserial
             leaderboardGroups.add(leaderboardGroupDeserializer.deserialize((JSONObject) leaderboardGroupJson));
         }
         return new LeaderboardSearchResultBaseImpl(new LeaderboardBaseImpl(leaderboardName, leaderboardDisplayName),
-                regattaName, boatClassName, leaderboardGroups, event);
+                regattaName, boatClassName, leaderboardGroups, events);
     }
 
 }

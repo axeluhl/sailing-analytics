@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -48,6 +49,10 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             }
             @Override
             public Serializable getId() {
+                return null;
+            }
+            @Override
+            public Boat getBoatOfCompetitorById(Serializable competitorID) {
                 return null;
             }
         };

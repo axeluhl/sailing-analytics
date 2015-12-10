@@ -4,7 +4,7 @@
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetitionResources" />
-	<g:HTMLPanel addStyleNames="{local_res.css.phase}">
+	<g:HTMLPanel addStyleNames="{local_res.css.phase}" ui:field="containerUi">
 		<div class="{local_res.css.phase_head}">
 			<div class="{local_res.css.phase_head_title}" ui:field="seriesNameUi"></div>
 			<div class="{local_res.css.phase_head_info}">

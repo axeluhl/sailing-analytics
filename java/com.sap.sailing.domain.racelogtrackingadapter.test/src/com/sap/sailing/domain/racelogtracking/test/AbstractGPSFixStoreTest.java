@@ -9,8 +9,9 @@ import org.junit.Before;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -66,8 +67,8 @@ public class AbstractGPSFixStoreTest {
     }
 
     protected void map(RaceLog raceLog, Competitor comp, DeviceIdentifier device, long from, long to) {
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(MillisecondsTimePoint.now(), author, device,
-                comp, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), author, 0,
+                comp, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
     protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
@@ -75,8 +76,8 @@ public class AbstractGPSFixStoreTest {
     }
 
     protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(MillisecondsTimePoint.now(), author, device,
-                mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+        raceLog.add(new RaceLogDeviceMarkMappingEventImpl(MillisecondsTimePoint.now(), author, 0,
+                mark, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

@@ -123,7 +123,7 @@ public class CubicRegressionPerCourseProcessor implements
         GroupKey compoundKey;
         try {
             compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
-                    .getCubicRegressionPerCourseClusterKeyDimensions().iterator());
+                    .getCubicRegressionPerCourseClusterKeyDimensions());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

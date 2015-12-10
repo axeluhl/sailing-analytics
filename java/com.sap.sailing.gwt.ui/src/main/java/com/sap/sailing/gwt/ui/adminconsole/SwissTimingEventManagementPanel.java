@@ -225,7 +225,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         declinationCheckbox.setValue(true);
         trackableRacesPanel.add(declinationCheckbox);
         
-        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
+        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateAsLiveRace());
         simulateWithStartTimeNow.setWordWrap(false);
         simulateWithStartTimeNow.setValue(false);
         trackableRacesPanel.add(simulateWithStartTimeNow);

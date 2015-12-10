@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.sap.sailing</groupId>
-	<artifactId>workspace</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>com.sap.sailing</groupId>
+    <artifactId>workspace</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<modules>
-		<module>java</module>
-	</modules>
+    <modules>
+        <module>java</module>
+    </modules>
 
-	<profiles>
-		<profile>
-			<!-- deactivate with parameter '-P !with-mobile'-->
-			<id>with-mobile</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>mobile</module>
-			</modules>
-		</profile>
-		<profile>
-			<!-- activate with parameter '-P with-ios'-->
-			<id>with-ios</id>
-			<modules>
-				<module>ios</module>
-			</modules>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <!-- deactivate with parameter '-P !with-mobile'-->
+            <id>with-mobile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>mobile</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- activate with parameter '-P with-ios'-->
+            <id>with-ios</id>
+            <modules>
+                <module>ios</module>
+            </modules>
+        </profile>
+    </profiles>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
-	
-	<repositories>
-		<repository>
-			<id>equinox-sdk-3.9</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/luna/</url>
-		</repository>
-<!--		
-		<repository>
-			<id>sap-nexus</id>
-			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
-		</repository>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+    
+    <repositories>
+        <repository>
+            <id>equinox-sdk-3.9</id>
+            <layout>p2</layout>
+            <url>http://download.eclipse.org/releases/luna/</url>
+        </repository>
+<!--        
+        <repository>
+            <id>sap-nexus</id>
+            <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
+        </repository>
 --> 
-		<repository>
-			<id>sailing-server-maven</id>
-			<url>http://maven.sapsailing.com/maven</url>
-		</repository>
+        <repository>
+            <id>sailing-server-maven</id>
+            <url>http://maven.sapsailing.com/maven</url>
+        </repository>
 
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-		</repository>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
  
-		<repository>
-			<id>uni-luebeck</id>
-			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
-		</repository>
-	</repositories>
+        <repository>
+            <id>uni-luebeck</id>
+            <url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
+        </repository>
+    </repositories>
 </project>

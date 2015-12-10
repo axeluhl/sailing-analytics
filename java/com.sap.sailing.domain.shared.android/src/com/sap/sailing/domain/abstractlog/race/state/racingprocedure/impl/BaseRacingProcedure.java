@@ -8,7 +8,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
@@ -19,6 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsInFinishingPhase
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.IsIndividualRecallDisplayedAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.WeakRaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
@@ -52,7 +52,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     protected final RaceLog raceLog;
     protected final AbstractLogEventAuthor author;
-    protected final RaceLogEventFactory factory;
     private final RacingProcedureConfiguration configuration;
 
     private final RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> changedListeners;
@@ -66,7 +65,6 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     private boolean cachedIsIndividualRecallDisplayed;
 
-
     /**
      * When calling me, call {@link BaseRacingProcedure#update()} afterwards!
      * 
@@ -74,14 +72,13 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
      *            is required for a {@link StartTimeFinder} in order to make individual recall timeouts depend on start
      *            time rather than the time the individual recall was issued
      */
-    public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
+    public BaseRacingProcedure(RaceLog raceLog, AbstractLogEventAuthor author,
             RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         if (configuration == null) {
             throw new IllegalArgumentException("configuration must not be null");
         }
         this.raceLog = raceLog;
         this.author = author;
-        this.factory = factory;
         this.configuration = configuration;
         this.changedListeners = createChangedListenerContainer();
         this.isRecallDisplayedAnalyzer = new IsIndividualRecallDisplayedAnalyzer(raceLog);
@@ -94,18 +91,18 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         this.raceLog.addListener(this.raceLogListener);
         this.cachedIsIndividualRecallDisplayed = false;
     }
-    
+
     @Override
     public void detach() {
         raceLog.removeListener(raceLogListener);
         changedListeners.removeAll();
     }
-    
+
     @Override
     public void addChangedListener(RacingProcedureChangedListener listener) {
         changedListeners.addBaseListener(listener);
     }
-    
+
     public void removeChangedListener(RacingProcedureChangedListener listener) {
         changedListeners.remove(listener);
     };
@@ -155,7 +152,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         }
         return false;
     }
-    
+
     @Override
     public TimePoint getIndividualRecallDisplayedTime() {
         if (hasIndividualRecall()) {
@@ -163,7 +160,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         }
         return null;
     }
-    
+
     @Override
     public TimePoint getIndividualRecallRemovalTime() {
         TimePoint displayed = getIndividualRecallDisplayedTime();
@@ -179,8 +176,11 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             if (raceStartTime != null) {
                 referenceTimePoint = raceStartTime;
             } else {
-                logger.warning("An individual recall was set but we don't have a start time set for the race; using individual recall set time "+
-                               displayed+" + timeout ("+individualRecallRemovalTimeout+") for implicit termination of individual recall");
+                logger.warning("An individual recall was set but we don't have a start time set for the race; using individual recall set time "
+                        + displayed
+                        + " + timeout ("
+                        + individualRecallRemovalTimeout
+                        + ") for implicit termination of individual recall");
                 referenceTimePoint = displayed;
             }
             return referenceTimePoint.plus(individualRecallRemovalTimeout);
@@ -190,12 +190,14 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     @Override
     public void displayIndividualRecall(TimePoint displayTime) {
-        raceLog.add(factory.createFlagEvent(displayTime, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, true));
+        raceLog.add(new RaceLogFlagEventImpl(displayTime, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE,
+                true));
     }
 
     @Override
     public void removeIndividualRecall(TimePoint timePoint) {
-        raceLog.add(factory.createFlagEvent(timePoint, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE, false));
+        raceLog.add(new RaceLogFlagEventImpl(timePoint, author, raceLog.getCurrentPassId(), Flags.XRAY, Flags.NONE,
+                false));
     }
 
     @Override
@@ -208,11 +210,11 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             return false;
         }
     }
-    
+
     @Override
     public boolean hasIndividualRecall() {
-        return configuration.hasInidividualRecall() == null ? 
-                hasIndividualRecallByDefault() : configuration.hasInidividualRecall();
+        return configuration.hasInidividualRecall() == null ? hasIndividualRecallByDefault() : configuration
+                .hasInidividualRecall();
     }
 
     protected abstract boolean hasIndividualRecallByDefault();
@@ -244,23 +246,23 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
         unscheduleStateEvent(RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT);
         scheduleStateEvents(new RaceStateEventImpl(removalTime, RaceStateEvents.INDIVIDUAL_RECALL_TIMEOUT));
     }
-    
+
     protected void scheduleStateEvents(RaceStateEvent stateEvent) {
         scheduleStateEvents(Arrays.asList(stateEvent));
     }
-    
+
     protected void scheduleStateEvents(Collection<RaceStateEvent> stateEvents) {
         if (scheduler != null) {
             scheduler.scheduleStateEvents(stateEvents);
         }
     }
-    
+
     protected void unscheduleStateEvent(RaceStateEvents raceStateEventName) {
         if (scheduler != null) {
             scheduler.unscheduleStateEvent(raceStateEventName);
         }
     }
-    
+
     @Override
     public RacingProcedureConfiguration getConfiguration() {
         return configuration;
@@ -276,7 +278,7 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             scheduler.scheduleStateEvents(createStartStateEvents(state.getStartTime()));
         }
     }
-    
+
     @Override
     public void onAdvancePass(ReadonlyRaceState state) {
         unscheduleAllEvents();
@@ -288,21 +290,21 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
             scheduler.unscheduleAllEvents();
         }
     }
-    
+
     protected boolean isFinished(TimePoint at) {
         IsFinishedAnalyzer analyzer = new IsFinishedAnalyzer(raceLog, finishedTimeFinder, at);
         return analyzer.analyze();
     }
-    
+
     protected boolean isInFinishingPhase(TimePoint at) {
         IsInFinishingPhaseAnalyzer analyzer = new IsInFinishingPhaseAnalyzer(raceLog, finishingTimeFinder, at);
         return analyzer.analyze();
     }
-    
+
     protected TimePoint getFinishingTime() {
         return finishingTimeFinder.analyze();
     }
-    
+
     protected TimePoint getFinishedTime() {
         return finishedTimeFinder.analyze();
     }

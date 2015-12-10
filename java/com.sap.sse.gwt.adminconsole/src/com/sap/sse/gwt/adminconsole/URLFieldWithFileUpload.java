@@ -46,7 +46,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
-        final HorizontalPanel imageUrlPanel = new HorizontalPanel(); 
+        final HorizontalPanel imageUrlPanel = new HorizontalPanel();
+        mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
         
         final FormPanel removePanel = new FormPanel();

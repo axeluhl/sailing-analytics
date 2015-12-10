@@ -20,12 +20,12 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO.EventType;
 
 public class TabletAndDesktopRegattaEventView extends Composite implements EventRegattaView {
     
@@ -54,9 +54,9 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         initWidget(uiBinder.createAndBindUi(this));
         initBreadCrumbs();
         
-        if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
+        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
-            Anchor seriesAnchor = new Anchor(currentPresenter.getCtx().getEventDTO().getSeriesName());
+            Anchor seriesAnchor = new Anchor(currentPresenter.getEventDTO().getSeriesName());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
             seriesAnchor.addClickHandler(new ClickHandler() {
                 @Override
@@ -82,7 +82,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
-                .getDisplayName() : currentPresenter.getCtx().getEventDTO().getDisplayName());
+                .getDisplayName() : currentPresenter.getEventDTO().getDisplayName());
         String currentTabTitle = tabPanelUi.getCurrentTabTitle();
         if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
             titleBuilder.append(" - ").append(currentTabTitle);
@@ -99,10 +99,10 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     private void initBreadCrumbs() {
         addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
         addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        if(currentPresenter.getCtx().getEventDTO().getType() == EventType.SERIES_EVENT) {
-            addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
+        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
+            addBreadCrumbItem(currentPresenter.getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
         }
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getLocationOrDisplayName(), currentPresenter.getCurrentEventNavigation());
+        addBreadCrumbItem(currentPresenter.getEventDTO().getLocationOrDisplayName(), currentPresenter.getCurrentEventNavigation());
         
         if(currentPresenter.showRegattaMetadata()) {
             addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), currentPresenter.getCurrentRegattaOverviewNavigation());

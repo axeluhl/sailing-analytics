@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
 import com.sap.sailing.gwt.home.mobile.partials.footer.Footer;
 import com.sap.sailing.gwt.home.mobile.partials.header.Header;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
+import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -22,7 +23,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link MobileApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class MobileApplicationView extends Composite implements ApplicationTopLevelView {
+public class MobileApplicationView extends Composite implements ApplicationTopLevelView<ResettableNavigationPathDisplay> {
     interface MyBinder extends UiBinder<Widget, MobileApplicationView> {
     }
 
@@ -67,5 +68,10 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
     @Override
     public ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+
+    @Override
+    public ResettableNavigationPathDisplay getNavigationPathDisplay() {
+        return headerPanel.getNavigationPathDisplay();
     }
 }

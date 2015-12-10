@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -28,7 +29,7 @@ public class RaceLogCloseOpenEndedDeviceMappingEventDeserializer extends BaseRac
     	Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) object.get(FIELD_DEVICE_MAPPING_EVENT_ID));
     	TimePoint closingTimePoint = new MillisecondsTimePoint((Long) object.get(FIELD_CLOSING_TIMEPOINT_MILLIS));
         
-        return factory.createCloseOpenEndedDeviceMappingEvent(createdAt, author, timePoint, id, passId,
+        return new RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, timePoint, author, id, passId,
                 deviceMappingEventId, closingTimePoint);
     }
 }

@@ -21,7 +21,6 @@ You may need to select "All generations" instead of "Current generation" to see 
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
-MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_NAME=MYSPECIFICEVENT

@@ -361,7 +361,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String successfullyUpdatedScores();
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
     String maneuverTypesToShowWhenCompetitorIsClicked();
-    String simulateWithStartTimeNow();
+    String simulateAsLiveRace();
+    String simulateWithOffset();
     String boatClassDoesNotMatchSelectedRegatta(String boatClass);
     String regattaExistForSelectedBoatClass();
     String reload();
@@ -413,6 +414,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
+    String scoringSchemeLowPointForLeagueOverallLeaderboard();
+    String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -434,7 +437,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String overallDetailsToShow();
     String hhmmssUnit();
     String actionAddWindData();
-    String valueMustBeBetweenMinMax(String name, String minValue, String maxValue);
+    String valueMustBeBetweenMinMax(String name, int minValue, int maxValue);
+    String valueMustBeGreaterThan(String name, String minValue);
     String optional();
     String pleaseEnterAValue();
     String latitude();
@@ -501,6 +505,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String regattaIsLive(String regattaName);
+    String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
@@ -1364,7 +1370,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String durationPlain();
     String finishedRaces();
     String selectCompetitor();
-    String allBoatClasses();
+    String all();
     String points();
     String numberOfRacesShort();
     String courseGeometry();
@@ -1415,6 +1421,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String groupAverageDescending();
     String groupMedianAscending();
     String groupMedianDescending();
+    String resultsFoundForSearch(@PluralCount(DefaultRule_1_0n.class) int amount, String searchText);
     String runPredefinedQuery();
     String selectPredefinedQuery();
     String predefinedQueryRunner();
@@ -1425,4 +1432,22 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String useClassGetNameTooltip();
     String useStringLiterals();
     String useStringLiteralsTooltip();
+    String errorLoadingDataWithTryAgain();
+    String addGalleryPhoto();
+    String addStageImage();
+    String addTeaserImage();
+    String addEventLogo();
+    String noImagesDefinedYet();
+    String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String couldNotRetrieveImageSizeYet();
+    @Override
+    String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String selectALeaderboardGroup();
+    @Override
+    String pleaseSelect();
+    String requiresValidRegatta();
+    String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
+    String errorTryingToCreateEmbeddedMap(String message);
+    String transparentBufferLineOnHover();
+    String bufferLineStrokeWeight();
 }

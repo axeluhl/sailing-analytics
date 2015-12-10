@@ -437,6 +437,9 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
 
         protected String doInBackground(String... urls) {
             uploadUrl = urls[0];
+            DataOutputStream outputStream = null;
+            FileInputStream imageInputStream = null;
+            BufferedReader reader = null;
             try {
                 if (imageFile != null) {
                     URL url = new URL(uploadUrl);
@@ -445,11 +448,11 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     urlConnection.setDoOutput(true);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "image/jpeg");
-                    DataOutputStream outputStream = new DataOutputStream(urlConnection.getOutputStream());
+                    outputStream = new DataOutputStream(urlConnection.getOutputStream());
 
                     int nRead;
                     byte[] data = new byte[2048];
-                    FileInputStream imageInputStream = new FileInputStream(imageFile);
+                    imageInputStream = new FileInputStream(imageFile);
                     while ((nRead = imageInputStream.read(data, 0, data.length)) != -1) {
                         outputStream.write(data, 0, nRead);
                     }
@@ -458,7 +461,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     outputStream.close();
                     Log.d(TAG, "Image upload response: " + urlConnection.getResponseCode());
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
+                        reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
                         StringBuilder builder = new StringBuilder();
                         String output;
                         while ((output = reader.readLine()) != null) {
@@ -471,6 +474,16 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             } catch (IOException e) {
                 ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
                 cancel(true);
+            } finally {
+                if (outputStream != null) {
+                    RegattaActivity.this.safeClose(outputStream);
+                }
+                if (imageInputStream != null) {
+                    RegattaActivity.this.safeClose(imageInputStream);
+                }
+                if (reader != null) {
+                    RegattaActivity.this.safeClose(reader);
+                }
             }
             return "";
         }
@@ -508,14 +521,15 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         protected File doInBackground(String... urls) {
             downloadUrl = urls[0];
             File imageFile = null;
-
+            InputStream in = null;
+            FileOutputStream outputStream = null;
             try {
-                InputStream in = new java.net.URL(downloadUrl).openStream();
+                in = new java.net.URL(downloadUrl).openStream();
                 imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
                 if (!imageFile.exists()){
                     imageFile.createNewFile();
                 }
-                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                outputStream = new FileOutputStream(imageFile);
                 int read = 0;
                 byte[] bytes = new byte[1024];
 
@@ -526,6 +540,13 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 in.close();
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    safeClose(in);
+                }
+                if (outputStream != null) {
+                    safeClose(outputStream);
+                }
             }
             return imageFile;
         }

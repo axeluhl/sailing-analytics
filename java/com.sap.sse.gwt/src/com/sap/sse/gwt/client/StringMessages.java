@@ -22,4 +22,5 @@ public interface StringMessages extends Messages {
     String configuration();
     String settings();
     String settingsForComponent(String localizedShortName);
+    String pleaseSelect();
 }

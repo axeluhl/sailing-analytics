@@ -1,14 +1,16 @@
 package com.sap.sailing.domain.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
 
 
 public enum BoatClassMasterdata {
     _18Footer ("18Footer", true, 8.90, 2.00, BoatHullType.MONOHULL, true, "18.Footer", "18ft", "18ft Skiff", "18. Footer"),
-    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre", "2.4-metre"),
+    _2_4M ("2.4 Meter", true, 4.11, 0.81, BoatHullType.MONOHULL, false, "2.4M", "2.4mR", "2.4 Metre", "2.4-metre", "24MR"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _12M ("12 Meter", true, 5.97, 1.43, BoatHullType.MONOHULL, true, "12M", "12mR", "12SQM", "12-metre", "12 metre"),
     _29ER ("29er", true, 4.45, 1.70, BoatHullType.MONOHULL, true),
@@ -27,7 +29,7 @@ public enum BoatClassMasterdata {
     D_ONE ("D-One", true, 4.23, 2.31, BoatHullType.MONOHULL, true, "Devoti D-One", "DOne", "D_One"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
     DYAS("Dyas", true, 7.15, 1.95, BoatHullType.MONOHULL, true),
-    EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40"),
+    EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40", "ess"),
     D_35 ("D35", false, 10.81, 6.89, BoatHullType.CATAMARAN, false),
     ELLIOTT_6M ("Elliott 6m", true, 6.0, 2.35, BoatHullType.MONOHULL, true, "Elliott6m"),
     EUROPE_INT ("Europe Int.", true, 3.35, 1.35, BoatHullType.MONOHULL, false, "Europe"),
@@ -84,7 +86,6 @@ public enum BoatClassMasterdata {
     ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int.");
 
-
     private final String displayName;
     private final String[] alternativeNames;
     private final double hullLengthInMeter;
@@ -92,6 +93,8 @@ public enum BoatClassMasterdata {
     private final BoatHullType hullType;
     private final boolean typicallyStartsUpwind;
     private final boolean hasAdditionalDownwindSail;
+
+    private static Map<String, BoatClassMasterdata> fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata; 
 
     private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
             double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
@@ -102,6 +105,17 @@ public enum BoatClassMasterdata {
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = alternativeNames;
+        addToCache(this);
+    }
+
+    private void addToCache(BoatClassMasterdata boatClassMasterdata) {
+        if (fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata == null) {
+            fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata = new HashMap<>();
+        }
+        fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.put(unifyBoatClassName(getDisplayName()), this);
+        for (final String alternativeName : getAlternativeNames()) {
+            fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.put(unifyBoatClassName(alternativeName), this);
+        }
     }
 
     private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
@@ -113,26 +127,43 @@ public enum BoatClassMasterdata {
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = null;
+        addToCache(this);
     }
 
     public static BoatClassMasterdata resolveBoatClass(String boatClassName) {
-        String boatClassNameToResolve = unifyBoatClassName(boatClassName);
-        for (BoatClassMasterdata boatClass : values()) {
-            if (unifyBoatClassName(boatClass.displayName).equals(boatClassNameToResolve)) {
-                return boatClass;
-            } else if (boatClass.alternativeNames != null) {
-                for (String name : boatClass.alternativeNames) {
-                    if (unifyBoatClassName(name).equals(boatClassNameToResolve)) {
-                        return boatClass;
-                    }
-                }
-            }
-        }
-        return null;
+        return fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata.get(unifyBoatClassName(boatClassName));
     }
 
+    /**
+     * Maps the <code>boatClassName</code> string by removing all whitespace and converting to all upper case.
+     * Example: "Laser Int." becomes "LASERINT."<p>
+     * 
+     * Note that the mapping is not related to the set of {@link BoatClassMasterdata} objects known and works the same
+     * regardless of whether <code>boatClassName</code> matches any of the existing {@link BoatClassMasterdata} literals,
+     * display names or alternative names.
+     */
     public static String unifyBoatClassName(String boatClassName) {
         return boatClassName == null ? null : boatClassName.toUpperCase().replaceAll("\\s+","");
+    }
+    
+    /**
+     * If any of the existing {@link BoatClassMasterdata} objects has a matching {@link #unifyBoatClassName(String)
+     * unified} display or alternative name, the unified display name of that object is returned. Otherwise, the
+     * {@link #unifyBoatClassName(String) unified} <code>boatClassName</code> value is returned. Example: "LASER" and
+     * "Laser" and "LSR" and "lsr" and "Laser Int." and "LASER INT ." and "LASERINT." will all be mapped to "LASERINT."
+     * based on the boat class masterdata object whose display name is "Laser Int.". In turn, "xyz" and "x y z" will be
+     * mapped to "XYZ" without any matching {@link BoatClassMasterdata} object existing, simply based on the string
+     * mapping described for {@link #unifyBoatClassName(String)}.
+     */
+    public static String unifyBoatClassNameBasedOnExistingMasterdata(String boatClassName) {
+        BoatClassMasterdata bcm = resolveBoatClass(boatClassName);
+        final String result;
+        if (bcm != null) {
+            result = unifyBoatClassName(bcm.getDisplayName());
+        } else {
+            result = unifyBoatClassName(boatClassName);
+        }
+        return result;
     }
     
     public Distance getHullLength() {

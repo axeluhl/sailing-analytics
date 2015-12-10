@@ -25,7 +25,7 @@ public class ImageCreateDialog extends ImageDialog {
         heightInPxBox = createIntegerBox(null, 10);
         heightInPxBox.setEnabled(false);
         List<String> tags = new ArrayList<>();
-        if(initialTag != null && !initialTag.isEmpty()) {
+        if (initialTag != null && !initialTag.isEmpty()) {
             tags.add(initialTag);
         }
         tagsListEditor.setValue(tags);

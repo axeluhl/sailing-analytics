@@ -52,7 +52,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
         initWidget(uiBinder.createAndBindUi(this));
         initBreadCrumbs();
         
-        String sailorsInfoURL = currentPresenter.getCtx().getEventDTO().getSailorsInfoWebsiteURL();
+        String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
         if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
             Label label = new Label();
             label.getElement().setInnerHTML(i18n.sailorInfoLongText().replace("\n", "<br />"));
@@ -79,7 +79,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
         StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
-                .getDisplayName() : currentPresenter.getCtx().getEventDTO().getDisplayName());
+                .getDisplayName() : currentPresenter.getEventDTO().getDisplayName());
         String currentTabTitle = tabPanelUi.getCurrentTabTitle();
         if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
             titleBuilder.append(" - ").append(currentTabTitle);
@@ -96,7 +96,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
     private void initBreadCrumbs() {
         addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
         addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        addBreadCrumbItem(currentPresenter.getCtx().getEventDTO().getDisplayName(), currentPresenter.getCurrentEventNavigation());
+        addBreadCrumbItem(currentPresenter.getEventDTO().getDisplayName(), currentPresenter.getCurrentEventNavigation());
     }
     
     private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {

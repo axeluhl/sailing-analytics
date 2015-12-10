@@ -20,7 +20,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
@@ -33,6 +32,19 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogProtestStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -84,7 +96,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
-        RaceLogProtestStartTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createProtestStartTimeEvent(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
@@ -103,7 +115,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogStartProcedureChangedEvent() {        
-        RaceLogStartProcedureChangedEvent expectedEvent = RaceLogEventFactory.INSTANCE.createStartProcedureChangedEvent(now, author, 0, RacingProcedureType.ESS);
+        RaceLogStartProcedureChangedEvent expectedEvent = new RaceLogStartProcedureChangedEventImpl(now, author, 0, RacingProcedureType.ESS);
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
@@ -122,7 +134,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogPathfinderEvent() {        
-        RaceLogPathfinderEvent expectedEvent = RaceLogEventFactory.INSTANCE.createPathfinderEvent(now, author, 0, "GER 20");
+        RaceLogPathfinderEvent expectedEvent = new RaceLogPathfinderEventImpl(now, author, 0, "GER 20");
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
 
@@ -144,7 +156,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogGateLineOpeningTimeEvent() {        
-        RaceLogGateLineOpeningTimeEvent expectedEvent = RaceLogEventFactory.INSTANCE.createGateLineOpeningTimeEvent(now, author, 0, 1234l, 54321l);
+        RaceLogGateLineOpeningTimeEvent expectedEvent = new RaceLogGateLineOpeningTimeEventImpl(now, author, 0, 1234l, 54321l);
 
        addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
 
@@ -166,7 +178,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
 
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogPassChangeEvent() {        
-        RaceLogPassChangeEvent event = RaceLogEventFactory.INSTANCE.createPassChangeEvent(now, author, 0);
+        RaceLogPassChangeEvent event = new RaceLogPassChangeEventImpl(now, author, 0);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -192,7 +204,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         
-        RaceLogFinishPositioningListChangedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningListChangedEvent(now, author, 0, storedPositioningList);
+        RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -223,7 +235,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>(storedCompetitor.getId(), storedCompetitor.getName(), MaxPointsReason.NONE));
         
-        RaceLogFinishPositioningConfirmedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, storedPositioningList);
+        RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -249,7 +261,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithBackwardsCompatibleRaceLogFinishPositioningConfirmedEvent() {
-        RaceLogFinishPositioningConfirmedEvent event = RaceLogEventFactory.INSTANCE.createFinishPositioningConfirmedEvent(now, author, 0, null);
+        RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, null);
 
         createAndStoreOldRaceLogFinishPositioningConfirmedEventDBEntry();
 
@@ -295,7 +307,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogCourseAreaChangeEvent() {
         final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseAreaChangedEvent(now, author, 0, uuid);
+        RaceLogCourseAreaChangedEvent event = new RaceLogCourseAreaChangeEventImpl(now, author, 0, uuid);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -318,7 +330,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogRaceStatusEvent() {
 
-        RaceLogRaceStatusEvent event = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(now, author, 0, RaceLogRaceStatus.SCHEDULED);
+        RaceLogRaceStatusEvent event = new RaceLogRaceStatusEventImpl(now, author, 0, RaceLogRaceStatus.SCHEDULED);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -341,7 +353,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogStartTimeEvent() {
 
-        RaceLogStartTimeEvent event = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 0, now);
+        RaceLogStartTimeEvent event = new RaceLogStartTimeEventImpl(now, author, 0, now);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -365,7 +377,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFlagEvent() {
 
-        RaceLogFlagEvent event = RaceLogEventFactory.INSTANCE.createFlagEvent(now, author, 0, Flags.FIRSTSUBSTITUTE, Flags.NONE, true);
+        RaceLogFlagEvent event = new RaceLogFlagEventImpl(now, author, 0, Flags.FIRSTSUBSTITUTE, Flags.NONE, true);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -389,7 +401,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogCourseDesignChangedEvent() {
         CourseBase course = createCourseBase();
-        RaceLogCourseDesignChangedEvent event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, author, 0, course);
+        RaceLogCourseDesignChangedEvent event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, course);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
@@ -412,7 +424,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogWindFixEvent() {
         Wind wind = createWindFix();
-        RaceLogWindFixEvent event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, wind, /* isMagnetic */ false);
+        RaceLogWindFixEvent event = new RaceLogWindFixEventImpl(now, author, 0, wind, /* isMagnetic */ false);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 

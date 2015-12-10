@@ -30,8 +30,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible);
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -45,7 +45,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
         if (selectedRaceTimes.startOfRace != null) {
-            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+            if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
             } else {

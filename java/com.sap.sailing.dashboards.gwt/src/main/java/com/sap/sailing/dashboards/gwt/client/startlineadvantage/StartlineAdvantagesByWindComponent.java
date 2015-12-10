@@ -86,8 +86,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO");
-                        logger.log(Level.INFO, caught.getMessage());
+                        logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO, "+caught.getMessage());
                     }
                 });
     }

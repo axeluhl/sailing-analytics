@@ -8,8 +8,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
 public class EventsOverviewRecent extends Composite {
 

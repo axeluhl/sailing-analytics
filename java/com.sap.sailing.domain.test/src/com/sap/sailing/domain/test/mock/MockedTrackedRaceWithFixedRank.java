@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -74,6 +75,11 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
             } else {
                 return null;
             }
+        }
+
+        @Override
+        public Boat getBoatOfCompetitorById(Serializable competitorID) {
+            return null;
         }
     }
     

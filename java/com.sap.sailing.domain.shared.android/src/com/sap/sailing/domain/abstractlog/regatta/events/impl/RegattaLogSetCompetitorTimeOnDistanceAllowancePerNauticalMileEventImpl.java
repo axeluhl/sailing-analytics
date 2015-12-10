@@ -16,9 +16,9 @@ public class RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventI
     private final Duration timeOnDistanceAllowancePerNauticalMile;
 
     public RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(TimePoint createdAt,
-            AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable pId, Competitor competitor,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, Competitor competitor,
             Duration timeOnDistanceAllowancePerNauticalMile) {
-        super(createdAt, author, logicalTimePoint, pId, competitor);
+        super(createdAt, logicalTimePoint, author, pId, competitor);
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
     }
 

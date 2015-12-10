@@ -8,9 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.ColorMap;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
@@ -25,22 +24,26 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private final boolean hasMultiSelection;
     
-    private final ColorMap<CompetitorDTO> competitorsColorMap;
-    
     private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
+    private final CompetitorColorProvider competitorColorProvider; 
+
     public CompetitorSelectionModel(boolean hasMultiSelection) {
-        this(hasMultiSelection, null);
+        this(hasMultiSelection, new CompetitorColorProviderImpl(), null);
     }
 
-    private CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
+    public CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider) {
+        this(hasMultiSelection, competitorColorProvider, null);
+    }
+
+    private CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
+        this.competitorColorProvider = competitorColorProvider;
         this.competitorsFilterSet = competitorsFilterSet;
         this.allCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
-        this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
     }
     
     /**
@@ -53,8 +56,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private void add(CompetitorDTO competitor, boolean notifyListeners) {
         if (competitor.getColor() != null) {
-            Color color = competitor.getColor();
-            competitorsColorMap.addBlockedColor(color);
+            competitorColorProvider.addBlockedColor(competitor.getColor());
         }
         boolean changed = allCompetitors.add(competitor);
         if (notifyListeners && changed) {
@@ -101,6 +103,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     public void remove(CompetitorDTO competitor) {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
+        }
+        if (competitor.getColor() != null) {
+            competitorColorProvider.removeBlockedColor(competitor.getColor());
         }
         boolean changed = allCompetitors.remove(competitor);
         if (changed) {
@@ -228,20 +233,15 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             fireListChanged(getAllCompetitors(), listenersNotToNotify);
         }
     }
-    
+
     @Override
     public Color getColor(CompetitorDTO competitor) {
-        final Color result;
-        if (allCompetitors.contains(competitor)) {
-            if (competitor.getColor() != null) {
-                result = competitor.getColor();
-            } else {
-                result = competitorsColorMap.getColorByID(competitor); 
-            }
-        } else {
-            result = null;
-        }
-        return result;
+        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor) : null;
+    }
+
+    @Override
+    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
+        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor, raceIdentfier) : null;
     }
 
     @Override

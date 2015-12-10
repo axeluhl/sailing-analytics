@@ -217,8 +217,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -229,6 +227,8 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
@@ -1742,6 +1742,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         private RegattaAndRaceIdentifier getRaceIdentifier() {
             return trackedRace.getRaceIdentifier();
         }
+
     }
 
     /**
@@ -3166,7 +3167,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     logger.info("Searching remote server " + remoteRef + " for " + query);
                     URLConnection urlConnection = eventsURL.openConnection();
                     urlConnection.connect();
-                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();

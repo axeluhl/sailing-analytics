@@ -409,11 +409,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Set<Competitor> registered = new RegisteredCompetitorsAnalyzer<>(isRegattaLike.getRegattaLog()).analyze();
         if (!registered.contains(mappedTo)) {
             isRegattaLike.getRegattaLog().add(
-                    new RegattaLogRegisterCompetitorEventImpl(now, author, now, UUID.randomUUID(), mappedTo));
+                    new RegattaLogRegisterCompetitorEventImpl(now, now, author, UUID.randomUUID(), mappedTo));
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
-        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, author, now, UUID.randomUUID(), mappedTo, device,
+        event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedTo, device,
                 from, null);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked in competitor " + mappedTo.getName());
@@ -496,8 +496,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
-        RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
-                author, now, UUID.randomUUID(), deviceMappingEventId, closingTimePoint);
+        RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
+                author, now, deviceMappingEventId, closingTimePoint);
 
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out competitor " + mappedTo.getName());

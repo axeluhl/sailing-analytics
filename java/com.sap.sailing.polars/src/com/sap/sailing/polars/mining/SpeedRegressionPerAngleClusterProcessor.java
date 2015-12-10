@@ -149,7 +149,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         GroupKey compoundKey;
         try {
             compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
-                    .getSpeedRegressionPerAngleClusterClusterKeyDimensions().iterator());
+                    .getSpeedRegressionPerAngleClusterClusterKeyDimensions());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

@@ -9,6 +9,7 @@ import com.sap.sse.datamining.components.management.QueryDefinitionDTORegistry;
 import com.sap.sse.datamining.exceptions.DataMiningComponentAlreadyRegisteredForKeyException;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 
 public class QueryDefinitionDTOManager implements QueryDefinitionDTORegistry {
 
@@ -26,8 +27,11 @@ public class QueryDefinitionDTOManager implements QueryDefinitionDTORegistry {
     }
 
     @Override
-    public StatisticQueryDefinitionDTO get(PredefinedQueryIdentifier identifier) {
-        return definitionDTOsMappedByName.get(identifier);
+    public ModifiableStatisticQueryDefinitionDTO get(PredefinedQueryIdentifier identifier) {
+        if (definitionDTOsMappedByName.containsKey(identifier)) {
+            return new ModifiableStatisticQueryDefinitionDTO(definitionDTOsMappedByName.get(identifier));
+        }
+        return null;
     }
     
     @Override

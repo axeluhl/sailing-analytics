@@ -3,17 +3,10 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.searchresult.SearchResultResources" />
-    <g:HTMLPanel>
-        <div class="{local_res.css.searchresult_content_item}">
-            <g:Anchor ui:field="regattaLink" styleName="{local_res.css.searchresult_content_item_headline}" />
-          <div class="{local_res.css.searchresult_content_item_description}"><span ui:field="resultRegattaDetails" />
-				<!-- <a href="http://" class="{local_res.css.searchresult_content_item_description_morelink}">More</a>-->
-          </div>
-          <div class="{local_res.css.searchresult_content_item_footer}">
-              <g:Anchor ui:field="eventOverviewLink" styleName="{local_res.css.searchresult_content_item_footer_link}" />
-              <span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="resultEventVenue" />
-              <span class="{local_res.css.searchresult_content_item_footer_separator}">|</span><span ui:field="resultEventDate" />
-          </div>
-        </div>
-    </g:HTMLPanel>
+    <div class="{local_res.css.searchresult_content_item}" ui:field="eventInfoContainerUi">
+		<a ui:field="resultTitleUi" class="{local_res.css.searchresult_content_item_headline}" />
+		<div class="{local_res.css.searchresult_content_item_description}"><span ui:field="resultDescriptionUi" />
+			<!-- <a href="http://" class="{local_res.css.searchresult_content_item_description_morelink}">More</a>-->
+		</div>
+	</div>
 </ui:UiBinder>

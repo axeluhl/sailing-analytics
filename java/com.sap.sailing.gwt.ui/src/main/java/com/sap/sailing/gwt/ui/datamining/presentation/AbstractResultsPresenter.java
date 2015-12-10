@@ -159,7 +159,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings> im
         if (currentResult != null) {
             isSimple = true;
             for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-                if (groupKey.hasSubKey()) {
+                if (groupKey.hasSubKeys()) {
                     isSimple = false;
                     break;
                 }

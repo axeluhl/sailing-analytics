@@ -1,0 +1,91 @@
+.searchresult {
+  font-size: 1rem;
+}
+.searchresult_header {
+  background: #f2f2f2;
+  margin: 0;
+  padding: 0;
+}
+.searchresult_header_form {
+  height: 100%;
+}
+.searchresult_header_form_label {
+  display: block;
+  font-size: 1.2em;
+  padding: 0 0.833333333333333em;
+  margin: 1.111111111111111em 0;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.searchresult_header_form_inputwrapper {
+  padding: 0.333333333333333em;
+}
+.searchresult_header_form_input {
+  float: left;
+  display: block;
+  font-weight: 600;
+  padding: 0 2.333333333333333em 0 0.666666666666667em;
+  width: 100%;
+  height: 2.666666666666667em;
+  border: none;
+  vertical-align: middle;
+}
+.searchresult_header_form_button {
+  float: left;
+  width: 2.333333333333333em;
+  height: 2.666666666666667em;
+  margin-left: -2.333333333333333em;
+  border: none;
+  vertical-align: middle;
+  background: url("images/mobile/search-icon-yellow.svg") no-repeat;
+  background-size: 1.333333333333333em 1.333333333333333em;
+  background-position: center;
+}
+.searchresult_amount {
+  font-size: 0.866666666666667em;
+  font-weight: 600;
+  color: #0a0a0a;
+  padding: 1.153846153846154em;
+  border-bottom: 1px solid #ccc;
+}
+.searchresult_item {
+  padding: 1.333333333333333em 1em;
+  border-bottom: 1px solid #ccc;
+  text-decoration: none !important;
+}
+.searchresult_item_headline {
+  font-size: 1.066666666666667em;
+  font-weight: 700;
+  margin-right: 2em;
+}
+.searchresult_item_event {
+  font-size: 0.866666666666667em;
+  color: #0a0a0a;
+  margin-right: 2em;
+}
+.searchresult_item_event_link {
+  color: #0a0a0a;
+}
+.searchresult_item_event_link:visited,
+.searchresult_item_event_link:active {
+  color: #0a0a0a;
+}
+.searchresult_item_event_separator:after {
+  content: "|";
+  margin: 0 0.384615384615385em;
+  color: #ccc;
+}
+.searchresult_item_arrow {
+  background: url("images/home/arrow-down-grey.png");
+  background-size: contain;
+  display: block;
+  width: 1.333333333333333em;
+  height: 1.333333333333333em;
+  top: 50%;
+  right: 1em;
+  position: absolute;
+  -webkit-transform: translateY(-50%) rotate(-90deg);
+     -moz-transform: translateY(-50%) rotate(-90deg);
+      -ms-transform: translateY(-50%) rotate(-90deg);
+          transform: translateY(-50%) rotate(-90deg);
+}

@@ -96,7 +96,7 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
             context.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                    if(selectionBox != null) {
+                    if (selectionBox != null) {
                         // add a removed value item back to the list of available items
                         List<String> diffList = new ArrayList<>();
                         Util.addAll(availableConstantValuesToAdd, diffList);
@@ -110,10 +110,10 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
 
         private void updateSelectionListBox(ListBox listBox, Iterable<String> values) {
             listBox.clear();
-            if(placeholderTextForAddListbox != null) {
+            if (placeholderTextForAddListbox != null) {
                 listBox.addItem(placeholderTextForAddListbox);
             } else {
-                listBox.addItem("Please select");
+                listBox.addItem(getStringMessages().pleaseSelect());
             }
             for (String value : values) {
                 listBox.addItem(value);
@@ -138,7 +138,7 @@ public class StringConstantsListEditorComposite extends ListEditorComposite<Stri
                 @Override
                 public void onClick(ClickEvent event) {
                     int selIndex = selectionBox.getSelectedIndex();
-                    String seletedItemText = selectionBox.getItemText(selIndex);
+                    String seletedItemText = selectionBox.getValue(selIndex);
                     addValue(seletedItemText);
                     selectionBox.setSelectedIndex(0);
                     addButton.setEnabled(false);

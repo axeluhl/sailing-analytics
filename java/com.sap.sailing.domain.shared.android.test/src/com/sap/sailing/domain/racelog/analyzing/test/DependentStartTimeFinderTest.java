@@ -21,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEve
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -64,16 +65,16 @@ public class DependentStartTimeFinderTest {
     @Test
     public void testDependentStartTimeUpdate() {
         final MillisecondsDurationImpl cAfterB = new MillisecondsDurationImpl(5000);
-        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), cAfterB));
+        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("B", "", ""), cAfterB, RaceLogRaceStatus.SCHEDULED));
 
         StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
         // Tests for correct behaviour, when race depending on has no start time set
         assertNull(finder.analyze().getStartTime());
 
         final MillisecondsDurationImpl bAfterA = new MillisecondsDurationImpl(6000);
-        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), bAfterA));
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), bAfterA, RaceLogRaceStatus.SCHEDULED));
 
         finder = new StartTimeFinder(raceLogResolver, raceLogB);
         StartTimeFinderResult result = finder.analyze();
@@ -98,7 +99,8 @@ public class DependentStartTimeFinderTest {
         assertEquals(expectedDependingOnRaces, result.getRacesDependingOn());
 
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogA.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000),
+                RaceLogRaceStatus.SCHEDULED));
 
         finder = new StartTimeFinder(raceLogResolver, raceLogB);
         result = finder.analyze();
@@ -111,7 +113,8 @@ public class DependentStartTimeFinderTest {
         assertEquals(5000, result.getStartTimeDiff().asMillis());
 
         // Test correct behaviour, when middle element changes
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(15000)));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(15000),
+                RaceLogRaceStatus.SCHEDULED));
         finder = new StartTimeFinder(raceLogResolver, raceLogA);
         result = finder.analyze();
         assertEquals(5000, result.getStartTime().asMillis());
@@ -131,16 +134,16 @@ public class DependentStartTimeFinderTest {
     @Test
     public void testDependentStartTimeCycle() {
         final MillisecondsDurationImpl cAfterB = new MillisecondsDurationImpl(6000);
-        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("B", "", ""), cAfterB));
+        raceLogC.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("B", "", ""), cAfterB, RaceLogRaceStatus.SCHEDULED));
 
         final MillisecondsDurationImpl bAfterA = new MillisecondsDurationImpl(7000);
-        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("A", "", ""), bAfterA));
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), bAfterA, RaceLogRaceStatus.SCHEDULED));
 
         final MillisecondsDurationImpl aAfterC = new MillisecondsDurationImpl(8000);
-        raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, author, nowMock, "12", null, 12,
-                new SimpleRaceLogIdentifierImpl("C", "", ""), aAfterC));
+        raceLogA.add(new RaceLogDependentStartTimeEventImpl(nowMock, nowMock, author, "12", 12,
+                new SimpleRaceLogIdentifierImpl("C", "", ""), aAfterC, RaceLogRaceStatus.SCHEDULED));
 
         // Check that all resolve to null in case of a cycle
         StartTimeFinder finder = new StartTimeFinder(raceLogResolver, raceLogC);
@@ -157,7 +160,8 @@ public class DependentStartTimeFinderTest {
 
         // Check that all resolve correctly after changing some element in cycle
         TimePoint now = MillisecondsTimePoint.now();
-        raceLogB.add(new RaceLogStartTimeEventImpl(now, author, now, "12", null, 12, new MillisecondsTimePoint(5000)));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, "12", 12, new MillisecondsTimePoint(5000),
+                RaceLogRaceStatus.SCHEDULED));
 
         // now A -> C -> B
         finder = new StartTimeFinder(raceLogResolver, raceLogA);

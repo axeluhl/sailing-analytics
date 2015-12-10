@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegatt
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
@@ -101,7 +100,4 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace);
     }
 
-    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
-    }
 }

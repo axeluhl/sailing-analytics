@@ -11,9 +11,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.dispatch.client.CollectionResult;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.CollectionResult;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
 
 public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite implements RefreshableWidget<CollectionResult<T>> {
 

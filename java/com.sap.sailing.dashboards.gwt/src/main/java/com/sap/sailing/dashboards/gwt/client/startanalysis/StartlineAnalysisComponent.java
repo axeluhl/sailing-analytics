@@ -201,8 +201,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received startanalysis list");
-                        logger.log(Level.INFO, caught.getMessage());
+                        logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
                     }
                 });
     }
@@ -266,8 +265,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets 
 
             @Override
             public void onFailure(Throwable caught) {
-                logger.log(Level.INFO, "Failed to received competitors for leaderboard name");
-                logger.log(Level.INFO, caught.getMessage());
+                logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
             }
         });
     }

@@ -25,4 +25,10 @@ public interface RaceDefinition extends Named, WithID {
     Iterable<Competitor> getCompetitors();
 
     Competitor getCompetitorById(Serializable competitorID);
+
+    /**
+     * Gets the boat used by the competitor for this race.
+     */
+    Boat getBoatOfCompetitorById(Serializable competitorID);
+
 }

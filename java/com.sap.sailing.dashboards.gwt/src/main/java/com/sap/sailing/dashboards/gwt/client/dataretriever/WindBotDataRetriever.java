@@ -70,21 +70,26 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                     public void onSuccess(WindInfoForRaceDTO result) {
                         logger.log(Level.INFO, "Received WindInfoForRaceDTO");
                         if (result != null) {
-                            if(windBotIDsInLiveRace.size() != getWindBotIdsFrom(result).size()){
-                                windBotIDsInLiveRace = getWindBotIdsFrom(result);
-                                notifyListenersAboutNumberOfWindBotChange(windBotIDsInLiveRace);
-                                logger.log(Level.INFO, "Number of Windbots changed");
+                            int numberOfReceivedExpeditionSources = getWindBotIdsFrom(result).size();
+                            if (numberOfReceivedExpeditionSources > 0) {
+                                if (windBotIDsInLiveRace.size() != numberOfReceivedExpeditionSources) {
+                                    windBotIDsInLiveRace = getWindBotIdsFrom(result);
+                                    notifyListenersAboutNumberOfWindBotChange(windBotIDsInLiveRace);
+                                    logger.log(Level.INFO, "Number of Windbots changed to "+numberOfReceivedExpeditionSources);
+                                }
+                                notifyWindBotDataRetrieverListeners(result);
+                            } else {
+                                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
+                                logger.log(Level.INFO, "WindInfoForRaceDTO is not containing wind from windbots");
                             }
-                            notifyWindBotDataRetrieverListeners(result);
                         } else {
-                            logger.log(Level.INFO, "WindInfoForRaceDTO is null");                            
+                            logger.log(Level.INFO, "WindInfoForRaceDTO is null");
                         }
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO");
-                        logger.log(Level.INFO, caught.getMessage());
+                        logger.log(Level.INFO, "Failed to received WindInfoForRaceDTO, "+caught.getMessage());
                     }
                 });
     }
@@ -109,7 +114,13 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
 
     private void notifyListenersAboutNumberOfWindBotChange(List<String> windBotIDs) {
         for (NumberOfWindBotsChangeListener numberOfWindBotsChangeListener : numberOfWindBotsChangeListeners) {
-            numberOfWindBotsChangeListener.numberOfWindBotsChanged(windBotIDs, this);
+            numberOfWindBotsChangeListener.numberOfWindBotsReceivedChanged(windBotIDs, this);
+        }
+    }
+    
+    private void notifyListenersAboutNumberOfWindBotsReceivedIsZero() {
+        for (NumberOfWindBotsChangeListener numberOfWindBotsChangeListener : numberOfWindBotsChangeListeners) {
+            numberOfWindBotsChangeListener.numberOfWindBotsReceivedIsZero();
         }
     }
     
@@ -126,6 +137,7 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
     public void notifyWindBotDataRetrieverListeners(WindInfoForRaceDTO windInfoForRaceDTO) {
         logger.log(Level.INFO, "Notifing WindBotDataRetrieverListener about new WindInfoForRaceDTO");
         for (WindBotDataRetrieverListener windBotDataRetrieverListener : windBotDataRetrieverListeners) {
+            logger.log(Level.INFO, "Notifying WindBotDataRetrieverListener");
             windBotDataRetrieverListener.updateWindBotUI(windInfoForRaceDTO);
         }
     }
@@ -143,13 +155,14 @@ public class WindBotDataRetriever implements TimeListener, WindBotDataRetrieverP
                 if(result != null) {
                 loadWindBotData(finaloldTime, finalNewTime, result);
                 } else {
-                    logger.log(Level.INFO, "RegattaAndRaceIdentifier is null");
-                    logger.log(Level.INFO, "Can´t load wind data");
+                    notifyListenersAboutNumberOfWindBotsReceivedIsZero();
+                    logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
                 }
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
                 logger.log(Level.INFO, " Failed to received RegattaAndRaceIdentifier from race that takes wind fixes now");
                 logger.log(Level.INFO, caught.getMessage());
             }

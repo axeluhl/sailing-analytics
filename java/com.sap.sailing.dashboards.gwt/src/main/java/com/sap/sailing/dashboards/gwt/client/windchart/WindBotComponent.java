@@ -169,12 +169,13 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * */
     @Override
     public void updateWindBotUI(WindInfoForRaceDTO windInfoForRaceDTO) {
-        
+        logger.log(Level.INFO, "WindBotComponent with id "+windBotId+" got notified about new WindInfoForRaceDTO");
         if (windInfoForRaceDTO != null) {
             WindTrackInfoDTO windTrackInfoDTO = getWindTrackInfoDTOFromAndWindBotID(windInfoForRaceDTO, windBotId);
             if (windTrackInfoDTO != null) {
                 logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id "+ windBotId);
-                if (windTrackInfoDTO.windFixes != null && windTrackInfoDTO.windFixes.size() > 0) {
+                if (windTrackInfoDTO.windFixes != null) {
+                    if (windTrackInfoDTO.windFixes.size() > 0) {
                     logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id "+ windBotId);
                     Point[] speedPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes, WindType.SPEED);
                     Point[] directionPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes,
@@ -192,12 +193,17 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
                             movingAverageDirection.getAverage());
                     locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes
                             .get(windTrackInfoDTO.windFixes.size() - 1).position);
+                    } else {
+                        logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is empty");
+                    }
                 } else {
-                    logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is null or empty");
+                    logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is null");
                 }
             } else {
                 logger.log(Level.INFO, "WindInfoForRaceDTO does not contains WindTrackInfoDTO for Windbot id "+ windBotId);
             }
+        } else {
+            logger.log(Level.INFO, "WindInfoForRaceDTO is null");
         }
     }
 

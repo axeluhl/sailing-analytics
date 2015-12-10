@@ -18,6 +18,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sse.common.Color;
@@ -243,9 +244,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                     competitorDTO = new CompetitorDTOImpl(c.getName(), c.getColor(), c.getEmail(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(),
-                              c.getBoat().getSailID(), c.getId().toString(),
+                              c.getId().toString(),
                               c.getTeam().getImage() == null ? null : c.getTeam().getImage().toString(),
                               c.getFlagImage() == null ? null : c.getFlagImage().toString(),
+                            new BoatDTO(c.getBoat().getName(), c.getBoat().getSailID(), c.getBoat().getColor()),  
                             new BoatClassDTO(c.getBoat().getBoatClass()
                             .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters()),
                             c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile());

@@ -18,6 +18,7 @@ import com.sap.sailing.selenium.pages.HostPage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 
@@ -47,7 +48,7 @@ public class AdminConsolePage extends HostPage {
     private static final String TRACTRAC_EVENTS_TAB_LABEL = "TracTrac Events"; //$NON-NLS-1$
     private static final String TRACTRAC_EVENTS_TAB_IDENTIFIER = "TracTracEventManagement"; //$NON-NLS-1$
     
-    private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Races"; //$NON-NLS-1$
+    private static final String TRACKED_RACES_TAB_PARENT_LABEL = "Tracked races"; //$NON-NLS-1$
     private static final String TRACKED_RACES_TAB_PARENT_IDENTIFIER = "RacesPanel"; //$NON-NLS-1$
     
     private static final String TRACKED_RACES_TAB_LABEL = "Tracked races"; //$NON-NLS-1$
@@ -61,6 +62,9 @@ public class AdminConsolePage extends HostPage {
     
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL = "Leaderboard groups"; //$NON-NLS-1$
     private static final String LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER = "LeaderboardGroupConfiguration"; //$NON-NLS-1$
+    
+    private static final String COMPETITOR_PANEL_TAB_LABEL = "Competitors"; //$NON-NLS-1$
+    private static final String COMPETITOR_PANEL_TAB_IDENTIFIER = "CompetitorPanel"; //$NON-NLS-1$
     
     /**
      * <p>Goes to the administration console and returns the representing page object.</p>
@@ -118,6 +122,12 @@ public class AdminConsolePage extends HostPage {
         goToTab(LEADERBOARD_CONFIGURATION_TAB_PARENT_LABEL, LEADERBOARD_CONFIGURATION_TAB_PARENT_IDENTIFIER, true);
         return new LeaderboardGroupConfigurationPanelPO(this.driver, goToTab(LEADERBOARD_GROUP_CONFIGURATION_TAB_LABEL,
                 LEADERBOARD_GROUP_CONFIGURATION_TAB_IDENTIFIER, false));
+    }
+    
+    public TrackedRacesCompetitorsPanelPO goToTrackedRacesCompetitors() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new TrackedRacesCompetitorsPanelPO(this.driver, goToTab(COMPETITOR_PANEL_TAB_LABEL,
+                COMPETITOR_PANEL_TAB_IDENTIFIER, false));
     }
     
     /**
