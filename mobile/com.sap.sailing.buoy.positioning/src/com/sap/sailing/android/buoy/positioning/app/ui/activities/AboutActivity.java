@@ -1,6 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
 import android.os.Bundle;
+import android.view.Menu;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.AboutFragment;
@@ -28,5 +29,13 @@ public class AboutActivity extends BaseActivity {
             getSupportActionBar().setTitle(R.string.about_this_app);
         }
         replaceFragment(R.id.content_frame, AboutFragment.newInstance());
+    }
+
+    /**
+     * Empty method to avoid creation of parent menu.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
     }
 }
