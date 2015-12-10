@@ -46,6 +46,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         table = new FlushableCellTable<T>(10000, tableRes);
+        table.ensureDebugId("WrappedTable");
         this.dataProvider = new ListDataProvider<T>();
         this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
         table.addColumnSortHandler(this.columnSortHandler);

@@ -261,6 +261,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, multiSelection);
+        raceColumnTable.asWidget().ensureDebugId("RaceColumnTable");
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
