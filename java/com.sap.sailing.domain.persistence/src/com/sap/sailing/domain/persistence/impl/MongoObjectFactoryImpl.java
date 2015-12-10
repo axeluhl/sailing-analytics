@@ -886,15 +886,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogRegisterCompetitorEvent(event));
         return result;
     }
-    
-    @SuppressWarnings("deprecation")
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event) {
-        BasicDBObject result = new BasicDBObject();
-        storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogCloseOpenEndedDeviceMappingEvent(event));
-        return result;
-    }
-    
+        
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogEndOfTrackingEvent event) {
         BasicDBObject result = new BasicDBObject();
         storeRaceLogIdentifier(raceLogIdentifier, result);
@@ -1054,16 +1046,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    @SuppressWarnings("deprecation")
-    private Object storeRaceLogCloseOpenEndedDeviceMappingEvent(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
-        result.put(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
-        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
-        return result;
-    }
-    
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogUseCompetitorsFromRaceLogEvent event) {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);

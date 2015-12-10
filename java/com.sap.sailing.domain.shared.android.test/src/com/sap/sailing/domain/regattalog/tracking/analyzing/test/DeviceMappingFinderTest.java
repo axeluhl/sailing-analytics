@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.analyzing.test;
+package com.sap.sailing.domain.regattalog.tracking.analyzing.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,9 +11,9 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -23,8 +23,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-@SuppressWarnings("deprecation")
-public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
+public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     private final DeviceIdentifier device = new SmartphoneImeiIdentifier("imei");
@@ -44,14 +43,14 @@ public class DeviceMappingFinderTest extends AbstractRaceLogTrackingTest {
     }
     
     private Serializable addMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Long from, Long to, Competitor item) {
-        RaceLogEvent mapping = new RaceLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), 0, item, device,
+        RegattaLogEvent mapping = new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), item, device,
                 t(from), t(to));
         log.add(mapping);
         return mapping.getId();
     }
     
     private void closeMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long millis) {
-        RaceLogEvent mapping = new RaceLogCloseOpenEndedDeviceMappingEventImpl(t(), t(), author, UUID.randomUUID(), 0, mappingId,
+        RegattaLogEvent mapping = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(t(), author, t(), UUID.randomUUID(), mappingId,
                 new MillisecondsTimePoint(millis));
         log.add(mapping);
     }

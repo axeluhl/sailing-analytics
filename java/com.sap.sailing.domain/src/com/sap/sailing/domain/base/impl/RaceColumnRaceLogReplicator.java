@@ -145,12 +145,6 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
     public void visit(RaceLogRegisterCompetitorEvent event) {
         notifyOnAdd(event);
     }
-    
-    @SuppressWarnings("deprecation")
-    @Override
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event) {
-        notifyOnAdd(event);
-    }
 
     @Override
     public void visit(RaceLogFixedMarkPassingEvent event) {

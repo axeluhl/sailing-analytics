@@ -47,9 +47,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogStartTrackingEvent event);
     
     public void visit(RaceLogRegisterCompetitorEvent event);
-    
-    @SuppressWarnings("deprecation")
-    public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
     

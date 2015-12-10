@@ -159,7 +159,7 @@ import com.sap.sailing.domain.common.PolarSheetsXYDiagramData;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RaceLogEventNotFoundException;
+import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
@@ -5434,43 +5434,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private void closeOpenEndedDeviceMapping(List<AbstractLog<?, ?>> logHierarchy, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, RaceLogEventNotFoundException {
+    private void closeOpenEndedDeviceMapping(RegattaLog regattaLog, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, UnableToCloseDeviceMappingException {
         boolean successfullyClosed = false;
-        for (AbstractLog<?, ?> abstractLog : logHierarchy) {
-            //check if abstractLog is the correct log for the closingEvent
-            final AbstractLogEvent<?> event;
-            abstractLog.lockForRead();
-            try {
-                 event = abstractLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
-            } finally {
-                abstractLog.unlockAfterRead();
-            }
+        regattaLog.lockForRead();
+        try {
+            RegattaLogEvent event = regattaLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
+
             if (event != null) {
                 successfullyClosed = true;
                 DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-                if (abstractLog instanceof RegattaLog) {
-                    RegattaLog regattaLog = (RegattaLog) abstractLog;
-                    List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                            new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
-                            new MillisecondsTimePoint(closingTimePoint)).analyze();
-                    for (RegattaLogEvent closingEvent : closingEvents) {
-                        regattaLog.add(closingEvent);            
-                    }
-                } else if (abstractLog instanceof RaceLog) {
-                    RaceLog raceLog = (RaceLog) abstractLog;
-                    @SuppressWarnings("deprecation")
-                    List<com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                            new com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogOpenEndedDeviceMappingCloser(raceLog, mapping, getService().getServerAuthor(),
-                            new MillisecondsTimePoint(closingTimePoint)).analyze();
-                    for (RaceLogEvent closingEvent : closingEvents) {
-                        raceLog.add(closingEvent);            
-                    }
+                List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
+                        new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
+                                new MillisecondsTimePoint(closingTimePoint)).analyze();
+                for (RegattaLogEvent closingEvent : closingEvents) {
+                    regattaLog.add(closingEvent);            
                 }
             }
+        } finally {
+            regattaLog.unlockAfterRead();
         }
-        
+
         if (!successfullyClosed){
-            throw new RaceLogEventNotFoundException();
+            throw new UnableToCloseDeviceMappingException();
         }
     }
     
@@ -5871,24 +5856,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException {
+    public void closeOpenEndedDeviceMapping(String leaderboardName, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, DoesNotHaveRegattaLogException, UnableToCloseDeviceMappingException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        
-        List<AbstractLog<?, ?>> logList = new ArrayList<>();
-        logList.add(regattaLog);
-        try {
-            closeOpenEndedDeviceMapping(logList, mappingDTO, closingTimePoint);
-        } catch (RaceLogEventNotFoundException e) {
-            logger.warning("Device Mapping Event couldn't be found on RegattaLog, checking in RaceLog (deprecated)");
-            
-            List<AbstractLog<?, ?>> logs = getLogHierarchy(leaderboardName);
-            try {
-                closeOpenEndedDeviceMapping(logs, mappingDTO, closingTimePoint);
-            } catch (RaceLogEventNotFoundException e1) {
-                logger.warning("Device Mapping Event could also not be found in RaceLogs");
-            }
-        }
-        
+        closeOpenEndedDeviceMapping(regattaLog, mappingDTO, closingTimePoint);
     }
 
     /**

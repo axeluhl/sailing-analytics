@@ -33,12 +33,10 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
@@ -271,20 +269,6 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());
-    }
-
-    @Test
-    public void testStoreAndLoadCloseOpenDeviceMappingEvent() {
-        RaceLogCloseOpenEndedDeviceMappingEvent expectedEvent = new RaceLogCloseOpenEndedDeviceMappingEventImpl(
-                expectedEventTime, expectedEventTime, author, expectedId, expectedPassId, UUID.randomUUID(),
-                new MillisecondsTimePoint(49));
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogCloseOpenEndedDeviceMappingEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(expectedEvent.getDeviceMappingEventId(), actualEvent.getDeviceMappingEventId());
-        assertEquals(expectedEvent.getClosingTimePoint(), actualEvent.getClosingTimePoint());
     }
 
     /**

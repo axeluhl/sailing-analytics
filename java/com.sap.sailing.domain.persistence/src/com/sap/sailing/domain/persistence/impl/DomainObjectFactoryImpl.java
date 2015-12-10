@@ -1374,8 +1374,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             return loadRaceLogRevokeEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogRegisterCompetitorEvent.class.getSimpleName())) {
             return loadRaceLogRegisterCompetitorEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
-        } else if (eventClass.equals(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
-            return loadRaceLogCloseOpenEndedDeviceMappingEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogAdditionalScoringInformationEvent.class.getSimpleName())) {
             return loadRaceLogAdditionalScoringInformationEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
         } else if (eventClass.equals(RaceLogFixedMarkPassingEvent.class.getSimpleName())){
@@ -1465,15 +1463,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     	Serializable competitorId = (Serializable) dbObject.get(FieldNames.RACE_LOG_COMPETITOR_ID.name());
     	Competitor comp = baseDomainFactory.getCompetitorStore().getExistingCompetitorById(competitorId);
         return new RaceLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, passId, comp);
-    }
-
-    @SuppressWarnings("deprecation")
-    private RaceLogEvent loadRaceLogCloseOpenEndedDeviceMappingEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-            Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
-        Serializable deviceMappingEventId = Helpers.tryUuidConversion((Serializable) dbObject.get(FieldNames.RACE_LOG_DEVICE_MAPPING_EVENT_ID.name()));
-        TimePoint closingTimePoint = loadTimePoint(dbObject, FieldNames.RACE_LOG_CLOSING_TIMEPOINT);
-        return new com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl(createdAt, logicalTimePoint, author, id, passId,
-                deviceMappingEventId, closingTimePoint);
     }
 
     private RaceLogEvent loadRaceLogAdditionalScoringInformationEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
