@@ -24,7 +24,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
@@ -127,11 +126,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
             if (log instanceof RaceLog) {
                 RaceLogEventVisitor visitor = new BaseRaceLogEventVisitor() {
-                    @Override
-                    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceCompetitorMappingEvent(event);
-                    }
-
                     @Override
                     public void visit(@SuppressWarnings("deprecation") com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
                         RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);

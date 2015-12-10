@@ -25,7 +25,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -72,7 +71,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
                 new RaceLogWindFixEventSerializer(competitorSerializer, 
                         new WindJsonSerializer(
                                 new PositionJsonSerializer())),
-                new RaceLogDeviceCompetitorMappingEventSerializer(competitorSerializer, deviceSerializer),
                 new RaceLogDeviceMarkMappingEventSerializer(competitorSerializer, new MarkJsonSerializer(), deviceSerializer),
                 new RaceLogDenoteForTrackingEventSerializer(competitorSerializer),
                 new RaceLogStartTrackingEventSerializer(competitorSerializer),
@@ -100,7 +98,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     private final JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer;
     private final JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer;
     private final JsonSerializer<RaceLogEvent> windFixEventSerializer;
-    private final JsonSerializer<RaceLogEvent> deviceCompetitorMappingSerializer;
     private final JsonSerializer<RaceLogEvent> deviceMarkMappingSerializer;
     private final JsonSerializer<RaceLogEvent> denoteForTrackingSerializer;
     private final JsonSerializer<RaceLogEvent> startTrackingSerializer;
@@ -131,7 +128,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
             JsonSerializer<RaceLogEvent> startProcedureChangedEventSerializer,
             JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer,
             JsonSerializer<RaceLogEvent> windFixEventSerializer,
-            JsonSerializer<RaceLogEvent> deviceCompetitorMappingSerializer,
             JsonSerializer<RaceLogEvent> deviceMarkMappingSerializer,
             JsonSerializer<RaceLogEvent> denoteForTrackingSerializer,
             JsonSerializer<RaceLogEvent> createRaceSerializer,
@@ -157,7 +153,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
         this.startProcedureChangedEventSerializer = startProcedureChangedEventSerializer;
         this.protestStartTimeEventSerializer = protestStartTimeEventSerializer;
         this.windFixEventSerializer = windFixEventSerializer;
-        this.deviceCompetitorMappingSerializer = deviceCompetitorMappingSerializer;
         this.deviceMarkMappingSerializer = deviceMarkMappingSerializer;
         this.denoteForTrackingSerializer = denoteForTrackingSerializer;
         this.startTrackingSerializer = createRaceSerializer;
@@ -253,11 +248,6 @@ public class RaceLogEventSerializer implements JsonSerializer<RaceLogEvent>, Rac
     @Override
     public void visit(RaceLogWindFixEvent event) {
         chosenSerializer = windFixEventSerializer;
-    }
-
-    @Override
-    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-        chosenSerializer = deviceCompetitorMappingSerializer;
     }
 
     @SuppressWarnings("deprecation")

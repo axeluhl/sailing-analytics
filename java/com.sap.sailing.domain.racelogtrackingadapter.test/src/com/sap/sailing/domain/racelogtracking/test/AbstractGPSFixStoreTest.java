@@ -10,8 +10,9 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -41,6 +42,7 @@ public class AbstractGPSFixStoreTest {
             new MockDeviceAndSessionIdentifierWithGPSFixesDeserializer();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected RaceLog raceLog;
+    protected RegattaLog regattaLog;
     protected GPSFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
@@ -68,7 +70,7 @@ public class AbstractGPSFixStoreTest {
     }
 
     protected void map(RaceLog raceLog, Competitor comp, DeviceIdentifier device, long from, long to) {
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), author, 0,
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, 0,
                 comp, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 

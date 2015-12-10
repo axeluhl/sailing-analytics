@@ -80,6 +80,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
 
         trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);

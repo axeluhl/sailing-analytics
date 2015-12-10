@@ -25,7 +25,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -112,11 +111,6 @@ public class RaceColumnRaceLogReplicator implements RaceLogEventVisitor, Seriali
 
     @Override
     public void visit(RaceLogWindFixEvent event) {
-        notifyOnAdd(event);
-    }
-
-    @Override
-    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
         notifyOnAdd(event);
     }
 

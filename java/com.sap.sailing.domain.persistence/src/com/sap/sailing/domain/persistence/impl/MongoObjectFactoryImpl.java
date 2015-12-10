@@ -41,7 +41,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEven
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -843,13 +842,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogWindFix(event));
         return result;
     }
-    
-    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogDeviceCompetitorMappingEvent event) {
-        BasicDBObject result = new BasicDBObject();
-        storeRaceLogIdentifier(raceLogIdentifier, result);
-        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogDeviceCompetitorMappingEvent(event));
-        return result;
-    }
 
     @SuppressWarnings("deprecation")
     public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event) {
@@ -989,15 +981,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (event.getTo() != null) {
             storeTimePoint(event.getTo(), result, toField);
         }
-    }
-
-    private Object storeRaceLogDeviceCompetitorMappingEvent(RaceLogDeviceCompetitorMappingEvent event) {
-        DBObject result = new BasicDBObject();
-        storeRaceLogEventProperties(event, result);
-        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogDeviceCompetitorMappingEvent.class.getSimpleName());
-        storeDeviceMappingEvent(event, result, FieldNames.RACE_LOG_FROM, FieldNames.RACE_LOG_TO);
-        result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
-        return result;
     }
 
     @SuppressWarnings("deprecation")

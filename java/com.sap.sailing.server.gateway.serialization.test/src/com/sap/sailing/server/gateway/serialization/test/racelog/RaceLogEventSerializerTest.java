@@ -26,7 +26,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChanged
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
@@ -55,7 +54,6 @@ public class RaceLogEventSerializerTest {
     private JsonSerializer<RaceLogEvent> startProcedureTypeChangedEventSerializer;
     private JsonSerializer<RaceLogEvent> protestStartTimeEventSerializer;
     private JsonSerializer<RaceLogEvent> windFixEventSerializer;
-    private JsonSerializer<RaceLogEvent> deviceCompetitorMappingEventSerializer;
     private JsonSerializer<RaceLogEvent> deviceMarkMappingEventSerializer;
     private JsonSerializer<RaceLogEvent> denoteForTrackingEventSerializer;
     private JsonSerializer<RaceLogEvent> startTrackingEventSerializer;
@@ -87,7 +85,6 @@ public class RaceLogEventSerializerTest {
         startProcedureTypeChangedEventSerializer = mock(JsonSerializer.class);
         protestStartTimeEventSerializer = mock(JsonSerializer.class);
         windFixEventSerializer = mock(JsonSerializer.class);
-        deviceCompetitorMappingEventSerializer = mock(JsonSerializer.class);
         deviceMarkMappingEventSerializer = mock(JsonSerializer.class);
         denoteForTrackingEventSerializer = mock(JsonSerializer.class);
         startTrackingEventSerializer = mock(JsonSerializer.class);
@@ -106,7 +103,7 @@ public class RaceLogEventSerializerTest {
                 finishPositioningListChangedEventSerializer, finishPositioningConfirmedEventSerializer,
                 pathfinderEventSerializer, gateLineOpeningTimeEventSerializer,
                 startProcedureTypeChangedEventSerializer, protestStartTimeEventSerializer, windFixEventSerializer,
-                deviceCompetitorMappingEventSerializer, deviceMarkMappingEventSerializer,
+                deviceMarkMappingEventSerializer,
                 denoteForTrackingEventSerializer, startTrackingEventSerializer, revokeEventSerializer,
                 registerCompetitorEventSerializer, fixedMarkPassingEventSerializer, suppressedMarkPassingsSerializer, 
                 additionalScoringInformationSerializer, dependentStartTimeEventSerializer, 
@@ -216,14 +213,6 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = new RaceLogWindFixEventImpl(null, author, 0, null, /* isMagnetic */ false);
         serializer.serialize(event);
         verify(windFixEventSerializer).serialize(event);
-    }
-
-    @Test
-    public void testDeviceCompetitorMappingSerializer() {
-        // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogDeviceCompetitorMappingEventImpl(null, author, 0, null, null, null, null);
-        serializer.serialize(event);
-        verify(deviceCompetitorMappingEventSerializer).serialize(event);
     }
 
     @Test

@@ -2,7 +2,6 @@ package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
@@ -36,8 +35,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogProtestStartTimeEvent event);
     
     public void visit(RaceLogWindFixEvent event);
-    
-    public void visit(RaceLogDeviceCompetitorMappingEvent event);
     
     @SuppressWarnings("deprecation")
     public void visit(com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent event);

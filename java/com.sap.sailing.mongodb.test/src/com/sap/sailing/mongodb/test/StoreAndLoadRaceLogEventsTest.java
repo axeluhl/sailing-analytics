@@ -34,11 +34,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
@@ -177,27 +175,6 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(startTime, actualEvent.getStartTime());
-    }
-
-    @Test
-    public void testStoreAndLoadDeviceCompetitorMappingEvent() {
-        DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-        Competitor mappedTo = DomainFactory.INSTANCE.getOrCreateCompetitor("abc", "abc", null, null, null, null, null, /* timeOnTimeFactor */
-                null, /* timeOnDistanceAllowancePerNauticalMile */null);
-        TimePoint from = new MillisecondsTimePoint(20);
-        TimePoint to = new MillisecondsTimePoint(30);
-        RaceLogDeviceCompetitorMappingEvent expectedEvent = new RaceLogDeviceCompetitorMappingEventImpl(
-                expectedEventTime, expectedEventTime, author, expectedId, expectedPassId,
-                mappedTo, device, from, to);
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogDeviceCompetitorMappingEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(device, actualEvent.getDevice());
-        assertEquals(from, actualEvent.getFrom());
-        assertEquals(to, actualEvent.getTo());
-        assertEquals(mappedTo, actualEvent.getMappedTo());
     }
 
     @Test
