@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.android.tracking.app.R;
@@ -38,6 +40,8 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
                 EulaHelper.openEulaPage(getActivity());
             }
         });
+        OpenSansTextView versionTextView = (OpenSansTextView) view.findViewById(R.id.system_information_application_version);
+        versionTextView.setText(AppUtils.with(getActivity()).getBuildInfo());
         return view;
     }
 

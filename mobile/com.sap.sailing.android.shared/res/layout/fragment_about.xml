@@ -42,4 +42,23 @@
         android:textSize="@dimen/about_button_text_size"
         android:textStyle="bold"/>
 
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        android:id="@+id/system_information_application_version_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/application_version"
+        android:layout_marginLeft="@dimen/about_button_side_margin"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/eula_button"/>
+
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        android:id="@+id/system_information_application_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/about_button_side_margin"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/system_information_application_version_header"/>
+
 </RelativeLayout>
