@@ -67,7 +67,6 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
         leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "regatta", new int[] {});
-
         log = leaderboard.getRegattaLike().getRegattaLog();
     }
 
@@ -90,7 +89,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         Map<Mark, List<DeviceMapping<Mark>>> mappings = new DeviceMarkMappingFinder<>(log).analyze();
         List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
-        assertThat("two additional mappings were created for the second ping", mappingsForMark.size(), equalTo(3));
+        assertThat("Assert an additional mapping was created for the second ping", mappingsForMark.size(), equalTo(2));
         assertOneFixPerMapping(mappingsForMark);
         }
     }
@@ -103,5 +102,4 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
             assertThat("all fixes stored", racingEventService.getGPSFixStore().getNumberOfFixes(device), equalTo(1L));
         }
     }
-
 }
