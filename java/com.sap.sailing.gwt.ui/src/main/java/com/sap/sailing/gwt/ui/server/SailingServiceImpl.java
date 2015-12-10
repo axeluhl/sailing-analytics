@@ -864,8 +864,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private RaceInfoDTO createRaceInfoDTO(String seriesName, RaceColumn raceColumn, Fleet fleet) {
         RaceInfoDTO raceInfoDTO = new RaceInfoDTO();
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+        raceInfoDTO.isTracked = trackedRace != null ? true : false;
         if (raceLog != null) {
-            raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
             ReadonlyRaceState state = ReadonlyRaceStateImpl.create(getService(), raceLog);
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
@@ -881,13 +882,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 raceInfoDTO.finishedTime = null;
                 if (raceInfoDTO.isTracked) {
-                    TimePoint endOfRace = raceColumn.getTrackedRace(fleet).getEndOfRace();
+                    TimePoint endOfRace = trackedRace.getEndOfRace();
                     raceInfoDTO.finishedTime = endOfRace != null ? endOfRace.asDate() : null;
                 }
             }
 
+            final TimePoint now = MillisecondsTimePoint.now();
             if (startTime != null) {
-                FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, MillisecondsTimePoint.now());
+                FlagPoleState activeFlagState = state.getRacingProcedure().getActiveFlags(startTime, now);
                 List<FlagPole> activeFlags = activeFlagState.getCurrentState();
                 FlagPoleState previousFlagState = activeFlagState.getPreviousState(state.getRacingProcedure(), startTime);
                 List<FlagPole> previousFlags = previousFlagState.getCurrentState();
@@ -919,7 +921,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             CourseBase lastCourse = state.getCourseDesign();
             if (lastCourse != null) {
-                raceInfoDTO.lastCourseDesign = convertToRaceCourseDTO(lastCourse, /* trackedRace */ null, /* timePoint */ null);
+                raceInfoDTO.lastCourseDesign = convertToRaceCourseDTO(lastCourse, new TrackedRaceMarkPositionFinder(trackedRace), now);
                 raceInfoDTO.lastCourseName = lastCourse.getName();
             }
             
@@ -937,7 +939,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             
             Wind wind = state.getWindFix();
             if (wind != null) {
-                raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, MillisecondsTimePoint.now());
+                raceInfoDTO.lastWind = createWindDTOFromAlreadyAveraged(wind, now);
             }
 
             fillStartProcedureSpecifics(raceInfoDTO, state);
@@ -947,7 +949,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceInfoDTO.fleetName = fleet.getName();
         raceInfoDTO.fleetOrdering = fleet.getOrdering();
         raceInfoDTO.raceIdentifier = raceColumn.getRaceIdentifier(fleet);
-        raceInfoDTO.isTracked = raceColumn.getTrackedRace(fleet) != null ? true : false;
         return raceInfoDTO;
     }
     
