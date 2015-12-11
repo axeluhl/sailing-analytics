@@ -658,15 +658,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * Whenever a {@link RaceLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
-     * found in the {@code RaceLog} in a separate thread. This method blocks if there is such a thread loading
+     * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
+     * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading
      * fixes, until that thread is finished.
-     * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
-     */
-    void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
-
-    /**
-     * @see #waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog)
+     * @param fromRegattaLog Make sure that the fixes defined by the mappings in this regattalog were loaded.
      */
     void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
     
