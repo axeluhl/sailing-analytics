@@ -332,6 +332,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         trackWind = new CheckBox(stringMessages.trackWind());
         correctWindDirectionForDeclination = new CheckBox(stringMessages.declinationCheckbox());
         startTrackingButton = new Button(stringMessages.startTracking());
+        startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.setEnabled(false);
         racesPanel.add(trackWind);
         racesPanel.add(correctWindDirectionForDeclination);
