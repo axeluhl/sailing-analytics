@@ -422,7 +422,6 @@
                     <plugin>
                         <groupId>com.sap.prd.codesign</groupId>
                         <artifactId>com.sap.prd.codesign.maven-jarsigner-plugin</artifactId>
-                        <version>1.2</version>
                         
                         <configuration>
                             <signingTech>ANDROID</signingTech>
