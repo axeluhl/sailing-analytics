@@ -183,7 +183,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
         addFixes1(race, comp1, dev1);
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(11), t(20)));
 

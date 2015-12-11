@@ -11,9 +11,9 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -81,7 +81,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -129,9 +129,10 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
-
+        
         trackedRace.attachRaceLog(raceLog);
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 10002);
         testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);
@@ -154,16 +155,16 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     }
 
     @Test
-    public void attachTwoRaceLogsAndSeeIfLoadingIsSerializedNicely() throws TransformationException,
+    public void attachTwoRegattaLogsAndSeeIfLoadingIsSerializedNicely() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Course course = new CourseImpl("course", Collections.<Waypoint> emptyList());
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass,
                 Arrays.asList(new Competitor[] { comp }));
-        RaceLog raceLog2 = new RaceLogImpl("raceLog 2");
+        RegattaLog regattaLog2 = new RegattaLogImpl("raceLog 2");
 
         final int numFixes = 10000;
         map(comp, device, 0, numFixes / 2);
-        map(raceLog2, comp, device, numFixes / 2 + 1, numFixes);
+        map(regattaLog2, comp, device, numFixes / 2 + 1, numFixes);
 
         for (int i = 0; i < numFixes; i++) {
             store.storeFix(device, createFix(i, 10, 20, 30, 40));
@@ -190,11 +191,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             }
         });
 
-        trackedRace.attachRaceLog(raceLog);
-        trackedRace.attachRaceLog(raceLog2);
+        trackedRace.attachRegattaLog(regattaLog);
+        trackedRace.attachRegattaLog(regattaLog2);
 
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog2);
+        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog2);
 
         assertThat("switch at most once between the two race logs while loading",
                 numberOfSwitchesBetweenLoadingRaceLogs, lessThanOrEqualTo(1));

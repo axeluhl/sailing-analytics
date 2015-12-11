@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -57,6 +58,7 @@ public class AbstractGPSFixStoreTest {
     public void setServiceAndRaceLog() {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
+        regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoGPSFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
                 serviceFinderFactory);
     }
@@ -68,13 +70,13 @@ public class AbstractGPSFixStoreTest {
         mongoOF.getGPSFixMetadataCollection().drop();
     }
 
-    protected void map(RaceLog raceLog, Competitor comp, DeviceIdentifier device, long from, long to) {
+    protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, 0,
                 comp, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
     protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
-        map(raceLog, comp, device, from, to);
+        map(regattaLog, comp, device, from, to);
     }
 
     protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
