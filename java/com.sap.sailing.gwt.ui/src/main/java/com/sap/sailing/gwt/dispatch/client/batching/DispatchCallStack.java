@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.dispatch.client.batching;
 
 import java.util.LinkedList;
 
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.dispatch.client.Action;
 import com.sap.sailing.gwt.dispatch.client.DispatchContext;
@@ -70,22 +71,44 @@ public final class DispatchCallStack<CTX extends DispatchContext> {
      * 
      * @param batchResult
      */
-    @SuppressWarnings("unchecked")
-    public void processResult(BatchResult batchResult) {
+    public void processResult(BatchResult batchResult, boolean processResultsScheduled) {
         assert (batchResult != null);
 
         int loop = 0;
         for (@SuppressWarnings("rawtypes")
         DispatchCall call : this.actionQueue) {
             Result result = batchResult.getResult(loop);
+            Throwable exception = batchResult.getException(loop);
 
+            CallbackCommand callbackCommand = new CallbackCommand(call, result, exception);
+            if(processResultsScheduled) {
+                SplitScheduler.get().schedule(callbackCommand);
+            } else {
+                callbackCommand.execute();
+            }
+            loop++;
+        }
+    }
+    
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private class CallbackCommand implements ScheduledCommand {
+        private final DispatchCall call;
+        private final Result result;
+        private final Throwable exception;
+        public CallbackCommand(DispatchCall call, Result result, Throwable exception) {
+            this.call = call;
+            this.result = result;
+            this.exception = exception;
+        }
+
+        @Override
+        public void execute() {
             if (result == null) {
-                Throwable exception = batchResult.getException(loop);
                 call.getCallback().onFailure(exception);
             } else {
                 call.getCallback().onSuccess(result);
             }
-            loop++;
         }
+        
     }
 }

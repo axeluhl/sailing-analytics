@@ -108,7 +108,7 @@ public class EventParamUtils {
                     .createNewDefaultSettings(null, null,
                     /* overallDetails */overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                            raceColumnSelectionStrategy);
+                            raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
         }
         return result;
     }

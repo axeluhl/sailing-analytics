@@ -54,7 +54,7 @@ public class ExperimentalFeatures {
     /**
      * Enables/disables the link to the race board on mobile races view (competition format), in case of a tracked race
      */
-    public static final boolean ENABLE_RACE_VIEWER_LINK_ON_MOBILE = false;
+    public static final boolean ENABLE_RACE_VIEWER_LINK_ON_MOBILE = true;
     /**
      * Provide selection to filter regattas by boat category on mobile multiregatta event overview
      */

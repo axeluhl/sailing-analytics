@@ -35,4 +35,9 @@ public class RaceLogDefineMarkEventImpl extends RaceLogEventImpl implements Race
         return mark;
     }
 
+    @Override
+    public String getShortInfo() {
+        return mark.toString();
+    }
+
 }
