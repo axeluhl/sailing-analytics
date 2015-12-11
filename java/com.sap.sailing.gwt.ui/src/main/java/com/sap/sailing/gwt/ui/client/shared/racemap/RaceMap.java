@@ -712,6 +712,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
             infoOverlay.removeCanvasPositionAndRotationTransition();
         }
+        // remove the advantage line animation
+        advantageTimer.removeAnimation();
     }
 
     public void redraw() {
@@ -917,7 +919,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
-                        showAdvantageLine(competitorsToShow, newTime);
+                        showAdvantageLine(competitorsToShow, newTime, timeForPositionTransitionMillis);
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
@@ -1223,7 +1225,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
+    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
@@ -1289,6 +1291,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                         break;
                     }
+                    MVCArray<LatLng> nextPath = MVCArray.newInstance();
                     LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
                             coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLengthInKm / 2.0);
                     LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -1320,13 +1323,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             }
                         });
                     } else {
-                        advantageLine.getPath().setAt(0, advantageLinePos1);
-                        advantageLine.getPath().setAt(1, advantageLinePos2);
+                        nextPath.push(advantageLinePos1);
+                        nextPath.push(advantageLinePos2);
+                        advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                         advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
                     drawAdvantageLine = true;
-                    advantageTimer.setLastFix(lastBoatFix);
                 }
             }
             if (!drawAdvantageLine) {
