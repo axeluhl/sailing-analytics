@@ -3893,6 +3893,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          final Map<Mark, List<DeviceMapping<Mark>>> markMappings = new HashMap<>();
          final Set<Mark> result = new HashSet<>();
          
+         race.getCourse().getWaypoints().forEach(waypoint -> Util.addAll(waypoint.getMarks(), result));
+         
          Set<Mark> marksDefinedInRegattaLog = new HashSet<Mark>(); 
          for (RegattaLog log: attachedRegattaLogs.values()){
              marksDefinedInRegattaLog.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());

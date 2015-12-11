@@ -3,6 +3,8 @@ package com.sap.sailing.domain.racelogtracking.test;
 import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -71,7 +73,7 @@ public class AbstractGPSFixStoreTest {
     }
 
     protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, 0,
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(),
                 comp, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
@@ -80,7 +82,7 @@ public class AbstractGPSFixStoreTest {
     }
 
     protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
-        regattaLog.add(new RegattaLogDeviceMarkMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, 0,
+        regattaLog.add(new RegattaLogDeviceMarkMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(),
                 mark, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
