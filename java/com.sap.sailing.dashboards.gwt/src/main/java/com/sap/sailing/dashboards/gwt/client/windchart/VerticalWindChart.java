@@ -3,7 +3,6 @@ package com.sap.sailing.dashboards.gwt.client.windchart;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.moxieapps.gwt.highcharts.client.Axis.Type;
@@ -39,6 +38,9 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.util.HighchartsUtil;
+import com.sap.sailing.dashboards.gwt.shared.WindType;
+import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
 
 /**
  * The class represents a wind chart that is displayed vertically. Because it is meant to be used to display wind fixes,
@@ -52,8 +54,7 @@ import com.sap.sailing.dashboards.gwt.client.util.HighchartsUtil;
 public class VerticalWindChart extends Composite implements HasWidgets {
 
     private Series verticalWindChartSeries;
-    private String positiveSeriesColorAsHex;
-    private String negativeSeriesColorAsHex;
+    private Point lastPoint;
     private List<VerticalWindChartClickListener> verticalWindChartClickListeners;
 
     /**
@@ -73,6 +74,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
 
     private static VerticalWindChartUiBinder uiBinder = GWT.create(VerticalWindChartUiBinder.class);
     
+    @SuppressWarnings("unused")
     private static final Logger logger = Logger.getLogger(VerticalWindChart.class.getName());
 
     interface VerticalWindChartUiBinder extends UiBinder<Widget, VerticalWindChart> {
@@ -110,8 +112,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         setChartOptions();
         setXAxisOptions();
         setYAxisOptions();
-        positiveSeriesColorAsHex = positiveFillColor;
-        negativeSeriesColorAsHex = negativeFillColor;
+        initVerticalWindChartSeries(positiveFillColor, negativeFillColor);
         verticalWindChartClickListeners = new ArrayList<VerticalWindChartClickListener>();
         HighchartsUtil.setSizeToMatchContainerDelayed(verticalWindChart);
     }
@@ -171,13 +172,13 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                                 }));
     }
 
-    private void initVerticalWindChartSeries() {
+    private void initVerticalWindChartSeries(String positivSeriesColorAsHex, String negativeSeriesColorAsHex) {
         verticalWindChartSeries = verticalWindChart.createSeries();
         AreaPlotOptions areaPlotOptions = new AreaPlotOptions();
         verticalWindChart.addSeries(verticalWindChartSeries.setName(null).setPlotOptions(
                 areaPlotOptions.setDashStyle(DashStyle.SOLID).setLineWidth(0.1)
                         .setMarker(new Marker().setEnabled(false)).setShadow(false).setHoverStateEnabled(false)
-                        .setLineColor("#FFFFFF").setFillColor(positiveSeriesColorAsHex)
+                        .setLineColor("#FFFFFF").setFillColor(positivSeriesColorAsHex)
                         .setOption("negativeFillColor", negativeSeriesColorAsHex)).setOption("turboThreshold", MAX_SERIES_POINTS));
     }
 
@@ -190,27 +191,52 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * {@link #setXAxisExtremesForSeriesPointRangeIsSmallerThanChartDisplayIntervall()} and
      * {@link #setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall()}.
      * */
-    public void addPointsToSeriesWithAverage(final Point[] points, final double average) {
-        if (verticalWindChartSeries == null) {
-            initVerticalWindChartSeries();
-            verticalWindChartSeries.setPoints(points, true);
-            logger.log(Level.INFO, "Set Points");
+    public void addPointsToSeriesWithAverageAndWindType(List<WindDTO> windFixes, final double average, WindType windType) {
+        if(windType.equals(WindType.SPEED)) {
+            addPointsToSeriesOfTypeSpeed(windFixes);
         } else {
-            for (Point point : points) {
-                verticalWindChartSeries.addPoint(point, true, false, false);
-                logger.log(Level.INFO, "Add Point");
-            }
+            addPointsToSeriesOfTypeDirection(windFixes);
         }
-        verticalWindChartSeries.updateThreshold("" + average);
-        adaptVerticalWindChartExtemes();
+        verticalWindChartSeries.updateThreshold(""+average);
+        adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
+    }
+    
+    private Point createSpeedPoint(WindDTO windDTO) {
+        Point result = new Point(windDTO.measureTimepoint, windDTO.trueWindSpeedInKnots);
+        if (lastPoint != null) {
+            adaptWindDirectionPointToStayCloseToLastPoint(lastPoint, result);
+        }
+        lastPoint = result;
+        return result;
+    }
+    
+    private Point createDirectionPoint(WindDTO windDTO) {
+        Point result = new Point(windDTO.measureTimepoint, windDTO.trueWindFromDeg);
+        if (lastPoint != null) {
+            adaptWindDirectionPointToStayCloseToLastPoint(lastPoint, result);
+        }
+        lastPoint = result;
+        return result;
+    }
+    
+    private void addPointsToSeriesOfTypeSpeed(List<WindDTO> windFixes) {
+        for (WindDTO windDTO : windFixes) {
+            verticalWindChartSeries.addPoint(createSpeedPoint(windDTO), false, false, false);
+        }
+    }
+    
+    private void addPointsToSeriesOfTypeDirection(List<WindDTO> windFixes) {
+        for (WindDTO windDTO : windFixes) {
+            verticalWindChartSeries.addPoint(createDirectionPoint(windDTO), false, false, false);
+        }
     }
 
     /**
      * Depending on the series points time range and the selected display interval, the series fits into the display
      * interval or not. So there are two cases where the extreme points of the x-axis get calculated differently.
      * */
-    private void adaptVerticalWindChartExtemes() {
-            setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall();
+    private void adaptVerticalWindChartExtemes(Long lastTimePoint) {
+            setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall(lastTimePoint.longValue());
     }
 
     /**
@@ -219,23 +245,10 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * the the max value minus the selected display interval and the max value the last points time value. The chart
      * gets other extremes, because the values do not fit anymore into the selected display interval.
      * */
-    private void setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall() {
-                long maximumExtremeValueInMillis = getLastPointOfVerticalWindChartSeries().getX().longValue();
+    private void setXAxisExtremesForSeriesPointRangeIsBiggerThanChartDisplayIntervall(long lastTimePoint) {
+                long maximumExtremeValueInMillis = lastTimePoint;
                 long minimumExtremeValueInMillis = maximumExtremeValueInMillis - chartIntervallinMinutes * 60 * 1000;
                 verticalWindChart.getXAxis().setExtremes(minimumExtremeValueInMillis, maximumExtremeValueInMillis, true, false);                
-    }
-
-
-    private Point getLastPointOfVerticalWindChartSeries() {
-        Point lastPointOfVerticalWindChartSeries = null;
-        if (verticalWindChartSeries != null) {
-            Point[] seriesPoints = verticalWindChartSeries.getPoints();
-            int seriesPointsLenght = seriesPoints.length;
-            if (seriesPointsLenght > 0) {
-                lastPointOfVerticalWindChartSeries = seriesPoints[seriesPointsLenght - 1];
-            }
-        }
-        return lastPointOfVerticalWindChartSeries;
     }
 
     public void addVerticalWindChartClickListener(VerticalWindChartClickListener verticalWindChartClickListener) {
@@ -251,6 +264,10 @@ public class VerticalWindChart extends Composite implements HasWidgets {
             verticalWindChartClickListener.clickedWindChartWithNewIntervalChangeInMillis(intervalInMillis);
         }
     }
+    
+    private Point adaptWindDirectionPointToStayCloseToLastPoint(Point previousPoint, Point point) {
+        return ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, point);
+    }
 
     /**
      * The method handles a click on the vertical wind charts focus panel. It changes the display interval of the x-axis
@@ -263,7 +280,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
         } else {
             chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
         }
-        adaptVerticalWindChartExtemes();
+        adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
         notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
     }
 

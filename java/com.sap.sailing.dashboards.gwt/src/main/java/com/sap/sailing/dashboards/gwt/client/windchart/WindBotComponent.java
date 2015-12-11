@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.moxieapps.gwt.highcharts.client.Point;
-
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -21,12 +19,11 @@ import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverL
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.compass.LocationPointerCompass;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
-import com.sap.sailing.dashboards.gwt.shared.SinWave;
 import com.sap.sailing.dashboards.gwt.shared.WindType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.dispatch.client.batching.SplitScheduler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -43,15 +40,10 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
  */
 public class WindBotComponent extends Composite implements HasWidgets, WindBotDataRetrieverListener {
 
-    private SinWave speedSinWave;
-    private SinWave directionSinWave;
-    private boolean inSimulationMode;
-
     private MovingAverage movingAverageSpeed;
     private MovingAverage movingAverageDirection;
 
     private static WindBotComponentUiBinder uiBinder = GWT.create(WindBotComponentUiBinder.class);
-    private static final String IN_SIMULATION_MODE = "simulation";
     private static final Logger logger = Logger.getLogger(WindBotComponent.class.getName());
 
     interface WindBotComponentUiBinder extends UiBinder<Widget, WindBotComponent> {
@@ -111,14 +103,6 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
     public WindBotComponent(String windBotId) {
         this.windBotId = windBotId;
         stringConstants = StringMessages.INSTANCE;
-        String inSimulationModeParameter = Window.Location.getParameter(IN_SIMULATION_MODE);
-        if (inSimulationModeParameter != null && inSimulationModeParameter.equals("true")) {
-            inSimulationMode = true;
-            this.speedSinWave = new SinWave(50, 8);
-            this.directionSinWave = new SinWave(100, 8);
-        } else {
-            inSimulationMode = false;
-        }
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
         trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
@@ -168,30 +152,42 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
      * */
     @Override
     public void updateWindBotUI(WindInfoForRaceDTO windInfoForRaceDTO) {
-        logger.log(Level.INFO, "WindBotComponent with id "+windBotId+" got notified about new WindInfoForRaceDTO");
+        logger.log(Level.INFO, "WindBotComponent with id " + windBotId + " got notified about new WindInfoForRaceDTO");
         if (windInfoForRaceDTO != null) {
-            WindTrackInfoDTO windTrackInfoDTO = getWindTrackInfoDTOFromAndWindBotID(windInfoForRaceDTO, windBotId);
+            final WindTrackInfoDTO windTrackInfoDTO = getWindTrackInfoDTOFromAndWindBotID(windInfoForRaceDTO, windBotId);
             if (windTrackInfoDTO != null) {
-                logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id "+ windBotId);
+                logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id " + windBotId);
                 if (windTrackInfoDTO.windFixes != null) {
                     if (windTrackInfoDTO.windFixes.size() > 0) {
-                    logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id "+ windBotId);
-                    Point[] speedPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes, WindType.SPEED);
-                    Point[] directionPoints = convertWindFixListIntoPointsArray(windTrackInfoDTO.windFixes,
-                            WindType.DIRECTION);
+                        logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id " + windBotId);
+                        SplitScheduler.get().schedule(new ScheduledCommand() {
 
-                    trueWindSpeedLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(speedPoints[speedPoints.length - 1].getY().doubleValue()));
-                    trueWindSpeedLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageSpeed.getAverage()));
-                    
-                    trueWindDirectionLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(directionPoints[directionPoints.length - 1].getY().doubleValue()));
-                    trueWindDirectionLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageDirection.getAverage()));
+                            @Override
+                            public void execute() {
+                                updateMovingAverages(windTrackInfoDTO.windFixes);
+                            }
+                        });
+                        SplitScheduler.get().schedule(new ScheduledCommand() {
 
-                    trueWindSpeedVerticalWindChart.addPointsToSeriesWithAverage(speedPoints,
-                            movingAverageSpeed.getAverage());
-                    trueWindDirectionVerticalWindChart.addPointsToSeriesWithAverage(directionPoints,
-                            movingAverageDirection.getAverage());
-                    locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes
-                            .get(windTrackInfoDTO.windFixes.size() - 1).position);
+                            @Override
+                            public void execute() {
+                                updateWindSpeedLabelsAndChart(windTrackInfoDTO);
+                            }
+                        });
+                        SplitScheduler.get().schedule(new ScheduledCommand() {
+
+                            @Override
+                            public void execute() {
+                                updateWindDirectionLabelsAndChart(windTrackInfoDTO);
+                            }
+                        });
+                        SplitScheduler.get().schedule(new ScheduledCommand() {
+
+                            @Override
+                            public void execute() {
+                                updateLocationPointerCompass(windTrackInfoDTO);
+                            }
+                        });
                     } else {
                         logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is empty");
                     }
@@ -199,52 +195,37 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
                     logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is null");
                 }
             } else {
-                logger.log(Level.INFO, "WindInfoForRaceDTO does not contains WindTrackInfoDTO for Windbot id "+ windBotId);
+                logger.log(Level.INFO, "WindInfoForRaceDTO does not contains WindTrackInfoDTO for Windbot id "
+                        + windBotId);
             }
         } else {
             logger.log(Level.INFO, "WindInfoForRaceDTO is null");
         }
     }
-
-    private Point[] convertWindFixListIntoPointsArray(List<WindDTO> windFixes, WindType windtype) {
-        if (windFixes != null && windFixes.size() > 0) {
-            Point[] points = new Point[windFixes.size()];
-            int counter = 0;
-            if (windtype.equals(WindType.DIRECTION)) {
-                Point previouspoint = new Point(windFixes.get(0).requestTimepoint, windFixes.get(0).trueWindFromDeg);
-                for (WindDTO windDTO : windFixes) {
-                    double nextSinusValue = 0;
-                    if (inSimulationMode == true) {
-                        nextSinusValue = directionSinWave.getNexNumber();
-                    }
-                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindFromDeg + nextSinusValue);
-                    points[counter] = adaptWindDirectionPointToStayCloseToLastPoint(previouspoint, points[counter]);
-                    previouspoint = points[counter];
-                        movingAverageDirection.add(windDTO.trueWindFromDeg + nextSinusValue);
-                    counter++;
-                }
-            } else if (windtype.equals(WindType.SPEED)) {
-                Point previouspoint = new Point(windFixes.get(0).requestTimepoint,
-                        windFixes.get(0).trueWindSpeedInKnots);
-                for (WindDTO windDTO : windFixes) {
-                    double nextSinusValue = 0;
-                    if (inSimulationMode == true) {
-                        nextSinusValue = speedSinWave.getNexNumber();
-                    }
-                    points[counter] = new Point(windDTO.requestTimepoint, windDTO.trueWindSpeedInKnots + nextSinusValue);
-                    points[counter] = adaptWindDirectionPointToStayCloseToLastPoint(previouspoint, points[counter]);
-                    previouspoint = points[counter];
-                    movingAverageSpeed.add(windDTO.trueWindSpeedInKnots + nextSinusValue);
-                    counter++;
-                }
-            }
-            return points;
-        } else {
-            return null;
-        }
+    
+    private void updateWindSpeedLabelsAndChart(final WindTrackInfoDTO windTrackInfoDTO) {
+        int size = windTrackInfoDTO.windFixes.size();
+        trueWindSpeedLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(windTrackInfoDTO.windFixes.get(size-1).trueWindSpeedInKnots));
+        trueWindSpeedVerticalWindChart.addPointsToSeriesWithAverageAndWindType(windTrackInfoDTO.windFixes, movingAverageSpeed.getAverage(), WindType.SPEED);
+        trueWindSpeedLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageSpeed.getAverage()));
     }
-
-    private Point adaptWindDirectionPointToStayCloseToLastPoint(Point previousPoint, Point point) {
-        return ChartPointRecalculator.stayClosestToPreviousPoint(previousPoint, point);
+    
+    private void updateWindDirectionLabelsAndChart(final WindTrackInfoDTO windTrackInfoDTO) {
+        int size = windTrackInfoDTO.windFixes.size();
+        trueWindDirectionLiveAverageComponent.setLiveValue(""+NumberFormat.getFormat("#0.0").format(windTrackInfoDTO.windFixes.get(size-1).trueWindFromDeg));
+        trueWindDirectionVerticalWindChart.addPointsToSeriesWithAverageAndWindType(windTrackInfoDTO.windFixes, movingAverageDirection.getAverage(), WindType.DIRECTION);
+        trueWindDirectionLiveAverageComponent.setAverageValue(""+NumberFormat.getFormat("#0.0").format(movingAverageDirection.getAverage()));
+    }
+    
+    private void updateLocationPointerCompass(final WindTrackInfoDTO windTrackInfoDTO) {
+        locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes
+                .get(windTrackInfoDTO.windFixes.size() - 1).position);
+    }
+    
+    private void updateMovingAverages(List<WindDTO> windFixes) {
+        for(WindDTO windDTO : windFixes) {
+            movingAverageSpeed.add(windDTO.trueWindSpeedInKnots);
+            movingAverageDirection.add(windDTO.trueWindFromDeg);
+        }
     }
 }
