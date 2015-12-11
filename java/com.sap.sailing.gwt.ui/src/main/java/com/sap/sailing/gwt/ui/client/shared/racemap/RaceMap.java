@@ -918,10 +918,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
                         fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
                         Iterable<CompetitorDTO> competitorsForWhichNewFixesWereReveiced =
-                                fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
+                                fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
                         if (!Util.isEmpty(competitorsForWhichNewFixesWereReveiced)) {
-                            showBoatsOnMap(newTime, timeForPositionTransitionMillis, competitorsForWhichNewFixesWereReveiced);
-                            showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
+                            showBoatsOnMap(newTime, transitionTimeInMillis, competitorsForWhichNewFixesWereReveiced);
+                            showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
                             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                             // adjust to new boat positions
                             showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
