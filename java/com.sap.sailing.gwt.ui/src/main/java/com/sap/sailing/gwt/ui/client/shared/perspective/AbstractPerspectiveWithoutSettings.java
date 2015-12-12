@@ -22,6 +22,7 @@ public abstract class AbstractPerspectiveWithoutSettings extends AbstractPerspec
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
+        // no-op
     }
 
     @Override

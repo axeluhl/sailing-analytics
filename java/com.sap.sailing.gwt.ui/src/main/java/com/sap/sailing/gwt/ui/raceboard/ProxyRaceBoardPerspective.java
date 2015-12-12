@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspective;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -81,5 +82,10 @@ public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPers
     @Override
     public RaceBoardPerspectiveSettings getSettings() {
         return perspectiveSettings;
+    }
+    
+    @Override
+    public void setSettingsOfComponents(CompositeSettings settingsOfComponents) {
+        // no-op
     }
 }

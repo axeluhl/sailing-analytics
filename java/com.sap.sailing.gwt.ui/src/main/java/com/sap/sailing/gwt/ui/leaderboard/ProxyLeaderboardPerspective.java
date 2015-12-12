@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.place.start.ProxyLeaderboardComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspective;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -68,5 +69,10 @@ public class ProxyLeaderboardPerspective extends AbstractPerspective<Leaderboard
     @Override
     public String getDependentCssClassName() {
         return "";
+    }
+
+    @Override
+    public void setSettingsOfComponents(CompositeSettings settingsOfComponents) {
+        // no-op
     }
 }

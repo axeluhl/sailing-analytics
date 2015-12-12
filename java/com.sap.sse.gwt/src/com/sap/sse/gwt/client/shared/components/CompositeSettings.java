@@ -23,4 +23,15 @@ public class CompositeSettings extends AbstractSettings {
         return settingsPerComponent;
     }
 
+    @SuppressWarnings("unchecked")
+    public <SettingsType extends Settings> SettingsType getSettingsForType(Class<SettingsType> settingsType) {
+        SettingsType result = null;
+        for(ComponentAndSettingsPair<?> componentAndSettings: settingsPerComponent) {
+            if(componentAndSettings.getB().getClass().getName().equals(settingsType.getName())) {
+                result = (SettingsType) componentAndSettings.getB();
+                break;
+            }
+        }
+        return result;
+    }
 }

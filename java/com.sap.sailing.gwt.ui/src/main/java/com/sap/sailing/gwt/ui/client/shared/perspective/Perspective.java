@@ -16,6 +16,8 @@ public interface Perspective<SettingsType extends Settings> extends Component<Se
     CompositeSettings getSettingsOfComponents();
     
     void updateSettingsOfComponents(CompositeSettings settingsOfComponents);
-    
+
+    void setSettingsOfComponents(CompositeSettings settingsOfComponents);
+
     String getPerspectiveName();
 }

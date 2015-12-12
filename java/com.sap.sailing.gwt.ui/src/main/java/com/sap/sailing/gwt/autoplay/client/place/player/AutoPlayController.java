@@ -72,7 +72,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     // leaderboard related attributes
     private LeaderboardDTO leaderboard;
-//    private LeaderboardSettings leaderboardSettings;
    
     // raceboard related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
@@ -104,11 +103,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         this.raceboardComponentsSettings = allRaceboardSettings.getB();
         this.leaderboardPerspectiveSettings = allLeaderboardSettings.getA();
         this.leaderboardComponentsSettings = allLeaderboardSettings.getB();
-        
-//        if(this.leaderboardSettings == null) {
-//            leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true); 
-//        }
-//        
+
         asyncActionsExecutor = new AsyncActionsExecutor();
         leaderboard = null;
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
@@ -135,7 +130,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        LeaderboardSettings leaderboardSettings = (LeaderboardSettings) leaderboardComponentsSettings.getSettingsPerComponent().iterator().next().getB();
+        LeaderboardSettings leaderboardSettings = leaderboardComponentsSettings.getSettingsForType(LeaderboardSettings.class);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, true,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, /*leaderboardGroupName*/ "", leaderboardName,
@@ -298,6 +293,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                     activeTvView = AutoPlayModes.Raceboard;
                     leaderboardTimer.pause();
                     raceboardTimer.setPlayMode(PlayModes.Live);
+                    
+                    raceBoardPanel.setSettingsOfComponents(raceboardComponentsSettings);
                     
                     isInitialScreen = false;
                 }
