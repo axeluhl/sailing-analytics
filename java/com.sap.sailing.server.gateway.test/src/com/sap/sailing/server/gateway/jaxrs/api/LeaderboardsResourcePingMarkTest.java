@@ -89,7 +89,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
         List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
-        assertThat("Assert an additional mapping was created for the second ping", mappingsForMark.size(), equalTo(2));
+        assertThat("Assert an additional mapping was created for the second ping", mappingsForMark.size(), equalTo(3));
         assertOneFixPerMapping(mappingsForMark);
         }
     }
