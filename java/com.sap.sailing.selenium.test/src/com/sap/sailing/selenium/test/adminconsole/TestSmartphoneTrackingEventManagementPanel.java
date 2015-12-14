@@ -1,9 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +26,6 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardPage;
-import com.sap.sailing.selenium.pages.leaderboard.LeaderboardTablePO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestSmartphoneTrackingEventManagementPanel extends AbstractSeleniumTest {
