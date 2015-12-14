@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile;
 
+import java.util.HashMap;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
@@ -7,6 +9,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -18,10 +21,13 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.client.EntryPointLinkFactory;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
 
+    private final StringMessages i18n_sec = StringMessages.INSTANCE;
     protected final AbstractUserProfilePlace currentPlace;
     protected final UserProfileClientFactory clientFactory;
 
@@ -41,8 +47,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     }
     
     private void initNavigationPath(NavigationPathDisplay navigationPathDisplay) {
-        StringMessages i18n = StringMessages.INSTANCE;
-        com.sap.sse.security.ui.client.i18n.StringMessages i18n_sec = com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE;
+        com.sap.sailing.gwt.ui.client.StringMessages i18n = com.sap.sailing.gwt.ui.client.StringMessages.INSTANCE;
         navigationPathDisplay.showNavigationPath(new NavigationItem(i18n.home(), getHomeNavigation()),
                 new NavigationItem(i18n_sec.userDetails(), getUserProfileNavigation()));
     }
@@ -51,11 +56,8 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
-        
         currentView.navigateTabsTo(currentPlace);
-        
         currentView.setUserManagementContext(clientFactory.getUserManagementContext());
-        
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -66,13 +68,49 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     }
     
     @Override
-    public void handleSaveChangesRequest(String email) {
-        Window.alert("Saving changes ...");
+    public void handleSaveChangesRequest(final String email) {
+        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, 
+                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), 
+                new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert(i18n_sec.successfullyUpdatedEmail(username, email));
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(i18n_sec.errorUpdatingEmail(caught.getMessage()));
+                    }
+                });
     }
     
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
-        Window.alert("Changes password ...");
+        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        clientFactory.getUserManagementService().updateSimpleUserPassword(username, oldPassword, null, newPassword, 
+                new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if (caught instanceof UserManagementException) {
+                            String message = ((UserManagementException) caught).getMessage();
+                            if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
+                                Window.alert(i18n_sec.passwordDoesNotMeetRequirements());
+                            } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
+                                Window.alert(i18n_sec.invalidCredentials());
+                            } else {
+                                Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
+                            }
+                        } else {
+                            Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                    }
+                });
     }
 
     @Override
