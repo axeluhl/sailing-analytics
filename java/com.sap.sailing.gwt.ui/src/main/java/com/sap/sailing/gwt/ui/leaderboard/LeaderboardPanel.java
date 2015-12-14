@@ -90,6 +90,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
+import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -110,8 +111,8 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -123,9 +124,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher,
-        BusyStateProvider {
+public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSettings> implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
+        IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -1728,7 +1728,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
-        this.setTitle(stringMessages.leaderboard());
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -1750,6 +1749,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
         this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
@@ -1829,10 +1829,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         setShowCompetitorSailId(settings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(settings.isShowCompetitorFullNameColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        if (timer.isInitialized()) {
-            loadCompleteLeaderboard(getLeaderboardDisplayDate());
-        }
 
+        SimplePanel mainPanel = new SimplePanel();
         contentPanel = new VerticalPanel();
         leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
@@ -1864,8 +1862,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
-        setWidget(contentPanel);
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+        initWidget(mainPanel);
+        mainPanel.setWidget(contentPanel);
+        this.setTitle(stringMessages.leaderboard());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        }
+
     }
 
     private Widget createToolbarPanel() {
@@ -3294,5 +3297,16 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 listener.onBusyStateChange(isBusy);
             }
         }
+    }
+
+    @Override
+    public void setSettingsOfComponents(CompositeSettings settingsOfComponents) {
+        LeaderboardSettings leaderboardSettings = settingsOfComponents.getSettingsForType(LeaderboardSettings.class);
+        updateSettings(leaderboardSettings);
+    }
+
+    @Override
+    public String getPerspectiveName() {
+        return stringMessages.leaderboard();
     }
 }
