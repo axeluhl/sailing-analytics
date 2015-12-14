@@ -25,7 +25,8 @@
   background-position: center center;
 }
 .useraccountdetails_image:hover .useraccountdetails_image_editbutton {
-  display: block;
+  /* remove comment after specifying design for image upload */
+  /* display: block; */
 }
 .useraccountdetails_content {
   float: left;
@@ -64,5 +65,5 @@
 .useraccountdetails_content_spacer {
   width: 100%;
   float: right;
-  height: 4em;
+  height: 2em;
 }

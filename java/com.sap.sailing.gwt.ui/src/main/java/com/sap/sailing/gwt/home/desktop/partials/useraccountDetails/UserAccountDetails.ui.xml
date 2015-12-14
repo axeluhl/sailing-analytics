@@ -9,9 +9,9 @@
     <div class="{local_res.css.useraccountdetails}">
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <a href="#" ui:field="editImageLinkUi" class="{local_res.css.useraccountdetails_image}">
-            <div class="{local_res.css.useraccountdetails_image_editbutton}"></div>
-          </a>
+          <div ui:field="editImageLinkUi" class="{local_res.css.useraccountdetails_image}">
+            <a href="#" class="{local_res.css.useraccountdetails_image_editbutton}"></a>
+          </div>
           <div class="{local_res.css.useraccountdetails_content}">
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
@@ -41,21 +41,19 @@
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
                 <ui:text from="{i18n_sec.password}" />
               </label>
-              <!-- placeholder="{i18n.passwordwordText}" -->
-              <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+              <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
                 TODO Old <ui:text from="{i18n_sec.password}" />
               </label>
-              <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+              <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
               <!-- <ui:text from='{i18n_ubi.passwordConfirmation}' /> -->
                 <ui:text from="{i18n_sec.passwordRepeat}" />
               </label>
-              <!-- placeholder="{i18n.passwordConfirmationText}" -->
               <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_submit}">

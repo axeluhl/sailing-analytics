@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.useraccountDetails;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,7 +25,7 @@ public class UserAccountDetails extends Composite {
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }
     
-    @UiField AnchorElement editImageLinkUi;
+    @UiField DivElement editImageLinkUi;
     @UiField InputElement usernameUi;
     @UiField InputElement nameUi;
     @UiField TextBox emailUi;
@@ -42,8 +42,6 @@ public class UserAccountDetails extends Composite {
         setPlaceholder(oldPasswordUi, "TODO placeholder text");
         setPlaceholder(newPasswordUi, "TODO placeholder text");
         setPlaceholder(newPasswordConfirmationUi, "TODO placeholder text");
-        // TODO remove after specifying desing for image upload
-        editImageLinkUi.removeFromParent();
     }
 
     public void setUserManagementContext(UserManagementContext userManagementContext) {
@@ -56,6 +54,9 @@ public class UserAccountDetails extends Composite {
         nameUi.setValue(currentUser.getName());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
+        oldPasswordUi.setValue("");
+        newPasswordUi.setValue("");
+        newPasswordConfirmationUi.setValue("");
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
