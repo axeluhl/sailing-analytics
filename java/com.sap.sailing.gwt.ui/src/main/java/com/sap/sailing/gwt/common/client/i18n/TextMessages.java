@@ -209,6 +209,7 @@ public interface TextMessages extends Messages {
     String solutionsTrainingText();
     String solutionsSimulatorText();
     String sapSailingAnalytics();
+    String autoPlayerConfiguration();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
 

@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
@@ -89,7 +90,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
         
-        sapHeader = new SAPHeader("Auto player configuration", false);
+        sapHeader = new SAPHeader(TextMessages.INSTANCE.autoPlayerConfiguration(), false);
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();
@@ -102,16 +103,16 @@ public class DesktopStartView extends Composite implements StartView {
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
-            if(!localeName.equals("default")) {
+            if (!localeName.equals("default")) {
                 String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
                 localeSelectionBox.addItem(displayName);
-                if(currentLocale.getLocaleName().equals(localeName)) {
+                if (currentLocale.getLocaleName().equals(localeName)) {
                     localeSelectionBox.setSelectedIndex(i);
                 }
                 i++;
             }
-         }
-        
+        }
+
         initWidget(uiBinder.createAndBindUi(this));
         this.ensureDebugId("AutoPlayStartView");
 
