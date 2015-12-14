@@ -189,5 +189,6 @@ public interface TextMessages extends Messages {
     String solutionsSimulatorNav();
     String solutionsSimulatorHeadline();
     String solutionsSimulatorText();
+    String autoPlayerConfiguration();
 
 }
