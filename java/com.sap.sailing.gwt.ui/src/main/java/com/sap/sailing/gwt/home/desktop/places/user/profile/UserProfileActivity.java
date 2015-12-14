@@ -23,17 +23,19 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePl
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
+import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
 
-    private final StringMessages i18n_sec = StringMessages.INSTANCE;
+    private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
+    
     protected final AbstractUserProfilePlace currentPlace;
     protected final UserProfileClientFactory clientFactory;
-
     protected final DesktopPlacesNavigator homePlacesNavigator;
-    
-    private static final ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
+
+    private final StringMessages i18n_sec = StringMessages.INSTANCE;
+    private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
     
     private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView = new TabletAndDesktopUserProfileView();
     
@@ -88,6 +90,11 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            Window.alert(errorMessage);
+            return;
+        }
         clientFactory.getUserManagementService().updateSimpleUserPassword(username, oldPassword, null, newPassword, 
                 new AsyncCallback<Void>() {
                     @Override
