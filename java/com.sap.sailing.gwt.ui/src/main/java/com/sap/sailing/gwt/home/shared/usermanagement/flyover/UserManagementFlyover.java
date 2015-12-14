@@ -46,10 +46,9 @@ public class UserManagementFlyover extends Composite implements AcceptsOneWidget
             @Override
             public void setPosition(int offsetWidth, int offsetHeight) {
                 Element anchor = Document.get().getElementById("usrMngmtFlyover");
-
                 if (anchor != null) {
-                    popupPanel.setPopupPosition(anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 20,
-                            anchor.getAbsoluteTop() + 20);
+                    int left = anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 15;
+                    popupPanel.setPopupPosition(left, anchor.getAbsoluteTop() + 20);
                 }
             }
         });
