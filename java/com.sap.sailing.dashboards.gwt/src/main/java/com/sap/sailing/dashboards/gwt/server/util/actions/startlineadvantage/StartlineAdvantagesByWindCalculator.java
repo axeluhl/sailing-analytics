@@ -41,20 +41,23 @@ public  class StartlineAdvantagesByWindCalculator extends AbstracPreCalculationD
         if (trackedRace != null) {
             retrieveDataForCalculation(trackedRace, dashboardDispatchContext.getPolarDataService());
             if (wind != null) {
+                Pair<Number[][], Number[][]> startlineAdvantagesAndConfidencesAsArray = null;
                 if (isStartlineCompletelyUnderneathLaylines()) {
                     logger.log(Level.INFO, "Startline is completely underneath laylines");
                     Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                    result.advantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
-                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    List<StartLineAdvantageDTO> startlineAdvantages = calculateStartlineAdvantagesUnderneathLaylinesInRange(advantagesRange);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(startlineAdvantages);
                     result.maximum = maximum;
+                    startlineAdvantagesAndConfidencesAsArray = convertStartLineAdvantageDTOListToPointAndConfidenceArrays(startlineAdvantages);
                 } else if (isStartlineCompletelyAboveLaylines()) {
                     logger.log(Level.INFO, "Startline is completely above laylines");
                     Pair<Double, Double> advantagesRange = new Pair<Double, Double>(0.0, startlineLenghtInMeters);
-                    result.advantages = calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
-                    subtractMinimumOfAllStartlineAdvantages(result.advantages);
-                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    List<StartLineAdvantageDTO> startlineAdvantages = calculatePolarBasedStartlineAdvantagesInRange(advantagesRange);
+                    subtractMinimumOfAllStartlineAdvantages(startlineAdvantages);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(startlineAdvantages);
                     result.maximum = maximum;
-                    subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
+                    subtractAgainstMaximumOfAllStartlineAdvantages(startlineAdvantages, maximum);
+                    startlineAdvantagesAndConfidencesAsArray = convertStartLineAdvantageDTOListToPointAndConfidenceArrays(startlineAdvantages);
                 } else {
                     logger.log(Level.INFO, "Layline(s) cross startline");
                     Position intersectionOfRightLaylineAndStartline = getIntersectionOfRightLaylineAndStartline();
@@ -62,12 +65,17 @@ public  class StartlineAdvantagesByWindCalculator extends AbstracPreCalculationD
                     Pair<Double, Double> polarBasedStartlineAdvatagesRange = getStartAndEndPointOfPolarBasedStartlineAdvatagesInDistancesToRCBoat(
                             intersectionOfRightLaylineAndStartline, intersectionOfleftLaylineAndStartline);
                     Pair<Double, Double> pinEndStartlineAdvatagesRange = getPinEndStartlineAdvantagesRangeFromPolarAdvantagesRange(polarBasedStartlineAdvatagesRange);
-                    result.advantages = calculatePolarBasedStartlineAdvantagesInRange(polarBasedStartlineAdvatagesRange);
-                    subtractMinimumOfAllStartlineAdvantages(result.advantages);
-                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(result.advantages);
+                    List<StartLineAdvantageDTO> startlineAdvantages = calculatePolarBasedStartlineAdvantagesInRange(polarBasedStartlineAdvatagesRange);
+                    subtractMinimumOfAllStartlineAdvantages(startlineAdvantages);
+                    double maximum = getMaximumAdvantageOfStartlineAdvantageDTOs(startlineAdvantages);
                     result.maximum = maximum;
-                    subtractAgainstMaximumOfAllStartlineAdvantages(result.advantages, maximum);
-                    addClosingZeroPointToMixedAdvantages(result.advantages, pinEndStartlineAdvatagesRange);
+                    subtractAgainstMaximumOfAllStartlineAdvantages(startlineAdvantages, maximum);
+                    addClosingZeroPointToMixedAdvantages(startlineAdvantages, pinEndStartlineAdvatagesRange);
+                    startlineAdvantagesAndConfidencesAsArray = convertStartLineAdvantageDTOListToPointAndConfidenceArrays(startlineAdvantages);
+                }
+                if (startlineAdvantagesAndConfidencesAsArray != null) {
+                    result.distanceToRCBoatToStartlineAdvantage = startlineAdvantagesAndConfidencesAsArray.getA();
+                    result.distanceToRCBoatToConfidence = startlineAdvantagesAndConfidencesAsArray.getB();
                 }
             }
         } else {
@@ -247,6 +255,23 @@ public  class StartlineAdvantagesByWindCalculator extends AbstracPreCalculationD
         }
         return result;
     }
+    
+    private Pair<Number[][], Number[][]> convertStartLineAdvantageDTOListToPointAndConfidenceArrays(List<StartLineAdvantageDTO> startLineAdvantageDTOList) {
+        Pair<Number[][], Number[][]> result = null;
+        if(startLineAdvantageDTOList != null && startLineAdvantageDTOList.size() > 0) {
+            Number[][] distanceToRCBoatToStartlineAdvantage = new Number[startLineAdvantageDTOList.size()][2];
+            Number[][] distanceToRCBoatToConfidence = new Number[startLineAdvantageDTOList.size()][2];
+            for(int i = 0; i < startLineAdvantageDTOList.size(); i++) {
+                StartLineAdvantageDTO startLineAdvantageDTO = startLineAdvantageDTOList.get(i);
+                distanceToRCBoatToStartlineAdvantage[i][0] = startLineAdvantageDTO.distanceToRCBoatInMeters;
+                distanceToRCBoatToStartlineAdvantage[i][1] = startLineAdvantageDTO.startLineAdvantage;
+                distanceToRCBoatToConfidence[i][0] = startLineAdvantageDTO.distanceToRCBoatInMeters;
+                distanceToRCBoatToConfidence[i][1] = startLineAdvantageDTO.confidence;
+            }
+            result = new Pair<Number[][], Number[][]>(distanceToRCBoatToStartlineAdvantage, distanceToRCBoatToConfidence);
+        }
+        return result;
+    } 
     
     private List<StartLineAdvantageDTO> calculatePolarBasedStartlineAdvantagesInRange(Pair<Double, Double> rangePinEndStartlineAdvantage) {
         List<StartLineAdvantageDTO> result = new ArrayList<StartLineAdvantageDTO>();

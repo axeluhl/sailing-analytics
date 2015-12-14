@@ -19,9 +19,13 @@ public class DispatchSystemImpl<CTX extends DispatchContext> implements Dispatch
     private final DispatchAsync<CTX> dispatch;
 
     public DispatchSystemImpl(String dispatchRPCPath) {
+        this(dispatchRPCPath, false);
+    }
+    
+    public DispatchSystemImpl(String dispatchRPCPath, boolean processResultsScheduled) {
         simpleDispatch = new SimpleDispatch<CTX>(dispatchRPCPath);
         dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
-                simpleDispatch));
+                simpleDispatch, processResultsScheduled));
     }
     
     @Override

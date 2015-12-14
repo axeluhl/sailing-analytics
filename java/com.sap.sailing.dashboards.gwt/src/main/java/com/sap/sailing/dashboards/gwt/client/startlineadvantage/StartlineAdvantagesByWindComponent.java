@@ -74,7 +74,7 @@ public class StartlineAdvantagesByWindComponent extends Composite implements Has
                             logger.log(Level.INFO, "Received StartlineAdvantagesWithMaxAndAverageDTO");
                             if (result != null && result.maximum != null && result.average != null) {
                                 logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
-                                startlineAdvantagesOnLineChart.setStartlineAdvantages(result.advantages);
+                                startlineAdvantagesOnLineChart.setStartlineAdvantagesAndConfidences(result.distanceToRCBoatToStartlineAdvantage, result.distanceToRCBoatToConfidence);
                                 advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(
                                         result.maximum.doubleValue()));
                                 advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(

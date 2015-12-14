@@ -128,6 +128,7 @@ public class StartlineAnalysisComponent extends Composite implements HasWidgets,
         initAndAddBottomNotification();
         getCachedSelectedCompetitorOrAskForWithPopup();
         initAndAddSettingsButtonWithSelectionIndicationLabel();
+        registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
 
     private void initLeftRightButtons() {

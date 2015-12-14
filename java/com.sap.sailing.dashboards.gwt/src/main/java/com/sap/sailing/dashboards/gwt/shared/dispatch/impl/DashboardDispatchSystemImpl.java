@@ -8,6 +8,6 @@ import com.sap.sailing.gwt.dispatch.client.impl.DispatchSystemImpl;
 public class DashboardDispatchSystemImpl extends DispatchSystemImpl<DashboardDispatchContext> implements DashboardDispatchSystem {
 
     public DashboardDispatchSystemImpl() {
-        super(RemoteServiceMappingConstants.ribdashboardDispatchServiceRemotePath);
+        super(RemoteServiceMappingConstants.ribdashboardDispatchServiceRemotePath, true);
     }
 }
