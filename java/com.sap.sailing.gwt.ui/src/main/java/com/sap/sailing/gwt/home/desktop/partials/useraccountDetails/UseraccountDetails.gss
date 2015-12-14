@@ -57,6 +57,8 @@
   width: 100%;
   float: right;
   text-align: right;
+}
+.useraccountdetails_content_submit > button {
   text-transform: uppercase;
 }
 .useraccountdetails_content_spacer {
