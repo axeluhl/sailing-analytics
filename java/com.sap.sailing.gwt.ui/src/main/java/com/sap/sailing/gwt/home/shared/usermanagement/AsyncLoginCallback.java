@@ -26,7 +26,11 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
             clientFactory.didLogin(result.getUserDTO());
             placeController.goTo(new LoggedInUserInfoPlace());
         } else {
-            view.setErrorMessage(result.getMessage());
+            if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
+                view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
+            } else {
+                view.setErrorMessage(result.getMessage());
+            }
         }
     }
     
