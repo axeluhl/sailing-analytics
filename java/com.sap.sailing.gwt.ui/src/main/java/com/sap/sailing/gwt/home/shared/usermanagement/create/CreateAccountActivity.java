@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementServic
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
+import com.sap.sse.security.ui.client.component.NewAccountValidator;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
@@ -18,6 +20,9 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private final ClientFactoryWithUserManagementService clientFactory;
     private final PlaceController placeController;
     private final CreateAccountView view = new CreateAccountViewImpl();
+    
+    private final StringMessages i18n_sec = StringMessages.INSTANCE;
+    private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
 
     public CreateAccountActivity(ClientFactoryWithUserManagementService clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
@@ -32,6 +37,11 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     @Override
     public void createAccount(String username, String email, final String password, String passwordConfirmation) {
+        String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            view.setErrorMessage(errorMessage);
+            return;
+        }
         clientFactory.getUserManagement().createSimpleUser(username, email, password, 
                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), 
                 new AsyncCallback<UserDTO>() {
