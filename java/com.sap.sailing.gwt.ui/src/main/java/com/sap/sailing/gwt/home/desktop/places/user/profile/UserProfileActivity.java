@@ -6,6 +6,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -62,6 +63,16 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
             }
         });
         
+    }
+    
+    @Override
+    public void handleSaveChangesRequest(String email) {
+        Window.alert("Saving changes ...");
+    }
+    
+    @Override
+    public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
+        Window.alert("Changes password ...");
     }
 
     @Override

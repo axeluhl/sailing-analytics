@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.home.desktop.partials.useraccountDetails;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.InputElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -19,6 +21,8 @@ public class UserAccountDetails extends Composite {
     }
     
     public interface Presenter {
+        void handleSaveChangesRequest(String email);
+        void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }
     
     @UiField AnchorElement editImageLinkUi;
@@ -29,12 +33,17 @@ public class UserAccountDetails extends Composite {
     @UiField PasswordTextBox newPasswordUi;
     @UiField PasswordTextBox newPasswordConfirmationUi;
     
+    private final Presenter presenter;
+    
     public UserAccountDetails(Presenter presenter) {
+        this.presenter = presenter;
         UseraccountDetailsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         setPlaceholder(oldPasswordUi, "TODO placeholder text");
         setPlaceholder(newPasswordUi, "TODO placeholder text");
         setPlaceholder(newPasswordConfirmationUi, "TODO placeholder text");
+        // TODO remove after specifying desing for image upload
+        editImageLinkUi.removeFromParent();
     }
 
     public void setUserManagementContext(UserManagementContext userManagementContext) {
@@ -51,5 +60,16 @@ public class UserAccountDetails extends Composite {
     
     private void setPlaceholder(Widget widget, String placeholderText) {
         widget.getElement().setAttribute("placeholder", placeholderText);
+    }
+    
+    @UiHandler("saveChangesUi")
+    void onSaveChangesClicked(ClickEvent event) {
+        presenter.handleSaveChangesRequest(emailUi.getValue());
+    }
+    
+    @UiHandler("changePasswordUi")
+    void onChangePasswordClicked(ClickEvent event) {
+        presenter.handlePasswordChangeRequest(oldPasswordUi.getValue(), newPasswordUi.getValue(),
+                newPasswordConfirmationUi.getValue());
     }
 }

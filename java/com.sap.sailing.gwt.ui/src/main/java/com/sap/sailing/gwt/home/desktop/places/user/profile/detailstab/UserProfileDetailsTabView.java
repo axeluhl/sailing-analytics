@@ -24,11 +24,11 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
-    @SuppressWarnings("unused")
-    private UserProfileView.Presenter currentPresenter;
     
     @UiField DivElement notLoggedInUi;
     @UiField(provided = true) UserAccountDetails accountDetailsUi;
+    
+    private UserProfileView.Presenter currentPresenter;
     
     public UserProfileDetailsTabView() {
     }
@@ -45,9 +45,8 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
 
     @Override
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
-        accountDetailsUi = new UserAccountDetails(null);
+        accountDetailsUi = new UserAccountDetails(currentPresenter);
         initWidget(ourUiBinder.createAndBindUi(this));
-        
         contentArea.setWidget(this);
     }
     
