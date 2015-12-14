@@ -781,7 +781,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // we expect some potential delay in computing the full tail. Therefore, in those cases we fire two requests: one fetching only the
                     // boat positions at newTime with zero tail length; and another one fetching everything else.
                     // TODO bug3378: two calls that both request simulation and mark data wastes bandwidth and CPU; one of them should only use getBoatPositions to request missing pieces of tails; showBoatsOnMap must not remove canvases / tails if one of the two calls delivers only partial results
-                    GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
+                    final GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
                     final boolean updateMarksAndLinesExceptAdvantageLineInCallback;
                     if (getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping != null) {
                         asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
@@ -853,13 +853,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * We assume that overlapping segments usually don't require a lot of loading time as the most typical case will be to update a longer
      * tail with a few new fixes that were received since the last time tick. Non-overlapping position requests typically occur for the
-     * first request when no fix at all is known for the competitor yet, and when the user has radically moved the time slider to some
+     * first request when no fix at all is known for the competitor yet, or when the user has radically moved the time slider to some
      * other time such that given the current tail length setting the new tail segment does not overlap with the old one, requiring a full
      * load of the entire tail data for that competitor.<p>
      * 
      * For the non-overlapping requests, this method creates a separate request which only loads boat positions, quick ranks, sidelines and
      * mark positions for the zero-length interval at <code>newTime</code>, assuming that this will work fairly fast and in particular in
      * O(1) time regardless of tail length, compared to fetching the entire tail for all competitors.
+     * 
+     * TODO bug 3378: This shall produce two calls: one complete GetRaceMapDataAction and another fetching of missing "long tails" which only needs to be carried out if the first call does not deliver everything requested by fromAndToAndOverlap
      */
     private GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(
             Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
