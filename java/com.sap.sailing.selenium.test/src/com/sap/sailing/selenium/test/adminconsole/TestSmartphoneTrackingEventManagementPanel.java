@@ -20,13 +20,13 @@ import com.sap.sailing.selenium.pages.adminconsole.regatta.SeriesEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.RaceColumnTableWrapperPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+
 
 public class TestSmartphoneTrackingEventManagementPanel extends AbstractSeleniumTest {
     private static final String IDM_5O5_2013_JSON_URL =
@@ -135,15 +135,6 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         //tracTracEvents.startTrackingForRaces(this.trackableRaces);
         for(TrackableRaceDescriptor race : this.trackableRaces) {
             tracTracEvents.startTrackingForRace(race);
-        }
-        
-        TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRaces(this.trackedRaces, Status.FINISHED); // TracAPI puts REPLAY races into FINISHED mode when done loading
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //trackedRacesList.stopTracking(this.trackedRaces);
-        for (TrackedRaceDescriptor race : this.trackedRaces) {
-            trackedRacesList.stopTracking(race);
         }
     }
 }
