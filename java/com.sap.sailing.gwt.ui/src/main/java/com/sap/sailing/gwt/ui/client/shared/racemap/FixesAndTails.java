@@ -448,7 +448,7 @@ public class FixesAndTails {
      * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
      *         second} component contains the "to" times for the competitors whose trails / positions to show; the
      *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
-     *         those requested or need to be replaced
+     *         those requested (<code>true</code>) or need to be replaced (<code>false</code>)
      */
     protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
