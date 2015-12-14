@@ -35,15 +35,19 @@
   padding-left: 12em;
   margin-left: -10em;
 }
+.useraccountdetails_content > div {
+  font-size: 0;
+}
 .useraccountdetails_content_detail {
-  float: right;
-  width: 50%;
   padding-left: 1.333333333333333em;
   margin-bottom: 1.333333333333333em;
   overflow: hidden;
+  font-size: 1rem;
+  display: inline-block;
 }
 .useraccountdetails_content_detail_label {
   display: block;
+  width: 100%;
   font-weight: 600;
   margin-bottom: 0.4em;
 }
@@ -55,15 +59,13 @@
   border: 1px solid #ccc;
 }
 .useraccountdetails_content_submit {
-  width: 100%;
-  float: right;
   text-align: right;
 }
 .useraccountdetails_content_submit > button {
   text-transform: uppercase;
+  margin-left: 1.333333333333333em;
 }
 .useraccountdetails_content_spacer {
-  width: 100%;
-  float: right;
-  height: 2em;
+  height: 2rem;
+  display: inline-block;
 }
