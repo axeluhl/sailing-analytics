@@ -862,6 +862,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * O(1) time regardless of tail length, compared to fetching the entire tail for all competitors.
      * 
      * TODO bug 3378: This shall produce two calls: one complete GetRaceMapDataAction and another fetching of missing "long tails" which only needs to be carried out if the first call does not deliver everything requested by fromAndToAndOverlap
+     * The second call of GetRaceMapDataAction is this:
+     * 
+     *               GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
+     *                       useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(),
+     *                       true, // extrapolate
+     *                       (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null));
+     *               asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
+     *                       getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, requestID,
+     *                               updateMarksAndLinesExceptAdvantageLineInCallback));
+     *
      */
     private GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(
             Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
