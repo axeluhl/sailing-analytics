@@ -53,7 +53,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         this.trackableRaces = new ArrayList<>();
         this.trackedRaces = new ArrayList<>();
         this.leaderboardRaces = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 0; i <= 5; i++) {
             String raceName = String.format(RACE, i);
             TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  raceName, BOAT_CLASS);
             TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, raceName);
@@ -70,19 +70,11 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
     
     @Test
     public void testAutomaticSelectionOfLinkedRaceInRaceTable() {
-        /*
-        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(),getContextRoot(), LEADERBOARD, false);
-        LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
-        List<String> races = leaderboardTable.getRaceNames();
-        
-        assertThat(races.size(), equalTo(5));
-        assertThat(leaderboardTable.getEntries().size(), equalTo(28));
-        */
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfigurationPanelPO.getLeaderboardDetails(this.regatta.toString());
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 1; i < 6; i++) {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(i), this.trackedRaces.get(i));
         }
         
@@ -91,7 +83,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         // select leaderboard
         DataEntryPO entryToSelect = null;
         for(DataEntryPO entry : leaderboards.getEntries()) {
-            if(entry.getColumnContent("Name") == LEADERBOARD) {
+            if(entry.getColumnContent("Name").equals(LEADERBOARD)) {
                 entryToSelect = entry;
                 break;
             }
@@ -104,7 +96,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         // select RaceColumn
         DataEntryPO raceToSelect = null;
         for (DataEntryPO entry : raceColumnTable.getEntries()) {
-            if (entry.getColumnContent("Race") == leaderboardRaces.get(0).getName()) {
+            if (entry.getColumnContent("Race").equals(leaderboardRaces.get(1).getName())) {
                 raceToSelect = entry;
             }
         }
@@ -114,7 +106,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         TrackedRacesListPO trackedRaces = smartphoneTrackingPanel.getTrackedRaceListComposite();
         List<DataEntryPO> seleceted = trackedRaces.getTrackedRacesTable().getSelectedEntries();
         assertEquals(seleceted.size(),1);
-        assertEquals(this.trackedRaces.get(0).race, seleceted.get(0).getColumnContent("Race"));
+        assertEquals(this.trackedRaces.get(1).race, seleceted.get(0).getColumnContent("Race"));
     }
     
     private void configureLeaderboard() {
