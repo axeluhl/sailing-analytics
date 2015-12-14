@@ -59,3 +59,8 @@
   text-align: right;
   text-transform: uppercase;
 }
+.useraccountdetails_content_spacer {
+  width: 100%;
+  float: right;
+  height: 4em;
+}

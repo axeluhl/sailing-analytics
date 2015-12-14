@@ -15,16 +15,28 @@
           <div class="{local_res.css.useraccountdetails_content}">
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from="{i18n_sec.username}" />
+                <ui:text from="{i18n_sec.name}" />
               </label>
-              <input ui:field="usernameUi" type="text" class="{local_res.css.useraccountdetails_content_detail_input}" />
+              <input ui:field="nameUi" type="text" disabled="disabled" class="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from="{i18n_sec.name}" />
+                <ui:text from="{i18n_sec.username}" />
               </label>
-              <input ui:field="nameUi" type="text" class="{local_res.css.useraccountdetails_content_detail_input}" />
+              <input ui:field="usernameUi" type="text" disabled="disabled" class="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
+            <div class="{local_res.css.useraccountdetails_content_detail}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.email}" />
+              </label>
+              <input ui:field="emailUi" type="email" class="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_submit}">
+              <div class="{res.mainCss.button} {res.mainCss.buttonprimary}">
+                <ui:text from="{i18n_sec.save}" />
+              </div>
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_spacer}"></div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
                 <ui:text from="{i18n_sec.password}" />
@@ -34,9 +46,9 @@
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
-                <ui:text from="{i18n_sec.email}" />
+                TODO Old<ui:text from="{i18n_sec.password}" />
               </label>
-              <input ui:field="emailUi" type="email" class="{local_res.css.useraccountdetails_content_detail_input}" />
+              <input type="password" placeholder="TODO placeholder text" class="{local_res.css.useraccountdetails_content_detail_input}"></input>
             </div>
             <div class="{local_res.css.useraccountdetails_content_detail}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
@@ -48,7 +60,7 @@
             </div>
             <div class="{local_res.css.useraccountdetails_content_submit}">
               <div class="{res.mainCss.button} {res.mainCss.buttonprimary}">
-                <ui:text from="{i18n_sec.save}" />
+                <ui:text from="{i18n_sec.changePassword}" />
               </div>
             </div>
           </div>

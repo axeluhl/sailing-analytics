@@ -19,5 +19,6 @@ public interface UseraccountDetailsResources extends ClientBundle {
         String useraccountdetails_content_detail_label();
         String useraccountdetails_content_detail_input();
         String useraccountdetails_content_submit();
+        String useraccountdetails_content_spacer();
     }
 }

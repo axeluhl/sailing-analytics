@@ -7,7 +7,7 @@
 	<g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
 		<div class="{res.mediaCss.columns} {res.mediaCss.small12}">
 			<div ui:field="notLoggedInUi">TODO you are currently not logged in</div>
-			<s:useraccountDetails.UserAccountDetails ui:field="accountDetailsUi" addStyleNames="{res.mainCss.spacermargintopbig}" />
+			<s:useraccountDetails.UserAccountDetails ui:field="accountDetailsUi" addStyleNames="{res.mainCss.spacermargintopmediumbig}" />
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder>
