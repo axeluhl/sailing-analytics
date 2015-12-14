@@ -188,7 +188,7 @@ public class FixesAndTails {
      *            the last one in the list
      * 
      * @return the competitors for which new fixes have been added; this will not include competitors appearing as keys
-     *         in <code>foxesForCompetitor</code> but with a <code>null</code> or empty fixes list
+     *         in <code>fixesForCompetitor</code> whose fixes list is <code>null</code> or empty
      */
     protected Iterable<CompetitorDTO> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
