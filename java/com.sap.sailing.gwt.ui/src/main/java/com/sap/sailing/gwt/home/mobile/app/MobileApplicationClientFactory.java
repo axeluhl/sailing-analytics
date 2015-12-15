@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFac
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -114,11 +115,13 @@ public class MobileApplicationClientFactory extends
     public void resetUserManagementContext() {
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
+        getEventBus().fireEvent(new UserManagementRequestEvent());
     }
 
     @Override
     public void didLogin(UserDTO user) {
         uCtx = new UserManagementContextImpl(user);
+        securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
     }
 

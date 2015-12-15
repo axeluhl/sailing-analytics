@@ -51,13 +51,11 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
                 clientFactory.resetUserManagementContext();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
                 clientFactory.resetUserManagementContext();
             }
         });
