@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -73,6 +75,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
+    private final SelectionChangeEvent.Handler raceColumnSelectionChangeHandler;
+    private HandlerRegistration raceColumnSelectionChangeHandlerRegistration;
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard;
 
@@ -265,11 +269,13 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
-        raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        raceColumnSelectionChangeHandler = new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
+                removeTrackedRaceListHandlerTemporarily();
                 leaderboardRaceColumnSelectionChanged();
             }
-        });
+        };
+        raceColumnSelectionChangeHandlerRegistration = raceColumnTableSelectionModel.addSelectionChangeHandler(raceColumnSelectionChangeHandler);
         vPanel.add(raceColumnTable);
 
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
@@ -379,6 +385,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
             @Override
             public void onSuccess(Void arg0) {
+                removeRaceColumnListHandlerTemporarily();
                 trackedRacesListComposite.clearSelection();
                 getSelectedRaceColumnWithFleet().getA().setRaceIdentifier(fleet, null);
                 raceColumnTable.getDataProvider().refresh();
@@ -435,6 +442,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                 
                                 @Override
                                 public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
+                                    removeTrackedRaceListHandlerTemporarily();
                                     if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
                                         RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
                                         
@@ -471,6 +479,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
+        removeTrackedRaceListHandlerTemporarily();
         trackedRacesListComposite.fillRegattas(regattas);
         allRegattas.clear();
         Util.addAll(regattas, allRegattas);
@@ -523,6 +532,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 
                             @Override
                             public void onSuccess(Boolean success) {
+                                removeRaceColumnListHandlerTemporarily();
                                 if (success) {
                                     // TODO consider enabling the Unlink button
                                     selectedRaceInLeaderboard.setRaceIdentifier(fleet, selectedRace);
@@ -661,5 +671,35 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             }
         });
         dialog.show();
+    }
+    /**
+     * TODO Lukas: Add JavaDoc
+     */
+    protected void removeTrackedRaceListHandlerTemporarily() {
+        if (trackedRaceListHandlerRegistration == null) {
+            return;
+        }
+        trackedRaceListHandlerRegistration.removeHandler();
+        trackedRaceListHandlerRegistration = null;
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
+            }
+        });
+    }
+    
+    protected void removeRaceColumnListHandlerTemporarily() {
+        if (raceColumnSelectionChangeHandlerRegistration == null) {
+            return;
+        }
+        raceColumnSelectionChangeHandlerRegistration.removeHandler();
+        raceColumnSelectionChangeHandlerRegistration = null;
+        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                raceColumnSelectionChangeHandlerRegistration = raceColumnTableSelectionModel.addSelectionChangeHandler(raceColumnSelectionChangeHandler);
+            }
+        });
     }
 }

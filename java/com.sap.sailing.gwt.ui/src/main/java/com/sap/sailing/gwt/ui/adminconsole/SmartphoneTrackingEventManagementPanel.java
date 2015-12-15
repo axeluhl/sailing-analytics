@@ -368,6 +368,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         if (selectedRaceInLeaderboard != null) {
             selectTrackedRaceInRaceList();
         } else {
+            removeTrackedRaceListHandlerTemporarily();
             trackedRacesListComposite.clearSelection();
         }
         enableStartTrackingButtonIfAppropriateRacesSelected();

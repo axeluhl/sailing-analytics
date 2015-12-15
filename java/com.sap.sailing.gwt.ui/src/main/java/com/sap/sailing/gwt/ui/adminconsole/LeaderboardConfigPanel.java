@@ -13,8 +13,6 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
@@ -607,6 +605,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         } else {
             columnMoveUpButton.setEnabled(false);
             columnMoveDownButton.setEnabled(false);
+            removeTrackedRaceListHandlerTemporarily();
             trackedRacesListComposite.clearSelection();
         }
     }
@@ -674,17 +673,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     @Override
     protected void leaderboardSelectionChanged() {
-        // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
-        trackedRaceListHandlerRegistration.removeHandler();
+        removeTrackedRaceListHandlerTemporarily();
         trackedRacesListComposite.clearSelection();
-        // add listener again using a scheduled command which is executed when the browser's event loop re-gains
-        // control; we assume that at that point in time the selection updates have already been performed
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
-            }
-        });
+        
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
