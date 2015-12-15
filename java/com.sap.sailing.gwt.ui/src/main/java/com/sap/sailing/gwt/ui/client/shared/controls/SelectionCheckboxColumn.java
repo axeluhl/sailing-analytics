@@ -67,8 +67,8 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param display
      *            {@link Flushable} to redraw the selected elements on the display
      */
-    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String checkboxColumnCellCSSClass,
-            String deselectedCheckboxCSSClass, EntityIdentityComparator<T> entityIdentityComparator,
+    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String deselectedCheckboxCSSClass,
+            String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator,
             ListDataProvider<T> listDataProvider, Flushable display) {
         this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
                 entityIdentityComparator, listDataProvider, display);
