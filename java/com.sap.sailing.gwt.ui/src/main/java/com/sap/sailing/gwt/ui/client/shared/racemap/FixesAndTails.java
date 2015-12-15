@@ -174,28 +174,37 @@ public class FixesAndTails {
     }
 
     /**
-     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
-     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
-     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
-     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
-     * The {@link #tails} affected by these fixes are updated accordingly when modifications fall inside the interval
-     * shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails are, however, not
-     * trimmed according to the specification for the tail length. This has to happen elsewhere (see also
-     * {@link #updateTail}).
+     * Adds the fixes received in <code>fixesForCompetitors</code> to {@link #fixes} and ensures they are still
+     * contiguous for each competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in
+     * <code>result</code> overlap with those already known, the fixes are merged into the list of already known fixes
+     * for the competitor. Otherwise, the fixes received in <code>result</code> replace those known so far for the
+     * respective competitor. The {@link #tails} affected by these fixes are updated accordingly when modifications fall
+     * inside the interval shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails
+     * are, however, not trimmed according to the specification for the tail length. This has to happen elsewhere (see
+     * also {@link #updateTail}).
      * 
      * @param fixesForCompetitors
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
      *            the last one in the list
-     * 
-     * @return the competitors for which new fixes have been added; this will not include competitors appearing as keys
-     *         in <code>fixesForCompetitor</code> whose fixes list is <code>null</code> or empty
+     * @param overlapsWithKnownFixes
+     *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
+     *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
+     *            deleted from the map (see {@link #removeTail(CompetitorDTO)}); the new fixes are then added to the
+     *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
+     *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorDTO, List, long)} is used to merge the
+     *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is
+     *            left unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
+     *            map's record for the competitor is <b>UPDATED</b> to <code>true</code> after the tail deletion and
+     *            {@link #fixes} replacement has taken place. This helps in cases where this update is only one of two
+     *            into which an original request was split (one quick update of the tail's head and another one for the
+     *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
+     *            having an overlap now, not leading to a replacement of the previous update originating from the same
+     *            request.
      */
-    protected Iterable<CompetitorDTO> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
+    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
-        final Set<CompetitorDTO> competitorsWithNewFixes = new HashSet<>();
         for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
-                competitorsWithNewFixes.add(e.getKey());
                 List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
                     fixesForCompetitor = new ArrayList<GPSFixDTO>();
@@ -206,19 +215,14 @@ public class FixesAndTails {
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    if (tails.containsKey(e.getKey())) {
-                        Polyline removedTail = tails.remove(e.getKey());
-                        removedTail.setMap(null);
-                    }
-                    firstShownFix.remove(e.getKey());
-                    lastShownFix.remove(e.getKey());
+                    removeTail(e.getKey());
                     fixesForCompetitor.addAll(e.getValue());
+                    overlapsWithKnownFixes.put(e.getKey(), true); // In case this was only one part of a split request, the next request *does* have an overlap
                 } else {
                     mergeFixes(e.getKey(), e.getValue(), timeForPositionTransitionMillis);
                 }
             }
         }
-        return competitorsWithNewFixes;
     }
 
     /**
@@ -483,7 +487,7 @@ public class FixesAndTails {
                 toDate = upTo;
             }
             // only request something for the competitor if we're missing information at all
-            if (fromDate.before(toDate) || fromDate.equals(toDate)) {
+            if (!fromDate.after(toDate)) {
                 from.put(competitor, fromDate);
                 to.put(competitor, toDate);
                 overlapWithKnownFixes.put(competitor, overlap);
