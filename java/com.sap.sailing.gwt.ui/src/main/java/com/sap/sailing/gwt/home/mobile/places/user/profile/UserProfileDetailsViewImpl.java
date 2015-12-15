@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
 import com.sap.sailing.gwt.home.mobile.partials.userheader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 
-public class UserProfileDetailsViewImpl extends Composite implements UserProfilDetailsView {
+public class UserProfileDetailsViewImpl extends Composite implements UserProfileDetailsView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, UserProfileDetailsViewImpl> {

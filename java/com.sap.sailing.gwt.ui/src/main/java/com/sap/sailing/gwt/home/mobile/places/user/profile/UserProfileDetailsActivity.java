@@ -6,15 +6,28 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 
-public class UserProfileDetailsActivity extends AbstractActivity implements UserProfilDetailsView.Presenter {
+public class UserProfileDetailsActivity extends AbstractActivity implements UserProfileDetailsView.Presenter {
+
+    private final MobileApplicationClientFactory clientFactory;
+    
+    private final UserProfileDetailsView currentView = new UserProfileDetailsViewImpl(this);
     
     public UserProfileDetailsActivity(AbstractUserProfilePlace place, MobileApplicationClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
-        panel.setWidget(new UserProfileDetailsViewImpl(this));
+        panel.setWidget(currentView);
+        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
+        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                currentView.setUserManagementContext(event.getCtx());
+            }
+        });
     }
     
     @Override
