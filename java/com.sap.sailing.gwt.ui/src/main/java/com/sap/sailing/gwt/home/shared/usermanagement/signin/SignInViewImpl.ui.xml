@@ -8,7 +8,7 @@
     <g:HTMLPanel>
         <div class="{local_res.css.form_title}"><ui:text from="{i18n_sec.signIn}" /></div>
         <div class="{local_res.css.form_errors}" ui:field="formErrorUi"></div>
-        <label class="{local_res.css.form_label}">TODO Username or Email</label>
+        <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.username}" /></label>
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="loginNameUi"/>
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.password}" /></label>
         <g:PasswordTextBox addStyleNames="{local_res.css.form_input}" ui:field="passwordUi"/>
