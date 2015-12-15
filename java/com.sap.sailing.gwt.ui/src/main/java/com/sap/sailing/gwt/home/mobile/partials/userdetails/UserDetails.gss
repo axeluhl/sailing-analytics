@@ -49,4 +49,5 @@
   float: right;
   margin-top: 0.666666666666667em;
   text-transform: uppercase;
+  width: 100%;
 }
