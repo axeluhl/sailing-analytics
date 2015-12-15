@@ -89,6 +89,7 @@ public class Header extends Composite {
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
+                dropdownTriggerUi.setSrc(event.getCtx().isLoggedIn() ? "images/mobile/navigation-icon-signedin.svg" : "images/mobile/navigation-icon.svg");
                 if(event.getCtx().isLoggedIn()) {
                     signInNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
                     userDetailsNavigationItem.getElement().getStyle().clearDisplay();
