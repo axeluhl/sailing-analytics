@@ -35,8 +35,8 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         initWidget(uiBinder.createAndBindUi(this));
         
         StringMessages i18n = StringMessages.INSTANCE;
-        setPlaceholder(passwordUi, i18n.password());
-        setPlaceholder(passwordConfirmationUi, i18n.passwordRepeat());
+        setPlaceholder(passwordUi, i18n.newPasswordPlaceholder());
+        setPlaceholder(passwordConfirmationUi, i18n.passwordRepeatPlaceholder());
     }
     
     @Override

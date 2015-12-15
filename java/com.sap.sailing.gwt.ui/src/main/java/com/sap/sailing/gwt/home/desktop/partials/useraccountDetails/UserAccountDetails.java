@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserAccountDetails extends Composite {
@@ -39,9 +40,10 @@ public class UserAccountDetails extends Composite {
         this.presenter = presenter;
         UseraccountDetailsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        setPlaceholder(oldPasswordUi, "TODO placeholder text");
-        setPlaceholder(newPasswordUi, "TODO placeholder text");
-        setPlaceholder(newPasswordConfirmationUi, "TODO placeholder text");
+        StringMessages i18n = StringMessages.INSTANCE;
+        setPlaceholder(oldPasswordUi, i18n.oldPasswordPlaceholder());
+        setPlaceholder(newPasswordUi, i18n.newPasswordPlaceholder());
+        setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
     }
 
     public void setUserManagementContext(UserManagementContext userManagementContext) {
