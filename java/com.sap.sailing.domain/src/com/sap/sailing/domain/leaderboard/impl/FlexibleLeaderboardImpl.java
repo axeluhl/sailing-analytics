@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -332,5 +333,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             result.put(FlexibleLeaderboardImpl.defaultFleet, getRaceColumns());
             return result;
         }
+    }
+    
+    @Override
+    protected LeaderboardType getLeaderboardType() {
+        return LeaderboardType.FlexibleLeaderboard;
     }
 }

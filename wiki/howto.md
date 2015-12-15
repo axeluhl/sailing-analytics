@@ -1,17 +1,17 @@
 # How to work with this Wiki
 
 ### General Information
-This Wiki is being stored into a GIT repository on branch master that is tracking remote branch master of origin at `/home/trac/git`. The physical location is `/home/gollum/wiki/gitwiki`. The changes here are pushed to origin on a more or less regular base (every week) by one of the admins.
+This Wiki is being stored into a GIT repository on branch master that is tracking remote branch master of origin at `/home/trac/git`. The physical location is `/home/wiki/gitwiki`. The changes here are pushed to origin on a more or less regular base (every week) by one of the admins.
 
-The script `/home/gollum/wiki/serve.sh` can be executed to either start or restart the process being responsible for this wiki. The process is a Ruby webserver (Rack) that uses the handler defined in `/home/gollum/wiki/app.rb`. This handler embeds Gollum wiki software into Rack and also makes sure that only authenticated access is possible (see `/home/gollum/wiki/users.yml`).
+The script `/home/wiki/serve.sh` can be executed to either start or restart the process being responsible for this wiki. The process is a Ruby webserver (Rack) that uses the handler defined in `/home/wiki/app.rb`. This handler embeds Gollum wiki software into Rack and also makes sure that only authenticated access is possible (see `/home/wiki/users.yml`).
 
 ### Making websites public
-Accessing this wiki is normally only allowed for authenticated users. If you want to share your work with others not having an account here then you can just request making a given url publicly available. On the server this is done by simply putting a new line to `/home/gollum/wiki/public.txt`.
+Accessing this wiki is normally only allowed for authenticated users. If you want to share your work with others not having an account here then you can just request making a given url publicly available. On the server this is done by simply putting a new line to `/home/wiki/public.txt`.
 
 ### Creating a New Account
 Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: http://www.sha1-online.com/.
 
-A Wiki administrator can add a new account by adding a new entry to `/home/gollum/wiki/users.yml`. The password there is encrypted using sha1sum (`echo -n "password" | sha1sum`) or, for those who don't happen to have sha1sum available, using an online SHA1 generator such as [this one](http://www.sha1-online.com/).
+A Wiki administrator can add a new account by adding a new entry to `/home/wiki/users.yml`. The password there is encrypted using sha1sum (`echo -n "password" | sha1sum`) or, for those who don't happen to have sha1sum available, using an online SHA1 generator such as [this one](http://www.sha1-online.com/).
 
 ### Editing
 You can edit information here freely but do not leave any nonsense here.

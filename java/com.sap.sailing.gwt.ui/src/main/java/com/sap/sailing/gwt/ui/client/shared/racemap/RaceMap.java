@@ -142,6 +142,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
+    private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    
     private MapWidget map;
     
     /**
@@ -175,6 +177,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
+    
+    private AdvantageLineAnimator advantageTimer;
     
     /**
      * The windward of two Polylines representing a triangle between startline and first mark.
@@ -534,9 +538,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   RaceMap.this.add(sapLogo);
               }
               map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
-              combinedWindPanel.getParent().addStyleName("CombinedWindPanelParentDiv");
               map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
-              trueNorthIndicatorPanel.getParent().addStyleName("TrueNorthIndicatorPanelParentDiv");
+              adjustLeftControlsIndent();
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
               map.setSize("100%", "100%");
@@ -710,6 +713,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
             infoOverlay.removeCanvasPositionAndRotationTransition();
         }
+        // remove the advantage line animation
+        if (advantageTimer != null) {
+            advantageTimer.removeAnimation();
+        }
     }
 
     public void redraw() {
@@ -766,6 +773,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
+                    final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
                     final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             fixesAndTails.computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
                     int requestID = ++boatPositionRequestIDCounter;
@@ -775,7 +783,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     GetRaceMapDataAction getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping = getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping(fromAndToAndOverlap, race, newTime);
                     if (getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping != null) {
                         asyncActionsExecutor.execute(getRaceMapDataForAllOverlappingAndTipsOfNonOverlapping, GET_RACE_MAP_DATA_CATEGORY,
-                                getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                                getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                         requestID = ++boatPositionRequestIDCounter;
                     }
                     // next, do the full thing; being the later call, if request throttling kicks in, the later call
@@ -783,7 +791,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, competitorSelection.getAllCompetitors(), race,
                             useNullAsTimePoint() ? null : newTime, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), /* extrapolate */ true, (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null));
                     asyncActionsExecutor.execute(getRaceMapDataAction, GET_RACE_MAP_DATA_CATEGORY,
-                            getRaceMapDataCallback(oldTime, newTime, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
+                            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, requestID));
                     
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
@@ -802,7 +810,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow = new ArrayList<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>>();
                             if (windInfo != null) {
                                 lastCombinedWindTrackInfoDTO = windInfo; 
-                                showAdvantageLine(competitorsToShow, newTime);
+                                showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
                                 for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
                                     WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                     switch (windSource.getType()) {
@@ -869,8 +877,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private AsyncCallback<RaceMapDataDTO> getRaceMapDataCallback(
-            final Date oldTime,
             final Date newTime,
+            final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, final int requestID) {
         return new AsyncCallback<RaceMapDataDTO>() {
@@ -894,10 +902,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         startedProcessingRequestID = requestID;
                         // Do boat specific actions
                         Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                        long timeForPositionTransitionMillis = calculateTimeForPositionTransition(newTime, oldTime);
-                        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, timeForPositionTransitionMillis);
-                        showBoatsOnMap(newTime, timeForPositionTransitionMillis, getCompetitorsToShow());
-                        showCompetitorInfoOnMap(newTime, timeForPositionTransitionMillis, competitorSelection.getSelectedFilteredCompetitors());
+                        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
+                        showBoatsOnMap(newTime, transitionTimeInMillis, getCompetitorsToShow());
+                        showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
                         if (douglasMarkers != null) {
                             removeAllMarkDouglasPeuckerpoints();
                         }
@@ -915,7 +922,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
                         // adjust to new boat positions
-                        showAdvantageLine(competitorsToShow, newTime);
+                        showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
@@ -1134,7 +1141,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private long calculateTimeForPositionTransition(final Date newTime, final Date oldTime) {
+    private long calculateTimeForPositionTransitionInMillis(final Date newTime, final Date oldTime) {
         final long timeForPositionTransitionMillis;
         boolean hasTimeJumped = oldTime != null && Math.abs(oldTime.getTime() - newTime.getTime()) > 3*timer.getRefreshInterval();
         if (timer.getPlayState() == PlayStates.Playing && !hasTimeJumped) {
@@ -1221,7 +1228,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
+    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
             if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
@@ -1287,6 +1294,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                         break;
                     }
+                    MVCArray<LatLng> nextPath = MVCArray.newInstance();
                     LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
                             coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLengthInKm / 2.0);
                     LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -1300,6 +1308,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         options.setStrokeOpacity(0.5);
 
                         advantageLine = Polyline.newInstance(options);
+                        advantageTimer = new AdvantageLineAnimator(advantageLine);
                         MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
                         pointsAsArray.insertAt(0, advantageLinePos1);
                         pointsAsArray.insertAt(1, advantageLinePos2);
@@ -1317,10 +1326,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             }
                         });
                     } else {
-                        advantageLine.getPath().removeAt(1);
-                        advantageLine.getPath().removeAt(0);
-                        advantageLine.getPath().insertAt(0, advantageLinePos1);
-                        advantageLine.getPath().insertAt(1, advantageLinePos2);
+                        nextPath.push(advantageLinePos1);
+                        nextPath.push(advantageLinePos2);
+                        advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
                         advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
                         advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                     }
@@ -1331,6 +1339,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (advantageLine != null) {
                     advantageLine.setMap(null);
                     advantageLine = null;
+                    advantageTimer = null;
                 }
             }
         }
@@ -2456,6 +2465,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             map.triggerResize();
             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
         }
+        // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
+        boolean isCompactHeader = this.getOffsetWidth() <= 600;
+        getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        
+        // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
+        if (combinedWindPanel.getParent() != null && trueNorthIndicatorPanel.getParent() != null) {
+            this.adjustLeftControlsIndent();
+        }
+    }
+    
+    private void adjustLeftControlsIndent() {
+        combinedWindPanel.getParent().setStyleName("CombinedWindPanelParentDiv");
+        trueNorthIndicatorPanel.getParent().setStyleName("TrueNorthIndicatorPanelParentDiv");
+        String leftControlsIndentStyle = getLeftControlsIndentStyle();
+        if (leftControlsIndentStyle != null) {
+            combinedWindPanel.getParent().addStyleName(leftControlsIndentStyle);
+            trueNorthIndicatorPanel.getParent().addStyleName(leftControlsIndentStyle);
+        }
     }
 
     @Override
@@ -2605,5 +2633,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
           }
         return mapOptions;
+    }
+
+    /**
+     * @return CSS style name to adjust the indent of left controls (combined wind and true north indicator).
+     */
+    protected String getLeftControlsIndentStyle() {
+        return null;
     }
 }

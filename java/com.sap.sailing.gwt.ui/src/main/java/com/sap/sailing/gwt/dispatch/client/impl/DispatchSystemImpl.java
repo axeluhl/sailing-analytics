@@ -16,8 +16,16 @@ import com.sap.sailing.gwt.dispatch.client.rpcimpl.SimpleDispatch;
 public class DispatchSystemImpl<CTX extends DispatchContext> implements DispatchSystem<CTX> {
     
     private final SimpleDispatch<CTX> simpleDispatch = new SimpleDispatch<CTX>(null);
-    private final DispatchAsync<CTX> dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
-            simpleDispatch));
+    private final DispatchAsync<CTX> dispatch;
+    
+    public DispatchSystemImpl() {
+        this(false);
+    }
+    
+    public DispatchSystemImpl(boolean processResultsScheduled) {
+        dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
+                simpleDispatch, processResultsScheduled));
+    }
 
     @Override
     public <R extends Result, A extends Action<R, CTX>> void execute(final A action, final AsyncCallback<R> callback) {

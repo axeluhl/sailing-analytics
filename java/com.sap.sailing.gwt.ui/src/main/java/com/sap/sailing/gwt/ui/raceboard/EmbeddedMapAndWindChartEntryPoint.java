@@ -151,7 +151,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed;
         // let the time panel always return to "live" mode.
         final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(
-                timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false) {
+                timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false,
+                /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ showWindChart) {
             protected boolean isLiveModeToBeMadePossible() {
                 return true;
             }

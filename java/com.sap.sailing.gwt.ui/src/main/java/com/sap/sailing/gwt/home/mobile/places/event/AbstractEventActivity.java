@@ -44,7 +44,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements Presenter {
@@ -248,7 +247,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         linkParams.put("raceName", trackedRaceName);
         linkParams.put("regattaName", regattaName);
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_MODE, "simple");
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         return linkParams;
