@@ -73,7 +73,7 @@
 				    <span>...when to start is less than (in s):</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-					<g:TextBox ui:field="timeToRaceStartInSeconds" />
+					<g:IntegerBox ui:field="timeToRaceStartInSeconds" />
 		        </div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">

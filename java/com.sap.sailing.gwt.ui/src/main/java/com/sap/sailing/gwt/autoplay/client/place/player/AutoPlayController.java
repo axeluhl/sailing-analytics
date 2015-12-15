@@ -53,13 +53,14 @@ import com.sap.sse.security.ui.client.UserService;
 public class AutoPlayController implements RaceTimesInfoProviderListener {
     private static final int REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD = 10000;
     private static final long REFRESH_INTERVAL_IN_MILLIS_RACEBOARD = 1000;
+    private static final long WAIT_TIME_AFTER_END_OF_RACE_MIILIS = 60 * 1000; // 1 min  
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final AsyncActionsExecutor asyncActionsExecutor;
-    
+
     /**
      * We use two timers: one for the leaderboard, one for the race board. This way, we can stop one while the other continues.
      * This way, the other component stops its auto-updates.
@@ -343,13 +344,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentLiveRace);
 
             Date endOfRace = currentRaceTimes.endOfRace;
-            long waitTimeAfterEndOfRace = 60 * 1000; // 1 min  
-            if (endOfRace != null && raceboardTimer.getTime().getTime() > endOfRace.getTime() + waitTimeAfterEndOfRace
+            if (endOfRace != null && raceboardTimer.getTime().getTime() > endOfRace.getTime() + WAIT_TIME_AFTER_END_OF_RACE_MIILIS
                 && raceboardTimer.getPlayMode() == PlayModes.Live) {
                 updatePlayMode(AutoPlayModes.Leaderboard);
             }
         } else {
-            currentLiveRace = checkForLiveRace();
+            currentLiveRace = checkForLiveRace(raceboardTimer.getLiveTimePointInMillis());
             if (currentLiveRace != null) {
                 updatePlayMode(AutoPlayModes.Raceboard);
             } else {
@@ -358,16 +358,22 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         }
     }
 
-    private RegattaAndRaceIdentifier checkForLiveRace() {
+    private RegattaAndRaceIdentifier checkForLiveRace(long serverTimePointAsMillis) {
         RegattaAndRaceIdentifier result = null;
         Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
             for (FleetDTO fleet : race.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleet);
-                if (raceIdentifier != null) {
+                if(raceIdentifier != null) {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
-                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
-                        return raceIdentifier;
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null && raceTimes.endOfRace == null) {
+                        long startTimeInMs = raceTimes.getStartOfRace().getTime();
+                        long timeToSwitchBeforeRaceStartInMs = autoPlayerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds() * 1000;
+                        long delayToLiveInMs = raceTimes.delayToLiveInMs;
+                        // the switch to the live race should happen at a defined timepoint before the race start (default is 3 min) 
+                        if (serverTimePointAsMillis - delayToLiveInMs > startTimeInMs - timeToSwitchBeforeRaceStartInMs) {
+                            return raceIdentifier;
+                        }
                     }
                 }
             }

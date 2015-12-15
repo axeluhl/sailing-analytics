@@ -19,8 +19,9 @@ public class PlayerPlace extends AbstractBasePlace {
         String eventUuidAsString = getParameter(AutoPlayerConfiguration.PARAM_EVENTID);
         String leaderboardName= getParameter(AutoPlayerConfiguration.PARAM_LEADEROARD_NAME);
         Boolean fullscreen = Boolean.valueOf(getParameter(AutoPlayerConfiguration.PARAM_FULLSCREEN));
+        Integer timeToSwitchBeforeRaceStartInSeconds = Integer.valueOf(getParameter(AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START));
         
-        this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen);
+        this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
         this.leaderboardPerspectiveSettings = null;
         this.raceboardPerspectiveSettings = null;
     }
@@ -29,7 +30,8 @@ public class PlayerPlace extends AbstractBasePlace {
             Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveSettings) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
-                AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName());
+                AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
+               AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
         this.playerConfiguration = playerConfiguration;
         this.leaderboardPerspectiveSettings = leaderboardPerspectiveSettings;
         this.raceboardPerspectiveSettings = raceboardPerspectiveSettings;

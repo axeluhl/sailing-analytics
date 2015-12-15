@@ -20,8 +20,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.DetailType;
@@ -31,8 +31,8 @@ import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
@@ -71,7 +71,7 @@ public class DesktopStartView extends Composite implements StartView {
     @UiField FlowPanel raceboardPerspectiveSettingsPanel;
     
     @UiField CheckBox autoSwitchToRaceboard;
-    @UiField TextBox timeToRaceStartInSeconds;
+    @UiField IntegerBox timeToRaceStartInSeconds;
     
     private final PlaceNavigator navigator;
     private final EventBus eventBus;
@@ -80,7 +80,7 @@ public class DesktopStartView extends Composite implements StartView {
     private ProxyLeaderboardPerspective leaderboardPerspective;
     private ProxyRaceBoardPerspective raceboardPerspective;
     
-    private final int defaultTimeToStartTimeInSeconds = 180;
+    private final int defaultTimeToRaceStartTimeInSeconds = 180;
     private final Map<Perspective<?>, CompositeSettings> perspectiveSettings;
     
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
@@ -117,7 +117,7 @@ public class DesktopStartView extends Composite implements StartView {
 
         startInFullscreenModeBox.setValue(true);
         autoSwitchToRaceboard.setValue(true);
-        timeToRaceStartInSeconds.setValue(String.valueOf(defaultTimeToStartTimeInSeconds));
+        timeToRaceStartInSeconds.setValue(defaultTimeToRaceStartTimeInSeconds);
 
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfigurationUi.getStyle().setVisibility(Visibility.HIDDEN);
@@ -243,7 +243,7 @@ public class DesktopStartView extends Composite implements StartView {
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    startInFullscreenModeBox.getValue()), leaderboardPerspectiveSettings, raceboardPerspectiveSettings);
+                    startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), leaderboardPerspectiveSettings, raceboardPerspectiveSettings);
         }
     }
 
