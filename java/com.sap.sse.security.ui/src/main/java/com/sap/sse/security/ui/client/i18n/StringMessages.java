@@ -89,4 +89,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String oldPasswordPlaceholder();
     String passwordRepeatPlaceholder();
     String resetPassword();
+    String youAreNotSignedIn();
 }

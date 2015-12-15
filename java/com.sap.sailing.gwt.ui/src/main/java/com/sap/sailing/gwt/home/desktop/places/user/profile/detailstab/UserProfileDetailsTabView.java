@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -14,6 +12,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -24,12 +23,15 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     }
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
+
+    @UiField(provided = true)
+    AuthorizedContentDecoratorDesktop decoratorUi;
     
-    @UiField DivElement notLoggedInUi;
-    @UiField(provided = true) UserAccountDetails accountDetailsUi;
-    
+    @UiField(provided = true)
+    UserAccountDetails accountDetailsUi;
+
     private UserProfileView.Presenter currentPresenter;
-    
+
     public UserProfileDetailsTabView() {
     }
 
@@ -37,7 +39,7 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     public Class<UserProfileDetailsPlace> getPlaceClassForActivation() {
         return UserProfileDetailsPlace.class;
     }
-    
+
     @Override
     public TabView.State getState() {
         return TabView.State.VISIBLE;
@@ -45,21 +47,16 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
 
     @Override
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
+        decoratorUi = new AuthorizedContentDecoratorDesktop(currentPresenter);
         accountDetailsUi = new UserAccountDetails(currentPresenter);
         initWidget(ourUiBinder.createAndBindUi(this));
         contentArea.setWidget(this);
     }
-    
+
     @Override
     public void setUserManagementContext(UserManagementContext userManagementContext) {
-        if(userManagementContext.isLoggedIn()) {
-            notLoggedInUi.getStyle().setDisplay(Display.NONE);
-            accountDetailsUi.getElement().getStyle().clearDisplay();
-            accountDetailsUi.setUserManagementContext(userManagementContext);
-        } else {
-            notLoggedInUi.getStyle().clearDisplay();
-            accountDetailsUi.getElement().getStyle().setDisplay(Display.NONE);
-        }
+        decoratorUi.setUserManagementContext(userManagementContext);
+        accountDetailsUi.setUserManagementContext(userManagementContext);
     }
 
     @Override

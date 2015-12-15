@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+    .message {
+        font-weight: bold;
+        font-style: italic;
+        padding: 0 0.5em;
+    }
+    .button {
+       display: block;
+    }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <div ui:field="messageUi" class="{res.mediaCss.columns} {res.mediaCss.small12} {style.message} {res.mainCss.spacermargintopmedium} {res.mainCss.spacermarginbottommedium}" />
+        <g:Button addStyleNames="{res.mediaCss.columns} {res.mediaCss.small12} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.spacermarginbottommedium}" ui:field="buttonUi" />
+    </g:HTMLPanel>
+</ui:UiBinder> 
