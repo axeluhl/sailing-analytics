@@ -368,7 +368,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         if (selectedRaceInLeaderboard != null) {
             selectTrackedRaceInRaceList();
         } else {
-            removeTrackedRaceListHandlerTemporarily();
             trackedRacesListComposite.clearSelection();
         }
         enableStartTrackingButtonIfAppropriateRacesSelected();
@@ -396,7 +395,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
         }
-        raceColumnTableSelectionModel.clear();
     }
 
     

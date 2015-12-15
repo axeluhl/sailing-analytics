@@ -605,7 +605,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         } else {
             columnMoveUpButton.setEnabled(false);
             columnMoveDownButton.setEnabled(false);
-            removeTrackedRaceListHandlerTemporarily();
             trackedRacesListComposite.clearSelection();
         }
     }
