@@ -53,7 +53,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         this.trackableRaces = new ArrayList<>();
         this.trackedRaces = new ArrayList<>();
         this.leaderboardRaces = new ArrayList<>();
-        for (int i = 0; i <= 5; i++) {
+        for (int i = 1; i < 6; i++) {
             String raceName = String.format(RACE, i);
             TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  raceName, BOAT_CLASS);
             TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, raceName);
@@ -74,7 +74,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfigurationPanelPO.getLeaderboardDetails(this.regatta.toString());
         
-        for (int i = 1; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             leaderboardDetails.linkRace(this.leaderboardRaces.get(i), this.trackedRaces.get(i));
         }
         
@@ -90,23 +90,27 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         }
         assertNotNull(entryToSelect);
         leaderboards.selectEntry(entryToSelect);
-        
-        RaceColumnTableWrapperPO raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
-        CellTablePO<DataEntryPO> raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
-        // select RaceColumn
-        DataEntryPO raceToSelect = null;
-        for (DataEntryPO entry : raceColumnTable.getEntries()) {
-            if (entry.getColumnContent("Race").equals(leaderboardRaces.get(1).getName())) {
-                raceToSelect = entry;
+        for (int i = 0; i < 5; i++) {
+            RaceColumnTableWrapperPO raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
+            CellTablePO<DataEntryPO> raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
+            // select RaceColumn
+            DataEntryPO raceToSelect = null;
+            for (DataEntryPO entry : raceColumnTable.getEntries()) {
+                if (entry.getColumnContent("Race").equals(leaderboardRaces.get(i).getName())) {
+                    raceToSelect = entry;
+                    break;
+                }
             }
+            assertNotNull(raceToSelect);
+            raceColumnTable.selectEntry(raceToSelect);
+
+            TrackedRacesListPO trackedRaces = smartphoneTrackingPanel.getTrackedRaceListComposite();
+            List<DataEntryPO> seleceted = trackedRaces.getTrackedRacesTable().getSelectedEntries();
+            assertEquals(seleceted.size(), 1);
+            assertEquals(this.trackedRaces.get(i).race, seleceted.get(0).getColumnContent("Race"));
+            
+            raceColumnTable.deselectEntry(raceToSelect);
         }
-        assertNotNull(raceToSelect);
-        raceColumnTable.selectEntry(raceToSelect);
-        
-        TrackedRacesListPO trackedRaces = smartphoneTrackingPanel.getTrackedRaceListComposite();
-        List<DataEntryPO> seleceted = trackedRaces.getTrackedRacesTable().getSelectedEntries();
-        assertEquals(seleceted.size(),1);
-        assertEquals(this.trackedRaces.get(1).race, seleceted.get(0).getColumnContent("Race"));
     }
     
     private void configureLeaderboard() {
