@@ -23,7 +23,7 @@ public class Hoverline {
         this.options.setMap(polyline.getMap());
         this.options.setPath(polyline.getPath());
         this.options.setStrokeColor(polylineOptions.getStrokeColor());
-        this.options.setZindex(polylineOptions.getZindex());
+        this.options.setZindex(polylineOptions.getZindex()); // if the zindex is not set, this line throws an exception in dev mode
         this.hoverline = Polyline.newInstance(this.options);
         this.hoverline.setVisible(false);
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
