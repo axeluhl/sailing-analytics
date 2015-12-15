@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,18 +91,11 @@ public final class HomeServiceUtil {
     }
     
     public static EventState calculateEventState(EventBase event) {
-        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
-    }
-    
-    public static EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
-        Date now = new Date();
-        if(now.compareTo(startDate) < 0) {
-            if(isPublic) {
-                return EventState.UPCOMING;
-            }
-            return EventState.PLANNED;
+        TimePoint now = MillisecondsTimePoint.now();
+        if (now.before(event.getStartDate())) {
+            return event.isPublic() ? EventState.UPCOMING : EventState.PLANNED;
         }
-        if(now.compareTo(endDate) > 0) {
+        if (now.after(event.getEndDate())) {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
