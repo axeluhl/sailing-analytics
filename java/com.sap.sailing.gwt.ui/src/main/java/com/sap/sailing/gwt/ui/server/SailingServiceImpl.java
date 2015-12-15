@@ -1733,6 +1733,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     } finally {
                         track.unlockAfterRead();
                     }
+                    final Set<GPSFixMoving> extrapolatedFixes;
                     if (fixes.isEmpty()) {
                         // then there was no (smoothened) fix between fromTimePoint and toTimePointExcluding; estimate...
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
@@ -1744,7 +1745,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 logger.finest(""+competitor.getName()+": " + estimatedFix+" (estimated)");
                             }
                             fixes.add(estimatedFix);
+                            extrapolatedFixes = Collections.singleton(estimatedFix);
+                        } else {
+                            extrapolatedFixes = Collections.emptySet();
                         }
+                    } else {
+                        extrapolatedFixes = Collections.emptySet();
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {
@@ -1774,8 +1780,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 legType = null;
                             }
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
-                            GPSFixDTO fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */
-                                    false);
+                            GPSFixDTO fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix));
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();

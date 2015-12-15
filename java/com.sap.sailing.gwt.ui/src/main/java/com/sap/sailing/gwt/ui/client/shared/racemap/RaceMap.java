@@ -2079,6 +2079,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return vPanel;
     }
 
+    // FIXME bug3378: only fetch those competitors relevant to the race displayed by this RaceMap; see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3378#c20
+    // could be a method on CompetitorSelectionProvider, parameterized by a RaceIdentifier, and if nothing is known about the race association, all competitors are returned as a safe default
     private Iterable<CompetitorDTO> getCompetitorsToShow() {
         Iterable<CompetitorDTO> result;
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
