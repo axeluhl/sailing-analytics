@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.app;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -28,6 +29,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -70,6 +72,24 @@ public class MobileApplicationClientFactory extends
             public void onUserStatusChange(UserDTO user) {
                 uCtx = new UserManagementContextImpl(user);
                 getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+            }
+        });
+        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
+            @Override
+            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
+                if (!event.isLogin()) {
+                    getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
+                        @Override
+                        public void onSuccess(SuccessInfo result) {
+                            resetUserManagementContext();
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            resetUserManagementContext();
+                        }
+                    });
+                }
             }
         });
     }
