@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -56,6 +58,8 @@ public class MobileActivityMapper implements ActivityMapper {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
         } else if (place instanceof SolutionsPlace) {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
+        } else if (place instanceof AbstractUserProfilePlace) {
+            return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
         } else {
             return null;
         }
