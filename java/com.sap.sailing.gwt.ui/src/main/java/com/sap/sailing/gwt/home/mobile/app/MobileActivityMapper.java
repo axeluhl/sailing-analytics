@@ -24,6 +24,12 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
+import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
+import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -60,6 +66,12 @@ public class MobileActivityMapper implements ActivityMapper {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
+        } else if (place instanceof SignInPlace) {
+            return new SignInActivity(clientFactory, clientFactory.getPlaceController());
+        } else if (place instanceof CreateAccountPlace) {
+            return new CreateAccountActivity(clientFactory, clientFactory.getPlaceController());
+        } else if (place instanceof PasswordRecoveryPlace) {
+            return new PasswordRecoveryActivity<MobileApplicationClientFactory>(clientFactory, clientFactory.getPlaceController());
         } else {
             return null;
         }

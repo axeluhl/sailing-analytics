@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -60,7 +60,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     @Override
     public void signIn() {
-        placeController.goTo(new SigInPlace());
+        placeController.goTo(new SignInPlace());
     }
 
 }

@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -90,8 +90,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
     }
     
-    public PlaceNavigation<SigInPlace> getSignInNavigation() {
-        return createGlobalPlaceNavigation(new SigInPlace());
+    public PlaceNavigation<SignInPlace> getSignInNavigation() {
+        return createGlobalPlaceNavigation(new SignInPlace());
     }
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {

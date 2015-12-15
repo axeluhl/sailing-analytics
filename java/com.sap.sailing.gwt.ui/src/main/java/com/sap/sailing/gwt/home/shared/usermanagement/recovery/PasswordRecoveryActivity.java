@@ -9,20 +9,21 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
+import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {
+public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagementService & ClientFactory> extends AbstractActivity implements PasswordRecoveryView.Presenter {
 
-    private final TabletAndDesktopApplicationClientFactory clientFactory;
+    private final CF clientFactory;
     private final PlaceController placeController;
     private final PasswordRecoveryView view = new PasswordRecoveryViewImpl();
 
-    public PasswordRecoveryActivity(TabletAndDesktopApplicationClientFactory clientFactory, PlaceController placeController) {
+    public PasswordRecoveryActivity(CF clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
     }
@@ -41,7 +42,7 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
                     @Override
                     public void onSuccess(Void result) {
                         clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
-                        placeController.goTo(new SigInPlace());
+                        placeController.goTo(new SignInPlace());
                     }
                     
                     @Override

@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
@@ -34,7 +34,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
                 if (event.getCtx().isLoggedIn()) {
                     view.setUserInfo(event.getCtx().getCurrentUser());
                 } else {
-                    placeController.goTo(new SigInPlace());
+                    placeController.goTo(new SignInPlace());
                 }
             }
         });
