@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -49,8 +50,9 @@ public class Header extends Composite {
     private final DropdownHandler dropdownHandler;
     private final HeaderNavigationItem signInNavigationItem;
     private final HeaderNavigationItem userDetailsNavigationItem;
+    private final HeaderNavigationItem signOutNavigationItem;
     
-    public Header(final MobilePlacesNavigator placeNavigator, EventBus eventBus) {
+    public Header(final MobilePlacesNavigator placeNavigator, final EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         
@@ -63,6 +65,12 @@ public class Header extends Composite {
         addUrl("http://blog.sapsailing.com", TextMessages.INSTANCE.blog());
         signInNavigationItem = addNavigation(placeNavigator.getSignInNavigation(), com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn());
         userDetailsNavigationItem = addNavigation(placeNavigator.getUserProfileNavigation(), com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.userDetails());
+        signOutNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signOut(), new Runnable() {
+            @Override
+            public void run() {
+                eventBus.fireEvent(new UserManagementRequestEvent(false));
+            }
+        });
         
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
         
@@ -84,9 +92,11 @@ public class Header extends Composite {
                 if(event.getCtx().isLoggedIn()) {
                     signInNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
                     userDetailsNavigationItem.getElement().getStyle().clearDisplay();
+                    signOutNavigationItem.getElement().getStyle().clearDisplay();
                 } else {
                     signInNavigationItem.getElement().getStyle().clearDisplay();
                     userDetailsNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
+                    signOutNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
                     
                 }
             }
@@ -98,14 +108,28 @@ public class Header extends Composite {
     }
     
     private HeaderNavigationItem addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
-        HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, placeNavigation.getTargetUrl());
+        return addNavigation(placeNavigation.getTargetUrl(), name, new Runnable() {
+            @Override
+            public void run() {
+                placeNavigation.goToPlace();
+                dropdownHandler.setVisible(false);
+            }
+            
+        });
+    }
+    
+    private HeaderNavigationItem addNavigation(String name, final Runnable action) {
+        return addNavigation(null, name, action);
+    }
+    
+    private HeaderNavigationItem addNavigation(String url, String name, final Runnable action) {
+        HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, url);
         navigationItem.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
                     event.preventDefault();
-                    placeNavigation.goToPlace();
-                    dropdownHandler.setVisible(false);
+                    action.run();
                 }
             }
         });
