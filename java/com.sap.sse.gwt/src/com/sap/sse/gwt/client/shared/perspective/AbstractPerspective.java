@@ -1,27 +1,25 @@
-package com.sap.sailing.gwt.ui.client.shared.perspective;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 /**
- * An abstract base class for perspectives with a widget.
+ * An abstract base class for perspectives.
  * @author Frank
  *
  */
-public abstract class AbstractPerspectiveComposite<SettingsType extends Settings> extends Composite implements Perspective<SettingsType> {
+public abstract class AbstractPerspective<SettingsType extends Settings> implements Perspective<SettingsType> {
 
     protected final List<Component<?>> components;
     
-    public AbstractPerspectiveComposite() {
+    public AbstractPerspective() {
         components = new ArrayList<Component<?>>();
     }
     
@@ -55,10 +53,5 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
     @Override
     public Iterable<Component<?>> getComponents() {
         return components;
-    }
-
-    @Override
-    public Widget getEntryWidget() {
-        return this.asWidget();
     }
 }

@@ -36,8 +36,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.perspective.Perspective;
-import com.sap.sailing.gwt.ui.client.shared.perspective.TabbedPerspectiveConfigurationDialog;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
@@ -53,6 +51,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);

@@ -9,11 +9,11 @@ import com.sap.sailing.gwt.autoplay.client.place.start.ProxyWindChartComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspective;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspective;
 
 /**
  * A proxy perspective containing proxy components for all components of a race viewer with all components like map, leaderboard, charts, etc.  

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.perspective;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;

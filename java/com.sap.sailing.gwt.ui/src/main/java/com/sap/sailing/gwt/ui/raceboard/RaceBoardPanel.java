@@ -54,7 +54,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
-import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -74,6 +73,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 

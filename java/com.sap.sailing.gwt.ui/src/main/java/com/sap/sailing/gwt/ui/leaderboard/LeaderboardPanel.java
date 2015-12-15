@@ -90,7 +90,6 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
-import com.sap.sailing.gwt.ui.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
@@ -116,6 +115,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**

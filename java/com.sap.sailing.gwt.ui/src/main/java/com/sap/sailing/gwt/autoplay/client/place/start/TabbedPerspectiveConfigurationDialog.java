@@ -1,8 +1,9 @@
-package com.sap.sailing.gwt.ui.client.shared.perspective;
+package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 /**
  * @author Frank
