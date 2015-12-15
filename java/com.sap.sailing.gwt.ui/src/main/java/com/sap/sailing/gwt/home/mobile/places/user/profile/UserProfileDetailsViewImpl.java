@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
 import com.sap.sailing.gwt.home.mobile.partials.userheader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
 
 public class UserProfileDetailsViewImpl extends Composite implements UserProfileDetailsView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -16,9 +17,11 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     }
 
     @UiField UserHeader userHeaderUi;
+    @UiField(provided = true) AuthorizedContentDecoratorMobile decoratorUi;
     @UiField(provided = true) UserDetails userDetailsUi;
     
     public UserProfileDetailsViewImpl(Presenter presenter) {
+        decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
         userDetailsUi = new UserDetails(presenter);
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -26,6 +29,7 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     @Override
     public void setUserManagementContext(UserManagementContext userManagementContext) {
         userHeaderUi.setUserManagementContext(userManagementContext);
+        decoratorUi.setUserManagementContext(userManagementContext);
         userDetailsUi.setUserManagementContext(userManagementContext);
     }
 }

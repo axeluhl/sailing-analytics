@@ -41,6 +41,11 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     }
     
     @Override
+    public void doTriggerLoginForm() {
+        clientFactory.getNavigator().getSignInNavigation().goToPlace();
+    }
+    
+    @Override
     public void handleSaveChangesRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
         clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, 
