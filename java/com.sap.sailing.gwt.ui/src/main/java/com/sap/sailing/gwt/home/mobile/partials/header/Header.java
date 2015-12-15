@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.mobile.partials.header;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -32,7 +31,7 @@ public class Header extends Composite {
     // @UiField Button searchButton;
     
     @UiField HeaderResources local_res;
-    @UiField ImageElement dropdownTriggerUi;
+    @UiField DivElement dropdownTriggerUi;
     @UiField Element dropdownContainerUi;
     @UiField FlowPanel dropdownListUi;
     @UiField FlowPanel dropdownListExtUi;
@@ -89,12 +88,13 @@ public class Header extends Composite {
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
-                dropdownTriggerUi.setSrc(event.getCtx().isLoggedIn() ? "images/mobile/navigation-icon-signedin.svg" : "images/mobile/navigation-icon.svg");
                 if(event.getCtx().isLoggedIn()) {
+                    dropdownTriggerUi.addClassName(HeaderResources.INSTANCE.css().header_navigation_iconsignedin());
                     signInNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
                     userDetailsNavigationItem.getElement().getStyle().clearDisplay();
                     signOutNavigationItem.getElement().getStyle().clearDisplay();
                 } else {
+                    dropdownTriggerUi.removeClassName(HeaderResources.INSTANCE.css().header_navigation_iconsignedin());
                     signInNavigationItem.getElement().getStyle().clearDisplay();
                     userDetailsNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
                     signOutNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
