@@ -14,12 +14,14 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -44,9 +46,11 @@ public class Header extends Composite {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
-    private DropdownHandler dropdownHandler;
+    private final DropdownHandler dropdownHandler;
+    private final HeaderNavigationItem signInNavigationItem;
+    private final HeaderNavigationItem userDetailsNavigationItem;
     
-    public Header(final MobilePlacesNavigator placeNavigator) {
+    public Header(final MobilePlacesNavigator placeNavigator, EventBus eventBus) {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         
@@ -57,6 +61,9 @@ public class Header extends Composite {
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
         addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
         addUrl("http://blog.sapsailing.com", TextMessages.INSTANCE.blog());
+        signInNavigationItem = addNavigation(placeNavigator.getSignInNavigation(), com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn());
+        userDetailsNavigationItem = addNavigation(placeNavigator.getUserProfileNavigation(), com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.userDetails());
+        
         dropdownHandler = new DropdownHandler(dropdownTriggerUi, dropdownContainerUi);
         
         Event.sinkEvents(searchUi, Event.ONCLICK);
@@ -70,13 +77,27 @@ public class Header extends Composite {
                 
             }
         });
+        
+        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(UserManagementContextEvent event) {
+                if(event.getCtx().isLoggedIn()) {
+                    signInNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
+                    userDetailsNavigationItem.getElement().getStyle().clearDisplay();
+                } else {
+                    signInNavigationItem.getElement().getStyle().clearDisplay();
+                    userDetailsNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
+                    
+                }
+            }
+        });
     }
     
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return navigationPathDisplay;
     }
     
-    private void addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
+    private HeaderNavigationItem addNavigation(final PlaceNavigation<?> placeNavigation, String name) {
         HeaderNavigationItem navigationItem = new HeaderNavigationItem(name, placeNavigation.getTargetUrl());
         navigationItem.addClickHandler(new ClickHandler() {
             @Override
@@ -89,6 +110,7 @@ public class Header extends Composite {
             }
         });
         dropdownListUi.add(navigationItem);
+        return navigationItem;
     }
     
     private void addUrl(String url, String name) {
