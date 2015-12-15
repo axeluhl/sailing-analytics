@@ -21,6 +21,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String tryingToVerifyUser();
     String fetchingUserInformation();
     String signedInAs(String name);
+    String signedInAsTitle();
     String close();
     String loading();
     String users();

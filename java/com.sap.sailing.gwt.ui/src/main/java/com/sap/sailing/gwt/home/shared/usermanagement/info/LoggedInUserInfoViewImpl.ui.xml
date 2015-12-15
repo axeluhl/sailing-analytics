@@ -6,7 +6,7 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
     <g:HTMLPanel>
-        <div class="{local_res.css.form_title} {local_res.css.form_subtitle}">TODO Signed in as:</div>
+        <div class="{local_res.css.form_title} {local_res.css.form_subtitle}"><ui:text from="{i18n_sec.signedInAsTitle}" /></div>
         <div class="{local_res.css.info_user}">
             <div class="{local_res.css.info_user_image}">
                 <div class="{local_res.css.info_user_image_item}" ui:field="userImageUi"></div>
