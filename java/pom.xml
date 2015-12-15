@@ -56,7 +56,6 @@
     <module>com.sap.sailing.expeditionconnector</module>
     <module>com.sap.sailing.server</module>
     <module>com.sap.sailing.server.gateway</module>
-    <module>com.sap.sailing.server.gateway.ess40</module>
     <module>com.sap.sailing.server.gateway.serialization</module>
     <module>com.sap.sailing.server.gateway.serialization.shared.android</module>
     <module>com.sap.sailing.www</module>

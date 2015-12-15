@@ -76,8 +76,8 @@ public abstract class AbstractSailingServerResource {
         TrackedRace trackedRace = null;
         if (regatta != null && race != null) {
             DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-            if(trackedRegatta != null) {
-                trackedRace = trackedRegatta.getTrackedRace(race);
+            if (trackedRegatta != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(race);
             }
         }
         return trackedRace;
