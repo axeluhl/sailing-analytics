@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.userHeader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
@@ -51,17 +52,15 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     @Override
     public void navigateTabsTo(AbstractUserProfilePlace place) {
         tabPanelUi.activatePlace(place);
-        // TODO implement
-//        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
-//
-//        titleBuilder.append(currentPresenter.getSeriesDTO().getDisplayName());
-//
-//        String currentTabTitle = tabPanelUi.getCurrentTabTitle();
-//        if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
-//            titleBuilder.append(" - ").append(currentTabTitle);
-//        }
-//        Window.setTitle(titleBuilder.toString());
-        Window.setTitle("TODO User Profile title");
+        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
+
+        titleBuilder.append(place.getLocationTitle());
+
+        String currentTabTitle = tabPanelUi.getCurrentTabTitle();
+        if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
+            titleBuilder.append(" - ").append(currentTabTitle);
+        }
+        Window.setTitle(titleBuilder.toString());
     }
     
     @Override
