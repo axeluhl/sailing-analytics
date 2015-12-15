@@ -84,6 +84,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorCommunicatingWithServer();
     String editProfile();
     String allPermissions();
+    String oldPassword();
     String newPasswordPlaceholder();
     String oldPasswordPlaceholder();
     String passwordRepeatPlaceholder();
