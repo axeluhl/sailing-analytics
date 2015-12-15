@@ -81,7 +81,7 @@
       <resource>
         <directory>${project.basedir}/assets</directory>
         <filtering>true</filtering>
-        <targetPath>${project.build.directory}/filtered-assets</targetPath>
+        <targetPath>${project.build.directory}/filteredassets</targetPath>
         <includes>
             <include>build.info</include>
         </includes>
@@ -89,7 +89,7 @@
       <resource>
         <directory>${project.basedir}/assets</directory>
         <filtering>false</filtering>
-        <targetPath>${project.build.directory}/filtered-assets</targetPath>
+        <targetPath>${project.build.directory}/filteredassets</targetPath>
         <excludes>
             <exclude>build.info</exclude>
         </excludes>
@@ -119,11 +119,11 @@
           <artifactId>android-maven-plugin</artifactId>
           <configuration>
             <resourceDirectory>res</resourceDirectory>
+            <assetsDirectory>${project.build.directory}/filteredassets</assetsDirectory>
             <sourceDirectories>
               <sourceDirectory>${project.basedir}/src</sourceDirectory>
             </sourceDirectories>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
-            <assetsDirectory>${project.build.directory}/filtered-assets</assetsDirectory>
             <failOnNonStandardStructure>false</failOnNonStandardStructure>
             <failOnConflictingLayouts>false</failOnConflictingLayouts>
             <failOnDuplicatePackages>false</failOnDuplicatePackages>
@@ -131,7 +131,6 @@
             <extractDuplicates>true</extractDuplicates>
             <release>false</release>
             <outputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</outputApk>
-
             <proguard>
               <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
               <skip>true</skip>
