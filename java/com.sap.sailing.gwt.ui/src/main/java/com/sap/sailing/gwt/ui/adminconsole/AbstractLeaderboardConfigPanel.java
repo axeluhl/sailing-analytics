@@ -95,7 +95,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected HandlerRegistration trackedRaceListHandlerRegistration;
     
     private final LeaderboardsRefresher leaderboardsRefresher;
-
+    
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Util.Pair<RaceColumnDTO, FleetDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
 
@@ -681,7 +681,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         }
         trackedRaceListHandlerRegistration.removeHandler();
         trackedRaceListHandlerRegistration = null;
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
@@ -695,7 +695,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         }
         raceColumnSelectionChangeHandlerRegistration.removeHandler();
         raceColumnSelectionChangeHandlerRegistration = null;
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 raceColumnSelectionChangeHandlerRegistration = raceColumnTableSelectionModel.addSelectionChangeHandler(raceColumnSelectionChangeHandler);
