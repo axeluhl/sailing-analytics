@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class SignInViewImpl extends Composite implements SignInView {
     
@@ -39,9 +38,6 @@ public class SignInViewImpl extends Composite implements SignInView {
     public SignInViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         
-        StringMessages i18n = StringMessages.INSTANCE;
-        setPlaceholder(loginNameUi, "TODO Username or Email");
-        setPlaceholder(passwordUi, i18n.password());
         if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANGEMENT) {
             socialLoginUi.removeFromParent();
         }
@@ -97,10 +93,6 @@ public class SignInViewImpl extends Composite implements SignInView {
     
     private void triggerLogin() {
         presenter.login(loginNameUi.getValue(), passwordUi.getValue());
-    }
-    
-    private void setPlaceholder(Widget widget, String placeholderText) {
-        widget.getElement().setAttribute("placeholder", placeholderText);
     }
     
     private void selectAll(TextBox textBox) {

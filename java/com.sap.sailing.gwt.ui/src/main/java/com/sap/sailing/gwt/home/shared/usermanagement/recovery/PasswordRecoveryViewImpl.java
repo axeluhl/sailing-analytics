@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     
@@ -27,9 +26,6 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     
     public PasswordRecoveryViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        StringMessages i18n = StringMessages.INSTANCE;
-        setPlaceholder(emailUi, i18n.email());
-        setPlaceholder(usernameUi, i18n.username());
     }
     
     @Override
@@ -46,9 +42,4 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     void onResetPasswordUiControlClicked(ClickEvent event) {
         presenter.resetPassword(emailUi.getValue(), usernameUi.getValue());
     }
-    
-    private void setPlaceholder(Widget widget, String placeholderText) {
-        widget.getElement().setAttribute("placeholder", placeholderText);
-    }
-    
 }
