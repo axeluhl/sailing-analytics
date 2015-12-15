@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 
 public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     
@@ -25,6 +26,7 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     private Presenter presenter;
     
     public PasswordRecoveryViewImpl() {
+        UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     

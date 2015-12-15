@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
@@ -27,6 +28,7 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     private Presenter presenter;
     
     public LoggedInUserInfoViewImpl() {
+        UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     

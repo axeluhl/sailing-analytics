@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class CreateAccountViewImpl extends Composite implements CreateAccountView {
@@ -32,6 +33,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     private Presenter presenter;
     
     public CreateAccountViewImpl() {
+        UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
         StringMessages i18n = StringMessages.INSTANCE;

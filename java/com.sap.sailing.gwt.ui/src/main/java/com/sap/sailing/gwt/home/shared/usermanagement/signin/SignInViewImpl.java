@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 
 public class SignInViewImpl extends Composite implements SignInView {
     
@@ -36,6 +37,7 @@ public class SignInViewImpl extends Composite implements SignInView {
     private Presenter presenter;
 
     public SignInViewImpl() {
+        UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
         if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANGEMENT) {
