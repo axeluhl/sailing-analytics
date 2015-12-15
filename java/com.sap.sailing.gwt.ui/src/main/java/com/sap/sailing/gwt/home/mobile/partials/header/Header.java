@@ -112,7 +112,6 @@ public class Header extends Composite {
             @Override
             public void run() {
                 placeNavigation.goToPlace();
-                dropdownHandler.setVisible(false);
             }
             
         });
@@ -130,6 +129,7 @@ public class Header extends Composite {
                 if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
                     event.preventDefault();
                     action.run();
+                    dropdownHandler.setVisible(false);
                 }
             }
         });
