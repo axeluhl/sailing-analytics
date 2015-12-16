@@ -25,4 +25,5 @@ public class PlaceTokenPrefixes {
     
     public static final String UserProfileDefault = "/user/profile/";
     public static final String UserProfileDetails = "/user/profile/details/";
+    public static final String UserConfirmation = "/user/confirmation/";
 }
