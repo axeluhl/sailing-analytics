@@ -75,8 +75,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>> raceColumnTable;
     protected final RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceColumnTableSelectionModel;
-    private final SelectionChangeEvent.Handler raceColumnSelectionChangeHandler;
-    private HandlerRegistration raceColumnSelectionChangeHandlerRegistration;
 
     protected RaceColumnDTOAndFleetDTOWithNameBasedEquality selectedRaceInLeaderboard;
 
@@ -269,13 +267,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         raceColumnTable.getTable().setWidth("100%");
         addColumnsToRacesTable(raceColumnTable.getTable());
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
-        raceColumnSelectionChangeHandler = new SelectionChangeEvent.Handler() {
+        raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
+                // If the selection on the raceColumnTable changes,
+                // you don't want to link or unlink raceColumns with the
+                // trackedRaceListHandler.
                 removeTrackedRaceListHandlerTemporarily();
                 leaderboardRaceColumnSelectionChanged();
             }
-        };
-        raceColumnSelectionChangeHandlerRegistration = raceColumnTableSelectionModel.addSelectionChangeHandler(raceColumnSelectionChangeHandler);
+        });
         vPanel.add(raceColumnTable);
 
         HorizontalPanel selectedLeaderboardRaceButtonPanel = new HorizontalPanel();
@@ -385,7 +385,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
             @Override
             public void onSuccess(Void arg0) {
-                removeRaceColumnListHandlerTemporarily();
                 trackedRacesListComposite.clearSelection();
                 getSelectedRaceColumnWithFleet().getA().setRaceIdentifier(fleet, null);
                 raceColumnTable.getDataProvider().refresh();
@@ -442,6 +441,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                 
                                 @Override
                                 public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
+                                    // This method should select the linked trackedRace.
+                                    // So you don't want to link or unlink it again throw the trackedRaceListHandler.
                                     removeTrackedRaceListHandlerTemporarily();
                                     if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
                                         RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
@@ -532,7 +533,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 
                             @Override
                             public void onSuccess(Boolean success) {
-                                removeRaceColumnListHandlerTemporarily();
                                 if (success) {
                                     // TODO consider enabling the Unlink button
                                     selectedRaceInLeaderboard.setRaceIdentifier(fleet, selectedRace);
@@ -672,8 +672,14 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         });
         dialog.show();
     }
+    
     /**
-     * TODO Lukas: Add JavaDoc
+     * Removes the {@link SelectionChangeEvent.Handler} until the browser regains control. The handler will be added
+     * again using {@link Scheduler#scheduleDeferred(ScheduledCommand)} method.
+     * <p>
+     * Use this method if you change the {@link ListDataProvider} or {@link RefreshableSelectionModel} of
+     * {@link TrackedRacesListComposite} and you don't want to trigger the
+     * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent)}
      */
     protected void removeTrackedRaceListHandlerTemporarily() {
         if (trackedRaceListHandlerRegistration == null) {
@@ -685,20 +691,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             @Override
             public void execute() {
                 trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
-            }
-        });
-    }
-    
-    protected void removeRaceColumnListHandlerTemporarily() {
-        if (raceColumnSelectionChangeHandlerRegistration == null) {
-            return;
-        }
-        raceColumnSelectionChangeHandlerRegistration.removeHandler();
-        raceColumnSelectionChangeHandlerRegistration = null;
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                raceColumnSelectionChangeHandlerRegistration = raceColumnTableSelectionModel.addSelectionChangeHandler(raceColumnSelectionChangeHandler);
             }
         });
     }

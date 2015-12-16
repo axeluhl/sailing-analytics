@@ -87,7 +87,6 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         hasRaceCandidates = false;
         this.trackedRacesListComposite.fillRegattas(result);
         for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
-            // TODO / FIXME Lukas: consider not to notify handlers, remind old implementation of TrackedRaceListComposite
             this.trackedRacesListComposite.selectRaceByIdentifier(assignedRace);
         }
         updateUI();
