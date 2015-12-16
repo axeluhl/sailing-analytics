@@ -49,7 +49,7 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
 
     @Prefix(PlaceTokenPrefixes.UserConfirmation)
     public static class Tokenizer implements PlaceTokenizer<ConfirmationPlace> {
-        RegExp keyValRegex = RegExp.compile("(.*)=(.*)");
+        private final RegExp keyValRegex = RegExp.compile("(.*)=(.*)");
 
         @Override
         public ConfirmationPlace getPlace(String token) {

@@ -7,12 +7,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.client.mvp.ErrorView;
 
-public class MessageViewImpl extends Composite implements ErrorView {
+public class ConfirmationViewImpl extends Composite implements ConfirmationView {
     private static WidgetUiBinder uiBinder = GWT.create(WidgetUiBinder.class);
 
-    interface WidgetUiBinder extends UiBinder<Widget, MessageViewImpl> {
+    interface WidgetUiBinder extends UiBinder<Widget, ConfirmationViewImpl> {
     }
 
     @UiField
@@ -20,11 +19,10 @@ public class MessageViewImpl extends Composite implements ErrorView {
     @UiField
     protected Element messageUi;
 
-    
-    public MessageViewImpl(String messageTitle, String message) {
+    public ConfirmationViewImpl(String messageTitle, String message) {
         initWidget(uiBinder.createAndBindUi(this));
         messageTitleUi.setInnerText(messageTitle);
         messageUi.setInnerText(message);
-
     }
+
 }

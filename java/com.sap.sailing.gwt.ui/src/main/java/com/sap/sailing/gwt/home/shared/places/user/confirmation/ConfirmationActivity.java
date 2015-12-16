@@ -7,10 +7,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class ConfirmationActivity extends AbstractActivity {
+public class ConfirmationActivity extends AbstractActivity implements ConfirmationView.Presenter {
     private final ConfirmationPlace place;
     private final ConfirmationClientFactory clientFactory;
-    private final StringMessages I18N_SEC = StringMessages.INSTANCE;
+    private final StringMessages i18n_sec = StringMessages.INSTANCE;
 
     public ConfirmationActivity(ConfirmationPlace place, ConfirmationClientFactory clientFactory) {
         this.place = place;
@@ -27,27 +27,27 @@ public class ConfirmationActivity extends AbstractActivity {
                     new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            panel.setWidget(new MessageViewImpl(I18N_SEC.accountConfirmation(), I18N_SEC
+                            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
                                     .errorValidatingEmail(place.getName(), caught.getMessage())));
                         }
 
                         @Override
                         public void onSuccess(Boolean result) {
-                            final MessageViewImpl view;
+                            final ConfirmationView view;
                             if (result) {
-                                view = new MessageViewImpl(I18N_SEC.accountConfirmation(), I18N_SEC
+                                view = new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
                                         .emailValidatedSuccessfully(place.getName()));
                             } else {
-                                view = new MessageViewImpl(I18N_SEC.accountConfirmation(), I18N_SEC
+                                view = new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
                                         .errorValidatingEmail(place.getName(),
-                                                I18N_SEC.emailValidationUnsuccessful(place.getName())));
+                                                i18n_sec.emailValidationUnsuccessful(place.getName())));
                             }
-                            panel.setWidget(view);
+                            panel.setWidget(view.asWidget());
                         }
                     }));
             break;
         case ERROR:
-            panel.setWidget(new MessageViewImpl(I18N_SEC.accountConfirmation(), I18N_SEC.error()));
+            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec.error()));
             break;
         }
     }
