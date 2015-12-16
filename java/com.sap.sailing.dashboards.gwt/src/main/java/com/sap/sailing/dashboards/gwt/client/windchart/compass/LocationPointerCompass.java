@@ -41,8 +41,8 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
     private LocationPointerCompassAngleDistance locationPointerCompassAngleDistance;
 
     public LocationPointerCompass() {
-        LocationPointerCompassRessources.INSTANCE.css().ensureInjected();
-        this.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.css().locationPointerCompass());
+        LocationPointerCompassRessources.INSTANCE.gss().ensureInjected();
+        this.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.gss().compass());
         initCompassNeedle();
         initAngleToPointetLocationLabel();
         initDistanceToPointedLocationLabel();
@@ -54,19 +54,19 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
     private void initCompassNeedle() {
         compassNeedle = new Image();
         compassNeedle.setResource(RibDashboardImageResources.INSTANCE.compass());
-        compassNeedle.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.css().locationPointerCompass_needle());
+        compassNeedle.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.gss().needle());
         LocationPointerCompass.this.add(compassNeedle);
     }
 
     private void initAngleToPointetLocationLabel() {
         angleToPointetLocationLabel = new Label();
-        angleToPointetLocationLabel.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.css().locationPointerCompass_angleToLocationLabel());
+        angleToPointetLocationLabel.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.gss().angleToLocationLabel());
         this.add(angleToPointetLocationLabel);
     }
 
     private void initDistanceToPointedLocationLabel() {
         distanceToPointetLocationLabel = new Label();
-        distanceToPointetLocationLabel.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.css().locationPointerCompass_distanceToLocationLabel());
+        distanceToPointetLocationLabel.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.gss().distanceToLocationLabel());
         distanceToPointetLocationLabel.setText("m");
         this.add(distanceToPointetLocationLabel);
     }

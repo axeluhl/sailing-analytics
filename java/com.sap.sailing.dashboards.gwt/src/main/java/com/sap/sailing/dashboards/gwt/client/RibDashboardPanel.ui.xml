@@ -1,53 +1,53 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
-	xmlns:startlineadvantage="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage"
+	xmlns:startlineadvantagegeometry="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage.geometry"
+	xmlns:startlineadvantagewind="urn:import:com.sap.sailing.dashboards.gwt.client.startlineadvantage.wind"
 	xmlns:startanalysis="urn:import:com.sap.sailing.dashboards.gwt.client.startanalysis"
 	xmlns:mgwtcarousel="urn:import:com.googlecode.mgwt.ui.client.widget.carousel"
 	xmlns:mgwtpanel="urn:import:com.googlecode.mgwt.ui.client.widget.panel">
 
-	<ui:style
-		type='com.sap.sailing.dashboards.gwt.client.RibDashboardPanelStyle' src='resources/Ribstyle.css'></ui:style>
+	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.resources.DashboardResources"/>
 
 	<g:LayoutPanel ui:field="root">
 		<g:layer left="0%" top="0%" right="0%" height="35pt">
-			<g:HTMLPanel ui:field="header" styleName="{style.bar}"></g:HTMLPanel>
+			<g:HTMLPanel ui:field="header" styleName="{resources.style.bar}"></g:HTMLPanel>
 		</g:layer>
 		<g:layer left="0pt" top="35pt" right="0pt" bottom="0pt">
 			<mgwtcarousel:Carousel ui:field="carousel">
-				<mgwtpanel:Panel styleName="{style.page}">
-					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{style.collumn} {style.left}">
-						<div class="{style.windloadinghint}">
-							<div ui:field="windloadinghintleft" class="{style.windloadinghinttext}"></div>
+				<mgwtpanel:Panel styleName="{resources.style.page}">
+					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{resources.style.collumn} {resources.style.left}">
+						<div class="{resources.style.windloadinghint}">
+							<div ui:field="windloadinghintleft" class="{resources.style.windloadinghinttext}"></div>
 						</div>
 					</g:HTMLPanel>
 					<g:HTMLPanel ui:field="rightwindbotcontainer"
-						styleName="{style.collumn} {style.right}">
-						<div class="{style.windloadinghint}">
-							<div ui:field="windloadinghintright" class="{style.windloadinghinttext}"></div>
+						styleName="{resources.style.collumn} {resources.style.right}">
+						<div class="{resources.style.windloadinghint}">
+							<div ui:field="windloadinghintright" class="{resources.style.windloadinghinttext}"></div>
 						</div>
 					</g:HTMLPanel>
-					<g:HTMLPanel ui:field="windcharthint" styleName="{style.windcharthint}"></g:HTMLPanel>
+					<g:HTMLPanel ui:field="windcharthint" styleName="{resources.style.windcharthint}"></g:HTMLPanel>
 				</mgwtpanel:Panel>
-				<mgwtpanel:Panel styleName="{style.page}">
-					<g:HTMLPanel styleName="{style.collumn} {style.startanalysiscollumn}">
-						<startanalysis:StartlineAnalysisComponent
-							ui:field="startanalysisComponent"></startanalysis:StartlineAnalysisComponent>
+				<mgwtpanel:Panel styleName="{resources.style.page}">
+					<g:HTMLPanel styleName="{resources.style.collumn} {resources.style.startanalysiscollumn}">
+						<startanalysis:StartAnalysisComponent
+							ui:field="startanalysisComponent"></startanalysis:StartAnalysisComponent>
 					</g:HTMLPanel>
-					<g:HTMLPanel styleName="{style.collumn} {style.collumn3}">
-							<g:HTMLPanel styleName="{style.startline_advantage_by_geometry_container}">
-						<startlineadvantage:StartLineAdvantageByGeometryComponent ui:field="startlineAdvantageByGeometryComponent"></startlineadvantage:StartLineAdvantageByGeometryComponent>
+					<g:HTMLPanel styleName="{resources.style.collumn} {resources.style.collumnthree}">
+							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_geometry_container}">
+						<startlineadvantagegeometry:StartLineAdvantageByGeometryComponent ui:field="startlineAdvantageByGeometryComponent"></startlineadvantagegeometry:StartLineAdvantageByGeometryComponent>
 						</g:HTMLPanel>
-							<g:HTMLPanel styleName="{style.startline_advantage_by_wind_container}">
-							<startlineadvantage:StartlineAdvantagesByWindComponent
-								ui:field="startlineAdvantagesByWindComponent"></startlineadvantage:StartlineAdvantagesByWindComponent>
+							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_wind_container}">
+							<startlineadvantagewind:StartlineAdvantagesByWindComponent
+								ui:field="startlineAdvantagesByWindComponent"></startlineadvantagewind:StartlineAdvantagesByWindComponent>
 							</g:HTMLPanel>
 					</g:HTMLPanel>
 				</mgwtpanel:Panel>
 			</mgwtcarousel:Carousel>
 		</g:layer>
 		<g:layer left="0%" bottom="0%" right="0%" height="30pt">
-			<g:HTMLPanel ui:field="bottombar" styleName="{style.bar}">
+			<g:HTMLPanel ui:field="bottombar" styleName="{resources.style.bar}">
 			</g:HTMLPanel>
 		</g:layer>
 	</g:LayoutPanel>

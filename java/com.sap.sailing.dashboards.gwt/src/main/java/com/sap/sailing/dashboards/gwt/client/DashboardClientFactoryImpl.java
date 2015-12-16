@@ -28,6 +28,7 @@ public class DashboardClientFactoryImpl implements DashboardClientFactory{
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.WEB_CONTEXT_PATH, RemoteServiceMappingConstants.sailingServiceRemotePath);
         dashboardFiveSecondsTimer = new Timer(PlayModes.Live);
         dashboardFiveSecondsTimer.setRefreshInterval(DASHBOARD_RERFRESH_INTERVAL);
+        
     }
     
     @Override

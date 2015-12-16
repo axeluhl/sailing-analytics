@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverListener;
-import com.sap.sailing.dashboards.gwt.client.startlineadvantage.LiveAverageComponent;
+import com.sap.sailing.dashboards.gwt.client.startlineadvantage.util.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.windchart.compass.LocationPointerCompass;
 import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.WindType;
@@ -101,6 +101,7 @@ public class WindBotComponent extends Composite implements HasWidgets, WindBotDa
     private final static String UNIT_WIND_DIRECTION = "°";
 
     public WindBotComponent(String windBotId) {
+        WindBotComponentResources.INSTANCE.gss().ensureInjected();
         this.windBotId = windBotId;
         stringConstants = StringMessages.INSTANCE;
         movingAverageSpeed = new MovingAverage(500);

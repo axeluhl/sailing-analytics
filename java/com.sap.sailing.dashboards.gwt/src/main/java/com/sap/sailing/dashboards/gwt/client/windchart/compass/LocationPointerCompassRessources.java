@@ -8,18 +8,14 @@ import com.google.gwt.resources.client.CssResource.Shared;
 public interface LocationPointerCompassRessources extends ClientBundle {
     public static final LocationPointerCompassRessources INSTANCE = GWT.create(LocationPointerCompassRessources.class);
 
-    @Source("LocationPointerCompass.css")
-    LocalCss css();
+    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "LocationPointerCompass.gss"})
+    LocationPointerCompassGSS gss();
 
     @Shared
-    public interface LocalCss extends CssResource {
-
-        public String locationPointerCompass();
-
-        public String locationPointerCompass_needle();
-
-        public String locationPointerCompass_angleToLocationLabel();
-
-        public String locationPointerCompass_distanceToLocationLabel();
+    public interface LocationPointerCompassGSS extends CssResource {
+        public String compass();
+        public String needle();
+        public String angleToLocationLabel();
+        public String distanceToLocationLabel();
     }
 }

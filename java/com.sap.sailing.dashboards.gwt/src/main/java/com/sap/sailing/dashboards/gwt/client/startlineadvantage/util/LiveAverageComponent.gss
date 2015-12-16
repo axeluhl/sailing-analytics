@@ -1,0 +1,107 @@
+@require 'theme';
+
+.live_average_component {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+}
+
+.header_container {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	height: 35%;
+}
+
+.header {
+	height: 100%;
+	margin-top: 5pt;
+	line-height: 15pt;
+	vertical-align: middle;
+	font-size: 13pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	overflow: visible;
+	font-weight: bold;
+}
+
+.live_container {
+	position: absolute;
+	top: 35%;
+	bottom: 30%;
+	right: 52%;
+	left: 0%;
+}
+
+.average_container {
+	position: absolute;
+	top: 35%;
+	bottom: 30%;
+	right: 0%;
+	left: 52%;
+}
+
+.middle_line {
+	position: absolute;
+	top: 35%;
+	height: 30pt;
+	width: 1px;
+	left: 50%;
+	background-color: black;
+	z-index: 100;
+}
+
+.panel_value_number {
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-size: 26pt;
+}
+
+.panel_value_unit {
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-size: 15pt;
+}
+
+.panel_value_unit_degrees {
+	position: absolute;
+	font-size: 20pt;
+	font-weight: lighter;
+}
+
+.value_panel {
+	margin: 0px;
+	width: 100%;
+	height: 90%;
+	text-align: center;
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-weight: bolder;
+}
+
+.label_text {
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	font-size: 11pt;
+	color: grey;
+	font-family: DASHBOARD_FONT_FAMILY;
+}
+
+.live_label_container {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	right: 50%;
+	height: 35%;
+}
+
+.average_label_container {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	left: 50%;
+	height: 35%;
+}

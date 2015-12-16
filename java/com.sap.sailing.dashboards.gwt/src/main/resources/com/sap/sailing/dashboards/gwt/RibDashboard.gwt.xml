@@ -52,8 +52,9 @@
 
 	<set-property name="user.agent" value="safari" />
 
-	<set-configuration-property name="mgwt.css"
-		value="pretty" />
+	<set-configuration-property name="mgwt.css" value="pretty" />
+	<set-configuration-property name="CssResource.enableGss" value="true" />
+	<set-configuration-property name="CssResource.legacy" value="true" />
 
 	<extend-property name="locale" values="de" />
 	<source path='client' />
