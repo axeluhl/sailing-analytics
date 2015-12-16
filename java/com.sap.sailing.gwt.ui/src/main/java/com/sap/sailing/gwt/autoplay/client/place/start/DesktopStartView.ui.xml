@@ -3,7 +3,8 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.shared"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
     <ui:style>
 		.row {
 			padding-bottom:1em;
@@ -22,7 +23,7 @@
         <div style="height:1em;" />
         <div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    <span>Display language:</span>
+			    <span><ui:text from='{i18n_ubi.chooseALanguage}' />:</span>
 	        </div>
 		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 				<g:ListBox ui:field="localeSelectionBox" />
@@ -30,7 +31,7 @@
         </div>
 		<div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    <span>Event:</span>
+			    <span><ui:text from='{i18n.event}' />:</span>
 	        </div>
 		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 				<g:ListBox ui:field="eventSelectionBox" />
@@ -38,7 +39,7 @@
 		</div>
 		<div ui:field="leaderboardSelectionUi" class="{res.mediaCss.grid}  {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    <span>Leaderboard:</span>
+			    <span><ui:text from='{i18n.leaderboard}' />:</span>
 	        </div>
 		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 				<g:ListBox ui:field="leaderboardSelectionBox" />
