@@ -48,7 +48,7 @@
         
         <div ui:field="screenConfigurationUi">
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}">Screen size and zoom</div>
+				<div class="{res.mediaCss.columns}">Player settings</div>
 			</div>			
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
@@ -58,9 +58,6 @@
 					<g:CheckBox ui:field="startInFullscreenModeBox" />
 		        </div>
 			</div>
-			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}">Screen switching</div>
-			</div>			
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
 				    <span>Switch automatically to live race:</span>
@@ -78,11 +75,11 @@
 		        </div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}">Viewer Settings</div>
+				<div class="{res.mediaCss.columns}">Page settings</div>
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Leaderboard Viewer:</span>
+				    <span>Leaderboard page:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="leaderboardPerspectiveSettingsPanel" />
@@ -90,7 +87,7 @@
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Race Viewer:</span>
+				    <span>Race player page:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:FlowPanel ui:field="raceboardPerspectiveSettingsPanel" />

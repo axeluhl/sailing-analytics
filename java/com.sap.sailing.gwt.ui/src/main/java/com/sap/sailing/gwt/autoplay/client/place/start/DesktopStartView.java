@@ -202,7 +202,7 @@ public class DesktopStartView extends Composite implements StartView {
     private void createPerspectiveSettingsUI(final Perspective<?> perspective, FlowPanel perspectiveSettingsPanel) {
         perspectiveSettingsPanel.clear();
 
-        Button perspectiveSettingsButton = new Button("General Settings");
+        Button perspectiveSettingsButton = new Button("Page settings");
         perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
         perspectiveSettingsPanel.add(perspectiveSettingsButton);
         perspectiveSettingsButton.setEnabled(perspective.hasSettings());
@@ -213,7 +213,7 @@ public class DesktopStartView extends Composite implements StartView {
             }
         });
 
-        Button perspectiveComponentSettingsButton = new Button("Component settings");
+        Button perspectiveComponentSettingsButton = new Button("Page component settings");
         perspectiveSettingsPanel.add(perspectiveComponentSettingsButton);
         perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
             @Override
