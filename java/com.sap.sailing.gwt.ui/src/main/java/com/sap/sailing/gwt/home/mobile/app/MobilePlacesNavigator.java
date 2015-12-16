@@ -21,6 +21,8 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
@@ -96,5 +98,13 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getCreateConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.ACC_CREATED));
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
     }
 }

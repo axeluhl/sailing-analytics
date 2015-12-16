@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile;
 
-import java.util.HashMap;
-
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
@@ -23,7 +21,6 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePl
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -73,8 +70,9 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public void handleSaveChangesRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
-        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, 
-                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), 
+        final String url = Window.Location.createUrlBuilder()
+                .setHash(homePlacesNavigator.getChangeMailConfirmationNavigation().getTargetUrl()).buildString();
+        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -145,6 +143,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return homePlacesNavigator.getUserProfileNavigation();
+
     }
     
     @Override

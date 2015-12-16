@@ -23,6 +23,8 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -66,6 +68,14 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
     
+    public PlaceNavigation<ConfirmationPlace> getCreateConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.ACC_CREATED));
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
+    }
+
     public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         MultiregattaRegattasPlace eventPlace = new MultiregattaRegattasPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);

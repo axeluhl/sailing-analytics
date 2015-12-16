@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 
@@ -63,6 +64,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
         // User management places:
         UserProfileDefaultPlace.Tokenizer.class,
         UserProfileDetailsPlace.Tokenizer.class,
+        ConfirmationPlace.Tokenizer.class,
         ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {

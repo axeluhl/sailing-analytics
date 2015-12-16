@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.create;
 
-import java.util.HashMap;
-
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
-import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -24,10 +24,12 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
+    private final PlaceNavigation<ConfirmationPlace> confirmationPlaceNav;
 
     public CreateAccountActivity(CreateAccountPlace place, ClientFactoryWithUserManagementService clientFactory,
-            PlaceController placeController) {
+            PlaceNavigation<ConfirmationPlace> confirmationPlaceNav, PlaceController placeController) {
         this.clientFactory = clientFactory;
+        this.confirmationPlaceNav = confirmationPlaceNav;
         this.placeController = placeController;
         this.place = place;
     }
@@ -41,12 +43,16 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void createAccount(String username, String email, final String password, String passwordConfirmation) {
         String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+
         if (errorMessage != null && !errorMessage.isEmpty()) {
             view.setErrorMessage(errorMessage);
             return;
         }
-        clientFactory.getUserManagement().createSimpleUser(username, email, password, 
-                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), 
+
+        final String url = Window.Location.createUrlBuilder().setHash(confirmationPlaceNav.getTargetUrl())
+                .buildString();
+
+        clientFactory.getUserManagement().createSimpleUser(username, email, password, url,
                 new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(UserDTO result) {

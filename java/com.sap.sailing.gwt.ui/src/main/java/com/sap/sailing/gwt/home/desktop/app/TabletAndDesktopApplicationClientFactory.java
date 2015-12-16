@@ -189,7 +189,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             if (placeToUse instanceof SignInPlace) {
                 return new SignInActivity((SignInPlace) placeToUse, cf, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity((CreateAccountPlace) placeToUse, cf, placeController);
+                return new CreateAccountActivity((CreateAccountPlace) placeToUse, cf, 
+                	getHomePlacesNavigator().getCreateConfirmationNavigation(), placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(
                         (PasswordRecoveryPlace) placeToUse, cf, placeController);

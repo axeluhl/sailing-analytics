@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile;
 
-import java.util.HashMap;
-
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
@@ -11,7 +9,6 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -48,8 +45,10 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     @Override
     public void handleSaveChangesRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
-        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, 
-                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), 
+        final String url = Window.Location.createUrlBuilder()
+                .setHash(clientFactory.getNavigator().getChangeMailConfirmationNavigation().getTargetUrl())
+                .buildString();
+        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
