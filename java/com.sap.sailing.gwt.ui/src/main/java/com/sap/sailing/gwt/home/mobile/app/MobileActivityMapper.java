@@ -23,6 +23,8 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
@@ -74,6 +76,8 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof PasswordRecoveryPlace) {
             return new PasswordRecoveryActivity<MobileApplicationClientFactory>(
                     (PasswordRecoveryPlace) place, clientFactory, clientFactory.getPlaceController());
+        } else if (place instanceof ConfirmationPlace) {
+            return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else {
             return null;
         }

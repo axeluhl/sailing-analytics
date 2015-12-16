@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.confirmation;
+package com.sap.sailing.gwt.home.shared.places.user.confirmation;
 
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
