@@ -7,15 +7,15 @@ import com.google.gwt.view.client.SetSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
- * The interface {@link RefreshableSelectionModel} unifies the refresh behavior of SelectionModels e.g. of a
+ * The {@link RefreshableSelectionModel} unifies the refresh behavior of SelectionModels e.g. of a
  * {@link SingleSelectionModel}. This {@link RefreshableSelectionModel selectionmodel} will automatically refresh the
  * selection, when there are changes on the {@link ListDataProvider}. Therefore the {@link RefreshableSelectionModel
  * selectionmodel} is a listener of the {@link ListDataProvider} and implements the {@link HasData}-interface.
  * <p>
  * All objects from the current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object)
- * represent the same entity} as an object from {@link ListDataProvider} will be reselected. All others are de-selected.
- * That means a selected object is not contained in {@link ListDataProvider#getList()} wouldn't be selected anymore. If
- * an element is reselected the element will be replaced with new version of it.
+ * represent the same entity} as a new object from {@link ListDataProvider} will be reselected. All others are
+ * de-selected. That means a selected object is not contained in {@link ListDataProvider#getList()} wouldn't be selected
+ * anymore. If an element is reselected the element will be replaced with new version of it.
  * <p>
  * If this selection model has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)}
  * method to compare.

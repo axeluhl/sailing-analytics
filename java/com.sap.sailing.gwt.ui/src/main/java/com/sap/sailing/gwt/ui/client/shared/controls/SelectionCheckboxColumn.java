@@ -30,11 +30,12 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * 
  * Clients should use the columns own {@link #getSelectionModel() RefreshableMultiSelectionModel}. This will ensure that
  * the {@link SelectionCheckboxColumn} will be refreshed correctly, when the selection changes or the
- * {@link ListDataProvider} have new elements. Clients should also ensure that the {@link Flushable display} and the
+ * {@link ListDataProvider} have new elements. Clients should also ensure that the {@link Flushable} and the
  * {@link ListDataProvider} is not <code>null</code> otherwise the {@link RefreshableMultiSelectionModel selectionmodel}
- * won´t work correct.
+ * won´t work correct. The {@link Flushable} interface is used to ensure, that the selection state is displayed
+ * correctly by {@link SelectionCheckboxColumn}. To ensure this, the {@link Flushable#flush()}-method is called after
+ * every selection state change.
  * <p>
- * 
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
  * to parameterize this column: one for the <code>&lt;td&gt;</code> element rendering the cell, and two for the
  * <code>&lt;div&gt;</code> element representing a selected or deselected element.

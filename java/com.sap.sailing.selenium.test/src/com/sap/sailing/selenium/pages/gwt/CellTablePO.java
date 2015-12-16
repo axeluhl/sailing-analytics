@@ -223,11 +223,6 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             entry.select();
         }
     }
-    public void deselectEntry(T entry) {
-        if(this.getWebElement().equals(entry.table.getWebElement())) {
-            entry.deselect();
-        }
-    }
     
     /**
      * <p>Selects the specified entries.</p>

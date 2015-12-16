@@ -14,7 +14,7 @@ import com.google.gwt.view.client.HasData;
 public interface Flushable {
     /**
      * This method will trigger a redraw of the {@link HasData display} so the {@link SelectionCheckboxColumn} is shown
-     * correctly again. This is especially imported when the selection comes form the program and not from the user.
+     * correctly again. This is especially important when the selection comes form the program and not from the user.
      */
     public void flush();
 }
