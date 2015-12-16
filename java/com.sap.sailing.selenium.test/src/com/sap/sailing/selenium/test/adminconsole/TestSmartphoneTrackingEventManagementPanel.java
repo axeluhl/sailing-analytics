@@ -109,7 +109,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
             assertEquals(seleceted.size(), 1);
             assertEquals(this.trackedRaces.get(i).race, seleceted.get(0).getColumnContent("Race"));
             
-            raceColumnTable.deselectEntry(raceToSelect);
+            //raceColumnTable.deselectEntry(raceToSelect);
         }
     }
     
