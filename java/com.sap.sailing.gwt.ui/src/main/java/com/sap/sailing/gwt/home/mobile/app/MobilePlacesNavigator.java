@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.app;
 
 import java.util.List;
 
+import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
@@ -93,7 +94,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     }
     
     public PlaceNavigation<SignInPlace> getSignInNavigation() {
-        return createGlobalPlaceNavigation(new SignInPlace(placeController.getWhere()));
+        Place nextTarget = placeController.getWhere() == null ? new StartPlace() : placeController.getWhere();
+        return createGlobalPlaceNavigation(new SignInPlace(nextTarget));
     }
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {

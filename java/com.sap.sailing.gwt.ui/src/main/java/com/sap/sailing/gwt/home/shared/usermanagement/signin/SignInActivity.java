@@ -8,7 +8,6 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementServic
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
@@ -33,7 +32,7 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
                 if (event.getCtx().isLoggedIn()) {
-                    placeController.goTo(new LoggedInUserInfoPlace());
+                    placeController.goTo(place.getNextTarget());
                 }
             }
         });
