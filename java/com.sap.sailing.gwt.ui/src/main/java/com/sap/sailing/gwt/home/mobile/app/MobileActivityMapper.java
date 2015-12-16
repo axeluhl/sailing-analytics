@@ -69,7 +69,8 @@ public class MobileActivityMapper implements ActivityMapper {
         } else if (place instanceof SignInPlace) {
             return new SignInActivity(clientFactory, clientFactory.getPlaceController());
         } else if (place instanceof CreateAccountPlace) {
-            return new CreateAccountActivity(clientFactory, clientFactory.getPlaceController());
+            return new CreateAccountActivity(clientFactory, clientFactory.getNavigator()
+                    .getCreateConfirmationNavigation(), clientFactory.getPlaceController());
         } else if (place instanceof PasswordRecoveryPlace) {
             return new PasswordRecoveryActivity<MobileApplicationClientFactory>(clientFactory, clientFactory.getPlaceController());
         } else {
