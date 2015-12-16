@@ -81,7 +81,9 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
         timeRangeWithZoomProvider.addTimeZoomChangeListener(this);
         timeRangeWithZoomProvider.addTimeRangeChangeListener(this);
         chartsCss.ensureInjected();
-        busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f, chartsCss.busyIndicatorStyle(), chartsCss.busyIndicatorImageStyle());
+        busyIndicator = new SimpleBusyIndicator(/* busy */ true, 2.0f);
+        busyIndicator.setPanelStyleClass(chartsCss.busyIndicatorStyle());
+        busyIndicator.setImageStyleClass(chartsCss.busyIndicatorImageStyle());
         settingsButton = createSettingsButton();
         settingsButton.setStyleName(chartsCss.settingsButtonStyle());
         settingsButton.addStyleName(chartsCss.settingsButtonBackgroundImage());
