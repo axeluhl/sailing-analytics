@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -40,7 +41,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
         ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithUserManagementContext,
-        ClientFactoryWithUserManagementService {
+        ClientFactoryWithUserManagementService, ConfirmationClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private WithSecurity securityProvider;
