@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, RefreshableSingleSelectionModel<DeviceMappingDTO>> {
@@ -30,7 +31,14 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                new EntityIdentityComparator<DeviceMappingDTO>() {
+                    @Override
+                    public boolean representSameEntity(DeviceMappingDTO dto1, DeviceMappingDTO dto2) {
+                        return dto1.deviceIdentifier.equals(dto2.deviceIdentifier) &&
+                                dto1.mappedTo.equals(dto2.mappedTo);
+                    }
+                });
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override

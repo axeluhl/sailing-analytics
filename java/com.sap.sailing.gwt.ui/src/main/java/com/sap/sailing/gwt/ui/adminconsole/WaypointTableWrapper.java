@@ -8,12 +8,19 @@ import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDTO>> extends TableWrapper<WaypointDTO, S> {    
     public WaypointTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, multiSelection, true,
+                new EntityIdentityComparator<WaypointDTO>() {
+                    @Override
+                    public boolean representSameEntity(WaypointDTO dto1, WaypointDTO dto2) {
+                        return dto1.getName().equals(dto2.getName());
+                    }
+                });
         
         TextColumn<WaypointDTO> nameColumn = new TextColumn<WaypointDTO>() {
             @Override

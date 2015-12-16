@@ -39,6 +39,11 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     public Widget asWidget() {
         return mainPanel;
     }
+    
+    /**
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
+     */
 
     public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {

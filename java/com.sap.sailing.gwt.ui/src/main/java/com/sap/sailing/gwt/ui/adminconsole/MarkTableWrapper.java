@@ -14,12 +14,19 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
     public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, multiSelection, true,
+                new EntityIdentityComparator<MarkDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                });
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {

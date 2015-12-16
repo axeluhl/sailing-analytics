@@ -5,13 +5,20 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 public class DeviceIdentifierTableWrapper extends TableWrapper<DeviceIdentifierDTO, RefreshableMultiSelectionModel<DeviceIdentifierDTO>> {
 
     public DeviceIdentifierTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false, null /*EntityIdentityComparator for RefreshableSelectionModel*/);
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false,
+                new EntityIdentityComparator<DeviceIdentifierDTO>() {
+                    @Override
+                    public boolean representSameEntity(DeviceIdentifierDTO dto1, DeviceIdentifierDTO dto2) {
+                        return dto1.deviceId.equals(dto2.deviceId);
+                    }
+                });
         
         TextColumn<DeviceIdentifierDTO> typeColumn = new TextColumn<DeviceIdentifierDTO>() {
             @Override
