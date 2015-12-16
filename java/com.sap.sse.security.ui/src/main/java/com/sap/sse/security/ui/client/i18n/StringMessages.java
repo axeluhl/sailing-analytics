@@ -21,6 +21,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String tryingToVerifyUser();
     String fetchingUserInformation();
     String signedInAs(String name);
+    String signedInAsTitle();
     String close();
     String loading();
     String users();
@@ -83,4 +84,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorCommunicatingWithServer();
     String editProfile();
     String allPermissions();
+    String oldPassword();
+    String newPasswordPlaceholder();
+    String oldPasswordPlaceholder();
+    String passwordRepeatPlaceholder();
+    String resetPassword();
+    String youAreNotSignedIn();
 }

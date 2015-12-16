@@ -10,10 +10,11 @@ import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.decorator.NotLoggedInPresenter;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
-    public interface Presenter extends UserAccountDetails.Presenter {
+    public interface Presenter extends UserAccountDetails.Presenter, NotLoggedInPresenter {
         void handleTabPlaceSelection(TabView<?, ? extends Presenter> selectedActivity);
 
         SafeUri getUrl(AbstractSeriesPlace place);

@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -142,10 +143,11 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return homePlacesNavigator.getUserProfileNavigation();
+
     }
-
+    
     @Override
-    public void handleResendEmail() {
-
+    public void doTriggerLoginForm() {
+        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
     }
 }

@@ -24,7 +24,7 @@ public class HeaderNavigationItem extends Widget implements HasClickHandlers {
     
     public HeaderNavigationItem(String linkText, String link) {
         setElement(uiBinder.createAndBindUi(this));
-        linkUi.setHref(link);
+        linkUi.setHref(link != null ? link : "#");
         linkUi.setTitle(linkText);
         listitemUi.setInnerText(linkText);
     }

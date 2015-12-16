@@ -37,8 +37,8 @@ import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActiv
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SigInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
+import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -163,11 +163,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public void resetUserManagementContext() {
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
+        getEventBus().fireEvent(new UserManagementRequestEvent());
     }
 
     @Override
     public void didLogin(UserDTO user) {
         uCtx = new UserManagementContextImpl(user);
+        securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
     }
 
@@ -184,13 +186,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             }
 
             final TabletAndDesktopApplicationClientFactory cf = TabletAndDesktopApplicationClientFactory.this;
-            if (placeToUse instanceof SigInPlace) {
+            if (placeToUse instanceof SignInPlace) {
                 return new SignInActivity(cf, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
                 return new CreateAccountActivity(cf, getHomePlacesNavigator().getCreateConfirmationNavigation(),
                         placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity(cf, placeController);
+                return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(cf, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity(cf, placeController);
             }
@@ -203,7 +205,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             if (uCtx.isLoggedIn()) {
                 return new LoggedInUserInfoPlace();
             } else {
-                return new SigInPlace();
+                return new SignInPlace();
             }
         }
 
