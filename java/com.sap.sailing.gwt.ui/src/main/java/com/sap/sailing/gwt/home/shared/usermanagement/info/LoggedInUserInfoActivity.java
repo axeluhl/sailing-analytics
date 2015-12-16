@@ -13,13 +13,15 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
-    private TabletAndDesktopApplicationClientFactory clientFactory;
-    private PlaceController placeController;
+    private final TabletAndDesktopApplicationClientFactory clientFactory;
+    private final PlaceController placeController;
+    private final LoggedInUserInfoPlace place;
     
-    public LoggedInUserInfoActivity(TabletAndDesktopApplicationClientFactory clientFactory,
-            PlaceController placeController) {
+    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place,
+            TabletAndDesktopApplicationClientFactory clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.place = place;
     }
 
     @Override

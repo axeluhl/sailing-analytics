@@ -15,11 +15,14 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
 
     private final ClientFactoryWithUserManagementService clientFactory;
     private final PlaceController placeController;
+    private final SignInPlace place;
     private final SignInView view = new SignInViewImpl();
     
-    public SignInActivity(ClientFactoryWithUserManagementService clientFactory, PlaceController placeController) {
+    public SignInActivity(SignInPlace place, ClientFactoryWithUserManagementService clientFactory,
+            PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.place = place;
     }
 
     @Override

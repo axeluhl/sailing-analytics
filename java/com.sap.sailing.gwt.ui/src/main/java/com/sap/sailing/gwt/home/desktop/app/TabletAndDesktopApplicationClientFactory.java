@@ -187,16 +187,17 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
             final TabletAndDesktopApplicationClientFactory cf = TabletAndDesktopApplicationClientFactory.this;
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity(cf, placeController);
+                return new SignInActivity((SignInPlace) placeToUse, cf, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(cf, placeController);
+                return new CreateAccountActivity((CreateAccountPlace) placeToUse, cf, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(cf, placeController);
+                return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(
+                        (PasswordRecoveryPlace) placeToUse, cf, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity(cf, placeController);
+                return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, cf, placeController);
             }
             
-            return new SignInActivity(cf, placeController);
+            return new SignInActivity(new SignInPlace(), cf, placeController);
         }
         
         @Override

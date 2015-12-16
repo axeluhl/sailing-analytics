@@ -19,14 +19,17 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     private final ClientFactoryWithUserManagementService clientFactory;
     private final PlaceController placeController;
+    private final CreateAccountPlace place;
     private final CreateAccountView view = new CreateAccountViewImpl();
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
 
-    public CreateAccountActivity(ClientFactoryWithUserManagementService clientFactory, PlaceController placeController) {
+    public CreateAccountActivity(CreateAccountPlace place, ClientFactoryWithUserManagementService clientFactory,
+            PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.place = place;
     }
 
     @Override

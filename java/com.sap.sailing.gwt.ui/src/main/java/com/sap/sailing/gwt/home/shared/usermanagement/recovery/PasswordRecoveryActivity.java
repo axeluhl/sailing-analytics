@@ -21,11 +21,13 @@ public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagement
 
     private final CF clientFactory;
     private final PlaceController placeController;
+    private final PasswordRecoveryPlace place;
     private final PasswordRecoveryView view = new PasswordRecoveryViewImpl();
 
-    public PasswordRecoveryActivity(CF clientFactory, PlaceController placeController) {
+    public PasswordRecoveryActivity(PasswordRecoveryPlace place, CF clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.place = place;
     }
     
     @Override
