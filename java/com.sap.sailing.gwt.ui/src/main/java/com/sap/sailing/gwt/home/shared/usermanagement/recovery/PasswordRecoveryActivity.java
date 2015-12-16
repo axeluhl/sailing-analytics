@@ -11,7 +11,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
@@ -44,7 +43,7 @@ public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagement
                     @Override
                     public void onSuccess(Void result) {
                         clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
-                        placeController.goTo(new SignInPlace());
+                        placeController.goTo(place.getNextTarget());
                     }
                     
                     @Override

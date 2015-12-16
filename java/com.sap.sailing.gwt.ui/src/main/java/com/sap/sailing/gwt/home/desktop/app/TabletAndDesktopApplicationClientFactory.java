@@ -197,7 +197,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, cf, placeController);
             }
             
-            return new SignInActivity(new SignInPlace(), cf, placeController);
+            return new SignInActivity(new SignInPlace(new LoggedInUserInfoPlace()), cf, placeController);
         }
         
         @Override
@@ -205,7 +205,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             if (uCtx.isLoggedIn()) {
                 return new LoggedInUserInfoPlace();
             } else {
-                return new SignInPlace();
+                return new SignInPlace(new LoggedInUserInfoPlace());
             }
         }
 

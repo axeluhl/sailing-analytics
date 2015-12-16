@@ -91,7 +91,7 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     }
     
     public PlaceNavigation<SignInPlace> getSignInNavigation() {
-        return createGlobalPlaceNavigation(new SignInPlace());
+        return createGlobalPlaceNavigation(new SignInPlace(placeController.getWhere()));
     }
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {

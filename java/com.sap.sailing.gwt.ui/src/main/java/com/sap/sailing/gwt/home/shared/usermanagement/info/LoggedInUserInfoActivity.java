@@ -15,13 +15,11 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     private final TabletAndDesktopApplicationClientFactory clientFactory;
     private final PlaceController placeController;
-    private final LoggedInUserInfoPlace place;
     
     public LoggedInUserInfoActivity(LoggedInUserInfoPlace place,
             TabletAndDesktopApplicationClientFactory clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
-        this.place = place;
     }
 
     @Override
@@ -36,7 +34,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
                 if (event.getCtx().isLoggedIn()) {
                     view.setUserInfo(event.getCtx().getCurrentUser());
                 } else {
-                    placeController.goTo(new SignInPlace());
+                    placeController.goTo(new SignInPlace(new LoggedInUserInfoPlace()));
                 }
             }
         });

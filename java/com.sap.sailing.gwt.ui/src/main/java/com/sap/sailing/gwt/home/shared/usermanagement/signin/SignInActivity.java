@@ -42,17 +42,17 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     @Override
     public void login(String loginName, String password) {
         clientFactory.getUserManagement().login(loginName, password,
-                new AsyncLoginCallback(clientFactory, placeController, view));
+                new AsyncLoginCallback(clientFactory, placeController, place.getNextTarget(), view));
     }
 
     @Override
     public void createAccount() {
-        placeController.goTo(new CreateAccountPlace());
+        placeController.goTo(new CreateAccountPlace(place.getNextTarget()));
     }
 
     @Override
     public void forgotPassword() {
-        placeController.goTo(new PasswordRecoveryPlace());
+        placeController.goTo(new PasswordRecoveryPlace(place.getNextTarget()));
     }
 
     @Override

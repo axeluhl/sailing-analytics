@@ -51,7 +51,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             @Override
             public void onSuccess(UserDTO result) {
                 clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory, placeController, view));
+                        new AsyncLoginCallback(clientFactory, placeController, place.getNextTarget(), view));
             }
             
             @Override
@@ -63,7 +63,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     @Override
     public void signIn() {
-        placeController.goTo(new SignInPlace());
+        placeController.goTo(new SignInPlace(place.getNextTarget()));
     }
 
 }
