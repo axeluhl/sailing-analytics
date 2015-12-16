@@ -108,8 +108,6 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
             List<DataEntryPO> seleceted = trackedRaces.getTrackedRacesTable().getSelectedEntries();
             assertEquals(seleceted.size(), 1);
             assertEquals(this.trackedRaces.get(i).race, seleceted.get(0).getColumnContent("Race"));
-            
-            //raceColumnTable.deselectEntry(raceToSelect);
         }
     }
     
