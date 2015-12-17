@@ -26,7 +26,9 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
@@ -69,6 +71,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
                 this, getHomePlacesNavigator().getCreateConfirmationNavigation(), getHomePlacesNavigator()
                         .getUserProfileNavigation(), userManagementDisplay, getEventBus());
+        this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
+            @Override
+            public void onSignInSuccessful(SignInSuccessfulEvent event) {
+                userManagementWizardController.goTo(new LoggedInUserInfoPlace());
+            }
+        });
         getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
             @Override
             public void onUserManagementRequestEvent(UserManagementRequestEvent event) {

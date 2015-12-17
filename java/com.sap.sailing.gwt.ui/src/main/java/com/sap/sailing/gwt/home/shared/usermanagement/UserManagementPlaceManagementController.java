@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.activity.shared.Activity;
+import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -41,7 +43,7 @@ public class UserManagementPlaceManagementController
     
     private static class Configuration
             <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService>
-            implements PlacesManagementConfiguration {
+            implements PlaceManagementConfiguration {
         private final CF clientFactory;
         private final PlaceNavigation<ConfirmationPlace> createConfirmationNavigation;
         private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
@@ -69,7 +71,7 @@ public class UserManagementPlaceManagementController
         
         @Override
         public Place getStartPlace() {
-            return isLoggedIn() ? new LoggedInUserInfoPlace() : new SignInPlace(new LoggedInUserInfoPlace());
+            return isLoggedIn() ? new LoggedInUserInfoPlace() : new SignInPlace();
         }
 
         @Override
@@ -89,7 +91,7 @@ public class UserManagementPlaceManagementController
                         userProfileNavigation, placeController);
             }
             
-            return getActivity(new SignInPlace(new LoggedInUserInfoPlace()));
+            return getActivity(new SignInPlace());
         }
         
         private boolean isLoggedIn() {
@@ -107,5 +109,26 @@ public class UserManagementPlaceManagementController
         }
 
     }
+    
+    public static class SignInSuccessfulEvent extends GwtEvent<SignInSuccessfulEvent.Handler> {
+        
+        public static final Type<SignInSuccessfulEvent.Handler> TYPE = new Type<>();
+        
+        public interface Handler extends EventHandler {
+            public void onSignInSuccessful(SignInSuccessfulEvent event);
+        }
+
+        @Override
+        public Type<Handler> getAssociatedType() {
+            return TYPE;
+        }
+
+        @Override
+        protected void dispatch(Handler handler) {
+            handler.onSignInSuccessful(this);
+        }
+
+    }
+    
 
 }

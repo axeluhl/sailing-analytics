@@ -41,7 +41,7 @@ public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWi
                 if (event.getCtx().isLoggedIn()) {
                     view.setUserInfo(event.getCtx().getCurrentUser());
                 } else {
-                    placeController.goTo(new SignInPlace(new LoggedInUserInfoPlace()));
+                    placeController.goTo(new SignInPlace());
                 }
             }
         });

@@ -19,23 +19,23 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     private final ClientFactoryWithUserManagementService clientFactory;
     private final PlaceController placeController;
-    private final CreateAccountPlace place;
     private final CreateAccountView view = new CreateAccountViewImpl();
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
     private final PlaceNavigation<ConfirmationPlace> confirmationPlaceNav;
+    private EventBus eventBus;
 
     public CreateAccountActivity(CreateAccountPlace place, ClientFactoryWithUserManagementService clientFactory,
             PlaceNavigation<ConfirmationPlace> confirmationPlaceNav, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.confirmationPlaceNav = confirmationPlaceNav;
         this.placeController = placeController;
-        this.place = place;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
+        this.eventBus = eventBus;
         view.setPresenter(this);
         panel.setWidget(view);
     }
@@ -43,12 +43,10 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void createAccount(String username, String email, final String password, String passwordConfirmation) {
         String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
-
         if (errorMessage != null && !errorMessage.isEmpty()) {
             view.setErrorMessage(errorMessage);
             return;
         }
-
         final String url = Window.Location.createUrlBuilder().setHash(confirmationPlaceNav.getTargetUrl())
                 .buildString();
 
@@ -57,7 +55,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             @Override
             public void onSuccess(UserDTO result) {
                 clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory, placeController, place.getNextTarget(), view));
+                        new AsyncLoginCallback(clientFactory, view, eventBus));
             }
             
             @Override
@@ -69,7 +67,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     @Override
     public void signIn() {
-        placeController.goTo(new SignInPlace(place.getNextTarget()));
+        placeController.goTo(new SignInPlace());
     }
 
 }
