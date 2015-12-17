@@ -6,7 +6,6 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
     <g:HTMLPanel>
-        <div class="{local_res.css.form_title}"><ui:text from="{i18n_sec.signIn}" /></div>
         <div class="{local_res.css.form_errors}" ui:field="formErrorUi"></div>
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.username}" /></label>
         <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="loginNameUi"/>
