@@ -1,39 +1,47 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.flyover;
+package com.sap.sailing.gwt.home.shared.usermanagement.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
 
-public class UserManagementFlyover extends Composite implements AcceptsOneWidget {
+public class UserManagementViewDesktop extends Composite implements UserManagementView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     
-    interface UserManagementFlyoverUiBinder extends UiBinder<Widget, UserManagementFlyover> {
+    interface UserManagementViewUiBinder extends UiBinder<Widget, UserManagementViewDesktop> {
     }
     
-    private static UserManagementFlyoverUiBinder uiBinder = GWT.create(UserManagementFlyoverUiBinder.class);
+    private static UserManagementViewUiBinder uiBinder = GWT.create(UserManagementViewUiBinder.class);
     
     private final PopupPanel popupPanel = new PopupPanel(true, false);
     
+    @UiField DivElement headingUi;
     @UiField SimplePanel contentContainerUi;
 
-    public UserManagementFlyover() {
+    public UserManagementViewDesktop() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
 //        popupPanel.addAutoHidePartner(autoHidePartner);
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
+    }
+    
+    @Override
+    public void setHeading(String heading) {
+        headingUi.setInnerText(heading);
+        UIObject.setVisible(headingUi, heading != null && !heading.isEmpty());
     }
     
     @Override

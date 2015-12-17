@@ -6,7 +6,10 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
         <div class="{res.mediaCss.column} {res.mediaCss.small12}">
-            <g:SimplePanel addStyleNames="{local_res.css.flyover_content}" ui:field="contentContainerUi"/>
+            <div class="{local_res.css.flyover_content}">
+                <div class="{local_res.css.form_title}" ui:field="headingUi"></div>
+                <g:SimplePanel ui:field="contentContainerUi"/>
+            </div>
         </div>	
 	</g:HTMLPanel>
 </ui:UiBinder>
