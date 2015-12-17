@@ -22,7 +22,7 @@ import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysis
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidgetResources;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
-import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;

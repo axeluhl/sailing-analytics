@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.shared.dto.startanalysis;
+package com.sap.sailing.dashboards.gwt.shared.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;

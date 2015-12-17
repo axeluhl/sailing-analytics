@@ -37,7 +37,7 @@ import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.card.StartAna
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
-import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 /**

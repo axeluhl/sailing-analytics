@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
-import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 

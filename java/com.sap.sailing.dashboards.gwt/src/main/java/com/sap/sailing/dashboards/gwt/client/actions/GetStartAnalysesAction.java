@@ -8,7 +8,7 @@ import com.sap.sailing.dashboards.gwt.server.util.actions.startanalysis.StartAna
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardAction;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
-import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;

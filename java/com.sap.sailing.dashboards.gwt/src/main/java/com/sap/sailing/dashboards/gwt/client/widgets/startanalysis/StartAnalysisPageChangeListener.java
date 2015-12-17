@@ -1,6 +1,6 @@
 package com.sap.sailing.dashboards.gwt.client.widgets.startanalysis;
 
-import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisDTO;
+import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 
 public interface StartAnalysisPageChangeListener {
 
