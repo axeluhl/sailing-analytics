@@ -9,5 +9,6 @@
     <item name="race_main" type="layout">@layout/race_main_xlarge</item>
     <item name="race_panel_flags" type="layout">@layout/race_panel_flags_ver</item>
     <item name="race_panel_setup" type="layout">@layout/race_panel_setup_ver</item>
+    <item name="system_information_view" type="layout">@layout/system_information_view_xlarge</item>
 
 </resources>

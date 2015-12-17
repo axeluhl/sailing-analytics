@@ -92,6 +92,13 @@
                 android:text="@string/application_install_date"
                 android:textAppearance="?attr/textSmall"/>
 
+            <TextView
+                android:id="@+id/system_information_application_install"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textXSmall"
+                tools:text="01. January 2015 - 00:00"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -117,12 +124,6 @@
                     android:text="@string/licence_information"/>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/system_information_application_install"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?attr/textXSmall"
-                tools:text="01. January 2015 - 00:00"/>
 
             <TextView
                 android:id="@+id/system_information_persistence_header"
