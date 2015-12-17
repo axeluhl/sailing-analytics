@@ -4,7 +4,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
-    <mp:section.MobileSection>
+    <mp:section.MobileSection borderTop="false">
         <mp:header>
             <mp:sectionHeader.SectionHeaderContent ui:field="sectionHeaderUi" />
         </mp:header>
