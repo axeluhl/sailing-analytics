@@ -34,7 +34,6 @@ public class UserManagementPlaceManagementController
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
-                fireEvent(event);
                 UserManagementPlaceManagementController.this.fireEvent(event);
             }
         });
