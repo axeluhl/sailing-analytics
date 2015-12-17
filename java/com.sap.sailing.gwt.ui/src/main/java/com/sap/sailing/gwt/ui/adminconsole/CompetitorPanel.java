@@ -68,6 +68,7 @@ public class CompetitorPanel extends SimplePanel {
                 refreshCompetitorList();
             }
         });
+        refreshButton.ensureDebugId("RefreshButton");
         buttonPanel.add(refreshButton);
         final Button allowReloadButton = new Button(stringMessages.allowReload());
         allowReloadButton.addClickHandler(new ClickHandler() {

@@ -8,6 +8,9 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.PageArea;
 
 public class TrackedRacesCompetitorsPanelPO extends PageArea {
+    @FindBy(how = BySeleniumId.class, using = "RefreshButton")
+    private WebElement refreshButton;
+    
     @FindBy(how = BySeleniumId.class, using = "AddCompetitorButton")
     private WebElement addButton;
     
@@ -18,11 +21,16 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
         super(driver, element);
     }
     
-    public TrackedRacesCompetitorCreateDialogPO pushAddButton() {
+    public TrackedRacesCompetitorEditDialogPO pushAddButton() {
         this.addButton.click();
         waitForAjaxRequests();
         WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorEditDialog");
-        return new TrackedRacesCompetitorCreateDialogPO(this.driver, dialog);
+        return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
+    }
+    
+    public void pushRefreshButton() {
+        this.refreshButton.click();
+        waitForAjaxRequests();
     }
     
     public TrackedRacesCompetitorTablePO getCompetitorTable() {
