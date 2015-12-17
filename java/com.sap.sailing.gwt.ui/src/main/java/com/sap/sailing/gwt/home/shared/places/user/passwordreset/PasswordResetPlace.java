@@ -36,7 +36,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
         return "ConfirmationPlace [name=" + name + ", validationSecret=" + validationSecret + "]";
     }
 
-    @Prefix(PlaceTokenPrefixes.UserConfirmation)
+    @Prefix(PlaceTokenPrefixes.UserPasswordReset)
     public static class Tokenizer implements PlaceTokenizer<PasswordResetPlace> {
         private final RegExp keyValRegex = RegExp.compile("(.*)=(.*)");
 
