@@ -12,7 +12,7 @@ public interface WindBotComponentResources extends ClientBundle {
 
     public static final WindBotComponentResources INSTANCE =  GWT.create(WindBotComponentResources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "WindBotComponent.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "WindBotComponent.gss"})
     WindBotComponentGss gss();
 
     public interface WindBotComponentGss extends CssResource {

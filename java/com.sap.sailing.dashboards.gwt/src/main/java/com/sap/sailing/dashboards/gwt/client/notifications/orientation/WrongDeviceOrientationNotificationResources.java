@@ -12,7 +12,7 @@ public interface WrongDeviceOrientationNotificationResources extends ClientBundl
 
     public static final WrongDeviceOrientationNotificationResources INSTANCE =  GWT.create(WrongDeviceOrientationNotificationResources.class);
     
-    @Source({ "com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "WrongDeviceOrientationNotification.gss"})
+    @Source({ "com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "WrongDeviceOrientationNotification.gss"})
     WrongDeviceNotificationGSS gss();
 
     public interface WrongDeviceNotificationGSS extends CssResource {

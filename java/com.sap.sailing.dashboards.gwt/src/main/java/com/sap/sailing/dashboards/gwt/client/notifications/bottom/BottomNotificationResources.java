@@ -12,7 +12,7 @@ public interface BottomNotificationResources extends ClientBundle{
 
     public static final BottomNotificationResources INSTANCE =  GWT.create(BottomNotificationResources.class);
     
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "BottomNotification.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "BottomNotification.gss"})
     NotificationsGSS gss();
     
     public interface NotificationsGSS extends CssResource {

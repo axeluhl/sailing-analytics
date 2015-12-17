@@ -12,7 +12,7 @@ public interface LiveAverageComponentResources extends ClientBundle {
 
     public static final LiveAverageComponentResources INSTANCE =  GWT.create(LiveAverageComponentResources.class);
     
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "LiveAverageComponent.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "LiveAverageComponent.gss"})
     LiveAverageComponentGss gss();
     
     interface LiveAverageComponentGss extends CssResource {

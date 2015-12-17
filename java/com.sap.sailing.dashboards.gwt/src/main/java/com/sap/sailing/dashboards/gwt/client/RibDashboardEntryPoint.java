@@ -6,6 +6,7 @@ import com.googlecode.mgwt.ui.client.MGWTSettings;
 import com.googlecode.mgwt.ui.client.MGWTSettings.StatusBarStyle;
 import com.googlecode.mgwt.ui.client.MGWTSettings.ViewPort;
 import com.googlecode.mgwt.ui.client.MGWTStyle;
+import com.sap.sailing.dashboards.gwt.client.dashboardpanel.DashboardPanel;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetriever;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
@@ -21,10 +22,10 @@ public class RibDashboardEntryPoint extends AbstractEntryPoint<StringMessages> {
     public void doOnModuleLoad() {
         applyMGWTSettings();
         DashboardClientFactory dashboardClientFactory = new DashboardClientFactoryImpl();
-        RibDashboardPanel ribDashboardPanel = new RibDashboardPanel(dashboardClientFactory);
-        RootLayoutPanel.get().add(ribDashboardPanel);
+        DashboardPanel rootPanel = new DashboardPanel(dashboardClientFactory);
+        RootLayoutPanel.get().add(rootPanel);
         WindBotDataRetriever windBotDataRetriever = new WindBotDataRetriever(dashboardClientFactory);
-        windBotDataRetriever.addNumberOfWindBotsChangeListeners(ribDashboardPanel);
+        windBotDataRetriever.addNumberOfWindBotsChangeListeners(rootPanel);
     }
 
     private void applyMGWTSettings() {

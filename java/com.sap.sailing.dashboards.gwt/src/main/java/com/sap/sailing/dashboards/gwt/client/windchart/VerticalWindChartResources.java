@@ -12,7 +12,7 @@ public interface VerticalWindChartResources extends ClientBundle {
 
     public static final VerticalWindChartResources INSTANCE =  GWT.create(VerticalWindChartResources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "VerticalWindChart.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "VerticalWindChart.gss"})
     VerticalWindChartGSS gss();
 
     public interface VerticalWindChartGSS extends CssResource {

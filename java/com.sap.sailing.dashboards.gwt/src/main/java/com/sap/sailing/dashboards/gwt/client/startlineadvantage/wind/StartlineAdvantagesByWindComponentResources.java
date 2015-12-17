@@ -12,7 +12,7 @@ public interface StartlineAdvantagesByWindComponentResources extends ClientBundl
 
     public static final StartlineAdvantagesByWindComponentResources INSTANCE =  GWT.create(StartlineAdvantagesByWindComponentResources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "StartlineAdvantagesByWindComponent.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartlineAdvantagesByWindComponent.gss"})
     StartlineAdvantagesOnLineChartGSS gss();
 
     public interface StartlineAdvantagesOnLineChartGSS extends CssResource {

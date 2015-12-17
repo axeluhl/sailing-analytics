@@ -13,10 +13,10 @@ interface StartAnalysisResources extends ClientBundle {
     @Source("com/sap/sailing/dashboards/gwt/client/images/windarrow.png")
     ImageResource combinedWindIcon();
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "StartAnalysis.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartAnalysis.gss"})
     StartAnalysisGSS gss();
     
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "StartAnalysisCombinedWindPanel.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartAnalysisCombinedWindPanel.gss"})
     CombinedWindPanelStyle combinedWindPanelStyle();
 
     public interface StartAnalysisGSS extends CssResource {

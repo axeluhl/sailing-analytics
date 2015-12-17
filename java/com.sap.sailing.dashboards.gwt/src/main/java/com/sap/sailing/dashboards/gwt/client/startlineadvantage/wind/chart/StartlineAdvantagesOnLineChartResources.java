@@ -12,7 +12,7 @@ public interface StartlineAdvantagesOnLineChartResources extends ClientBundle {
 
     public static final StartlineAdvantagesOnLineChartResources INSTANCE =  GWT.create(StartlineAdvantagesOnLineChartResources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "StartlineAdvantagesOnLineChart.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartlineAdvantagesOnLineChart.gss"})
     StartlineAdvantagesOnLineChartGSS gss();
 
     public interface StartlineAdvantagesOnLineChartGSS extends CssResource {

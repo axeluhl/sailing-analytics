@@ -8,7 +8,7 @@ import com.google.gwt.resources.client.CssResource.Shared;
 public interface LocationPointerCompassRessources extends ClientBundle {
     public static final LocationPointerCompassRessources INSTANCE = GWT.create(LocationPointerCompassRessources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "LocationPointerCompass.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "LocationPointerCompass.gss"})
     LocationPointerCompassGSS gss();
 
     @Shared

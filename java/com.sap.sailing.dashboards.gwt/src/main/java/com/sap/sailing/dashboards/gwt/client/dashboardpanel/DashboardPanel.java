@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client;
+package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,12 +18,14 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
+import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
+import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
+import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.orientation.WrongDeviceOrientationNotification;
-import com.sap.sailing.dashboards.gwt.client.resources.DashboardResources;
 import com.sap.sailing.dashboards.gwt.client.startanalysis.StartAnalysisComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.geometry.StartLineAdvantageByGeometryComponent;
 import com.sap.sailing.dashboards.gwt.client.startlineadvantage.wind.StartlineAdvantagesByWindComponent;
@@ -40,9 +42,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  * @author Alexander Ries
  * 
  */
-public class RibDashboardPanel extends Composite implements NumberOfWindBotsChangeListener, PollsLiveDataEvery5Seconds {
+public class DashboardPanel extends Composite implements NumberOfWindBotsChangeListener, PollsLiveDataEvery5Seconds {
 
-    interface RootUiBinder extends UiBinder<Widget, RibDashboardPanel> {}
+    interface RootUiBinder extends UiBinder<Widget, DashboardPanel> {}
 
     private static RootUiBinder uiBinder = GWT.create(RootUiBinder.class);
 
@@ -85,10 +87,10 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
     private List<WindBotComponent> windBotComponents;
     private StringMessages stringConstants;
     DashboardClientFactory dashboardClientFactory;
-    private static final Logger logger = Logger.getLogger(RibDashboardPanel.class.getName());
+    private static final Logger logger = Logger.getLogger(DashboardPanel.class.getName());
 
-    public RibDashboardPanel(DashboardClientFactory dashboardClientFactory) {
-        DashboardResources.INSTANCE.style().ensureInjected();
+    public DashboardPanel(DashboardClientFactory dashboardClientFactory) {
+        DashboardPanelResources.INSTANCE.style().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         windBotComponents = new ArrayList<WindBotComponent>();
         startanalysisComponent = new StartAnalysisComponent(this.dashboardClientFactory);
@@ -108,7 +110,7 @@ public class RibDashboardPanel extends Composite implements NumberOfWindBotsChan
     private void initLogos() {
         Image logo = new Image();
         logo.setResource(RibDashboardImageResources.INSTANCE.logo_sap());
-        logo.getElement().addClassName(DashboardResources.INSTANCE.style().logo());
+        logo.getElement().addClassName(DashboardPanelResources.INSTANCE.style().logo());
         Document.get().getBody().appendChild(logo.getElement());
     }
     

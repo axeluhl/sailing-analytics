@@ -9,7 +9,7 @@ public interface StartLineAdvantageByGeometryRessources extends ClientBundle {
     
     public static final StartLineAdvantageByGeometryRessources INSTANCE = GWT.create(StartLineAdvantageByGeometryRessources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/resources/theme/theme.gss", "StartLineAdvantageByGeometry.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartLineAdvantageByGeometry.gss"})
     StartLineAdvantageByGeometryGss gss();
     
     @Shared

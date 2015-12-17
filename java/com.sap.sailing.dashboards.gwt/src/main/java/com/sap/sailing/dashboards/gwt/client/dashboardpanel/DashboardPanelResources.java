@@ -1,4 +1,4 @@
-package com.sap.sailing.dashboards.gwt.client.resources;
+package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 
 /**
  * @author Alexander Ries (D062114)
@@ -8,11 +8,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
  
-public interface DashboardResources extends ClientBundle {
+public interface DashboardPanelResources extends ClientBundle {
     
-    public static final DashboardResources INSTANCE =  GWT.create(DashboardResources.class);
+    public static final DashboardPanelResources INSTANCE =  GWT.create(DashboardPanelResources.class);
     
-    @Source({"theme/theme.gss", "Ribstyle.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "DashboardPanel.gss"})
     DashboardGSS style();
 
     public interface DashboardGSS extends CssResource {
