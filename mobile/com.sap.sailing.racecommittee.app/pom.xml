@@ -77,6 +77,13 @@
           <version>1.0.0-SNAPSHOT</version>
           <type>apklib</type>
         </dependency>
+
+        <dependency>
+            <groupId>de.psdev.licensesdialog</groupId>
+            <artifactId>licensesdialog</artifactId>
+            <version>1.8.0</version>
+            <type>aar</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -120,7 +127,7 @@
                 </executions>
             </plugin>
 
-	    <!-- plugins for generating version file and copying .apk -->
+        <!-- plugins for generating version file and copying .apk -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

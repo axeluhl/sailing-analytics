@@ -145,7 +145,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
 
     @Override
     public String getSailID() {
-        return boat.getSailId();
+        return boat==null?null:boat.getSailId();
     }
     
     @Override

@@ -12,8 +12,11 @@
     <string name="accuracy">Genauigkeit</string>
     <string name="position_set">Die Position wurde gesetzt</string>
     <string name="no_information">Keine Information</string>
-    <string name="title_activity_settings">Einstellungen</string>
-    <string name="action_settings">Einstellungen</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">Positionieren Sie das Gerät in der Nähe der Markierung und betätigen Sie \'Position Setzen\', um die Position
+        der Markierung zu setzen. Nutzen Sie die Anzeige der GPS-Qualität und entscheiden Sie, ob die Position genau genug ist. Bitte aktivieren Sie
+        GPS auf Ihrem Gerät oder warten Sie bis ein GPS-Signal verfügbar ist.</string>
+    <string name="action_settings">@string/settings</string>
     <string name="settings">Einstellungen</string>
 
     <string name="server">Polling Einstellungen</string>

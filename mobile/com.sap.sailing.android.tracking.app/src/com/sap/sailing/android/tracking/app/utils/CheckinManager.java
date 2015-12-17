@@ -36,11 +36,13 @@ public class CheckinManager {
     private CheckinDataActivity activity;
     private AppPreferences prefs;
     private String url;
+    private boolean update;
 
-    public CheckinManager(String url, CheckinDataActivity activity) {
+    public CheckinManager(String url, CheckinDataActivity activity, boolean update) {
         this.activity = activity;
         this.url = url;
         prefs = new AppPreferences(activity);
+        this.update = update;
     }
 
     public void callServerAndGenerateCheckinData() {
@@ -218,6 +220,7 @@ public class CheckinManager {
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
+        data.setUpdate(update);
         data.competitorName = urlData.competitorName;
         data.competitorId = urlData.competitorId;
         data.competitorSailId = urlData.competitorSailId;

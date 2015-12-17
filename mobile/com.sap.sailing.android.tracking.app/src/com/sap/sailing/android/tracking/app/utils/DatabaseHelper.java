@@ -23,6 +23,7 @@ import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -36,6 +37,21 @@ public class DatabaseHelper {
         }
 
         return mInstance;
+    }
+
+    public List<String> getCheckinUrls(Context context) {
+        List<String> checkinUrls = new ArrayList<>();
+        ContentResolver cr = context.getContentResolver();
+        Cursor cursor = cr.query(CheckinUri.CONTENT_URI, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            String checkinUrl = cursor.getString(cursor.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
+            if (!checkinUrls.contains(checkinUrl)){
+                checkinUrls.add(checkinUrl);
+            }
+            cursor.moveToNext();
+        }
+        return checkinUrls;
     }
 
     public long getEventRowIdForCheckinDigest(Context context, String checkinDigest) {

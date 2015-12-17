@@ -72,6 +72,9 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.activities.SettingActivity"/>
+        <activity
+            android:name=".ui.activities.AboutActivity"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name="com.sap.sailing.android.shared.services.sending.MessageSendingService"

@@ -2,8 +2,10 @@ package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import java.text.DecimalFormat;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -34,6 +36,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
@@ -106,6 +109,24 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             }
         }
         initMarkerReceiver();
+        checkGPS();
+    }
+
+    private void checkGPS() {
+        if (lastKnownLocation == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.error_message_no_position)
+                .setPositiveButton(android.R.string.ok, null);
+            if (!LocationHelper.isGPSEnabled(getActivity())) {
+                builder.setNegativeButton(R.string.settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LocationHelper.openLocationSettings(getActivity());
+                    }
+                });
+            }
+            builder.show();
+        }
     }
 
     private void initMarkerReceiver() {

@@ -75,6 +75,9 @@ dependencies {
     compile "com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}"
     compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
+    /* licence dialog */
+    compile('de.psdev.licensesdialog:licensesdialog:1.8.0')
+
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 

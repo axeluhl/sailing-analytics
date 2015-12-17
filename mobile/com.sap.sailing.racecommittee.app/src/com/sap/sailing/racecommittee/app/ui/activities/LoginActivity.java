@@ -32,6 +32,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
@@ -352,6 +353,10 @@ public class LoginActivity extends BaseActivity
             if (resultCode != ConnectionResult.SUCCESS) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
+        }
+
+        if (!EulaHelper.isEulaAccepted(this)) {
+            EulaHelper.showEulaDialog(this);
         }
     }
 

@@ -224,11 +224,11 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.ImageDescriptorImpl;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.media.VideoDescriptor;
-import com.sap.sse.common.media.VideoDescriptorImpl;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
+import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
@@ -638,11 +638,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // deprecated style: a DBObject whose keys are the escaped competitor names
         // new style: a BasicDBList whose entries are DBObjects with COMPETITOR_ID and COMPETITOR_DISPLAY_NAME fields
         if (competitorDisplayNames != null) {
-            for (Object o : (BasicDBList) competitorDisplayNames) {
-                DBObject competitorDisplayName = (DBObject) o;
-                final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
-                final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
-                correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
+            if (competitorDisplayNames instanceof BasicDBList) {
+                for (Object o : (BasicDBList) competitorDisplayNames) {
+                    DBObject competitorDisplayName = (DBObject) o;
+                    final Serializable competitorId = (Serializable) competitorDisplayName.get(FieldNames.COMPETITOR_ID.name());
+                    final String displayName = (String) competitorDisplayName.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+                    correctionsToUpdate.setDisplayNameByID(competitorId, displayName);
+                }
+            } else {
+                logger.severe("Deprecated, now unreadable format of the "+FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name()
+                        +" field for leaderboard "+dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name())+
+                        ". You will have to update the competitor display names manually: "+
+                        competitorDisplayNames);
             }
         }
     }
