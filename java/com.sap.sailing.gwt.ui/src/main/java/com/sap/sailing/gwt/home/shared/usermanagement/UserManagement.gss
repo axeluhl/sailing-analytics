@@ -201,4 +201,5 @@ a.form_social_button_google:before {
 }
 .info_user_username {
     color: #666;
+    word-break: break-all; 
 }
