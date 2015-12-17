@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.app;
 
-import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -22,23 +20,13 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNa
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
-import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementController;
-import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementController.StartPlaceActivityMapper;
+import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.shared.usermanagement.AbstractUserManagementPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.RequiresLoggedInUser;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
@@ -51,7 +39,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WithSecurity securityProvider;
-    private final WrappedPlacesManagementController userManagementWizardController;
+    private final WrappedPlaceManagementController userManagementWizardController;
     private UserManagementContext uCtx = new UserManagementContextImpl();
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
@@ -78,8 +66,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         });
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new WrappedPlacesManagementController(
-                new DesktopUserManagementStartPlaceActivityMapper(userManagementDisplay), userManagementDisplay);
+        this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
+                this, getHomePlacesNavigator().getCreateConfirmationNavigation(), getHomePlacesNavigator()
+                        .getUserProfileNavigation(), userManagementDisplay, getEventBus());
         getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
             @Override
             public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
@@ -90,12 +79,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                     userManagementDisplay.show();
                     userManagementWizardController.start();
                 }
-            }
-        });
-        getEventBus().addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
-            @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
-                userManagementWizardController.fireEvent(event);
             }
         });
     }
@@ -172,60 +155,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         uCtx = new UserManagementContextImpl(user);
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-    }
-
-    private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
-
-        private final UserManagementViewDesktop userManagementDisplay;
-        private PlaceController placeController;
-
-        public DesktopUserManagementStartPlaceActivityMapper(UserManagementViewDesktop userManagementDisplay) {
-            this.userManagementDisplay = userManagementDisplay;
-        }
-
-        @Override
-        public Activity getActivity(final Place requestedPlace) {
-            final Place placeToUse;
-            if (requestedPlace instanceof RequiresLoggedInUser && !uCtx.isLoggedIn()) {
-                placeToUse = getStartPlace();
-            } else {
-                placeToUse = requestedPlace;
-            }
-            
-            userManagementDisplay.setHeading(placeToUse instanceof AbstractUserManagementPlace
-                            ? ((AbstractUserManagementPlace) placeToUse).getLocationTitle() : "");
-            
-            final TabletAndDesktopApplicationClientFactory cf = TabletAndDesktopApplicationClientFactory.this;
-            if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity((SignInPlace) placeToUse, cf, placeController);
-            } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity((CreateAccountPlace) placeToUse, cf, 
-                	getHomePlacesNavigator().getCreateConfirmationNavigation(), placeController);
-            } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(
-                        (PasswordRecoveryPlace) placeToUse, cf, placeController);
-            } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity<TabletAndDesktopApplicationClientFactory>(
-                        (LoggedInUserInfoPlace) placeToUse, cf, getHomePlacesNavigator().getUserProfileNavigation(),
-                        placeController);
-            }
-            
-            return getActivity(new SignInPlace(new LoggedInUserInfoPlace()));
-        }
-        
-        @Override
-        public Place getStartPlace() {
-            if (uCtx.isLoggedIn()) {
-                return new LoggedInUserInfoPlace();
-            } else {
-                return new SignInPlace(new LoggedInUserInfoPlace());
-            }
-        }
-
-        @Override
-        public void setPlaceController(PlaceController placeController) {
-            this.placeController = placeController;
-        }
     }
 
 }
