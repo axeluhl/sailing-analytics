@@ -10,6 +10,18 @@ interface StartAnalysisResources extends ClientBundle {
 
     public static final StartAnalysisResources INSTANCE =  GWT.create(StartAnalysisResources.class);
     
+    @Source("com/sap/sailing/dashboards/gwt/client/images/leftarrow.png")
+    ImageResource left();
+
+    @Source("com/sap/sailing/dashboards/gwt/client/images/rightarrow.png")
+    ImageResource right();
+    
+    @Source("com/sap/sailing/dashboards/gwt/client/images/leftarrow_disabled.png")
+    ImageResource leftdisabled();
+
+    @Source("com/sap/sailing/dashboards/gwt/client/images/rightarrow_disabled.png")
+    ImageResource rightdisabled();
+    
     @Source("com/sap/sailing/dashboards/gwt/client/images/windarrow.png")
     ImageResource combinedWindIcon();
 

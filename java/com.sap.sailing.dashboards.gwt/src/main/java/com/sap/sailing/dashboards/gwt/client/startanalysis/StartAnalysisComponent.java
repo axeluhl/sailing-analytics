@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.actions.GetCompetitorInLeaderboardAction;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartAnalysesAction;
 import com.sap.sailing.dashboards.gwt.client.notifications.bottom.BottomNotification;
@@ -131,14 +130,14 @@ public class StartAnalysisComponent extends Composite implements HasWidgets, Pol
     }
 
     private void initLeftRightButtons() {
-        leftButton.setResource(RibDashboardImageResources.INSTANCE.leftdisabled());
+        leftButton.setResource(StartAnalysisResources.INSTANCE.leftdisabled());
         left_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 clickedArrowButton(false);
             }
         });
-        rightButton.setResource(RibDashboardImageResources.INSTANCE.rightdisabled());
+        rightButton.setResource(StartAnalysisResources.INSTANCE.rightdisabled());
         right_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -269,11 +268,11 @@ public class StartAnalysisComponent extends Composite implements HasWidgets, Pol
                     int displayPage = page + 1;
                     header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
                     if (page != numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(RibDashboardImageResources.INSTANCE.right());
+                        rightButton.setResource(StartAnalysisResources.INSTANCE.right());
                         rightButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == 0) {
-                        leftButton.setResource(RibDashboardImageResources.INSTANCE.leftdisabled());
+                        leftButton.setResource(StartAnalysisResources.INSTANCE.leftdisabled());
                         leftButton.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
@@ -286,11 +285,11 @@ public class StartAnalysisComponent extends Composite implements HasWidgets, Pol
                     int displayPage = page + 1;
                     header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
                     if (page >= 0) {
-                        leftButton.setResource(RibDashboardImageResources.INSTANCE.left());
+                        leftButton.setResource(StartAnalysisResources.INSTANCE.left());
                         leftButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(RibDashboardImageResources.INSTANCE.rightdisabled());
+                        rightButton.setResource(StartAnalysisResources.INSTANCE.rightdisabled());
                         rightButton.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
@@ -306,9 +305,9 @@ public class StartAnalysisComponent extends Composite implements HasWidgets, Pol
             startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
             header.getElement().setInnerHTML("Start " + starts.get(page).raceName);
             notifyStartAnalysisPageChangeListener(page);
-            rightButton.setResource(RibDashboardImageResources.INSTANCE.rightdisabled());
+            rightButton.setResource(StartAnalysisResources.INSTANCE.rightdisabled());
             rightButton.getElement().getStyle().setProperty("disabled", "true");
-            leftButton.setResource(RibDashboardImageResources.INSTANCE.left());
+            leftButton.setResource(StartAnalysisResources.INSTANCE.left());
             leftButton.getElement().getStyle().setProperty("disabled", "false");
         }
     }
@@ -320,7 +319,7 @@ public class StartAnalysisComponent extends Composite implements HasWidgets, Pol
             header.getElement().setInnerHTML("Start " + startAnalysisDTO.raceName);
         }
         if (numberOfStartAnalysisCards > 0) {
-            rightButton.setResource(RibDashboardImageResources.INSTANCE.right());
+            rightButton.setResource(StartAnalysisResources.INSTANCE.right());
         }
         final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(numberOfStartAnalysisCards
                 * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO,

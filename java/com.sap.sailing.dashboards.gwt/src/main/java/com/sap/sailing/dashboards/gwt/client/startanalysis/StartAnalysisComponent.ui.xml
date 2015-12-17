@@ -6,15 +6,14 @@
 	xmlns:maps="urn:import:com.google.gwt.maps.client">
 
 	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.startanalysis.StartAnalysisResources"/>
-	<ui:with field='res' type='com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources' />
 
 	<g:HTMLPanel styleName="{resources.gss.startanalysis}">
 		<g:HTMLPanel ui:field="header" styleName="{resources.gss.panel_header}">
 			No Starts Available
 		</g:HTMLPanel>
-		<g:Image resource="{res.left}" ui:field="leftButton"
+		<g:Image resource="{resources.left}" ui:field="leftButton"
 			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}"></g:Image>
-		<g:Image resource="{res.right}" ui:field="rightButton"
+		<g:Image resource="{resources.right}" ui:field="rightButton"
 			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_right}"></g:Image>
 		<g:FocusPanel ui:field="left_focus_panel" styleName="{resources.gss.left_focus_panel}"></g:FocusPanel>
 		<g:FocusPanel ui:field="right_focus_panel" styleName="{resources.gss.right_focus_panel}"></g:FocusPanel>

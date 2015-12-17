@@ -7,10 +7,17 @@ package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
  
 public interface DashboardPanelResources extends ClientBundle {
     
     public static final DashboardPanelResources INSTANCE =  GWT.create(DashboardPanelResources.class);
+    
+    @Source("com/sap/sailing/dashboards/gwt/client/images/logo_sap.png")
+    ImageResource logo_sap();
+    
+    @Source("com/sap/sailing/dashboards/gwt/client/images/settings.png")
+    ImageResource settings();
     
     @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "DashboardPanel.gss"})
     DashboardGSS style();

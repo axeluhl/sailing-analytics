@@ -3,6 +3,7 @@ package com.sap.sailing.dashboards.gwt.client.notifications.orientation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 
 /**
  * @author Alexander Ries (D062114)
@@ -11,6 +12,9 @@ import com.google.gwt.resources.client.CssResource;
 public interface WrongDeviceOrientationNotificationResources extends ClientBundle {
 
     public static final WrongDeviceOrientationNotificationResources INSTANCE =  GWT.create(WrongDeviceOrientationNotificationResources.class);
+    
+    @Source("com/sap/sailing/dashboards/gwt/client/images/rotatedevice.png")
+    ImageResource rotatedevice();
     
     @Source({ "com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "WrongDeviceOrientationNotification.gss"})
     WrongDeviceNotificationGSS gss();

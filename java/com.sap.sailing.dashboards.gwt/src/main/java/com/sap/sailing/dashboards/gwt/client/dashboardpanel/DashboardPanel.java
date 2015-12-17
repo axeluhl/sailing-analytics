@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
@@ -109,7 +108,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
 
     private void initLogos() {
         Image logo = new Image();
-        logo.setResource(RibDashboardImageResources.INSTANCE.logo_sap());
+        logo.setResource(DashboardPanelResources.INSTANCE.logo_sap());
         logo.getElement().addClassName(DashboardPanelResources.INSTANCE.style().logo());
         Document.get().getBody().appendChild(logo.getElement());
     }

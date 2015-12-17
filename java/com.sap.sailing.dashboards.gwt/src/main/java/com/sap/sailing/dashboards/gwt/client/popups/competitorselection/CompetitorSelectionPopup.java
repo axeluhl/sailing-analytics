@@ -23,9 +23,7 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
 
     interface CompetitorSelectionPopupStyle extends CssResource {
         String popupshow();
-
         String popuphide();
-
         String buttonshow();
     }
 

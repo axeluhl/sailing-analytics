@@ -5,7 +5,6 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.domain.common.Position;
 
 /**
@@ -53,7 +52,7 @@ public class LocationPointerCompass extends AbsolutePanel implements HasWidgets,
 
     private void initCompassNeedle() {
         compassNeedle = new Image();
-        compassNeedle.setResource(RibDashboardImageResources.INSTANCE.compass());
+        compassNeedle.setResource(LocationPointerCompassRessources.INSTANCE.compass());
         compassNeedle.getElement().addClassName(LocationPointerCompassRessources.INSTANCE.gss().needle());
         LocationPointerCompass.this.add(compassNeedle);
     }

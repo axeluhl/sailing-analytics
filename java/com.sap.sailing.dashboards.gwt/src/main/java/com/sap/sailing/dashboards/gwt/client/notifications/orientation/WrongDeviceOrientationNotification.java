@@ -4,7 +4,6 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
 import com.sap.sailing.dashboards.gwt.client.device.Orientation;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationListener;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationType;
@@ -22,7 +21,7 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
         this.addStyleName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().hidden());
 
         Image rotateDeviceIcon = new Image();
-        rotateDeviceIcon.setResource(RibDashboardImageResources.INSTANCE.rotatedevice());
+        rotateDeviceIcon.setResource(WrongDeviceOrientationNotificationResources.INSTANCE.rotatedevice());
         rotateDeviceIcon.getElement().addClassName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().logo());
         add(rotateDeviceIcon);
 
