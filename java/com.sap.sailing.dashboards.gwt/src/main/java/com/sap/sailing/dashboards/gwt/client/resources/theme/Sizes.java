@@ -5,5 +5,9 @@ package com.sap.sailing.dashboards.gwt.client.resources.theme;
  *
  */
 public class Sizes {
-
+    public static final String DASHBOARD_FONT_SIZE_VERY_SMALL = "12px";
+    public static final String DASHBOARD_FONT_SIZE_SMALL = "12px";
+    public static final String DASHBOARD_FONT_SIZE_MEDIUM = "12px";
+    public static final String DASHBOARD_FONT_SIZE_BIG = "12px";
+    public static final String DASHBOARD_FONT_SIZE_VERY_BIG = "12px";
 }
