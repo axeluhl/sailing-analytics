@@ -27,18 +27,19 @@ import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementControll
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.usermanagement.AbstractUserManagementPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.RequiresLoggedInUser;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.flyover.UserManagementFlyover;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -76,9 +77,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             }
         });
         
-        final UserManagementFlyover userManagementDisplay = new UserManagementFlyover();
+        final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
         this.userManagementWizardController = new WrappedPlacesManagementController(
-                new DesktopUserManagementStartPlaceActivityMapper(), userManagementDisplay);
+                new DesktopUserManagementStartPlaceActivityMapper(userManagementDisplay), userManagementDisplay);
         getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
             @Override
             public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
@@ -174,7 +175,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     private class DesktopUserManagementStartPlaceActivityMapper implements StartPlaceActivityMapper {
+
+        private final UserManagementViewDesktop userManagementDisplay;
         private PlaceController placeController;
+
+        public DesktopUserManagementStartPlaceActivityMapper(UserManagementViewDesktop userManagementDisplay) {
+            this.userManagementDisplay = userManagementDisplay;
+        }
 
         @Override
         public Activity getActivity(final Place requestedPlace) {
@@ -184,7 +191,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             } else {
                 placeToUse = requestedPlace;
             }
-
+            
+            userManagementDisplay.setHeading(placeToUse instanceof AbstractUserManagementPlace
+                            ? ((AbstractUserManagementPlace) placeToUse).getLocationTitle() : "");
+            
             final TabletAndDesktopApplicationClientFactory cf = TabletAndDesktopApplicationClientFactory.this;
             if (placeToUse instanceof SignInPlace) {
                 return new SignInActivity((SignInPlace) placeToUse, cf, placeController);
@@ -198,7 +208,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, cf, placeController);
             }
             
-            return new SignInActivity(new SignInPlace(new LoggedInUserInfoPlace()), cf, placeController);
+            return getActivity(new SignInPlace(new LoggedInUserInfoPlace()));
         }
         
         @Override

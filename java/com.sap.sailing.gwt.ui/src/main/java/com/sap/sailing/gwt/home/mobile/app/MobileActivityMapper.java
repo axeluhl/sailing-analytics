@@ -12,6 +12,8 @@ import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniO
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.mobile.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationActivityProxy;
+import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationPlace;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
@@ -26,12 +28,6 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 
 public class MobileActivityMapper implements ActivityMapper {
     private final MobileApplicationClientFactory clientFactory;
@@ -68,14 +64,8 @@ public class MobileActivityMapper implements ActivityMapper {
             return new SolutionsActivityProxy((SolutionsPlace) place, clientFactory);
         } else if (place instanceof AbstractUserProfilePlace) {
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
-        } else if (place instanceof SignInPlace) {
-            return new SignInActivity((SignInPlace) place, clientFactory, clientFactory.getPlaceController());
-        } else if (place instanceof CreateAccountPlace) {
-            return new CreateAccountActivity((CreateAccountPlace) place, clientFactory, 
-            		clientFactory.getNavigator().getCreateConfirmationNavigation(), clientFactory.getPlaceController());
-        } else if (place instanceof PasswordRecoveryPlace) {
-            return new PasswordRecoveryActivity<MobileApplicationClientFactory>(
-                    (PasswordRecoveryPlace) place, clientFactory, clientFactory.getPlaceController());
+        } else if (place instanceof AuthenticationPlace) {
+            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else {

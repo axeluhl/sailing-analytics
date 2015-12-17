@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationPlace;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
@@ -65,6 +66,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
         // User management places:
         UserProfileDefaultPlace.Tokenizer.class,
         UserProfileDetailsPlace.Tokenizer.class,
+        AuthenticationPlace.Tokenizer.class,
         ConfirmationPlace.Tokenizer.class,
         PasswordResetPlace.Tokenizer.class,
         ErrorPlace.Tokenizer.class

@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.mobile.app;
 
 import java.util.List;
 
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
@@ -11,6 +10,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.Regatta
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationPlace;
 import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -93,9 +92,8 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
     }
     
-    public PlaceNavigation<SignInPlace> getSignInNavigation() {
-        Place nextTarget = placeController.getWhere() == null ? new StartPlace() : placeController.getWhere();
-        return createGlobalPlaceNavigation(new SignInPlace(nextTarget));
+    public PlaceNavigation<AuthenticationPlace> getSignInNavigation() {
+        return createGlobalPlaceNavigation(new AuthenticationPlace());
     }
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
