@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
+import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.startanalysis.StartAnalysisCompetitorDTO;

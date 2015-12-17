@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.client.actions;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.dashboards.gwt.client.startanalysis.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.StartlineAdvantageByGeometryCalculator;
+import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAndCachesMovingAverageAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartLineAdvantageDTO;

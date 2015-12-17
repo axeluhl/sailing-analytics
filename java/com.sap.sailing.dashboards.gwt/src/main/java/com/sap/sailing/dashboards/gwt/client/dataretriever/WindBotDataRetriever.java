@@ -10,8 +10,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
-import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatTakesWindFixesNowAction;
+import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;

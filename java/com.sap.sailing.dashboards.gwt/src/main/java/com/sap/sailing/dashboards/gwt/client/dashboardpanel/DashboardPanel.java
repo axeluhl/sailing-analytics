@@ -19,16 +19,16 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.ui.client.widget.carousel.Carousel;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
-import com.sap.sailing.dashboards.gwt.client.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
 import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.orientation.WrongDeviceOrientationNotification;
-import com.sap.sailing.dashboards.gwt.client.startanalysis.StartAnalysisComponent;
-import com.sap.sailing.dashboards.gwt.client.startlineadvantage.geometry.StartLineAdvantageByGeometryComponent;
-import com.sap.sailing.dashboards.gwt.client.startlineadvantage.wind.StartlineAdvantagesByWindComponent;
-import com.sap.sailing.dashboards.gwt.client.windchart.WindBotComponent;
+import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
+import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidget;
+import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartLineAdvantageByGeometryWidget;
+import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.wind.StartlineAdvantagesByWindWidget;
+import com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidget;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -63,7 +63,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     HTMLPanel rightwindbotcontainer;
     
     @UiField(provided = true)
-    StartlineAdvantagesByWindComponent startlineAdvantagesByWindComponent;
+    StartlineAdvantagesByWindWidget startlineAdvantagesByWindComponent;
 
     @UiField
     public DivElement windloadinghintleft;
@@ -78,12 +78,12 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     public HTMLPanel windcharthint;
 
     @UiField(provided = true)
-    public StartAnalysisComponent startanalysisComponent;
+    public StartAnalysisWidget startanalysisComponent;
     
     @UiField(provided = true)
-    public StartLineAdvantageByGeometryComponent startlineAdvantageByGeometryComponent;
+    public StartLineAdvantageByGeometryWidget startlineAdvantageByGeometryComponent;
 
-    private List<WindBotComponent> windBotComponents;
+    private List<WindBotWidget> windBotComponents;
     private StringMessages stringConstants;
     DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(DashboardPanel.class.getName());
@@ -91,10 +91,10 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     public DashboardPanel(DashboardClientFactory dashboardClientFactory) {
         DashboardPanelResources.INSTANCE.style().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
-        windBotComponents = new ArrayList<WindBotComponent>();
-        startanalysisComponent = new StartAnalysisComponent(this.dashboardClientFactory);
-        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindComponent(this.dashboardClientFactory);
-        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryComponent(this.dashboardClientFactory);
+        windBotComponents = new ArrayList<WindBotWidget>();
+        startanalysisComponent = new StartAnalysisWidget(this.dashboardClientFactory);
+        startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindWidget(this.dashboardClientFactory);
+        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryWidget(this.dashboardClientFactory);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
@@ -136,12 +136,12 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         windBotComponents.clear();
         for (String windBotID : windBotIDs) {
             if (windBotAddedCounterTOConsiderForPanels == 0) {
-                WindBotComponent leftwindBotComponent = new WindBotComponent(windBotID);
+                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID);
                 leftwindbotcontainer.add(leftwindBotComponent);
                 windBotComponents.add(leftwindBotComponent);
                 windloadinghintleft.getStyle().setOpacity(0.0);
             } else if (windBotAddedCounterTOConsiderForPanels == 1) {
-                WindBotComponent rightwindBotComponent = new WindBotComponent(windBotID);
+                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID);
                 rightwindbotcontainer.add(rightwindBotComponent);
                 windBotComponents.add(rightwindBotComponent);
                 windloadinghintright.getStyle().setOpacity(0.0);
@@ -157,7 +157,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     }
 
     private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        for (WindBotComponent windBotComponent : windBotComponents) {
+        for (WindBotWidget windBotComponent : windBotComponents) {
             logger.log(Level.INFO, "Registering WindBotDataRetrieverListener");
             windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
         }
@@ -165,7 +165,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
 
     private void removeWindBotComponentsAsDataRetrieverListener(
             WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        for (WindBotComponent windBotComponent : windBotComponents) {
+        for (WindBotWidget windBotComponent : windBotComponents) {
             windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
         }
     }
