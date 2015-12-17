@@ -5,7 +5,6 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlacesManagementController;
@@ -15,6 +14,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.RequiresLoggedInUser;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
@@ -70,8 +70,8 @@ public class AuthenticationActivity extends AbstractActivity {
                 return new PasswordRecoveryActivity<MobileApplicationClientFactory>(
                         (PasswordRecoveryPlace) placeToUse, clientFactory, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                History.back();
-                return null;
+                return new LoggedInUserInfoActivity<MobileApplicationClientFactory>((LoggedInUserInfoPlace) placeToUse, 
+                        clientFactory, clientFactory.getNavigator().getUserProfileNavigation(), placeController);
             }
             
             return getActivity(new SignInPlace(new LoggedInUserInfoPlace()));

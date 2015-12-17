@@ -5,20 +5,27 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
+import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
+public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWithUserManagementService & ClientFactoryWithUserManagementContext>
+        extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
-    private final TabletAndDesktopApplicationClientFactory clientFactory;
+    private final CF clientFactory;
+    private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
     private final PlaceController placeController;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place,
-            TabletAndDesktopApplicationClientFactory clientFactory, PlaceController placeController) {
+    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, CF clientFactory,
+            PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation, PlaceController placeController) {
         this.clientFactory = clientFactory;
+        this.userProfileNavigation = userProfileNavigation;
         this.placeController = placeController;
     }
 
@@ -43,7 +50,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
     @Override
     public void gotoProfileUi() {
         clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
-        clientFactory.getHomePlacesNavigator().getUserProfileNavigation().goToPlace();
+        userProfileNavigation.goToPlace();
     }
 
     @Override

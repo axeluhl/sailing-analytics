@@ -205,7 +205,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 return new PasswordRecoveryActivity<TabletAndDesktopApplicationClientFactory>(
                         (PasswordRecoveryPlace) placeToUse, cf, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, cf, placeController);
+                return new LoggedInUserInfoActivity<TabletAndDesktopApplicationClientFactory>(
+                        (LoggedInUserInfoPlace) placeToUse, cf, getHomePlacesNavigator().getUserProfileNavigation(),
+                        placeController);
             }
             
             return getActivity(new SignInPlace(new LoggedInUserInfoPlace()));
