@@ -24,6 +24,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String signedInAsTitle();
     String close();
     String loading();
+    String user();
     String users();
     String addURLFilter();
     String ok();
