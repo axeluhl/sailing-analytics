@@ -24,20 +24,21 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetit
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
-import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
+    private static WindowManager manager;
+    private static WebDriverWindow windowForEdit;
+    private static WebDriverWindow windowForSelection;
+    
     // TestMaintenanceOfSelectionAfterDataChanges
     private CompetitorEntry competitorEntry;
     private CompetitorEntry competitorEntryToSelect;
 
     // TestRefreshOfDependingUIElements
-    private static final String IDM_5O5_2013_JSON_URL = "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
-
     private static final String REGATTA = "IDM 2013"; //$NON-NLS-1$
 
     private static final String LEADERBOARD = "IDM 2013 (5O5)"; //$NON-NLS-1$
@@ -56,6 +57,9 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         clearState(getContextRoot());
+        manager = this.environment.getWindowManager();
+        windowForEdit = manager.getCurrentWindow();
+        windowForSelection = manager.openNewWindow();
         super.setUp();
     }
 
@@ -67,6 +71,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
     @Test
     public void testMaintenanceOfSelectionAfterDataChanges() {
+        windowForEdit.switchToWindow();
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
 
         for (int i = 0; i < 2; i++) {
@@ -97,10 +102,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         }
         assertTrue(found);
 
-        // Open a second window & setup second window
-        WindowManager manager = this.environment.getWindowManager();
-        WebDriverWindow windowForEdit = manager.getCurrentWindow();
-        WebDriverWindow windowForSelection = manager.openNewWindow();
         windowForSelection.switchToWindow();
         TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel();
         found = false;
@@ -116,12 +117,9 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
 
         assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1);
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName()
-                .equals(competitorEntryToSelect.getName()));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId()
-                .equals(competitorEntryToSelect.getSailId()));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName()
-                .equals(competitorEntryToSelect.getBoatClassName()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(name));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(sailId));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(boatClassName));
         // change competitor
         windowForEdit.switchToWindow();
         dialog = competitorEntry.clickEditButton();
@@ -134,7 +132,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         // assert selection
         windowForSelection.switchToWindow();
         competitorPanelForSelection.pushRefreshButton();
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 0);
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1);
         for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
             String itName = it.getName();
             if (itName.equals(changedName)) {
@@ -144,12 +142,9 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             }
         }
         assertTrue(found);
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName()
-                .equals(competitorEntryToSelect.getName()));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId()
-                .equals(competitorEntryToSelect.getSailId()));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName()
-                .equals(competitorEntryToSelect.getBoatClassName()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(changedName));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(changedSailId));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(boatClassName));
     }
 
     private void setUpTestRefreshOfDependingUIElements() {
@@ -168,8 +163,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             this.trackedRaces.add(trackedRace);
             this.leaderboardRaces.add(leaderboardRace);
         }
-        clearState(getContextRoot());
-        super.setUp();
         configureLeaderboard();
     }
 
@@ -188,21 +181,10 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
-        
-        // Start the tracking for the races and wait until they are ready to use
-        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(IDM_5O5_2013_JSON_URL);
-        tracTracEvents.setReggataForTracking(this.regatta);
-        tracTracEvents.setTrackSettings(false, false, false);
-        // TODO: There exists a bug in Selenium with key modifiers (Issue 3734 and 6817), so we can't use multi
-        //       selection (Firefox on Windows)
-        //tracTracEvents.startTrackingForRaces(this.trackableRaces);
-        for(TrackableRaceDescriptor race : this.trackableRaces) {
-            tracTracEvents.startTrackingForRace(race);
-        }
     }
     @Test
     public void testRefreshOfDependingUIElements() {
+        windowForSelection.switchToWindow();
         setUpTestRefreshOfDependingUIElements();
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         SmartphoneTrackingEventManagementPanelPO smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
@@ -224,9 +206,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         assertTrue(5 == anzRaceColumns);
         
         // Open a second window & setup second window
-        WindowManager manager = this.environment.getWindowManager();
-        WebDriverWindow windowForSelection = manager.getCurrentWindow();
-        WebDriverWindow windowForEdit = manager.openNewWindow();
         windowForEdit.switchToWindow();
         
         AdminConsolePage adminConsoleForEdit = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
