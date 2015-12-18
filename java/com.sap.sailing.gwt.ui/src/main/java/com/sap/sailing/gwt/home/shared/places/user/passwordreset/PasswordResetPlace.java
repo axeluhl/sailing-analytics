@@ -11,29 +11,34 @@ import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 
 public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVersion {
     private final String name;
-    private final String validationSecret;
+    private final String email;
+    private final String resetSecret;
 
     public PasswordResetPlace() {
-        this.name = "";
-        this.validationSecret = "";
+        this("", "", "");
     }
 
-    public PasswordResetPlace(String name, String validationSecret) {
+    public PasswordResetPlace(String name, String email, String validationSecret) {
         this.name = name;
-        this.validationSecret = validationSecret;
+        this.email = email;
+        this.resetSecret = validationSecret;
     }
 
     public String getName() {
         return name;
     }
-
-    public String getValidationSecret() {
-        return validationSecret;
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public String getResetSecret() {
+        return resetSecret;
     }
 
     @Override
     public String toString() {
-        return "ConfirmationPlace [name=" + name + ", validationSecret=" + validationSecret + "]";
+        return "PasswordResetPlace [name=" + name + ", email=" + email + ", resetSecret=" + resetSecret + "]";
     }
 
     @Prefix(PlaceTokenPrefixes.UserPasswordReset)
@@ -43,8 +48,7 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
         @Override
         public PasswordResetPlace getPlace(String token) {
             String contentToken;
-            String name = "";
-            String validationSecret = "";
+            String name = "", email = "", resetSecret = "";
             if (token.startsWith("?")) {
                 contentToken = token.substring(1);
                 for (String keyValToken : contentToken.split("&")) {
@@ -56,15 +60,16 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
                             final String decoded = URL.decodeQueryString(value);
                             if ("u".equals(key)) {
                                 name = decoded;
-                            } else if ("v".equals(key)) {
-                                validationSecret = decoded;
+                            } else if ("e".equals(key)) {
+                                email = decoded;
+                            } else if ("s".equals(key)) {
+                                resetSecret = decoded;
                             }
                         }
                     }
                 }
-                return new PasswordResetPlace(name, validationSecret);
             }
-            return new PasswordResetPlace();
+            return new PasswordResetPlace(name, email, resetSecret);
         }
 
         @Override
