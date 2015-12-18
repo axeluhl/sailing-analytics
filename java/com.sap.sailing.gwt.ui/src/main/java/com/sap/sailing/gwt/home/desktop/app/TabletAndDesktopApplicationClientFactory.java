@@ -24,6 +24,8 @@ import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementControlle
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
@@ -164,6 +166,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         uCtx = new UserManagementContextImpl(user);
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+    
+    @Override
+    public PasswordResetView createPasswordResetView() {
+        return new PasswordResetViewImpl();
     }
 
 }

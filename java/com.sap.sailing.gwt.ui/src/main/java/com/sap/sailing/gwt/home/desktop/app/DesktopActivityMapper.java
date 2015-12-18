@@ -31,6 +31,8 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
 public class DesktopActivityMapper implements ActivityMapper {
@@ -81,6 +83,8 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
         } else if (place instanceof ConfirmationPlace) {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
+        } else if (place instanceof PasswordResetPlace) {
+            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else {
             return null;
         }
