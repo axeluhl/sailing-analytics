@@ -1,6 +1,5 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -45,7 +44,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton();
         final String name = ""+System.currentTimeMillis();
         dialog.setNameTextBox(name);
-        String sailId = ""+System.currentTimeMillis();
+        final String sailId = ""+System.currentTimeMillis();
         dialog.setSailIdTextBox(sailId);
         final String boatClassName = "Laser Int.";
         dialog.setBoatClassNameSuggestBox(boatClassName);
@@ -56,10 +55,8 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             String itName = it.getName();
             if (itName.equals(name)) {
                 found = true;
-                // found a candidate:
-                assertEquals(sailId, it.getSailId());
-                assertEquals(boatClassName, it.getBoatClassName());
                 competitorEntry = it;
+                break;
             }
         }
         assertTrue(found);
@@ -75,23 +72,23 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             String itName = it.getName();
             if (itName.equals(name)) {
                 found = true;
-                // found a candidate:
-                assertEquals(sailId, it.getSailId());
-                assertEquals(boatClassName, it.getBoatClassName());
                 competitorEntryToSelect = it;
+                break;
             }
         }
         assertTrue(found);
         competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
 
         assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1);
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().iterator().next().equals(competitorEntryToSelect));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(competitorEntryToSelect.getName()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(competitorEntryToSelect.getSailId()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(competitorEntryToSelect.getBoatClassName()));
         // change competitor
         windowForEdit.switchToWindow();
         dialog = competitorEntry.clickEditButton();
         final String changedName = ""+System.currentTimeMillis();
         dialog.setNameTextBox(changedName);
-        String changedSailId = ""+System.currentTimeMillis();
+        final String changedSailId = ""+System.currentTimeMillis();
         dialog.setSailIdTextBox(changedSailId);
         dialog.pressOk();
         
@@ -103,12 +100,13 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             String itName = it.getName();
             if (itName.equals(changedName)) {
                 found = true;
-                // found a candidate:
-                assertEquals(changedSailId, it.getSailId());
-                assertEquals(boatClassName, it.getBoatClassName());
                 competitorEntryToSelect = it;
+                break;
             }
         }
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().iterator().next().equals(competitorEntryToSelect));
+        assertTrue(found);
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(competitorEntryToSelect.getName()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(competitorEntryToSelect.getSailId()));
+        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(competitorEntryToSelect.getBoatClassName()));
     }
 }
