@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
@@ -95,12 +96,17 @@ public class Header extends Composite {
                 updateActiveLink(event.getNewPlace());
             }
         });
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
-            @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
-                usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
-            }
-        });
+        
+        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
+            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+                @Override
+                public void onUserChangeEvent(UserManagementContextEvent event) {
+                    usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
+                }
+            });
+        } else {
+            usermenu.removeFromParent();
+        }
     }
 
     @UiHandler("startPageLink")
