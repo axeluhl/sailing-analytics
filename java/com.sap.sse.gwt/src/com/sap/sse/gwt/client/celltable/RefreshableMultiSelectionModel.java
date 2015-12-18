@@ -24,9 +24,11 @@ import com.google.gwt.view.client.SelectionModel;
  * <p>
  * For more details on the update process read the {@link RefreshableSelectionModel} Javadoc and see the methods
  * {@link RefreshableMultiSelectionModel#refreshSelectionModel(Iterable)} and
- * {@link RefreshableMultiSelectionModel#setRowData(int, List)}.
+ * {@link RefreshableMultiSelectionModel#setRowData(int, List)}.<p>
  * 
- * @author D064976
+ * TODO try to factor out the commonalities with RefreshableSingleSelectionModel into a delegate
+ * 
+ * @author Lukas Furmanek
  * @param <T>
  *            the type of entries
  */
@@ -44,10 +46,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      *            display on {@link ListDataProvider}
      */
     public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        super();
-        this.comp = comp;
-        this.listDataProvider = listDataProvider;
-        this.listDataProvider.addDataDisplay(this);
+        this(/* keyProvider */ null, comp, listDataProvider);
     }
 
     /**
@@ -84,7 +83,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null || dontcheckSelectionState || item == null || getSelectedSet() == null) {
+        if (comp == null || dontcheckSelectionState || item == null || getSelectedSet().isEmpty()) {
             super.setSelected(item, selected);
         } else {
             T wasSelectedBefore = null;
@@ -97,7 +96,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
             }
             if (wasSelectedBefore != null) {
                 super.setSelected(wasSelectedBefore, false);
-                isSelected(item); //triggers the deleting of the wasSelectedBefrore element in super class
+                isSelected(item); // triggers the deleting of the wasSelectedBefrore element in super class
                 super.setSelected(item, selected);
             } else {
                 super.setSelected(item, selected);
@@ -119,31 +118,37 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      * {@link AbstractSelectionModel#fireEvent(com.google.gwt.event.shared.GwtEvent)}.
      * 
      * @param newObjects
-     *            the new objects to refresh the {@link RefreshableMultiSelectionModel selectionmodel}
+     *            the new objects to refresh the {@link RefreshableMultiSelectionModel selection model}
      */
     private void refreshSelectionModel(Iterable<T> newObjects) {
-        dontcheckSelectionState = true;
-        final Set<T> selectedSet = getSelectedSet();
-        final boolean isEmpty = selectedSet.isEmpty();
-        if (!isEmpty) {
-            clear();
-            for (T it : newObjects) {
-                if (comp == null) {
-                    setSelected(it, selectedSet.contains(it));
-                } else {
-                    boolean isSelected = false;
-                    for (T selected : selectedSet) {
-                        isSelected = comp.representSameEntity(selected, it);
-                        if (isSelected) {
-                            setSelected(it, isSelected);
-                            break;
+        if (!dontcheckSelectionState) { // avoid endless recursions
+            dontcheckSelectionState = true;
+            try {
+                final Set<T> selectedSet = getSelectedSet(); // gets the selected set as a non-live copy, so later
+                                                             // changes to the selection won't change this set anymore
+                final boolean isEmpty = selectedSet.isEmpty();
+                if (!isEmpty) {
+                    clear();
+                    for (T it : newObjects) {
+                        if (comp == null) {
+                            setSelected(it, selectedSet.contains(it));
+                        } else {
+                            boolean isSelected = false;
+                            for (T selected : selectedSet) {  // FIXME leads to O(n^2) effort which is inacceptable for large tables with all elements selected
+                                isSelected = comp.representSameEntity(selected, it);
+                                if (isSelected) {
+                                    setSelected(it, isSelected);
+                                    break;
+                                }
+                            }
                         }
                     }
+                    SelectionChangeEvent.fire(this);
                 }
+            } finally {
+                dontcheckSelectionState = false;
             }
-            SelectionChangeEvent.fire(this);
         }
-        dontcheckSelectionState = false;
     }
     
     /**
@@ -152,7 +157,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        refreshSelectionModel(new ArrayList<>(listDataProvider.getList()));
+        refreshSelectionModel(listDataProvider.getList());
     }
 
     @Override

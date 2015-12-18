@@ -21,9 +21,11 @@ import com.google.gwt.view.client.RangeChangeEvent.Handler;
  * <p>
  * For more details on the update process read the {@link RefreshableSelectionModel} Javadoc and see the methods
  * {@link RefreshableSingleSelectionModel#refreshSelectionModel(Iterable)} and
- * {@link RefreshableSingleSelectionModel#setRowData(int, List)}.
+ * {@link RefreshableSingleSelectionModel#setRowData(int, List)}.<p>
  * 
- * @author D064976
+ * TODO try to factor out the commonalities with RefreshableMultiSelectionModel into a delegate
+ * 
+ * @author Lukas Furmanek
  * @param <T>
  *            the type of entries
  */
@@ -108,21 +110,26 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      *            the new objects to refresh the {@link RefreshableSingleSelectionModel selectionmodel}
      */
     private void refreshSelectionModel(Iterable<T> newObjects) {
-        // avoid a new selection state check in setSelected
-        dontcheckSelectionState = true;
-        final T selected = getSelectedObject();
-        if (selected != null) {
-            clear();
-            for (final T it : newObjects) {
-                boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
-                if (isEqual) {
-                    setSelected(it, true);
-                    break;
+        if (!dontcheckSelectionState) { // avoid endless recursion
+            try {
+                // avoid a new selection state check in setSelected
+                dontcheckSelectionState = true;
+                final T selected = getSelectedObject();
+                if (selected != null) {
+                    clear();
+                    for (final T it : newObjects) {
+                        boolean isEqual = comp == null ? selected.equals(it) : comp.representSameEntity(selected, it);
+                        if (isEqual) {
+                            setSelected(it, true);
+                            break;
+                        }
+                    }
                 }
+                SelectionChangeEvent.fire(this);
+            } finally {
+                dontcheckSelectionState = false;
             }
         }
-        SelectionChangeEvent.fire(this);
-        dontcheckSelectionState = false;
     }
 
     /**
