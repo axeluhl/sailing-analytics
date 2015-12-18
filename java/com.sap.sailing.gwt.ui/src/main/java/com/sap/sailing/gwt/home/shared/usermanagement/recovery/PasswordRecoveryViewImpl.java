@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.home.shared.usermanagement.recovery;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -38,10 +40,32 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     @Override
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
+        selectAll(usernameUi.getValue().isEmpty() ? emailUi : usernameUi);
+    }
+    
+    @Override
+    protected void onLoad() {
+        selectAll(emailUi);
     }
     
     @UiHandler("resetPasswordUi")
     void onResetPasswordUiControlClicked(ClickEvent event) {
+        triggerPasswordReset();
+    }
+    
+    @UiHandler({ "emailUi", "usernameUi"})
+    void onResetPasswordKeyPressed(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            triggerPasswordReset();
+        }
+    }
+    
+    private void triggerPasswordReset() {
         presenter.resetPassword(emailUi.getValue(), usernameUi.getValue());
+    }
+    
+    private void selectAll(TextBox textBox) {
+        textBox.setFocus(true);
+        textBox.selectAll();
     }
 }
