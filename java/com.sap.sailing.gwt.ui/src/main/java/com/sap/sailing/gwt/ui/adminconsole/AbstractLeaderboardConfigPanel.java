@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -680,8 +678,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
     
     /**
-     * Removes the {@link SelectionChangeEvent.Handler} until the browser regains control. The handler will be added
-     * again using {@link Scheduler#scheduleDeferred(ScheduledCommand)} method.
+     * Removes the {@link SelectionChangeEvent.Handler}. The handler can be added again using
+     * {@link #addTrackedRaceListHandler()}.
      * <p>
      * Use this method if you change the {@link ListDataProvider} or {@link RefreshableSelectionModel} of
      * {@link TrackedRacesListComposite} and you don't want to trigger the
