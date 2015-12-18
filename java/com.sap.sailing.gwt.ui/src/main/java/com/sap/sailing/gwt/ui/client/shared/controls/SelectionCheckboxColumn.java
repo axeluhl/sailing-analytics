@@ -28,12 +28,12 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * updates work properly.
  * <p>
  * 
- * Clients should use the columns own {@link #getSelectionModel() RefreshableMultiSelectionModel}. This will ensure that
- * the {@link SelectionCheckboxColumn} will be refreshed correctly, when the selection changes or the
- * {@link ListDataProvider} have new elements. Clients should also ensure that the {@link Flushable} and the
- * {@link ListDataProvider} is not <code>null</code> otherwise the {@link RefreshableMultiSelectionModel selectionmodel}
- * won´t work correct. The {@link Flushable} interface is used to ensure, that the selection state is displayed
- * correctly by {@link SelectionCheckboxColumn}. To ensure this, the {@link Flushable#flush()}-method is called after
+ * Clients should use the column's own {@link #getSelectionModel() RefreshableMultiSelectionModel}. This will ensure that
+ * the {@link SelectionCheckboxColumn} will be refreshed correctly when the selection changes or the
+ * {@link ListDataProvider} has new elements. Clients should also ensure that the {@link Flushable} and the
+ * {@link ListDataProvider} are not <code>null</code>; otherwise the {@link RefreshableMultiSelectionModel selection model}
+ * won´t work correctly. The {@link Flushable} interface is used to ensure that the selection state is displayed
+ * correctly by {@link SelectionCheckboxColumn}. To ensure this, the {@link Flushable#flush()} method is called after
  * every selection state change.
  * <p>
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
@@ -41,12 +41,11 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * <code>&lt;div&gt;</code> element representing a selected or deselected element.
  * 
  * @author Axel Uhl (D043530)
+ * @author Lukas Furmanek
  * 
  * @param <T>
  */
-
-// TODO Lukas: discuss with Axel change to non abstract class. (Here are no abstract methods anymore.)
-public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnWithMinMax<T, Boolean> {
+public class SelectionCheckboxColumn<T> extends AbstractSortableColumnWithMinMax<T, Boolean> {
     private final BetterCheckboxCell cell;
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
@@ -68,7 +67,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      * @param display
      *            {@link Flushable} to redraw the selected elements on the display
      */
-    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass, String deselectedCheckboxCSSClass,
+    public SelectionCheckboxColumn(String selectedCheckboxCSSClass, String deselectedCheckboxCSSClass,
             String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator,
             ListDataProvider<T> listDataProvider, Flushable display) {
         this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
@@ -122,7 +121,7 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
             public void setSelected(T item, boolean selected) {
                 boolean wasSelected = isSelected(item);
                 super.setSelected(item, selected);
-                if(wasSelected != selected) {
+                if (wasSelected != selected) {
                     display.flush();
                 }
             }

@@ -121,11 +121,18 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         public int hashCode() {
             return comp.hashCode(t);
         }
+        
+        private T getT() {
+            return t;
+        }
 
         @SuppressWarnings("unchecked") // need to cast to generic type argument T
         @Override
         public boolean equals(Object obj) {
-            return comp.representSameEntity(t, (T) obj);
+            if (!(obj instanceof RefreshableMultiSelectionModel<?>.EntityIdentityWrapper)) {
+                throw new ClassCastException("Can only compare EntityIdentityWrapper with other objects of same class");
+            }
+            return comp.representSameEntity(t, ((EntityIdentityWrapper) obj).getT());
         }
     }
     
@@ -166,7 +173,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                         }
                         for (final T selected : selectedSet) {
                             T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper(selected));
-                            setSelected(newSelectedElement, newSelectedElement != null);
+                            if (newSelectedElement != null) {
+                                setSelected(newSelectedElement, true);
+                            }
                         }
                     }
                     SelectionChangeEvent.fire(this);

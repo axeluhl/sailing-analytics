@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -142,9 +143,9 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             }
         }
         assertTrue(found);
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(changedName));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(changedSailId));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(boatClassName));
+        assertEquals(changedName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
+        assertEquals(changedSailId, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId());
+        assertEquals(boatClassName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName());
     }
 
     private void setUpTestRefreshOfDependingUIElements() {

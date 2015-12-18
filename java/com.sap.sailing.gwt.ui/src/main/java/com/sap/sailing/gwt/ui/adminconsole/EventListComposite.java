@@ -198,13 +198,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     public int hashCode(EventDTO t) {
                         return t.id.hashCode();
                     }
-                },eventListDataProvider,table) {
-
-            @Override
-            public Boolean getValue(EventDTO row) {
-                return eventTable.getSelectionModel().isSelected(row);
-            }
-        };
+                },eventListDataProvider,table);
         
         AnchorCell anchorCell = new AnchorCell();
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {

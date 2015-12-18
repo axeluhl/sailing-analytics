@@ -4,12 +4,12 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.view.client.HasData;
 
 /**
- * This {@link Flushable}-interface should be implemented of the {@link HasData display} which uses the
- * {@link SelectionCheckboxColumn}. You need this interface to ensure that the display, displays the correct selection
+ * This {@link Flushable} interface should be implemented by the {@link HasData display} which uses the
+ * {@link SelectionCheckboxColumn}. You need this interface to ensure that the display displays the correct selection
  * state of the {@link SelectionCheckboxColumn}. The method {@link Flushable#flush()} will trigger a redraw of selected
- * lines e.g. with calling the method {@link CellTable#flush()}.
+ * lines, e.g., by calling the method {@link CellTable#flush()}.
  * 
- * @author D064976
+ * @author Lukas Furmanek
  */
 public interface Flushable {
     /**

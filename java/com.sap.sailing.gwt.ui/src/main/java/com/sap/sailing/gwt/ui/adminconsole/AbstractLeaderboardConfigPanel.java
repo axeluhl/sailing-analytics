@@ -310,7 +310,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                     public int hashCode(StrippedLeaderboardDTO t) {
                         return t.name.hashCode();
                     }
-                }, listDataProvider, leaderboardTable) {};
+                }, listDataProvider, leaderboardTable);
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn, new Comparator<StrippedLeaderboardDTO>() {
             @Override
