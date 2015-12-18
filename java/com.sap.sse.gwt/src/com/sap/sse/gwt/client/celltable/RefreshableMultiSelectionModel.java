@@ -1,6 +1,8 @@
 package com.sap.sse.gwt.client.celltable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -103,6 +105,36 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     }
 
     /**
+     * Wraps an object such that its {@link #equals(Object)} and {@link #hashCode()} implementations are based on the
+     * {@link RefreshableMultiSelectionModel#comp} comparator's
+     * {@link EntityIdentityComparator#representSameEntity(Object, Object)} and
+     * {@link EntityIdentityComparator#hashCode(Object)} methods, respectively.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     * @param <T>
+     */
+    private class EntityIdentityWrapper {
+        private final T t;
+        
+        public EntityIdentityWrapper(T t) {
+            super();
+            this.t = t;
+        }
+
+        @Override
+        public int hashCode() {
+            return comp.hashCode(t);
+        }
+
+        @SuppressWarnings("unchecked") // need to cast to generic type argument T
+        @Override
+        public boolean equals(Object obj) {
+            return comp.representSameEntity(t, (T) obj);
+        }
+    }
+    
+    /**
      * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>.All objects from the
      * current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same
      * entity} as an object from <code>newObjects</code> will be reselected. All others are de-selected. That means a
@@ -127,18 +159,18 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                 final boolean isEmpty = selectedSet.isEmpty();
                 if (!isEmpty) {
                     clear();
-                    for (T it : newObjects) {
-                        if (comp == null) {
+                    if (comp == null) {
+                        for (T it : newObjects) {
                             setSelected(it, selectedSet.contains(it));
-                        } else {
-                            boolean isSelected = false;
-                            for (T selected : selectedSet) {  // FIXME leads to O(n^2) effort which is inacceptable for large tables with all elements selected
-                                isSelected = comp.representSameEntity(selected, it);
-                                if (isSelected) {
-                                    setSelected(it, isSelected);
-                                    break;
-                                }
-                            }
+                        }
+                    } else {
+                        final Map<EntityIdentityWrapper, T> wrappedNewObjects = new HashMap<>();
+                        for (T it : newObjects) {
+                            wrappedNewObjects.put(new EntityIdentityWrapper(it), it);
+                        }
+                        for (final T selected : selectedSet) {
+                            T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper(selected));
+                            setSelected(newSelectedElement, newSelectedElement != null);
                         }
                     }
                     SelectionChangeEvent.fire(this);
