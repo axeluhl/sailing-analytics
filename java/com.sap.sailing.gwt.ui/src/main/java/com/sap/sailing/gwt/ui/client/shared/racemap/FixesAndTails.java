@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,22 +48,23 @@ public class FixesAndTails {
     private final Map<CompetitorDTO, List<GPSFixDTO>> fixes;
     
     /**
-     * Tails of competitors currently displayed as overlays on the map.
+     * Tails of competitors currently displayed as overlays on the map. A tail may have an {@link MVCArray#getLength()
+     * empty} {@link Polyline#getPath()}. In this case, {@link #firstShownFix} and {@link #lastShownFix} will hold
+     * <code>-1</code> for that competitor key.
      */
     private final Map<CompetitorDTO, Polyline> tails;
 
-
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
+     * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the first fix shown
      * in {@link #tails} is. If a key is contained in this map, it is also contained in {@link #lastShownFix} and vice
-     * versa.
+     * versa. If a tail is present but has an empty path, this map contains <code>-1</code> for that competitor.
      */
     private final Map<CompetitorDTO, Integer> firstShownFix;
 
     /**
-     * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in
+     * Key set is equal to that of {@link #tails} and tells what the index in {@link #fixes} of the last fix shown in
      * {@link #tails} is. If a key is contained in this map, it is also contained in {@link #firstShownFix} and vice
-     * versa.
+     * versa. If a tail is present but has an empty path, this map contains <code>-1</code> for that competitor.
      */
     private final Map<CompetitorDTO, Integer> lastShownFix;
 
@@ -129,7 +131,9 @@ public class FixesAndTails {
      * Creates a polyline for the competitor represented by <code>competitorDTO</code>, taking the fixes from
      * {@link #fixes fixes.get(competitorDTO)} and using the fixes starting at time point <code>from</code> (inclusive)
      * up to the last fix with time point before <code>to</code>. The polyline is returned. Updates are applied to
-     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.
+     * {@link #lastShownFix}, {@link #firstShownFix} and {@link #tails}.<p>
+     * 
+     * Precondition: <code>tails.containsKey(competitorDTO) == false</code>
      */
     protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
         List<LatLng> points = new ArrayList<LatLng>();
@@ -173,22 +177,45 @@ public class FixesAndTails {
     }
 
     /**
-     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
-     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
-     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
-     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
-     * The {@link #tails} affected by these fixes are updated accordingly when modifications fall inside the interval
-     * shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails are, however,
-     * not trimmed according to the specification for the tail length. This has to happen elsewhere (see also
-     * {@link #updateTail}).
+     * Adds the fixes received in <code>fixesForCompetitors</code> to {@link #fixes} and ensures they are still
+     * contiguous for each competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in
+     * <code>result</code> overlap with those already known, the fixes are merged into the list of already known fixes
+     * for the competitor. Otherwise, the fixes received in <code>result</code> replace those known so far for the
+     * respective competitor. The {@link #tails} affected by these fixes are updated accordingly when modifications fall
+     * inside the interval shown by the tail, as defined by {@link #firstShownFix} and {@link #lastShownFix}. The tails
+     * are, however, not trimmed according to the specification for the tail length. This has to happen elsewhere (see
+     * also {@link #updateTail}).
      * 
      * @param fixesForCompetitors
      *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
      *            the last one in the list
+     * @param overlapsWithKnownFixes
+     *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
+     *            <code>false</code>, any fixes previously stored for that competitor are removed, and the tail is
+     *            deleted from the map (see {@link #removeTail(CompetitorDTO)}); the new fixes are then added to the
+     *            {@link #fixes} map, and a new tail will have to be constructed as needed (does not happen here). If
+     *            this map holds <code>true</code>, {@link #mergeFixes(CompetitorDTO, List, long)} is used to merge the
+     *            new fixes from <code>fixesForCompetitors</code> into the {@link #fixes} collection, and the tail is
+     *            left unchanged. <b>NOTE:</b> When a non-overlapping set of fixes is updated (<code>false</code>), this
+     *            map's record for the competitor is <b>UPDATED</b> to <code>true</code> after the tail deletion and
+     *            {@link #fixes} replacement has taken place. This helps in cases where this update is only one of two
+     *            into which an original request was split (one quick update of the tail's head and another one for the
+     *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
+     *            having an overlap now, not leading to a replacement of the previous update originating from the same
+     *            request.
+     * @return 
+     * 
+     * @return a {@link Runnable} for each competitor that the caller must invoke before starting to create or update
+     *         the key competitor's tail. The object returned may be a no-op, but it may also clear an existing tail if
+     *         necessary. The reason why this is not executed immediately is that there may be a transition-based delay
+     *         with which the tails are updated. In this case we would be producing severe flicker. By delaying the
+     *         command to the point when the update is applied should avoid such flicker.
      */
-    protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
+    protected Map<CompetitorDTO, Runnable> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
-        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
+        final Map<CompetitorDTO, Runnable> result = new HashMap<>();
+        final Runnable noOp = new Runnable() { @Override public void run() {} };
+        for (final Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
                 List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
@@ -200,18 +227,18 @@ public class FixesAndTails {
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    if (tails.containsKey(e.getKey())) {
-                        Polyline removedTail = tails.remove(e.getKey());
-                        removedTail.setMap(null);
-                    }
-                    firstShownFix.remove(e.getKey());
-                    lastShownFix.remove(e.getKey());
+                    result.put(e.getKey(), new Runnable() { @Override public void run() { clearTail(e.getKey()); } });
                     fixesForCompetitor.addAll(e.getValue());
+                    overlapsWithKnownFixes.put(e.getKey(), true); // In case this was only one part of a split request, the next request *does* have an overlap
                 } else {
                     mergeFixes(e.getKey(), e.getValue(), timeForPositionTransitionMillis);
+                    result.put(e.getKey(), noOp);
                 }
+            } else {
+                result.put(e.getKey(), noOp);
             }
         }
+        return result;
     }
 
     /**
@@ -289,6 +316,7 @@ public class FixesAndTails {
             } else {
                 intoThis.add(intoThisIndex, mergeThisFix);
                 if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                    // fix inserted at a position currently visualized by tail
                     tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                 }
                 if (intoThisIndex < indexOfFirstShownFix) {
@@ -354,12 +382,19 @@ public class FixesAndTails {
      * @param delayForTailChangeInMillis
      *            the time in milliseconds after which to actually draw the tail update, or <code>-1</code> to perform
      *            the update immediately
+     * @param tailPreparer
+     *            will be {@link Runnable#run} just before the updates are applied to the <code>tail</code>. In
+     *            particular, if a transition is active, the effect of running this preparer will be held back until the
+     *            transition applies. May be <code>null</code> in which case simply no preparer is run.
      */
     protected void updateTail(final Polyline tail, final  CompetitorDTO competitorDTO,
-            final Date from, final Date to, final int delayForTailChangeInMillis) {
+            final Date from, final Date to, final int delayForTailChangeInMillis, final Runnable tailPreparer) {
         Timer delayedOrImmediateExecutor = new Timer() {
             @Override
             public void run() {
+                if (tailPreparer != null) {
+                    tailPreparer.run();
+                }
                 int vertexCount = tail.getPath().getLength();
                 final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
                 int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix
@@ -381,7 +416,7 @@ public class FixesAndTails {
                     tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
                     vertexCount++;
                 }
-                // now adjust the polylines tail: remove excess vertices that are after "to"
+                // now adjust the polyline's tail: remove excess vertices that are after "to"
                 int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix
                         .get(competitorDTO);
                 while (indexOfLastShownFix != -1 && vertexCount > 0
@@ -400,6 +435,9 @@ public class FixesAndTails {
                     indexOfLastShownFix++;
                     GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
                     tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
+                    if (indexOfFirstShownFix < 0) { // empty tail before?
+                        indexOfFirstShownFix = indexOfLastShownFix; // set to the first vertex inserted into tail
+                    }
                 }
                 firstShownFix.put(competitorDTO, indexOfFirstShownFix);
                 lastShownFix.put(competitorDTO, indexOfLastShownFix);
@@ -428,6 +466,19 @@ public class FixesAndTails {
         firstShownFix.remove(competitor);
         lastShownFix.remove(competitor);
     }
+    
+    /**
+     * Leaves the tail on the map and empties its path {@link Polyline#getPath()}. Correspondingly, the
+     * {@link #firstShownFix} and {@link #lastShownFix} entries for <code>competitor</code> are set to <code>-1</code>.
+     */
+    private void clearTail(CompetitorDTO competitor) {
+        Polyline tail = tails.get(competitor);
+        if (tail != null) {
+            tail.getPath().clear();
+            firstShownFix.put(competitor, -1);
+            lastShownFix.put(competitor, -1);
+        }
+    }
 
     /**
      * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
@@ -441,7 +492,7 @@ public class FixesAndTails {
      * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
      *         second} component contains the "to" times for the competitors whose trails / positions to show; the
      *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
-     *         those requested or need to be replaced
+     *         those requested (<code>true</code>) or need to be replaced (<code>false</code>)
      */
     protected Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow, long effectiveTailLengthInMilliseconds) {
@@ -476,7 +527,7 @@ public class FixesAndTails {
                 toDate = upTo;
             }
             // only request something for the competitor if we're missing information at all
-            if (fromDate.before(toDate) || fromDate.equals(toDate)) {
+            if (!fromDate.after(toDate)) {
                 from.put(competitor, fromDate);
                 to.put(competitor, toDate);
                 overlapWithKnownFixes.put(competitor, overlap);
