@@ -20,6 +20,9 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFac
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -41,7 +44,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
         ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithUserManagementContext,
-        ClientFactoryWithUserManagementService, ConfirmationClientFactory {
+        ClientFactoryWithUserManagementService, ConfirmationClientFactory, PasswordResetClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private WithSecurity securityProvider;
@@ -149,5 +152,10 @@ public class MobileApplicationClientFactory extends
     @Override
     public UserManagementServiceAsync getUserManagement() {
         return securityProvider.getUserManagementService();
+    }
+    
+    @Override
+    public PasswordResetView createPasswordResetView() {
+        return new PasswordResetViewImpl();
     }
 }
