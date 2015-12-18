@@ -51,8 +51,7 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
     public MarkedAsyncCallback(AsyncCallback<T> callback, String category) {
         this.callback = callback;
         this.category = category;
-        
-        if(DebugInfo.isDebugIdEnabled()) {
+        if (DebugInfo.isDebugIdEnabled()) {
             PendingAjaxCallMarker.incrementPendingAjaxCalls(this.category);
         }
     }
@@ -70,7 +69,7 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
         try {
             this.callback.onFailure(cause);
         } finally {
-            if(DebugInfo.isDebugIdEnabled()) {
+            if (DebugInfo.isDebugIdEnabled()) {
                 PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
             }
         }
@@ -89,7 +88,7 @@ public final class MarkedAsyncCallback<T> implements AsyncCallback<T> {
         try {
             this.callback.onSuccess(result);
         } finally {
-            if(DebugInfo.isDebugIdEnabled()) {
+            if (DebugInfo.isDebugIdEnabled()) {
                 PendingAjaxCallMarker.decrementPendingAjaxCalls(this.category);
             }
         }
