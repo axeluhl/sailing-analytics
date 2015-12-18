@@ -117,10 +117,10 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         assertTrue(found);
         competitorPanelForSelection.getCompetitorTable().selectEntry(competitorEntryToSelect);
 
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1);
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName().equals(name));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId().equals(sailId));
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName().equals(boatClassName));
+        assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
+        assertEquals(name, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getName());
+        assertEquals(sailId, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getSailId());
+        assertEquals(boatClassName, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().get(0).getBoatClassName());
         // change competitor
         windowForEdit.switchToWindow();
         dialog = competitorEntry.clickEditButton();
@@ -204,7 +204,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         RaceColumnTableWrapperPO raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
         CellTablePO<DataEntryPO> raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
         final int anzRaceColumns = raceColumnTable.getEntries().size();
-        assertTrue(5 == anzRaceColumns);
+        assertEquals(5, anzRaceColumns);
         
         // Open a second window & setup second window
         windowForEdit.switchToWindow();
@@ -235,6 +235,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         raceColumnTableWrapper = smartphoneTrackingPanel.getRaceColumnTableWrapper();
         raceColumnTable = raceColumnTableWrapper.getRaceColumnTable();
         final int newAnzRaceColumns = raceColumnTable.getEntries().size();
-        assertTrue(7 == newAnzRaceColumns);
+        assertEquals(7, newAnzRaceColumns);
     }
 }
