@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.core.util.Util;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -19,6 +17,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -59,11 +58,10 @@ public class DeviceConfigurationListComposite extends Composite {
         
         configurationTable = createConfigurationTable();
         configurationTable.setVisible(true);
-        // TODO / FIXME Lukas define EntityIdentityComparator
         refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<DeviceConfigurationMatcherDTO>() {
             @Override
             public boolean representSameEntity(DeviceConfigurationMatcherDTO dto1, DeviceConfigurationMatcherDTO dto2) {
-                return Util.equalOrNull(dto1.type.name(), dto2.type.name());
+                return Util.equalsWithNull(dto1.type.name(), dto2.type.name());
             }
 
             @Override
