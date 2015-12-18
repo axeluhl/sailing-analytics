@@ -1212,6 +1212,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
     String useInternalAlgorithm();
     String editMarkPassings();
+    String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
     String setSuppressedPassing();

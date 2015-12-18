@@ -171,6 +171,11 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         this.position = position;
     }
     
+    public void setMarkPosition(LatLng positionLatLng) {
+        this.position = coordinateSystem.getPosition(positionLatLng);
+        this.draw();
+    }
+    
     /**
      * The real-world position where the mark displayed by this overlay is located
      */

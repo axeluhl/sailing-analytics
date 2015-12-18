@@ -96,6 +96,7 @@ import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -398,11 +399,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private boolean orientationChangeInProgress;
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
+    private EditMarkPositionPanel editMarkPositionPanel;
     
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
-            boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter,
+            Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages, boolean showMapControls,
+            boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, RegattaAndRaceIdentifier raceIdentifier,
+            CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -629,6 +631,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               RaceMap.this.redraw();
               trueNorthIndicatorPanel.redraw();
               showAdditionalControls(map);
+              
+              editMarkPositionPanel.setMap(map);
           }
         };
         LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
@@ -1041,6 +1045,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     removedOverlay.removeFromMap();
                 }
             }
+            editMarkPositionPanel.setMarkPositions(courseMarkOverlays);
         }
     }
     
@@ -2632,5 +2637,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected String getLeftControlsIndentStyle() {
         return null;
+    }
+
+    public void setEditMarkPositionPanel(EditMarkPositionPanel editMarkPositionPanel) {
+        this.editMarkPositionPanel = editMarkPositionPanel;
     }
 }
