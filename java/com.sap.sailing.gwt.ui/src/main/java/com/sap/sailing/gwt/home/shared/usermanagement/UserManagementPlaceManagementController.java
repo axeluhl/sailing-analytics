@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementServic
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
@@ -30,9 +31,10 @@ public class UserManagementPlaceManagementController
 
     public UserManagementPlaceManagementController(CF clientFactory,
             PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
+            PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
             PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
             UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration<CF>(clientFactory, createConfirmationNavigation, userProfileNavigation, userManagementView));
+        super(new Configuration<CF>(clientFactory, createConfirmationNavigation, passwordResetPlaceNav, userProfileNavigation, userManagementView));
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -49,12 +51,15 @@ public class UserManagementPlaceManagementController
         private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
+        private final PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav;
 
         public Configuration(CF clientFactory, PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
+                PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
                 PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
                 UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
             this.createConfirmationNavigation = createConfirmationNavigation;
+            this.passwordResetPlaceNav = passwordResetPlaceNav;
             this.userProfileNavigation = userProfileNavigation;
             this.userManagementView = userManagementView;
         }
@@ -85,7 +90,7 @@ public class UserManagementPlaceManagementController
                 return new CreateAccountActivity((CreateAccountPlace) placeToUse, clientFactory,
                         createConfirmationNavigation, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity<CF>((PasswordRecoveryPlace) placeToUse, clientFactory, placeController);
+                return new PasswordRecoveryActivity<CF>((PasswordRecoveryPlace) placeToUse, clientFactory, passwordResetPlaceNav, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity<CF>((LoggedInUserInfoPlace) placeToUse, clientFactory,
                         userProfileNavigation, placeController);

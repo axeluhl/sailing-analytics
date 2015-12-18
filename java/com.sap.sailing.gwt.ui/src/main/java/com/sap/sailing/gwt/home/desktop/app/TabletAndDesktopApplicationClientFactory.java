@@ -69,8 +69,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
         this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
-                this, getHomePlacesNavigator().getCreateConfirmationNavigation(), getHomePlacesNavigator()
-                        .getUserProfileNavigation(), userManagementDisplay, getEventBus());
+                this, getHomePlacesNavigator().getCreateConfirmationNavigation(),
+                getHomePlacesNavigator().getPasswordResetNavigation(),
+                getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
         this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
             @Override
             public void onSignInSuccessful(SignInSuccessfulEvent event) {

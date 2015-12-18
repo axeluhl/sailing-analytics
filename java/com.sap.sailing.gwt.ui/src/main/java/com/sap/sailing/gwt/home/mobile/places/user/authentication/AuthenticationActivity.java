@@ -24,7 +24,8 @@ public class AuthenticationActivity extends AbstractActivity {
         panel.setWidget(userManagementView);
         WrappedPlaceManagementController userManagementController = 
                 new UserManagementPlaceManagementController<MobileApplicationClientFactory>(clientFactory, 
-                        clientFactory.getNavigator().getCreateConfirmationNavigation(), clientFactory
+                        clientFactory.getNavigator().getCreateConfirmationNavigation(),
+                        clientFactory.getNavigator().getPasswordResetNavigation(), clientFactory
                         .getNavigator().getUserProfileNavigation(), userManagementView, eventBus);
         userManagementController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
             @Override

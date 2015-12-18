@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 
@@ -106,5 +107,9 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {
         return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
+    }
+    
+    public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
+        return createGlobalPlaceNavigation(new PasswordResetPlace());
     }
 }

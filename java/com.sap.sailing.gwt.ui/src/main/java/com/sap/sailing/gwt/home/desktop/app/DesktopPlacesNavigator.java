@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.Solutions
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -74,6 +75,10 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {
         return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
+    }
+    
+    public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
+        return createGlobalPlaceNavigation(new PasswordResetPlace());
     }
 
     public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
