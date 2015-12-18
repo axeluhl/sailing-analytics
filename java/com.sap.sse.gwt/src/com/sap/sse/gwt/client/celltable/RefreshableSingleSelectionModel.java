@@ -84,7 +84,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
         if (comp == null || dontcheckSelectionState || item == null || getSelectedObject() == null) {
             super.setSelected(item, selected);
         } else {
-            if(comp.representSameEntity(getSelectedObject(), item)) {
+            if (comp.representSameEntity(getSelectedObject(), item)) {
                 super.setSelected(getSelectedObject(), false); //This old version of item will be deleted with the next clear()
                 super.setSelected(item, selected);
             } else {
