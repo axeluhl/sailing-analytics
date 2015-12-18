@@ -78,5 +78,5 @@ public class ExperimentalFeatures {
     /**
      * Provide buttons for user management login via social services like facebook or google.
      */
-    public static final boolean SHOW_SOCIAL_LOGINS_FOR_USER_MANGEMENT = false;
+    public static final boolean SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT = false;
 }

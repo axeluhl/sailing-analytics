@@ -40,7 +40,7 @@ public class SignInViewImpl extends Composite implements SignInView {
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANGEMENT) {
+        if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT) {
             socialLoginUi.removeFromParent();
         }
     }
