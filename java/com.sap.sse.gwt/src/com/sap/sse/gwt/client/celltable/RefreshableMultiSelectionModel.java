@@ -5,15 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.RangeChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel;
 
 /**
  * This {@link RefreshableMultiSelectionModel} implements the {@link RefreshableSelectionModel} interface. So it
@@ -33,7 +28,7 @@ import com.google.gwt.view.client.SelectionModel;
  *            the type of entries
  */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
-        implements RefreshableSelectionModel<T>, HasData<T> {
+        implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
     private final ListDataProvider<T> listDataProvider;
@@ -62,7 +57,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         super(keyProvider);
         this.comp = comp;
         this.listDataProvider = listDataProvider;
-        this.listDataProvider.addDataDisplay(this);
+        this.listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
     }
 
     /**
@@ -150,7 +145,8 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      * @param newObjects
      *            the new objects to refresh the {@link RefreshableMultiSelectionModel selection model}
      */
-    private void refreshSelectionModel(Iterable<T> newObjects) {
+    @Override
+    public void refreshSelectionModel(Iterable<T> newObjects) {
         if (!dontcheckSelectionState) { // avoid endless recursions
             dontcheckSelectionState = true;
             try {
@@ -179,95 +175,5 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                 dontcheckSelectionState = false;
             }
         }
-    }
-    
-    /**
-     * This method is called when the {@link ListDataProvider} has new elements. It takes the new elements and refreshes
-     * the {@link RefreshableMultiSelectionModel selectionmodel} with them.
-     */
-    @Override
-    public void setRowData(int start, List<? extends T> values) {
-        refreshSelectionModel(listDataProvider.getList());
-    }
-
-    @Override
-    public int getRowCount() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public Range getVisibleRange() {
-        return new Range(0, Integer.MAX_VALUE);
-    }
-
-    @Override
-    public int getVisibleItemCount() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public HandlerRegistration addRangeChangeHandler(Handler handler) {
-        return null;
-    }
-
-    @Override
-    public HandlerRegistration addRowCountChangeHandler(
-            com.google.gwt.view.client.RowCountChangeEvent.Handler handler) {
-        return null;
-    }
-
-    @Override
-    public boolean isRowCountExact() {
-        return false;
-    }
-
-    @Override
-    public void setRowCount(int count) {
-        return;
-    }
-
-    @Override
-    public void setRowCount(int count, boolean isExact) {
-        return;
-    }
-
-    @Override
-    public void setVisibleRange(int start, int length) {
-        return;
-    }
-
-    @Override
-    public void setVisibleRange(Range range) {
-        return;
-    }
-
-    @Override
-    public HandlerRegistration addCellPreviewHandler(com.google.gwt.view.client.CellPreviewEvent.Handler<T> handler) {
-        return null;
-    }
-
-    @Override
-    public SelectionModel<? super T> getSelectionModel() {
-        return null;
-    }
-
-    @Override
-    public T getVisibleItem(int indexOnPage) {
-        return null;
-    }
-
-    @Override
-    public Iterable<T> getVisibleItems() {
-        return null;
-    }
-
-    @Override
-    public void setSelectionModel(SelectionModel<? super T> selectionModel) {
-        return;
-    }
-
-    @Override
-    public void setVisibleRangeAndClearData(Range range, boolean forceRangeChangeEvent) {
-        clear();
     }
 }

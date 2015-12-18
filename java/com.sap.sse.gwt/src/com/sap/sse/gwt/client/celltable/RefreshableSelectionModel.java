@@ -31,10 +31,12 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * @author D064976
  */
 
-public interface RefreshableSelectionModel<T> extends SetSelectionModel<T>, HasData<T> {
+public interface RefreshableSelectionModel<T> extends SetSelectionModel<T> {
     /**
      * @return Returns an instance of {@link EntityIdentityComparator}, to compare objects from the type
      *         <code>&ltT&gt</code>.
      */
     EntityIdentityComparator<T> getEntityIdentityComparator();
+
+    void refreshSelectionModel(Iterable<T> newObjects);
 }
