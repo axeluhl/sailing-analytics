@@ -12,6 +12,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.LinkUtil;
@@ -90,23 +91,22 @@ public class Header extends Composite {
             }
         });
         
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
-            @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
-                if(event.getCtx().isLoggedIn()) {
-                    dropdownTriggerUi.addClassName(HeaderResources.INSTANCE.css().header_navigation_iconsignedin());
-                    signInNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
-                    userDetailsNavigationItem.getElement().getStyle().clearDisplay();
-                    signOutNavigationItem.getElement().getStyle().clearDisplay();
-                } else {
-                    dropdownTriggerUi.removeClassName(HeaderResources.INSTANCE.css().header_navigation_iconsignedin());
-                    signInNavigationItem.getElement().getStyle().clearDisplay();
-                    userDetailsNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
-                    signOutNavigationItem.getElement().getStyle().setDisplay(Display.NONE);
-                    
+        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_MOBILE) {
+            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+                @Override
+                public void onUserChangeEvent(UserManagementContextEvent event) {
+                    String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
+                    UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
+                    signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
+                    userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
+                    signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
                 }
-            }
-        });
+            });
+        } else {
+            signInNavigationItem.removeFromParent();
+            userDetailsNavigationItem.removeFromParent();
+            signOutNavigationItem.removeFromParent();
+        }
     }
     
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
