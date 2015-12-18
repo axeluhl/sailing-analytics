@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
     private final RaceMap raceMap;
     
     private Map<String, CourseMarkOverlay> courseMarkOverlays;
-    private Set<HandlerRegistration> courseMarkListeners;
+    private Set<HandlerRegistration> courseMarkHandlers;
     
     private Set<String> selectedMarks;
 
@@ -42,7 +42,7 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
     public EditMarkPositionPanel(final RaceMap raceMap, final StringMessages stringMessages) {
         
         this.raceMap = raceMap;
-        courseMarkListeners = new HashSet<>();
+        courseMarkHandlers = new HashSet<>();
         selectedMarks = new HashSet<>();
         mapListeners = new HashSet<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
@@ -53,17 +53,22 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
         this.visible = visible;
         if (visible) {
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
+            unregisterCourseMarkHandlers();
             registerCourseMarkListeners();
         } else {
+            raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
-            unregisterListeners(courseMarkListeners); 
+            unregisterCourseMarkHandlers(); 
         }
         super.setVisible(visible);
     }
     
-    private void unregisterListeners(Collection<HandlerRegistration> listeners) {
-        for (final HandlerRegistration listener : listeners) {
-            listener.removeHandler();
+    private void unregisterCourseMarkHandlers() {
+        Iterator<HandlerRegistration> iterator = courseMarkHandlers.iterator();
+        while(iterator.hasNext()) {
+            HandlerRegistration handler = iterator.next();
+            handler.removeHandler();
+            iterator.remove();
         }
     }
 
@@ -75,9 +80,8 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
     }
 
     private void registerCourseMarkListeners() {
-        unregisterListeners(courseMarkListeners);
         for (final Map.Entry<String, CourseMarkOverlay> courseMark : courseMarkOverlays.entrySet()) {
-            courseMarkListeners.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
+            courseMarkHandlers.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
                 @Override
                 public void onEvent(MouseDownMapEvent event) {
                     selectedMarks.add(courseMark.getKey());

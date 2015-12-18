@@ -1803,8 +1803,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public void unregisterAllCourseMarkInfoWindowClickHandlers() {
-        for (HandlerRegistration handler : courseMarkClickHandlers.values()) {
-            handler.removeHandler();
+        Iterator<Entry<String, HandlerRegistration>> iterator = courseMarkClickHandlers.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Entry<String, HandlerRegistration> handler = iterator.next();
+            handler.getValue().removeHandler();
+            iterator.remove();
         }
     }
 
