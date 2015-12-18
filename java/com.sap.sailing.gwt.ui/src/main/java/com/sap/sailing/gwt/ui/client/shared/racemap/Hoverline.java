@@ -23,7 +23,11 @@ public class Hoverline {
         this.options.setMap(polyline.getMap());
         this.options.setPath(polyline.getPath());
         this.options.setStrokeColor(polylineOptions.getStrokeColor());
-        this.options.setZindex(polylineOptions.getZindex());
+        try {
+            this.options.setZindex(polylineOptions.getZindex());  // if the zindex is not set, this line throws an exception in dev mode
+        } catch (Exception e) {
+            // the Z-index of polylineOptions most likely was undefined and therefore cannot be copied (GWT DevMode problem, mostly)
+        }
         this.hoverline = Polyline.newInstance(this.options);
         this.hoverline.setVisible(false);
         polyline.addMouseOverHandler(new MouseOverMapHandler() {
