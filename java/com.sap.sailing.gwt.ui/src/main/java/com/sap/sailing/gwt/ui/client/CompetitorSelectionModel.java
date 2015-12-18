@@ -217,8 +217,8 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         
         Set<CompetitorDTO> oldCompetitorsToRemove = new HashSet<CompetitorDTO>(allCompetitors);
         for (CompetitorDTO newCompetitor : newCompetitors) {
-            if (allCompetitors.contains(newCompetitor)) { // TODO Lukas: should this use an EntityIdentityComparator instead?
-                oldCompetitorsToRemove.remove(newCompetitor); // TODO Lukas: the old competitor object remains in allCompetitors; it is equal but doesn't have to be identical to newCompetitor; should it be replaced?
+            if (allCompetitors.contains(newCompetitor)) { // TODO bug 3413 Lukas: should this use an EntityIdentityComparator instead?
+                oldCompetitorsToRemove.remove(newCompetitor); // TODO bug 3413 Lukas: the old competitor object remains in allCompetitors; it is equal but doesn't have to be identical to newCompetitor; should it be replaced?
             } else {
                 add(newCompetitor, false); // due to the equals definition of CompetitorDTOImpl that compares most fields, state changes lead to a replacement here
                 changed = true;

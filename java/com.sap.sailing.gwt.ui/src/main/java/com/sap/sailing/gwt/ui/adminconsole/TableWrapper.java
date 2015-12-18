@@ -30,7 +30,6 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
-    private final EntityIdentityComparator<T> entityIdentityComparator;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListHandler<T> columnSortHandler;
@@ -47,7 +46,6 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
 
     public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
-        this.entityIdentityComparator = entityIdentityComparator;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         table = new FlushableCellTable<T>(10000, tableRes);
@@ -59,7 +57,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
             SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
                     tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), this.entityIdentityComparator, dataProvider, table);
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator, dataProvider, table);
             columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
             @SuppressWarnings("unchecked")
             S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
