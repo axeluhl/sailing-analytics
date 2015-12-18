@@ -27,7 +27,7 @@ public class PasswordResetViewImpl extends Composite implements PasswordResetVie
     protected PasswordTextBox newPasswordConfirmationUi;
 
     
-    public PasswordResetViewImpl(String messageTitle, String message) {
+    public PasswordResetViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         changePasswordUi.setEnabled(false);
     }
@@ -37,7 +37,7 @@ public class PasswordResetViewImpl extends Composite implements PasswordResetVie
         this.currentPresenter = currentPresenter;
     }
 
-    @UiHandler("changePasswordUi")
+    @UiHandler({ "newPasswordUi", "newPasswordConfirmationUi" })
     void onKeyUp(KeyUpEvent event) {
         changePasswordUi.setEnabled(isInputValid());
     }
