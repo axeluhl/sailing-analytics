@@ -274,6 +274,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 // trackedRaceListHandler.
                 removeTrackedRaceListHandlerTemporarily();
                 leaderboardRaceColumnSelectionChanged();
+                addTrackedRaceListHandler();
             }
         });
         vPanel.add(raceColumnTable);
@@ -450,7 +451,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                     removeTrackedRaceListHandlerTemporarily();
                                     if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
                                         RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
-                                        
                                         if (raceIdentifier != null) {
                                             selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
                                         } else {
@@ -459,6 +459,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                     } else {
                                         trackedRacesListComposite.clearSelection();
                                     }
+                                    addTrackedRaceListHandler();
                                 }
                             }));
         }
@@ -488,6 +489,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesListComposite.fillRegattas(regattas);
         allRegattas.clear();
         Util.addAll(regattas, allRegattas);
+        addTrackedRaceListHandler();
     }
 
     @Override
@@ -685,17 +687,14 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
      * {@link TrackedRacesListComposite} and you don't want to trigger the
      * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent)}
      */
-    protected void removeTrackedRaceListHandlerTemporarily() {
-        if (trackedRaceListHandlerRegistration == null) {
-            return;
+    private void removeTrackedRaceListHandlerTemporarily() {
+        if (trackedRaceListHandlerRegistration != null) {
+            trackedRaceListHandlerRegistration.removeHandler();
+            trackedRaceListHandlerRegistration = null;
         }
-        trackedRaceListHandlerRegistration.removeHandler();
-        trackedRaceListHandlerRegistration = null;
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
-            }
-        });
+    }
+    
+    private void addTrackedRaceListHandler() {
+        trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
     }
 }
