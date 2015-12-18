@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.shared.places.user.passwordreset;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -10,6 +9,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordResetViewImpl extends Composite implements PasswordResetView {
     private static WidgetUiBinder uiBinder = GWT.create(WidgetUiBinder.class);
@@ -19,17 +19,15 @@ public class PasswordResetViewImpl extends Composite implements PasswordResetVie
 
     private Presenter currentPresenter;
 
-    @UiField
-    protected Button changePasswordUi;
-    @UiField
-    protected PasswordTextBox newPasswordUi;
-    @UiField
-    protected PasswordTextBox newPasswordConfirmationUi;
+    @UiField StringMessages i18n_sec;
+    @UiField protected Button changePasswordUi;
+    @UiField protected PasswordTextBox newPasswordUi;
+    @UiField protected PasswordTextBox newPasswordConfirmationUi;
 
-    
     public PasswordResetViewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        changePasswordUi.setEnabled(false);
+        setPlaceholder(newPasswordUi, i18n_sec.newPasswordPlaceholder());
+        setPlaceholder(newPasswordConfirmationUi, i18n_sec.passwordRepeatPlaceholder());
     }
 
     @Override
@@ -37,21 +35,12 @@ public class PasswordResetViewImpl extends Composite implements PasswordResetVie
         this.currentPresenter = currentPresenter;
     }
 
-    @UiHandler({ "newPasswordUi", "newPasswordConfirmationUi" })
-    void onKeyUp(KeyUpEvent event) {
-        changePasswordUi.setEnabled(isInputValid());
-    }
-
-    private boolean isInputValid() {
-        String newP = newPasswordUi.getValue();
-        String repP = newPasswordConfirmationUi.getValue();
-        return (newP != null && !newP.isEmpty() && repP != null && !repP.isEmpty());
-    }
-
     @UiHandler("changePasswordUi")
     void onChangePasswordClicked(ClickEvent event) {
-        if (isInputValid()) {
-            currentPresenter.resetPassword(newPasswordUi.getValue());
-        }
+        currentPresenter.resetPassword(newPasswordUi.getValue(), newPasswordConfirmationUi.getValue());
+    }
+    
+    private void setPlaceholder(Widget widget, String placeholderText) {
+        widget.getElement().setAttribute("placeholder", placeholderText);
     }
 }

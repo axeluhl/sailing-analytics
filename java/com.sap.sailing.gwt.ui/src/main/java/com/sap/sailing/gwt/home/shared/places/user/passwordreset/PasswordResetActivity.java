@@ -6,12 +6,14 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordResetActivity extends AbstractActivity implements PasswordResetView.Presenter {
     private final PasswordResetPlace place;
     private final PasswordResetClientFactory clientFactory;
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
+    private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
 
     public PasswordResetActivity(PasswordResetPlace place, PasswordResetClientFactory clientFactory) {
         this.place = place;
@@ -24,10 +26,16 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
         view.setPresenter(this);
         panel.setWidget(view.asWidget());
     }
-
+    
     @Override
-    public void resetPassword(String newPassword) {
-        clientFactory.getUserManagement().updateSimpleUserPassword(place.getName(), null, place.getResetSecret(),
+    public void resetPassword(String newPassword, String newPasswordConfirmation) {
+        final String username = place.getName();
+        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            Window.alert(errorMessage);
+            return;
+        }
+        clientFactory.getUserManagement().updateSimpleUserPassword(username, null, place.getResetSecret(),
                 newPassword, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
