@@ -1615,6 +1615,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         public boolean representSameEntity(LeaderboardRowDTO dto1, LeaderboardRowDTO dto2) {
                             return dto1.competitor.getIdAsString().equals(dto2.competitor.getIdAsString());
                         }
+                        @Override
+                        public int hashCode(LeaderboardRowDTO t) {
+                            return t.competitor.getIdAsString().hashCode();
+                        }
                     }, getData(), leaderboardTable);
             competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         }

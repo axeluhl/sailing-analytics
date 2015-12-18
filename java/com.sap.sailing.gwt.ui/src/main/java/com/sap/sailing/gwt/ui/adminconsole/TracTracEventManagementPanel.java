@@ -383,10 +383,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
                 new EntityIdentityComparator<TracTracRaceRecordDTO>() {
-
                     @Override
                     public boolean representSameEntity(TracTracRaceRecordDTO dto1, TracTracRaceRecordDTO dto2) {
                         return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(TracTracRaceRecordDTO t) {
+                        return t.id.hashCode();
                     }
                 }, raceList, racesTable) {
                     @Override

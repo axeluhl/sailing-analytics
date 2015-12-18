@@ -26,6 +26,10 @@ public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> exte
                     public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
                         return dto1.getIdAsString().equals(dto2.getIdAsString());
                     }
+                    @Override
+                    public int hashCode(MarkDTO t) {
+                        return t.getIdAsString().hashCode();
+                    }
                 });
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override

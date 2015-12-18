@@ -306,6 +306,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                     public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
                         return dto1.name.equals(dto2.name);
                     }
+                    @Override
+                    public int hashCode(StrippedLeaderboardDTO t) {
+                        return t.name.hashCode();
+                    }
                 }, listDataProvider, leaderboardTable) {};
         selectionCheckboxColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(selectionCheckboxColumn, new Comparator<StrippedLeaderboardDTO>() {

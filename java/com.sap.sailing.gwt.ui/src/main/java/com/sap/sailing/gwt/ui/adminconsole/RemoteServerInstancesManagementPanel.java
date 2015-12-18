@@ -162,11 +162,14 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         
         refreshableServerSelectionModel = new RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO>(
                 new EntityIdentityComparator<RemoteSailingServerReferenceDTO>() {
-
                     @Override
                     public boolean representSameEntity(RemoteSailingServerReferenceDTO dto1,
                             RemoteSailingServerReferenceDTO dto2) {
                         return dto1.getUrl().equals(dto2.getUrl());
+                    }
+                    @Override
+                    public int hashCode(RemoteSailingServerReferenceDTO t) {
+                        return t.getUrl().hashCode();
                     }
                 }, serverDataProvider);
         serverTable.setSelectionModel(refreshableServerSelectionModel);

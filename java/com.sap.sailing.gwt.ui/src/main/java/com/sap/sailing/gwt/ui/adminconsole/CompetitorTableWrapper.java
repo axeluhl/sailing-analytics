@@ -34,10 +34,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
-
                     @Override
                     public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
                         return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(CompetitorDTO t) {
+                        return t.getIdAsString().hashCode();
                     }
                 });
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();

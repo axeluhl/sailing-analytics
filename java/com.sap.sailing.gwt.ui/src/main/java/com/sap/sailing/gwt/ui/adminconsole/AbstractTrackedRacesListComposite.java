@@ -121,6 +121,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
                 return dto1.getRaceIdentifier().equals(dto2.getRaceIdentifier());
             }
+            @Override
+            public int hashCode(RaceDTO t) {
+                return t.getRaceIdentifier().hashCode();
+            }
         };
         if (multiSelection) {
             this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(
