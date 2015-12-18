@@ -171,6 +171,10 @@ public class MediaPanel extends FlowPanel {
             public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
                 return dto1.dbId.equals(dto2.dbId);
             }
+            @Override
+            public int hashCode(MediaTrack t) {
+                return t.dbId.hashCode();
+            }
         }, mediaTrackListDataProvider);
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());

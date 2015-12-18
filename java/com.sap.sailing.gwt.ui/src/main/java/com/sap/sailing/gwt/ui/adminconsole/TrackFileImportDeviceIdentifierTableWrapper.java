@@ -16,11 +16,14 @@ RefreshableSingleSelectionModel<TrackFileImportDeviceIdentifierDTO>> {
             ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
                 new EntityIdentityComparator<TrackFileImportDeviceIdentifierDTO>() {
-
                     @Override
                     public boolean representSameEntity(TrackFileImportDeviceIdentifierDTO dto1,
                             TrackFileImportDeviceIdentifierDTO dto2) {
                         return dto1.uuidAsString.equals(dto2.uuidAsString);
+                    }
+                    @Override
+                    public int hashCode(TrackFileImportDeviceIdentifierDTO t) {
+                        return t.uuidAsString.hashCode();
                     }
                 });
         

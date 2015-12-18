@@ -197,10 +197,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
                 new EntityIdentityComparator<StrippedLeaderboardDTO>() {
-
                     @Override
                     public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
                         return dto1.name.equals(dto2.name);
+                    }
+                    @Override
+                    public int hashCode(StrippedLeaderboardDTO t) {
+                        return t.name.hashCode();
                     }
                 }, leaderboardsProvider, leaderboardsTable) {
         };
@@ -377,6 +380,10 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             public boolean representSameEntity(StrippedLeaderboardDTO dto1,
                                     StrippedLeaderboardDTO dto2) {
                                 return dto1.name.equals(dto2.name);
+                            }
+                            @Override
+                            public int hashCode(StrippedLeaderboardDTO t) {
+                                return t.name.hashCode();
                             }
                         }, groupDetailsProvider, groupDetailsTable) {
         };
@@ -581,10 +588,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         };
         refreshableGroupsSelectionModel = new RefreshableMultiSelectionModel<>(groupsKeyProvider,
                 new EntityIdentityComparator<LeaderboardGroupDTO>() {
-
                     @Override
                     public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
                         return dto1.getId().equals(dto2.getId());
+                    }
+                    @Override
+                    public int hashCode(LeaderboardGroupDTO t) {
+                        return t.getId().hashCode();
                     }
                 }, groupsProvider);
         refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

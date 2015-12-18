@@ -35,8 +35,12 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
                 new EntityIdentityComparator<DeviceMappingDTO>() {
                     @Override
                     public boolean representSameEntity(DeviceMappingDTO dto1, DeviceMappingDTO dto2) {
-                        return dto1.deviceIdentifier.equals(dto2.deviceIdentifier) &&
-                                dto1.mappedTo.equals(dto2.mappedTo);
+                        return dto1.deviceIdentifier.deviceId.equals(dto2.deviceIdentifier.deviceId) &&
+                                dto1.mappedTo.getIdAsString().equals(dto2.mappedTo.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(DeviceMappingDTO t) {
+                        return t.deviceIdentifier.deviceId.concat(t.mappedTo.getIdAsString()).hashCode();
                     }
                 });
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());

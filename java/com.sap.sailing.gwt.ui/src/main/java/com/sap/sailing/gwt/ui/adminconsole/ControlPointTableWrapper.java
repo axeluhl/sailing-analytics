@@ -15,10 +15,13 @@ public class ControlPointTableWrapper<S extends RefreshableSelectionModel<Contro
             ErrorReporter errorReporter) {
         super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ true,
                 new EntityIdentityComparator<ControlPointDTO>() {
-
                     @Override
                     public boolean representSameEntity(ControlPointDTO dto1, ControlPointDTO dto2) {
                         return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(ControlPointDTO t) {
+                        return t.getIdAsString().hashCode();
                     }
                 });
         TextColumn<ControlPointDTO> nameColumn = new TextColumn<ControlPointDTO>() {

@@ -36,6 +36,11 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                 return dto1.getA().getName().toString().equals(dto2.getA().getName().toString()) &&
                         dto1.getB().getName().toString().equals(dto2.getB().getName().toString());
             }
+
+            @Override
+            public int hashCode(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
+                return t.getA().getName().toString().concat(t.getB().getName().toString()).hashCode();
+            }
         });
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
                 new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {

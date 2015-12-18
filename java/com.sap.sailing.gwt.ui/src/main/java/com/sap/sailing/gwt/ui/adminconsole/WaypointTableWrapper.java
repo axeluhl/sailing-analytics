@@ -20,6 +20,10 @@ public class WaypointTableWrapper<S extends RefreshableSelectionModel<WaypointDT
                     public boolean representSameEntity(WaypointDTO dto1, WaypointDTO dto2) {
                         return dto1.getName().equals(dto2.getName());
                     }
+                    @Override
+                    public int hashCode(WaypointDTO t) {
+                        return t.getName().hashCode();
+                    }
                 });
         
         TextColumn<WaypointDTO> nameColumn = new TextColumn<WaypointDTO>() {

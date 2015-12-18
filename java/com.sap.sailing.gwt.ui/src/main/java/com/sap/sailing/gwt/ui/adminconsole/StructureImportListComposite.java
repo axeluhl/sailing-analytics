@@ -47,6 +47,10 @@ public class StructureImportListComposite extends RegattaListComposite implement
                     public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
                         return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
                     }
+                    @Override
+                    public int hashCode(RegattaDTO t) {
+                        return t.getRegattaIdentifier().hashCode();
+                    }
                 }, regattaListDataProvider, table) {
             @Override
             public Boolean getValue(RegattaDTO row) {

@@ -265,10 +265,13 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
                 new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
-
                     @Override
                     public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
                         return dto1.raceId.equals(dto2.raceId);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingRaceRecordDTO t) {
+                        return t.raceId.hashCode();
                     }
                 }, raceList) {
         });

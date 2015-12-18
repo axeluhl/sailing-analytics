@@ -194,6 +194,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
                         return dto1.id.equals(dto2.id);
                     }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
                 },eventListDataProvider,table) {
 
             @Override

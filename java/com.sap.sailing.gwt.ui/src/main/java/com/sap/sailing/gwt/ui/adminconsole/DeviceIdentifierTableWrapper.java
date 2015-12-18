@@ -18,6 +18,10 @@ public class DeviceIdentifierTableWrapper extends TableWrapper<DeviceIdentifierD
                     public boolean representSameEntity(DeviceIdentifierDTO dto1, DeviceIdentifierDTO dto2) {
                         return dto1.deviceId.equals(dto2.deviceId);
                     }
+                    @Override
+                    public int hashCode(DeviceIdentifierDTO t) {
+                        return t.deviceId.hashCode();
+                    }
                 });
         
         TextColumn<DeviceIdentifierDTO> typeColumn = new TextColumn<DeviceIdentifierDTO>() {
