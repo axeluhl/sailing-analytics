@@ -1776,7 +1776,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
         final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, markDTO, coordinateSystem);
-        courseMarkClickHandlers.put(markDTO.getName(), courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTO, courseMarkOverlay)));
         return courseMarkOverlay;
     }
     
@@ -1793,6 +1792,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         public void onEvent(ClickMapEvent event) {
             LatLng latlng = courseMarkOverlay.getMarkLatLngPosition();
             showMarkInfoWindow(markDTO, latlng);
+            GWT.log("showWindow");
         }
     }
     
@@ -1800,6 +1800,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTOName);
         courseMarkClickHandlers.put(markDTOName, 
                 courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTOs.get(markDTOName), courseMarkOverlay)));
+        GWT.log("register");
     }
     
     public void registerAllCourseMarkInfoWindowClickHandlers() {
@@ -1808,11 +1809,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(name);
             courseMarkClickHandlers.put(name, 
                     courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTO, courseMarkOverlay)));
+            GWT.log("register");
         }
     }
     
     public void unregisterAllCourseMarkInfoWindowClickHandlers() {
         for (HandlerRegistration handler : courseMarkClickHandlers.values()) {
+            GWT.log("unregister");
             handler.removeHandler();
         }
     }
