@@ -265,7 +265,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
         super.setVisible(visible);
-        
     }
 
     @Override

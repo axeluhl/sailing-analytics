@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
@@ -16,21 +15,20 @@ import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
-import com.google.gwt.maps.client.overlays.MarkerOptions;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class EditMarkPositionPanel  extends AbsolutePanel implements Component<AbstractSettings>, RaceSelectionChangeListener {
+    private final RaceMap raceMap;
+    
     private Map<String, CourseMarkOverlay> courseMarkOverlays;
     private Set<HandlerRegistration> courseMarkListeners;
     
@@ -39,25 +37,49 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
     private MapWidget map;
     private Set<HandlerRegistration> mapListeners;
     
-    public EditMarkPositionPanel(final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, final Timer timer) {
-        this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
+    private boolean visible;
+    
+    public EditMarkPositionPanel(final RaceMap raceMap, final StringMessages stringMessages) {
+        
+        this.raceMap = raceMap;
         courseMarkListeners = new HashSet<>();
         selectedMarks = new HashSet<>();
         mapListeners = new HashSet<>();
+        this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
+        setVisible(false);
     }
     
-    public void setMarkPositions(final Map<String, CourseMarkOverlay> courseMarkOverlays) {
-        this.courseMarkOverlays = courseMarkOverlays;
-        MarkerOptions.newInstance().setDraggable(true);
-        for (final HandlerRegistration listener : courseMarkListeners) {
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+        if (visible) {
+            raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
+            registerCourseMarkListeners();
+        } else {
+            raceMap.registerAllCourseMarkInfoWindowClickHandlers();
+            unregisterListeners(courseMarkListeners); 
+        }
+        super.setVisible(visible);
+    }
+    
+    private void unregisterListeners(Collection<HandlerRegistration> listeners) {
+        for (final HandlerRegistration listener : listeners) {
             listener.removeHandler();
         }
+    }
+
+    public void setMarkOverlays(final Map<String, CourseMarkOverlay> courseMarkOverlays) {
+        this.courseMarkOverlays = courseMarkOverlays;
+        if (visible) {
+            registerCourseMarkListeners();
+        }
+    }
+
+    private void registerCourseMarkListeners() {
+        unregisterListeners(courseMarkListeners);
         for (final Map.Entry<String, CourseMarkOverlay> courseMark : courseMarkOverlays.entrySet()) {
             courseMarkListeners.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
                 @Override
                 public void onEvent(MouseDownMapEvent event) {
-                    GWT.log(courseMark.getKey() + " add");
                     selectedMarks.add(courseMark.getKey());
                     MapOptions mapOptions = MapOptions.newInstance(false);
                     mapOptions.setDraggable(false);
@@ -110,16 +132,13 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
             @Override
             public void onEvent(MouseMoveMapEvent event) {
                 for (final String markName : selectedMarks) {
-                    String log = markName + " move: " + courseMarkOverlays.get(markName).getPosition() + " / ";
                     courseMarkOverlays.get(markName).setMarkPosition(event.getMouseEvent().getLatLng());
-                    GWT.log(log + courseMarkOverlays.get(markName).getPosition());
                 }
             }
         }));
         mapListeners.add(this.map.addClickHandler(new ClickMapHandler() {
             @Override
             public void onEvent(ClickMapEvent event) {
-                GWT.log("click");
                 selectedMarks.removeAll(selectedMarks);
                 MapOptions mapOptions = MapOptions.newInstance(false);
                 mapOptions.setDraggable(true);

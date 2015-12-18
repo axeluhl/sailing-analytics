@@ -271,8 +271,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             components.add(editMarkPassingPanel);
-            editMarkPositionPanel = new EditMarkPositionPanel(sailingService, selectedRaceIdentifier,
-                    stringMessages, errorReporter, timer);
+            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, stringMessages);
             raceMap.setEditMarkPositionPanel(editMarkPositionPanel);
             components.add(editMarkPositionPanel);
         }

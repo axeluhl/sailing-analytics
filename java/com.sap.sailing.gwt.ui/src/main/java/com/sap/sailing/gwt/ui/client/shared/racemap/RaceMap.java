@@ -22,6 +22,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
@@ -268,6 +269,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Map overlays with html5 canvas used to display course marks including buoy zones
      */
     private final Map<String, CourseMarkOverlay> courseMarkOverlays;
+    
+    private final Map<String, HandlerRegistration> courseMarkClickHandlers;
 
     private final Map<String, MarkDTO> markDTOs;
 
@@ -423,6 +426,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
+        courseMarkClickHandlers = new HashMap<String, HandlerRegistration>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
@@ -1028,6 +1032,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseMarkOverlay.setSelected(isSelected);
                         courseMarkOverlays.put(markDTO.getName(), courseMarkOverlay);
                         markDTOs.put(markDTO.getName(), markDTO);
+                        registerCourseMarkInfoWindowClickHandler(markDTO.getName());
                         courseMarkOverlay.addToMap();
                     } else {
                         courseMarkOverlay.setMarkPosition(markDTO.position);
@@ -1045,7 +1050,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     removedOverlay.removeFromMap();
                 }
             }
-            editMarkPositionPanel.setMarkPositions(courseMarkOverlays);
+            editMarkPositionPanel.setMarkOverlays(courseMarkOverlays);
         }
     }
     
@@ -1771,14 +1776,45 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected CourseMarkOverlay createCourseMarkOverlay(int zIndex, final MarkDTO markDTO) {
         final CourseMarkOverlay courseMarkOverlay = new CourseMarkOverlay(map, zIndex, markDTO, coordinateSystem);
-        courseMarkOverlay.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                LatLng latlng = courseMarkOverlay.getMarkLatLngPosition();
-                showMarkInfoWindow(markDTO, latlng);
-            }
-        });
+        courseMarkClickHandlers.put(markDTO.getName(), courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTO, courseMarkOverlay)));
         return courseMarkOverlay;
+    }
+    
+    private class CourseMarkInfoWindowClickHandler implements ClickMapHandler {
+        private final MarkDTO markDTO;
+        private final CourseMarkOverlay courseMarkOverlay;
+        
+        public CourseMarkInfoWindowClickHandler(MarkDTO markDTO, CourseMarkOverlay courseMarkOverlay) {
+            this.markDTO = markDTO;
+            this.courseMarkOverlay = courseMarkOverlay;
+        }
+        
+        @Override
+        public void onEvent(ClickMapEvent event) {
+            LatLng latlng = courseMarkOverlay.getMarkLatLngPosition();
+            showMarkInfoWindow(markDTO, latlng);
+        }
+    }
+    
+    public void registerCourseMarkInfoWindowClickHandler(final String markDTOName) {
+        final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTOName);
+        courseMarkClickHandlers.put(markDTOName, 
+                courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTOs.get(markDTOName), courseMarkOverlay)));
+    }
+    
+    public void registerAllCourseMarkInfoWindowClickHandlers() {
+        for (MarkDTO markDTO : markDTOs.values()) {
+            final String name = markDTO.getName();
+            final CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(name);
+            courseMarkClickHandlers.put(name, 
+                    courseMarkOverlay.addClickHandler(new CourseMarkInfoWindowClickHandler(markDTO, courseMarkOverlay)));
+        }
+    }
+    
+    public void unregisterAllCourseMarkInfoWindowClickHandlers() {
+        for (HandlerRegistration handler : courseMarkClickHandlers.values()) {
+            handler.removeHandler();
+        }
     }
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
