@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.home.shared.usermanagement.create;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -49,13 +51,24 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @Override
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
+        selectAll(emailUi);
+    }
+    
+    @Override
+    protected void onLoad() {
+        selectAll(emailUi);
     }
     
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
-        String username = usernameUi.getValue(), email = emailUi.getValue();
-        String password = passwordUi.getValue(), passwordConfirmation = passwordConfirmationUi.getValue();
-        presenter.createAccount(username, email, password, passwordConfirmation);
+        triggerCreateAccount();
+    }
+    
+    @UiHandler({ "emailUi", "usernameUi", "passwordUi", "passwordConfirmationUi"})
+    void onCreateAccountKeyPressed(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            triggerCreateAccount();
+        }
     }
     
     @UiHandler("signInUi")
@@ -63,8 +76,19 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         presenter.signIn();
     }
     
+    private void triggerCreateAccount() {
+        String username = usernameUi.getValue(), email = emailUi.getValue();
+        String password = passwordUi.getValue(), passwordConfirmation = passwordConfirmationUi.getValue();
+        presenter.createAccount(username, email, password, passwordConfirmation);
+    }
+    
     private void setPlaceholder(Widget widget, String placeholderText) {
         widget.getElement().setAttribute("placeholder", placeholderText);
+    }
+    
+    private void selectAll(TextBox textBox) {
+        textBox.setFocus(true);
+        textBox.selectAll();
     }
     
 }
