@@ -1,16 +1,16 @@
 package com.sap.sse.gwt.client.celltable;
 
-import java.util.ArrayList;
 import java.util.List;
+
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RangeChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.google.gwt.view.client.RangeChangeEvent.Handler;
 
 /**
  * This {@link RefreshableSingleSelectionModel} implements the {@link RefreshableSelectionModel} interface. So it
@@ -138,7 +138,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      */
     @Override
     public void setRowData(int start, List<? extends T> values) {
-        refreshSelectionModel(new ArrayList<>(listDataProvider.getList()));
+        refreshSelectionModel(listDataProvider.getList());
     }
 
     @Override
