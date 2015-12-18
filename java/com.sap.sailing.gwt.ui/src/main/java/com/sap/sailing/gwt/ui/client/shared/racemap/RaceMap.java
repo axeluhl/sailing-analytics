@@ -292,6 +292,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final CompetitorSelectionProvider competitorSelection;
     
+    private final RaceCompetitorSet raceCompetitorSet;
+    
     private List<RegattaAndRaceIdentifier> selectedRaces;
 
     /**
@@ -426,6 +428,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         this.competitorSelection = competitorSelection;
+        this.raceCompetitorSet = new RaceCompetitorSet(competitorSelection);
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
@@ -885,8 +888,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         // overlap if it happens after this update.
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
-                    (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null)), GET_RACE_MAP_DATA_CATEGORY,
-                getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
+                    (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID()),
+            GET_RACE_MAP_DATA_CATEGORY,
+            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
