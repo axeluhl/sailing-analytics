@@ -18,10 +18,10 @@ public class PasswordResetPlace extends AbstractBasePlace implements HasMobileVe
         this("", "", "");
     }
 
-    public PasswordResetPlace(String name, String email, String validationSecret) {
+    public PasswordResetPlace(String name, String email, String resetSecret) {
         this.name = name;
         this.email = email;
-        this.resetSecret = validationSecret;
+        this.resetSecret = resetSecret;
     }
 
     public String getName() {
