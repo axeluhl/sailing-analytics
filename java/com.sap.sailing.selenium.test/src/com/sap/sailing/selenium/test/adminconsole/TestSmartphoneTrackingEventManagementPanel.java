@@ -106,7 +106,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
 
             TrackedRacesListPO trackedRaces = smartphoneTrackingPanel.getTrackedRaceListComposite();
             List<DataEntryPO> seleceted = trackedRaces.getTrackedRacesTable().getSelectedEntries();
-            assertEquals(seleceted.size(), 1);
+            assertEquals(1, seleceted.size());
             assertEquals(this.trackedRaces.get(i).race, seleceted.get(0).getColumnContent("Race"));
         }
     }
