@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -272,7 +274,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 // trackedRaceListHandler.
                 removeTrackedRaceListHandlerTemporarily();
                 leaderboardRaceColumnSelectionChanged();
-                addTrackedRaceListHandler();
             }
         });
         vPanel.add(raceColumnTable);
@@ -457,7 +458,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                                     } else {
                                         trackedRacesListComposite.clearSelection();
                                     }
-                                    addTrackedRaceListHandler();
                                 }
                             }));
         }
@@ -487,7 +487,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         trackedRacesListComposite.fillRegattas(regattas);
         allRegattas.clear();
         Util.addAll(regattas, allRegattas);
-        addTrackedRaceListHandler();
     }
 
     @Override
@@ -678,21 +677,25 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
     
     /**
-     * Removes the {@link SelectionChangeEvent.Handler}. The handler can be added again using
-     * {@link #addTrackedRaceListHandler()}.
+     * Removes the {@link SelectionChangeEvent.Handler} until the browser regains control. The handler will be added
+     * again using {@link Scheduler#scheduleDeferred(ScheduledCommand)} method.
      * <p>
      * Use this method if you change the {@link ListDataProvider} or {@link RefreshableSelectionModel} of
      * {@link TrackedRacesListComposite} and you don't want to trigger the
      * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent)}
      */
     private void removeTrackedRaceListHandlerTemporarily() {
-        if (trackedRaceListHandlerRegistration != null) {
-            trackedRaceListHandlerRegistration.removeHandler();
-            trackedRaceListHandlerRegistration = null;
+        if (trackedRaceListHandlerRegistration == null) {
+            return;
         }
-    }
-    
-    private void addTrackedRaceListHandler() {
-        trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel.addSelectionChangeHandler(trackedRaceListHandler);
+        trackedRaceListHandlerRegistration.removeHandler();
+        trackedRaceListHandlerRegistration = null;
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                trackedRaceListHandlerRegistration = refreshableTrackedRaceSelectionModel
+                        .addSelectionChangeHandler(trackedRaceListHandler);
+            }
+        });
     }
 }
