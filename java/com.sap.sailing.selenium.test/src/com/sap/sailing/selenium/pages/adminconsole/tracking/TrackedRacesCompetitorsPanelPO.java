@@ -16,9 +16,12 @@ public class TrackedRacesCompetitorsPanelPO extends PageArea {
     
     @FindBy(how = BySeleniumId.class, using = "CompetitorsTable")
     private WebElement competitorsTable;
+    
+    public final WebDriver driver;
 
     public TrackedRacesCompetitorsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
+        this.driver = driver;
     }
     
     public TrackedRacesCompetitorEditDialogPO pushAddButton() {

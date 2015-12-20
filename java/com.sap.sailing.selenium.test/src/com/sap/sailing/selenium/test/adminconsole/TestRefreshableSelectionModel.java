@@ -9,6 +9,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.WebDriverWindow;
 import com.sap.sailing.selenium.core.WindowManager;
@@ -132,8 +135,18 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
         // assert selection
         windowForSelection.switchToWindow();
+        
         competitorPanelForSelection.pushRefreshButton();
-        assertTrue(competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1);
+        WebDriverWait waitTimer = new WebDriverWait(competitorPanelForSelection.driver, 10);
+        ExpectedCondition<Boolean> condition = new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver arg0) {
+                return competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size() == 1;
+            }
+        };
+        waitTimer.until(condition);
+        
+        assertEquals(1, competitorPanelForSelection.getCompetitorTable().getSelectedEntries().size());
         for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
             String itName = it.getName();
             if (itName.equals(changedName)) {
