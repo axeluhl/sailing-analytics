@@ -7,6 +7,7 @@ import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
 
 public class TrackedRacesCompetitorTablePO extends CellTablePO<CompetitorEntry> {
@@ -45,8 +46,8 @@ public class TrackedRacesCompetitorTablePO extends CellTablePO<CompetitorEntry> 
         }
 
         public TrackedRacesCompetitorEditDialogPO clickEditButton() {
-            this.editButton.click();
-            waitForAjaxRequests();
+            WebElement action = ActionsHelper.findEditAction(getWebElement());
+            action.click();
             WebElement dialog = findElementBySeleniumId(this.driver, "CompetitorEditDialog");
             return new TrackedRacesCompetitorEditDialogPO(this.driver, dialog);
         }

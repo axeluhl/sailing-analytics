@@ -37,19 +37,11 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         private final AbstractImagePrototype imagePrototype;
         private final String actionName;
         private final String tooltip;
-        private String debugId;
         public ImageSpec(String actionName, String tooltip, AbstractImagePrototype imagePrototype) {
             super();
             this.imagePrototype = imagePrototype;
             this.actionName = actionName;
             this.tooltip = tooltip;
-        }
-        public ImageSpec(String actionName, String tooltip, AbstractImagePrototype imagePrototype, String debugId) {
-            super();
-            this.imagePrototype = imagePrototype;
-            this.actionName = actionName;
-            this.tooltip = tooltip;
-            this.debugId = debugId;
         }
         public AbstractImagePrototype getImagePrototype() {
             return imagePrototype;
@@ -59,9 +51,6 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         }
         public String getTooltip() {
             return tooltip;
-        }
-        public String getDebugId() {
-            return debugId;
         }
     }
 
@@ -76,9 +65,6 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
          */
         @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\">{3}</div>")
         SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
-        
-        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\" selenium-id=\"{4}\">{3}</div>")
-        SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value, String seleniumId);
     }
 
     public ImagesBarCell() {
@@ -172,13 +158,8 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
             SafeStyles imgStyle = getImageStyle();
             for (ImageSpec imageSpec : getImageSpecs()) {
                 SafeHtml rendered;
-                if (imageSpec.getDebugId() != null) {
-                    rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
-                            imageSpec.getImagePrototype().getSafeHtml(), imageSpec.getDebugId());
-                } else {
-                    rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
-                            imageSpec.getImagePrototype().getSafeHtml());
-                }
+                rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
+                        imageSpec.getImagePrototype().getSafeHtml());
                 sb.append(rendered);
             }
         }
