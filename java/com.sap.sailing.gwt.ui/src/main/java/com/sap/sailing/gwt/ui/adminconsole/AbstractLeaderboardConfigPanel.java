@@ -682,7 +682,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
      * <p>
      * Use this method if you change the {@link ListDataProvider} or {@link RefreshableSelectionModel} of
      * {@link TrackedRacesListComposite} and you don't want to trigger the
-     * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent)}
+     * {@link SelectionChangeEvent.Handler#onSelectionChange(SelectionChangeEvent)}.
      */
     private void removeTrackedRaceListHandlerTemporarily() {
         if (trackedRaceListHandlerRegistration == null) {
@@ -690,6 +690,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         }
         trackedRaceListHandlerRegistration.removeHandler();
         trackedRaceListHandlerRegistration = null;
+        // It is necessary to do this with the ScheduleDeferred() method,
+        // because the SelectionChangeEvent isn't fired directly after
+        // selection changes. So an remove of SelectionChangeHandler before 
+        // the selection change and and new registration directly after it
+        // isn't possible.
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
