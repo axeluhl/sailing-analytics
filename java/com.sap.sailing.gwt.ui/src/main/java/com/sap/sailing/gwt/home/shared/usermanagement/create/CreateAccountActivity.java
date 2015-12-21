@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -41,7 +42,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     }
     
     @Override
-    public void createAccount(String username, String email, final String password, String passwordConfirmation) {
+    public void createAccount(final String username, String email, final String password, String passwordConfirmation) {
         String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             view.setErrorMessage(errorMessage);
@@ -60,7 +61,13 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             
             @Override
             public void onFailure(Throwable caught) {
-                view.setErrorMessage("Error occured! Creating account failed.");
+                if (caught instanceof UserManagementException) {
+                    if (UserManagementException.USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
+                        Window.alert(i18n_sec.userAlreadyExists(username));
+                    }
+                } else {
+                    Window.alert(i18n_sec.errorCreatingUser(username, caught.getMessage()));
+                }
             }
         });
     }
