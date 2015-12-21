@@ -35,6 +35,7 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
             Window.alert(errorMessage);
             return;
         }
+        
         clientFactory.getUserManagement().updateSimpleUserPassword(username, null, place.getResetSecret(),
                 newPassword, new AsyncCallback<Void>() {
                     @Override
@@ -55,7 +56,7 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                        clientFactory.getPasswordResttedConfirmationNavigation(username).goToPlace();
                     }
                 });
     }

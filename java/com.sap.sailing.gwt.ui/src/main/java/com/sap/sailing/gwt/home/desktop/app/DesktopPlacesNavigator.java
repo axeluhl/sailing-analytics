@@ -77,6 +77,10 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
     }
     
+    public PlaceNavigation<ConfirmationPlace> getPasswordResttedConfirmationNavigation(String username) {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_SEND, username));
+    }
+    
     public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
         return createGlobalPlaceNavigation(new PasswordResetPlace());
     }

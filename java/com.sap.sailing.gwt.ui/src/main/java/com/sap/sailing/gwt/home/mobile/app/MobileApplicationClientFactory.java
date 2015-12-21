@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.mobile.places.error.ErrorViewImpl;
 import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
@@ -20,6 +21,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFac
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
@@ -157,5 +159,10 @@ public class MobileApplicationClientFactory extends
     @Override
     public PasswordResetView createPasswordResetView() {
         return new PasswordResetViewImpl();
+    }
+    
+    @Override
+    public PlaceNavigation<ConfirmationPlace> getPasswordResttedConfirmationNavigation(String username) {
+        return getNavigator().getPasswordResttedConfirmationNavigation(username);
     }
 }
