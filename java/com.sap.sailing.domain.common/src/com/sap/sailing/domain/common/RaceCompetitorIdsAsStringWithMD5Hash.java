@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
