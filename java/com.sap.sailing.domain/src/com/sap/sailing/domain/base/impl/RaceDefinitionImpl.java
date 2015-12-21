@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
@@ -27,6 +28,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Map<Serializable, Boat> competitorBoats;
     private final BoatClass boatClass;
     private final Serializable id;
+    private final RaceCompetitorIdsAsStringWithMD5Hash raceCompetitorsMD5Hash;
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors) {
         this(name, course, boatClass, competitors, Collections.emptyMap());
@@ -56,6 +58,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
                 throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
             }
         }
+        raceCompetitorsMD5Hash = new RaceCompetitorIdsAsStringWithMD5Hash();
         for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
             Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId()); // only assign boat if competitor is part of race
             if (competitor != null && competitorAndBoat.getValue() != null) {
@@ -78,10 +81,15 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     public Course getCourse() {
         return course;
     }
-
+    
     @Override
     public Iterable<Competitor> getCompetitors() {
         return Collections.unmodifiableSet(competitors);
+    }
+    
+    @Override
+    public byte[] getCompetitorMD5() {
+        return raceCompetitorsMD5Hash.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID();
     }
 
     @Override

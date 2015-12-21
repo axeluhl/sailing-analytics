@@ -924,6 +924,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
+                        if (raceMapDataDTO.raceCompetitorIdsAsStrings != null) {
+                            try {
+                                raceCompetitorSet.setIdsAsStringsOfCompetitorsInRace(raceMapDataDTO.raceCompetitorIdsAsStrings);
+                            } catch (Exception e) {
+                                GWT.log("Error trying to update competitor set for race "+raceIdentifier.getRaceName()+
+                                        " in regatta "+raceIdentifier.getRegattaName(), e);
+                            }
+                        }
                         quickRanks = raceMapDataDTO.quickRanks;
                         competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber =
                                 raceMapDataDTO.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
@@ -2085,15 +2093,30 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return vPanel;
     }
 
-    // FIXME bug3378: only fetch those competitors relevant to the race displayed by this RaceMap; see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3378#c20
-    // could be a method on CompetitorSelectionProvider, parameterized by a RaceIdentifier, and if nothing is known about the race association, all competitors are returned as a safe default
+    /**
+     * @return the {@link CompetitorSelectionProvider#getSelectedCompetitors()} if
+     *         {@link RaceMapSettings#isShowOnlySelectedCompetitors() only selected competitors are to be shown}, the
+     *         {@link CompetitorSelectionProvider#getFilteredCompetitors() filtered competitors} otherwise. In both cases,
+     *         if we have {@link RaceCompetitorSet information about the competitors participating} in this map's race,
+     *         the result set is reduced to those, no matter if other regatta participants would otherwise have been in
+     *         the result set
+     */
     private Iterable<CompetitorDTO> getCompetitorsToShow() {
-        Iterable<CompetitorDTO> result;
+        final Set<CompetitorDTO> result = new HashSet<>();
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
+        final Set<String> raceCompetitorIdsAsString = raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings();
         if (!settings.isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
-            result = competitorSelection.getFilteredCompetitors();
+            for (final CompetitorDTO filteredCompetitor : competitorSelection.getFilteredCompetitors()) {
+                if (raceCompetitorIdsAsString == null || raceCompetitorIdsAsString.contains(filteredCompetitor.getIdAsString())) {
+                    result.add(filteredCompetitor);
+                }
+            }
         } else {
-            result = selection;
+            for (final CompetitorDTO selectedCompetitor : selection) {
+                if (raceCompetitorIdsAsString == null || raceCompetitorIdsAsString.contains(selectedCompetitor.getIdAsString())) {
+                    result.add(selectedCompetitor);
+                }
+            }
         }
         return result;
     }

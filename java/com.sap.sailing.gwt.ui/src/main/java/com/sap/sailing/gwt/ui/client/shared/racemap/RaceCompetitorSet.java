@@ -1,42 +1,40 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-public class RaceCompetitorSet {
+/**
+ * As an extension of {@link RaceCompetitorIdsAsStringWithMD5Hash}, adds the link with a
+ * {@link CompetitorSelectionProvider} and allows its clients to obtain the {@link CompetitorDTO} objects for those
+ * competitors participating in the race under consideration.
+ * <p>
+ * 
+ * The implementation caches the {@link CompetitorDTO}s and keeps this cache up to date by
+ * {@link CompetitorSelectionProvider#addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener)}
+ * listening} on the competitor selection provider for changes. When either the set of competitors for the race
+ * {@link #setIdsAsStringsOfCompetitorsInRace(Iterable) changes} or the set of competitors
+ * {@link CompetitorSelectionChangeListener#competitorsListChanged(Iterable) changes}, the {@link CompetitorDTO}
+ * collection is re-calculated.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
+    private static final long serialVersionUID = 3357742414149799988L;
+
     private final CompetitorSelectionProvider competitorSelection;
-    
-    /**
-     * The {@link #competitorSelection} manages the competitors for the entire leaderboard which may be a
-     * superset of the competitors participating in the race shown by this map. For certain operations,
-     * however, it is useful to know exactly the competitors participating in the race shown by this map.
-     * For example, boat positions should only be requested from the server for those competitors, not all
-     * in the regatta, particularly when racing in split fleets.<p>
-     * 
-     * To keep this set consistent, the client sends a secure hash of this set to the server where the hash
-     * will be compared with the hash across the set of competitor IDs as string.<p>
-     * 
-     * If this field is <code>null</code>, nothing is known yet about the competitor-to-race assignment.
-     */
-    private Iterable<String> idsAsStringOfCompetitorsParticipatingInRace;
     
     /**
      * A subset of the competitor selection's {@link CompetitorSelectionProvider#getAllCompetitors()} describing the
@@ -45,18 +43,18 @@ public class RaceCompetitorSet {
      * 
      * When {@link #idsAsStringOfCompetitorsParticipatingInRace} is <code>null</code> then so is this field, and vice versa.
      */
-    private Set<CompetitorDTO> competitorsParticipatingInRace;
+    private Iterable<CompetitorDTO> competitorsParticipatingInRace;
     
     /**
-     * The MD5 hash of the {@link #idsAsStringOfCompetitorsParticipatingInRace} where the competitors are first ordered
-     * alphanumerically by their ID as String using {@link String#compareTo(String)}, then concatenating these strings
-     * and converting to a byte[] using a UTF-8 encoding. May be <code>null</code> if it hasn't been computed before
-     * or if {@link #idsAsStringOfCompetitorsParticipatingInRace} is still <code>null</code>.
+     * Starts out using {@link CompetitorSelectionProvider#getAllCompetitors() all regatta competitors} as response for
+     * {@link #getCompetitorsParticipatingInRace()}. Only after a call to
+     * {@link #setIdsAsStringsOfCompetitorsInRace(Iterable)} has been received may this set become adjusted to the
+     * actual subset participating in the race.
      */
-    private byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
-    
     public RaceCompetitorSet(CompetitorSelectionProvider competitorSelection) {
+        super();
         this.competitorSelection = competitorSelection;
+        this.competitorsParticipatingInRace = competitorSelection.getAllCompetitors();
         competitorSelection.addCompetitorSelectionChangeListener(new CompetitorSelectionChangeListener() {
             @Override
             public void removedFromSelection(CompetitorDTO competitor) {
@@ -86,52 +84,40 @@ public class RaceCompetitorSet {
         });
     }
     
-    public void setIdsAsStringsOfCompetitorsInRace(Iterable<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
-        this.idsAsStringOfCompetitorsParticipatingInRace = idsAsStringsOfCompetitorsInRace;
+    public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
+        super.setIdsAsStringsOfCompetitorsInRace(idsAsStringsOfCompetitorsInRace);
         competitorsParticipatingInRace = computeCompetitorsFromIDs(competitorSelection.getAllCompetitors());
-        md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = computeMD5(competitorsParticipatingInRace);
     }
     
+    public Iterable<CompetitorDTO> getCompetitorsParticipatingInRace() {
+        return competitorsParticipatingInRace;
+    }
+
     /**
      * Tries to locate the competitors described by the IDs in {@link #idsAsStringOfCompetitorsParticipatingInRace} in
      * <code>competitors</code> and returns them in a set. If not all competitors can be found, <code>null</code> is
      * returned instead.
      */
     private Set<CompetitorDTO> computeCompetitorsFromIDs(Iterable<CompetitorDTO> competitors) {
-        final Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<>();
-        for (CompetitorDTO c : competitors) {
-            competitorsByIdAsString.put(c.getIdAsString(), c);
-        }
-        Set<CompetitorDTO> result = new HashSet<>();
-        for (String id : idsAsStringOfCompetitorsParticipatingInRace) {
-            CompetitorDTO c = competitorsByIdAsString.get(id);
-            if (c == null) {
-                result = null;
-                break;
-            } else {
-                result.add(c);
+        Set<CompetitorDTO> result;
+        if (getIdsOfCompetitorsParticipatingInRaceAsStrings() == null) {
+            result = null;
+        } else {
+            final Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<>();
+            for (CompetitorDTO c : competitors) {
+                competitorsByIdAsString.put(c.getIdAsString(), c);
+            }
+            result = new HashSet<>();
+            for (String id : getIdsOfCompetitorsParticipatingInRaceAsStrings()) {
+                CompetitorDTO c = competitorsByIdAsString.get(id);
+                if (c == null) {
+                    result = null;
+                    break;
+                } else {
+                    result.add(c);
+                }
             }
         }
         return result;
-    }
-
-    public byte[] getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID() {
-        return md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
-    }
-
-    private byte[] computeMD5(Iterable<CompetitorDTO> competitors) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
-        List<CompetitorDTO> l = new ArrayList<>();
-        Util.addAll(competitors, l);
-        Collections.sort(l, new Comparator<CompetitorDTO>() {
-            @Override
-            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
-                return o1.getIdAsString().compareTo(o2.getIdAsString());
-            }
-        });
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        for (CompetitorDTO c : l) {
-            bos.write(c.getIdAsString().getBytes("UTF-8"));
-        }
-        return MessageDigest.getInstance("MD5").digest(bos.toByteArray());
     }
 }

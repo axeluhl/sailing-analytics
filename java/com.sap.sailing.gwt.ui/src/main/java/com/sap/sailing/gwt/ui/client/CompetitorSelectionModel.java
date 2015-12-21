@@ -115,7 +115,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Iterable<CompetitorDTO> getSelectedCompetitors() {
-        return Collections.unmodifiableCollection(selectedCompetitors);
+        return Collections.unmodifiableSet(selectedCompetitors);
     }
 
     @Override
