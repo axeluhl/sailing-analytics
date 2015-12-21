@@ -104,16 +104,6 @@
 	</servlet-mapping>
 		
 	<!-- RACE COMMITTEE END -->
-
-	<servlet>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<url-pattern>/moderator</url-pattern>
-	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
