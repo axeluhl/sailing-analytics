@@ -162,7 +162,7 @@ public class MobileApplicationClientFactory extends
     }
     
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResttedConfirmationNavigation(String username) {
-        return getNavigator().getPasswordResttedConfirmationNavigation(username);
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return getNavigator().getPasswordResettedConfirmationNavigation(username);
     }
 }

@@ -176,8 +176,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     @Override
-    public PlaceNavigation<ConfirmationPlace> getPasswordResttedConfirmationNavigation(String username) {
-        return getHomePlacesNavigator().getPasswordResttedConfirmationNavigation(username);
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return getHomePlacesNavigator().getPasswordResettedConfirmationNavigation(username);
     }
 
 }

@@ -56,7 +56,7 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
 
                     @Override
                     public void onSuccess(Void result) {
-                        clientFactory.getPasswordResttedConfirmationNavigation(username).goToPlace();
+                        clientFactory.getPasswordResettedConfirmationNavigation(username).goToPlace();
                     }
                 });
     }

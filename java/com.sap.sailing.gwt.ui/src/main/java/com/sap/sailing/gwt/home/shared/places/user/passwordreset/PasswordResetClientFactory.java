@@ -7,5 +7,5 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 public interface PasswordResetClientFactory extends ClientFactoryWithUserManagementService, ErrorAndBusyClientFactory {
     PasswordResetView createPasswordResetView();
-    PlaceNavigation<ConfirmationPlace> getPasswordResttedConfirmationNavigation(String username);
+    PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username);
 }
