@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -60,7 +61,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
         this.listeners = new ConcurrentHashMap<>();
-        client = new WebSocketClient();
+        client = new WebSocketClient(new SslContextFactory());
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
         reconnect();
@@ -227,9 +228,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
-                if (uri.getScheme().equals("ws")) {
-                    // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
-                    // look for ws connectivity
+                if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
                     client.start();
                     client.connect(this, uri, request);
