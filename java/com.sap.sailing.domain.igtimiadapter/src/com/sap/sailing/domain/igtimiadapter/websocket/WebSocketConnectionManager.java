@@ -54,6 +54,8 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     
     private static final int LOG_EVERY_SO_MANY_MESSAGES = 100;
     
+    private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
+    
     public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
@@ -232,9 +234,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
                     client.start();
                     client.connect(this, uri, request);
-                    logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
-                    lastException = null;
-                    break; // successfully connected
+                    if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
+                        logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
+                        lastException = null;
+                        break; // successfully connected
+                    }
                 }
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
