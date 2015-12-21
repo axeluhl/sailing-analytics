@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.util.tools.shared.Md5Utils;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -85,7 +86,7 @@ public class RaceCompetitorSet {
         });
     }
     
-    public void setIdsAsStringsOfCompetitorsInRace(Iterable<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, IOException {
+    public void setIdsAsStringsOfCompetitorsInRace(Iterable<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
         this.idsAsStringOfCompetitorsParticipatingInRace = idsAsStringsOfCompetitorsInRace;
         competitorsParticipatingInRace = computeCompetitorsFromIDs(competitorSelection.getAllCompetitors());
         md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = computeMD5(competitorsParticipatingInRace);
@@ -118,7 +119,7 @@ public class RaceCompetitorSet {
         return md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
     }
 
-    private byte[] computeMD5(Iterable<CompetitorDTO> competitors) throws UnsupportedEncodingException, IOException {
+    private byte[] computeMD5(Iterable<CompetitorDTO> competitors) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
         List<CompetitorDTO> l = new ArrayList<>();
         Util.addAll(competitors, l);
         Collections.sort(l, new Comparator<CompetitorDTO>() {
@@ -131,6 +132,6 @@ public class RaceCompetitorSet {
         for (CompetitorDTO c : l) {
             bos.write(c.getIdAsString().getBytes("UTF-8"));
         }
-        return Md5Utils.getMd5Digest(bos.toByteArray());
+        return MessageDigest.getInstance("MD5").digest(bos.toByteArray());
     }
 }
