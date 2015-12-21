@@ -32,7 +32,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -47,8 +46,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPassingsPanel extends AbsolutePanel implements Component<AbstractSettings>, RaceSelectionChangeListener,
-        CompetitorSelectionChangeListener {
+public class EditMarkPassingsPanel extends AbsolutePanel implements Component<AbstractSettings>, CompetitorSelectionChangeListener {
     private static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -259,6 +257,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(removeSuppressedPassingButton);
         buttonPanel.add(selectCompetitorLabel);
         enableButtons();
+        refreshWaypoints();
     }
     
     @Override
@@ -381,12 +380,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 }
             }
         }
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        raceIdentifier = selectedRaces.iterator().next();
-        refreshWaypoints();
     }
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {
