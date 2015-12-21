@@ -40,15 +40,6 @@
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
 
-   	<servlet>
-		<servlet-name>AdminApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>AdminApp</servlet-name>
-		<url-pattern>/admin</url-pattern>
-	</servlet-mapping>
-	
 	<servlet>
 		<servlet-name>RCConfiguration</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.ConfigurationJsonGetServlet</servlet-class>
