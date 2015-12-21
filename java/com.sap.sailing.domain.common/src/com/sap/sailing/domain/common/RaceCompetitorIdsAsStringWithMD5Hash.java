@@ -70,7 +70,6 @@ public class RaceCompetitorIdsAsStringWithMD5Hash implements Serializable {
      * <code>null</code> argument has been performed.
      */
     public RaceCompetitorIdsAsStringWithMD5Hash() {
-        super();
     }
 
     /**
@@ -99,10 +98,10 @@ public class RaceCompetitorIdsAsStringWithMD5Hash implements Serializable {
         List<String> l = new ArrayList<>();
         Util.addAll(idsAsStringsOfCompetitorsInRace, l);
         Collections.sort(l);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final MessageDigest md5 = MessageDigest.getInstance("MD5");
         for (String c : l) {
-            bos.write(c.getBytes("UTF-8"));
+            md5.update(c.getBytes("UTF-8"));
         }
-        return MessageDigest.getInstance("MD5").digest(bos.toByteArray());
+        return md5.digest();
     }
 }

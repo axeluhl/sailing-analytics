@@ -34,7 +34,7 @@ import com.sap.sse.common.filter.FilterSet;
 public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
     private static final long serialVersionUID = 3357742414149799988L;
 
-    private final CompetitorSelectionProvider competitorSelection;
+    private CompetitorSelectionProvider competitorSelection;
     
     /**
      * A subset of the competitor selection's {@link CompetitorSelectionProvider#getAllCompetitors()} describing the
@@ -44,6 +44,8 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * When {@link #idsAsStringOfCompetitorsParticipatingInRace} is <code>null</code> then so is this field, and vice versa.
      */
     private Iterable<CompetitorDTO> competitorsParticipatingInRace;
+    
+    RaceCompetitorSet() {} // for GWT serialization only
     
     /**
      * Starts out using {@link CompetitorSelectionProvider#getAllCompetitors() all regatta competitors} as response for

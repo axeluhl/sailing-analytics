@@ -1643,14 +1643,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID) throws NoWindException {
-        final ArrayList<String> raceCompetitorIdsAsStrings;
+        final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
         // competitor set will be calculated and returned to the client
         if (trackedRace == null || Arrays.equals(md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, trackedRace.getRace().getCompetitorMD5())) {
             raceCompetitorIdsAsStrings = null; // tracked race not found or still same MD5 hash, suggesting unchanged competitor set
         } else {
-            raceCompetitorIdsAsStrings = new ArrayList<>();
+            raceCompetitorIdsAsStrings = new HashSet<>();
             for (final Competitor c : trackedRace.getRace().getCompetitors()) {
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
