@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -76,11 +75,11 @@ public class RaceCompetitorIdsAsStringWithMD5Hash implements Serializable {
      * was <code>null</code> then this has the same effect as calling {@link #RaceCompetitorIdsAsStringWithMD5Hash()}.
      */
     public RaceCompetitorIdsAsStringWithMD5Hash(Set<String> idsAsStringOfCompetitorsParticipatingInRace)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException, IOException {
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
         this.setIdsAsStringsOfCompetitorsInRace(idsAsStringOfCompetitorsParticipatingInRace);
     }
 
-    public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
+    public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         this.idsAsStringOfCompetitorsParticipatingInRace = idsAsStringsOfCompetitorsInRace;
         md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = computeMD5(idsAsStringsOfCompetitorsInRace);
     }
@@ -93,7 +92,7 @@ public class RaceCompetitorIdsAsStringWithMD5Hash implements Serializable {
         return idsAsStringOfCompetitorsParticipatingInRace;
     }
 
-    private byte[] computeMD5(Iterable<String> idsAsStringsOfCompetitorsInRace) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
+    private byte[] computeMD5(Iterable<String> idsAsStringsOfCompetitorsInRace) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         List<String> l = new ArrayList<>();
         Util.addAll(idsAsStringsOfCompetitorsInRace, l);
         Collections.sort(l);

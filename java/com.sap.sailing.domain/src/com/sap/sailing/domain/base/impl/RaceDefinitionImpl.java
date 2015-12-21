@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,14 +53,15 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         this.competitors = new HashSet<>();
         this.competitorsById = new LinkedHashMap<>();
         this.competitorBoats = new HashMap<>();
+        final Set<String> idsOfCompetitorsAsString = new HashSet<>();
         for (Competitor competitor : competitors) {
             Competitor competitorWithEqualID = competitorsById.put(competitor.getId(), competitor);
             this.competitors.add(competitor);
+            idsOfCompetitorsAsString.add(competitor.getId().toString());
             if (competitorWithEqualID != null && competitorWithEqualID != competitor) {
                 throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
             }
         }
-        raceCompetitorsMD5Hash = new RaceCompetitorIdsAsStringWithMD5Hash();
         for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
             Competitor competitor = competitorsById.get(competitorAndBoat.getKey().getId()); // only assign boat if competitor is part of race
             if (competitor != null && competitorAndBoat.getValue() != null) {
@@ -67,6 +70,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
                 logger.warning("Trying to set boat "+competitorAndBoat.getValue()+" for competitor "+competitorAndBoat.getKey()+
                         " which is not part of race "+getName()+"'s set of competitors");
             }
+        }
+        try {
+            raceCompetitorsMD5Hash = new RaceCompetitorIdsAsStringWithMD5Hash(idsOfCompetitorsAsString);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Internal error: issue with UTF8 or MD5 for encoding competitor IDs as MD5 hash", e);
         }
         this.boatClass = boatClass;
         this.id = id;
