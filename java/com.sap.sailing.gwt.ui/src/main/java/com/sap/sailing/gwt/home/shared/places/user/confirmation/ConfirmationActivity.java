@@ -20,7 +20,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         switch (place.getAction()) {
-        case ACC_CREATED:
+        case MAIL_VERIFIED:
         case CHANGED_EMAIL:
             panel.setWidget(clientFactory.createBusyView());
             clientFactory.getUserManagement().validateEmail(place.getName(), place.getValidationSecret(),
@@ -48,6 +48,16 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
             break;
         case ERROR:
             panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec.error()));
+            break;
+        case ACC_CREATED:
+            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
+                    .signedUpSuccessfully(place.getName())));
+            break;
+        case RESET_SEND:
+            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
+                    .successfullyResetPassword(place.getName())));
+            break;
+        default:
             break;
         }
     }

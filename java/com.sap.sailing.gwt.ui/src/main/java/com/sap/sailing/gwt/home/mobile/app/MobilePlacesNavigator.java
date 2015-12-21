@@ -102,7 +102,7 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<ConfirmationPlace> getCreateConfirmationNavigation() {
-        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.ACC_CREATED));
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
     }
 
     public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {

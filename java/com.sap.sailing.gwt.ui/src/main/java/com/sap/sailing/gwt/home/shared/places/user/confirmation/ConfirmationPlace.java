@@ -15,12 +15,18 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
     private final Action action;
 
     public enum Action {
-        ERROR, ACC_CREATED, CHANGED_EMAIL
+        ERROR, ACC_CREATED, RESET_SEND, MAIL_VERIFIED, CHANGED_EMAIL
     };
 
     public ConfirmationPlace(Action action) {
         this.action = action;
         this.name = "";
+        this.validationSecret = "";
+    }
+
+    public ConfirmationPlace(Action action, String name) {
+        this.action = action;
+        this.name = name;
         this.validationSecret = "";
     }
 
