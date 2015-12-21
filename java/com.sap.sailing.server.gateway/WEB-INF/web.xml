@@ -133,15 +133,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<url-pattern>/wind</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>WindImportServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
 	</servlet>
