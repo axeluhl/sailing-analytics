@@ -164,7 +164,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     
     private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                competitorsAndTheirBoats, raceboardTimer, raceToShow, leaderboardName, null, /* event */null, raceboardViewConfig,
+                competitorsAndTheirBoats, raceboardTimer, raceToShow, leaderboardName, null, /* event */null, raceboardPerspectiveSettings,
                 errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
                 /* isScreenLargeEnoughToOfferChartSupport */ true);
         return raceBoardPanel;
