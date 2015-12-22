@@ -149,7 +149,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, false, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
                 StartAnalysisWidgetResources.INSTANCE.combinedWindPanelStyle(), /* showHeaderPanel */ true);
-        raceMap.onRaceSelectionChange(Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier));
         raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
         raceMap.getSettings().setTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);

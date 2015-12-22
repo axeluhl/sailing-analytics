@@ -25,12 +25,13 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -40,7 +41,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final StringMessages stringMessages;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-    private MultiSelectionModel<RemoteSailingServerReferenceDTO> serverSelectionModel;
+    private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
+    private RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO> refreshableServerSelectionModel;
     private LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO> filteredServerTablePanel;
 
     private final CaptionPanel remoteServersPanel;
@@ -60,8 +62,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         VerticalPanel remoteServersContentPanel = new VerticalPanel();
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
+        serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         serverDataProvider.addDataDisplay(remoteServersTable);
 
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
@@ -158,8 +160,19 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
         serverTable.setEmptyTableWidget(new Label(stringMessages.noSailingServerInstancesYet()));
         
-        serverSelectionModel = new MultiSelectionModel<RemoteSailingServerReferenceDTO>();
-        serverTable.setSelectionModel(serverSelectionModel);
+        refreshableServerSelectionModel = new RefreshableMultiSelectionModel<RemoteSailingServerReferenceDTO>(
+                new EntityIdentityComparator<RemoteSailingServerReferenceDTO>() {
+                    @Override
+                    public boolean representSameEntity(RemoteSailingServerReferenceDTO dto1,
+                            RemoteSailingServerReferenceDTO dto2) {
+                        return dto1.getUrl().equals(dto2.getUrl());
+                    }
+                    @Override
+                    public int hashCode(RemoteSailingServerReferenceDTO t) {
+                        return t.getUrl().hashCode();
+                    }
+                }, serverDataProvider);
+        serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;
     }
@@ -180,7 +193,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
 
     private void removeSelectedSailingServers() {
         Set<String> toRemove = new HashSet<String>();
-        for (RemoteSailingServerReferenceDTO selectedServer: serverSelectionModel.getSelectedSet()) {
+        for (RemoteSailingServerReferenceDTO selectedServer: refreshableServerSelectionModel.getSelectedSet()) {
         	toRemove.add(selectedServer.getName());
         }
         
