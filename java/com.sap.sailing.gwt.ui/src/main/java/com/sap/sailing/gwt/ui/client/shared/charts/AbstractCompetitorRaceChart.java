@@ -45,7 +45,6 @@ import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -94,16 +93,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Long timeOfLatestRequestInMillis;
     
     protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
             final StringMessages stringMessages, ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
+        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter, detailType, compactChart, allowTimeAdjust,
                 null, null);
     }
 
     AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
@@ -124,9 +123,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         createChart();
         setSelectedDetailType(detailType);
-        
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        this.selectedRaceIdentifier = selectedRaceIdentifier;
+        clearChart();
+        if (selectedRaceIdentifier != null) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     /**
@@ -548,20 +550,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private boolean isYAxisReversed() {
         return hasReversedYAxis(selectedDetailType);
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRaceIdentifier = selectedRaces.iterator().next();
-        } else {
-            selectedRaceIdentifier = null;
-        }
-
-        clearChart();
-        if (selectedRaceIdentifier != null) {
-            timeChanged(timer.getTime(), null);
-        }
     }
 
     /**
