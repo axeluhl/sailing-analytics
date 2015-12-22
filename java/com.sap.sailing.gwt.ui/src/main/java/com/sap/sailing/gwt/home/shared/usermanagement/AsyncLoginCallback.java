@@ -12,19 +12,23 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     private final ClientFactoryWithUserManagementService clientFactory;
     private final ErrorMessageView view;
     private final EventBus eventBus;
+    private final boolean fireSignInSuccessfulEvent;
     
     public AsyncLoginCallback(ClientFactoryWithUserManagementService clientFactory, ErrorMessageView view,
-            EventBus eventBus) {
+            EventBus eventBus, boolean fireSignInSuccessfulEvent) {
         this.clientFactory = clientFactory;
         this.view = view;
         this.eventBus = eventBus;
+        this.fireSignInSuccessfulEvent = fireSignInSuccessfulEvent;
     }
 
     @Override
     public void onSuccess(SuccessInfo result) {
         if (result.isSuccessful()) {
             clientFactory.didLogin(result.getUserDTO());
-            eventBus.fireEvent(new SignInSuccessfulEvent());
+            if (fireSignInSuccessfulEvent) {
+                eventBus.fireEvent(new SignInSuccessfulEvent());
+            }
         } else {
             if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                 view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());

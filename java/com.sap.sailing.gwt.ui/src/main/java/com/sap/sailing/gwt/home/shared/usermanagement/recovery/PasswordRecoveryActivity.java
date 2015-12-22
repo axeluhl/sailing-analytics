@@ -10,9 +10,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -38,7 +38,7 @@ public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagement
     }
 
     @Override
-    public void resetPassword(String email, final String username) {
+    public void resetPassword(final String email, final String username) {
         final String url = Window.Location.createUrlBuilder().setHash(passwordResetPlaceNav.getTargetUrl())
                 .buildString();
         clientFactory.getUserManagement().resetPassword(username, email,
@@ -46,8 +46,8 @@ public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagement
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
-                        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
-                        placeController.goTo(new SignInPlace());
+                        String name = (username == null || username.isEmpty()) ? email : username;
+                        placeController.goTo(new ConfirmationPlace(Action.RESET_REQUESTED, name));
                     }
                     
                     @Override

@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContex
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivity;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
@@ -26,7 +28,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 public class UserManagementPlaceManagementController
-        <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService>
+        <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
         extends WrappedPlaceManagementController {
 
     public UserManagementPlaceManagementController(CF clientFactory,
@@ -44,7 +46,7 @@ public class UserManagementPlaceManagementController
     }
     
     private static class Configuration
-            <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService>
+            <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
             implements PlaceManagementConfiguration {
         private final CF clientFactory;
         private final PlaceNavigation<ConfirmationPlace> createConfirmationNavigation;
@@ -94,6 +96,8 @@ public class UserManagementPlaceManagementController
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity<CF>((LoggedInUserInfoPlace) placeToUse, clientFactory,
                         userProfileNavigation, placeController);
+            } else if (placeToUse instanceof ConfirmationPlace) {
+                return new ConfirmationActivity((ConfirmationPlace) placeToUse, clientFactory);
             }
             
             return getActivity(new SignInPlace());

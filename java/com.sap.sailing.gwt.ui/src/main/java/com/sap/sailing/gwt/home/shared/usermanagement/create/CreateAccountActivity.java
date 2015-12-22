@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.shared.UserManagementException;
@@ -56,7 +57,8 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             @Override
             public void onSuccess(UserDTO result) {
                 clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory, view, eventBus));
+                        new AsyncLoginCallback(clientFactory, view, eventBus, false));
+                placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
             }
             
             @Override
