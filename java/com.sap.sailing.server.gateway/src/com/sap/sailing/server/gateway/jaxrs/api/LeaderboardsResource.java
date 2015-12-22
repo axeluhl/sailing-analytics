@@ -116,8 +116,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     @Path("{name}")
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
-            @DefaultValue("true") @QueryParam("useCache") boolean useCache,
-            @DefaultValue("1000") @QueryParam("maxCompetitorsCount") int maxCompetitorsCount) {
+            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
 
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
