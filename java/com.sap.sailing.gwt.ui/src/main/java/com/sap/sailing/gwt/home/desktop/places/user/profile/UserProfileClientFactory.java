@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile;
 
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.ui.client.SailingClientFactory;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 

@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
 import com.sap.sailing.gwt.home.mobile.partials.userheader.UserHeader;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
 
 public class UserProfileDetailsViewImpl extends Composite implements UserProfileDetailsView {

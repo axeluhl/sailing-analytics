@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.app;
+package com.sap.sailing.gwt.home.shared.usermanagement.app;
 
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.shared.UserDTO;
