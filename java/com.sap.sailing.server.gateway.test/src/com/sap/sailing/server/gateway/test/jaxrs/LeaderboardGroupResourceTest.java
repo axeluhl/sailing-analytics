@@ -1,10 +1,12 @@
-package com.sap.sailing.server.gateway.test;
+package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
@@ -25,11 +27,11 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet;
+import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
+public class LeaderboardGroupResourceTest extends AbstractJaxRsApiTest {
     private Regatta regatta;
     private LeaderboardGroup leaderboardGroup;
     private String boatClassName = "49er";
@@ -74,10 +76,15 @@ public class LeaderboardGroupJsonExportTest extends AbstractJsonExportTest {
     }
 
     @Test
-    public void testExportLeaderboardGroupsAsJson() throws Exception {   
-        String jsonString = callJsonHttpServlet(new LeaderboardGroupsJsonGetServlet(), "GET", null);
-        Object obj = JSONValue.parse(jsonString);
-        JSONArray array = (JSONArray) obj;
+    public void testExportLeaderboardGroupsAsJson() throws Exception {
+        LeaderboardGroupsResource resource = new LeaderboardGroupsResource();
+        LeaderboardGroupsResource spyResource = spyResource(resource);
+        Response leaderboardGroupsResponse = spyResource.getLeaderboardGroups();
+        
+        String jsonString = (String) leaderboardGroupsResponse.getEntity();
+        Object obj= JSONValue.parse(jsonString);
+        JSONArray array= (JSONArray) obj;
+
         assertTrue(array.size() == 1);
         String jsonFirstLeaderboardGroup = (String) array.get(0);
         assertTrue(leaderboardGroup.getName().equals(jsonFirstLeaderboardGroup));
