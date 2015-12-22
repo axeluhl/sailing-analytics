@@ -35,26 +35,20 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
 
     /**
      * @param comp
-     *            {@link EntityIdentityComparator} to compare the identity of the objects
+     *            {@link EntityIdentityComparator} to compare the identity of the objects; if not <code>null</code>, this will
+     *            also be used to determine the selection "keys" using a {@link ProvidesKey} implementation based on this
+     *            comparator.
      * @param listDataProvider
      *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
      *            display on {@link ListDataProvider}
      */
-    public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        this(/* keyProvider */ null, comp, listDataProvider);
-    }
-
-    /**
-     * @param keyProvider
-     *            {@link ProvidesKey} for the super class constructor
-     * @param comp
-     *            {@link EntityIdentityComparator} to compare the identity of the objects
-     * @param listDataProvider
-     *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
-     *            display on {@link ListDataProvider}
-     */
-    public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        super(keyProvider);
+    public RefreshableMultiSelectionModel(final EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
+        super(/* keyProvider */ comp == null ? null : new ProvidesKey<T>() {
+            @Override
+            public Object getKey(T item) {
+                return new EntityIdentityWrapper<T>(item, comp);
+            }
+        });
         this.comp = comp;
         this.listDataProvider = listDataProvider;
         this.listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
@@ -109,12 +103,14 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      *
      * @param <T>
      */
-    private class EntityIdentityWrapper {
+    private static class EntityIdentityWrapper<T> {
         private final T t;
+        private final EntityIdentityComparator<T> comp;
         
-        public EntityIdentityWrapper(T t) {
+        public EntityIdentityWrapper(T t, EntityIdentityComparator<T> comp) {
             super();
             this.t = t;
+            this.comp = comp;
         }
 
         @Override
@@ -126,13 +122,14 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
             return t;
         }
 
-        @SuppressWarnings("unchecked") // need to cast to generic type argument T
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof RefreshableMultiSelectionModel<?>.EntityIdentityWrapper)) {
+            if (!(obj instanceof EntityIdentityWrapper<?>)) {
                 throw new ClassCastException("Can only compare EntityIdentityWrapper with other objects of same class");
             }
-            return comp.representSameEntity(t, ((EntityIdentityWrapper) obj).getT());
+            @SuppressWarnings("unchecked") // need to cast to generic type argument T
+            EntityIdentityWrapper<T> objAsT = ((EntityIdentityWrapper<T>) obj);
+            return comp.representSameEntity(t, objAsT.getT());
         }
     }
     
@@ -164,15 +161,18 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                     clear();
                     if (comp == null) {
                         for (T it : newObjects) {
-                            setSelected(it, selectedSet.contains(it));
+                            final boolean selected = selectedSet.contains(it);
+                            if (selected) {
+                                setSelected(it, true);
+                            }
                         }
                     } else {
-                        final Map<EntityIdentityWrapper, T> wrappedNewObjects = new HashMap<>();
+                        final Map<EntityIdentityWrapper<T>, T> wrappedNewObjects = new HashMap<>();
                         for (T it : newObjects) {
-                            wrappedNewObjects.put(new EntityIdentityWrapper(it), it);
+                            wrappedNewObjects.put(new EntityIdentityWrapper<T>(it, comp), it);
                         }
                         for (final T selected : selectedSet) {
-                            T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper(selected));
+                            T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper<T>(selected, comp));
                             if (newSelectedElement != null) {
                                 setSelected(newSelectedElement, true);
                             }
