@@ -20,6 +20,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -340,24 +343,21 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
         fileUpload.addChangeHandler(new ChangeHandler() {
-
             @Override
             public void onChange(ChangeEvent event) {
                 importResultPanel.clear();
                 String fileName = fileUpload.getFilename();
                 boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
                 submitButton.setEnabled(isValidFileName);
-
                 String boatId = "";
                 if (isValidFileName) {
                     RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
                     MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
-                    if (match.getGroupCount() > 0) {
+                    if (match != null && match.getGroupCount() > 0) {
                         boatId = match.getGroup(1);
                     }
                 }
                 boatIdTextBox.setText(boatId);
-
             }
         });
 
@@ -382,17 +382,17 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 if ((fileUpload.getFilename() != null) && (fileUpload.getFilename().trim().length() > 0)) {
                     Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
                     String warningMessage;
-                    if (selectedRaces.size() > 0) {
+                    if (!selectedRaces.isEmpty()) {
                         warningMessage = stringMessages.windImport_SelectedRacesWarning(selectedRaces.size());
-                        RaceSelection raceSelection = RaceSelection.create();
+                        JSONArray raceSelection = new JSONArray();
                         for (RaceDTO race : selectedRaces) {
                             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-                            RaceSelection.RaceEntry raceEntry = RaceSelection.RaceEntry.create();
-                            raceEntry.setRaceName(raceIdentifier.getRaceName());
-                            raceEntry.setRegatteName(raceIdentifier.getRegattaName());
-                            raceSelection.addRace(raceEntry);
+                            JSONObject raceEntry = new JSONObject();
+                            raceEntry.put("race", new JSONString(raceIdentifier.getRaceName()));
+                            raceEntry.put("regatta", new JSONString(raceIdentifier.getRegattaName()));
+                            raceSelection.set(raceSelection.size(), raceEntry);
                         }
-                        hiddenRacesField.setValue(raceSelection.toJson());
+                        hiddenRacesField.setValue(raceSelection.toString());
                     } else {
                         warningMessage = stringMessages.windImport_AllRacesWarning();
                         hiddenRacesField.setValue(null);
