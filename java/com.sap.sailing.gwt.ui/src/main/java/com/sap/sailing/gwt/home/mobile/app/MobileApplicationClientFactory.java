@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
@@ -35,6 +37,7 @@ import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -154,6 +157,11 @@ public class MobileApplicationClientFactory extends
     @Override
     public UserManagementServiceAsync getUserManagement() {
         return securityProvider.getUserManagementService();
+    }
+    
+    @Override
+    public ConfirmationView createAccountConfirmationView(String message) {
+        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
     }
     
     @Override

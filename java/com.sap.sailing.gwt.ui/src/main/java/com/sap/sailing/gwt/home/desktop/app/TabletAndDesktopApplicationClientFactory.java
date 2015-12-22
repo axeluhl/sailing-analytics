@@ -26,6 +26,8 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
@@ -39,6 +41,7 @@ import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 
@@ -168,6 +171,11 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         uCtx = new UserManagementContextImpl(user);
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+    
+    @Override
+    public ConfirmationView createAccountConfirmationView(String message) {
+        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
     }
     
     @Override

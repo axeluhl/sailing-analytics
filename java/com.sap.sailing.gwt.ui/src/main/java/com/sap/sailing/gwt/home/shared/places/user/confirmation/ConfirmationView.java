@@ -1,12 +1,9 @@
 package com.sap.sailing.gwt.home.shared.places.user.confirmation;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
-public interface ConfirmationView {
+public interface ConfirmationView extends IsWidget {
 
-    Widget asWidget();
-
-    
     public interface Presenter {
 
     }

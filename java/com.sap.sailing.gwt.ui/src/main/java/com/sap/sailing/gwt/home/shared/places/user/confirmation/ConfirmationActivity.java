@@ -27,35 +27,28 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
                     new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
+                            panel.setWidget(clientFactory.createAccountConfirmationView(i18n_sec
                                     .errorValidatingEmail(place.getName(), caught.getMessage())));
                         }
 
                         @Override
                         public void onSuccess(Boolean result) {
-                            final ConfirmationView view;
-                            if (result) {
-                                view = new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
-                                        .emailValidatedSuccessfully(place.getName()));
-                            } else {
-                                view = new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
-                                        .errorValidatingEmail(place.getName(),
-                                                i18n_sec.emailValidationUnsuccessful(place.getName())));
-                            }
-                            panel.setWidget(view.asWidget());
+                            final String message = result ? i18n_sec.emailValidatedSuccessfully(place.getName())
+                                    : i18n_sec.emailValidationUnsuccessful(place.getName());
+                            panel.setWidget(clientFactory.createAccountConfirmationView(message));
                         }
                     }));
             break;
         case ERROR:
-            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec.error()));
+            panel.setWidget(clientFactory.createAccountConfirmationView(i18n_sec.error()));
             break;
         case ACC_CREATED:
-            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
-                    .signedUpSuccessfully(place.getName())));
+            panel.setWidget(clientFactory.createAccountConfirmationView(
+                    i18n_sec.signedUpSuccessfully(place.getName())));
             break;
         case RESET_SEND:
-            panel.setWidget(new ConfirmationViewImpl(i18n_sec.accountConfirmation(), i18n_sec
-                    .successfullyResetPassword(place.getName())));
+            panel.setWidget(clientFactory.createAccountConfirmationView(
+                    i18n_sec.successfullyResetPassword(place.getName())));
             break;
         default:
             break;
