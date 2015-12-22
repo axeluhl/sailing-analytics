@@ -13,7 +13,6 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     private CheckBox showLeaderboardCheckBox; 
     private CheckBox showWindChartCheckBox; 
     private CheckBox showCompetitorsChartCheckBox;
-    private CheckBox autoSelectMediaCheckBox;
 
     private final StringMessages stringMessages;
     private final RaceBoardPerspectiveSettings initialSettings;
@@ -39,20 +38,15 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
         showCompetitorsChartCheckBox.setValue(initialSettings.isShowCompetitorsChart());
         vp.add(showCompetitorsChartCheckBox);        
         
-        autoSelectMediaCheckBox = dialog.createCheckbox("Auto select media");
-        autoSelectMediaCheckBox.setValue(initialSettings.isAutoSelectMedia());
-        vp.add(autoSelectMediaCheckBox);        
-
         return vp;
     }
     
-
     @Override
     public RaceBoardPerspectiveSettings getResult() {
         RaceBoardPerspectiveSettings result = new RaceBoardPerspectiveSettings(/*activeCompetitorsFilterSetName*/ null, 
                 showLeaderboardCheckBox.getValue(), showWindChartCheckBox.getValue(), showCompetitorsChartCheckBox.getValue(),
                 /*showViewStreamlets */ false, /*showViewStreamletColors*/ false, /*showViewSimulation*/ false,
-                /*canReplayDuringLiveRaces*/ false, autoSelectMediaCheckBox.getValue(), /*defaultMedia*/ null);
+                /*canReplayDuringLiveRaces*/ false);
         return result;
     }
     

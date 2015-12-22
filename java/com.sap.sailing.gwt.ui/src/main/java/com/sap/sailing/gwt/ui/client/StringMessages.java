@@ -135,6 +135,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String autoZoom();
     String zoomFactor();
     String autoRefresh();
+    String autoPlayMedia();
     String delayInSeconds();
     String delayBetweenAutoAdvances();
     String delayMustBeNonNegative();

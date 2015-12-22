@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
@@ -129,7 +130,7 @@ public class DesktopStartView extends Composite implements StartView {
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         leaderboardPerspective = new ProxyLeaderboardPerspective(new LeaderboardPerspectiveSettings(), leaderboard, createDefaultLeaderboardSettings(leaderboard));
         raceboardPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard, 
-                createDefaultLeaderboardSettings(leaderboard), createDefaultMultiCompetitorRaceChartSettings());
+                createDefaultLeaderboardSettings(leaderboard), createDefaultMultiCompetitorRaceChartSettings(), new MediaPlayerSettings());
         
         perspectiveSettings.clear();
     }

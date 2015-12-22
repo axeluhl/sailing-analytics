@@ -38,7 +38,6 @@ import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
-import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -54,7 +53,7 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class MediaPlayerManagerComponent implements Component<AbstractSettings>, PlayStateListener, TimeListener,
+public class MediaPlayerManagerComponent implements Component<MediaPlayerSettings>, PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
@@ -79,14 +78,14 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final PopupPositionProvider popupPositionProvider;
-    private boolean autoSelectMedia;
+    private MediaPlayerSettings settings;
 
     private PlayerChangeListener playerChangeListener;
 
     public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, boolean autoSelectMedia) {
+            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -103,7 +102,7 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.popupPositionProvider = popupPositionProvider;
-        this.autoSelectMedia = autoSelectMedia;
+        this.settings = settings;
 
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
@@ -300,7 +299,7 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
                     setStatus(mediaTrack);
                 }
 
-                if (autoSelectMedia) {
+                if (settings.isAutoSelectMedia()) {
                     playDefault();
                 }
                 notifyStateChange();
@@ -730,22 +729,23 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
 
     @Override
     public boolean hasSettings() {
-        return false;
+        return true;
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
-        return null;
+    public SettingsDialogComponent<MediaPlayerSettings> getSettingsDialogComponent() {
+        MediaPlayerSettings mediaPlayerSettings = new MediaPlayerSettings(settings.isAutoSelectMedia());
+        return new MediaPlayerSettingsDialogComponent(mediaPlayerSettings, stringMessages);
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) {
-        // no-op
+    public void updateSettings(MediaPlayerSettings newSettings) {
+        this.settings = newSettings;
     }
 
     @Override
-    public AbstractSettings getSettings() {
-        return null;
+    public MediaPlayerSettings getSettings() {
+        return settings;
     }
 
     @Override

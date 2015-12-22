@@ -15,8 +15,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
-    private final boolean autoSelectMedia;
-    private final String defaultMedia;
     private final boolean showViewStreamlets;
     private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
@@ -32,20 +30,16 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
-    public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
-    public static final String PARAM_DEFAULT_MEDIA = "defaultMedia";
 
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
         /* showWindChart */false, /* showCompetitorsChart */false, /* showViewStreamlets */false, /* showViewStreamletColors */
-        false, /* showViewSimulation */false,
-        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
+        false, /* showViewSimulation */false, /* canReplayDuringLiveRaces */false);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
             boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets,
-            boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
-            boolean autoSelectMedia, String defaultMedia) {
+            boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
@@ -54,8 +48,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
-        this.autoSelectMedia = autoSelectMedia;
-        this.defaultMedia = defaultMedia;
     }
 
     public boolean isShowLeaderboard() {
@@ -90,14 +82,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return canReplayDuringLiveRaces;
     }
 
-    public boolean isAutoSelectMedia() {
-        return autoSelectMedia;
-    }
-
-    public String getDefaultMedia() {
-        return defaultMedia;
-    }
-
     public static RaceBoardPerspectiveSettings readSettingsFromURL() {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, false /* default */);
@@ -107,11 +91,9 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, false /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, null /* default */);
-        final Boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(PARAM_AUTOSELECT_MEDIA, true /* default */);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(PARAM_DEFAULT_MEDIA, null /* default */);
 
         return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, /* canReplayWhileLiveIsPossible */
-                false, autoSelectMedia, defaultMedia);
+                false);
     }
 }

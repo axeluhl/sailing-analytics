@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -104,6 +105,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
+    private MediaPlayerManagerComponent mediaPlayerManagerComponent;
     private EditMarkPassingsPanel editMarkPassingPanel;
     
     /**
@@ -268,10 +270,9 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             componentsForSideBySideViewer.add(editMarkPassingPanel);
         }
-        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
-        MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
+        mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
-                errorReporter, userAgent, this, autoSelectMedia);
+                errorReporter, userAgent, this, MediaPlayerSettings.readSettingsFromURL());
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel);
         components.addAll(componentsForSideBySideViewer);
@@ -518,6 +519,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         windChart.updateSettings(windChartSettings);
         MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settingsOfComponents.getSettingsForType(MultiCompetitorRaceChartSettings.class);
         competitorChart.updateSettings(multiCompetitorRaceChartSettings);
+        MediaPlayerSettings mediaPlayerSettings = settingsOfComponents.getSettingsForType(MediaPlayerSettings.class);
+        mediaPlayerManagerComponent.updateSettings(mediaPlayerSettings);
     }
 }
 

@@ -86,11 +86,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
-        final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_AUTOSELECT_MEDIA, true);
-        final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardPerspectiveSettings.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         raceboardViewConfig = new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, canReplayWhileLiveIsPossible);
 
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
