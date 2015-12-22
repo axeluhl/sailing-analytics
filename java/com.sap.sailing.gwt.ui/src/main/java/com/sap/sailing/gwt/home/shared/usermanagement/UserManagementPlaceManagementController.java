@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 public class UserManagementPlaceManagementController
-        <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
+        <CF extends ClientFactory & ClientFactoryWithUserManagementContext & UserManagementClientFactory & ConfirmationClientFactory>
         extends WrappedPlaceManagementController {
 
     public UserManagementPlaceManagementController(CF clientFactory,
@@ -46,7 +46,7 @@ public class UserManagementPlaceManagementController
     }
     
     private static class Configuration
-            <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
+            <CF extends ClientFactory & ClientFactoryWithUserManagementContext & UserManagementClientFactory & ConfirmationClientFactory>
             implements PlaceManagementConfiguration {
         private final CF clientFactory;
         private final PlaceNavigation<ConfirmationPlace> createConfirmationNavigation;

@@ -160,7 +160,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     @Override
-    public void resetUserManagementContext() {
+    public void didLogout() {
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementRequestEvent());

@@ -3,18 +3,18 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     
-    private final ClientFactoryWithUserManagementService clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final ErrorMessageView view;
     private final EventBus eventBus;
     private final boolean fireSignInSuccessfulEvent;
     
-    public AsyncLoginCallback(ClientFactoryWithUserManagementService clientFactory, ErrorMessageView view,
+    public AsyncLoginCallback(UserManagementClientFactory clientFactory, ErrorMessageView view,
             EventBus eventBus, boolean fireSignInSuccessfulEvent) {
         this.clientFactory = clientFactory;
         this.view = view;

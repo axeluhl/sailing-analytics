@@ -10,12 +10,12 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePl
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWithUserManagementService & ClientFactoryWithUserManagementContext>
+public class LoggedInUserInfoActivity<CF extends ClientFactory & UserManagementClientFactory & ClientFactoryWithUserManagementContext>
         extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
     private final CF clientFactory;
@@ -58,12 +58,12 @@ public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWi
         clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                clientFactory.resetUserManagementContext();
+                clientFactory.didLogout();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                clientFactory.resetUserManagementContext();
+                clientFactory.didLogout();
             }
         });
     }

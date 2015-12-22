@@ -6,19 +6,19 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
 
-    private final ClientFactoryWithUserManagementService clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final SignInView view = new SignInViewImpl();
     private EventBus eventBus;
     
-    public SignInActivity(SignInPlace place, ClientFactoryWithUserManagementService clientFactory,
+    public SignInActivity(SignInPlace place, UserManagementClientFactory clientFactory,
             PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;

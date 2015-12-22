@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
@@ -19,7 +19,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
 
-    private final ClientFactoryWithUserManagementService clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final CreateAccountView view = new CreateAccountViewImpl();
     
@@ -28,7 +28,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private final PlaceNavigation<ConfirmationPlace> confirmationPlaceNav;
     private EventBus eventBus;
 
-    public CreateAccountActivity(CreateAccountPlace place, ClientFactoryWithUserManagementService clientFactory,
+    public CreateAccountActivity(CreateAccountPlace place, UserManagementClientFactory clientFactory,
             PlaceNavigation<ConfirmationPlace> confirmationPlaceNav, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.confirmationPlaceNav = confirmationPlaceNav;

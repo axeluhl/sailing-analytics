@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementService;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -49,7 +49,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
         ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithUserManagementContext,
-        ClientFactoryWithUserManagementService, ConfirmationClientFactory, PasswordResetClientFactory {
+        UserManagementClientFactory, ConfirmationClientFactory, PasswordResetClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private WithSecurity securityProvider;
@@ -90,12 +90,12 @@ public class MobileApplicationClientFactory extends
                     getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
                         @Override
                         public void onSuccess(SuccessInfo result) {
-                            resetUserManagementContext();
+                            didLogout();
                         }
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            resetUserManagementContext();
+                            didLogout();
                         }
                     });
                 }
@@ -141,7 +141,7 @@ public class MobileApplicationClientFactory extends
     }
     
     @Override
-    public void resetUserManagementContext() {
+    public void didLogout() {
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementRequestEvent());
