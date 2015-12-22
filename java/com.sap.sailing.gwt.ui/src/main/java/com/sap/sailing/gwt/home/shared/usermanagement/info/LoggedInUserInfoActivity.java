@@ -9,20 +9,17 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class LoggedInUserInfoActivity<CF extends ClientFactory & UserManagementClientFactory & ClientFactoryWithUserManagementContext>
-        extends AbstractActivity implements LoggedInUserInfoView.Presenter {
+public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
-    private final CF clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
     private final PlaceController placeController;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, CF clientFactory,
+    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, UserManagementClientFactory clientFactory,
             PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.userProfileNavigation = userProfileNavigation;

@@ -23,7 +23,7 @@ public class AuthenticationActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(userManagementView);
         WrappedPlaceManagementController userManagementController = 
-                new UserManagementPlaceManagementController<MobileApplicationClientFactory>(clientFactory, 
+                new UserManagementPlaceManagementController(clientFactory, 
                         clientFactory.getNavigator().getMailVerifiedConfirmationNavigation(),
                         clientFactory.getNavigator().getPasswordResetNavigation(), clientFactory
                         .getNavigator().getUserProfileNavigation(), userManagementView, eventBus);

@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
@@ -25,7 +24,6 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.ClientFactoryWithUserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
@@ -48,8 +46,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        ErrorAndBusyClientFactory, SearchResultClientFactory, ClientFactoryWithUserManagementContext,
-        UserManagementClientFactory, ConfirmationClientFactory, PasswordResetClientFactory {
+        ErrorAndBusyClientFactory, SearchResultClientFactory, UserManagementClientFactory, PasswordResetClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private WithSecurity securityProvider;

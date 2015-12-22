@@ -75,7 +75,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         });
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
+        this.userManagementWizardController = new UserManagementPlaceManagementController(
                 this, getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                 getHomePlacesNavigator().getPasswordResetNavigation(),
                 getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
