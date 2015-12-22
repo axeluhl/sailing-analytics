@@ -1452,4 +1452,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String topN(int n);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String profile();
 }

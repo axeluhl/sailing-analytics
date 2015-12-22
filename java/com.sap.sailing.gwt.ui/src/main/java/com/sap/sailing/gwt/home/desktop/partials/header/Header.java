@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
@@ -31,6 +32,8 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
@@ -41,6 +44,8 @@ public class Header extends Composite {
     
     @UiField TextBox searchText;
     @UiField Button searchButton;
+    
+    @UiField Anchor usermenu;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
@@ -51,35 +56,26 @@ public class Header extends Composite {
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     
+    private final EventBus eventBus;
+    
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
-        this(navigator);
-        
-        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
-
-            @Override
-            public void onPlaceChanged(PlaceChangedEvent event) {
-                updateActiveLink(event.getNewPlace());
-            }
-        });
-    }
-    
-    public Header(final DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
+        this.eventBus = eventBus;
 
         HeaderResources.INSTANCE.css().ensureInjected();
-
+        
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
-
+        
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
         solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
-
+        
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
@@ -93,6 +89,24 @@ public class Header extends Composite {
                 }
             }
         });
+        
+        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+            @Override
+            public void onPlaceChanged(PlaceChangedEvent event) {
+                updateActiveLink(event.getNewPlace());
+            }
+        });
+        
+        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
+            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+                @Override
+                public void onUserChangeEvent(UserManagementContextEvent event) {
+                    usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
+                }
+            });
+        } else {
+            usermenu.removeFromParent();
+        }
     }
 
     @UiHandler("startPageLink")
@@ -120,6 +134,11 @@ public class Header extends Composite {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
                 .getText());
         navigator.goToPlace(searchResultNavigation);
+    }
+    
+    @UiHandler("usermenu")
+    void toggleUsermenu(ClickEvent event) {
+        eventBus.fireEvent(new UserManagementRequestEvent());
     }
     
     private void updateActiveLink(Place place) {

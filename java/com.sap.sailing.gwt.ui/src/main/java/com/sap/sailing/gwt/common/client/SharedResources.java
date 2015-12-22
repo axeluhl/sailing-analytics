@@ -27,6 +27,7 @@ public interface SharedResources extends ClientBundle {
         String buttonstrong();
         String buttoninactive();
         String buttonprimary();
+        String buttonprimaryoutlined();
         String buttonred();
         String buttonrefresh();
         String buttonarrowdown();
@@ -40,6 +41,11 @@ public interface SharedResources extends ClientBundle {
         String mainsection_header();
         String mainsection_header_title();
         String mainsection_navigation();
+        String input();
+        String input_label();
+        String input_input();
+        String input_inputerror();
+        String input_errortext();
         String lightbox();
         String lightbox_overlay();
         String lightbox_content();

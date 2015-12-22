@@ -15,8 +15,10 @@ import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.start.StartActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
@@ -27,6 +29,11 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityP
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
 public class DesktopActivityMapper implements ActivityMapper {
     private final DesktopClientFactory clientFactory;
@@ -59,6 +66,11 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesActivityProxy((AbstractSeriesPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
+        } else if (place instanceof AbstractUserProfilePlace) {
+            if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
+                return new StartActivityProxy(new StartPlace(), clientFactory);
+            }
+            return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);
         } else if (place instanceof SponsoringPlace) {
@@ -69,6 +81,10 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new WhatsNewActivityProxy((WhatsNewPlace) place, clientFactory);
         } else if (place instanceof SearchResultPlace) {
             return new SearchResultActivityProxy((SearchResultPlace) place, clientFactory);
+        } else if (place instanceof ConfirmationPlace) {
+            return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
+        } else if (place instanceof PasswordResetPlace) {
+            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
         } else {
             return null;
         }

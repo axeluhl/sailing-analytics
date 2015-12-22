@@ -1,0 +1,70 @@
+package com.sap.sailing.gwt.home.shared.places.user.passwordreset;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
+
+public class PasswordResetViewImpl extends Composite implements PasswordResetView {
+    private static WidgetUiBinder uiBinder = GWT.create(WidgetUiBinder.class);
+
+    interface WidgetUiBinder extends UiBinder<Widget, PasswordResetViewImpl> {
+    }
+
+    private Presenter currentPresenter;
+
+    @UiField StringMessages i18n_sec;
+    @UiField protected Button changePasswordUi;
+    @UiField protected PasswordTextBox newPasswordUi;
+    @UiField protected PasswordTextBox newPasswordConfirmationUi;
+
+    public PasswordResetViewImpl() {
+        initWidget(uiBinder.createAndBindUi(this));
+        setPlaceholder(newPasswordUi, i18n_sec.newPasswordPlaceholder());
+        setPlaceholder(newPasswordConfirmationUi, i18n_sec.passwordRepeatPlaceholder());
+    }
+
+    @Override
+    public void setPresenter(Presenter currentPresenter) {
+        this.currentPresenter = currentPresenter;
+    }
+    
+    @Override
+    protected void onLoad() {
+        selectAll(newPasswordUi);
+    }
+
+    @UiHandler("changePasswordUi")
+    void onChangePasswordClicked(ClickEvent event) {
+        triggerChangePassword();
+    }
+    
+    @UiHandler({"newPasswordUi", "newPasswordConfirmationUi"})
+    void onChangePasswordKeyPressed(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            triggerChangePassword();
+        }
+    }
+    
+    private void triggerChangePassword() {
+        currentPresenter.resetPassword(newPasswordUi.getValue(), newPasswordConfirmationUi.getValue());
+    }
+    
+    private void setPlaceholder(Widget widget, String placeholderText) {
+        widget.getElement().setAttribute("placeholder", placeholderText);
+    }
+    
+    private void selectAll(TextBox textBox) {
+        textBox.setFocus(true);
+        textBox.selectAll();
+    }
+}

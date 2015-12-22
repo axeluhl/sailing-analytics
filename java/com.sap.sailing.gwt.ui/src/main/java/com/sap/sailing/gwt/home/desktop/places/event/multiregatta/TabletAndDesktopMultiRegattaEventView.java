@@ -36,7 +36,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
 
     @UiField StringMessages i18n;
     
-    @UiField(provided = true) TabPanel<EventMultiregattaView.Presenter> tabPanelUi;
+    @UiField(provided = true) TabPanel<AbstractMultiregattaEventPlace, EventMultiregattaView.Presenter, MultiregattaTabView<AbstractMultiregattaEventPlace>> tabPanelUi;
     @UiField(provided = true) EventHeader eventHeader;
     
     private Presenter currentPresenter;

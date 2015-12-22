@@ -38,7 +38,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
 
     @UiField StringMessages i18n;
 
-    @UiField(provided = true) TabPanel<EventRegattaView.Presenter> tabPanelUi;
+    @UiField(provided = true) TabPanel<AbstractEventRegattaPlace, EventRegattaView.Presenter, RegattaTabView<AbstractEventRegattaPlace>> tabPanelUi;
     @UiField(provided = true) EventHeader eventHeader;
     
     private Presenter currentPresenter;

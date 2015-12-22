@@ -18,14 +18,38 @@ import com.sap.sailing.gwt.home.desktop.places.start.TabletAndDesktopStartView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNewView;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
+import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
+    private final WithSecurity securityProvider;
+    private final WrappedPlaceManagementController userManagementWizardController;
+    private UserManagementContext uCtx = new UserManagementContextImpl();
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -41,6 +65,38 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
+        securityProvider = new DefaultWithSecurityImpl();
+        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                uCtx = new UserManagementContextImpl(user);
+                getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+            }
+        });
+        
+        final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
+        this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
+                this, getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
+                getHomePlacesNavigator().getPasswordResetNavigation(),
+                getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
+        this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
+            @Override
+            public void onSignInSuccessful(SignInSuccessfulEvent event) {
+                userManagementWizardController.goTo(new LoggedInUserInfoPlace());
+            }
+        });
+        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
+            @Override
+            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
+                if (userManagementDisplay.isShowing()) {
+                    userManagementDisplay.hide();
+                } else {
+                    userManagementDisplay.setWidget(createBusyView());
+                    userManagementDisplay.show();
+                    userManagementWizardController.start();
+                }
+            }
+        });
     }
     
     @Override
@@ -92,4 +148,44 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public BusyView createBusyView() {
         return new BusyViewImpl();
     }
+
+    @Override
+    public UserManagementServiceAsync getUserManagement() {
+        return securityProvider.getUserManagementService();
+    }
+
+    @Override
+    public UserManagementContext getUserManagementContext() {
+        return uCtx;
+    }
+    
+    @Override
+    public void resetUserManagementContext() {
+        uCtx = new UserManagementContextImpl();
+        securityProvider.getUserService().updateUser(true);
+        getEventBus().fireEvent(new UserManagementRequestEvent());
+    }
+
+    @Override
+    public void didLogin(UserDTO user) {
+        uCtx = new UserManagementContextImpl(user);
+        securityProvider.getUserService().updateUser(true);
+        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+    
+    @Override
+    public ConfirmationView createAccountConfirmationView(String message) {
+        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
+    }
+    
+    @Override
+    public PasswordResetView createPasswordResetView() {
+        return new PasswordResetViewImpl();
+    }
+    
+    @Override
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return getHomePlacesNavigator().getPasswordResettedConfirmationNavigation(username);
+    }
+
 }
