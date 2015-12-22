@@ -29,7 +29,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T> {
-    private final EntityIdentityComparator<T> comp;
+    final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
     private final ListDataProvider<T> listDataProvider;
 
@@ -93,46 +93,6 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         }
     }
 
-    /**
-     * Wraps an object such that its {@link #equals(Object)} and {@link #hashCode()} implementations are based on the
-     * {@link RefreshableMultiSelectionModel#comp} comparator's
-     * {@link EntityIdentityComparator#representSameEntity(Object, Object)} and
-     * {@link EntityIdentityComparator#hashCode(Object)} methods, respectively.
-     * 
-     * @author Axel Uhl (D043530)
-     *
-     * @param <T>
-     */
-    private static class EntityIdentityWrapper<T> {
-        private final T t;
-        private final EntityIdentityComparator<T> comp;
-        
-        public EntityIdentityWrapper(T t, EntityIdentityComparator<T> comp) {
-            super();
-            this.t = t;
-            this.comp = comp;
-        }
-
-        @Override
-        public int hashCode() {
-            return comp.hashCode(t);
-        }
-        
-        private T getT() {
-            return t;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof EntityIdentityWrapper<?>)) {
-                throw new ClassCastException("Can only compare EntityIdentityWrapper with other objects of same class");
-            }
-            @SuppressWarnings("unchecked") // need to cast to generic type argument T
-            EntityIdentityWrapper<T> objAsT = ((EntityIdentityWrapper<T>) obj);
-            return comp.representSameEntity(t, objAsT.getT());
-        }
-    }
-    
     /**
      * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>.All objects from the
      * current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same
