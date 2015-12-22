@@ -46,7 +46,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     public void handleSaveChangesRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
-                .setHash(clientFactory.getNavigator().getChangeMailConfirmationNavigation().getTargetUrl())
+                .setHash(clientFactory.getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl())
                 .buildString();
         clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
                 new AsyncCallback<Void>() {

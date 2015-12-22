@@ -101,16 +101,12 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
     }
 
-    public PlaceNavigation<ConfirmationPlace> getCreateConfirmationNavigation() {
+    public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
         return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
     }
 
-    public PlaceNavigation<ConfirmationPlace> getChangeMailConfirmationNavigation() {
-        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.CHANGED_EMAIL));
-    }
-    
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
-        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_SEND, username));
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
     }
     
     public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {

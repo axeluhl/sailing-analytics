@@ -71,7 +71,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     public void handleSaveChangesRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
-                .setHash(homePlacesNavigator.getChangeMailConfirmationNavigation().getTargetUrl()).buildString();
+                .setHash(homePlacesNavigator.getMailVerifiedConfirmationNavigation().getTargetUrl()).buildString();
         clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
                 new AsyncCallback<Void>() {
                     @Override
