@@ -1249,7 +1249,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
                     if (tail == null) {
-                        tailPreparer.run(); // presumably a no-op, but you never know...
+                        if (tailPreparer != null) { // could be we didn't receive boat position data for this competitor; then no tailPreparer will have been created
+                            tailPreparer.run(); // presumably a no-op, but you never know...
+                        }
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                     } else {
                         fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
