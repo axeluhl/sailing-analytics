@@ -260,8 +260,27 @@ public class Node<T> {
         if (bounds.contains(point)) {
             result = 0;
         } else {
-            // continue here
-            result = 0.0;
+            // Find out the point on the border defined by bounds that is nearest to point.
+            final double latDegNearestOnBorder =
+                    point.getLatDeg() > bounds.getNorthEast().getLatDeg() ? bounds.getNorthEast().getLatDeg() :
+                        point.getLatDeg() < bounds.getSouthWest().getLatDeg() ? bounds.getSouthWest().getLatDeg() : point.getLatDeg();
+            // Now construct a Bounds object of zero latitude span at point's latitude and with the longitude span
+            // copied from this Node's bounds. If these bounds contain point, use point's longitude as it is spanned by
+            // this node's bounds. Otherwise, extend the bounds to contain point, then check whether the west or east border
+            // was changed to contain point; point was closer to the border that was changed to include point
+            Bounds boundsAtPointLat = new BoundsImpl(new DegreePosition(point.getLatDeg(), bounds.getSouthWest().getLngDeg()),
+                                                       new DegreePosition(point.getLatDeg(), bounds.getNorthEast().getLngDeg()));
+            final double lngDegNearestOnBorder;
+            if (boundsAtPointLat.contains(point)) {
+                lngDegNearestOnBorder = point.getLngDeg();
+            } else {
+                if (boundsAtPointLat.getSouthWest().getLngDeg() == bounds.getSouthWest().getLngDeg()) {
+                    lngDegNearestOnBorder = bounds.getNorthEast().getLngDeg();
+                } else {
+                    lngDegNearestOnBorder = bounds.getSouthWest().getLngDeg();
+                }
+            }
+            result = QuadTree.getLatLngDistance(point, new DegreePosition(latDegNearestOnBorder, lngDegNearestOnBorder));
         }
         return result;
     }
