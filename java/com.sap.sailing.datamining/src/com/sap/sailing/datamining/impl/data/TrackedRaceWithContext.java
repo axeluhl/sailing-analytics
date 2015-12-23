@@ -103,7 +103,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
             GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
             track.lockForRead();
             try {
-                number += Util.size(track.getFixes());
+                number += Util.size(track.getRawFixes());
             } finally {
                 track.unlockAfterRead();
             }
@@ -118,7 +118,7 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
             GPSFixTrack<Mark, GPSFix> track = getTrackedRace().getTrack(mark);
             track.lockForRead();
             try {
-                number += Util.size(track.getFixes());
+                number += Util.size(track.getRawFixes());
             } finally {
                 track.unlockAfterRead();
             }
