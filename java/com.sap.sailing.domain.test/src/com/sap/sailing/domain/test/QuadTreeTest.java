@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -12,7 +13,6 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
+import com.sap.sse.common.Util;
 
 public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {
@@ -31,8 +32,8 @@ public class QuadTreeTest {
             super(southWest, northEast, maxItems);
         }
 
-        public void put(Position x) {
-            super.put(x, x);
+        public Position put(Position x) {
+            return super.put(x, x);
         }
     }
 
@@ -1178,7 +1179,6 @@ public class QuadTreeTest {
         p3 = new DegreePosition(50.47848271564207, 8.7066650390625);
     }
     
-    @Ignore
     @Test
     public void testNoNPEDuringSecondPutInSameLeaf() {
         final QuadTree<Object> qt = new QuadTree<Object>();
@@ -1218,7 +1218,6 @@ public class QuadTreeTest {
         stop[0] = true;
     }
     
-    @Ignore
     @Test
     public void testDistance() {
 	double maxDistance = 0.06242236766906711;
@@ -1230,7 +1229,6 @@ public class QuadTreeTest {
 	assertNotNull(p3Nearest);
     }
     
-    @Ignore
     @Test
     public void testNearest() {
         double maxDistance = 0.06242236766906711;
@@ -1242,7 +1240,6 @@ public class QuadTreeTest {
         assertSame(getNearestByApproximateDistance(p3), p3Nearest);
     }
     
-    @Ignore
     private Position getNearestByApproximateDistance(Position pos) {
         double minDistance = Double.MAX_VALUE;
         Position nearestByDistance = null;
@@ -1255,7 +1252,6 @@ public class QuadTreeTest {
         return nearestByDistance;
     }
     
-    @Ignore
     @Test
     public void testTooFarAwayProducesEmptyResults() {
         double maxDistance = 0.06242236766906711;
@@ -1275,20 +1271,23 @@ public class QuadTreeTest {
         performanceReportCase.addMeasurement(new Measurement("findNearest_"+ITERATIONS+"_millis", duration));
     }
     
-    @Ignore
     @Test
     public void measureInsertPerformance() {
         long start = System.currentTimeMillis();
+        int originalSize = Util.size(quadtree.get(new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180))));
+        int duplicates = 0;
         final int ITERATIONS = 100000;
         for (int i=0; i<ITERATIONS; i++) {
             final Position randomPosition = new DegreePosition(49.5+Math.random(), 7.5+Math.random());
-            quadtree.put(randomPosition);
+            if (quadtree.put(randomPosition) != null) {
+                duplicates++;
+            }
         }
         long duration = System.currentTimeMillis() - start;
         performanceReportCase.addMeasurement(new Measurement("insertPosition_"+ITERATIONS+"_millis", duration));
+        assertEquals(originalSize+ITERATIONS-duplicates, Util.size(quadtree.get(new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180)))));
     }
     
-    @Ignore
     @Test
     public void measureRemovePerformance() {
         final int ITERATIONS = 100000;
@@ -1306,7 +1305,6 @@ public class QuadTreeTest {
         performanceReportCase.addMeasurement(new Measurement("removePosition_"+ITERATIONS+"_millis", duration));
     }
     
-    @Ignore
     @Test
     public void testDistanceAcrossDateline() {
         GLatLngQuadTree myQuadtree = new GLatLngQuadTree(new DegreePosition(-10, 170), new DegreePosition(10, -170), /* maxItems */3);
@@ -1320,7 +1318,6 @@ public class QuadTreeTest {
         assertSame(nearToDateline, nearestToDatelineEast);
     }
     
-    @Ignore
     @Test
     public void testBasicDistanceAcrossDateline() {
         final Position nearToDateline = new DegreePosition(0, 179.5);
@@ -1339,7 +1336,6 @@ public class QuadTreeTest {
         assertTrue(dNearReverse < dFarReverse);
     }
     
-    @Ignore
     @AfterClass
     public static void writeMeasurements() throws IOException {
         performanceReport.write();

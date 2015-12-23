@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.common.quadtree.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +13,6 @@ import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * A node in a {@link QuadTree}. There may be internal nodes that have no elements in them but have exactly
@@ -26,10 +23,6 @@ import com.sap.sse.common.Util.Pair;
  * @param <T>
  */
 public class Node<T> {
-    // TODO remove when done testing
-    private static int hits;
-    private static int misses;
-    
     /**
      * Either an array of exactly four child nodes which are then all non-<code>null</code>, or <code>null</code>,
      * meaning that this node is a child node, having no children but potentially having items. A node that has children
@@ -68,7 +61,7 @@ public class Node<T> {
      * The quadrant index in {@link #children} for the south-east subtree
      */
     private final int SE = 3;
-    
+
     /**
      * Creates a new node with the <code>bounds</code> as specified. The node starts out empty, as a leaf node that has
      * an empty set of items.
@@ -241,22 +234,8 @@ public class Node<T> {
                 }
             }
         } else {
-            // sort children by proximity / containing-relationship to point to find best result more quickly,
-            // avoiding scanning through large / deep nodes that may not even contain the point
-            @SuppressWarnings("unchecked")
-            final Pair<Node<T>, Double>[] childDistances = (Pair<Node<T>, Double>[]) new Pair<?,?>[4];
             for (int i=0; i<4; i++) {
-                childDistances[i] = new Pair<>(children[i], children[i].getDistance(point));
-            }
-            Arrays.sort(childDistances, new Comparator<Pair<Node<T>, Double>>() {
-                @Override
-                public int compare(Pair<Node<T>, Double> o1, Pair<Node<T>, Double> o2) {
-                    return Double.compare(o1.getB(),o2.getB());
-                }
-            });
-            for (int i=0; i<4; i++) {
-                final Node<T> child = childDistances[i].getA();
-//                final Node<T> child = children[i];
+                final Node<T> child = children[i];
                 // If we have a possible result already, only investigate the child node if it is nearer to point
                 // than the result candidate
                 if (result == null || child.getDistance(result.getKey()) < minDistance) {
@@ -264,14 +243,9 @@ public class Node<T> {
                     if (childResult != null) {
                         double childDistance = QuadTree.getLatLngDistance(childResult.getKey(), point);
                         if (childDistance < minDistance) {
-                            hits++;
                             result = childResult;
                             minDistance = childDistance;
-                        } else {
-                            misses++;
                         }
-                    } else {
-                        misses++;
                     }
                 }
             }

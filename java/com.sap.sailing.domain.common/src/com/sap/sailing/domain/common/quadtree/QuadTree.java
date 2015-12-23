@@ -37,8 +37,8 @@ public class QuadTree<T> implements Serializable {
         root = new Node<T>(bounds, maxItems);
     }
 
-    public void put(Position point, T obj) {
-        root.put(point, obj);
+    public T put(Position point, T obj) {
+        return root.put(point, obj);
     }
 
     public T remove(Position point, T obj) {
