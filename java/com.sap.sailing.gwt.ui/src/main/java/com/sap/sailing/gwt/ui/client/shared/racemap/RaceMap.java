@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -121,6 +120,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -140,6 +140,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+    private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
@@ -2620,10 +2621,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
         boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
-        if (isHighlighted || noCompetitorSelected) {
+        if (isHighlighted || noCompetitorSelected || getSettings().isShowOnlySelectedCompetitors()) {
             options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         } else {
-            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
+            options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
         }
         if (isHighlighted) {
             options.setStrokeWeight(2);
