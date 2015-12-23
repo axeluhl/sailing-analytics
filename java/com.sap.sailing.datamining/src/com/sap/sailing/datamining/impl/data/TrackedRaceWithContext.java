@@ -5,12 +5,19 @@ import java.util.Calendar;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceWithContext implements HasTrackedRaceContext {
 
@@ -82,6 +89,41 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time.asDate());
         return calendar.get(Calendar.YEAR);
+    }
+
+    @Override
+    public Boolean isTracked() {
+        return getTrackedRace().hasStarted(MillisecondsTimePoint.now());
+    }
+
+    @Override
+    public int getNumberOfCompetitorFixes() {
+        int number = 0;
+        for (Competitor competitor : getRace().getCompetitors()) {
+            GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
+            track.lockForRead();
+            try {
+                number += Util.size(track.getFixes());
+            } finally {
+                track.unlockAfterRead();
+            }
+        }
+        return number;
+    }
+
+    @Override
+    public int getNumberOfMarkFixes() {
+        int number = 0;
+        for (Mark mark : getTrackedRace().getMarks()) {
+            GPSFixTrack<Mark, GPSFix> track = getTrackedRace().getTrack(mark);
+            track.lockForRead();
+            try {
+                number += Util.size(track.getFixes());
+            } finally {
+                track.unlockAfterRead();
+            }
+        }
+        return number;
     }
 
 }
