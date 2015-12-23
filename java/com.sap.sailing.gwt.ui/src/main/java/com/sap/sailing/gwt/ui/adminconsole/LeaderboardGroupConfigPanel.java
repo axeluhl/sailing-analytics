@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -578,13 +577,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
-        ProvidesKey<LeaderboardGroupDTO> groupsKeyProvider = new ProvidesKey<LeaderboardGroupDTO>() {
-            @Override
-            public Object getKey(LeaderboardGroupDTO group) {
-                return group.getName();
-            }
-        };
-        refreshableGroupsSelectionModel = new RefreshableMultiSelectionModel<>(groupsKeyProvider,
+        refreshableGroupsSelectionModel = new RefreshableMultiSelectionModel<>(
                 new EntityIdentityComparator<LeaderboardGroupDTO>() {
                     @Override
                     public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {

@@ -1,23 +1,23 @@
 // **********************************************************************
-// 
+//
 // <copyright>
-// 
+//
 //  BBN Technologies
 //  10 Moulton Street
 //  Cambridge, MA 02138
 //  (617) 873-8000
-// 
+//
 //  Copyright (C) BBNT Solutions LLC. All rights reserved.
-// 
+//
 // </copyright>
 // **********************************************************************
-// 
+//
 // $Source$
 // $RCSfile$
 // $Revision: 184 $
 // $Date: 2008-09-16 16:17:21 +0200 (Tue, 16 Sep 2008) $
 // $Author: axel.uhl $
-// 
+//
 // **********************************************************************
 
 package com.sap.sailing.domain.common.quadtree;
@@ -26,18 +26,16 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.quadtree.impl.Bounds;
 import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 /**
- * The QuadTree lets you organize objects in a grid, that redefines itself and focuses more gridding when more objects
- * appear in a certain area.
- * <p>
- * 
- * Note that this class is not thread safe. If multiple threads can access the same instance concurrently, callers have
- * to ensure proper synchronization. Concurrent reads are permissible while any write should block all other operations.
+ * A spatial data structure that provides efficient (O(log n)) access to nearest neighbors and
+ * to objects in a certain radius around another object. The location of objects is provided as
+ * {@link Position}.
  * 
  * @param <T>
  *            type of object stored by coordinates
@@ -50,11 +48,11 @@ public class QuadTree<T> implements Serializable {
     private QuadTreeNode<T> top;
     
     public QuadTree() {
-        this(new Bounds(new DegreePosition(-90.0, -180.0), new DegreePosition(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
+        this(new BoundsImpl(new DegreePosition(-90.0, -180.0), new DegreePosition(90.0, 180.0)), 20, QuadTreeNode.NO_MIN_SIZE);
     }
 
     public QuadTree(Position southWest, Position northEast, int maxItems) {
-        this(new Bounds(southWest, northEast), maxItems, QuadTreeNode.NO_MIN_SIZE);
+        this(new BoundsImpl(southWest, northEast), maxItems, QuadTreeNode.NO_MIN_SIZE);
     }
 
     public QuadTree(Bounds bounds, int maxItems, double minSize) {
@@ -151,8 +149,8 @@ public class QuadTree<T> implements Serializable {
         // where there might be a smudge overlap for very small
         // scales.
         if (rect.getSouthWest().getLngDeg() > rect.getNorthEast().getLngDeg() || (Math.abs(rect.getSouthWest().getLngDeg() - rect.getNorthEast().getLngDeg()) < .001)) {
-            return getTop().get(new Bounds(rect.getSouthWest(), new DegreePosition(rect.getNorthEast().getLatDeg(), 180)),
-                   getTop().get(new Bounds(new DegreePosition(rect.getSouthWest().getLatDeg(), -180), rect.getNorthEast()), vector));
+            return getTop().get(new BoundsImpl(rect.getSouthWest(), new DegreePosition(rect.getNorthEast().getLatDeg(), 180)),
+                   getTop().get(new BoundsImpl(new DegreePosition(rect.getSouthWest().getLatDeg(), -180), rect.getNorthEast()), vector));
         } else
             return getTop().get(rect, vector);
     }

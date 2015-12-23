@@ -1,0 +1,118 @@
+@require 'theme';
+
+.bar {
+	height: 100%;
+	margin-top: 20pt;
+	line-height: 15pt;
+	vertical-align: middle;
+	font-size: 15pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+}
+
+.page {
+	position: absolute;
+	border: none;
+	border-radius: 0;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 30pt;
+	margin: 5pt;
+}
+
+.logo {
+	position: absolute;
+	width: 48pt;
+	height: 23.5pt;
+	margin-top: 17.5pt;
+	margin-left: 10pt;
+	z-index: 1;
+}
+
+.collumn {
+	position: absolute;
+	top: 5pt;
+	bottom: 15pt;
+	margin: 5pt;
+}
+
+.startanalysiscollumn {
+	right: 33.3%;
+	left: 0%;
+}
+
+.collumnthree {
+	left: 66.8%;
+	right: 0pt;
+}
+
+.left {
+	left: 0pt;
+	right: 50%;
+}
+
+.right {
+	left: 50%;
+	right: 0pt;
+}
+
+.startline_advantage_by_wind_container {
+	position: absolute;
+	background-color: white;
+	top: 27%;
+	right: 0pt;
+	left: 0pt;
+	bottom: 0%;
+}
+
+.startline_advantage_by_geometry_container {
+	position: absolute;
+	background-color: white;
+	top: 0%;
+	right: 0pt;
+	left: 0pt;
+	bottom: 73%;
+	margin-bottom: 10pt;
+}
+
+.windcharthint {
+	position: absolute;
+	bottom: 0pt;
+	height: 15pt;
+	line-height: 15pt;
+	margin-top: 0pt;
+	vertical-align: middle;
+	font-size: 12pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+}
+
+.windloadinghint {
+	position: absolute;
+	background-color: white;
+	opacity: 0.4;
+	width: 100%;
+	height: 100%;
+	vertical-align: middle;
+	text-align: center;
+	z-index: 0;
+}
+
+.windloadinghinttext {
+	position: absolute;
+	bottom: 0pt;
+	height: 15pt;
+	line-height: 15pt;
+	margin-top: 0pt;
+	vertical-align: middle;
+	font-size: 12pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	top: 50%;
+}
