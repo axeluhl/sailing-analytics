@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.quadtree;
 
 import java.io.Serializable;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
@@ -57,7 +58,8 @@ public class QuadTree<T> implements Serializable {
      * based on Euklidian geometry with the latitude/longitude values.
      */
     public T get(Position point) {
-        return root.get(point);
+        final Entry<Position, T> result = root.get(point);
+        return result == null ? null : result.getValue();
     }
 
     /**
@@ -74,7 +76,8 @@ public class QuadTree<T> implements Serializable {
      * @return the object that was found, null if nothing is within the maximum distance.
      */
     public T get(Position point, double withinDistance) {
-        return root.get(point, withinDistance);
+        final Entry<Position, T> result = root.get(point, withinDistance);
+        return result == null ? null : result.getValue();
     }
 
     /**
@@ -89,8 +92,9 @@ public class QuadTree<T> implements Serializable {
      * and doing the "sqrt thing"
      */
     public static double getLatLngDistance(Position a, Position b) {
-        double distance = Math.sqrt((a.getLatDeg() - b.getLatDeg()) * (a.getLatDeg() - b.getLatDeg()) + (a.getLngDeg() - b.getLngDeg())
-                * (a.getLngDeg() - b.getLngDeg()));
+        final double dy = a.getLatDeg() - b.getLatDeg();
+        final double dx = a.getLngDeg() - b.getLngDeg();
+        double distance = Math.sqrt(dy * dy + dx * dx);
         return distance;
     }
 }

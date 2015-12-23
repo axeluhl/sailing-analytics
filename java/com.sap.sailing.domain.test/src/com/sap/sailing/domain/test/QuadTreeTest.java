@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1300,14 +1301,32 @@ public class QuadTreeTest {
     @Test
     public void testDistanceAcrossDateline() {
         GLatLngQuadTree myQuadtree = new GLatLngQuadTree(new DegreePosition(-10, 170), new DegreePosition(10, -170), /* maxItems */3);
-        final DegreePosition nearToDateline = new DegreePosition(0, 179.5);
-        final DegreePosition farFromDateline = new DegreePosition(0, -175);
+        final Position nearToDateline = new DegreePosition(0, 179.5);
+        final Position farFromDateline = new DegreePosition(0, -175);
         myQuadtree.put(nearToDateline);
         myQuadtree.put(farFromDateline);
         final Position nearestToDatelineWest = myQuadtree.get(new DegreePosition(0, 179.9));
         final Position nearestToDatelineEast = myQuadtree.get(new DegreePosition(0, -179.9));
         assertSame(nearToDateline, nearestToDatelineWest);
         assertSame(nearToDateline, nearestToDatelineEast);
+    }
+    
+    @Test
+    public void testBasicDistanceAcrossDateline() {
+        final Position nearToDateline = new DegreePosition(0, 179.5);
+        final Position farFromDateline = new DegreePosition(0, -175);
+        checkDatelineDistances(nearToDateline, farFromDateline, new DegreePosition(0, 180));
+        checkDatelineDistances(nearToDateline, farFromDateline, new DegreePosition(0, -180));
+    }
+
+    private void checkDatelineDistances(final Position nearToDateline, final Position farFromDateline,
+            final Position dateLine) {
+        final double dNear = QuadTree.getLatLngDistance(nearToDateline, dateLine);
+        final double dFar = QuadTree.getLatLngDistance(farFromDateline, dateLine);
+        assertTrue(dNear < dFar);
+        final double dNearReverse = QuadTree.getLatLngDistance(dateLine, nearToDateline);
+        final double dFarReverse = QuadTree.getLatLngDistance(dateLine, farFromDateline);
+        assertTrue(dNearReverse < dFarReverse);
     }
     
     @AfterClass

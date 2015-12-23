@@ -1,15 +1,18 @@
 package com.sap.sailing.domain.common.quadtree.impl;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Util;
 
 /**
  * A node in a {@link QuadTree}. There may be internal nodes that have no elements in them but have exactly
@@ -91,7 +94,9 @@ public class Node<T> {
     private void distributeItemsToChildren() {
         assert items != null;
         assert children != null;
-        for (final Entry<Position, T> item : items.entrySet()) {
+        final Map<Position, T> myItems = items;
+        items = null;
+        for (final Entry<Position, T> item : myItems.entrySet()) {
             getChild(item.getKey()).put(item.getKey(), item.getValue());
         }
         assert items == null;
@@ -212,18 +217,87 @@ public class Node<T> {
      * Other children only need to be traversed if their bounds are closer to <code>point</code> than the key found so
      * far.
      */
-    public T get(Position point) {
+    public Map.Entry<Position, T> get(Position point) {
+        assert (items == null) != (children == null);
+        Map.Entry<Position, T> result = null;
+        double minDistance = Double.MAX_VALUE;
+        if (items != null) {
+            for (final Entry<Position, T> item : items.entrySet()) {
+                double itemDistanceToPoint = QuadTree.getLatLngDistance(point, item.getKey());
+                if (itemDistanceToPoint < minDistance) {
+                    result = item;
+                    minDistance = itemDistanceToPoint;
+                }
+            }
+        } else {
+            // TODO could sort children by proximity / containing-relationship to point to find best result more quickly
+            for (final Node<T> child : children) {
+                // If we have a possible result already, only investigate the child node if it is nearer to point
+                // than the result candidate
+                if (result == null || child.getDistance(result.getKey()) < minDistance) {
+                    final Entry<Position, T> childResult = child.get(point);
+                    if (childResult != null) {
+                        double childDistance = QuadTree.getLatLngDistance(childResult.getKey(), point);
+                        if (childDistance < minDistance) {
+                            result = childResult;
+                            minDistance = childDistance;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Computes a "distance" of this node's {@link #bounds} to the <code>point</code> based on the distance definition
+     * provided by {@link QuadTree#getLatLngDistance(Position, Position)}. If <code>point</code> is
+     * {@link Bounds#contains(Position) contained} in this node's {@link #bounds}, the distance returned is
+     * <code>0</code>. Otherwise, the distance to the nearest border of this node's {@link #bounds} is determined.
+     */
+    private double getDistance(Position point) {
+        final double result;
+        if (bounds.contains(point)) {
+            result = 0;
+        } else {
+            // continue here
+            result = 0.0;
+        }
+        return result;
+    }
+
+    public Map.Entry<Position, T> get(Position point, double withinDistance) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public T get(Position point, double withinDistance) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public Collection<T> get(Bounds rect) {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Fetches all values within the <code>bounds</code> specified. Always returns a non-<code>null</code> iterable
+     * which may, however, be empty.
+     * 
+     * @param bounds
+     *            It is permissible for <code>bounds</code> to not even intersect with this node's {@link #bounds}.
+     *            Then, however, the result will be empty.
+     */
+    public Iterable<T> get(Bounds bounds) {
+        final Iterable<T> result;
+        if (this.bounds.intersects(bounds)) {
+            Set<T> preResult = new HashSet<>();
+            if (items != null) {
+                for (final Entry<Position, T> item : items.entrySet()) {
+                    if (bounds.contains(item.getKey())) {
+                        preResult.add(item.getValue());
+                    }
+                }
+            } else {
+                for (final Node<T> child : children) {
+                    Util.addAll(child.get(bounds), preResult);
+                }
+            }
+            result = preResult;
+        } else {
+            result = Collections.emptySet();
+        }
+        return result;
     }
 }
