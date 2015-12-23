@@ -55,7 +55,7 @@ public class QuadTree<T> implements Serializable {
         this(new BoundsImpl(southWest, northEast), maxItems, QuadTreeNode.NO_MIN_SIZE);
     }
 
-    public QuadTree(Bounds bounds, int maxItems, double minSize) {
+    private QuadTree(Bounds bounds, int maxItems, double minSize) {
         top = new QuadTreeNode<T>(bounds, maxItems, minSize);
     }
 
@@ -155,7 +155,7 @@ public class QuadTree<T> implements Serializable {
             return getTop().get(rect, vector);
     }
 
-    protected QuadTreeNode<T> getTop() {
+    private QuadTreeNode<T> getTop() {
         return top;
     }
 

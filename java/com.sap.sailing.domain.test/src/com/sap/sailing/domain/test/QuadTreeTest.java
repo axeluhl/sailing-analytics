@@ -1237,19 +1237,13 @@ public class QuadTreeTest {
         assertSame(getNearestByApproximateDistance(p3), p3Nearest);
     }
     
-    private double approximateDistance(Position p1, Position p2) {
-        double dLat = p2.getLatDeg() - p1.getLatDeg();
-        double dLon = p2.getLngDeg() - p1.getLngDeg();
-        return Math.sqrt(dLat*dLat + dLon*dLon);
-    }
-    
     private Position getNearestByApproximateDistance(Position pos) {
         double minDistance = Double.MAX_VALUE;
         Position nearestByDistance = null;
         for (final Position p : quadtree.get(new BoundsImpl(new DegreePosition(-90, -180), new DegreePosition(90, 180)))) { // get all
-            if (approximateDistance(p, pos) < minDistance) {
+            if (QuadTree.getLatLngDistance(p, pos) < minDistance) {
                 nearestByDistance = p;
-                minDistance = approximateDistance(p, pos);
+                minDistance = QuadTree.getLatLngDistance(p, pos);
             }
         }
         return nearestByDistance;
